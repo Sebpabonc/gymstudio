@@ -1,6 +1,9 @@
-# Workout Tracker
+# Gym Studio
 
-React + Vite + TypeScript app that stores workout data in localStorage.
+Minimal MVP for logging gym workouts and quick exercise lookup.
+
+- Tech: React, TypeScript, Vite
+- Local persistence: `localStorage`
 
 Quick start:
 
@@ -9,3 +12,8 @@ cd workout-tracker
 npm install
 npm run dev
 ```
+
+Contributing:
+
+- Open an issue or PR on GitHub
+- Keep changes small and focused
