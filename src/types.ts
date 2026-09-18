@@ -1,21 +1,22 @@
 export type Exercise = {
   id: string
   name: string
-  muscleGroup?: string
+  primaryMuscle: string
+  secondaryMuscle?: string
+  notes?: string
+  tips?: string[]
 }
 
-export type SetEntry = {
+export type WorkoutSet = {
+  id: string
   reps: number
   weight: number
 }
 
-export type ExerciseEntry = {
-  exerciseId: string
-  sets: SetEntry[]
-}
-
-export type Session = {
+export type WorkoutEntry = {
   id: string
-  date: string // ISO date
-  exercises: ExerciseEntry[]
+  exerciseId: string
+  date: string
+  sets: WorkoutSet[]
+  notes?: string
 }

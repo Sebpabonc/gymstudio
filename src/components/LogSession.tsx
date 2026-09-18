@@ -8,13 +8,15 @@ export default function LogSession({ onSaved }:{ onSaved:()=>void }){
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [date, setDate] = useState(new Date().toISOString().slice(0,10))
   const [entries, setEntries] = useState<ExerciseEntry[]>([])
+  const [search, setSearch] = useState('')
 
   useEffect(()=>{
     setExercises(loadExercises())
   },[])
 
   function addExercise(exId:string){
-    setEntries((s)=>[...s,{ exerciseId: exId, sets: [{ reps: 5, weight: 0 }] }])
+    // prevent duplicate exercise entries in the same session
+    setEntries((s)=> (s.some(se=>se.exerciseId===exId) ? s : [...s,{ exerciseId: exId, sets: [{ reps: 5, weight: 0 }] }]))
   }
 
   function updateSet(exIndex:number,setIndex:number, field:'reps'|'weight', value:number){
@@ -37,6 +39,15 @@ export default function LogSession({ onSaved }:{ onSaved:()=>void }){
     setEntries((s)=>s.filter((_,idx)=>idx!==i))
   }
 
+  function findLastSessionForExercise(exId: string) {
+    const sessions = loadSessions()
+    for (const s of sessions) {
+      const found = s.exercises.find((e) => e.exerciseId === exId)
+      if (found) return { session: s, entry: found }
+    }
+    return null
+  }
+
   function save(){
     const sessions = loadSessions()
     const session: Session = { id: uid(), date, exercises: entries }
@@ -54,21 +65,43 @@ export default function LogSession({ onSaved }:{ onSaved:()=>void }){
       </div>
 
       <div className="row">
-        <label>Add Exercise</label>
-        <select onChange={(e)=>{ if(e.target.value) addExercise(e.target.value); e.currentTarget.selectedIndex=0 }}>
-          <option value="">Select...</option>
-          {exercises.map(ex=> <option key={ex.id} value={ex.id}>{ex.name}</option>)}
-        </select>
+        <label>Search exercise</label>
+        <input placeholder="Search exercises..." value={search} onChange={(e)=>setSearch(e.target.value)} />
       </div>
+
+      {search.trim() !== '' && (
+        <ul className="list">
+          {exercises
+            .filter((ex) => ex.name.toLowerCase().includes(search.toLowerCase()))
+            .slice(0, 10)
+            .map((ex) => (
+              <li key={ex.id} className="list-item">
+                <div>
+                  <strong>{ex.name}</strong>
+                  <div style={{fontSize:12,color:'#6b6b66'}}>{ex.muscleGroup}</div>
+                </div>
+                <div>
+                  <button onClick={()=>addExercise(ex.id)}>Add</button>
+                </div>
+              </li>
+          ))}
+        </ul>
+      )}
 
       {entries.map((entry,exIndex)=>{
         const ex = exercises.find(e=>e.id===entry.exerciseId)
+        const last = findLastSessionForExercise(entry.exerciseId)
         return (
           <div key={exIndex} className="entry">
             <div className="entry-header">
               <strong>{ex?.name || entry.exerciseId}</strong>
               <button className="danger" onClick={()=>removeEntry(exIndex)}>Remove</button>
             </div>
+            {last && (
+              <div style={{marginTop:8, fontSize:12, color:'#666'}}>
+                <strong>Último:</strong> {new Date(last.session.date).toLocaleDateString()} — {last.entry.sets.map(s=>`${s.reps}x${s.weight}`).join(', ')}
+              </div>
+            )}
             <table className="sets">
               <thead><tr><th>#</th><th>Reps</th><th>Weight</th></tr></thead>
               <tbody>

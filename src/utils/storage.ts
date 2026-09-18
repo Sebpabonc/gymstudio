@@ -1,55 +1,84 @@
-import { Exercise, Session } from '../types'
-import { getMuscleGroupForExercise, workoutExerciseNames } from '../data/workoutPlan'
+import { Exercise, WorkoutEntry } from '../types'
+import { exerciseLibrary } from '../data/exerciseLibrary'
 
-const EXERCISES_KEY = 'wt_exercises'
-const SESSIONS_KEY = 'wt_sessions'
+const EXERCISES_KEY = 'gym-studio.exercises'
+const HISTORY_KEY = 'gym-studio.history'
 
-function buildDefaultExercises(): Exercise[] {
-  return workoutExerciseNames.map((name) => ({
-    id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
-    name,
-    muscleGroup: getMuscleGroupForExercise(name),
-  }))
+function normalizeExerciseName(value: string) {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+function mergeExercises(saved: Partial<Exercise>[]): Exercise[] {
+  const normalized = new Map<string, Exercise>()
+
+  for (const exercise of [...exerciseLibrary, ...saved]) {
+    if (!exercise || !exercise.name) continue
+
+    const key = normalizeExerciseName(exercise.name)
+    const current = normalized.get(key)
+
+    normalized.set(key, {
+      id: exercise.id || current?.id || key,
+      name: exercise.name,
+      primaryMuscle: exercise.primaryMuscle || current?.primaryMuscle || 'Other',
+      secondaryMuscle: exercise.secondaryMuscle ?? current?.secondaryMuscle,
+      notes: exercise.notes ?? current?.notes,
+      tips: exercise.tips?.length ? exercise.tips : current?.tips ?? [],
+    })
+  }
+
+  return Array.from(normalized.values())
 }
 
 export function loadExercises(): Exercise[] {
   const raw = localStorage.getItem(EXERCISES_KEY)
+
   if (!raw) {
-    const defaults = buildDefaultExercises()
-    localStorage.setItem(EXERCISES_KEY, JSON.stringify(defaults))
-    return defaults
+    saveExercises(exerciseLibrary)
+    return [...exerciseLibrary]
   }
 
   try {
-    const parsed = JSON.parse(raw) as Exercise[]
-    const merged = [...buildDefaultExercises(), ...parsed].filter(
-      (exercise, index, arr) =>
-        arr.findIndex((item) => item.name.toLowerCase() === exercise.name.toLowerCase()) === index
-    )
+    const parsed = JSON.parse(raw) as Partial<Exercise>[]
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      saveExercises(exerciseLibrary)
+      return [...exerciseLibrary]
+    }
 
-    localStorage.setItem(EXERCISES_KEY, JSON.stringify(merged))
+    const merged = mergeExercises(parsed)
+    saveExercises(merged)
     return merged
   } catch {
-    const defaultExercises = buildDefaultExercises()
-    localStorage.setItem(EXERCISES_KEY, JSON.stringify(defaultExercises))
-    return defaultExercises
+    saveExercises(exerciseLibrary)
+    return [...exerciseLibrary]
   }
 }
 
-export function saveExercises(exs: Exercise[]) {
-  localStorage.setItem(EXERCISES_KEY, JSON.stringify(exs))
+export function saveExercises(exercises: Exercise[]) {
+  localStorage.setItem(EXERCISES_KEY, JSON.stringify(exercises))
 }
 
-export function loadSessions(): Session[] {
-  const raw = localStorage.getItem(SESSIONS_KEY)
+export function loadWorkoutHistory(): WorkoutEntry[] {
+  const raw = localStorage.getItem(HISTORY_KEY)
   if (!raw) return []
+
   try {
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw) as WorkoutEntry[]
+    return Array.isArray(parsed) ? parsed : []
   } catch {
     return []
   }
 }
 
-export function saveSessions(sessions: Session[]) {
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions))
+export function saveWorkoutHistory(history: WorkoutEntry[]) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+}
+
+export function addWorkoutEntry(entry: WorkoutEntry) {
+  const nextHistory = [...loadWorkoutHistory(), entry].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
+  saveWorkoutHistory(nextHistory)
+  return nextHistory
 }
