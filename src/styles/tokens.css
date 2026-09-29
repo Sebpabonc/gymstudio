@@ -1,0 +1,41 @@
+/*
+ * Gym Studio design tokens — derived from branding_page_1.png:
+ * monochrome, near-black surfaces, pure white type, heavy slab-serif display
+ * (Alfa Slab One) paired with a bold geometric sans (League Spartan).
+ */
+:root {
+  /* Surfaces */
+  --color-bg: #0c0c0d;
+  --color-surface: #171718;
+  --color-surface-2: #212123;
+  --color-line: rgba(255, 255, 255, 0.09);
+  --color-line-strong: rgba(255, 255, 255, 0.18);
+
+  /* Type */
+  --color-text: #f6f6f4;
+  --color-text-muted: #9c9c98;
+  --color-text-faint: #6b6b68;
+
+  /* Inverted (white) surfaces, used for the "last time" card and primary action */
+  --color-inverse: #f6f6f4;
+  --color-inverse-text: #0c0c0d;
+  --color-inverse-muted: #5d5d5a;
+
+  /* Progress signals — the only color in the UI, kept restrained */
+  --color-up: #8fd99b;
+  --color-down: #f08c7e;
+  --color-danger: #ff8a7a;
+
+  /* Fonts */
+  --font-display: 'Alfa Slab One', 'Rockwell', 'Roboto Slab', Georgia, serif;
+  --font-ui: 'League Spartan', 'Futura', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+
+  /* Shape & spacing */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --space-gutter: 16px;
+  --tap: 48px;
+
+  color-scheme: dark;
+}
