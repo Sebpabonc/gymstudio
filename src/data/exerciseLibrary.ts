@@ -1,6 +1,89 @@
 import { Exercise } from '../types'
 
-export const exerciseLibrary: Exercise[] = [
+const musclePalette: Record<string, { body: string; accent: string; glow: string }> = {
+  Chest: { body: '#ff7b72', accent: '#ffd166', glow: '#fff5c7' },
+  Back: { body: '#60a5fa', accent: '#a78bfa', glow: '#dbeafe' },
+  Legs: { body: '#34d399', accent: '#fbbf24', glow: '#d1fae5' },
+  Shoulders: { body: '#fbbf24', accent: '#f97316', glow: '#fef3c7' },
+  Biceps: { body: '#f472b6', accent: '#fb7185', glow: '#fce7f3' },
+  Triceps: { body: '#c084fc', accent: '#f9a8d4', glow: '#f3e8ff' },
+  Core: { body: '#38bdf8', accent: '#22d3ee', glow: '#dff7ff' },
+  General: { body: '#a3e635', accent: '#facc15', glow: '#ecfccb' },
+}
+
+function createExerciseTipArt(primaryMuscle: string, seed: number) {
+  const palette = musclePalette[primaryMuscle] ?? musclePalette.General
+  const sway = seed % 2 === 0 ? -10 : 10
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="240" height="160" viewBox="0 0 240 160">
+      <defs>
+        <linearGradient id="bg-${seed}" x1="0" x2="1">
+          <stop offset="0%" stop-color="#10141d" />
+          <stop offset="100%" stop-color="#1b2330" />
+        </linearGradient>
+      </defs>
+      <g>
+        <rect width="240" height="160" rx="18" fill="url(#bg-${seed})"/>
+        <circle cx="120" cy="30" r="12" fill="${palette.glow}" opacity="0.9"/>
+        <path d="M 120 44 L 120 72" stroke="${palette.glow}" stroke-width="10" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="rotate" values="-${sway} 120 80; ${sway} 120 80; -${sway} 120 80" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 120 58 L 86 86 M 120 58 L 154 86" stroke="${palette.glow}" stroke-width="8" stroke-linecap="round" opacity="0.96">
+          <animateTransform attributeName="transform" type="rotate" values="-${sway} 120 80; ${sway} 120 80; -${sway} 120 80" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 120 72 L 104 104 L 90 130 M 120 72 L 136 104 L 150 130" stroke="${palette.glow}" stroke-width="8" stroke-linecap="round" opacity="0.96">
+          <animateTransform attributeName="transform" type="rotate" values="-${sway} 120 80; ${sway} 120 80; -${sway} 120 80" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 100 80 Q 120 50 140 80" fill="none" stroke="${palette.body}" stroke-width="12" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="rotate" values="-${sway} 120 80; ${sway} 120 80; -${sway} 120 80" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 120 74 L 120 105" stroke="${palette.accent}" stroke-width="10" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="rotate" values="-${sway} 120 80; ${sway} 120 80; -${sway} 120 80" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 98 118 L 118 120 M 142 118 L 122 120" stroke="${palette.body}" stroke-width="7" stroke-linecap="round" opacity="0.75">
+          <animateTransform attributeName="transform" type="rotate" values="-${sway} 120 80; ${sway} 120 80; -${sway} 120 80" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+        <circle cx="86" cy="86" r="5" fill="${palette.body}" opacity="0.8"/>
+        <circle cx="154" cy="86" r="5" fill="${palette.body}" opacity="0.8"/>
+        <path d="M 90 54 L 150 54" stroke="${palette.glow}" stroke-width="2" stroke-dasharray="6 6" opacity="0.8"/>
+      </g>
+    </svg>
+  `
+
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+const standardizeExerciseName = (name: string) => {
+  const normalized = name
+    .replace(/\bDb\b/gi, 'Dumbbell')
+    .replace(/\bBb\b/gi, 'Barbell')
+    .replace(/\bHB\b/gi, 'Hex Bar')
+    .replace(/\bLPD\b/gi, 'Lat Pulldown')
+    .replace(/\bRDL\b/gi, 'Romanian Deadlift')
+    .replace(/\bOH\b/gi, 'Overhead')
+    .replace(/\bFFE\b/gi, 'Front Foot Elevated')
+    .replace(/\bSupp\.\b/gi, 'Supported')
+    .replace(/\bHor\.\b/gi, 'Horizontal')
+    .replace(/\bY\s*Raises\b/gi, 'Y Raises')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (/Neutral Grip/.test(normalized) && !normalized.includes('(')) {
+    return normalized.replace(/\s+\(Neutral Grip\)|\s+Neutral Grip\b/i, ' (Neutral Grip)')
+  }
+
+  return normalized
+    .replace(/\bA1\b/gi, '')
+    .replace(/\bB1\b/gi, '')
+    .replace(/\bC1\b/gi, '')
+    .replace(/\bD1\b/gi, '')
+    .replace(/\bE1\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+const rawExerciseLibrary: Exercise[] = [
   {
     id: 'barbell-bench-press',
     name: 'Barbell Bench Press',
@@ -666,3 +749,22 @@ export const exerciseLibrary: Exercise[] = [
     ],
   }
 ]
+
+export const exerciseLibrary = rawExerciseLibrary.map((exercise, exerciseIndex) => ({
+  ...exercise,
+  name: standardizeExerciseName(exercise.name),
+  overallStatement: exercise.notes ?? standardizeExerciseName(exercise.name),
+  tips: (exercise.tips ?? []).map((tip, tipIndex) => {
+    const visual = createExerciseTipArt(exercise.primaryMuscle, exerciseIndex + tipIndex)
+
+    if (typeof tip === 'string') {
+      return { text: tip, image: visual }
+    }
+
+    return {
+      ...tip,
+      text: tip.text ?? '',
+      image: tip.image ?? tip.imageUrl ?? visual,
+    }
+  }),
+}))

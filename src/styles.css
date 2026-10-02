@@ -7,10 +7,22 @@
   --text: #f3f3f1;
   --muted: #c8c7c4;
   --muted-strong: #efefeb;
+  --brand: #8d5e63;
+  --brand-strong: #5a474b;
+  --brand-soft: rgba(141, 94, 99, 0.18);
+  --brand-contrast: #121314;
   --shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
-  --button-dark: #f4f4f2;
-  --button-text: #151515;
+  --button-dark: linear-gradient(135deg, #7a5d60 0%, #2f2f31 100%);
+  --button-text: #f5f5f5;
   --success: #dfe7df;
+
+  --font-display: clamp(1.7rem, 4.5vw, 2.08rem);
+  --font-section: 0.65rem;
+  --font-body: 0.76rem;
+  --font-caption: 0.54rem;
+  --font-display-weight: 800;
+  --font-section-weight: 700;
+  --font-body-weight: 500;
 }
 
 * {
@@ -35,9 +47,28 @@ body {
     linear-gradient(180deg, #dfe0df 0%, #b8b9b7 100%);
   color: var(--text);
   font-family: Inter, 'Segoe UI', sans-serif;
+  font-size: var(--font-body);
+  line-height: 1.45;
+  font-weight: var(--font-body-weight);
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+span,
+button,
+input,
+textarea,
+label,
+strong,
+small {
+  font-size: inherit;
 }
 
 body::before {
@@ -127,23 +158,44 @@ button {
   gap: 10px;
 }
 
+.header-row-with-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.language-toggle {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .brand-mark {
   width: 36px;
   height: 36px;
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.94);
-  color: var(--button-text);
+  background: linear-gradient(135deg, rgba(122, 93, 96, 0.95), rgba(59, 59, 62, 0.95));
+  color: var(--text);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.12em;
+  box-shadow: 0 8px 18px rgba(25, 25, 28, 0.32);
 }
 
 .brand-name {
   margin-left: auto;
-  font-size: 0.64rem;
-  font-weight: 700;
+  font-size: var(--font-caption);
+  font-weight: var(--font-section-weight);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text);
@@ -151,18 +203,18 @@ button {
 
 .brand-header h1 {
   margin: 14px 0 0;
-  font-size: clamp(2rem, 8vw, 3rem);
+  font-size: var(--font-display);
   line-height: 0.95;
   letter-spacing: -0.07em;
   text-transform: uppercase;
-  font-weight: 800;
+  font-weight: var(--font-display-weight);
   color: var(--text);
 }
 
 .eyebrow {
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: var(--font-caption);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -195,9 +247,9 @@ button {
 }
 
 .field-label {
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-size: var(--font-caption);
+  font-weight: var(--font-section-weight);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -289,7 +341,7 @@ button {
 
 .exercise-card h2 {
   margin-top: 4px;
-  font-size: clamp(1.6rem, 7vw, 2.3rem);
+  font-size: var(--font-display);
   letter-spacing: -0.06em;
   line-height: 1;
 }
@@ -297,14 +349,26 @@ button {
 .date-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 8px;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 10px 20px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--line);
-  color: var(--muted-strong);
-  font-size: 0.58rem;
-  letter-spacing: 0.08em;
+  background: rgba(110, 170, 205, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #f4f5f6;
+  font-size: clamp(0.85rem, 2vw, 1.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
   text-transform: uppercase;
+  min-height: 42px;
+  width: fit-content;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.collapse-all-button {
+  background: rgba(122, 184, 224, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .chip-row {
@@ -314,6 +378,18 @@ button {
   margin-top: 14px;
 }
 
+.planned-exercise-card .chip-row-tight {
+  margin-top: -4px;
+}
+
+.planned-overall-statement {
+  margin: 8px 0 0;
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -321,8 +397,8 @@ button {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--line);
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: var(--font-caption);
+  font-weight: var(--font-section-weight);
   color: var(--text);
 }
 
@@ -357,7 +433,12 @@ button {
   margin: 0;
 }
 
-.expand-toggle {
+.toggle-button,
+.expand-toggle,
+.collapse-trigger,
+.set-section-toggle,
+.posture-tips-toggle,
+.session-toggle {
   appearance: none;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -367,18 +448,62 @@ button {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 5px 9px;
+  padding: 5px 10px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-button:hover,
+.expand-toggle:hover,
+.collapse-trigger:hover,
+.set-section-toggle:hover,
+.posture-tips-toggle:hover,
+.session-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .tips-list {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 0;
+  list-style: none;
   display: grid;
-  gap: 8px;
+  gap: 10px;
   color: var(--muted-strong);
   line-height: 1.45;
   font-size: 0.82rem;
+}
+
+.tip-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px;
+}
+
+.tip-image {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.visual-tip {
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tip-item span {
+  display: block;
+  color: var(--muted-strong);
 }
 
 .tips-box.collapsed .tips-list {
@@ -478,8 +603,9 @@ button {
 }
 
 .section-title-row h3 {
-  font-size: 0.82rem;
-  letter-spacing: 0.14em;
+  font-size: var(--font-section);
+  font-weight: var(--font-section-weight);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted-strong);
 }
@@ -490,14 +616,14 @@ button {
   justify-content: space-between;
   gap: 10px;
   color: var(--muted-strong);
-  font-size: 1.1rem;
+  font-size: var(--font-body);
   line-height: 1.3;
   letter-spacing: -0.02em;
 }
 
 .last-session-line strong {
   color: var(--text);
-  font-size: 1.5rem;
+  font-size: var(--font-display);
   letter-spacing: -0.06em;
   font-weight: 800;
 }
@@ -610,6 +736,7 @@ button {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  box-shadow: 0 10px 22px rgba(33, 33, 35, 0.32);
 }
 
 .progress-list {
@@ -638,7 +765,633 @@ button {
   font-size: 1rem;
 }
 
+.tab-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.tab-button {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted-strong);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 9px 6px;
+  line-height: 1.2;
+}
+
+.tab-button.active {
+  background: var(--button-dark);
+  color: var(--button-text);
+  border-color: transparent;
+}
+
+.plan-card {
+  display: grid;
+  gap: 12px;
+}
+
+.plan-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  color: var(--muted-strong);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.day-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.day-tab {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted-strong);
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 6px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  gap: 0;
+}
+
+.day-tab-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.day-tab-summary {
+  display: none;
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  opacity: 0.85;
+}
+
+.day-tab.active .day-tab-summary {
+  display: block;
+}
+
+.day-tab.active {
+  background: var(--button-dark);
+  color: var(--button-text);
+  border-color: transparent;
+}
+
+.day-plan-card {
+  display: grid;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px;
+}
+
+.custom-plan-builder {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.custom-library-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.custom-library-row label {
+  display: grid;
+  gap: 5px;
+}
+
+.custom-library-row span {
+  color: var(--muted);
+  font-size: 0.54rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.custom-library-row select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 8px 9px;
+  font-size: 0.76rem;
+}
+
+.custom-plan-header {
+  display: grid;
+  gap: 4px;
+}
+
+.custom-plan-header strong {
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.custom-plan-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.custom-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.custom-plan-grid label {
+  display: grid;
+  gap: 5px;
+}
+
+.custom-plan-grid span {
+  color: var(--muted);
+  font-size: 0.54rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.custom-plan-grid input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 8px 9px;
+  font-size: 0.76rem;
+}
+
+.custom-plan-full {
+  grid-column: 1 / -1;
+}
+
+.custom-plan-list {
+  display: grid;
+  gap: 8px;
+}
+
+.custom-plan-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.custom-plan-item span {
+  color: var(--muted-strong);
+  font-size: 0.74rem;
+  letter-spacing: -0.01em;
+}
+
+.day-plan-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+}
+
+.day-plan-header h2 {
+  margin: 4px 0 0;
+  font-size: var(--font-display);
+  font-weight: var(--font-display-weight);
+  letter-spacing: -0.065em;
+  line-height: 0.92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.day-exercises {
+  display: grid;
+  gap: 10px;
+}
+
+.planned-exercise-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.planned-exercise-card.collapsed {
+  padding: 10px 12px;
+}
+
+.planned-exercise-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.planned-exercise-title-block {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.planned-exercise-name-wrap {
+  display: grid;
+  gap: 0;
+}
+
+.planned-exercise-main-name {
+  font-size: calc(var(--font-body) * 1.4);
+  line-height: 1.3;
+}
+
+.planned-exercise-header .planned-exercise-main-name {
+  font-size: calc(var(--font-body) * 1.4);
+}
+
+.planned-exercise-card.collapsed .planned-exercise-main-name {
+  font-size: calc(var(--font-body) * 1.05);
+}
+
+.planned-exercise-detail-name {
+  color: var(--muted-strong);
+  font-size: var(--font-body);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.planned-exercise-header strong {
+  font-size: var(--font-body);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0;
+}
+
+.collapse-trigger {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.plan-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.metric-pill {
+  display: grid;
+  gap: 3px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+}
+
+.metric-pill span {
+  color: var(--muted);
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.metric-pill strong {
+  font-size: 0.82rem;
+  letter-spacing: -0.04em;
+}
+
+.planned-progress-box {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.planned-set-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.planned-set-header span {
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.set-section-toggle {
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  padding: 5px 9px;
+}
+
+.planned-progress-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.planned-set-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.planned-set-row {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.planned-set-label {
+  color: var(--muted-strong);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.planned-set-field-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.planned-progress-row label,
+.planned-set-field-pair label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planned-progress-row input,
+.planned-set-field-pair input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 9px 10px;
+  font-size: 0.82rem;
+}
+
+.planned-notes-field {
+  display: grid;
+  gap: 5px;
+}
+
+.planned-notes-field span {
+  color: var(--muted);
+  font-size: 0.54rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planned-notes-field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 8px 9px;
+  font-size: 0.76rem;
+  resize: vertical;
+  min-height: 52px;
+}
+
+.planned-history-section {
+  display: grid;
+  gap: 8px;
+}
+
+.planned-history-list {
+  display: grid;
+  gap: 8px;
+}
+
+.planned-history-item {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.planned-history-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted-strong);
+}
+
+.planned-history-topline strong {
+  font-size: 0.82rem;
+  letter-spacing: -0.02em;
+}
+
+.planned-history-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.planned-history-meta small {
+  font-size: 0.56rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.planned-history-comment {
+  margin: 2px 0 0;
+  color: var(--muted-strong);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.planned-history-comment strong {
+  color: var(--text);
+}
+
+.planned-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.trend-meta {
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+.planned-progress-meta small {
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planned-progress-meta strong {
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.small-button {
+  padding: 10px 12px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.goal-row {
+  display: grid;
+  gap: 4px;
+  padding-top: 2px;
+}
+
+.goal-row span {
+  color: var(--muted);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.goal-row strong {
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.posture-tips-box {
+  display: grid;
+  gap: 12px;
+  padding: 12px 14px 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.posture-tips-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.posture-tips-header:focus-visible {
+  outline: 2px solid rgba(242, 181, 72, 0.9);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.posture-tips-header span {
+  color: var(--muted-strong);
+  font-size: var(--font-section);
+  font-weight: var(--font-section-weight);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.posture-tips-toggle {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  padding: 7px 18px;
+}
+
+.posture-tips-list {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.posture-tips-list li {
+  color: var(--muted-strong);
+  font-size: 0.77rem;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+}
+
+.posture-tips-list li.tip-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px;
+}
+
 @media (max-width: 420px) {
+  .day-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .day-plan-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .app-shell {
     padding: 0;
   }

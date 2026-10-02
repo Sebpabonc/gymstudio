@@ -45,7 +45,7 @@ export default function SessionList({onSelect}:{onSelect?:(s:Session)=>void}){
                     <div className="muted">{new Date(session.date).toLocaleDateString()}</div>
                     <div>{session.exercises.length} exercises</div>
                   </div>
-                  <span className="session-toggle">{isExpanded ? 'Hide' : 'View'}</span>
+                  <span className="toggle-button session-toggle">{isExpanded ? '−' : '+'}</span>
                 </div>
                 <button className="danger session-remove-button" onClick={() => removeSession(session.id)}>Remove</button>
               </li>

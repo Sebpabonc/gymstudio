@@ -27,7 +27,37 @@ export type WorkoutPhase = {
   groups: PlanGroup[]
 }
 
-export const workoutPhases: WorkoutPhase[] = [
+const standardizeExerciseName = (name: string) => {
+  return name
+    .replace(/\bDb\b/gi, 'Dumbbell')
+    .replace(/\bBB\b/gi, 'Barbell')
+    .replace(/\bHB\b/gi, 'Hex Bar')
+    .replace(/\bLPD\b/gi, 'Lat Pulldown')
+    .replace(/\bRDL\b/gi, 'Romanian Deadlift')
+    .replace(/\bOH\b/gi, 'Overhead')
+    .replace(/\bSupp\./gi, 'Supported')
+    .replace(/\bHor\./gi, 'Horizontal')
+    .replace(/\bFFE\b/gi, 'Front Foot Elevated')
+    .replace(/\bNeutral Grip\b/gi, 'Neutral Grip')
+    .replace(/\bWide Grip\b/gi, 'Wide Grip')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b(\d+)\s*Dumbbell\b/gi, '$1 lb Dumbbell')
+    .replace(/\b(\d+)\s*Barbell\b/gi, '$1 lb Barbell')
+    .replace(/\b(\d+)\s*lb\s*Dumbbell\b/gi, '$1 lb Dumbbell')
+    .replace(/\b(\d+)\s*lb\s*Barbell\b/gi, '$1 lb Barbell')
+    .replace(/\bNeutral Grip\b/gi, 'Neutral Grip')
+    .replace(/\bCable Flyes\b/gi, 'Cable Flies')
+    .replace(/\bStanding DB Curls\b/gi, 'Standing Dumbbell Curls')
+    .replace(/\bDB\b/gi, 'Dumbbell')
+    .replace(/\bDb\b/gi, 'Dumbbell')
+    .replace(/\bBB\b/gi, 'Barbell')
+    .replace(/\s+\(Neutral Grip\)/gi, ' (Neutral Grip)')
+    .replace(/\b(\d+)\s*lb\s*Dumbbell\s+Press\b/gi, '$1 lb Dumbbell Press')
+    .replace(/\b(\d+)\s*lb\s*Barbell\s+Bench\s+Press\b/gi, '$1 lb Barbell Bench Press')
+}
+
+const rawWorkoutPhases: WorkoutPhase[] = [
   {
     id: 'tp-16-2-26',
     label: 'TP 16-2-26',
@@ -364,6 +394,17 @@ export const workoutPhases: WorkoutPhase[] = [
   },
 ]
 
+export const workoutPhases = rawWorkoutPhases.map((phase) => ({
+  ...phase,
+  groups: phase.groups.map((group) => ({
+    ...group,
+    exercises: group.exercises.map((exercise) => ({
+      ...exercise,
+      name: standardizeExerciseName(exercise.name),
+    })),
+  })),
+}))
+
 export const workoutExercises = [
   '45 Db Press Neutral Grip',
   '30 Db Press Neutral Grip',
@@ -427,7 +468,7 @@ export const workoutExercises = [
 export const workoutExerciseNames = Array.from(
   new Set(
     workoutPhases.flatMap((phase) =>
-      phase.groups.flatMap((group) => group.exercises.map((exercise) => exercise.name))
+      phase.groups.flatMap((group) => group.exercises.map((exercise) => standardizeExerciseName(exercise.name)))
     )
   )
 )

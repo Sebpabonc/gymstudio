@@ -1,10 +1,17 @@
+export type ExerciseTip = {
+  text: string
+  image?: string
+  imageUrl?: string
+}
+
 export type Exercise = {
   id: string
   name: string
   primaryMuscle: string
   secondaryMuscle?: string
   notes?: string
-  tips?: string[]
+  overallStatement?: string
+  tips?: Array<string | ExerciseTip>
 }
 
 export type WorkoutSet = {
