@@ -1341,6 +1341,69 @@ button {
   color: var(--nav-active);
 }
 
+.rest-timer-pill {
+  position: absolute;
+  left: 50%;
+  bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 82px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  max-width: calc(100% - 20px);
+  min-height: 52px;
+  padding: 4px 6px 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  background: rgba(24, 24, 25, 0.96);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transform: translateX(-50%);
+}
+
+.rest-timer-pill button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.rest-timer-time {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.rest-timer-done {
+  flex: 1 1 auto;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.rest-timer-action {
+  flex: 0 0 auto;
+  min-width: 52px;
+  padding: 0 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted-strong);
+  font-size: 0.68rem;
+}
+
+.rest-timer-paused {
+  color: var(--muted);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
 .bottom-tab-bar button.active::after {
   content: '';
   position: absolute;
@@ -2065,6 +2128,18 @@ button {
 .metric-pill strong {
   font-size: 0.82rem;
   letter-spacing: -0.04em;
+}
+
+.rest-start-button {
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted-strong);
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 
 .planned-progress-box {
@@ -3071,4 +3146,9 @@ button {
   font-size: 0.85rem;
   font-weight: 600;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* Keep the last exercise scrollable above the rest timer pill as well as the dock. */
+.app-content.with-rest-timer {
+  padding-bottom: calc(60px + 64px + max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
 }

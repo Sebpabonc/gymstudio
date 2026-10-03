@@ -11,6 +11,7 @@ import {
   getSessionStorageValue,
   hasDismissedWelcome,
   loadExercises,
+  loadRestTimerState,
   loadWorkoutHistory,
   mapTrainingBlockRows,
   normalizeExerciseName,
@@ -18,6 +19,7 @@ import {
   setActiveBlockId,
   setAskExerciseAiConsent,
   setSessionStorageValue,
+  saveRestTimerState,
   getActiveBlockId,
   upsertExerciseRecord,
   setStorageNamespace,
@@ -519,6 +521,24 @@ describe('demo storage namespace', () => {
 
     sessionStorage.removeItem('gym-studio.demo-mode')
     expect(await loadWorkoutHistory()).toEqual(realHistory)
+  })
+
+  it('isolates the persisted rest timer in demo mode', () => {
+    const timer = { endAt: 1_800_000_000_000 }
+    saveRestTimerState(timer)
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+
+    expect(loadRestTimerState()).toBeNull()
+    saveRestTimerState({ pausedRemainingMs: 15_000 })
+    expect(localStorage.getItem('gym-studio.demo.rest-timer')).toBe(
+      JSON.stringify({ pausedRemainingMs: 15_000 })
+    )
+    expect(loadRestTimerState()).toEqual({ pausedRemainingMs: 15_000 })
+
+    sessionStorage.removeItem('gym-studio.demo-mode')
+    expect(loadRestTimerState()).toEqual(timer)
+    saveRestTimerState(null)
+    expect(loadRestTimerState()).toBeNull()
   })
 })
 
