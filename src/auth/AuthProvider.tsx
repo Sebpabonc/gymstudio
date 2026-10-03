@@ -1,9 +1,11 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabaseClient, isGoogleProviderEnabled } from '../lib/supabaseClient'
 import { isDemoMode } from '../utils/demoMode'
+import { syncWorkoutHistory } from '../utils/sync'
 
 export type AuthStatus = 'loading' | 'signed-out' | 'signed-in'
+export type WorkoutSyncStatus = 'syncing' | 'synced' | 'offline' | 'error'
 
 type AuthState = {
   session: Session | null
@@ -45,6 +47,8 @@ type AuthContextValue = {
   user: User | null
   status: AuthStatus
   available: boolean
+  syncStatus: WorkoutSyncStatus
+  lastSyncedAt: string | null
   signInWithPassword: (email: string, password: string) => Promise<ActionResult>
   signUp: (email: string, password: string) => Promise<ActionResult>
   resetPassword: (email: string) => Promise<ActionResult>
@@ -77,6 +81,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const demoMode = isDemoMode()
   const startingState: AuthState = demoMode ? { ...initialState, status: 'signed-out' } : initialState
   const [state, dispatch] = useReducer(authStateReducer, startingState)
+  const [syncStatus, setSyncStatus] = useState<WorkoutSyncStatus>('syncing')
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
 
   useEffect(() => {
     if (demoMode) return
@@ -106,6 +112,74 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       unsubscribe?.()
     }
   }, [demoMode])
+
+  useEffect(() => {
+    const userId = state.session?.user.id
+    if (demoMode || !userId) {
+      return
+    }
+
+    let active = true
+    let running = false
+    let rerun = false
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
+
+    const sync = async () => {
+      if (!active) return
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setSyncStatus('offline')
+        return
+      }
+      if (running) {
+        rerun = true
+        return
+      }
+
+      running = true
+      setSyncStatus('syncing')
+      try {
+        await syncWorkoutHistory(userId)
+        if (active) {
+          if (retryTimer) clearTimeout(retryTimer)
+          setLastSyncedAt(new Date().toISOString())
+          setSyncStatus('synced')
+        }
+      } catch {
+        if (active) {
+          setSyncStatus('error')
+          retryTimer = setTimeout(() => void sync(), 10_000)
+        }
+      } finally {
+        running = false
+        if (rerun && active) {
+          rerun = false
+          void sync()
+        }
+      }
+    }
+
+    const scheduleSync = () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => void sync(), 2_000)
+    }
+    const syncWhenOnline = () => void sync()
+    const syncWhenOffline = () => setSyncStatus('offline')
+
+    void sync()
+    window.addEventListener('gym-studio:history-saved', scheduleSync)
+    window.addEventListener('online', syncWhenOnline)
+    window.addEventListener('offline', syncWhenOffline)
+
+    return () => {
+      active = false
+      if (debounceTimer) clearTimeout(debounceTimer)
+      if (retryTimer) clearTimeout(retryTimer)
+      window.removeEventListener('gym-studio:history-saved', scheduleSync)
+      window.removeEventListener('online', syncWhenOnline)
+      window.removeEventListener('offline', syncWhenOffline)
+    }
+  }, [demoMode, state.session?.user.id])
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const client = await getClient()
@@ -146,12 +220,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthContextValue>(() => ({
     ...state,
     user: state.session?.user ?? null,
+    syncStatus,
+    lastSyncedAt,
     signInWithPassword,
     signUp,
     resetPassword,
     signInWithGoogle,
     signOut,
-  }), [state, signInWithPassword, signUp, resetPassword, signInWithGoogle, signOut])
+  }), [
+    state,
+    syncStatus,
+    lastSyncedAt,
+    signInWithPassword,
+    signUp,
+    resetPassword,
+    signInWithGoogle,
+    signOut,
+  ])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

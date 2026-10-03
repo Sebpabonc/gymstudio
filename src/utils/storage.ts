@@ -8,6 +8,40 @@ const HISTORY_KEY = 'gym-studio.history'
 const CATALOGUE_KEY = 'gym-studio.catalogue'
 const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
 const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
+const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
+
+export type SyncWorkoutEntry = WorkoutEntry & {
+  updatedAt: string
+  dirty: boolean
+  deletedAt?: string
+}
+
+type SyncMetadata = {
+  entries: Record<string, { updatedAt: string; dirty: boolean; deletedAt?: string }>
+  lastPulledAt: Record<string, string>
+}
+
+function loadSyncMetadata(): SyncMetadata {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(storageKey(SYNC_METADATA_KEY)) ?? 'null')
+    return {
+      entries: parsed?.entries ?? {},
+      lastPulledAt: parsed?.lastPulledAt ?? {},
+    }
+  } catch {
+    return { entries: {}, lastPulledAt: {} }
+  }
+}
+
+function saveSyncMetadata(metadata: SyncMetadata) {
+  localStorage.setItem(storageKey(SYNC_METADATA_KEY), JSON.stringify(metadata))
+}
+
+function signalWorkoutHistorySaved() {
+  if (!isDemoMode() && typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('gym-studio:history-saved'))
+  }
+}
 
 export function storageKey(key: string) {
   return isDemoMode() ? key.replace(/^gym-studio\./, 'gym-studio.demo.') : key
@@ -459,7 +493,102 @@ export async function loadWorkoutHistory(): Promise<WorkoutEntry[]> {
 }
 
 export function saveWorkoutHistory(history: WorkoutEntry[]) {
+  const raw = localStorage.getItem(storageKey(HISTORY_KEY))
+  let previous: WorkoutEntry[] = []
+  try {
+    const parsed = JSON.parse(raw ?? '[]')
+    if (Array.isArray(parsed)) previous = parsed
+  } catch {
+    previous = []
+  }
+
+  const previousById = new Map(previous.map((entry) => [entry.id, JSON.stringify(entry)]))
+  const metadata = loadSyncMetadata()
+  const nextEntries: SyncMetadata['entries'] = {}
+  const now = new Date().toISOString()
+
+  for (const entry of history) {
+    const sync = metadata.entries[entry.id]
+    const unchanged = previousById.get(entry.id) === JSON.stringify(entry)
+    nextEntries[entry.id] = unchanged && sync
+      ? sync
+      : { updatedAt: now, dirty: true }
+  }
+
   localStorage.setItem(storageKey(HISTORY_KEY), JSON.stringify(history))
+  saveSyncMetadata({ ...metadata, entries: nextEntries })
+  signalWorkoutHistorySaved()
+}
+
+export async function loadWorkoutHistoryForSync(): Promise<SyncWorkoutEntry[]> {
+  const history = await loadWorkoutHistory()
+  const metadata = loadSyncMetadata()
+  let changed = false
+  const entries = history.map((entry) => {
+    let sync = metadata.entries[entry.id]
+    if (!sync || typeof sync.updatedAt !== 'string' || typeof sync.dirty !== 'boolean') {
+      sync = { updatedAt: new Date().toISOString(), dirty: true }
+      metadata.entries[entry.id] = sync
+      changed = true
+    }
+    return { ...entry, ...sync }
+  })
+  if (changed) saveSyncMetadata(metadata)
+  return entries
+}
+
+export function saveMergedWorkoutHistory(history: SyncWorkoutEntry[]) {
+  const metadata = loadSyncMetadata()
+  const entries: SyncMetadata['entries'] = {}
+  for (const entry of history) {
+    entries[entry.id] = {
+      updatedAt: entry.updatedAt,
+      dirty: entry.dirty,
+      ...(entry.deletedAt ? { deletedAt: entry.deletedAt } : {}),
+    }
+  }
+  localStorage.setItem(
+    storageKey(HISTORY_KEY),
+    JSON.stringify(history.map(({ updatedAt: _updatedAt, dirty: _dirty, deletedAt: _deletedAt, ...entry }) => entry))
+  )
+  saveSyncMetadata({ ...metadata, entries })
+}
+
+export function markWorkoutEntriesSynced(
+  entries: Array<{ id: string; expectedUpdatedAt: string; updatedAt?: string }>
+) {
+  const metadata = loadSyncMetadata()
+  let changed = false
+  for (const entry of entries) {
+    const current = metadata.entries[entry.id]
+    if (!current || current.updatedAt !== entry.expectedUpdatedAt) continue
+    metadata.entries[entry.id] = {
+      ...current,
+      updatedAt: entry.updatedAt ?? current.updatedAt,
+      dirty: false,
+    }
+    changed = true
+  }
+  if (changed) saveSyncMetadata(metadata)
+}
+
+export async function markAllWorkoutEntriesDirty() {
+  const entries = await loadWorkoutHistoryForSync()
+  const metadata = loadSyncMetadata()
+  for (const entry of entries) {
+    metadata.entries[entry.id] = { ...metadata.entries[entry.id], dirty: true }
+  }
+  saveSyncMetadata(metadata)
+}
+
+export function getWorkoutHistoryLastPulledAt(userId: string) {
+  return loadSyncMetadata().lastPulledAt[userId] ?? null
+}
+
+export function setWorkoutHistoryLastPulledAt(userId: string, updatedAt: string) {
+  const metadata = loadSyncMetadata()
+  metadata.lastPulledAt[userId] = updatedAt
+  saveSyncMetadata(metadata)
 }
 
 export async function addWorkoutEntry(entry: WorkoutEntry) {
