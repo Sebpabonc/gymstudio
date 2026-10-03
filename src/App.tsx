@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
 import {
@@ -83,13 +83,9 @@ export default function App() {
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<ViewTab>('track')
-  const catalogueRefreshStarted = useRef(false)
   const text = uiText
 
   useEffect(() => {
-    if (catalogueRefreshStarted.current) return
-    catalogueRefreshStarted.current = true
-
     let cancelled = false
     void (async () => {
       const refresh = refreshCatalogue()

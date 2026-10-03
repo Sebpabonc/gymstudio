@@ -96,6 +96,15 @@ describe('loadExercises', () => {
     expect(localStorage.getItem('gym-studio.exercises')).not.toBeNull()
   })
 
+  it('loads the complete bundled catalogue when there is no cache or Supabase client', async () => {
+    supabaseMock.clientState.current = null
+
+    const exercises = await loadExercises()
+
+    expect(exercises).toHaveLength(224)
+    expect(exercises.find((exercise) => exercise.id === 'barbell-bench-press')?.postureTips).toHaveLength(5)
+  })
+
   it('recovers from corrupted saved data', async () => {
     localStorage.setItem('gym-studio.exercises', '{not json')
     expect(await loadExercises()).toHaveLength(exerciseLibrary.length)
