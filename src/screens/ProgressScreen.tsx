@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useMemo, useState } from 'react'
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { localIsoDate } from '../lib/dates'
 import {
   adherence,
@@ -140,6 +140,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   const [pickedId, setPickedId] = useState(initialExerciseId ?? '')
   const [exerciseSearch, setExerciseSearch] = useState('')
   const [exercisePickerOpen, setExercisePickerOpen] = useState(false)
+  const exercisePickerButtonRef = useRef<HTMLButtonElement>(null)
   const [targets, setTargets] = useState(() => loadWeightTargets())
   const today = localIsoDate()
 
@@ -310,6 +311,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
           <>
             <span className="field-label">Exercise</span>
             <button
+              ref={exercisePickerButtonRef}
               type="button"
               className="exercise-picker-button"
               aria-expanded={exercisePickerOpen}
@@ -343,6 +345,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                         setPickedId(exercise.id)
                         setExerciseSearch('')
                         setExercisePickerOpen(false)
+                        exercisePickerButtonRef.current?.focus()
                       }}
                     >
                       <span className="result-name">{getExerciseDisplayName(exercise)}</span>
