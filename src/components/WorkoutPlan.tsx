@@ -19,9 +19,15 @@ import {
   upsertExerciseRecord,
 } from '../utils/storage'
 import { applyTargetToWeights, targetAppliesToDay } from '../utils/weightTargets'
-import { blockDateRange, blockWeek, defaultActiveBlock, formatBenchAngle } from '../utils/trainingBlocks'
+import {
+  blockDateRange,
+  blockWeek,
+  defaultActiveBlock,
+  formatBenchAngle,
+  nextUnloggedDay,
+  trainingBlockDateStatus,
+} from '../utils/trainingBlocks'
 import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, formatLoggedTime, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
-import { isDemoMode } from '../utils/demoMode'
 import {
   copyWeightToUntouchedSets,
   filterLoggableSets,
@@ -257,6 +263,7 @@ export default function WorkoutPlan({
   const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
   const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
   const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
+  const [pinnedBlockId, setPinnedBlockId] = useState(() => getActiveBlockId() ?? '')
   const [blockCardExpanded, setBlockCardExpanded] = useState(
     () => getSessionStorageValue(BLOCK_CARD_EXPANDED_KEY) === 'true'
   )
@@ -312,15 +319,17 @@ export default function WorkoutPlan({
     calendarHistory: 'Work done on this day',
     calendarEmpty: 'No workouts logged on this date.',
     changeBlock: 'Change block',
-    currentBlock: 'Current',
     coach: 'Coach',
     pt: 'PT',
     loadingBlocks: 'Loading training blocks…',
   }
 
+  const today = getTodayIsoDate()
   const activeBlock = useMemo(
-    () => trainingBlocks.find((block) => block.id === selectedBlockId) ?? defaultActiveBlock(trainingBlocks),
-    [selectedBlockId, trainingBlocks]
+    () =>
+      trainingBlocks.find((block) => block.id === selectedBlockId) ??
+      defaultActiveBlock(trainingBlocks, today),
+    [selectedBlockId, today, trainingBlocks]
   )
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
   const activeBlockExercises = useMemo(
@@ -343,7 +352,12 @@ export default function WorkoutPlan({
     [activeDay, exerciseCatalog]
   )
   const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
-  const activeBlockWeek = activeBlock ? blockWeek(activeBlock) : null
+  const activeBlockWeek = activeBlock ? blockWeek(activeBlock, today) : null
+  const todayDay = activeBlock ? nextUnloggedDay(activeBlock, history, today) : undefined
+  const hasCurrentBlock = trainingBlocks.some((block) => trainingBlockDateStatus(block, today) === 'Current')
+  const nextUpcomingBlock = trainingBlocks
+    .filter((block) => trainingBlockDateStatus(block, today) === 'Upcoming')
+    .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.number - b.number)[0]
 
   const completionScope = (blockId?: string, dayKey?: string) => ({ date: localIsoDate(), blockId, dayKey })
   const activeCompletionScope =
@@ -379,19 +393,13 @@ export default function WorkoutPlan({
       setExerciseCatalog(exercises)
       setHistory(entries)
       setTrainingBlocks(blocks)
-      const savedBlock = blocks.find((block) => block.id === getActiveBlockId())
-      const latestHistoryDate = entries.reduce(
-        (latest, entry) => (entry.date > latest ? entry.date : latest),
-        ''
-      )
-      const historyBlock = isDemoMode() && latestHistoryDate
-        ? blocks.find((block) => blockWeek(block, latestHistoryDate) !== null)
-        : undefined
-      const nextBlock = savedBlock ?? historyBlock ?? defaultActiveBlock(blocks)
+      const savedBlockId = getActiveBlockId()
+      const pinnedBlock = blocks.find((block) => block.id === savedBlockId)
+      const nextBlock = pinnedBlock ?? defaultActiveBlock(blocks, getTodayIsoDate())
+      if (savedBlockId && !pinnedBlock) setActiveBlockId(null)
+      setPinnedBlockId(pinnedBlock?.id ?? '')
       setSelectedBlockId(nextBlock?.id ?? '')
-      setSelectedDay((current) =>
-        nextBlock?.days.some((day) => day.key === current) ? current : nextBlock?.days[0]?.key ?? ''
-      )
+      setSelectedDay(nextBlock ? nextUnloggedDay(nextBlock, entries)?.key ?? '' : '')
     })
 
     return () => {
@@ -679,6 +687,17 @@ export default function WorkoutPlan({
       setSessionStorageValue(BLOCK_CARD_EXPANDED_KEY, String(next))
       return next
     })
+  }
+
+  const useDateBasedBlock = () => {
+    const block = defaultActiveBlock(trainingBlocks, today)
+    setActiveBlockId(null)
+    setPinnedBlockId('')
+    setSelectedBlockId(block?.id ?? '')
+    setSelectedDay(block ? nextUnloggedDay(block, history, today)?.key ?? '' : '')
+    setCollapsedExercises({})
+    setPlannedDrafts({})
+    setBlockSelectorOpen(false)
   }
 
   const toggleAllExercises = () => {
@@ -1113,6 +1132,13 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
         </div>
       )}
 
+      {planMode === 'preset' && !hasCurrentBlock && nextUpcomingBlock && (
+        <section className="next-block-banner" role="status">
+          <strong>{`Next block starts ${formatBlockStartDate(nextUpcomingBlock.startDate)}`}</strong>
+          <span>{`Block ${nextUpcomingBlock.number} · ${nextUpcomingBlock.name}`}</span>
+        </section>
+      )}
+
       {planMode === 'preset' && activeBlock && (
         <section className="training-block-card" aria-label="Active training block">
           <button
@@ -1128,11 +1154,14 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             </span>
             <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
             <strong className="training-block-status">
-              {activeBlockWeek
-                ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
-                : getTodayIsoDate() < activeBlock.startDate
-                  ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
-                  : 'Completed'}
+              {pinnedBlockId === activeBlock.id && <span>Pinned block</span>}
+              <span>
+                {trainingBlockDateStatus(activeBlock, today) === 'Current'
+                  ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
+                  : trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
+                    ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
+                    : 'Completed'}
+              </span>
             </strong>
             <span className="toggle-button expand-toggle" aria-hidden="true">
               {blockCardExpanded ? '−' : '+'}
@@ -1181,8 +1210,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     className={block.id === activeBlock.id ? 'training-block-option active' : 'training-block-option'}
                     onClick={() => {
                       setActiveBlockId(block.id)
+                      setPinnedBlockId(block.id)
                       setSelectedBlockId(block.id)
-                      setSelectedDay(block.days[0]?.key ?? '')
+                      setSelectedDay(nextUnloggedDay(block, history, today)?.key ?? block.days[0]?.key ?? '')
                       setCollapsedExercises({})
                       setPlannedDrafts({})
                       setBlockSelectorOpen(false)
@@ -1193,10 +1223,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       <small className="training-block-option-summary">{block.summary}</small>
                       <small>{`${blockDateRange(block)} · ${block.method.replace(/-/g, ' ')}`}</small>
                     </span>
-                    {block.id === activeBlock.id && <small>{text.currentBlock}</small>}
+                    <small className="training-block-option-status">
+                      {`${trainingBlockDateStatus(block, today)}${pinnedBlockId === block.id ? ' · Pinned block' : ''}`}
+                    </small>
                   </button>
                 ))}
               </div>
+            )}
+            {pinnedBlockId === activeBlock.id && (
+              <button type="button" className="secondary-button block-change-button" onClick={useDateBasedBlock}>
+                Use date-based block
+              </button>
             )}
           </div>
         </section>
@@ -1215,6 +1252,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 collapseAllExerciseSections()
               }}
             >
+              {todayDay?.key === day.key && <span className="day-tab-today">Today</span>}
               <span className="day-tab-label">{`Day ${day.position} · ${day.name}`}</span>
               {(() => {
                 const today = localIsoDate()

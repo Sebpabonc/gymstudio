@@ -371,8 +371,13 @@ export function getActiveBlockId() {
   return localStorage.getItem(storageKey(ACTIVE_BLOCK_KEY))
 }
 
-export function setActiveBlockId(blockId: string) {
-  localStorage.setItem(storageKey(ACTIVE_BLOCK_KEY), blockId)
+export function setActiveBlockId(blockId: string | null) {
+  const key = storageKey(ACTIVE_BLOCK_KEY)
+  if (blockId) {
+    localStorage.setItem(key, blockId)
+  } else {
+    localStorage.removeItem(key)
+  }
 }
 
 function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[] {
