@@ -516,7 +516,7 @@ export default function WorkoutPlan({
 
     setSetSectionsVisible((current) => ({
       ...current,
-      [key]: !(current[key] ?? true),
+      [key]: !(current[key] ?? false),
     }))
   }
 
@@ -525,7 +525,7 @@ export default function WorkoutPlan({
 
     setProgressSectionsVisible((current) => ({
       ...current,
-      [key]: !(current[key] ?? true),
+      [key]: !(current[key] ?? false),
     }))
   }
 

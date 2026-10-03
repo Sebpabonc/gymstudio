@@ -105,7 +105,7 @@ describe('loadExercises', () => {
 
     const exercises = await loadExercises()
 
-    expect(exercises).toHaveLength(224)
+    expect(exercises).toHaveLength(227)
     expect(exercises.find((exercise) => exercise.id === 'barbell-bench-press')?.postureTips).toHaveLength(5)
   })
 
@@ -480,8 +480,8 @@ describe('workout history', () => {
 })
 
 describe('exercise library data', () => {
-  it('bundles all 224 approved exercises with five English posture tips each', () => {
-    expect(exerciseLibrary).toHaveLength(224)
+  it('bundles all 227 approved exercises with five English posture tips each', () => {
+    expect(exerciseLibrary).toHaveLength(227)
     expect(exerciseLibrary.find((exercise) => exercise.id === 'barbell-bench-press')).toMatchObject({
       name: 'Barbell Bench Press',
       bodyRegion: 'Chest',
