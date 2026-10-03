@@ -1,6 +1,6 @@
 import { Exercise, WorkoutEntry } from '../types'
 import { exerciseLibrary } from '../data/exerciseLibrary'
-import { supabaseClient } from '../lib/supabaseClient'
+import { getSupabaseClient } from '../lib/supabaseClient'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
@@ -9,14 +9,17 @@ const CATALOGUE_KEY = 'gym-studio.catalogue'
 type CatalogueRow = {
   id: string
   name_en: string
+  name_es: string | null
   primary_muscle: string
   secondary_muscles: string[]
   aliases: string[]
 }
 
+type CatalogueExercise = Pick<Exercise, 'id' | 'name' | 'primaryMuscle' | 'secondaryMuscle' | 'nameEs'>
+
 type CatalogueCache = {
   fetchedAt: string
-  exercises: Exercise[]
+  exercises: CatalogueExercise[]
   aliases: Record<string, string>
 }
 
@@ -58,6 +61,8 @@ const exerciseDisplayTranslations: Record<string, { es: string; en: string }> = 
 }
 
 export function getExerciseDisplayName(value: string | Exercise, language: 'es' | 'en' = 'en') {
+  if (typeof value !== 'string' && language === 'es' && value.nameEs) return value.nameEs
+
   const name = typeof value === 'string' ? value : value.name
   const key = normalizeExerciseName(name)
   const translated = exerciseDisplayTranslations[key]
@@ -79,6 +84,7 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
     normalized.set(key, {
       id: exercise.id || current?.id || key,
       name: exercise.name,
+      nameEs: exercise.nameEs ?? current?.nameEs,
       primaryMuscle: exercise.primaryMuscle || current?.primaryMuscle || 'Other',
       secondaryMuscle: exercise.secondaryMuscle ?? current?.secondaryMuscle,
       notes: exercise.notes ?? current?.notes,
@@ -98,7 +104,13 @@ function loadCatalogueCache(): CatalogueCache | null {
     if (!Array.isArray(parsed.exercises)) return null
     return {
       fetchedAt: parsed.fetchedAt,
-      exercises: parsed.exercises,
+      exercises: parsed.exercises.map((exercise) => ({
+        id: exercise.id,
+        name: exercise.name,
+        nameEs: exercise.nameEs,
+        primaryMuscle: exercise.primaryMuscle,
+        secondaryMuscle: exercise.secondaryMuscle,
+      })),
       aliases: parsed.aliases ?? {},
     }
   } catch {
@@ -107,30 +119,28 @@ function loadCatalogueCache(): CatalogueCache | null {
 }
 
 async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: Record<string, string> } | null> {
-  if (!supabaseClient) return null
-
   try {
+    const supabaseClient = await getSupabaseClient()
+    if (!supabaseClient) return null
+
     const { data, error } = await supabaseClient
       .from('exercises')
-      .select('id, name_en, primary_muscle, secondary_muscles, aliases')
+      .select('id, name_en, name_es, primary_muscle, secondary_muscles, aliases')
       .eq('is_active', true)
       .order('name_en')
 
     if (error || !data) return null
 
     const rows = data as CatalogueRow[]
-    const libraryById = new Map(exerciseLibrary.map((exercise) => [exercise.id, exercise]))
     const aliases: Record<string, string> = {}
     const exercises = rows.map((row) => {
       for (const alias of row.aliases ?? []) aliases[alias] = row.id
-      const bundled = libraryById.get(row.id)
       return {
         id: row.id,
         name: row.name_en,
+        nameEs: row.name_es ?? undefined,
         primaryMuscle: row.primary_muscle,
         secondaryMuscle: row.secondary_muscles?.[0],
-        notes: bundled?.notes,
-        tips: bundled?.tips,
       }
     })
 
@@ -152,7 +162,17 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
   try {
     localStorage.setItem(
       CATALOGUE_KEY,
-      JSON.stringify({ fetchedAt: new Date().toISOString(), ...catalogue })
+      JSON.stringify({
+        fetchedAt: new Date().toISOString(),
+        exercises: catalogue.exercises.map(({ id, name, nameEs, primaryMuscle, secondaryMuscle }) => ({
+          id,
+          name,
+          nameEs,
+          primaryMuscle,
+          secondaryMuscle,
+        })),
+        aliases: catalogue.aliases,
+      })
     )
   } catch {
     return catalogue.exercises
@@ -184,7 +204,12 @@ export function loadExercises(): Exercise[] {
     savedExercises = []
   }
 
-  const merged = mergeExercises(catalogue?.exercises ?? exerciseLibrary, savedExercises)
+  const bundledExercisesById = new Map(exerciseLibrary.map((exercise) => [exercise.id, exercise]))
+  const catalogueExercises = catalogue?.exercises.map((exercise) => {
+    const bundled = bundledExercisesById.get(exercise.id)
+    return { ...exercise, notes: bundled?.notes, tips: bundled?.tips }
+  })
+  const merged = mergeExercises(catalogueExercises ?? exerciseLibrary, savedExercises)
   saveExercises(merged)
   return merged
 }

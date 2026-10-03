@@ -1,6 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-const url = import.meta.env.VITE_SUPABASE_URL
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+let supabaseClient: SupabaseClient | null = null
 
-export const supabaseClient = url && anonKey ? createClient(url, anonKey) : null
+export async function getSupabaseClient(): Promise<SupabaseClient | null> {
+  const url = import.meta.env.VITE_SUPABASE_URL
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  if (!url || !anonKey) return null
+
+  if (!supabaseClient) {
+    const { createClient } = await import('@supabase/supabase-js')
+    supabaseClient = createClient(url, anonKey)
+  }
+
+  return supabaseClient
+}

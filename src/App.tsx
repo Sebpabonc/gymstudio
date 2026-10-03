@@ -93,13 +93,16 @@ export default function App() {
   }, [])
 
   const selectedExercise = useMemo(
-    () => exercises.find((exercise) => exercise.id === selectedId) ?? exercises[0],
+    () =>
+      exercises.find((exercise) => exercise.id === selectedId) ??
+      exercises.find((exercise) => exercise.id === 'barbell-bench-press') ??
+      exercises[0],
     [exercises, selectedId]
   )
 
   useEffect(() => {
-    if (!selectedId && exercises[0]) {
-      setSelectedId(exercises[0].id)
+    if (!selectedId && exercises.length) {
+      setSelectedId(exercises.find((exercise) => exercise.id === 'barbell-bench-press')?.id ?? exercises[0].id)
     }
   }, [exercises, selectedId])
 

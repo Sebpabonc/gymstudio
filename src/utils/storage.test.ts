@@ -22,9 +22,7 @@ const supabaseMock = vi.hoisted(() => {
 })
 
 vi.mock('../lib/supabaseClient', () => ({
-  get supabaseClient() {
-    return supabaseMock.clientState.current
-  },
+  getSupabaseClient: vi.fn(async () => supabaseMock.clientState.current),
 }))
 
 function createMemoryStorage(): Storage {
@@ -73,6 +71,15 @@ describe('getExerciseDisplayName', () => {
 
   it('falls back to the original name when there is no translation', () => {
     expect(getExerciseDisplayName('Some New Exercise', 'es')).toBe('Some New Exercise')
+  })
+
+  it('uses the Spanish catalogue name when available', () => {
+    expect(
+      getExerciseDisplayName(
+        { id: 'catalogue-exercise', name: 'New Exercise', nameEs: 'Ejercicio nuevo', primaryMuscle: 'Core' },
+        'es'
+      )
+    ).toBe('Ejercicio nuevo')
   })
 })
 
@@ -148,6 +155,29 @@ describe('loadExercises', () => {
     ])
     expect(exercises.some((exercise) => exercise.name === 'Lat Pulldown')).toBe(false)
   })
+
+  it('ignores cached tips and notes and restores bundled content by exercise id', () => {
+    const bundled = exerciseLibrary.find((exercise) => exercise.id === 'romanian-deadlift')!
+    localStorage.setItem(
+      'gym-studio.catalogue',
+      JSON.stringify({
+        fetchedAt: '2026-10-03T00:00:00Z',
+        exercises: [{
+          id: bundled.id,
+          name: 'Romanian Deadlift (Barbell)',
+          primaryMuscle: 'Hamstrings',
+          notes: 'Stale cached notes',
+          tips: ['Stale cached tip'],
+        }],
+        aliases: {},
+      })
+    )
+
+    const exercise = loadExercises().find((item) => item.id === bundled.id)
+
+    expect(exercise?.notes).toBe(bundled.notes)
+    expect(exercise?.tips).toEqual(bundled.tips)
+  })
 })
 
 describe('remote catalogue', () => {
@@ -155,6 +185,7 @@ describe('remote catalogue', () => {
     {
       id: 'romanian-deadlift',
       name_en: 'Romanian Deadlift (Barbell)',
+      name_es: 'Peso muerto rumano con barra',
       primary_muscle: 'Hamstrings',
       secondary_muscles: ['Glutes', 'Lower Back'],
       aliases: ['bb-rdl'],
@@ -162,29 +193,31 @@ describe('remote catalogue', () => {
     {
       id: 'lat-pulldown',
       name_en: 'Lat Pulldown (Wide Grip)',
+      name_es: null,
       primary_muscle: 'Lats',
       secondary_muscles: ['Upper Back', 'Biceps'],
       aliases: [],
     },
   ]
 
-  it('maps active rows and preserves bundled tips by id', async () => {
+  it('maps active database fields without bundled tips or notes', async () => {
     supabaseMock.response.data = rows
 
     const catalogue = await fetchRemoteCatalogue()
     const deadlift = catalogue?.find((exercise) => exercise.id === 'romanian-deadlift')
-    const bundledDeadlift = exerciseLibrary.find((exercise) => exercise.id === 'romanian-deadlift')
 
     expect(supabaseMock.from).toHaveBeenCalledWith('exercises')
+    expect(supabaseMock.select).toHaveBeenCalledWith('id, name_en, name_es, primary_muscle, secondary_muscles, aliases')
     expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
     expect(supabaseMock.order).toHaveBeenCalledWith('name_en')
     expect(deadlift).toMatchObject({
       name: 'Romanian Deadlift (Barbell)',
+      nameEs: 'Peso muerto rumano con barra',
       primaryMuscle: 'Hamstrings',
       secondaryMuscle: 'Glutes',
-      notes: bundledDeadlift?.notes,
-      tips: bundledDeadlift?.tips,
     })
+    expect(deadlift?.notes).toBeUndefined()
+    expect(deadlift?.tips).toBeUndefined()
   })
 
   it('returns null when Supabase returns an error', async () => {
@@ -203,8 +236,16 @@ describe('remote catalogue', () => {
     await refreshCatalogue()
 
     const cache = JSON.parse(localStorage.getItem('gym-studio.catalogue')!)
+    const deadlift = loadExercises().find((exercise) => exercise.id === 'romanian-deadlift')
+    const bundledDeadlift = exerciseLibrary.find((exercise) => exercise.id === 'romanian-deadlift')
+
     expect(cache.exercises).toHaveLength(2)
+    expect(cache.exercises[0]).not.toHaveProperty('tips')
+    expect(cache.exercises[0]).not.toHaveProperty('notes')
     expect(cache.aliases).toEqual({ 'bb-rdl': 'romanian-deadlift' })
+    expect(localStorage.getItem('gym-studio.catalogue')!.length).toBeLessThan(50_000)
+    expect(deadlift?.tips).toEqual(bundledDeadlift?.tips)
+    expect(deadlift?.nameEs).toBe('Peso muerto rumano con barra')
   })
 })
 
