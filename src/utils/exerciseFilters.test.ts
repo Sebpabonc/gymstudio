@@ -25,12 +25,13 @@ const exercises: Exercise[] = [
 ]
 
 describe('exercise filters', () => {
-  it('filters by body region and searches Spanish names, muscle groups, and equipment', () => {
+  it('filters by body region and searches English names, muscle groups, and equipment', () => {
     expect(filterExercises(exercises, '', 'Back')).toEqual([exercises[0]])
-    expect(filterExercises(exercises, 'remo')).toEqual([exercises[0]])
+    expect(filterExercises(exercises, 'row')).toEqual([exercises[0]])
+    expect(filterExercises(exercises, 'remo')).toEqual([])
     expect(filterExercises(exercises, 'forearms', 'Back')).toEqual([exercises[0]])
     expect(filterExercises(exercises, 'barbell', 'Chest')).toEqual([exercises[1]])
-    expect(filterExercises(exercises, 'remo', 'Chest')).toEqual([])
+    expect(filterExercises(exercises, 'row', 'Chest')).toEqual([])
   })
 
   it('returns only available regions in the catalogue order', () => {

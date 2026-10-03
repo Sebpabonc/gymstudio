@@ -1,6 +1,6 @@
 import { Exercise, ExerciseTip } from '../types'
 
-export const ALL_BODY_REGIONS = 'Todos'
+export const ALL_BODY_REGIONS = 'All'
 
 const bodyRegionOrder = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core', 'Full Body']
 
@@ -18,7 +18,6 @@ export function filterExercises(exercises: Exercise[], query: string, bodyRegion
 
     const searchableValues = [
       exercise.name,
-      exercise.nameEs,
       ...(exercise.primaryMuscles ?? [exercise.primaryMuscle]),
       ...(exercise.secondaryMuscles ?? (exercise.secondaryMuscle ? [exercise.secondaryMuscle] : [])),
       exercise.equipment,

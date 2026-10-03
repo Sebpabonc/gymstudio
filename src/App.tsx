@@ -401,7 +401,7 @@ export default function App() {
                     {selectedExercise.primaryMuscles !== undefined || selectedExercise.secondaryMuscles !== undefined ? (
                       <div className="muscle-groups">
                         <div className="muscle-group">
-                          <span className="field-label">Principales</span>
+                          <span className="field-label">Primary muscles</span>
                           <div className="chip-row muscle-chip-row">
                             {(selectedExercise.primaryMuscles ?? [selectedExercise.primaryMuscle]).map((muscle) => (
                               <span key={muscle} className="chip">{muscle}</span>
@@ -409,7 +409,7 @@ export default function App() {
                           </div>
                         </div>
                         <div className="muscle-group">
-                          <span className="field-label">Secundarios</span>
+                          <span className="field-label">Secondary muscles</span>
                           <div className="chip-row muscle-chip-row">
                             {(selectedExercise.secondaryMuscles ??
                               (selectedExercise.secondaryMuscle ? [selectedExercise.secondaryMuscle] : [])

@@ -64,22 +64,24 @@ describe('normalizeExerciseName', () => {
 })
 
 describe('getExerciseDisplayName', () => {
-  it('returns the translated name for a known exercise', () => {
+  it('always returns the English exercise name', () => {
     expect(getExerciseDisplayName('Lat Pulldown', 'en')).toBe('Lat Pulldown')
-    expect(getExerciseDisplayName('Romanian Deadlift', 'es')).toBe('Peso muerto rumano')
+    expect(getExerciseDisplayName('Romanian Deadlift', 'es')).toBe('Romanian Deadlift')
+    expect(
+      getExerciseDisplayName(
+        { id: 'catalogue-exercise', name: 'Barbell Row', nameEs: 'Remo con barra', primaryMuscle: 'Back' },
+        'es'
+      )
+    ).toBe('Barbell Row')
   })
 
-  it('falls back to the original name when there is no translation', () => {
-    expect(getExerciseDisplayName('Some New Exercise', 'es')).toBe('Some New Exercise')
-  })
-
-  it('uses the Spanish catalogue name when available', () => {
+  it('uses the name field when no translation is available', () => {
     expect(
       getExerciseDisplayName(
         { id: 'catalogue-exercise', name: 'New Exercise', nameEs: 'Ejercicio nuevo', primaryMuscle: 'Core' },
         'es'
       )
-    ).toBe('Ejercicio nuevo')
+    ).toBe('New Exercise')
   })
 })
 
