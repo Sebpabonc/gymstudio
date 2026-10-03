@@ -119,8 +119,11 @@ export function weeklyPRCount(records: PersonalRecordSession[], weekStart: strin
   }).length
 }
 
-export function weeklySummary(sessionsDone: number, sessionsPlanned: number, prCount: number) {
-  return `This week: ${sessionsDone} of ${sessionsPlanned} sessions · ${prCount} PR${prCount === 1 ? '' : 's'} · on track`
+export function weeklySummary(sessionsDone: number, sessionsPlanned: number, prCount: number, today: string) {
+  const weekday = new Date(dateValue(today)).getUTCDay()
+  const sessionsExpected = Math.min(weekday === 0 ? 6 : weekday, sessionsPlanned)
+  const status = sessionsDone >= sessionsExpected ? 'on track' : 'in progress'
+  return `This week: ${sessionsDone} of ${sessionsPlanned} sessions · ${prCount} PR${prCount === 1 ? '' : 's'} · ${status}`
 }
 
 export function mainLiftForToday(blocks: TrainingBlock[], today: string) {

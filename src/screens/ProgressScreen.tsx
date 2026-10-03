@@ -214,7 +214,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   return (
     <>
       <section className="card progress-headline" aria-label="Weekly progress">
-        <h2 className="progress-headline-text">{weeklySummary(currentWeekAdherence.week.sessionsDone, currentWeekAdherence.week.sessionsPlanned, prCount)}</h2>
+        <h2 className="progress-headline-text">{weeklySummary(currentWeekAdherence.week.sessionsDone, currentWeekAdherence.week.sessionsPlanned, prCount, today)}</h2>
         <div
           className="progress-session-days"
           role="img"

@@ -127,8 +127,9 @@ describe('progress view model', () => {
       { exerciseId: 'curl', date: '2026-03-09', badges: ['weight' as const], likelyTypoSetIds: [] },
     ]
     expect(weeklyPRCount(records, '2026-03-02')).toBe(2)
-    expect(weeklySummary(1, 6, 1)).toBe('This week: 1 of 6 sessions · 1 PR · on track')
-    expect(weeklySummary(0, 6, 0)).toBe('This week: 0 of 6 sessions · 0 PRs · on track')
+    expect(weeklySummary(1, 6, 1, '2026-03-02')).toBe('This week: 1 of 6 sessions · 1 PR · on track')
+    expect(weeklySummary(0, 6, 0, '2026-03-02')).toBe('This week: 0 of 6 sessions · 0 PRs · in progress')
+    expect(weeklySummary(0, 6, 0, '2026-03-08')).toBe('This week: 0 of 6 sessions · 0 PRs · in progress')
   })
 
   it('picks the main lift of the current day, falling back to most logged', () => {
