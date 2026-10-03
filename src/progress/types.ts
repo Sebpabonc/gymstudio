@@ -53,17 +53,20 @@ export type ProgressSuggestion =
       dayType: DayType
       increment: number
       message: string
+      why: string
     }
   | {
       type: 'plateau'
       exerciseId: string
       dayType: DayType
       message: string
+      why: string
     }
   | {
       type: 'fatigue'
       week: number
       message: string
+      why: string
     }
 
 export type BlockLiftReport = {

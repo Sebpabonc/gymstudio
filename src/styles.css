@@ -2464,6 +2464,40 @@ button {
   display: none;
 }
 
+.progress-section .expand-toggle {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.progress-section .secondary-button {
+  min-height: 44px;
+}
+
+.progress-headline {
+  display: grid;
+  gap: 12px;
+}
+
+.progress-headline-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.progress-session-days {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.progress-session-day {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
 .progress-suggestions,
 .record-list,
 .muscle-bars,
@@ -2533,6 +2567,33 @@ button {
   padding: 10px 12px;
 }
 
+.suggestion-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 5px;
+  line-height: 1.4;
+}
+
+.suggestion-why {
+  margin: 0;
+  color: var(--muted);
+}
+
+.suggestion-exercise-link {
+  appearance: none;
+  justify-self: start;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--nav-active);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  padding: 8px 4px;
+  cursor: pointer;
+}
+
 .suggestion-actions .suggestion-button {
   border: 0;
   background: none;
@@ -2548,8 +2609,41 @@ button {
   color: var(--text);
   font-size: var(--font-caption);
   font-weight: 700;
-  padding: 6px 12px;
+  min-height: 44px;
+  padding: 8px 12px;
   cursor: pointer;
+}
+
+.exercise-picker-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.exercise-picker-button span {
+  color: var(--muted);
+  font-size: 1.2rem;
+}
+
+.exercise-picker-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.exercise-picker-panel .search-input,
+.exercise-picker-panel .result-item,
+.progress-section .day-toggle .tab-button {
+  min-height: 44px;
 }
 
 .session-dots {
@@ -2647,6 +2741,46 @@ button {
   color: var(--muted);
 }
 
+.record-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.record-help {
+  position: relative;
+}
+
+.record-help summary {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.record-help summary::-webkit-details-marker {
+  display: none;
+}
+
+.record-help[open] .record-help-text {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: calc(100% - 4px);
+  width: max-content;
+  max-width: min(220px, 70vw);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-soft);
+  color: var(--text);
+  padding: 8px 10px;
+  box-shadow: var(--shadow);
+}
+
 .muscle-bar-head {
   display: flex;
   justify-content: space-between;
@@ -2690,7 +2824,7 @@ button {
 }
 
 .muscle-done.high {
-  background: #e6c27a;
+  background: var(--muted);
 }
 
 .muscle-planned {

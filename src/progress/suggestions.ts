@@ -2,9 +2,9 @@ import { Exercise, TrainingBlock } from '../types'
 import { ProgressEntry, ProgressSuggestion } from './types'
 import {
   blockWeek,
-  currentOrLatestBlock,
   dateValue,
   exerciseFor,
+  findBlockForDate,
   findEntryBlock,
   getDayType,
   groupExerciseSessions,
@@ -68,7 +68,7 @@ export function progressSuggestions(
   today: string,
   appliedExerciseIds: ReadonlySet<string> = new Set()
 ): ProgressSuggestion[] {
-  const block = currentOrLatestBlock(blocks, today)
+  const block = findBlockForDate(blocks, today)
   if (!block) return []
   const sessions = groupExerciseSessions(entries)
   const recentAfter = dateValue(today) - SIX_WEEKS_MS
@@ -109,6 +109,7 @@ export function progressSuggestions(
         dayType,
         increment,
         message: `Ready to add ${increment} kg on ${name} next ${dayType} day.`,
+        why: 'You completed every planned set and rep target last time.',
       })
       continue
     }
@@ -132,6 +133,7 @@ export function progressSuggestions(
       exerciseId,
       dayType,
       message: `${name} has held steady for 3 ${dayType}-day sessions. Aim for one more rep at the same weight before adding load.`,
+      why: `Your last three ${dayType}-day sessions did not beat the earlier best.`,
     }
     plateauSuggestions.push(suggestion)
     plateauByWeek.set(latestWeek, (plateauByWeek.get(latestWeek) ?? 0) + 1)
@@ -147,6 +149,7 @@ export function progressSuggestions(
         type: 'fatigue',
         week: fatigueWeek,
         message: 'Many lifts have stalled at once. Sleep, food and stress usually matter more than the program; prioritize recovery.',
+        why: 'Three or more lifts stalled in the same week.',
       },
     ]
   }
