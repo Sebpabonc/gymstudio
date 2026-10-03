@@ -1569,6 +1569,8 @@ button {
 }
 
 .training-block-status {
+  display: grid;
+  gap: 2px;
   color: var(--text);
   font-size: 0.64rem;
   text-align: right;
@@ -1661,6 +1663,7 @@ button {
 
 .block-change-button {
   justify-self: start;
+  min-height: 44px;
   padding: 7px 10px;
   font-size: 0.66rem;
 }
@@ -1674,6 +1677,7 @@ button {
 
 .training-block-option {
   width: 100%;
+  min-height: 44px;
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -1706,6 +1710,26 @@ button {
   overflow-wrap: anywhere;
 }
 
+.training-block-option-status {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.next-block-banner {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--brand-soft);
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.next-block-banner span {
+  color: var(--muted-strong);
+}
+
 .day-tab {
   appearance: none;
   border: 1px solid var(--line);
@@ -1720,8 +1744,18 @@ button {
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-height: 42px;
+  min-height: 56px;
   gap: 2px;
+}
+
+.day-tab-today {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--text);
+  font-size: 0.5rem;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .day-tab-label {
