@@ -2386,3 +2386,35 @@ button {
 .guest-data-actions .secondary-button {
   width: 100%;
 }
+
+.planned-exercise-card.completed {
+  opacity: 0.6;
+  filter: grayscale(0.7);
+}
+
+.superset-group.completed {
+  opacity: 0.85;
+}
+
+.done-badge {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: normal;
+}
+
+.done-summary {
+  font-weight: 500;
+}
+
+.day-tab-progress {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.8;
+}

@@ -16,6 +16,7 @@ import {
   upsertExerciseRecord,
 } from '../utils/storage'
 import { blockDateRange, blockWeek, defaultActiveBlock, formatBenchAngle } from '../utils/trainingBlocks'
+import { findCompletedEntry, formatLoggedTime, summarizeCompletedEntry } from '../utils/completedExercises'
 import { isDemoMode } from '../utils/demoMode'
 import { filterLoggableSets, parseRepPrescription, workoutMaxWeight, workoutVolume } from '../utils/workoutSets'
 
@@ -275,6 +276,7 @@ export default function WorkoutPlan({
   const [progressSectionsVisible, setProgressSectionsVisible] = useState<Record<string, boolean>>({})
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
   const [activeSetIndexByExercise, setActiveSetIndexByExercise] = useState<Record<string, number>>({})
+  const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
 
   const text = {
     title: 'Planned before you go',
@@ -347,6 +349,21 @@ export default function WorkoutPlan({
   )
   const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
   const activeBlockWeek = activeBlock ? blockWeek(activeBlock) : null
+
+  const completionScope = (blockId?: string, dayKey?: string) => ({ date: localIsoDate(), blockId, dayKey })
+  const activeCompletionScope =
+    planMode === 'preset' && activeBlock && activeDay
+      ? completionScope(activeBlock.id, activeDay.key)
+      : completionScope()
+  const findExerciseCompletion = (exercise: PlanExercise, entries: WorkoutEntry[]) => {
+    const exerciseKey = normalizeExerciseName(exercise.name)
+    const matching = entries.filter((entry) => {
+      if (exercise.exerciseId) return entry.exerciseId === exercise.exerciseId
+      const match = exerciseCatalog.find((item) => item.id === entry.exerciseId)
+      return match && normalizeExerciseName(match.name) === exerciseKey
+    })
+    return findCompletedEntry(matching, activeCompletionScope)
+  }
 
   useEffect(() => {
     if (mode) {
@@ -699,7 +716,13 @@ export default function WorkoutPlan({
       notes: draft.notes?.trim() ?? '',
     }
 
-    const nextHistory = [nextEntry, ...history].sort(
+    const existingEntry = findCompletedEntry(
+      history.filter((entry) => entry.exerciseId === canonicalId),
+      activeCompletionScope
+    )
+    const entryToSave = existingEntry ? { ...nextEntry, id: existingEntry.id } : nextEntry
+
+    const nextHistory = [entryToSave, ...history.filter((entry) => entry.id !== existingEntry?.id)].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     )
 
@@ -728,12 +751,24 @@ export default function WorkoutPlan({
 
     setProgressSectionsVisible((current) => ({
       ...current,
-      [exerciseKey]: true,
+      [exerciseKey]: false,
     }))
 
     setActiveSetIndexByExercise((current) => ({
       ...current,
       [exerciseKey]: 0,
+    }))
+
+    setLoggedAtByExercise((current) => ({ ...current, [entryToSave.id]: Date.now() }))
+
+    const currentIndex = activeExercises.findIndex((item) => normalizeExerciseName(item.name) === exerciseKey)
+    const nextExercise = activeExercises
+      .slice(currentIndex + 1)
+      .find((item) => !findExerciseCompletion(item, nextHistory))
+    setCollapsedExercises((current) => ({
+      ...current,
+      [exerciseKey]: true,
+      ...(nextExercise ? { [normalizeExerciseName(nextExercise.name)]: false } : {}),
     }))
   }
 
@@ -1046,6 +1081,23 @@ export default function WorkoutPlan({
               }}
             >
               <span className="day-tab-label">{`Day ${day.position} · ${day.name}`}</span>
+              {(() => {
+                const today = localIsoDate()
+                const done = day.exercises.filter((item) =>
+                  history.some(
+                    (entry) =>
+                      entry.exerciseId === item.exerciseId &&
+                      entry.date === today &&
+                      entry.blockId === activeBlock.id &&
+                      entry.dayKey === day.key
+                  )
+                ).length
+                return (
+                  <span className="day-tab-progress" aria-label={`${done} of ${day.exercises.length} exercises done`}>
+                    {`${done}/${day.exercises.length} done`}
+                  </span>
+                )
+              })()}
               {day.key === (activeDay?.key ?? selectedDay) && <span className="day-tab-summary">{day.focus}</span>}
             </button>
           ))}
@@ -1220,9 +1272,11 @@ export default function WorkoutPlan({
             const isProgressSectionVisible = progressSectionsVisible[exerciseKey] ?? false
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
             const postureTips = getPostureTips(exercise, libraryMatch)
+            const completedEntry = findExerciseCompletion(exercise, history)
             const cardClasses = [
               'planned-exercise-card',
               isCollapsed ? 'collapsed' : '',
+              completedEntry ? 'completed' : '',
             ].filter(Boolean).join(' ')
 
             return (
@@ -1238,6 +1292,13 @@ export default function WorkoutPlan({
                       {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
                     </div>
                   </div>
+                  {completedEntry && (
+                    <span className="done-badge" role="status">
+                      <span aria-hidden="true">✓ </span>
+                      Done{loggedAtByExercise[completedEntry.id] ? ` · ${formatLoggedTime(loggedAtByExercise[completedEntry.id])}` : ''}
+                      <span className="done-summary"> · {summarizeCompletedEntry(completedEntry)}</span>
+                    </span>
+                  )}
                   <button
                     type="button"
                     className="toggle-button collapse-trigger"
@@ -1503,11 +1564,13 @@ export default function WorkoutPlan({
             })
 
             if (!group.isSuperset) return <React.Fragment key={group.key}>{cards}</React.Fragment>
+            const groupDone = group.items.every(({ exercise }) => findExerciseCompletion(exercise, history))
             const codes = group.items.map(({ exercise }) => exercise.code ?? exercise.name)
             return (
-              <div key={group.key} className="superset-group">
+              <div key={group.key} className={groupDone ? 'superset-group completed' : 'superset-group'}>
                 <div className="superset-group-header">
                   <span className="chip technique-chip">Superset</span>
+                  {groupDone && <span className="done-badge" role="status"><span aria-hidden="true">✓ </span>Done</span>}
                   <p>Do {codes[0]}, rest ~10 s, then {codes.slice(1).join(', ')}; rest after the pair.</p>
                 </div>
                 {cards}
