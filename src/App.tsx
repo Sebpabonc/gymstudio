@@ -80,6 +80,7 @@ export default function App() {
   const demoMode = isDemoMode()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
+  const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
   const [search, setSearch] = useState('')
   const [bodyRegion, setBodyRegion] = useState(ALL_BODY_REGIONS)
   const [selectedId, setSelectedId] = useState<string>('')
@@ -93,12 +94,17 @@ export default function App() {
     let cancelled = false
     const readHistory = async () => {
       const savedHistory = await loadWorkoutHistory()
-      if (!demoMode || savedHistory.length > 0) return savedHistory
+      if (!demoMode) return savedHistory
+      if (savedHistory.length > 0) {
+        setDemoHistoryReady(true)
+        return savedHistory
+      }
 
       const blocks = await fetchTrainingBlocks()
       const { generateDemoHistory } = await import('./demo/generateDemoHistory')
       const generatedHistory = generateDemoHistory({ blocks, endDate: localIsoDate(), months: 6, seed: 26 })
       saveWorkoutHistory(generatedHistory)
+      setDemoHistoryReady(true)
       return generatedHistory
     }
 
@@ -522,7 +528,13 @@ export default function App() {
               )}
             </>
           ) : activeTab === 'planned' ? (
-            <WorkoutPlan mode="preset" lockMode />
+            demoMode && !demoHistoryReady ? (
+              <section className="card" aria-live="polite">
+                <p className="empty-state">Loading demo history…</p>
+              </section>
+            ) : (
+              <WorkoutPlan mode="preset" lockMode />
+            )
           ) : (
             <WorkoutPlan mode="custom" lockMode />
           )}
