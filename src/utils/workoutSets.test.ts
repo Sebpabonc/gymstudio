@@ -48,6 +48,13 @@ describe('workout sets', () => {
     ]
     expect(selectCompletedSets(sets, [true, false])).toEqual([sets[0]])
     expect(selectCompletedSets(sets, [])).toEqual([])
+    const dropSet: WorkoutSet = {
+      id: 'drop-set',
+      reps: 12,
+      weight: 30,
+      drop: { reps: 12, weight: 22 },
+    }
+    expect(selectCompletedSets([dropSet, sets[0]], [true, false])).toEqual([dropSet])
   })
 
   it('parses both parts of a drop-set prescription', () => {

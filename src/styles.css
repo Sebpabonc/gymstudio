@@ -2153,6 +2153,7 @@ button {
 
 .planned-set-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -2186,11 +2187,37 @@ button {
 
 .planned-set-row {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.02);
+}
+
+.planned-set-row.completed,
+.superset-set-row.completed {
+  background: rgba(180, 211, 184, 0.08);
+}
+
+.planned-set-row.completed {
+  outline-color: rgba(180, 211, 184, 0.75);
+}
+
+.superset-set-row.completed {
+  border-color: rgba(180, 211, 184, 0.55);
+}
+
+.planned-set-row:not(.completed) .set-stepper input,
+.superset-set-row:not(.completed) .set-stepper input {
+  opacity: 0.62;
+}
+
+.planned-set-row-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
 }
 
 .planned-set-label {
@@ -2198,6 +2225,113 @@ button {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.planned-set-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.set-stepper {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(36px, 1fr) 44px;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.set-stepper::after {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  padding: 0 3px;
+  transform: translateX(-50%);
+  background: var(--bg-soft);
+  color: var(--muted);
+  content: attr(data-unit);
+  font-size: 0.54rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.set-stepper input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 6px 2px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.stepper-button,
+.complete-set-button {
+  display: inline-flex;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+
+.stepper-button:active,
+.complete-set-button[aria-pressed='true'] {
+  border-color: rgba(180, 211, 184, 0.75);
+  background: rgba(180, 211, 184, 0.2);
+  color: var(--success);
+}
+
+.complete-set-button {
+  font-size: 1rem;
+}
+
+.same-as-set-one-button {
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted-strong);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.same-as-set-one-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.planned-drop-set-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding-left: 12px;
+}
+
+.planned-drop-set-row > strong {
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.superset-copy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .planned-set-field-pair {
@@ -2490,6 +2624,64 @@ button {
 }
 
 @media (max-width: 420px) {
+  .day-plan-card,
+  .planned-exercise-card {
+    padding: 8px;
+  }
+
+  .planned-progress-box {
+    padding: 6px;
+  }
+
+  .planned-set-row,
+  .superset-set-row {
+    padding: 6px;
+  }
+
+  .planned-set-row {
+    grid-template-columns: 30px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 4px;
+    padding: 0 4px;
+    margin-inline: -43px;
+    border: 0;
+    outline: 1px solid var(--line);
+  }
+
+  .planned-set-row-heading {
+    display: contents;
+  }
+
+  .planned-set-row .planned-set-label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .planned-set-row .complete-set-button {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .planned-set-row > .planned-set-controls {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .planned-drop-set-row {
+    grid-column: 1 / -1;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 4px;
+    padding-left: 12px;
+  }
+
+  .planned-set-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .superset-group {
+    padding: 8px;
+  }
+
   .superset-set-exercises,
   .superset-notes-grid {
     grid-template-columns: minmax(0, 1fr);
