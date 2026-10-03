@@ -8,6 +8,12 @@ related: docs/ux/proposals/2026-10-04-ux-audit.md, docs/ux/README.md (AI guardra
 
 # AI-first personal training — roadmap
 
+> **Approved by Sebas on 2026-10-04.** Decisions: bottom tab bar (move "Make your plan" into
+> Exercises) — yes; open on today's block/day automatically — yes; rest timer vibration on, sound
+> off — yes; order: quick wins first, then the bigger bets. AI: provider **OpenAI** (PO has
+> ChatGPT; app uses the OpenAI API, billed separately); monthly AI budget cap **USD 20**; Phase 1
+> first; AI is opt-in with a privacy screen; AI-drafted blocks always go through the PT before the PO.
+
 > Proposal only. The AI provider, architecture, security and cost are **Tech Lead** decisions.
 > Fitness content and rules are **PT** decisions. Priorities and approval belong to **Sebas**.
 > This document describes capabilities and trade-offs. It doesn't pick a vendor.
