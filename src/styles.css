@@ -355,6 +355,9 @@ button {
 
 .account-back,
 .forgot-password {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
   justify-self: start;
   padding: 0;
   border: 0;
@@ -375,6 +378,7 @@ button {
 
 .account-mode-tabs button {
   min-width: 0;
+  min-height: 44px;
   padding: 9px 5px;
   border: 0;
   border-radius: 9px;
@@ -403,7 +407,7 @@ button {
 .account-form input {
   width: 100%;
   min-width: 0;
-  min-height: 42px;
+  min-height: 44px;
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -432,6 +436,7 @@ button {
 
 .password-field button {
   flex: 0 0 auto;
+  min-height: 44px;
   margin-right: 8px;
   padding: 6px;
   border: 0;
@@ -444,6 +449,71 @@ button {
 .forgot-password {
   justify-self: end;
   margin: 0 0 2px;
+}
+
+.account-benefits {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted-strong);
+}
+
+.account-local-data {
+  margin: 0;
+  color: var(--muted);
+}
+
+.account-privacy {
+  color: var(--muted);
+}
+
+.account-privacy summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--muted-strong);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-privacy p {
+  margin: 0 0 4px;
+}
+
+.welcome-card {
+  display: grid;
+  gap: 10px;
+}
+
+.welcome-card h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.welcome-card ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.welcome-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.welcome-actions .primary-button,
+.welcome-actions .secondary-button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  text-align: center;
+  text-decoration: none;
 }
 
 .account-divider {
@@ -798,6 +868,38 @@ button {
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 8px;
+}
+
+.exercise-ai-controls,
+.planned-posture-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.planned-posture-actions > .posture-tips-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.ask-ai-button {
+  appearance: none;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 5px 12px;
+  background: var(--brand-soft);
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ask-ai-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .tips-box.collapsed .tips-header {
@@ -2619,6 +2721,117 @@ button {
 
 .guest-data-actions .secondary-button {
   width: 100%;
+}
+
+.ask-exercise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.ask-exercise-sheet {
+  width: min(100%, 560px);
+  max-height: min(90vh, 800px);
+  overflow-y: auto;
+  display: grid;
+  gap: 16px;
+  padding: 20px 16px max(20px, env(safe-area-inset-bottom));
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+  background: var(--bg-soft);
+  box-shadow: var(--shadow);
+}
+
+.ask-exercise-sheet-header,
+.ask-exercise-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ask-exercise-sheet-header h2 {
+  margin: 4px 0 0;
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+}
+
+.ask-exercise-sheet-header .field-label,
+.ask-exercise-form .field-label {
+  margin: 0;
+}
+
+.ask-exercise-consent,
+.ask-exercise-form {
+  display: grid;
+  gap: 10px;
+}
+
+.ask-exercise-consent p,
+.ask-exercise-consent-message,
+.ask-exercise-answer p,
+.ask-exercise-error p {
+  margin: 0;
+}
+
+.ask-exercise-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.ask-exercise-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ask-exercise-suggestion {
+  cursor: pointer;
+  text-align: left;
+}
+
+.ask-exercise-form textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.ask-exercise-form-footer span,
+.ask-exercise-answer small,
+.ask-exercise-disclaimer {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.ask-exercise-form-footer .primary-button {
+  width: auto;
+}
+
+.ask-exercise-answer,
+.ask-exercise-error {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ask-exercise-error {
+  color: var(--muted-strong);
+}
+
+.ask-exercise-disclaimer {
+  margin: 0;
 }
 
 .planned-exercise-card.completed {

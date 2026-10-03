@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
+import AskExercise from './components/AskExercise'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
@@ -8,7 +9,9 @@ import { useTextEntryFocused } from './utils/textEntryFocus'
 import { exitDemoMode, isDemoMode } from './utils/demoMode'
 import {
   fetchTrainingBlocks,
+  dismissWelcome,
   getExerciseDisplayName,
+  hasDismissedWelcome,
   loadExercises,
   loadWorkoutHistory,
   refreshCatalogue,
@@ -102,6 +105,7 @@ export default function App() {
   const headerSentinelRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLElement>(null)
   const dockHidden = useTextEntryFocused()
+  const [showWelcome, setShowWelcome] = useState(() => !hasDismissedWelcome())
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const text = uiText
@@ -172,6 +176,7 @@ export default function App() {
       exercises[0],
     [exercises, selectedId]
   )
+  const selectedExerciseTips = selectedExercise ? getExerciseTips(selectedExercise) : []
 
   useEffect(() => {
     if (!selectedId && exercises.length) {
@@ -363,10 +368,35 @@ export default function App() {
                 <p className="empty-state">Loading demo history…</p>
               </section>
             ) : (
-              <WorkoutPlan mode="preset" lockMode />
+              <>
+                {showWelcome && (
+                  <section className="card welcome-card" aria-labelledby="welcome-title">
+                    <h2 id="welcome-title">Welcome to GymStudio</h2>
+                    <ul>
+                      <li>Follow a training plan built around your week.</li>
+                      <li>Log sets, reps, and weight as you train.</li>
+                      <li>Track your workouts and progress over time.</li>
+                    </ul>
+                    <div className="welcome-actions">
+                      <button
+                        type="button"
+                        className="primary-button"
+                        onClick={() => {
+                          dismissWelcome()
+                          setShowWelcome(false)
+                        }}
+                      >
+                        Got it
+                      </button>
+                      {!demoMode && <a className="secondary-button" href="?demo=1">Try the demo</a>}
+                    </div>
+                  </section>
+                )}
+                <WorkoutPlan mode="preset" lockMode onSignIn={() => setActiveTab('you')} />
+              </>
             )
           ) : exerciseMode === 'custom' ? (
-            <WorkoutPlan mode="custom" lockMode />
+            <WorkoutPlan mode="custom" lockMode onSignIn={() => setActiveTab('you')} />
           ) : (
             <>
               <section className="card search-panel">
@@ -466,30 +496,38 @@ export default function App() {
                       </p>
                     )}
 
-                    {getExerciseTips(selectedExercise).length ? (
-                      <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
-                        <div className="tips-header">
-                          <p className="field-label">{text.postureTips}</p>
-                          <button
-                            type="button"
-                            className="toggle-button expand-toggle"
-                            onClick={() => setTipsExpanded((current) => !current)}
-                            aria-expanded={tipsExpanded}
-                            aria-controls={`track-posture-tips-${selectedExercise.id}`}
-                          >
-                            {tipsExpanded ? '−' : '+'}
-                          </button>
+                    <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
+                      <div className="tips-header">
+                        <p className="field-label">{text.postureTips}</p>
+                        <div className="exercise-ai-controls">
+                          {selectedExerciseTips.length > 0 && (
+                            <button
+                              type="button"
+                              className="toggle-button expand-toggle"
+                              onClick={() => setTipsExpanded((current) => !current)}
+                              aria-expanded={tipsExpanded}
+                              aria-controls={`track-posture-tips-${selectedExercise.id}`}
+                            >
+                              {tipsExpanded ? '−' : '+'}
+                            </button>
+                          )}
+                          <AskExercise
+                            exerciseId={selectedExercise.id}
+                            exerciseName={getExerciseDisplayName(selectedExercise)}
+                            onSignIn={() => setActiveTab('you')}
+                          />
                         </div>
-
+                      </div>
+                      {selectedExerciseTips.length > 0 && (
                         <ul id={`track-posture-tips-${selectedExercise.id}`} className="tips-list" hidden={!tipsExpanded}>
-                          {getExerciseTips(selectedExercise).map((tip, index) => (
+                          {selectedExerciseTips.map((tip, index) => (
                             <li key={`${selectedExercise.id}-tip-${index}`} className="tip-item">
                               {typeof tip === 'string' ? tip : tip.text}
                             </li>
                           ))}
                         </ul>
-                      </div>
-                    ) : null}
+                      )}
+                    </div>
 
                     <div className="summary-grid">
                       <div className="metric-card">

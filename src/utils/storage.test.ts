@@ -5,14 +5,18 @@ import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
 import {
   addWorkoutEntry,
   fetchTrainingBlocks,
+  dismissWelcome,
   getExerciseDisplayName,
+  getAskExerciseAiConsent,
   getSessionStorageValue,
+  hasDismissedWelcome,
   loadExercises,
   loadWorkoutHistory,
   mapTrainingBlockRows,
   normalizeExerciseName,
   storageKey,
   setActiveBlockId,
+  setAskExerciseAiConsent,
   setSessionStorageValue,
   getActiveBlockId,
   upsertExerciseRecord,
@@ -457,6 +461,21 @@ describe('training blocks', () => {
 })
 
 describe('demo storage namespace', () => {
+  it('isolates the welcome dismissal from demo mode', () => {
+    dismissWelcome()
+    expect(hasDismissedWelcome()).toBe(true)
+
+    setStorageNamespace('user-1')
+    expect(hasDismissedWelcome()).toBe(true)
+    setStorageNamespace(null)
+
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+    expect(hasDismissedWelcome()).toBe(false)
+    dismissWelcome()
+    expect(localStorage.getItem('gym-studio.demo.welcome-dismissed')).toBe('true')
+    expect(localStorage.getItem('gym-studio.welcome-dismissed')).toBe('true')
+  })
+
   it('isolates session values in demo mode', () => {
     setSessionStorageValue('gym-studio.block-card-expanded', 'true')
     sessionStorage.setItem('gym-studio.demo-mode', '1')
@@ -492,6 +511,22 @@ describe('demo storage namespace', () => {
 
 describe('per-account storage namespaces', () => {
   afterEach(() => setStorageNamespace(null))
+
+  it('stores Ask AI consent separately for each account', () => {
+    expect(getAskExerciseAiConsent()).toBeNull()
+
+    setStorageNamespace('user-a')
+    setAskExerciseAiConsent('enabled')
+    expect(getAskExerciseAiConsent()).toBe('enabled')
+
+    setStorageNamespace('user-b')
+    expect(getAskExerciseAiConsent()).toBeNull()
+    setAskExerciseAiConsent('declined')
+    expect(getAskExerciseAiConsent()).toBe('declined')
+
+    setStorageNamespace('user-a')
+    expect(getAskExerciseAiConsent()).toBe('enabled')
+  })
 
   it('keeps each account and the guest history separate', async () => {
     await addWorkoutEntry(entry('guest-entry', '2026-09-01'))

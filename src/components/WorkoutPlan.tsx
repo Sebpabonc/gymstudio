@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import AskExercise from './AskExercise'
 import { localIsoDate } from '../lib/dates'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
 import {
@@ -240,9 +241,11 @@ function sanitizeLoggedComment(rawNote: string | undefined, fragments: Array<str
 export default function WorkoutPlan({
   mode,
   lockMode = false,
+  onSignIn,
 }: {
   mode?: PlanMode
   lockMode?: boolean
+  onSignIn: () => void
 }) {
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
@@ -1467,23 +1470,32 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       </p>
                     )}
 
-                    <div className="posture-tips-box">
-                      <button
-                        type="button"
-                        className="posture-tips-header"
-                        onClick={() => togglePostureTips(exercise.name)}
-                        aria-expanded={isTipsVisible}
-                        aria-controls={`posture-tips-${exerciseKey}`}
-                      >
-                        <span>{text.posture}</span>
-                        <span className="toggle-button" aria-hidden="true">{isTipsVisible ? '−' : '+'}</span>
-                      </button>
+                    <div className="planned-posture-actions">
+                      <div className="posture-tips-box">
+                        <button
+                          type="button"
+                          className="posture-tips-header"
+                          onClick={() => togglePostureTips(exercise.name)}
+                          aria-expanded={isTipsVisible}
+                          aria-controls={`posture-tips-${exerciseKey}`}
+                        >
+                          <span>{text.posture}</span>
+                          <span className="toggle-button" aria-hidden="true">{isTipsVisible ? '−' : '+'}</span>
+                        </button>
 
-                      <ul id={`posture-tips-${exerciseKey}`} className="posture-tips-list" hidden={!isTipsVisible}>
-                        {postureTips.map((tip, index) => (
-                          <li key={`${exercise.name}-tip-${index}`}>{tip}</li>
-                        ))}
-                      </ul>
+                        <ul id={`posture-tips-${exerciseKey}`} className="posture-tips-list" hidden={!isTipsVisible}>
+                          {postureTips.map((tip, index) => (
+                            <li key={`${exercise.name}-tip-${index}`}>{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      {libraryMatch && (
+                        <AskExercise
+                          exerciseId={libraryMatch.id}
+                          exerciseName={libraryMatch.name}
+                          onSignIn={onSignIn}
+                        />
+                      )}
                     </div>
 
                     <div className="plan-metrics">

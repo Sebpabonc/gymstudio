@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-let supabaseClient: SupabaseClient | null = null
+let supabaseClientPromise: Promise<SupabaseClient> | null = null
 let googleProviderEnabled: Promise<boolean> | null = null
 
 export function isGoogleProviderEnabled(): Promise<boolean> {
@@ -26,21 +26,24 @@ export function isGoogleProviderEnabled(): Promise<boolean> {
   return googleProviderEnabled
 }
 
-export async function getSupabaseClient(): Promise<SupabaseClient | null> {
+export function getSupabaseClient(): Promise<SupabaseClient | null> {
   const url = import.meta.env.VITE_SUPABASE_URL
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-  if (!url || !anonKey) return null
+  if (!url || !anonKey) return Promise.resolve(null)
 
-  if (!supabaseClient) {
-    const { createClient } = await import('@supabase/supabase-js')
-    supabaseClient = createClient(url, anonKey, {
+  if (!supabaseClientPromise) {
+    const initialization = import('@supabase/supabase-js').then(({ createClient }) => createClient(url, anonKey, {
       auth: {
         flowType: 'pkce',
         persistSession: true,
         detectSessionInUrl: true,
       },
+    }))
+    supabaseClientPromise = initialization.catch((error: unknown) => {
+      supabaseClientPromise = null
+      throw error
     })
   }
 
-  return supabaseClient
+  return supabaseClientPromise
 }
