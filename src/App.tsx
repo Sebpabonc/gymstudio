@@ -18,6 +18,7 @@ import {
   getAvailableBodyRegions,
   getExerciseTips,
 } from './utils/exerciseFilters'
+import { formatWorkoutSet, workoutMaxWeight, workoutVolume } from './utils/workoutSets'
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
@@ -184,17 +185,17 @@ export default function App() {
 
   const previousWorkout = exerciseHistory[0]
   const previousVolume = previousWorkout
-    ? previousWorkout.sets.reduce((total, set) => total + set.reps * set.weight, 0)
+    ? workoutVolume(previousWorkout.sets)
     : 0
   const previousMax = previousWorkout
-    ? Math.max(...previousWorkout.sets.map((set) => set.weight), 0)
+    ? workoutMaxWeight(previousWorkout.sets)
     : 0
 
   const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
     id: entry.id,
     date: entry.date,
-    maxWeight: Math.max(...entry.sets.map((set) => set.weight), 0),
-    totalVolume: entry.sets.reduce((total, set) => total + set.reps * set.weight, 0),
+    maxWeight: workoutMaxWeight(entry.sets),
+    totalVolume: workoutVolume(entry.sets),
   }))
 
   const updateSet = (index: number, field: 'reps' | 'weight', value: string) => {
@@ -464,7 +465,7 @@ export default function App() {
                         <div className="last-sets">
                           {previousWorkout.sets.map((set, index) => (
                             <span key={`${previousWorkout.id}-${index}`}>
-                              <strong>{index + 1}</strong> {set.reps} × {set.weight} kg
+                              <strong>{index + 1}</strong> {formatWorkoutSet(set)}
                             </span>
                           ))}
                         </div>

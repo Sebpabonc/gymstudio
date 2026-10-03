@@ -532,6 +532,20 @@ describe('workout history', () => {
     await addWorkoutEntry(entry('c', '2026-09-08'))
     expect((await loadWorkoutHistory()).map((e) => e.id)).toEqual(['b', 'c', 'a'])
   })
+
+  it('preserves block, day, and drop-set fields in saved history', async () => {
+    const plannedEntry: WorkoutEntry = {
+      ...entry('planned-drop', '2026-09-15'),
+      exerciseId: 'barbell-bench-press',
+      blockId: 'block-2',
+      dayKey: 'chest-back-a',
+      sets: [{ id: 'planned-drop-1', reps: 12, weight: 30, drop: { reps: 12, weight: 22 } }],
+    }
+
+    await addWorkoutEntry(plannedEntry)
+
+    expect(await loadWorkoutHistory()).toEqual([plannedEntry])
+  })
 })
 
 describe('exercise library data', () => {

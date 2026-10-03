@@ -4,6 +4,7 @@ import chestShoulders from '../../docs/fitness/approved/catalogue-v2/chest-shoul
 import legsGlutes from '../../docs/fitness/approved/catalogue-v2/legs-glutes.json'
 import { localIsoDate } from '../lib/dates'
 import { TrainingBlock, WorkoutEntry } from '../types'
+import { parseRepPrescription } from '../utils/workoutSets'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const catalogue = [...armsCore, ...back, ...chestShoulders, ...legsGlutes]
@@ -93,8 +94,7 @@ function progressionWeek(week: number, plateauStart: number | undefined) {
 
 function repsForSet(reps: string[], index: number) {
   const prescribed = reps[index] ?? reps[reps.length - 1] ?? '8'
-  const parsed = Number.parseInt(prescribed, 10)
-  return Number.isFinite(parsed) ? parsed : 8
+  return parseRepPrescription(prescribed)[0] ?? 8
 }
 
 function blockForDate(blocks: TrainingBlock[], value: number) {
@@ -147,7 +147,10 @@ export function generateDemoHistory({
       const deload = week === 0 ? 0.92 : 1
       const sessionKey = `${formatDate(value)}:${block.id}:${day.key}:${exercise.code}`
       const sets = Array.from({ length: exercise.sets }, (_, setIndex) => {
-        const reps = repsForSet(exercise.reps, setIndex)
+        const prescription = exercise.reps[setIndex] ?? exercise.reps[exercise.reps.length - 1] ?? '8'
+        const repTargets = parseRepPrescription(prescription)
+        const reps = repTargets[0] ?? repsForSet(exercise.reps, setIndex)
+        const dropReps = repTargets[1] ?? reps
         const pyramidMultiplier =
           exercise.technique === 'reverse-pyramid'
             ? 1 - setIndex * 0.07
@@ -158,10 +161,19 @@ export function generateDemoHistory({
           setIndex === exercise.sets - 1 && randomValue(seed, `miss:${sessionKey}`) < 0.07
             ? 1 + Math.floor(randomValue(seed, `miss-count:${sessionKey}`) * 2)
             : 0
+        const weight = roundLoad(baseWeight * (1 + weeklyGrowth) * deload * pyramidMultiplier, increment)
         return {
           id: `${sessionKey}:${setIndex + 1}`,
           reps: Math.max(1, reps - missedReps),
-          weight: roundLoad(baseWeight * (1 + weeklyGrowth) * deload * pyramidMultiplier, increment),
+          weight,
+          ...(exercise.technique === 'drop-set'
+            ? {
+                drop: {
+                  reps: Math.max(1, dropReps - missedReps),
+                  weight: roundLoad(weight * 0.75, increment),
+                },
+              }
+            : {}),
         }
       })
 
@@ -170,6 +182,8 @@ export function generateDemoHistory({
         exerciseId: exercise.exerciseId,
         date: formatDate(value),
         sets,
+        blockId: block.id,
+        dayKey: day.key,
       })
     })
   }
