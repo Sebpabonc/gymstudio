@@ -3,6 +3,7 @@ import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { isDemoMode } from './demoMode'
 import { isTargetMet, WeightTarget, WeightTargets } from './weightTargets'
+import { RestTimerState } from './restTimer'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
@@ -13,6 +14,7 @@ const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
 const WEIGHT_TARGETS_KEY = 'gym-studio.weight-targets'
 const ASK_EXERCISE_AI_CONSENT_KEY = 'gym-studio.ai-consent.ask-exercise'
 const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
+const REST_TIMER_KEY = 'gym-studio.rest-timer'
 
 export type SyncWorkoutEntry = WorkoutEntry & {
   updatedAt: string
@@ -144,6 +146,43 @@ export function setSessionStorageValue(key: string, value: string) {
     if (typeof sessionStorage !== 'undefined') sessionStorage.setItem(storageKey(key), value)
   } catch {
     // Session storage is optional when browser storage is unavailable.
+  }
+}
+
+export function loadRestTimerState(): RestTimerState | null {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(storageKey(REST_TIMER_KEY)) ?? 'null')
+    if (!parsed || typeof parsed !== 'object') return null
+    if (
+      'endAt' in parsed &&
+      typeof parsed.endAt === 'number' &&
+      Number.isFinite(parsed.endAt)
+    ) {
+      return { endAt: parsed.endAt }
+    }
+    if (
+      'pausedRemainingMs' in parsed &&
+      typeof parsed.pausedRemainingMs === 'number' &&
+      Number.isFinite(parsed.pausedRemainingMs) &&
+      parsed.pausedRemainingMs >= 0
+    ) {
+      return { pausedRemainingMs: parsed.pausedRemainingMs }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+export function saveRestTimerState(timer: RestTimerState | null) {
+  try {
+    if (timer) {
+      localStorage.setItem(storageKey(REST_TIMER_KEY), JSON.stringify(timer))
+    } else {
+      localStorage.removeItem(storageKey(REST_TIMER_KEY))
+    }
+  } catch {
+    // The timer still works when browser storage is unavailable.
   }
 }
 
