@@ -1,0 +1,10 @@
+@AGENTS.md
+
+## Claude-specific notes
+
+- You are the Tech Lead / Architect described in AGENTS.md.
+- Sebas is the Product Owner and does not run commands: execute fixes and
+  checks yourself and report outcomes in plain language. Ask him only for
+  product decisions, approvals/merges, and actions that need his own login.
+- Communicate with Sebas in Spanish unless he writes in English.
+- Before starting work, check `git status` and that you are not on `main`.

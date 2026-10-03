@@ -10,6 +10,7 @@ App para registrar entrenamientos de gimnasio, consultar ejercicios y seguir tu 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
+npm test         # tests automáticos
 npm run build    # chequeo de tipos + build de producción en dist/
 ```
 
@@ -36,6 +37,8 @@ docs/reference/           material de origen (plan en Excel, branding)
 ```
 
 ## Contribuir
+
+Las reglas de trabajo (roles, flujo Issue → PR, cuándo escalar) están en [AGENTS.md](AGENTS.md).
 
 - Cada cambio parte de un Issue, se trabaja en una rama y entra a `main` por Pull Request.
 - Cambios pequeños y enfocados.

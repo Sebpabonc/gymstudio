@@ -8,6 +8,8 @@ const noCacheHeaders = {
 }
 
 export default defineConfig({
+  // Relative asset paths: works on GitHub Pages (/gymstudio/) and inside Capacitor.
+  base: './',
   plugins: [react()],
   server: {
     port: 5173,
