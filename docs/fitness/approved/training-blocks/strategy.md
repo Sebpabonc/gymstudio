@@ -119,7 +119,9 @@ intensity — so no two consecutive blocks use the same method. Each block chang
 
 - **Block 6 — Hypertrophy Flat Pyramid II (5 Oct 2026).** Volume after the block 5 intensity
   phase. Flat 10–12 reps (A) / 12–15 (B) with supersets. New: pendulum squat, Bulgarian split
-  squats, T-bar row, incline machine press, rear-delt work on arms day, cable crunches.
+  squats, T-bar row, rear-delt work on arms day, cable crunches. Chest leads with the 30° incline
+  dumbbell press, then a flat (0°) dumbbell press + high-to-low cable fly superset and the pec deck,
+  so upper, mid and lower chest are all trained (revised 2026-10-04, see below).
 - **Block 7 — Strength-Hypertrophy II (16 Nov 2026).** Heavy block like the coach's block 3:
   flat 6s (A) / 8s (B), 2-minute rests, 5–6 exercises. New: back squat, barbell row, flat Smith
   machine bench press, 30° incline dumbbell press, seated barbell overhead press (upright seat),
@@ -155,13 +157,17 @@ work. The exercise stays the same; the target shifts.
 
 **The rotation across blocks 6–9.** The main chest press never uses the same angle in two
 blocks in a row (30° → 0° → 45° → 0°), and from block 7 on every chest day uses at least two
-different angles. Block 6 was already reviewed, so it keeps its exercises; its upper-chest focus at
-30° is balanced by the incline machine, low-to-high cable flies and the pec deck. Machines with a
-fixed path (pec deck, chest-supported T-bar, preacher bench) have no bench angle to set.
+different angles. Block 6 was revised on 2026-10-04 (PO allowed changes) so its chest day also uses
+two angles: the main press stays at 30° (keeping the 30 → 0 → 45 → 0 rotation), and the incline
+machine press + low-to-high cable fly superset, which repeated the upper-chest work of the main lift,
+became a flat (0°) dumbbell press + high-to-low cable fly superset for the mid and lower chest. Its
+shoulder, back and arm days already covered front/side/rear delts, lats and upper back, and both
+biceps and triceps heads, so they are unchanged. Machines with a fixed path (pec deck,
+chest-supported T-bar, preacher bench) have no bench angle to set.
 
 | Block | Chest (main / others) | Shoulders | Back | Arms |
 |---|---|---|---|---|
-| 6 — Flat pyramid II | **30°** DB press / incline machine, cable, pec deck | Smith seated press 75° | Chest-supported T-bar (machine) | Incline curl 45°; EZ skull crusher flat 0° |
+| 6 — Flat pyramid II | **30°** DB press / 0° DB press, high-to-low cable fly, pec deck | Smith seated press 75° | Chest-supported T-bar (machine) | Incline curl 45°; EZ skull crusher flat 0° |
 | 7 — Strength II | **0°** Smith flat press / 30° DB press, dips | Seated BB press 90°; seated lateral raise 90° | Chest-supported DB row 30° | JM press 0°; seated overhead extension 90° |
 | 8 — Pyramid II | **45°** incline BB press / −15° DB press + fly | DB press 75°; Y-raise 45° | EZ pullover 0° | Spider curl 45°; decline skull crusher −15° |
 | 9 — Reverse pyramid III | **0°** BB bench / 15° incline fly, incline machine | Standing press; rear-delt fly 30° | Chest-supported DB row 45° | Incline curl 60°; seated overhead extension 90° |
