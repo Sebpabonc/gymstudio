@@ -11,6 +11,7 @@ const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
 const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
 const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
 const WEIGHT_TARGETS_KEY = 'gym-studio.weight-targets'
+const ASK_EXERCISE_AI_CONSENT_KEY = 'gym-studio.ai-consent.ask-exercise'
 const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 
 export type SyncWorkoutEntry = WorkoutEntry & {
@@ -143,6 +144,25 @@ export function setSessionStorageValue(key: string, value: string) {
     if (typeof sessionStorage !== 'undefined') sessionStorage.setItem(storageKey(key), value)
   } catch {
     // Session storage is optional when browser storage is unavailable.
+  }
+}
+
+export type AskExerciseAiConsent = 'enabled' | 'declined'
+
+export function getAskExerciseAiConsent(): AskExerciseAiConsent | null {
+  try {
+    const choice = localStorage.getItem(storageKey(ASK_EXERCISE_AI_CONSENT_KEY))
+    return choice === 'enabled' || choice === 'declined' ? choice : null
+  } catch {
+    return null
+  }
+}
+
+export function setAskExerciseAiConsent(choice: AskExerciseAiConsent) {
+  try {
+    localStorage.setItem(storageKey(ASK_EXERCISE_AI_CONSENT_KEY), choice)
+  } catch {
+    // Consent cannot be remembered when browser storage is unavailable.
   }
 }
 

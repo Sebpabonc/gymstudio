@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
+import AskExercise from './components/AskExercise'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
@@ -159,6 +160,7 @@ export default function App() {
       exercises[0],
     [exercises, selectedId]
   )
+  const selectedExerciseTips = selectedExercise ? getExerciseTips(selectedExercise) : []
 
   useEffect(() => {
     if (!selectedId && exercises.length) {
@@ -366,11 +368,11 @@ export default function App() {
                     </div>
                   </section>
                 )}
-                <WorkoutPlan mode="preset" lockMode />
+                <WorkoutPlan mode="preset" lockMode onSignIn={() => setActiveTab('you')} />
               </>
             )
           ) : exerciseMode === 'custom' ? (
-            <WorkoutPlan mode="custom" lockMode />
+            <WorkoutPlan mode="custom" lockMode onSignIn={() => setActiveTab('you')} />
           ) : (
             <>
               <section className="card search-panel">
@@ -470,30 +472,38 @@ export default function App() {
                       </p>
                     )}
 
-                    {getExerciseTips(selectedExercise).length ? (
-                      <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
-                        <div className="tips-header">
-                          <p className="field-label">{text.postureTips}</p>
-                          <button
-                            type="button"
-                            className="toggle-button expand-toggle"
-                            onClick={() => setTipsExpanded((current) => !current)}
-                            aria-expanded={tipsExpanded}
-                            aria-controls={`track-posture-tips-${selectedExercise.id}`}
-                          >
-                            {tipsExpanded ? '−' : '+'}
-                          </button>
+                    <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
+                      <div className="tips-header">
+                        <p className="field-label">{text.postureTips}</p>
+                        <div className="exercise-ai-controls">
+                          {selectedExerciseTips.length > 0 && (
+                            <button
+                              type="button"
+                              className="toggle-button expand-toggle"
+                              onClick={() => setTipsExpanded((current) => !current)}
+                              aria-expanded={tipsExpanded}
+                              aria-controls={`track-posture-tips-${selectedExercise.id}`}
+                            >
+                              {tipsExpanded ? '−' : '+'}
+                            </button>
+                          )}
+                          <AskExercise
+                            exerciseId={selectedExercise.id}
+                            exerciseName={getExerciseDisplayName(selectedExercise)}
+                            onSignIn={() => setActiveTab('you')}
+                          />
                         </div>
-
+                      </div>
+                      {selectedExerciseTips.length > 0 && (
                         <ul id={`track-posture-tips-${selectedExercise.id}`} className="tips-list" hidden={!tipsExpanded}>
-                          {getExerciseTips(selectedExercise).map((tip, index) => (
+                          {selectedExerciseTips.map((tip, index) => (
                             <li key={`${selectedExercise.id}-tip-${index}`} className="tip-item">
                               {typeof tip === 'string' ? tip : tip.text}
                             </li>
                           ))}
                         </ul>
-                      </div>
-                    ) : null}
+                      )}
+                    </div>
 
                     <div className="summary-grid">
                       <div className="metric-card">

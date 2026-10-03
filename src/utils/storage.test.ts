@@ -7,6 +7,7 @@ import {
   fetchTrainingBlocks,
   dismissWelcome,
   getExerciseDisplayName,
+  getAskExerciseAiConsent,
   getSessionStorageValue,
   hasDismissedWelcome,
   loadExercises,
@@ -15,6 +16,7 @@ import {
   normalizeExerciseName,
   storageKey,
   setActiveBlockId,
+  setAskExerciseAiConsent,
   setSessionStorageValue,
   getActiveBlockId,
   upsertExerciseRecord,
@@ -509,6 +511,22 @@ describe('demo storage namespace', () => {
 
 describe('per-account storage namespaces', () => {
   afterEach(() => setStorageNamespace(null))
+
+  it('stores Ask AI consent separately for each account', () => {
+    expect(getAskExerciseAiConsent()).toBeNull()
+
+    setStorageNamespace('user-a')
+    setAskExerciseAiConsent('enabled')
+    expect(getAskExerciseAiConsent()).toBe('enabled')
+
+    setStorageNamespace('user-b')
+    expect(getAskExerciseAiConsent()).toBeNull()
+    setAskExerciseAiConsent('declined')
+    expect(getAskExerciseAiConsent()).toBe('declined')
+
+    setStorageNamespace('user-a')
+    expect(getAskExerciseAiConsent()).toBe('enabled')
+  })
 
   it('keeps each account and the guest history separate', async () => {
     await addWorkoutEntry(entry('guest-entry', '2026-09-01'))
