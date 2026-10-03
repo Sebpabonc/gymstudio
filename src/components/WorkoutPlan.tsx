@@ -265,7 +265,6 @@ export default function WorkoutPlan({
   const [toast, setToast] = useState('')
 
   const text = {
-    title: 'Planned before you go',
     badge: '6-week block',
     sets: 'Sets',
     reps: 'Reps',
@@ -996,7 +995,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
   return (
     <div className="card plan-card">
       <div className="section-title-row">
-        <h3>{text.title}</h3>
         <div className="plan-header-actions">
           <button
             type="button"

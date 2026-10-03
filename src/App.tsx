@@ -27,7 +27,6 @@ const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
 const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
 
 const uiText = {
-  subtitle: 'Performance tracking',
   searchLabel: 'Search exercise',
   searchPlaceholder: 'Bench press, squat, row...',
   exercise: 'Exercise',
@@ -259,15 +258,6 @@ export default function App() {
         </header>
 
         <main className="app-content">
-          {activeTab === 'today' && (
-            <section className="today-brand" aria-label="Gym Studio">
-              <div className="brand-row">
-                <span className="brand-mark" aria-hidden="true">BF</span>
-                <span className="brand-name">Borcelle Fitness</span>
-              </div>
-              <p className="eyebrow">{text.subtitle}</p>
-            </section>
-          )}
           {activeTab === 'exercises' && (
             <div className="exercise-mode-switch" role="group" aria-label="Exercise tools">
               <button
