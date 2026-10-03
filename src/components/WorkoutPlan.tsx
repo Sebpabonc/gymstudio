@@ -7,6 +7,8 @@ import {
   getExerciseDisplayName,
   getSessionStorageValue,
   loadExercises,
+  loadWeightTargets,
+  consumeWeightTarget,
   loadWorkoutHistory,
   normalizeExerciseName,
   saveWorkoutHistory,
@@ -15,6 +17,7 @@ import {
   setActiveBlockId,
   upsertExerciseRecord,
 } from '../utils/storage'
+import { applyTargetToWeights, targetAppliesToDay } from '../utils/weightTargets'
 import { blockDateRange, blockWeek, defaultActiveBlock, formatBenchAngle } from '../utils/trainingBlocks'
 import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, formatLoggedTime, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import { isDemoMode } from '../utils/demoMode'
@@ -240,6 +243,7 @@ export default function WorkoutPlan({
   const [customExerciseDraft, setCustomExerciseDraft] = useState<PlanExercise>(defaultCustomExercise)
   const [selectedLibraryExerciseId, setSelectedLibraryExerciseId] = useState('')
   const [logError, setLogError] = useState<Record<string, string>>({})
+  const [weightTargets, setWeightTargets] = useState(() => loadWeightTargets())
   const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
   const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
   const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
@@ -553,6 +557,12 @@ export default function WorkoutPlan({
     return match ? Number(match[1]) : 1
   }
 
+  const getAppliedTarget = (exercise?: PlanExercise, exerciseId?: string) => {
+    if (!exercise || !exerciseId) return undefined
+    const target = weightTargets[exerciseId]
+    return targetAppliesToDay(target, planMode === 'preset' ? activeDay?.key : undefined) ? target : undefined
+  }
+
   const getDraftForExercise = (exerciseName: string, exercise?: PlanExercise) => {
     const key = getPlanDraftKey(exerciseName)
     const best = bestProgressByName.get(normalizeExerciseName(exerciseName))
@@ -567,10 +577,12 @@ export default function WorkoutPlan({
       exercise && prefillExerciseId
         ? findPrefillEntry(history, prefillExerciseId, planMode === 'preset' ? activeDay?.key : undefined)
         : undefined
-    const baseSetWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
+    const lastWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       return Number(source?.weight ?? bestWeight) || 0
     })
+    const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
+    const baseSetWeights = appliedTarget ? applyTargetToWeights(lastWeights, appliedTarget) : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       return Number(source?.drop?.weight) || Number(((baseSetWeights[index] ?? 0) * 0.75).toFixed(2))
@@ -733,6 +745,7 @@ export default function WorkoutPlan({
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
     setToast(`Logged · ${summarizeCompletedEntry(entryToSave)}`)
+    setWeightTargets(consumeWeightTarget(entryToSave.exerciseId, entryToSave.sets))
     setExerciseCatalog(await loadExercises())
 
     setPlannedDrafts((current) => {
@@ -837,6 +850,7 @@ export default function WorkoutPlan({
     }))
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
+    for (const entry of entriesToSave) setWeightTargets(consumeWeightTarget(entry.exerciseId, entry.sets))
 
     const exerciseKeys = exercises.map((exercise) => normalizeExerciseName(exercise.name))
     setPlannedDrafts((current) => Object.fromEntries(
@@ -1471,6 +1485,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <div className="planned-progress-box">
                       <div className="planned-set-header">
                         <span>{text.setLog}</span>
+                        {getAppliedTarget(exercise, exercise.exerciseId) && (
+                          <span className="weight-target-chip">
+                            +{getAppliedTarget(exercise, exercise.exerciseId)?.increaseKg} kg applied
+                          </span>
+                        )}
                         <button
                           type="button"
                           className="toggle-button set-section-toggle"
