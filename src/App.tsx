@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
 import RestTimer from './components/RestTimer'
 import AskExercise from './components/AskExercise'
@@ -115,13 +115,14 @@ export default function App() {
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const text = uiText
 
-  useEffect(() => {
-    saveRestTimerState(restTimer)
-  }, [restTimer])
-
-  const startRest = (durationSeconds: number) => {
-    setRestTimer(startRestTimer(durationSeconds))
-  }
+  const updateRestTimer = useCallback((timer: RestTimerState | null) => {
+    saveRestTimerState(timer)
+    setRestTimer(timer)
+  }, [])
+  const startRest = useCallback(
+    (durationSeconds: number) => updateRestTimer(startRestTimer(durationSeconds)),
+    [updateRestTimer]
+  )
 
   useEffect(() => {
     const sentinel = headerSentinelRef.current
@@ -698,7 +699,7 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <RestTimer timer={restTimer} hidden={dockHidden} onChange={setRestTimer} />
+        <RestTimer timer={restTimer} hidden={dockHidden} onChange={updateRestTimer} />
       </div>
     </div>
   )

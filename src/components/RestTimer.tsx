@@ -57,22 +57,23 @@ export default function RestTimer({
 
   return (
     <div className="rest-timer-pill" role="status" aria-live="polite">
-      <button
-        type="button"
-        className="rest-timer-time"
-        aria-label={isPaused ? 'Resume rest timer' : 'Pause rest timer'}
-        aria-pressed={isPaused}
-        onClick={() => onChange(toggleRestTimerPause(timer))}
-        disabled={isDone}
-      >
-        {isDone ? 'Rest done' : (
+      {isDone ? (
+        <span className="rest-timer-done">Rest done</span>
+      ) : (
+        <button
+          type="button"
+          className="rest-timer-time"
+          aria-label={isPaused ? 'Resume rest timer' : 'Pause rest timer'}
+          aria-pressed={isPaused}
+          onClick={() => onChange(toggleRestTimerPause(timer))}
+        >
           <>
             <span aria-hidden="true">⏱</span>
             {formatRemainingTime(remainingRestSeconds(timer, now))}
             {isPaused && <span className="rest-timer-paused">Paused</span>}
           </>
-        )}
-      </button>
+        </button>
+      )}
       {!isDone && (
         <>
           <button

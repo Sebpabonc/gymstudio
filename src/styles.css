@@ -1380,9 +1380,12 @@ button {
   font-size: 0.88rem;
 }
 
-.rest-timer-time:disabled {
-  opacity: 1;
-  cursor: default;
+.rest-timer-done {
+  flex: 1 1 auto;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-align: center;
 }
 
 .rest-timer-action {
