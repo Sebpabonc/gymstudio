@@ -2430,6 +2430,15 @@ button {
   display: none;
 }
 
+.progress-section .expand-toggle {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.progress-section .secondary-button {
+  min-height: 44px;
+}
+
 .progress-headline {
   display: grid;
   gap: 12px;
@@ -2595,6 +2604,12 @@ button {
 .exercise-picker-panel {
   display: grid;
   gap: 8px;
+}
+
+.exercise-picker-panel .search-input,
+.exercise-picker-panel .result-item,
+.progress-section .day-toggle .tab-button {
+  min-height: 44px;
 }
 
 .session-dots {
