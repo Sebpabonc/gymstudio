@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { getSupabaseClient } from '../lib/supabaseClient'
 
 export default function ProfileScreen({ onClose }: { onClose: () => void }) {
-  const { user, signOut } = useAuth()
+  const { user, signOut, syncStatus, lastSyncedAt } = useAuth()
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -23,6 +23,17 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
 
   const metadata = user?.user_metadata as { full_name?: string; name?: string } | undefined
   const name = fullName || metadata?.full_name || metadata?.name
+  const syncMessage = syncStatus === 'syncing'
+    ? 'Syncing…'
+    : syncStatus === 'offline'
+      ? 'Offline — will sync later'
+      : syncStatus === 'error'
+        ? 'Sync error — retrying'
+        : `Synced · ${lastSyncedAt && Date.now() - Date.parse(lastSyncedAt) < 60_000
+          ? 'just now'
+          : lastSyncedAt
+            ? new Date(lastSyncedAt).toLocaleString()
+            : 'just now'}`
 
   const leaveAccount = async () => {
     setBusy(true)
@@ -37,7 +48,9 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
       <h2>Your profile</h2>
       {name && <p className="profile-name">{name}</p>}
       <p className="profile-email">{user?.email}</p>
-      <p className="account-message">Sync: coming soon</p>
+      <p className="account-message" role="status" aria-live="polite">
+        {syncMessage}
+      </p>
       <button type="button" className="secondary-button profile-signout" onClick={leaveAccount} disabled={busy}>
         {busy ? 'Signing out…' : 'Sign out'}
       </button>
