@@ -457,6 +457,19 @@ describe('training blocks', () => {
   it('persists the selected block id', () => {
     setActiveBlockId('block-6')
     expect(getActiveBlockId()).toBe('block-6')
+
+    setActiveBlockId(null)
+    expect(getActiveBlockId()).toBeNull()
+  })
+
+  it('isolates a pinned block selection in demo mode', () => {
+    setActiveBlockId('real-block')
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+
+    expect(getActiveBlockId()).toBeNull()
+    setActiveBlockId('demo-block')
+    expect(localStorage.getItem('gym-studio.demo.active-block-id')).toBe('demo-block')
+    expect(localStorage.getItem('gym-studio.active-block-id')).toBe('real-block')
   })
 })
 
