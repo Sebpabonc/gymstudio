@@ -1,12 +1,23 @@
 ---
 title: Progress section: evidence-informed insights
-status: draft            # draft | approved | rejected
+status: approved
 author: pt-fitness-expert
 created: 2026-10-04
-approved_by:             # Sebas, when approving
-approved_on:
+approved_by: Sebas (decisions 1-2); 3-4 delegated to Tech Lead
+approved_on: 2026-10-04
 exercises: [incline-dumbbell-press, machine-chest-press-incline, cable-fly-low-to-high, plate-loaded-t-bar-row-chest-supported, pull-up]
 ---
+
+> **PO decisions (2026-10-04)**
+> 1. Strength chart shows **A days by default**, B days behind a toggle — yes.
+> 2. The app **suggests actions** based on the user's history and progress — yes.
+> 3. *(Delegated, Tech Lead)* Drop sets are logged as **one set row with a main part and a drop part**
+>    (`{ reps, weight, drop: { reps, weight } }`), not as two separate sets. Analytics use only the main part
+>    for e1RM and count the pair as 1 set.
+> 4. *(Delegated, Tech Lead)* No RIR/"reps left" input for now — avoid extra taps mid-workout; revisit after
+>    a few weeks of using the insights.
+> Each logged entry also records its `blockId` and `dayKey` automatically (fixes A/B detection).
+
 
 > Scope: what the **Progress** section should show, and how to calculate it from data the app
 > already has. Today Progress lists the last 5 sessions of one exercise (top weight and total volume).
