@@ -223,6 +223,7 @@ describe('progress calculations', () => {
       type: 'add-weight',
       increment: 2,
       message: 'Ready to add 2 kg on Dumbbell Press next B day.',
+      why: 'You completed every planned set and rep target last time.',
     })
     const lowerBodySuggestion = progressSuggestions(
       [makeEntry('leg-press', '2026-01-05', [[80, 8]], { dayKey: 'lower-body-a' })],
@@ -254,6 +255,23 @@ describe('progress calculations', () => {
     )
     expect(fatigue.filter((item) => item.type === 'fatigue')).toHaveLength(1)
     expect(fatigue.some((item) => item.type === 'plateau')).toBe(false)
+  })
+
+  it('does not suggest changes from a block that has ended', () => {
+    const block = makeBlock([{
+      code: 'B1',
+      position: 1,
+      exerciseId: 'press',
+      sets: 1,
+      reps: ['8'],
+      restSeconds: 90,
+      technique: 'straight',
+    }])
+    const entries = [
+      makeEntry('press', '2026-02-09', [[20, 8]], { blockId: block.id, dayKey: 'chest-back-b' }),
+      makeEntry('press', '2026-02-10', [[20, 8]], { blockId: block.id, dayKey: 'chest-back-b' }),
+    ]
+    expect(progressSuggestions(entries, [block], [dumbbellExercise], '2026-02-16')).toEqual([])
   })
 
   it('reports median block change and requires two sessions in each comparison window', () => {
@@ -361,13 +379,13 @@ describe('progress calculations', () => {
   it('runs the engine against realistic demo history', async () => {
     const entries = generateDemoHistory({
       blocks: approvedBlocks,
-      endDate: '2026-10-03',
+      endDate: '2026-10-09',
       months: 8,
       seed: 26,
     })
     const { exerciseLibrary } = await loadExerciseLibrary()
     const records = personalRecords(entries, approvedBlocks)
-    const suggestions = progressSuggestions(entries, approvedBlocks, exerciseLibrary, '2026-10-03')
+    const suggestions = progressSuggestions(entries, approvedBlocks, exerciseLibrary, '2026-10-09')
     const reports = blockReports(entries, approvedBlocks, exerciseLibrary)
     const lastFullWeekSets = weeklySets(entries, approvedBlocks, exerciseLibrary, '2026-09-21')
 

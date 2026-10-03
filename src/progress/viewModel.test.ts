@@ -4,6 +4,7 @@ import {
   buildChartModel,
   chartSummary,
   defaultExerciseId,
+  filterExerciseOptions,
   exercisesWithHistory,
   limitSuggestions,
   muscleStatus,
@@ -14,6 +15,8 @@ import {
   sessionDots,
   topLifts,
   visibleBlockReports,
+  weeklyPRCount,
+  weeklySummary,
 } from './viewModel'
 import { BlockReport, ProgressEntry, ProgressSuggestion } from './types'
 
@@ -90,9 +93,33 @@ describe('progress view model', () => {
   })
 
   it('marks high sets as planned when the plan prescribes them', () => {
-    expect(muscleStatus({ band: 'high', done: 24, planned: 24 })).toBe('High — as planned')
-    expect(muscleStatus({ band: 'high', done: 26, planned: 20 })).toBe('High')
+    expect(muscleStatus({ band: 'high', done: 24, planned: 24 })).toBe('Above range (planned)')
+    expect(muscleStatus({ band: 'high', done: 26, planned: 20 })).toBe('Above range')
     expect(muscleStatus({ band: 'in-range', done: 12, planned: 12 })).toBe('In range')
+  })
+
+  it('orders chart exercises by most recent session and filters them by search', () => {
+    const entries = [
+      entry('bench', '2026-01-06'),
+      entry('curl', '2026-01-07'),
+      entry('curl', '2026-01-08'),
+      entry('row', '2026-01-09'),
+    ]
+    const options = exercisesWithHistory(entries, exercises)
+    expect(options.map((item) => item.id)).toEqual(['row', 'curl', 'bench'])
+    expect(filterExerciseOptions(options, 'UR')).toEqual([exercises[2]])
+    expect(filterExerciseOptions(options, '')).toEqual(options)
+  })
+
+  it('summarizes PRs from the selected week without counting outside dates', () => {
+    const records = [
+      { exerciseId: 'bench', date: '2026-03-02', badges: ['e1rm' as const, 'weight' as const], likelyTypoSetIds: [] },
+      { exerciseId: 'row', date: '2026-03-08', badges: ['reps' as const], likelyTypoSetIds: [] },
+      { exerciseId: 'curl', date: '2026-03-09', badges: ['weight' as const], likelyTypoSetIds: [] },
+    ]
+    expect(weeklyPRCount(records, '2026-03-02')).toBe(2)
+    expect(weeklySummary(1, 6, 1)).toBe('This week: 1 of 6 sessions · 1 PR · on track')
+    expect(weeklySummary(0, 6, 0)).toBe('This week: 0 of 6 sessions · 0 PRs · on track')
   })
 
   it('picks the main lift of the current day, falling back to most logged', () => {
@@ -116,8 +143,21 @@ describe('progress view model', () => {
     expect(model.points[1].y).toBeLessThan(model.points[0].y)
     expect(model.bands).toHaveLength(1)
     expect(model.path.startsWith('M')).toBe(true)
+    expect(model.xTicks.map((tick) => tick.date)).toEqual(['2026-01-05', '2026-01-19'])
     expect(buildChartModel([], blocks).points).toEqual([])
     expect(chartSummary(points, 'Up.')).toContain('2 sessions')
+  })
+
+  it('starts a new chart line at each block boundary', () => {
+    const blocks = [block(1, '2026-01-05'), block(2, '2026-02-16')]
+    const points = [
+      { date: '2026-01-05', e1rm: 60, dayType: 'A' as const, blockId: 'b1' },
+      { date: '2026-02-16', e1rm: 66, dayType: 'A' as const, blockId: 'b2' },
+      { date: '2026-02-23', e1rm: 68, dayType: 'A' as const, blockId: 'b2' },
+    ]
+    const model = buildChartModel(points, blocks)
+    expect(model.path.match(/M/g)).toHaveLength(2)
+    expect(model.path.match(/L/g)).toHaveLength(1)
   })
 
   it('falls back to the most recent week and block with sessions', () => {
