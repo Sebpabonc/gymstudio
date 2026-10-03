@@ -17,7 +17,7 @@ import {
 } from '../utils/storage'
 import { blockDateRange, blockWeek, defaultActiveBlock } from '../utils/trainingBlocks'
 import { isDemoMode } from '../utils/demoMode'
-import { parseRepPrescription, workoutMaxWeight, workoutVolume } from '../utils/workoutSets'
+import { filterLoggableSets, parseRepPrescription, workoutMaxWeight, workoutVolume } from '../utils/workoutSets'
 
 type PlanExercise = {
   name: string
@@ -249,6 +249,7 @@ export default function WorkoutPlan({
   const [customPlan, setCustomPlan] = useState<PlanExercise[]>(() => loadCustomPlan())
   const [customExerciseDraft, setCustomExerciseDraft] = useState<PlanExercise>(defaultCustomExercise)
   const [selectedLibraryExerciseId, setSelectedLibraryExerciseId] = useState('')
+  const [logError, setLogError] = useState<Record<string, string>>({})
   const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
   const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
   const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
@@ -657,7 +658,7 @@ export default function WorkoutPlan({
 
     const draft = getDraftForExercise(exercise.name, exercise)
     const setCount = getDefaultSetCount(exercise) || 1
-    const validSets = Array.from({ length: setCount }, (_, index) => {
+    const allSets = Array.from({ length: setCount }, (_, index) => {
       const currentWeight = draft.setWeights?.[index] ?? draft.weight ?? 0
       const currentReps = draft.setReps?.[index] ?? draft.reps ?? getDefaultRepTarget(exercise)
       const set = createSet(Number(currentReps) || getDefaultRepTarget(exercise), Number(currentWeight) || 0)
@@ -669,6 +670,15 @@ export default function WorkoutPlan({
       }
       return set
     })
+    const equipment = exerciseCatalog.find((item) => item.id === canonicalId)?.equipment
+    const validSets = filterLoggableSets(allSets, equipment)
+
+    if (validSets.length === 0) {
+      setLogError((current) => ({ ...current, [exerciseKey]: 'Enter at least one set' }))
+      return
+    }
+
+    setLogError((current) => (current[exerciseKey] ? { ...current, [exerciseKey]: '' } : current))
 
     const nextEntry: WorkoutEntry = {
       id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
@@ -1415,6 +1425,10 @@ export default function WorkoutPlan({
                             onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
                           />
                         </label>
+                      )}
+
+                      {isSetSectionVisible && logError[getPlanDraftKey(exercise.name)] && (
+                        <p role="alert" className="account-error">{logError[getPlanDraftKey(exercise.name)]}</p>
                       )}
 
                       {isSetSectionVisible && (

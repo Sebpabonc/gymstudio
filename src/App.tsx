@@ -18,7 +18,7 @@ import {
   getAvailableBodyRegions,
   getExerciseTips,
 } from './utils/exerciseFilters'
-import { formatWorkoutSet, workoutMaxWeight, workoutVolume } from './utils/workoutSets'
+import { filterLoggableSets, formatWorkoutSet, workoutMaxWeight, workoutVolume } from './utils/workoutSets'
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
@@ -221,18 +221,19 @@ export default function App() {
     setDraftSets((current) => (current.length > 1 ? current.filter((set) => set.id !== setId) : current))
   }
 
+  const [saveError, setSaveError] = useState('')
+
   const saveWorkout = () => {
     if (!selectedExercise) return
 
-    const validSets = draftSets
-      .map((set) => ({
-        ...set,
-        reps: Number(set.reps) || 0,
-        weight: Number(set.weight) || 0,
-      }))
-      .filter((set) => set.reps > 0 || set.weight > 0)
+    const validSets = filterLoggableSets(draftSets, selectedExercise.equipment)
 
-    if (validSets.length === 0) return
+    if (validSets.length === 0) {
+      setSaveError('Enter at least one set')
+      return
+    }
+
+    setSaveError('')
 
     const nextEntry: WorkoutEntry = {
       id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
@@ -536,6 +537,8 @@ export default function App() {
                       onChange={(event) => setDraftNotes(event.target.value)}
                       placeholder={text.notesPlaceholder}
                     />
+
+                    {saveError && <p role="alert" className="account-error">{saveError}</p>}
 
                     <button type="button" className="primary-button" onClick={saveWorkout}>
                       {text.saveWorkout}
