@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { TrainingBlock } from '../types'
-import { blockDateRange, blockWeek, defaultActiveBlock } from './trainingBlocks'
+import { blockDateRange, blockWeek, defaultActiveBlock, formatBenchAngle } from './trainingBlocks'
 
 const blocks: TrainingBlock[] = [
   {
@@ -54,5 +54,19 @@ describe('training block dates', () => {
 
   it('formats an inclusive six-week date range in English', () => {
     expect(blockDateRange(blocks[1])).toBe('5 Oct – 15 Nov 2026')
+  })
+})
+
+describe('bench angle labels', () => {
+  it('formats flat, incline, upright, and decline angles', () => {
+    expect(formatBenchAngle(0)).toBe('Flat bench')
+    expect(formatBenchAngle(30)).toBe('Incline 30°')
+    expect(formatBenchAngle(90)).toBe('Upright seat')
+    expect(formatBenchAngle(-15)).toBe('Decline 15°')
+  })
+
+  it('omits a label when the angle is not set', () => {
+    expect(formatBenchAngle(null)).toBeNull()
+    expect(formatBenchAngle(undefined)).toBeNull()
   })
 })

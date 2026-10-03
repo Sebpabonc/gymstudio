@@ -38,6 +38,15 @@ export function blockWeek(block: TrainingBlock, today: string | Date = new Date(
   return Math.floor((todayValue - startValue) / (7 * DAY_MS)) + 1
 }
 
+export function formatBenchAngle(angleDegrees?: number | null) {
+  if (angleDegrees == null) return null
+  if (angleDegrees === 0) return 'Flat bench'
+  if (angleDegrees === 90) return 'Upright seat'
+  return angleDegrees > 0
+    ? `Incline ${angleDegrees}°`
+    : `Decline ${Math.abs(angleDegrees)}°`
+}
+
 function formatDate(value: number) {
   return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',

@@ -15,7 +15,7 @@ import {
   setActiveBlockId,
   upsertExerciseRecord,
 } from '../utils/storage'
-import { blockDateRange, blockWeek, defaultActiveBlock } from '../utils/trainingBlocks'
+import { blockDateRange, blockWeek, defaultActiveBlock, formatBenchAngle } from '../utils/trainingBlocks'
 import { isDemoMode } from '../utils/demoMode'
 import { filterLoggableSets, parseRepPrescription, workoutMaxWeight, workoutVolume } from '../utils/workoutSets'
 
@@ -155,6 +155,14 @@ const techniqueDetails: Record<NonNullable<PlanExercise['technique']>, string> =
   'reverse-pyramid': 'Reverse pyramid: heaviest set first, weight down each set',
   'drop-set': 'Drop set: to failure, drop 20–30% and continue',
   superset: 'Superset: back to back with the paired exercise',
+}
+
+const techniqueLabels: Record<NonNullable<PlanExercise['technique']>, string> = {
+  straight: 'Straight sets',
+  superset: 'Superset',
+  'drop-set': 'Drop set',
+  pyramid: 'Pyramid',
+  'reverse-pyramid': 'Reverse pyramid',
 }
 
 function formatBlockStartDate(value: string) {
@@ -1200,10 +1208,11 @@ export default function WorkoutPlan({
                 ...(libraryMatch?.tips?.map((tip) => (typeof tip === 'string' ? tip : tip.text)) ?? []),
               ]),
             }))
-            const muscleChips = [
-              exercise.focus,
-              libraryMatch?.secondaryMuscle,
-            ].filter((value, index, array): value is string => Boolean(value) && array.indexOf(value) === index).slice(0, 2)
+            const muscleChips = (
+              libraryMatch?.primaryMuscles ??
+              (libraryMatch?.primaryMuscle ? [libraryMatch.primaryMuscle] : [])
+            ).slice(0, 2)
+            const benchAngleLabel = formatBenchAngle(exercise.angleDegrees)
             const activeSetIndex = activeSetIndexByExercise[exerciseKey] ?? 0
             const safeSetIndex = Math.min(Math.max(activeSetIndex, 0), Math.max(setCount - 1, 0))
             const isCollapsed = !!collapsedExercises[exerciseKey]
@@ -1243,13 +1252,8 @@ export default function WorkoutPlan({
                 {!isCollapsed && (
                   <>
                     <div className="chip-row chip-row-tight">
-                      {exercise.technique === 'superset' && !group.isSuperset && (
-                        <span className="chip technique-chip">Superset</span>
-                      )}
-                      {exercise.technique && exercise.technique !== 'superset' && (
-                        <span className="chip technique-chip">{exercise.technique.replace(/-/g, ' ')}</span>
-                      )}
-                      {exercise.angleDegrees && <span className="chip subtle">{`Bench ${exercise.angleDegrees}°`}</span>}
+                      {exercise.technique && <span className="chip technique-chip">{techniqueLabels[exercise.technique]}</span>}
+                      {benchAngleLabel && <span className="chip subtle">{benchAngleLabel}</span>}
                       {muscleChips.map((muscle, index) => (
                         <span key={`${exerciseKey}-muscle-${index}`} className={index === 0 ? 'chip' : 'chip subtle'}>
                           {muscle}
@@ -1259,7 +1263,7 @@ export default function WorkoutPlan({
                     {exercise.technique && (
                       <p className="technique-description">{techniqueDetails[exercise.technique]}</p>
                     )}
-                    {exercise.notes && <p className="planned-exercise-notes">{exercise.notes}</p>}
+                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
                     <div className="posture-tips-box">
                       <button

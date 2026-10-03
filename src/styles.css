@@ -666,6 +666,11 @@ button {
   margin-top: -4px;
 }
 
+.planned-exercise-card .chip-row-tight .chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .planned-overall-statement {
   margin: 8px 0 0;
   color: var(--muted-strong);
