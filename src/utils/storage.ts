@@ -1,10 +1,50 @@
-import { Exercise, WorkoutEntry } from '../types'
+import { Exercise, PlannedExercise, TrainingBlock, TrainingDay, WorkoutEntry } from '../types'
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
 const CATALOGUE_KEY = 'gym-studio.catalogue'
+const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
+const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
+
+type TrainingExerciseRow = {
+  code: string
+  position?: number
+  exercise_id?: string
+  exerciseId?: string
+  sets: number
+  reps: string[]
+  rest_seconds?: number
+  restSeconds?: number
+  technique: PlannedExercise['technique']
+  angle_degrees?: number | null
+  angleDegrees?: number
+  notes?: string | null
+}
+
+type TrainingDayRow = {
+  key: string
+  position?: number
+  name: string
+  focus?: string | null
+  exercises?: TrainingExerciseRow[]
+  training_block_exercises?: TrainingExerciseRow[]
+}
+
+type TrainingBlockRow = {
+  id: string
+  number: number
+  name: string
+  method: string
+  start_date?: string
+  startDate?: string
+  weeks: number
+  origin: TrainingBlock['origin']
+  summary: string
+  days?: TrainingDayRow[]
+  training_block_days?: TrainingDayRow[]
+}
 
 type CatalogueRow = {
   id: string
@@ -57,6 +97,109 @@ export function normalizeExerciseName(value: string) {
 
 export function getExerciseDisplayName(value: string | Exercise) {
   return typeof value === 'string' ? value : value.name
+}
+
+export function mapTrainingBlockRows(rows: unknown[]): TrainingBlock[] {
+  return (rows as TrainingBlockRow[])
+    .map((row) => {
+      const days = (row.days ?? row.training_block_days ?? []).map((day, dayIndex): TrainingDay => ({
+        key: day.key,
+        position: day.position ?? dayIndex + 1,
+        name: day.name,
+        focus: day.focus ?? undefined,
+        exercises: (day.exercises ?? day.training_block_exercises ?? [])
+          .map((exercise, exerciseIndex): PlannedExercise => ({
+            code: exercise.code,
+            position: exercise.position ?? exerciseIndex + 1,
+            exerciseId: exercise.exercise_id ?? exercise.exerciseId ?? '',
+            sets: exercise.sets,
+            reps: exercise.reps,
+            restSeconds: exercise.rest_seconds ?? exercise.restSeconds ?? 0,
+            technique: exercise.technique,
+            angleDegrees: exercise.angle_degrees ?? exercise.angleDegrees ?? undefined,
+            notes: exercise.notes ?? undefined,
+          }))
+          .sort((a, b) => a.position - b.position),
+      })).sort((a, b) => a.position - b.position)
+
+      return {
+        id: row.id,
+        number: row.number,
+        name: row.name,
+        method: row.method,
+        startDate: row.start_date ?? row.startDate ?? '',
+        weeks: row.weeks,
+        origin: row.origin,
+        summary: row.summary,
+        days,
+      }
+    })
+    .sort((a, b) => a.number - b.number)
+}
+
+function loadTrainingBlockCache(): TrainingBlock[] | null {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(TRAINING_BLOCKS_KEY) ?? 'null')
+    if (!Array.isArray(parsed) || parsed.length === 0) return null
+    if (parsed.some((block) => typeof block?.id !== 'string' || !Array.isArray(block?.days))) return null
+    return parsed as TrainingBlock[]
+  } catch {
+    return null
+  }
+}
+
+function saveTrainingBlockCache(blocks: TrainingBlock[]) {
+  try {
+    localStorage.setItem(TRAINING_BLOCKS_KEY, JSON.stringify(blocks))
+  } catch {
+    return
+  }
+}
+
+export async function fetchTrainingBlocks(): Promise<TrainingBlock[]> {
+  const cachedBlocks = loadTrainingBlockCache()
+
+  try {
+    const supabaseClient = await getSupabaseClient()
+    if (supabaseClient) {
+      const { data, error } = await supabaseClient
+        .from('training_blocks')
+        .select(
+          'id, number, name, method, start_date, weeks, origin, summary, days:training_block_days(key, position, name, focus, exercises:training_block_exercises(code, position, exercise_id, sets, reps, rest_seconds, technique, angle_degrees, notes))'
+        )
+        .eq('is_active', true)
+        .order('number')
+
+      if (!error && data) {
+        const blocks = mapTrainingBlockRows(data)
+        if (blocks.length > 0) {
+          saveTrainingBlockCache(blocks)
+          return blocks
+        }
+      }
+    }
+  } catch {
+    // Use the most recent cached or bundled data when the remote catalogue is unavailable.
+  }
+
+  if (cachedBlocks) return cachedBlocks
+
+  try {
+    const { default: bundledRows } = await import('../../docs/fitness/approved/training-blocks/blocks.json')
+    const blocks = mapTrainingBlockRows(bundledRows)
+    saveTrainingBlockCache(blocks)
+    return blocks
+  } catch {
+    return []
+  }
+}
+
+export function getActiveBlockId() {
+  return localStorage.getItem(ACTIVE_BLOCK_KEY)
+}
+
+export function setActiveBlockId(blockId: string) {
+  localStorage.setItem(ACTIVE_BLOCK_KEY, blockId)
 }
 
 function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[] {
