@@ -46,6 +46,15 @@ export function recentRecords(records: PersonalRecordSession[], max = MAX_RECORD
 }
 
 export const RECORD_LABELS = { weight: 'Weight PR', reps: 'Rep PR', e1rm: 'e1RM PR' } as const
+export const RECORD_TOOLTIPS = {
+  weight: 'Highest weight lifted while meeting the minimum rep target.',
+  reps: 'Most reps completed at a weight equal to or heavier than before.',
+  e1rm: 'Estimated one-rep max: your estimated maximum weight for one repetition.',
+} as const
+
+export function formatBlockMethod(method: string) {
+  return method.replace(/[-_]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
 
 export function visibleBlockReports(reports: BlockReport[], entries: ProgressEntry[], blocks: TrainingBlock[]) {
   const loggedBlockIds = new Set<string>()
@@ -77,7 +86,7 @@ export function muscleScale(rows: ReturnType<typeof muscleRows>) {
 
 export function muscleStatus(row: { done: number; planned: number; band: string }) {
   if (row.band === 'high') {
-    return row.planned >= row.done ? 'High — as planned' : 'High'
+    return row.planned >= row.done ? 'Above range (planned)' : 'Above range'
   }
   if (row.band === 'in-range') return 'In range'
   if (row.band === 'light') return 'Light'
@@ -85,11 +94,36 @@ export function muscleStatus(row: { done: number; planned: number; band: string 
 }
 
 export function exercisesWithHistory(entries: ProgressEntry[], exercises: Exercise[]) {
-  const counts = new Map<string, number>()
-  for (const entry of entries) counts.set(entry.exerciseId, (counts.get(entry.exerciseId) ?? 0) + 1)
+  const latestDates = new Map<string, string>()
+  for (const entry of entries) {
+    const date = entry.date.slice(0, 10)
+    if (date > (latestDates.get(entry.exerciseId) ?? '')) latestDates.set(entry.exerciseId, date)
+  }
   return exercises
-    .filter((exercise) => counts.has(exercise.id))
-    .sort((a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0) || a.name.localeCompare(b.name))
+    .filter((exercise) => latestDates.has(exercise.id))
+    .sort((a, b) => (latestDates.get(b.id) ?? '').localeCompare(latestDates.get(a.id) ?? '') || a.name.localeCompare(b.name))
+}
+
+export function filterExerciseOptions(exercises: Exercise[], query: string) {
+  const normalized = query.trim().toLowerCase()
+  if (!normalized) return exercises
+  return exercises.filter((exercise) => `${exercise.name} ${exercise.id}`.toLowerCase().includes(normalized))
+}
+
+export function weeklyPRCount(records: PersonalRecordSession[], weekStart: string) {
+  const start = dateValue(weekStart)
+  const end = start + 7 * DAY_MS
+  return records.filter((record) => {
+    const date = dateValue(record.date)
+    return record.badges.length > 0 && date >= start && date < end
+  }).length
+}
+
+export function weeklySummary(sessionsDone: number, sessionsPlanned: number, prCount: number, today: string) {
+  const weekday = new Date(dateValue(today)).getUTCDay()
+  const sessionsExpected = Math.min(weekday === 0 ? 6 : weekday, sessionsPlanned)
+  const status = sessionsDone >= sessionsExpected ? 'on track' : 'in progress'
+  return `This week: ${sessionsDone} of ${sessionsPlanned} sessions · ${prCount} PR${prCount === 1 ? '' : 's'} · ${status}`
 }
 
 export function mainLiftForToday(blocks: TrainingBlock[], today: string) {
@@ -123,6 +157,7 @@ export type ChartModel = {
   path: string
   bands: ChartBand[]
   yTicks: Array<{ value: number; y: number }>
+  xTicks: Array<{ date: string; label: string; x: number }>
 }
 
 export const CHART_SIZE = { width: 320, height: 190, left: 34, right: 10, top: 12, bottom: 22 }
@@ -133,7 +168,7 @@ export function buildChartModel(
   recordDates: Set<string> = new Set()
 ): ChartModel {
   const { width, height, left, right, top, bottom } = CHART_SIZE
-  if (!points.length) return { width, height, points: [], path: '', bands: [], yTicks: [] }
+  if (!points.length) return { width, height, points: [], path: '', bands: [], yTicks: [], xTicks: [] }
   const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date))
   const minTime = dateValue(sorted[0].date)
   const maxTime = dateValue(sorted[sorted.length - 1].date)
@@ -171,14 +206,29 @@ export function buildChartModel(
     value: Math.round(value),
     y: Number(yFor(value).toFixed(1)),
   }))
+  const xTickPoints = [...new Map([
+    [chartPoints[0].date, chartPoints[0]],
+    [chartPoints[Math.floor((chartPoints.length - 1) / 2)].date, chartPoints[Math.floor((chartPoints.length - 1) / 2)]],
+    [chartPoints[chartPoints.length - 1].date, chartPoints[chartPoints.length - 1]],
+  ]).values()]
+  const xTicks = xTickPoints.map((point) => ({
+    date: point.date,
+    label: new Date(`${point.date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }),
+    x: point.x,
+  }))
+  const path = chartPoints.map((point, index) => {
+    const startsSegment = index === 0 || point.blockId !== chartPoints[index - 1].blockId
+    return `${startsSegment ? 'M' : 'L'}${point.x} ${point.y}`
+  }).join(' ')
 
   return {
     width,
     height,
     points: chartPoints,
-    path: chartPoints.map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x} ${point.y}`).join(' '),
+    path,
     bands,
     yTicks,
+    xTicks,
   }
 }
 
