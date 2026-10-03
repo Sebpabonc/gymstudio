@@ -417,6 +417,10 @@ export default function WorkoutPlan({
   }, [mode])
 
   useEffect(() => {
+    if (planMode !== 'preset') sessionStartedAt.current = null
+  }, [planMode])
+
+  useEffect(() => {
     let cancelled = false
     void Promise.all([loadExercises(), loadWorkoutHistory(), fetchTrainingBlocks()]).then(([exercises, entries, blocks]) => {
       if (cancelled) return

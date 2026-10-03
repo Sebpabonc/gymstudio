@@ -51,6 +51,7 @@ describe('logging feedback', () => {
 
     expect(sessionDurationMs(start, start.scopeKey, 61_000)).toBe(60_000)
     expect(sessionDurationMs(start, 'preset:2026-10-03:block-1:day-2', 61_000)).toBe(0)
+    expect(sessionDurationMs(start, 'custom:2026-10-03:block-1:day-1', 61_000)).toBe(0)
   })
 
   it('summarizes set count, main and drop-set volume, duration and PRs', () => {
