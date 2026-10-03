@@ -186,16 +186,30 @@ describe('remote catalogue', () => {
       id: 'romanian-deadlift',
       name_en: 'Romanian Deadlift (Barbell)',
       name_es: 'Peso muerto rumano con barra',
+      body_region: 'Legs',
       primary_muscle: 'Hamstrings',
+      primary_muscles: ['Hamstrings', 'Glutes'],
       secondary_muscles: ['Glutes', 'Lower Back'],
+      equipment: 'barbell',
+      posture_tips: [
+        'Tip one',
+        'Tip two',
+        'Tip three',
+        'Tip four',
+        'Tip five',
+      ],
       aliases: ['bb-rdl'],
     },
     {
       id: 'lat-pulldown',
       name_en: 'Lat Pulldown (Wide Grip)',
       name_es: null,
+      body_region: 'Back',
       primary_muscle: 'Lats',
+      primary_muscles: ['Lats'],
       secondary_muscles: ['Upper Back', 'Biceps'],
+      equipment: 'cable',
+      posture_tips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
       aliases: [],
     },
   ]
@@ -207,7 +221,9 @@ describe('remote catalogue', () => {
     const deadlift = catalogue?.find((exercise) => exercise.id === 'romanian-deadlift')
 
     expect(supabaseMock.from).toHaveBeenCalledWith('exercises')
-    expect(supabaseMock.select).toHaveBeenCalledWith('id, name_en, name_es, primary_muscle, secondary_muscles, aliases')
+    expect(supabaseMock.select).toHaveBeenCalledWith(
+      'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, aliases'
+    )
     expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
     expect(supabaseMock.order).toHaveBeenCalledWith('name_en')
     expect(deadlift).toMatchObject({
@@ -215,6 +231,11 @@ describe('remote catalogue', () => {
       nameEs: 'Peso muerto rumano con barra',
       primaryMuscle: 'Hamstrings',
       secondaryMuscle: 'Glutes',
+      bodyRegion: 'Legs',
+      primaryMuscles: ['Hamstrings', 'Glutes'],
+      secondaryMuscles: ['Glutes', 'Lower Back'],
+      equipment: 'barbell',
+      postureTips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
     })
     expect(deadlift?.notes).toBeUndefined()
     expect(deadlift?.tips).toBeUndefined()
@@ -243,7 +264,12 @@ describe('remote catalogue', () => {
     expect(cache.exercises[0]).not.toHaveProperty('tips')
     expect(cache.exercises[0]).not.toHaveProperty('notes')
     expect(cache.aliases).toEqual({ 'bb-rdl': 'romanian-deadlift' })
-    expect(localStorage.getItem('gym-studio.catalogue')!.length).toBeLessThan(50_000)
+    expect(new TextEncoder().encode(localStorage.getItem('gym-studio.catalogue')!).byteLength).toBeLessThan(200_000)
+    expect(deadlift?.bodyRegion).toBe('Legs')
+    expect(deadlift?.primaryMuscles).toEqual(['Hamstrings', 'Glutes'])
+    expect(deadlift?.secondaryMuscles).toEqual(['Glutes', 'Lower Back'])
+    expect(deadlift?.equipment).toBe('barbell')
+    expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.tips).toEqual(bundledDeadlift?.tips)
     expect(deadlift?.nameEs).toBe('Peso muerto rumano con barra')
   })

@@ -11,11 +11,27 @@ type CatalogueRow = {
   name_en: string
   name_es: string | null
   primary_muscle: string
+  body_region: string | null
+  primary_muscles: string[] | null
   secondary_muscles: string[]
+  equipment: string | null
+  posture_tips: string[] | null
   aliases: string[]
 }
 
-type CatalogueExercise = Pick<Exercise, 'id' | 'name' | 'primaryMuscle' | 'secondaryMuscle' | 'nameEs'>
+type CatalogueExercise = Pick<
+  Exercise,
+  | 'id'
+  | 'name'
+  | 'primaryMuscle'
+  | 'secondaryMuscle'
+  | 'nameEs'
+  | 'bodyRegion'
+  | 'primaryMuscles'
+  | 'secondaryMuscles'
+  | 'equipment'
+  | 'postureTips'
+>
 
 type CatalogueCache = {
   fetchedAt: string
@@ -87,6 +103,11 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
       nameEs: exercise.nameEs ?? current?.nameEs,
       primaryMuscle: exercise.primaryMuscle || current?.primaryMuscle || 'Other',
       secondaryMuscle: exercise.secondaryMuscle ?? current?.secondaryMuscle,
+      bodyRegion: exercise.bodyRegion ?? current?.bodyRegion,
+      primaryMuscles: exercise.primaryMuscles ?? current?.primaryMuscles,
+      secondaryMuscles: exercise.secondaryMuscles ?? current?.secondaryMuscles,
+      equipment: exercise.equipment ?? current?.equipment,
+      postureTips: exercise.postureTips ?? current?.postureTips,
       notes: exercise.notes ?? current?.notes,
       tips: exercise.tips?.length ? exercise.tips : current?.tips ?? [],
     })
@@ -110,6 +131,11 @@ function loadCatalogueCache(): CatalogueCache | null {
         nameEs: exercise.nameEs,
         primaryMuscle: exercise.primaryMuscle,
         secondaryMuscle: exercise.secondaryMuscle,
+        bodyRegion: exercise.bodyRegion,
+        primaryMuscles: exercise.primaryMuscles,
+        secondaryMuscles: exercise.secondaryMuscles,
+        equipment: exercise.equipment,
+        postureTips: exercise.postureTips,
       })),
       aliases: parsed.aliases ?? {},
     }
@@ -125,7 +151,9 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
 
     const { data, error } = await supabaseClient
       .from('exercises')
-      .select('id, name_en, name_es, primary_muscle, secondary_muscles, aliases')
+      .select(
+        'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, aliases'
+      )
       .eq('is_active', true)
       .order('name_en')
 
@@ -139,8 +167,13 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
         id: row.id,
         name: row.name_en,
         nameEs: row.name_es ?? undefined,
-        primaryMuscle: row.primary_muscle,
+        primaryMuscle: row.primary_muscles?.[0] ?? row.primary_muscle,
         secondaryMuscle: row.secondary_muscles?.[0],
+        bodyRegion: row.body_region ?? undefined,
+        primaryMuscles: row.primary_muscles ?? undefined,
+        secondaryMuscles: row.secondary_muscles ?? undefined,
+        equipment: row.equipment ?? undefined,
+        postureTips: row.posture_tips ?? undefined,
       }
     })
 
@@ -164,12 +197,17 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
       CATALOGUE_KEY,
       JSON.stringify({
         fetchedAt: new Date().toISOString(),
-        exercises: catalogue.exercises.map(({ id, name, nameEs, primaryMuscle, secondaryMuscle }) => ({
-          id,
-          name,
-          nameEs,
-          primaryMuscle,
-          secondaryMuscle,
+        exercises: catalogue.exercises.map((exercise) => ({
+          id: exercise.id,
+          name: exercise.name,
+          nameEs: exercise.nameEs,
+          primaryMuscle: exercise.primaryMuscle,
+          secondaryMuscle: exercise.secondaryMuscle,
+          bodyRegion: exercise.bodyRegion,
+          primaryMuscles: exercise.primaryMuscles,
+          secondaryMuscles: exercise.secondaryMuscles,
+          equipment: exercise.equipment,
+          postureTips: exercise.postureTips,
         })),
         aliases: catalogue.aliases,
       })

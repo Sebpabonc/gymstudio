@@ -244,6 +244,39 @@ button {
 
 .search-shell {
   position: relative;
+  display: grid;
+  gap: 8px;
+}
+
+.region-chips {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.region-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.region-chip {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  padding: 6px 10px;
+  font-size: var(--font-caption);
+  font-weight: var(--font-section-weight);
+}
+
+.region-chip.active {
+  background: var(--brand-soft);
+  border-color: rgba(141, 94, 99, 0.6);
+  color: var(--text);
 }
 
 .field-label {
@@ -275,13 +308,10 @@ button {
 }
 
 .search-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  z-index: 10;
   display: grid;
   gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -376,6 +406,22 @@ button {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 14px;
+}
+
+.muscle-groups {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.muscle-group {
+  display: grid;
+  gap: 4px;
+}
+
+.muscle-chip-row {
+  margin-top: 0;
+  gap: 6px;
 }
 
 .planned-exercise-card .chip-row-tight {
