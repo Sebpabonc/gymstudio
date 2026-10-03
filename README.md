@@ -1,44 +1,53 @@
 # Gym Studio
 
-App para registrar entrenamientos de gimnasio, consultar ejercicios y seguir tu plan.
+App to log gym workouts, look up exercises (with posture tips) and follow your plan.
 
-- Tecnología: React, TypeScript, Vite, Capacitor (iOS)
-- Persistencia actual: `localStorage` (la migración a Supabase está planificada)
+- Tech: React, TypeScript, Vite, Capacitor (iOS), Supabase
+- Exercise catalogue: Supabase (`public.exercises`), cached on the device for offline use
+- Workout history: `localStorage` on the device (cloud sync comes with user accounts)
+- Live app: https://sebpabonc.github.io/gymstudio/
 
-## Arrancar
+## Getting started
 
 ```bash
 npm install
+cp .env.example .env.local   # fill in the public Supabase URL and anon key (optional)
 npm run dev      # http://localhost:5173
-npm test         # tests automáticos
-npm run build    # chequeo de tipos + build de producción en dist/
+npm test         # unit tests
+npm run build    # typecheck + production build into dist/
 ```
 
-Para probar en el teléfono: `npm run dev -- --host` y abre la IP del Mac desde el móvil (misma red Wi-Fi).
+Without `.env.local` the app still runs, using the bundled exercise list.
+
+To try it on a phone: `npm run dev -- --host` and open the Mac's IP from the phone (same Wi-Fi).
 
 ## iOS
 
 ```bash
-npm run mobile:sync      # build web + copia a ios/ (los archivos copiados no se versionan)
-npm run mobile:open:ios  # abre el proyecto en Xcode
+npm run mobile:sync      # web build + copy into ios/ (copied files are not versioned)
+npm run mobile:open:ios  # open the project in Xcode
 ```
 
-## Estructura
+## Structure
 
 ```
 src/
-  App.tsx                 pantalla principal
-  components/WorkoutPlan  plan de entrenamiento y calendario
-  data/                   biblioteca de ejercicios y plan base
-  utils/storage.ts        lectura/escritura en localStorage
-  types.ts                modelo de datos
-ios/                      proyecto nativo de Capacitor
-docs/reference/           material de origen (plan en Excel, branding)
+  App.tsx                 main screen
+  components/WorkoutPlan  workout plan and calendar
+  data/                   bundled exercise library (offline fallback) and base plan
+  lib/supabaseClient.ts   lazy-loaded Supabase client (public anon key only)
+  utils/storage.ts        all persistence: catalogue fetch/cache, exercises, history
+  types.ts                domain types
+supabase/migrations/      database schema and catalogue seed (numbered SQL)
+docs/fitness/             fitness knowledge: drafts → approved (exercise catalogue v2)
+scripts/                  catalogue validation and seed generation
+ios/                      Capacitor native project
+docs/reference/           source material (original plan spreadsheet, branding)
 ```
 
-## Contribuir
+## Contributing
 
-Las reglas de trabajo (roles, flujo Issue → PR, cuándo escalar) están en [AGENTS.md](AGENTS.md).
+Ways of working (roles, Issue → PR flow, when to escalate) are in [AGENTS.md](AGENTS.md).
 
-- Cada cambio parte de un Issue, se trabaja en una rama y entra a `main` por Pull Request.
-- Cambios pequeños y enfocados.
+- Every change starts from an Issue, is built on a branch and reaches `main` through a Pull Request.
+- `main` is protected: CI (catalogue validation, typecheck, tests, build) must pass.

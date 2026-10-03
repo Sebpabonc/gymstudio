@@ -1,16 +1,19 @@
 # Fitness knowledge
 
-Contenido de dominio fitness (técnica, cues, músculos, seguridad) con un circuito
-de aprobación. Nada de aquí llega a la app sin pasar por estos pasos:
+Fitness-domain content (technique, posture tips, muscles, safety) follows an approval
+flow. Nothing here reaches the app without going through these steps:
 
 ```
-PT / Fitness Expert  →  drafts/  →  aprobación de Sebas  →  approved/  →  Tech Lead diseña  →  Copilot implementa
+PT / Fitness Expert  →  drafts/  →  Sebas approves  →  approved/  →  Tech Lead designs  →  Copilot implements
 ```
 
-| Carpeta | Quién escribe | Significado |
+| Folder | Who writes | Meaning |
 |---|---|---|
-| `drafts/` | Agente PT (`.claude/agents/pt-fitness-expert.md`) | Propuesta. **No es verdad para la app.** |
-| `approved/` | Tech Lead, solo tras la aprobación explícita de Sebas | Conocimiento aprobado; puede convertirse en un Issue. |
+| `drafts/` | PT agent (`.claude/agents/pt-fitness-expert.md`) | Proposal. **Not true for the app.** |
+| `approved/` | Tech Lead, only after Sebas's explicit approval (or delegated review) | Approved knowledge; can become an Issue or a database seed. |
 
-Cada archivo usa [TEMPLATE.md](TEMPLATE.md). Al aprobarse, se mueve a `approved/`,
-se cambia `status: approved` y se anota quién y cuándo lo aprobó.
+- The exercise catalogue lives in `approved/catalogue-v2/*.json` and follows
+  [catalogue-v2-spec.md](catalogue-v2-spec.md). CI validates it with `scripts/validate-catalogue.py`.
+- Other documents use [TEMPLATE.md](TEMPLATE.md). When approved, a document moves to
+  `approved/`, its status becomes `approved`, and who approved it and when is recorded.
+- All content is written in **English** (the app is English-only).
