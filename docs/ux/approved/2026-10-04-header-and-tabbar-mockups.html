@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Header and Tab Bar Options</title>
+<style>
+  /* Tokens copied from src/styles.css (GymStudio) + two proposed additions marked NEW */
+  :root {
+    --bg-dark: #1f1f20;
+    --bg-soft: #2b2b2d;
+    --panel: rgba(255, 255, 255, 0.07);
+    --line: rgba(255, 255, 255, 0.14);
+    --text: #f3f3f1;
+    --muted: #c8c7c4;
+    --brand: #8d5e63;
+    --brand-strong: #5a474b;
+    --brand-soft: rgba(141, 94, 99, 0.18);
+    --nav-active: #c99ca1;               /* NEW: lighter brand tint, 6.9:1 on --bg-dark */
+    --nav-idle: rgba(243, 243, 241, 0.55); /* NEW: quiet inactive icon, ~5:1 on --bg-dark */
+    --page: #e9e9e7;
+    --ink: #1c1c1d;
+    --ink-muted: #5d5d5b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --page: #141415; --ink: #f3f3f1; --ink-muted: #b4b3b0; }
+  }
+  :root[data-theme="dark"] { --page: #141415; --ink: #f3f3f1; --ink-muted: #b4b3b0; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: Inter, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+  }
+  .page { max-width: 1280px; margin: 0 auto; padding: 32px 16px 64px; }
+  .page > header h1 { margin: 0 0 6px; font-size: 1.6rem; letter-spacing: -0.03em; }
+  .page > header p { margin: 0; color: var(--ink-muted); max-width: 70ch; line-height: 1.5; font-size: 0.95rem; }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(375px, 1fr));
+    gap: 32px 24px;
+    margin-top: 28px;
+  }
+  @media (max-width: 420px) { .options { grid-template-columns: 1fr; } }
+  .option { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+  .option-title { width: 100%; max-width: 375px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .option-title h2 { margin: 0; font-size: 1.05rem; letter-spacing: -0.02em; }
+  .option-title .num { color: var(--ink-muted); font-weight: 700; font-size: 0.85rem; }
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 999px;
+    background: var(--brand); color: #fff; font-size: 0.68rem; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .notes { width: 100%; max-width: 375px; font-size: 0.86rem; line-height: 1.45; }
+  .notes h3 { margin: 10px 0 4px; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
+  .notes ul { margin: 0; padding-left: 18px; }
+  .notes li { margin: 2px 0; }
+  .state-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); width: 100%; max-width: 375px; }
+
+  /* ---------- Phone ---------- */
+  .phone {
+    position: relative;
+    width: 375px; max-width: 100%;
+    height: 812px;
+    border-radius: 46px;
+    background: linear-gradient(180deg, rgba(37,37,38,0.98), rgba(18,18,18,0.99));
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 0 0 8px #0d0d0e, 0 28px 70px rgba(0,0,0,0.35);
+    overflow: hidden;
+    color: var(--text);
+    font-size: 12.2px;
+    display: flex; flex-direction: column;
+  }
+  .phone.crop { height: 170px; border-radius: 46px 46px 18px 18px; }
+  .island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 120px; height: 34px; border-radius: 999px; background: #050505; z-index: 20; }
+  .status { flex: 0 0 47px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 34px; font-size: 14px; font-weight: 600; position: relative; z-index: 15; }
+  .status .sig { letter-spacing: 1px; font-size: 11px; }
+  .home-ind { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.85); z-index: 30; }
+
+  .content { flex: 1; min-height: 0; overflow: hidden; padding: 12px 12px 0; display: grid; gap: 12px; align-content: start; }
+  .card { background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 22px; padding: 14px 12px; box-shadow: inset 0 1px rgba(255,255,255,0.08); }
+  .row-top { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .icon-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; }
+  .icon-btn svg { width: 15px; height: 15px; stroke: var(--text); fill: none; stroke-width: 1.8; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; font-size: 9.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+  .block { border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; background: rgba(255,255,255,0.03); display: flex; align-items: center; gap: 10px; }
+  .block small { display: block; color: var(--muted); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
+  .block strong { font-size: 15px; line-height: 1.25; letter-spacing: -0.02em; }
+  .block .meta { margin-left: auto; text-align: right; font-weight: 700; font-size: 11px; white-space: nowrap; }
+  .days { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+  .day { border: 1px solid var(--line); border-radius: 12px; padding: 7px 4px; text-align: center; font-size: 10.5px; font-weight: 700; line-height: 1.25; }
+  .day span { display: block; color: var(--muted); font-weight: 600; }
+  .day.on { background: linear-gradient(135deg, rgba(141,94,99,0.55), rgba(47,47,49,0.6)); }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 2px 4px; }
+  .ex { border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+  .ex .code { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; }
+  .ex strong { display: block; font-size: 13.5px; color: var(--text); }
+  .ex .sub { color: var(--muted); }
+  .ex .done { display: inline-block; margin-top: 5px; border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; font-size: 10.5px; color: var(--muted); }
+  .ex .done b { color: var(--text); }
+  .ex .plus { margin-left: auto; width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 16px; color: var(--muted); }
+  .ex.dim { opacity: 0.72; }
+
+  .sync { width: 10px; height: 10px; border-radius: 50%; background: #e7bd72; flex: 0 0 10px; }
+
+  /* Shared nav icon styles */
+  .nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .nav button { appearance: none; border: 0; background: transparent; color: var(--nav-idle); font: inherit; padding: 0; cursor: pointer; }
+  .nav button[aria-current="page"] { color: var(--nav-active); }
+  .nav button[aria-current="page"] svg { stroke-width: 2.1; }
+  .nav button:focus-visible { outline: 2px solid var(--nav-active); outline-offset: 2px; border-radius: 12px; }
+
+  /* ---------- Option 1: wordmark header + icon-only bar ---------- */
+  .h1-bar { flex: 0 0 56px; display: flex; align-items: center; gap: 10px; padding: 0 18px; border-bottom: 1px solid var(--line); }
+  .wordmark { margin: 0; font-weight: 800; text-transform: uppercase; letter-spacing: -0.05em; line-height: 0.95; color: var(--text); }
+  .h1-bar .wordmark { font-size: 19px; }
+  .h1-bar .screen { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding-left: 10px; border-left: 1px solid var(--line); line-height: 1; }
+  .h1-bar .sync { margin-left: auto; }
+
+  .bar1 { position: relative; flex: 0 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); padding: 2px 12px 34px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(24,24,25,0.72); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+  .bar1 button { height: 50px; display: grid; place-items: center; position: relative; }
+  .bar1 button[aria-current="page"]::after { content: ''; position: absolute; bottom: 5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--nav-active); }
+
+  /* ---------- Option 2: large title collapses ---------- */
+  .h2-large { flex: 0 0 auto; padding: 6px 18px 12px; border-bottom: 1px solid transparent; }
+  .h2-large .top { display: flex; align-items: center; justify-content: space-between; height: 22px; }
+  .h2-large .eyebrow { font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .h2-large .wordmark { font-size: 34px; margin-top: 4px; }
+  .h2-large .screen { margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .h2-small { flex: 0 0 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: rgba(24,24,25,0.72); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+  .h2-small .wordmark { font-size: 15px; }
+  .h2-small .screen { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .h2-small .mid { display: flex; align-items: baseline; gap: 8px; }
+
+  .bar2 { flex: 0 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); padding: 4px 12px 32px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(24,24,25,0.72); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+  .bar2 button { min-height: 50px; display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 10px; font-weight: 600; letter-spacing: 0; }
+  .bar2 button[aria-current="page"] { font-weight: 800; }
+
+  /* ---------- Option 3: floating dock ---------- */
+  .opt3 .content { padding-bottom: 110px; }
+  .dock { position: absolute; left: 50%; transform: translateX(-50%); bottom: 26px; display: flex; gap: 4px; padding: 6px 10px; border-radius: 30px; background: rgba(31,31,32,0.72); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); box-shadow: 0 12px 30px rgba(0,0,0,0.45); z-index: 25; }
+  .dock button { width: 50px; height: 48px; display: grid; place-items: center; position: relative; }
+  .dock button[aria-current="page"]::after { content: ''; position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--nav-active); }
+  .fade { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(180deg, transparent, rgba(18,18,18,0.92)); z-index: 22; pointer-events: none; }
+
+  /* ---------- Footer notes ---------- */
+  .wide { margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .panel { border: 1px solid rgba(127,127,127,0.25); border-radius: 18px; padding: 16px 18px; font-size: 0.9rem; line-height: 1.5; }
+  .panel h3 { margin: 0 0 8px; font-size: 0.95rem; }
+  .panel ul { margin: 0; padding-left: 18px; }
+  code { font-size: 0.85em; background: rgba(127,127,127,0.15); padding: 1px 5px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>GymStudio header and tab bar: three options</h1>
+    <p>UXer proposal, 4 Oct 2026, in response to PO feedback on PR #86. The PO wants the GYM STUDIO wordmark back without losing the vertical space PR #86 saved, and a quieter bottom bar. Colours, radii and type come from <code>src/styles.css</code>. Content is the real demo "Today" screen (Block 6, Day 1).</p>
+  </header>
+
+  <!-- SVG icon sprite (same glyphs as NavigationIcon in App.tsx) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-6h-4v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></symbol>
+    <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  </svg>
+
+  <div class="options">
+
+    <!-- ================= OPTION 1 ================= -->
+    <section class="option" aria-labelledby="o1">
+      <div class="option-title"><span class="num">Option 1</span><h2 id="o1">Wordmark header + icon-only bar</h2><span class="badge">Recommended</span></div>
+      <div class="phone" role="img" aria-label="Option 1 mockup: GYM STUDIO wordmark header with Today subtitle, icon-only bottom bar">
+        <div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●● ▮</span></div>
+        <header class="h1-bar">
+          <p class="wordmark">Gym Studio</p>
+          <span class="screen">Today</span>
+          <span class="sync" title="Demo data"></span>
+        </header>
+        <div class="content">
+          <div class="card">
+            <div class="row-top"><span class="icon-btn"><svg><use href="#i-cal"/></svg></span><span class="chip">6-week block</span></div>
+            <div class="block"><div><small>Block 6</small><strong>Hypertrophy Flat Pyramid II</strong></div><div class="meta">Starts Mon 5 Oct</div></div>
+            <div class="days">
+              <div class="day on">Day 1 · Chest-Back A<span>3/7</span></div>
+              <div class="day">Day 2 · Arms A<span>3/7</span></div>
+              <div class="day">Day 3 · Lower Body A<span>0/7</span></div>
+            </div>
+          </div>
+          <div class="section-label">Chest &amp; Back · Heavy</div>
+          <div class="ex"><div><span class="code">A1</span><strong>Dumbbell Bench Press</strong><span class="sub">Incline</span><br><span class="done"><b>✓ Done</b> · 3 sets · top 5 kg</span></div><span class="plus">+</span></div>
+          <div class="ex"><div><span class="code">B1</span><strong>Dumbbell Bench Press</strong><span class="done"><b>✓ Done</b> · 1 set · top 24 kg</span></div><span class="plus">+</span></div>
+          <div class="ex dim"><div><span class="code">C1</span><strong>Pec Deck Fly</strong></div><span class="plus">+</span></div>
+          <div class="ex dim"><div><span class="code">D1</span><strong>Plate-Loaded T-Bar Row</strong><span class="sub">Chest-Supported</span></div><span class="plus">+</span></div>
+        </div>
+        <nav class="nav bar1" aria-label="Primary navigation">
+          <button type="button" aria-label="Today" aria-current="page"><svg aria-hidden="true"><use href="#i-home"/></svg></button>
+          <button type="button" aria-label="Exercises"><svg aria-hidden="true"><use href="#i-search"/></svg></button>
+          <button type="button" aria-label="Progress"><svg aria-hidden="true"><use href="#i-chart"/></svg></button>
+          <button type="button" aria-label="You"><svg aria-hidden="true"><use href="#i-person"/></svg></button>
+        </nav>
+        <div class="home-ind"></div>
+      </div>
+      <div class="notes">
+        <p style="margin:0">Header stays 56 px (same as PR #86): wordmark left, screen name as a small uppercase subtitle after a hairline divider, sync dot right. Bar: 4 thin-line icons, no labels, no pill; active = lighter brand tint + heavier stroke + 4 px dot. Translucent blurred background with a faint hairline.</p>
+        <h3>Pros</h3>
+        <ul>
+          <li>Brand back at zero height cost; the most minimal bar (about 10 px shorter than today's).</li>
+          <li>Active state uses three cues (colour, stroke weight, dot), so it is not colour-only.</li>
+          <li>Smallest code change: CSS on <code>.brand-header</code> and <code>.bottom-tab-bar</code>, one span in the markup.</li>
+        </ul>
+        <h3>Cons</h3>
+        <ul>
+          <li>No visible labels; NN/g research shows unlabelled icons are understood less well by new users.</li>
+          <li>The wordmark is smaller (19 px) than the old 2 rem hero version.</li>
+          <li>Needs <code>aria-label</code>s and long-press or tooltip hints so the tabs stay discoverable.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= OPTION 2 ================= -->
+    <section class="option" aria-labelledby="o2">
+      <div class="option-title"><span class="num">Option 2</span><h2 id="o2">Large title that collapses</h2></div>
+      <div class="state-label">State A: top of the page (first load)</div>
+      <div class="phone" role="img" aria-label="Option 2 mockup: large GYM STUDIO title, bottom bar with icons and tiny labels">
+        <div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●● ▮</span></div>
+        <header class="h2-large">
+          <div class="top"><span class="eyebrow">Borcelle Fitness · Performance tracking</span><span class="sync"></span></div>
+          <p class="wordmark">Gym Studio</p>
+          <div class="screen">Today</div>
+        </header>
+        <div class="content" style="padding-top:4px">
+          <div class="card">
+            <div class="row-top"><span class="icon-btn"><svg><use href="#i-cal"/></svg></span><span class="chip">6-week block</span></div>
+            <div class="block"><div><small>Block 6</small><strong>Hypertrophy Flat Pyramid II</strong></div><div class="meta">Starts Mon 5 Oct</div></div>
+            <div class="days">
+              <div class="day on">Day 1 · Chest-Back A<span>3/7</span></div>
+              <div class="day">Day 2 · Arms A<span>3/7</span></div>
+              <div class="day">Day 3 · Lower Body A<span>0/7</span></div>
+            </div>
+          </div>
+          <div class="section-label">Chest &amp; Back · Heavy</div>
+          <div class="ex"><div><span class="code">A1</span><strong>Dumbbell Bench Press</strong><span class="sub">Incline</span><br><span class="done"><b>✓ Done</b> · 3 sets · top 5 kg</span></div><span class="plus">+</span></div>
+          <div class="ex"><div><span class="code">B1</span><strong>Dumbbell Bench Press</strong><span class="done"><b>✓ Done</b> · 1 set · top 24 kg</span></div><span class="plus">+</span></div>
+          <div class="ex dim"><div><span class="code">C1</span><strong>Pec Deck Fly</strong></div><span class="plus">+</span></div>
+        </div>
+        <nav class="nav bar2" aria-label="Primary navigation">
+          <button type="button" aria-current="page"><svg aria-hidden="true"><use href="#i-home"/></svg>Today</button>
+          <button type="button"><svg aria-hidden="true"><use href="#i-search"/></svg>Exercises</button>
+          <button type="button"><svg aria-hidden="true"><use href="#i-chart"/></svg>Progress</button>
+          <button type="button"><svg aria-hidden="true"><use href="#i-person"/></svg>You</button>
+        </nav>
+        <div class="home-ind"></div>
+      </div>
+      <div class="state-label">State B: after scrolling about 40 px</div>
+      <div class="phone crop" role="img" aria-label="Option 2 collapsed header: small GYM STUDIO wordmark with Today">
+        <div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●● ▮</span></div>
+        <header class="h2-small">
+          <span class="mid"><span class="wordmark">Gym Studio</span><span class="screen">Today</span></span>
+          <span class="sync"></span>
+        </header>
+        <div class="content" style="padding-top:10px">
+          <div class="ex"><div><span class="code">C1</span><strong>Pec Deck Fly</strong></div><span class="plus">+</span></div>
+        </div>
+      </div>
+      <div class="notes">
+        <p style="margin:0">Hero header (about 110 px) brings back the original wordmark and tagline, then shrinks to a 48 px bar once the user scrolls, like iOS large titles. Bar keeps icons with tiny 10 px labels; active = brand tint + bold label, no pill, no separate panel.</p>
+        <h3>Pros</h3>
+        <ul>
+          <li>Closest to the design the PO liked: big, bold brand moment on every open.</li>
+          <li>Visible labels: the clearest option for new users and the safest for accessibility.</li>
+          <li>Follows a familiar platform pattern (iOS large title).</li>
+        </ul>
+        <h3>Cons</h3>
+        <ul>
+          <li>Takes about 55 px more at the top until the user scrolls, so less of the first exercise is visible mid-session.</li>
+          <li>Needs scroll-linked JS or CSS and a reduced-motion fallback, so it is the most work to build.</li>
+          <li>The bar is less minimal than Option 1 because labels add visual noise.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= OPTION 3 ================= -->
+    <section class="option opt3" aria-labelledby="o3">
+      <div class="option-title"><span class="num">Option 3</span><h2 id="o3">Floating minimal dock</h2></div>
+      <div class="phone" role="img" aria-label="Option 3 mockup: wordmark header and a floating rounded dock with four icons">
+        <div class="island"></div>
+        <div class="status"><span>9:41</span><span class="sig">●●● ▮</span></div>
+        <header class="h1-bar">
+          <p class="wordmark">Gym Studio</p>
+          <span class="screen">Today</span>
+          <span class="sync"></span>
+        </header>
+        <div class="content">
+          <div class="card">
+            <div class="row-top"><span class="icon-btn"><svg><use href="#i-cal"/></svg></span><span class="chip">6-week block</span></div>
+            <div class="block"><div><small>Block 6</small><strong>Hypertrophy Flat Pyramid II</strong></div><div class="meta">Starts Mon 5 Oct</div></div>
+            <div class="days">
+              <div class="day on">Day 1 · Chest-Back A<span>3/7</span></div>
+              <div class="day">Day 2 · Arms A<span>3/7</span></div>
+              <div class="day">Day 3 · Lower Body A<span>0/7</span></div>
+            </div>
+          </div>
+          <div class="section-label">Chest &amp; Back · Heavy</div>
+          <div class="ex"><div><span class="code">A1</span><strong>Dumbbell Bench Press</strong><span class="sub">Incline</span><br><span class="done"><b>✓ Done</b> · 3 sets · top 5 kg</span></div><span class="plus">+</span></div>
+          <div class="ex"><div><span class="code">B1</span><strong>Dumbbell Bench Press</strong><span class="done"><b>✓ Done</b> · 1 set · top 24 kg</span></div><span class="plus">+</span></div>
+          <div class="ex dim"><div><span class="code">C1</span><strong>Pec Deck Fly</strong></div><span class="plus">+</span></div>
+          <div class="ex dim"><div><span class="code">D1</span><strong>Plate-Loaded T-Bar Row</strong><span class="sub">Chest-Supported</span></div><span class="plus">+</span></div>
+          <div class="ex dim"><div><span class="code">E1</span><strong>Cable Lat Pulldown</strong><span class="sub">Underhand Grip</span></div><span class="plus">+</span></div>
+        </div>
+        <div class="fade"></div>
+        <nav class="nav dock" aria-label="Primary navigation">
+          <button type="button" aria-label="Today" aria-current="page"><svg aria-hidden="true"><use href="#i-home"/></svg></button>
+          <button type="button" aria-label="Exercises"><svg aria-hidden="true"><use href="#i-search"/></svg></button>
+          <button type="button" aria-label="Progress"><svg aria-hidden="true"><use href="#i-chart"/></svg></button>
+          <button type="button" aria-label="You"><svg aria-hidden="true"><use href="#i-person"/></svg></button>
+        </nav>
+        <div class="home-ind"></div>
+      </div>
+      <div class="notes">
+        <p style="margin:0">Same 56 px wordmark header as Option 1. A 228 × 60 px rounded dock floats 26 px above the home indicator over the content (blur + soft shadow). Content scrolls under it and gets extra bottom padding.</p>
+        <h3>Pros</h3>
+        <ul>
+          <li>The most modern and "designed" look; matches the iOS 26 floating tab bar direction.</li>
+          <li>Content uses the full height; no full-width bar edge.</li>
+          <li>Pairs well with the rounded cards already in the app (22 px radius).</li>
+        </ul>
+        <h3>Cons</h3>
+        <ul>
+          <li>Covers the "+" buttons and set inputs at the bottom of the list; needs careful padding, which is risky for mid-set logging.</li>
+          <li>Blur over busy content can reduce legibility; needs a solid fallback.</li>
+          <li>No labels (same discoverability issue as Option 1) and a compact 50 px hit area.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <div class="wide">
+    <div class="panel">
+      <h3>Accessibility (applies to all options)</h3>
+      <ul>
+        <li>Tap targets: each tab is at least 50 × 48 px (Apple asks for 44 pt and Material for 48 dp). With 4 tabs, Option 1 gives about 88 × 50 px per tab.</li>
+        <li>The active state is never colour-only. It combines colour, a heavier stroke and a dot (Options 1 and 3), or colour and a bold label (Option 2). Keep <code>aria-current="page"</code>.</li>
+        <li>Icon-only tabs need <code>aria-label="Today"</code> and similar on each button, with <code>aria-hidden</code> on the SVG. Keep <code>&lt;nav aria-label="Primary navigation"&gt;</code>.</li>
+        <li>Contrast: active <code>#c99ca1</code> on <code>#1f1f20</code> is about 6.9:1, and inactive at 55% white is about 5:1. The existing <code>--brand</code> (#8d5e63) is only about 3:1, so do not use it for icons.</li>
+        <li>The wordmark is decorative branding. Keep one real heading per screen: visually-hidden <code>&lt;h1&gt;Today&lt;/h1&gt;</code>, or make the screen subtitle the h1.</li>
+        <li>Option 2: respect <code>prefers-reduced-motion</code> by switching states without an animation.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>What changed vs. today (PR #86)</h3>
+      <ul>
+        <li>Header: "Today" alone becomes the GYM STUDIO wordmark plus a "TODAY" subtitle, at the same 56 px in Options 1 and 3.</li>
+        <li>Bar: the active pill background and the solid dark panel are removed. Options 1 and 3 also drop the labels.</li>
+        <li>Icon glyphs stay the same (home, search, chart, person). Only the stroke weight and colour change.</li>
+        <li>Full rationale and sources: <code>2026-10-04-header-and-tabbar.md</code>.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

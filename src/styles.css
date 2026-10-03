@@ -258,6 +258,9 @@ button {
 
 .account-back,
 .forgot-password {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
   justify-self: start;
   padding: 0;
   border: 0;
@@ -278,6 +281,7 @@ button {
 
 .account-mode-tabs button {
   min-width: 0;
+  min-height: 44px;
   padding: 9px 5px;
   border: 0;
   border-radius: 9px;
@@ -306,7 +310,7 @@ button {
 .account-form input {
   width: 100%;
   min-width: 0;
-  min-height: 42px;
+  min-height: 44px;
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -335,6 +339,7 @@ button {
 
 .password-field button {
   flex: 0 0 auto;
+  min-height: 44px;
   margin-right: 8px;
   padding: 6px;
   border: 0;
@@ -347,6 +352,71 @@ button {
 .forgot-password {
   justify-self: end;
   margin: 0 0 2px;
+}
+
+.account-benefits {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted-strong);
+}
+
+.account-local-data {
+  margin: 0;
+  color: var(--muted);
+}
+
+.account-privacy {
+  color: var(--muted);
+}
+
+.account-privacy summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--muted-strong);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-privacy p {
+  margin: 0 0 4px;
+}
+
+.welcome-card {
+  display: grid;
+  gap: 10px;
+}
+
+.welcome-card h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.welcome-card ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.welcome-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.welcome-actions .primary-button,
+.welcome-actions .secondary-button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  text-align: center;
+  text-decoration: none;
 }
 
 .account-divider {
@@ -721,7 +791,8 @@ button {
   flex: 0 0 auto;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 5px 10px;
+  min-height: 40px;
+  padding: 5px 12px;
   background: var(--brand-soft);
   color: var(--text);
   font-size: 0.68rem;

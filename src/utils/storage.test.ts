@@ -5,9 +5,11 @@ import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
 import {
   addWorkoutEntry,
   fetchTrainingBlocks,
+  dismissWelcome,
   getExerciseDisplayName,
   getAskExerciseAiConsent,
   getSessionStorageValue,
+  hasDismissedWelcome,
   loadExercises,
   loadWorkoutHistory,
   mapTrainingBlockRows,
@@ -459,6 +461,21 @@ describe('training blocks', () => {
 })
 
 describe('demo storage namespace', () => {
+  it('isolates the welcome dismissal from demo mode', () => {
+    dismissWelcome()
+    expect(hasDismissedWelcome()).toBe(true)
+
+    setStorageNamespace('user-1')
+    expect(hasDismissedWelcome()).toBe(true)
+    setStorageNamespace(null)
+
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+    expect(hasDismissedWelcome()).toBe(false)
+    dismissWelcome()
+    expect(localStorage.getItem('gym-studio.demo.welcome-dismissed')).toBe('true')
+    expect(localStorage.getItem('gym-studio.welcome-dismissed')).toBe('true')
+  })
+
   it('isolates session values in demo mode', () => {
     setSessionStorageValue('gym-studio.block-card-expanded', 'true')
     sessionStorage.setItem('gym-studio.demo-mode', '1')

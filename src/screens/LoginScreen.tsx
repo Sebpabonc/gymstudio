@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
+import { hasGuestWorkoutData } from '../utils/storage'
 
 type LoginMode = 'sign-in' | 'sign-up'
 
@@ -21,7 +22,7 @@ function friendlyError(message: string) {
 
 export default function LoginScreen({ onClose }: { onClose: () => void }) {
   const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle } = useAuth()
-  const [mode, setMode] = useState<LoginMode>('sign-in')
+  const [mode, setMode] = useState<LoginMode>(() => hasGuestWorkoutData() ? 'sign-in' : 'sign-up')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -86,6 +87,19 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
     <section className="card account-screen">
       <button type="button" className="account-back" onClick={onClose}>← Back to Today</button>
       <h2>{mode === 'sign-in' ? 'Welcome back' : 'Create your account'}</h2>
+      <ul className="account-benefits">
+        <li>Back up your workouts.</li>
+        <li>Use GymStudio on any device.</li>
+        <li>Your synced data is private to your account.</li>
+      </ul>
+      <p className="account-local-data">
+        After sign-in, choose whether to move your local workouts to your account or keep them on this device.
+        They won't be discarded without your choice.
+      </p>
+      <details className="account-privacy">
+        <summary>Privacy note</summary>
+        <p>Workout history stays on this device while you're signed out. Synced history is only visible to your account.</p>
+      </details>
       <div className="account-mode-tabs" role="tablist" aria-label="Account action">
         <button
           type="button"
