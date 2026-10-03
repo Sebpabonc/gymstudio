@@ -37,6 +37,7 @@ type PlanExercise = {
   reps?: string
   repsPerSet?: string[]
   rest: string
+  restSeconds?: number
   focus: string
   goal: string
   tip: string
@@ -242,10 +243,12 @@ export default function WorkoutPlan({
   mode,
   lockMode = false,
   onSignIn,
+  onStartRest,
 }: {
   mode?: PlanMode
   lockMode?: boolean
   onSignIn: () => void
+  onStartRest: (durationSeconds: number) => void
 }) {
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
@@ -331,6 +334,7 @@ export default function WorkoutPlan({
         reps: exercise.reps.join(' · '),
         repsPerSet: exercise.reps,
         rest: `${exercise.restSeconds} s`,
+        restSeconds: exercise.restSeconds,
         focus: activeDay.focus ?? '',
         goal: '',
         tip: '',
@@ -768,6 +772,7 @@ export default function WorkoutPlan({
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
+    onStartRest(exercise.restSeconds ?? 90)
     setToast(`Logged · ${summarizeCompletedEntry(entryToSave)}`)
     setWeightTargets(consumeWeightTarget(entryToSave.exerciseId, entryToSave.sets))
     setExerciseCatalog(await loadExercises())
@@ -875,6 +880,9 @@ export default function WorkoutPlan({
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
     for (const entry of entriesToSave) setWeightTargets(consumeWeightTarget(entry.exerciseId, entry.sets))
+    if (entriesToSave.length === exercises.length) {
+      onStartRest(exercises[exercises.length - 1]?.restSeconds ?? 90)
+    }
 
     const exerciseKeys = exercises.map((exercise) => normalizeExerciseName(exercise.name))
     setPlannedDrafts((current) => Object.fromEntries(
@@ -1510,6 +1518,13 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       <div className="metric-pill">
                         <span>{text.rest}</span>
                         <strong>{exercise.rest}</strong>
+                        <button
+                          type="button"
+                          className="rest-start-button"
+                          onClick={() => onStartRest(exercise.restSeconds ?? 90)}
+                        >
+                          Start rest
+                        </button>
                       </div>
                     </div>
 

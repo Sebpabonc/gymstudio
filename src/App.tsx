@@ -1,5 +1,6 @@
-import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
+import RestTimer from './components/RestTimer'
 import AskExercise from './components/AskExercise'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
@@ -13,10 +14,13 @@ import {
   getExerciseDisplayName,
   hasDismissedWelcome,
   loadExercises,
+  loadRestTimerState,
   loadWorkoutHistory,
   refreshCatalogue,
   saveWorkoutHistory,
+  saveRestTimerState,
 } from './utils/storage'
+import { RestTimerState, startRestTimer } from './utils/restTimer'
 import {
   ALL_BODY_REGIONS,
   filterExercises,
@@ -101,6 +105,7 @@ export default function App() {
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<AppTab>('today')
+  const [restTimer, setRestTimer] = useState<RestTimerState | null>(() => loadRestTimerState())
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
   const headerSentinelRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLElement>(null)
@@ -109,6 +114,15 @@ export default function App() {
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const text = uiText
+
+  const updateRestTimer = useCallback((timer: RestTimerState | null) => {
+    saveRestTimerState(timer)
+    setRestTimer(timer)
+  }, [])
+  const startRest = useCallback(
+    (durationSeconds: number) => updateRestTimer(startRestTimer(durationSeconds)),
+    [updateRestTimer]
+  )
 
   useEffect(() => {
     const sentinel = headerSentinelRef.current
@@ -392,11 +406,11 @@ export default function App() {
                     </div>
                   </section>
                 )}
-                <WorkoutPlan mode="preset" lockMode onSignIn={() => setActiveTab('you')} />
+                <WorkoutPlan mode="preset" lockMode onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
               </>
             )
           ) : exerciseMode === 'custom' ? (
-            <WorkoutPlan mode="custom" lockMode onSignIn={() => setActiveTab('you')} />
+            <WorkoutPlan mode="custom" lockMode onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
           ) : (
             <>
               <section className="card search-panel">
@@ -685,6 +699,7 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <RestTimer timer={restTimer} hidden={dockHidden} onChange={updateRestTimer} />
       </div>
     </div>
   )
