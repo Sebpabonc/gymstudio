@@ -6,7 +6,6 @@ const exercises: Exercise[] = [
   {
     id: 'back-row',
     name: 'Barbell Row',
-    nameEs: 'Remo con barra',
     primaryMuscle: 'Back',
     primaryMuscles: ['Lats', 'Upper Back'],
     secondaryMuscle: 'Biceps',
@@ -17,7 +16,6 @@ const exercises: Exercise[] = [
   {
     id: 'chest-press',
     name: 'Bench Press',
-    nameEs: 'Press de banca',
     primaryMuscle: 'Chest',
     bodyRegion: 'Chest',
     equipment: 'barbell',
@@ -28,7 +26,7 @@ describe('exercise filters', () => {
   it('filters by body region and searches English names, muscle groups, and equipment', () => {
     expect(filterExercises(exercises, '', 'Back')).toEqual([exercises[0]])
     expect(filterExercises(exercises, 'row')).toEqual([exercises[0]])
-    expect(filterExercises(exercises, 'remo')).toEqual([])
+    expect(filterExercises(exercises, 'pull')).toEqual([])
     expect(filterExercises(exercises, 'forearms', 'Back')).toEqual([exercises[0]])
     expect(filterExercises(exercises, 'barbell', 'Chest')).toEqual([exercises[1]])
     expect(filterExercises(exercises, 'row', 'Chest')).toEqual([])

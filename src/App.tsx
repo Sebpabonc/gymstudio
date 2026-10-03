@@ -74,16 +74,14 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 }
 
 export default function App() {
-  const [exercises, setExercises] = useState<Exercise[]>(() => loadExercises())
-  const [history, setHistory] = useState<WorkoutEntry[]>(() => loadWorkoutHistory())
+  const [exercises, setExercises] = useState<Exercise[]>([])
+  const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [search, setSearch] = useState('')
   const [bodyRegion, setBodyRegion] = useState(ALL_BODY_REGIONS)
   const [selectedId, setSelectedId] = useState<string>('')
   const [draftSets, setDraftSets] = useState<WorkoutSet[]>([createSet(8, 0), createSet(8, 0)])
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
-  const [chatInput, setChatInput] = useState('')
-  const [chatReply, setChatReply] = useState('')
   const [activeTab, setActiveTab] = useState<ViewTab>('track')
   const catalogueRefreshStarted = useRef(false)
   const text = uiText
@@ -92,11 +90,35 @@ export default function App() {
     if (catalogueRefreshStarted.current) return
     catalogueRefreshStarted.current = true
 
-    void refreshCatalogue().then((catalogue) => {
-      if (!catalogue) return
-      setExercises(loadExercises())
-      setHistory(loadWorkoutHistory())
-    })
+    let cancelled = false
+    void (async () => {
+      const refresh = refreshCatalogue()
+      const cachedExercises = await loadExercises(false)
+      if (cancelled) return
+      if (cachedExercises.length) {
+        setExercises(cachedExercises)
+        setHistory(await loadWorkoutHistory())
+      }
+
+      const refreshedCatalogue = await refresh
+      if (!refreshedCatalogue?.length && !cachedExercises.length) {
+        const [offlineExercises, offlineHistory] = await Promise.all([loadExercises(), loadWorkoutHistory()])
+        if (cancelled) return
+        setExercises(offlineExercises)
+        setHistory(offlineHistory)
+        return
+      }
+      if (!refreshedCatalogue?.length || cancelled) return
+
+      const [updatedExercises, updatedHistory] = await Promise.all([loadExercises(false), loadWorkoutHistory()])
+      if (cancelled) return
+      setExercises(updatedExercises)
+      setHistory(updatedHistory)
+    })()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const selectedExercise = useMemo(
@@ -117,8 +139,6 @@ export default function App() {
     if (!selectedExercise) return
     setDraftSets([createSet(8, 0), createSet(8, 0)])
     setDraftNotes('')
-    setChatInput('')
-    setChatReply('')
   }, [selectedExercise])
 
   const availableBodyRegions = useMemo(() => getAvailableBodyRegions(exercises), [exercises])
@@ -202,98 +222,6 @@ export default function App() {
     setDraftNotes('')
   }
 
-  const askExerciseQuestion = (customQuestion?: string) => {
-    if (!selectedExercise) return
-
-    const question = (customQuestion ?? chatInput).trim()
-    if (!question) return
-
-    const normalizeText = (value: string) =>
-      value
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-
-    const cleanQuestion = normalizeText(question)
-    const exerciseKey = selectedExercise.id
-
-    const answers: Record<string, string[]> = {
-      'barbell-bench-press': [
-        'La espalda debe estar estable, con pies bien apoyados y omóplatos retraídos.',
-        'Siente el esfuerzo principalmente en el pecho y tríceps, no en la zona lumbar.',
-        'Baja controlando el peso y mantén los codos en un ángulo cómodo.',
-      ],
-      'incline-dumbbell-press': [
-        'Mantén la espalda pegada al banco y los hombros bajos.',
-        'Los codos deben ir ligeramente hacia atrás, no separados en línea recta.',
-        'En la bajada, controla el recorrido para no forzar la articulación.',
-      ],
-      'lat-pulldown': [
-        'Tira con el pecho hacia la barra y sin encorvar la zona baja.',
-        'El movimiento debe sentirse en la espalda y no solo en los brazos.',
-        'Llega con control y vuelve con el peso sin saltar.',
-      ],
-      'seated-cable-row': [
-        'Mantén la espalda recta y la mirada al frente.',
-        'Trae la manija hacia la parte baja del abdomen sin redondear la espalda.',
-        'No uses impulso del tronco ni levantes la pelvis.',
-      ],
-      'back-squat': [
-        'Los pies deben estar firmes y la mirada al frente.',
-        'La rodilla sigue la dirección del dedo del pie y la espalda no se redondea.',
-        'Empuja el piso y baja sin perder el centro de gravedad.',
-      ],
-      'romanian-deadlift': [
-        'La zona lumbar debe mantenerse neutra y la mirada al frente.',
-        'Los hombros deben bajar y permanecer relajados.',
-        'Haz la bajada con cadera y pecho en línea, sin hundir la espalda.',
-      ],
-      'dumbbell-shoulder-press': [
-        'Activa el core y evita balancearte con la cadera.',
-        'Los codos no deben caer hacia los lados ni la espalda arquearse.',
-        'La prensa debe sentirse en hombros y no en el cuello.',
-      ],
-      'leg-curl': [
-        'Mantén la pelvis estable y la espalda pegada a la máquina.',
-        'El esfuerzo debe sentirse en los isquiotibiales, no en la zona lumbar.',
-        'Controla la bajada para evitar empujar con la cadera.',
-      ],
-    }
-
-    const fallback = [
-      'Mantén la postura estable, el core activado y el movimiento controlado.',
-      'No fuerces la movilidad ni te balancees para levantar más peso.',
-      'Si aparece dolor o sensación inestable, reduce carga y corrige la posición.',
-    ]
-
-    const answer =
-      cleanQuestion.includes('donde') ||
-      cleanQuestion.includes('sentir') ||
-      cleanQuestion.includes('esfuerzo') ||
-      cleanQuestion.includes('duele') ||
-      cleanQuestion.includes('trabaja')
-        ? answers[exerciseKey]?.[0] ?? fallback[0]
-        : cleanQuestion.includes('postura') ||
-            cleanQuestion.includes('forma') ||
-            cleanQuestion.includes('correccion') ||
-            cleanQuestion.includes('correcta') ||
-            cleanQuestion.includes('como')
-          ? answers[exerciseKey]?.[1] ?? fallback[1]
-          : cleanQuestion.includes('evitar') ||
-              cleanQuestion.includes('error') ||
-              cleanQuestion.includes('no') ||
-              cleanQuestion.includes('cuidado') ||
-              cleanQuestion.includes('mal')
-            ? answers[exerciseKey]?.[2] ?? fallback[2]
-            : answers[exerciseKey]?.[0] ?? fallback[0]
-
-    setChatReply(answer)
-    setChatInput('')
-  }
-
   return (
     <div className="app-shell">
       <div className="phone-frame">
@@ -372,7 +300,7 @@ export default function App() {
                               setSearch('')
                             }}
                           >
-                            <span className="result-name">{getExerciseDisplayName(exercise, 'en')}</span>
+                            <span className="result-name">{getExerciseDisplayName(exercise)}</span>
                             <span className="result-meta">
                               {[exercise.bodyRegion, (exercise.primaryMuscles ?? [exercise.primaryMuscle]).join(', ')]
                                 .filter(Boolean)
@@ -394,7 +322,7 @@ export default function App() {
                     <div className="exercise-header">
                       <div>
                         <p className="field-label">{text.exercise}</p>
-                        <h2>{getExerciseDisplayName(selectedExercise, 'en')}</h2>
+                        <h2>{getExerciseDisplayName(selectedExercise)}</h2>
                       </div>
                     </div>
 
