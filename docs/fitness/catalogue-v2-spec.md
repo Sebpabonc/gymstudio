@@ -33,7 +33,7 @@ Each file is a JSON array of exercise objects (UTF-8, 2-space indent).
 |---|---|
 | `id` | Lowercase-dash, unique across all files. **Existing ids (v1) must be kept exactly** (history references them). New ids are derived from `name_en` (e.g. `cable-fly-high-to-low`). |
 | `name_en` | Format: `<Equipment> <Exercise> (<Variant>, <Variant>)`, Title Case. Equipment word first except bodyweight/standard names (`Pull-Up (Neutral Grip)`, `Push-Up`, `Dip`). Variants in parentheses, ordered: angle/position → grip → stance/foot → unilateral. No set techniques, loads or degrees in names (`Drop Sets`, `30°`, `Weighted` are plan modifiers), except standard named angles (`45° Back Extension` → `Back Extension (45°)`). |
-| `name_es` | Same structure in Spanish, sentence case: `Press de banca con mancuernas (inclinado, agarre neutro)`. |
+| `name_es` | Optional Spanish translation kept for future localisation (same structure, sentence case). The app is English-only. |
 | `body_region` | One of: `Chest`, `Back`, `Shoulders`, `Arms`, `Legs`, `Glutes`, `Core`, `Full Body`. |
 | `primary_muscles` | 1–2 muscles mostly targeted. |
 | `secondary_muscles` | 0–4 supporting muscles; never repeat a primary. |
@@ -42,7 +42,7 @@ Each file is a JSON array of exercise objects (UTF-8, 2-space indent).
 | `movement_pattern` | One of: `push horizontal`, `push vertical`, `pull horizontal`, `pull vertical`, `squat`, `hinge`, `lunge`, `isolation`, `core`, `carry`. |
 | `mechanic` | `compound` or `isolation`. |
 | `laterality` | `bilateral` or `unilateral`. |
-| `posture_tips` | **Exactly 5**, Spanish, one sentence each, ≤ 140 characters, imperative ("Mantén…", "Apoya…"). Order: 1) posición inicial, 2) postura/alineación durante el movimiento, 3) ejecución (recorrido y control), 4) error común a evitar, 5) seguridad. No medical advice. |
+| `posture_tips` | **Exactly 5**, **English**, one sentence each, ≤ 140 characters, imperative ("Keep…", "Plant…"). Order: 1) starting position, 2) posture/alignment during the movement, 3) execution (range and control), 4) common mistake to avoid, 5) safety. No medical advice. |
 | `aliases` | Old ids merged into this exercise (carry over v1 aliases). |
 | `origin` | `existing` (v1 id kept) or `new`. |
 

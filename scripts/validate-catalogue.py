@@ -31,6 +31,7 @@ REQUIRED = [
     'movement_pattern', 'mechanic', 'laterality', 'posture_tips', 'aliases', 'origin',
 ]
 ID_RE = re.compile(r'^[a-z0-9]+(-[a-z0-9]+)*$')
+SPANISH_CHARS = re.compile(r'[áéíóúñ¿¡ÁÉÍÓÚÑ]')
 FORBIDDEN_IN_NAMES = re.compile(r'drop sets?|\blb\b|weighted|\d+\s*°(?!\))', re.I)
 
 
@@ -88,6 +89,8 @@ def main():
         for tip in tips:
             if len(tip) > 140:
                 problems.append(f'{where}: tip over 140 chars')
+            if SPANISH_CHARS.search(tip):
+                problems.append(f'{where}: tip is not in English: {tip[:50]!r}')
         if len(set(tips)) != len(tips):
             problems.append(f'{where}: repeated tip')
         for name_key in ('name_en', 'name_es'):

@@ -8,7 +8,7 @@ Single source of truth for every AI agent and human working in this repository
 
 GymStudio is a mobile-first gym app: look up exercises, follow a workout plan,
 log sets (weight × reps) and see progress. Web app today, iOS app via Capacitor.
-The UI is bilingual (Spanish/English display names).
+The app, its content and all repo docs are **English-only**.
 
 ## Roles and authority
 
