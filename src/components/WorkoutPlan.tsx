@@ -9,10 +9,12 @@ import {
   loadWorkoutHistory,
   normalizeExerciseName,
   saveWorkoutHistory,
+  storageKey,
   setActiveBlockId,
   upsertExerciseRecord,
 } from '../utils/storage'
 import { blockDateRange, blockWeek, defaultActiveBlock } from '../utils/trainingBlocks'
+import { isDemoMode } from '../utils/demoMode'
 
 type PlanExercise = {
   name: string
@@ -53,7 +55,7 @@ const defaultCustomExercise: PlanExercise = {
 }
 
 function loadCustomPlan(): PlanExercise[] {
-  const raw = localStorage.getItem(CUSTOM_PLAN_KEY)
+  const raw = localStorage.getItem(storageKey(CUSTOM_PLAN_KEY))
   if (!raw) return []
 
   try {
@@ -77,7 +79,7 @@ function loadCustomPlan(): PlanExercise[] {
 }
 
 function saveCustomPlan(exercises: PlanExercise[]) {
-  localStorage.setItem(CUSTOM_PLAN_KEY, JSON.stringify(exercises))
+  localStorage.setItem(storageKey(CUSTOM_PLAN_KEY), JSON.stringify(exercises))
 }
 
 function createTipIllustration(muscle: string, variant: number) {
@@ -341,7 +343,14 @@ export default function WorkoutPlan({
       setHistory(entries)
       setTrainingBlocks(blocks)
       const savedBlock = blocks.find((block) => block.id === getActiveBlockId())
-      const nextBlock = savedBlock ?? defaultActiveBlock(blocks)
+      const latestHistoryDate = entries.reduce(
+        (latest, entry) => (entry.date > latest ? entry.date : latest),
+        ''
+      )
+      const historyBlock = isDemoMode() && latestHistoryDate
+        ? blocks.find((block) => blockWeek(block, latestHistoryDate) !== null)
+        : undefined
+      const nextBlock = savedBlock ?? historyBlock ?? defaultActiveBlock(blocks)
       setSelectedBlockId(nextBlock?.id ?? '')
       setSelectedDay((current) =>
         nextBlock?.days.some((day) => day.key === current) ? current : nextBlock?.days[0]?.key ?? ''

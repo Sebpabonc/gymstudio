@@ -10,6 +10,7 @@ import {
   loadWorkoutHistory,
   mapTrainingBlockRows,
   normalizeExerciseName,
+  storageKey,
   setActiveBlockId,
   getActiveBlockId,
   upsertExerciseRecord,
@@ -58,6 +59,7 @@ const entry = (id: string, date: string): WorkoutEntry => ({
 
 beforeEach(() => {
   vi.stubGlobal('localStorage', createMemoryStorage())
+  vi.stubGlobal('sessionStorage', createMemoryStorage())
   supabaseMock.response.data = null
   supabaseMock.response.error = null
   supabaseMock.clientState.current = supabaseMock.client
@@ -401,6 +403,27 @@ describe('training blocks', () => {
   it('persists the selected block id', () => {
     setActiveBlockId('block-6')
     expect(getActiveBlockId()).toBe('block-6')
+  })
+})
+
+describe('demo storage namespace', () => {
+  it('isolates demo history from the saved real history', async () => {
+    const realHistory = [{
+      id: 'real-entry',
+      exerciseId: 'barbell-bench-press',
+      date: '2026-09-01',
+      sets: [{ id: 'real-set', reps: 8, weight: 60 }],
+    }]
+    localStorage.setItem('gym-studio.history', JSON.stringify(realHistory))
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+
+    expect(storageKey('gym-studio.history')).toBe('gym-studio.demo.history')
+    await addWorkoutEntry(entry('demo-entry', '2026-09-02'))
+    expect(localStorage.getItem('gym-studio.history')).toBe(JSON.stringify(realHistory))
+    expect(JSON.parse(localStorage.getItem('gym-studio.demo.history')!)).toHaveLength(1)
+
+    sessionStorage.removeItem('gym-studio.demo-mode')
+    expect(await loadWorkoutHistory()).toEqual(realHistory)
   })
 })
 

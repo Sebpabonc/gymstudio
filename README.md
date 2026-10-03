@@ -19,6 +19,8 @@ npm run build    # typecheck + production build into dist/
 
 Without `.env.local` the app still runs, using the bundled exercise list.
 
+Open `https://sebpabonc.github.io/gymstudio/?demo=1` to preview six months of isolated demo workout history.
+
 To try it on a phone: `npm run dev -- --host` and open the Mac's IP from the phone (same Wi-Fi).
 
 ## iOS
