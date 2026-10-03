@@ -113,17 +113,25 @@ export async function syncWorkoutHistory(userId: string) {
   }
 
   lastPulledAt = getWorkoutHistoryLastPulledAt(userId)
-  let query = client
-    .from('workout_entries')
-    .select('id, exercise_id, date, sets, notes, block_id, day_key, updated_at, deleted_at')
-  if (lastPulledAt) query = query.gt('updated_at', lastPulledAt)
-  const { data, error } = await query
-    .eq('user_id', userId)
-    .order('updated_at', { ascending: true })
+  const remoteEntries: RemoteWorkoutEntry[] = []
+  for (let from = 0; ; from += 1_000) {
+    let query = client
+      .from('workout_entries')
+      .select('id, exercise_id, date, sets, notes, block_id, day_key, updated_at, deleted_at')
+    if (lastPulledAt) query = query.gte('updated_at', lastPulledAt)
+    const { data, error } = await query
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, from + 999)
 
-  if (error) throw error
+    if (error) throw error
 
-  const remoteEntries = (data ?? []) as RemoteWorkoutEntry[]
+    const page = (data ?? []) as RemoteWorkoutEntry[]
+    remoteEntries.push(...page)
+    if (page.length < 1_000) break
+  }
+
   const currentEntries = await loadWorkoutHistoryForSync()
   const merged = mergeWorkoutEntries(currentEntries, remoteEntries)
   saveMergedWorkoutHistory(merged)

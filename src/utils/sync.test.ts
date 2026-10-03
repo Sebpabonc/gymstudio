@@ -128,11 +128,13 @@ describe('syncWorkoutHistory', () => {
     const remoteRows: RemoteWorkoutEntry[] = [remoteEntry(serverUpdatedAt)]
     const query = {
       eq: vi.fn(),
-      gt: vi.fn(),
-      order: vi.fn(async () => ({ data: remoteRows, error: null })),
+      gte: vi.fn(),
+      order: vi.fn(),
+      range: vi.fn(async () => ({ data: remoteRows, error: null })),
     }
     query.eq.mockReturnValue(query)
-    query.gt.mockReturnValue(query)
+    query.gte.mockReturnValue(query)
+    query.order.mockReturnValue(query)
     const upsertSelect = vi.fn(async () => ({
       data: [{ id: localEntry.id, updated_at: serverUpdatedAt }],
       error: null,
@@ -164,5 +166,69 @@ describe('syncWorkoutHistory', () => {
       entries: { [localEntry.id]: { updatedAt: serverUpdatedAt, dirty: false } },
       lastPulledAt: { 'user-1': serverUpdatedAt },
     })
+  })
+
+  it('pulls all pages in batches of 1000 before advancing the cursor', async () => {
+    const cursor = '2026-10-03T00:00:00.000Z'
+    const rows = Array.from({ length: 2_001 }, (_, index) =>
+      remoteEntry('2026-10-03T00:00:01.000Z', { id: `entry-${index}` })
+    )
+    const ranges: Array<[number, number]> = []
+    const query = {
+      eq: vi.fn(),
+      gte: vi.fn(),
+      order: vi.fn(),
+      range: vi.fn(async (from: number, to: number) => {
+        ranges.push([from, to])
+        return { data: rows.slice(from, to + 1), error: null }
+      }),
+    }
+    query.eq.mockReturnValue(query)
+    query.gte.mockReturnValue(query)
+    query.order.mockReturnValue(query)
+    supabaseMock.client = { from: vi.fn(() => ({ select: vi.fn(() => query) })) }
+
+    const { setWorkoutHistoryLastPulledAt, loadWorkoutHistory } = await import('./storage')
+    setWorkoutHistoryLastPulledAt('user-1', cursor)
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+
+    expect(ranges).toEqual([[0, 999], [1_000, 1_999], [2_000, 2_999]])
+    expect(query.order.mock.calls).toEqual([
+      ['updated_at', { ascending: true }],
+      ['id', { ascending: true }],
+      ['updated_at', { ascending: true }],
+      ['id', { ascending: true }],
+      ['updated_at', { ascending: true }],
+      ['id', { ascending: true }],
+    ])
+    expect(await loadWorkoutHistory()).toHaveLength(2_001)
+    expect(JSON.parse(localStorage.getItem('gym-studio.sync-metadata')!).lastPulledAt['user-1'])
+      .toBe('2026-10-03T00:00:01.000Z')
+  })
+
+  it('pulls rows exactly at the last-pulled timestamp boundary', async () => {
+    const cursor = '2026-10-03T00:00:00.000Z'
+    const boundaryRow = remoteEntry(cursor, { id: 'boundary-entry' })
+    const query = {
+      eq: vi.fn(),
+      gte: vi.fn(),
+      order: vi.fn(),
+      range: vi.fn(async () => ({ data: [boundaryRow], error: null })),
+    }
+    query.eq.mockReturnValue(query)
+    query.gte.mockReturnValue(query)
+    query.order.mockReturnValue(query)
+    supabaseMock.client = { from: vi.fn(() => ({ select: vi.fn(() => query) })) }
+
+    const { setWorkoutHistoryLastPulledAt, loadWorkoutHistory } = await import('./storage')
+    setWorkoutHistoryLastPulledAt('user-1', cursor)
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+
+    expect(query.gte).toHaveBeenCalledWith('updated_at', cursor)
+    expect(await loadWorkoutHistory()).toEqual([
+      expect.objectContaining({ id: 'boundary-entry' }),
+    ])
   })
 })
