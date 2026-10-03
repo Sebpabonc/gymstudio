@@ -40,7 +40,6 @@ import {
   captureUndoSnapshots,
   createSessionSummary,
   getPersonalRecordBadges,
-  getPersonalRecords,
   SessionStart,
   sessionDurationMs,
   SessionSummary,
@@ -384,9 +383,13 @@ export default function WorkoutPlan({
   const nextUpcomingBlock = trainingBlocks
     .filter((block) => trainingBlockDateStatus(block, today) === 'Upcoming')
     .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.number - b.number)[0]
-  const personalRecordSessions = useMemo(
-    () => getPersonalRecords(history, trainingBlocks),
-    [history, trainingBlocks]
+  const personalRecordBadgesByEntryId = useMemo(
+    () => new Map(
+      history
+        .filter((entry) => entry.date === today)
+        .map((entry) => [entry.id, getPersonalRecordBadges(entry, history, trainingBlocks)])
+    ),
+    [history, today, trainingBlocks]
   )
 
   const completionScope = (blockId?: string, dayKey?: string) => ({ date: localIsoDate(), blockId, dayKey })
@@ -767,13 +770,12 @@ export default function WorkoutPlan({
     nextHistory: WorkoutEntry[],
     scope: typeof activeCompletionScope
   ) => {
-    const records = getPersonalRecords(nextHistory, trainingBlocks)
     const exerciseNames = entries.map(
       (entry) => exerciseCatalog.find((exercise) => exercise.id === entry.exerciseId)?.name ?? entry.exerciseId
     )
     const setCount = entries.reduce((total, entry) => total + entry.sets.length, 0)
     const recordMessages = entries.flatMap((entry) =>
-      getPersonalRecordBadges(entry, records).map((badge) => {
+      getPersonalRecordBadges(entry, nextHistory, trainingBlocks).map((badge) => {
         if (badge === 'weight') return `New weight PR ${workoutMaxWeight(entry.sets)} kg`
         if (badge === 'reps') return 'New rep PR'
         return 'New e1RM PR'
@@ -821,7 +823,8 @@ export default function WorkoutPlan({
       ...createSessionSummary(
         entries,
         sessionDurationMs(sessionStartedAt.current, scopeKey, loggedAt),
-        getPersonalRecords(nextHistory, trainingBlocks)
+        nextHistory,
+        trainingBlocks
       ),
       nextSession: nextDay ? `Day ${nextDay.position} · ${nextDay.name}` : undefined,
     })
@@ -1569,7 +1572,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const completedEntry = findExerciseCompletion(exercise, history)
             const recordBadges =
               completedEntry?.date === today
-                ? getPersonalRecordBadges(completedEntry, personalRecordSessions)
+                ? personalRecordBadgesByEntryId.get(completedEntry.id) ?? []
                 : []
             const cardClasses = [
               'planned-exercise-card',

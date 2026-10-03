@@ -1,5 +1,5 @@
 import { TrainingBlock, WorkoutEntry } from '../types'
-import { PersonalRecordSession, PersonalRecordType } from '../progress/types'
+import { PersonalRecordType } from '../progress/types'
 import { personalRecords } from '../progress/personalRecords'
 import { CompletionScope, findCompletedEntry } from './completedExercises'
 import { workoutVolume } from './workoutSets'
@@ -59,21 +59,29 @@ export function undoLoggedEntries(history: WorkoutEntry[], snapshots: UndoSnapsh
 
 export function getPersonalRecordBadges(
   entry: WorkoutEntry,
-  records: PersonalRecordSession[]
+  history: WorkoutEntry[],
+  blocks: TrainingBlock[]
 ): PersonalRecordType[] {
+  const scopedHistory = history.filter(
+    (item) =>
+      item.date !== entry.date ||
+      (item.blockId === entry.blockId && item.dayKey === entry.dayKey)
+  )
+  const records = personalRecords(scopedHistory, blocks)
   return records.find((record) => record.exerciseId === entry.exerciseId && record.date === entry.date)?.badges ?? []
 }
 
 export function createSessionSummary(
   entries: WorkoutEntry[],
   durationMs: number,
-  records: PersonalRecordSession[]
+  history: WorkoutEntry[],
+  blocks: TrainingBlock[]
 ): SessionSummary {
   const durationMinutes = Math.max(1, Math.round(durationMs / 60_000))
   const badgesByExercise = new Map<string, Set<PersonalRecordType>>()
 
   for (const entry of entries) {
-    const badges = getPersonalRecordBadges(entry, records)
+    const badges = getPersonalRecordBadges(entry, history, blocks)
     if (badges.length === 0) continue
     const exerciseBadges = badgesByExercise.get(entry.exerciseId) ?? new Set<PersonalRecordType>()
     badges.forEach((badge) => exerciseBadges.add(badge))

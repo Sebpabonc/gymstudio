@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import { WorkoutEntry } from '../types'
-import { PersonalRecordSession } from '../progress/types'
 import {
   captureUndoSnapshots,
   createSessionSummary,
@@ -58,19 +57,50 @@ describe('logging feedback', () => {
     const logged = entry({
       sets: [
         { id: 'set-1', reps: 10, weight: 20, drop: { reps: 5, weight: 10 } },
-        { id: 'set-2', reps: 8, weight: 25 },
+        { id: 'set-2', reps: 1, weight: 25 },
       ],
     })
-    const records: PersonalRecordSession[] = [
-      { exerciseId: 'press', date: logged.date, badges: ['weight'], likelyTypoSetIds: [] },
+    const history = [
+      ...['2026-09-01', '2026-09-08', '2026-09-15'].map((date, index) =>
+        entry({
+          id: `prior-${index}`,
+          date,
+          sets: [{ id: `prior-set-${index}`, reps: 12, weight: 20 }],
+        })
+      ),
+      logged,
     ]
 
-    expect(createSessionSummary([logged], 90_000, records)).toEqual({
+    expect(createSessionSummary([logged], 90_000, history, [])).toEqual({
       duration: '2 mins',
       sets: 2,
-      volume: 450,
-      prs: [{ exerciseId: 'press', badges: ['weight'] }],
+      volume: 275,
+      prs: [{ exerciseId: 'press', badges: ['weight', 'reps'] }],
     })
-    expect(getPersonalRecordBadges(logged, records)).toEqual(['weight'])
+  })
+
+  it('does not carry a same-date PR across different workout days', () => {
+    const previousSessions = ['2026-09-01', '2026-09-08', '2026-09-15'].map((date, index) =>
+      entry({
+        id: `previous-${index}`,
+        date,
+        dayKey: 'day-1',
+        sets: [{ id: `previous-set-${index}`, reps: 8, weight: 20 }],
+      })
+    )
+    const currentDayEntry = entry({
+      id: 'day-1-entry',
+      dayKey: 'day-1',
+      sets: [{ id: 'day-1-set', reps: 8, weight: 20 }],
+    })
+    const otherDayEntry = entry({
+      id: 'day-2-entry',
+      dayKey: 'day-2',
+      sets: [{ id: 'day-2-set', reps: 8, weight: 30 }],
+    })
+    const history = [...previousSessions, currentDayEntry, otherDayEntry]
+
+    expect(getPersonalRecordBadges(currentDayEntry, history, [])).toEqual([])
+    expect(getPersonalRecordBadges(otherDayEntry, history, [])).toContain('weight')
   })
 })
