@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
+import { localIsoDate } from './lib/dates'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
 import {
   getExerciseDisplayName,
@@ -203,7 +204,7 @@ export default function App() {
     const nextEntry: WorkoutEntry = {
       id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
       exerciseId: selectedExercise.id,
-      date: new Date().toISOString().slice(0, 10),
+      date: localIsoDate(),
       sets: validSets,
       notes: draftNotes.trim() || undefined,
     }
