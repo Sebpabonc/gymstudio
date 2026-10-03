@@ -3051,7 +3051,7 @@
     "start_date": "2026-10-05",
     "weeks": 6,
     "origin": "pt",
-    "summary": "A 6-week volume block: flat sets with the same reps and weight on every set, plus supersets, to build muscle with lots of quality work after the heavy, intense block 5.",
+    "summary": "A 6-week volume block: flat sets with the same reps and weight on every set, plus supersets. Chest is pressed at 30 degrees and flat, with high-to-low cable flies, to grow every part of the chest.",
     "insights": [
       {
         "title": "Goal",
@@ -3059,7 +3059,7 @@
       },
       {
         "title": "How it works",
-        "body": "Every set of an exercise uses the same reps and weight, for example 4 x 12 on the incline dumbbell press, the Smith machine shoulder press and the plate-loaded pendulum squat. After the main lift, two exercises for the same muscle are done as a superset: the first, about 10 seconds of rest, then the second, then 60-90 seconds of rest. New choices include the chest-supported T-bar row, Bulgarian split squats, reverse pec deck and cable crunches."
+        "body": "Every set of an exercise uses the same reps and weight, for example 4 x 12 on the 30-degree incline dumbbell press, the Smith machine shoulder press and the plate-loaded pendulum squat. After the main lift, two exercises are done as a superset: the first, about 10 seconds of rest, then the second, then 60-90 seconds of rest. On chest day that is a flat dumbbell press with high-to-low cable flies. New choices include the chest-supported T-bar row, Bulgarian split squats, reverse pec deck and cable crunches."
       },
       {
         "title": "A days vs B days",
@@ -3075,7 +3075,7 @@
       },
       {
         "title": "Key tips",
-        "body": "Pick a starting weight you can hold for all four sets; it is fine if week 1 feels a little easy. Keep the 10-second gap inside supersets short. Learn the new exercises with moderate weights first before pushing them hard."
+        "body": "Pick a starting weight you can hold for all four sets; it is fine if week 1 feels a little easy. Keep the 10-second gap inside supersets short: on chest day, set up a flat bench next to the cable station before you start. Learn the new exercises with moderate weights first before pushing them hard."
       }
     ],
     "days": [
@@ -3101,7 +3101,7 @@
           },
           {
             "code": "B1",
-            "exercise_id": "machine-chest-press-incline",
+            "exercise_id": "dumbbell-bench-press",
             "sets": 3,
             "reps": [
               "10",
@@ -3110,12 +3110,12 @@
             ],
             "rest_seconds": 10,
             "technique": "superset",
-            "angle_degrees": null,
+            "angle_degrees": 0,
             "notes": ""
           },
           {
             "code": "B2",
-            "exercise_id": "cable-fly-low-to-high",
+            "exercise_id": "high-cable-fly",
             "sets": 3,
             "reps": [
               "12",
@@ -3426,7 +3426,7 @@
           },
           {
             "code": "B1",
-            "exercise_id": "machine-chest-press-incline",
+            "exercise_id": "dumbbell-bench-press",
             "sets": 3,
             "reps": [
               "12",
@@ -3435,12 +3435,12 @@
             ],
             "rest_seconds": 10,
             "technique": "superset",
-            "angle_degrees": null,
+            "angle_degrees": 0,
             "notes": ""
           },
           {
             "code": "B2",
-            "exercise_id": "cable-fly-low-to-high",
+            "exercise_id": "high-cable-fly",
             "sets": 3,
             "reps": [
               "15",
