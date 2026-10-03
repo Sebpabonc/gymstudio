@@ -703,6 +703,37 @@ button {
   margin-bottom: 8px;
 }
 
+.exercise-ai-controls,
+.planned-posture-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.planned-posture-actions > .posture-tips-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.ask-ai-button {
+  appearance: none;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: var(--brand-soft);
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ask-ai-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .tips-box.collapsed .tips-header {
   margin-bottom: 0;
 }
@@ -2486,6 +2517,116 @@ button {
 
 .guest-data-actions .secondary-button {
   width: 100%;
+}
+
+.ask-exercise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.ask-exercise-sheet {
+  width: min(100%, 560px);
+  max-height: min(90vh, 800px);
+  overflow-y: auto;
+  display: grid;
+  gap: 16px;
+  padding: 20px 16px max(20px, env(safe-area-inset-bottom));
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+  background: var(--bg-soft);
+  box-shadow: var(--shadow);
+}
+
+.ask-exercise-sheet-header,
+.ask-exercise-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ask-exercise-sheet-header h2 {
+  margin: 4px 0 0;
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+}
+
+.ask-exercise-sheet-header .field-label,
+.ask-exercise-form .field-label {
+  margin: 0;
+}
+
+.ask-exercise-consent,
+.ask-exercise-form {
+  display: grid;
+  gap: 10px;
+}
+
+.ask-exercise-consent p,
+.ask-exercise-answer p,
+.ask-exercise-error p {
+  margin: 0;
+}
+
+.ask-exercise-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.ask-exercise-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ask-exercise-suggestion {
+  cursor: pointer;
+  text-align: left;
+}
+
+.ask-exercise-form textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.ask-exercise-form-footer span,
+.ask-exercise-answer small,
+.ask-exercise-disclaimer {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.ask-exercise-form-footer .primary-button {
+  width: auto;
+}
+
+.ask-exercise-answer,
+.ask-exercise-error {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ask-exercise-error {
+  color: var(--muted-strong);
+}
+
+.ask-exercise-disclaimer {
+  margin: 0;
 }
 
 .planned-exercise-card.completed {
