@@ -300,6 +300,10 @@ describe('training blocks', () => {
       weeks: 6,
       origin: 'coach',
       summary: 'Second summary',
+      insights: [
+        { title: 'Goal', body: 'Build muscle.' },
+        { title: 'How it works', body: 'Use flat sets.' },
+      ],
       days: [
         {
           key: 'arms-a',
@@ -354,6 +358,11 @@ describe('training blocks', () => {
     const blocks = mapTrainingBlockRows(trainingBlockRows)
 
     expect(blocks.map((block) => block.number)).toEqual([1, 2])
+    expect(blocks[0].insights).toEqual([])
+    expect(blocks[1].insights).toEqual([
+      { title: 'Goal', body: 'Build muscle.' },
+      { title: 'How it works', body: 'Use flat sets.' },
+    ])
     expect(blocks[1].startDate).toBe('2026-03-30')
     expect(blocks[1].origin).toBe('coach')
     expect(blocks[1].days.map((day) => day.key)).toEqual(['chest-back-a', 'arms-a'])
@@ -375,7 +384,7 @@ describe('training blocks', () => {
 
     expect(supabaseMock.from).toHaveBeenCalledWith('training_blocks')
     expect(supabaseMock.select).toHaveBeenCalledWith(
-      'id, number, name, method, start_date, weeks, origin, summary, days:training_block_days(key, position, name, focus, exercises:training_block_exercises(code, position, exercise_id, sets, reps, rest_seconds, technique, angle_degrees, notes))'
+      'id, number, name, method, start_date, weeks, origin, summary, insights, days:training_block_days(key, position, name, focus, exercises:training_block_exercises(code, position, exercise_id, sets, reps, rest_seconds, technique, angle_degrees, notes))'
     )
     expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
     expect(supabaseMock.order).toHaveBeenCalledWith('number')
@@ -398,6 +407,14 @@ describe('training blocks', () => {
       name: 'Hypertrophy Flat Pyramid II',
       startDate: '2026-10-05',
     })
+    expect(bundledBlocks[5].insights.map(({ title }) => title)).toEqual([
+      'Goal',
+      'How it works',
+      'A days vs B days',
+      'How to progress',
+      'What to expect',
+      'Key tips',
+    ])
   })
 
   it('persists the selected block id', () => {

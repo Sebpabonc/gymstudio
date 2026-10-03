@@ -247,6 +247,7 @@ export default function WorkoutPlan({
   const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
   const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
   const [blockSelectorOpen, setBlockSelectorOpen] = useState(false)
+  const [blockInsightsOpen, setBlockInsightsOpen] = useState(false)
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
@@ -890,6 +891,24 @@ export default function WorkoutPlan({
           <p>{activeBlock.summary}</p>
           <button
             type="button"
+            className="about-block-toggle"
+            onClick={() => setBlockInsightsOpen((current) => !current)}
+            aria-expanded={blockInsightsOpen}
+            aria-controls="training-block-insights"
+          >
+            About this block
+            <span className="block-insights-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
+            {activeBlock.insights.map((insight) => (
+              <section key={insight.title}>
+                <h5>{insight.title}</h5>
+                <p>{insight.body}</p>
+              </section>
+            ))}
+          </div>
+          <button
+            type="button"
             className="secondary-button block-change-button"
             onClick={() => setBlockSelectorOpen((current) => !current)}
             aria-expanded={blockSelectorOpen}
@@ -914,6 +933,7 @@ export default function WorkoutPlan({
                 >
                   <span>
                     <strong>{`Block ${block.number} · ${block.name}`}</strong>
+                    <small className="training-block-option-summary">{block.summary}</small>
                     <small>{`${blockDateRange(block)} · ${block.method.replace(/-/g, ' ')}`}</small>
                   </span>
                   {block.id === activeBlock.id && <small>{text.currentBlock}</small>}

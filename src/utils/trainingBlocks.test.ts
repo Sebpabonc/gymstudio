@@ -12,6 +12,7 @@ const blocks: TrainingBlock[] = [
     weeks: 6,
     origin: 'coach',
     summary: '',
+    insights: [],
     days: [],
   },
   {
@@ -23,6 +24,7 @@ const blocks: TrainingBlock[] = [
     weeks: 6,
     origin: 'pt',
     summary: '',
+    insights: [],
     days: [],
   },
 ]
