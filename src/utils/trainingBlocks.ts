@@ -35,6 +35,11 @@ export function defaultActiveBlock(blocks: TrainingBlock[], today: string | Date
   const started = sorted.filter((block) => dateValue(block.startDate) <= todayValue)
   return (
     sorted.find((block) => dateValue(block.startDate) <= todayValue && todayValue < blockEnd(block)) ??
+    // Between blocks: show the next one if it starts within a week, so the user can prepare.
+    sorted.find((block) => {
+      const start = dateValue(block.startDate)
+      return start > todayValue && start - todayValue <= 7 * DAY_MS
+    }) ??
     started[started.length - 1] ??
     sorted[0]
   )

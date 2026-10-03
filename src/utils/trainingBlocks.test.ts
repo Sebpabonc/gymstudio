@@ -37,8 +37,8 @@ const blocks: TrainingBlock[] = [
 ]
 
 describe('training block dates', () => {
-  it('selects the most recent block during a gap before the next one', () => {
-    expect(defaultActiveBlock(blocks, '2026-10-03')?.id).toBe('block-5')
+  it('selects the next block during a gap when it starts within a week', () => {
+    expect(defaultActiveBlock(blocks, '2026-10-03')?.id).toBe('block-6')
   })
 
   it('selects a block containing today and switches at the six-week boundary', () => {
@@ -146,5 +146,21 @@ describe('bench angle labels', () => {
   it('omits a label when the angle is not set', () => {
     expect(formatBenchAngle(null)).toBeNull()
     expect(formatBenchAngle(undefined)).toBeNull()
+  })
+})
+
+describe('defaultActiveBlock between blocks', () => {
+  const day = { key: 'd1', position: 1, focus: 'Push', exercises: [] }
+  const block = (id: string, startDate: string) =>
+    ({ id, startDate, weeks: 1, days: [day] }) as unknown as import('../types').TrainingBlock
+
+  it('prefers the block starting within a week over the one that just ended', () => {
+    const blocks = [block('b5', '2026-09-21'), block('b6', '2026-10-05')]
+    expect(defaultActiveBlock(blocks, '2026-10-04')?.id).toBe('b6')
+  })
+
+  it('keeps the last started block when the next one is more than a week away', () => {
+    const blocks = [block('b5', '2026-09-01'), block('b6', '2026-10-20')]
+    expect(defaultActiveBlock(blocks, '2026-10-04')?.id).toBe('b5')
   })
 })
