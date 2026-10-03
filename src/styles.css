@@ -2569,6 +2569,7 @@ button {
 }
 
 .ask-exercise-consent p,
+.ask-exercise-consent-message,
 .ask-exercise-answer p,
 .ask-exercise-error p {
   margin: 0;

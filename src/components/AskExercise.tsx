@@ -115,7 +115,7 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
               </button>
             </div>
 
-            {consent !== 'enabled' ? (
+            {consent === null ? (
               <div className="ask-exercise-consent">
                 <p>
                   Your question, this exercise and your last 5 sessions of it are sent to OpenAI to answer. Nothing else.
@@ -129,6 +129,8 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
                   </button>
                 </div>
               </div>
+            ) : consent === 'declined' ? (
+              <p className="ask-exercise-consent-message">AI is off for this account because you chose not to turn it on.</p>
             ) : (
               <>
                 <div className="ask-exercise-suggestions" aria-label="Suggested questions">
