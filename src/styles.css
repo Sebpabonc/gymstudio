@@ -702,6 +702,31 @@ button {
   line-height: 1.5;
 }
 
+.squeeze-cue {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 10px;
+  border: 1px solid rgba(242, 181, 72, 0.28);
+  border-radius: 12px;
+  background: rgba(242, 181, 72, 0.08);
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.squeeze-cue-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .tips-box {
   margin-top: 14px;
   padding: 12px 10px 10px;

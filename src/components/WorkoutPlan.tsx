@@ -1265,6 +1265,13 @@ export default function WorkoutPlan({
                     )}
                     {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
+                    {libraryMatch?.squeezeCue?.trim() && (
+                      <p className="squeeze-cue">
+                        <span className="squeeze-cue-label"><span aria-hidden="true">💪</span> Squeeze</span>
+                        <span>{libraryMatch.squeezeCue}</span>
+                      </p>
+                    )}
+
                     <div className="posture-tips-box">
                       <button
                         type="button"

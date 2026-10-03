@@ -14,6 +14,7 @@ export type Exercise = {
   secondaryMuscles?: string[]
   equipment?: string
   postureTips?: string[]
+  squeezeCue?: string
   notes?: string
   overallStatement?: string
   tips?: Array<string | ExerciseTip>
