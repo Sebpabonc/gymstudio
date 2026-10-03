@@ -56,6 +56,19 @@ def main():
                 problems.append(f'{where}: missing {key}')
             elif SPANISH.search(block[key]):
                 problems.append(f'{where}: {key} not in English')
+        if len(block.get('summary') or '') > 260:
+            problems.append(f'{where}: summary over 260 characters')
+        insights = block.get('insights') or []
+        titles = [i.get('title') for i in insights]
+        expected = ['Goal', 'How it works', 'A days vs B days', 'How to progress', 'What to expect']
+        if titles[:5] != expected or len(titles) not in (5, 6) or (len(titles) == 6 and titles[5] != 'Key tips'):
+            problems.append(f'{where}: insights titles must be {expected} (+ optional Key tips), got {titles}')
+        for item in insights:
+            body = item.get('body') or ''
+            if not 40 <= len(body) <= 600:
+                problems.append(f"{where}: insight {item.get('title')!r} body must be 40-600 characters")
+            if SPANISH.search(body):
+                problems.append(f"{where}: insight {item.get('title')!r} not in English")
         days = block.get('days', [])
         if [d.get('key') for d in days] != DAY_KEYS:
             problems.append(f'{where}: days must be {DAY_KEYS}')

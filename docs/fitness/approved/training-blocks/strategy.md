@@ -8,6 +8,8 @@ date: 2026-10-03
 
 > **Approved by Sebas on 2026-10-03.** All 9 blocks approved; required equipment confirmed available.
 > Block 6 starts Monday 5 October 2026 (PO decision) and blocks 7–9 follow every 6 weeks.
+> 2026-10-04: PT added block summaries and expandable insights (Goal, How it works, A vs B days,
+> How to progress, What to expect, Key tips); used at the PO's request.
 > The 3 proposed exercises were added to the catalogue (`approved/catalogue-v2/arms-core.json`).
 
 ## The weekly split and why
