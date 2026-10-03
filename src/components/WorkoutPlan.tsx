@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import AskExercise from './AskExercise'
 import { localIsoDate } from '../lib/dates'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
@@ -36,6 +36,15 @@ import {
   workoutVolume,
 } from '../utils/workoutSets'
 import { createSupersetEntries, groupSupersets } from '../utils/supersets'
+import {
+  captureUndoSnapshots,
+  createSessionSummary,
+  getPersonalRecordBadges,
+  getPersonalRecords,
+  SessionSummary,
+  undoLoggedEntries,
+  UndoSnapshot,
+} from '../utils/loggingFeedback'
 
 type PlanExercise = {
   name: string
@@ -66,6 +75,15 @@ type PlanDraft = {
 }
 
 type PlanMode = 'preset' | 'custom'
+
+type LogToast = {
+  message: string
+  undoSnapshots: UndoSnapshot[]
+}
+
+type DaySessionSummary = SessionSummary & {
+  nextSession?: string
+}
 
 const CUSTOM_PLAN_KEY = 'gym-studio.custom-plan'
 const BLOCK_CARD_EXPANDED_KEY = 'gym-studio.block-card-expanded'
@@ -282,7 +300,9 @@ export default function WorkoutPlan({
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
   const [activeSetIndexByExercise, setActiveSetIndexByExercise] = useState<Record<string, number>>({})
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
-  const [toast, setToast] = useState('')
+  const [toast, setToast] = useState<LogToast | null>(null)
+  const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
+  const sessionStartedAt = useRef<number | null>(null)
 
   const text = {
     badge: '6-week block',
@@ -362,6 +382,10 @@ export default function WorkoutPlan({
   const nextUpcomingBlock = trainingBlocks
     .filter((block) => trainingBlockDateStatus(block, today) === 'Upcoming')
     .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.number - b.number)[0]
+  const personalRecordSessions = useMemo(
+    () => getPersonalRecords(history, trainingBlocks),
+    [history, trainingBlocks]
+  )
 
   const completionScope = (blockId?: string, dayKey?: string) => ({ date: localIsoDate(), blockId, dayKey })
   const activeCompletionScope =
@@ -380,7 +404,7 @@ export default function WorkoutPlan({
 
   useEffect(() => {
     if (!toast) return undefined
-    const timer = window.setTimeout(() => setToast(''), 3000)
+    const timer = window.setTimeout(() => setToast(null), 5000)
     return () => window.clearTimeout(timer)
   }, [toast])
 
@@ -731,6 +755,71 @@ export default function WorkoutPlan({
     setActiveSetIndexByExercise(Object.fromEntries(nextActiveSetState))
   }
 
+  const showLogToast = (
+    entries: WorkoutEntry[],
+    previousHistory: WorkoutEntry[],
+    nextHistory: WorkoutEntry[],
+    scope: typeof activeCompletionScope
+  ) => {
+    const records = getPersonalRecords(nextHistory, trainingBlocks)
+    const exerciseNames = entries.map(
+      (entry) => exerciseCatalog.find((exercise) => exercise.id === entry.exerciseId)?.name ?? entry.exerciseId
+    )
+    const setCount = entries.reduce((total, entry) => total + entry.sets.length, 0)
+    const recordMessages = entries.flatMap((entry) =>
+      getPersonalRecordBadges(entry, records).map((badge) => {
+        if (badge === 'weight') return `New weight PR ${workoutMaxWeight(entry.sets)} kg`
+        if (badge === 'reps') return 'New rep PR'
+        return 'New e1RM PR'
+      })
+    )
+
+    setToast({
+      message: `${exerciseNames.join(' + ')} logged · ${setCount} ${setCount === 1 ? 'set' : 'sets'}${
+        recordMessages.length ? ` · ${recordMessages.join(' · ')} 🎉` : ''
+      }`,
+      undoSnapshots: captureUndoSnapshots(previousHistory, entries, scope),
+    })
+  }
+
+  const maybeShowSessionSummary = (
+    previousHistory: WorkoutEntry[],
+    nextHistory: WorkoutEntry[],
+    loggedAt: number
+  ) => {
+    if (planMode !== 'preset' || !activeBlock || !activeDay || activeExercises.length === 0) return
+    const wasComplete = activeExercises.every((exercise) => findExerciseCompletion(exercise, previousHistory))
+    const isComplete = activeExercises.every((exercise) => findExerciseCompletion(exercise, nextHistory))
+    if (!isComplete || wasComplete) return
+
+    const entries = nextHistory.filter(
+      (entry) =>
+        entry.date === activeCompletionScope.date &&
+        entry.blockId === activeCompletionScope.blockId &&
+        entry.dayKey === activeCompletionScope.dayKey
+    )
+    const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
+    setSessionSummary({
+      ...createSessionSummary(
+        entries,
+        loggedAt - (sessionStartedAt.current ?? loggedAt),
+        getPersonalRecords(nextHistory, trainingBlocks)
+      ),
+      nextSession: nextDay ? `Day ${nextDay.position} · ${nextDay.name}` : undefined,
+    })
+    sessionStartedAt.current = null
+  }
+
+  const undoLastLog = () => {
+    if (!toast) return
+    const nextHistory = undoLoggedEntries(history, toast.undoSnapshots)
+    setHistory(nextHistory)
+    saveWorkoutHistory(nextHistory)
+    setToast(null)
+    setSessionSummary(null)
+    sessionStartedAt.current = null
+  }
+
   const logPlannedExercise = async (exercise: PlanExercise) => {
     const exerciseKey = getPlanDraftKey(exercise.name)
     const sectionKey = normalizeExerciseName(exercise.name)
@@ -788,11 +877,14 @@ export default function WorkoutPlan({
 
     const storedHistory = await loadWorkoutHistory()
     const { history: nextHistory, entry: entryToSave } = upsertScopedEntry(storedHistory, nextEntry, activeCompletionScope)
+    const loggedAt = Date.now()
+    sessionStartedAt.current ??= loggedAt
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
     onStartRest(exercise.restSeconds ?? 90)
-    setToast(`Logged · ${summarizeCompletedEntry(entryToSave)}`)
+    showLogToast([entryToSave], storedHistory, nextHistory, activeCompletionScope)
+    maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
     setWeightTargets(consumeWeightTarget(entryToSave.exerciseId, entryToSave.sets))
     setExerciseCatalog(await loadExercises())
 
@@ -890,7 +982,11 @@ export default function WorkoutPlan({
       nextHistory = result.history
       return result.entry
     })
-    setToast(`Logged · ${entriesToSave.length} exercises`)
+    const loggedAt = Date.now()
+    sessionStartedAt.current ??= loggedAt
+    const scope = { ...activeCompletionScope, date }
+    showLogToast(entriesToSave, storedHistory, nextHistory, scope)
+    maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
 
     setLogError((current) => ({
       ...current,
@@ -1455,6 +1551,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
             const postureTips = getPostureTips(exercise, libraryMatch)
             const completedEntry = findExerciseCompletion(exercise, history)
+            const recordBadges =
+              completedEntry?.date === today
+                ? getPersonalRecordBadges(completedEntry, personalRecordSessions)
+                : []
             const cardClasses = [
               'planned-exercise-card',
               isCollapsed ? 'collapsed' : '',
@@ -1481,6 +1581,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           <span className="done-summary"> · {summarizeCompletedEntry(completedEntry)}</span>
                         </span>
                       )}
+                      {recordBadges.map((badge) => (
+                        <span key={`${completedEntry?.id}-${badge}`} className="personal-record-badge">
+                          {badge === 'e1rm' ? 'e1RM' : badge === 'weight' ? 'Weight' : 'Rep'} PR
+                        </span>
+                      ))}
                   </div>
                   <button
                     type="button"
@@ -1897,7 +2002,63 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           })}
         </div>
       </section>
-      {toast && <div className="log-toast" role="status" aria-live="polite">{toast}</div>}
+      {sessionSummary && (
+        <div className="session-summary-backdrop" onClick={() => setSessionSummary(null)}>
+          <section
+            className="session-summary-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="session-summary-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="session-summary-header">
+              <h2 id="session-summary-title">Session complete</h2>
+              <button
+                type="button"
+                className="session-summary-close"
+                onClick={() => setSessionSummary(null)}
+                aria-label="Close session summary"
+              >
+                ×
+              </button>
+            </header>
+            <div className="session-summary-metrics">
+              <div><strong>{sessionSummary.duration}</strong><span>Duration</span></div>
+              <div><strong>{sessionSummary.sets}</strong><span>Sets</span></div>
+              <div><strong>{sessionSummary.volume.toLocaleString('en-US')} kg</strong><span>Volume</span></div>
+            </div>
+            <section className="session-summary-records" aria-label="Personal records">
+              <h3>Personal records</h3>
+              {sessionSummary.prs.length > 0 ? (
+                <ul>
+                  {sessionSummary.prs.map(({ exerciseId, badges }) => {
+                    const exerciseName = exerciseCatalog.find((exercise) => exercise.id === exerciseId)?.name ?? exerciseId
+                    const labels = badges.map((badge) =>
+                      badge === 'e1rm' ? 'e1RM PR' : badge === 'weight' ? 'Weight PR' : 'Rep PR'
+                    )
+                    return <li key={exerciseId}>{exerciseName} · {labels.join(', ')}</li>
+                  })}
+                </ul>
+              ) : (
+                <p>No new personal records this session.</p>
+              )}
+            </section>
+            {sessionSummary.nextSession && <p className="session-summary-next">{`Next session: ${sessionSummary.nextSession}`}</p>}
+            {toast && (
+              <div className="log-toast in-summary" role="status" aria-live="polite">
+                <span>{toast.message}</span>
+                <button type="button" onClick={undoLastLog}>Undo</button>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+      {toast && !sessionSummary && (
+        <div className="log-toast" role="status" aria-live="polite">
+          <span>{toast.message}</span>
+          <button type="button" onClick={undoLastLog}>Undo</button>
+        </div>
+      )}
     </div>
   )
 }
