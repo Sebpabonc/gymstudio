@@ -2,6 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles.css'
+import { initializeDemoMode } from './utils/demoMode'
 
 async function clearLegacyRuntimeState() {
   try {
@@ -20,6 +21,7 @@ async function clearLegacyRuntimeState() {
 }
 
 void clearLegacyRuntimeState()
+initializeDemoMode()
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -1,12 +1,17 @@
 import { Exercise, PlannedExercise, TrainingBlock, TrainingDay, WorkoutEntry } from '../types'
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
+import { isDemoMode } from './demoMode'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
 const CATALOGUE_KEY = 'gym-studio.catalogue'
 const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
 const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
+
+export function storageKey(key: string) {
+  return isDemoMode() ? key.replace(/^gym-studio\./, 'gym-studio.demo.') : key
+}
 
 type TrainingExerciseRow = {
   code: string
@@ -139,7 +144,7 @@ export function mapTrainingBlockRows(rows: unknown[]): TrainingBlock[] {
 
 function loadTrainingBlockCache(): TrainingBlock[] | null {
   try {
-    const parsed = JSON.parse(localStorage.getItem(TRAINING_BLOCKS_KEY) ?? 'null')
+    const parsed = JSON.parse(localStorage.getItem(storageKey(TRAINING_BLOCKS_KEY)) ?? 'null')
     if (!Array.isArray(parsed) || parsed.length === 0) return null
     if (parsed.some((block) => typeof block?.id !== 'string' || !Array.isArray(block?.days))) return null
     return parsed as TrainingBlock[]
@@ -150,7 +155,7 @@ function loadTrainingBlockCache(): TrainingBlock[] | null {
 
 function saveTrainingBlockCache(blocks: TrainingBlock[]) {
   try {
-    localStorage.setItem(TRAINING_BLOCKS_KEY, JSON.stringify(blocks))
+    localStorage.setItem(storageKey(TRAINING_BLOCKS_KEY), JSON.stringify(blocks))
   } catch {
     return
   }
@@ -195,11 +200,11 @@ export async function fetchTrainingBlocks(): Promise<TrainingBlock[]> {
 }
 
 export function getActiveBlockId() {
-  return localStorage.getItem(ACTIVE_BLOCK_KEY)
+  return localStorage.getItem(storageKey(ACTIVE_BLOCK_KEY))
 }
 
 export function setActiveBlockId(blockId: string) {
-  localStorage.setItem(ACTIVE_BLOCK_KEY, blockId)
+  localStorage.setItem(storageKey(ACTIVE_BLOCK_KEY), blockId)
 }
 
 function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[] {
@@ -230,7 +235,7 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
 }
 
 function loadCatalogueCache(): CatalogueCache | null {
-  const raw = localStorage.getItem(CATALOGUE_KEY)
+  const raw = localStorage.getItem(storageKey(CATALOGUE_KEY))
   if (!raw) return null
 
   try {
@@ -305,7 +310,7 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
 
   try {
     localStorage.setItem(
-      CATALOGUE_KEY,
+      storageKey(CATALOGUE_KEY),
       JSON.stringify({
         fetchedAt: new Date().toISOString(),
         exercises: catalogue.exercises.map((exercise) => ({
@@ -330,7 +335,7 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
 }
 
 export async function loadExercises(useBundledFallback = true): Promise<Exercise[]> {
-  const raw = localStorage.getItem(EXERCISES_KEY)
+  const raw = localStorage.getItem(storageKey(EXERCISES_KEY))
   const catalogue = loadCatalogueCache()
   if (!catalogue && !useBundledFallback) return []
 
@@ -374,7 +379,7 @@ export function saveExercises(exercises: Exercise[], baseExercises: Exercise[] =
   const customExercises = exercises.filter(
     (exercise) => !catalogueIds.has(exercise.id) && !catalogueNames.has(normalizeExerciseName(exercise.name))
   )
-  localStorage.setItem(EXERCISES_KEY, JSON.stringify(customExercises))
+  localStorage.setItem(storageKey(EXERCISES_KEY), JSON.stringify(customExercises))
 }
 
 export async function upsertExerciseRecord(exercise: Partial<Exercise> & { name: string }): Promise<Exercise> {
@@ -402,7 +407,7 @@ export async function upsertExerciseRecord(exercise: Partial<Exercise> & { name:
 }
 
 export async function loadWorkoutHistory(): Promise<WorkoutEntry[]> {
-  const raw = localStorage.getItem(HISTORY_KEY)
+  const raw = localStorage.getItem(storageKey(HISTORY_KEY))
   if (!raw) return []
 
   try {
@@ -433,7 +438,7 @@ export async function loadWorkoutHistory(): Promise<WorkoutEntry[]> {
 }
 
 export function saveWorkoutHistory(history: WorkoutEntry[]) {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+  localStorage.setItem(storageKey(HISTORY_KEY), JSON.stringify(history))
 }
 
 export async function addWorkoutEntry(entry: WorkoutEntry) {

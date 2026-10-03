@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
 import { localIsoDate } from './lib/dates'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
+import { exitDemoMode, isDemoMode } from './utils/demoMode'
 import {
+  fetchTrainingBlocks,
   getExerciseDisplayName,
   loadExercises,
   loadWorkoutHistory,
@@ -75,8 +77,10 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 }
 
 export default function App() {
+  const demoMode = isDemoMode()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
+  const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
   const [search, setSearch] = useState('')
   const [bodyRegion, setBodyRegion] = useState(ALL_BODY_REGIONS)
   const [selectedId, setSelectedId] = useState<string>('')
@@ -88,18 +92,34 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false
+    const readHistory = async () => {
+      const savedHistory = await loadWorkoutHistory()
+      if (!demoMode) return savedHistory
+      if (savedHistory.length > 0) {
+        setDemoHistoryReady(true)
+        return savedHistory
+      }
+
+      const blocks = await fetchTrainingBlocks()
+      const { generateDemoHistory } = await import('./demo/generateDemoHistory')
+      const generatedHistory = generateDemoHistory({ blocks, endDate: localIsoDate(), months: 6, seed: 26 })
+      saveWorkoutHistory(generatedHistory)
+      setDemoHistoryReady(true)
+      return generatedHistory
+    }
+
     void (async () => {
       const refresh = refreshCatalogue()
       const cachedExercises = await loadExercises(false)
       if (cancelled) return
       if (cachedExercises.length) {
         setExercises(cachedExercises)
-        setHistory(await loadWorkoutHistory())
+        setHistory(await readHistory())
       }
 
       const refreshedCatalogue = await refresh
       if (!refreshedCatalogue?.length && !cachedExercises.length) {
-        const [offlineExercises, offlineHistory] = await Promise.all([loadExercises(), loadWorkoutHistory()])
+        const [offlineExercises, offlineHistory] = await Promise.all([loadExercises(), readHistory()])
         if (cancelled) return
         setExercises(offlineExercises)
         setHistory(offlineHistory)
@@ -107,7 +127,7 @@ export default function App() {
       }
       if (!refreshedCatalogue?.length || cancelled) return
 
-      const [updatedExercises, updatedHistory] = await Promise.all([loadExercises(false), loadWorkoutHistory()])
+      const [updatedExercises, updatedHistory] = await Promise.all([loadExercises(false), readHistory()])
       if (cancelled) return
       setExercises(updatedExercises)
       setHistory(updatedHistory)
@@ -221,6 +241,12 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {demoMode && (
+        <aside className="demo-banner" aria-label="Demo mode">
+          <span>Demo data — not your real history</span>
+          <button type="button" onClick={exitDemoMode}>Exit demo</button>
+        </aside>
+      )}
       <div className="phone-frame">
         <header className="brand-header">
           <div className="brand-row">
@@ -502,7 +528,13 @@ export default function App() {
               )}
             </>
           ) : activeTab === 'planned' ? (
-            <WorkoutPlan mode="preset" lockMode />
+            demoMode && !demoHistoryReady ? (
+              <section className="card" aria-live="polite">
+                <p className="empty-state">Loading demo history…</p>
+              </section>
+            ) : (
+              <WorkoutPlan mode="preset" lockMode />
+            )
           ) : (
             <WorkoutPlan mode="custom" lockMode />
           )}
