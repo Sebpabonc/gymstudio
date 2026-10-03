@@ -4,6 +4,11 @@ import { exerciseLibrary } from '../data/exerciseLibrary'
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
 
+// Keep legacy exercise IDs mapped to their canonical library IDs.
+const legacyExerciseIdAliases: Record<string, string> = {
+  'bb-bench-press': 'barbell-bench-press',
+}
+
 export function normalizeExerciseName(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
@@ -17,7 +22,6 @@ const exerciseDisplayTranslations: Record<string, { es: string; en: string }> = 
   'romanian-deadlift': { es: 'Peso muerto rumano', en: 'Romanian Deadlift' },
   'dumbbell-shoulder-press': { es: 'Prensa de hombros con mancuernas', en: 'Dumbbell Shoulder Press' },
   'leg-curl': { es: 'Curl de piernas', en: 'Leg Curl' },
-  'bb-bench-press': { es: 'Prensa de banca con barra', en: 'BB Bench Press' },
   'bb-bent-over-reverse-grip-rows': { es: 'Remo invertido inclinado con barra', en: 'BB Bent Over Reverse Grip Rows' },
   'bb-press': { es: 'Prensa con barra', en: 'BB Press' },
   'bb-rdl': { es: 'Peso muerto rumano con barra', en: 'BB RDL' },
@@ -84,7 +88,11 @@ export function loadExercises(): Exercise[] {
       return [...exerciseLibrary]
     }
 
-    const merged = mergeExercises(parsed)
+    const savedExercises = parsed.filter(
+      (exercise) =>
+        !exercise?.id || !Object.prototype.hasOwnProperty.call(legacyExerciseIdAliases, exercise.id)
+    )
+    const merged = mergeExercises(savedExercises)
     saveExercises(merged)
     return merged
   } catch {
@@ -125,7 +133,18 @@ export function loadWorkoutHistory(): WorkoutEntry[] {
 
   try {
     const parsed = JSON.parse(raw) as WorkoutEntry[]
-    return Array.isArray(parsed) ? parsed : []
+    if (!Array.isArray(parsed)) return []
+
+    let changed = false
+    const migrated = parsed.map((entry) => {
+      if (!Object.prototype.hasOwnProperty.call(legacyExerciseIdAliases, entry.exerciseId)) return entry
+
+      changed = true
+      return { ...entry, exerciseId: legacyExerciseIdAliases[entry.exerciseId] }
+    })
+
+    if (changed) saveWorkoutHistory(migrated)
+    return migrated
   } catch {
     return []
   }
