@@ -1,12 +1,22 @@
 ---
 title: Catálogo canónico de ejercicios (fuente única de verdad)
-status: draft            # draft | approved | rejected
+status: approved         # draft | approved | rejected
 author: pt-fitness-expert
 created: 2026-10-03
-approved_by:             # Sebas, al aprobar
-approved_on:
+approved_by: Sebas (preguntas 1–2); 3–10 delegadas por Sebas a la recomendación del PT/Tech Lead
+approved_on: 2026-10-03
 exercises: [barbell-bench-press, incline-barbell-bench-press, decline-bb-press, incline-dumbbell-press, db-press-neutral-grip, close-grip-bench-press, close-grip-decline-press, plate-loaded-chest-press-wide-grip, wide-grip-chest-press, mid-cable-fly, high-cable-fly, decline-dumbbell-fly, close-grip-dips, dumbbell-shoulder-press, db-oh-press-neutral-grip, neutral-grip-pin-loaded-shoulder-press, wide-grip-shoulder-press-machine, plate-loaded-wide-grip-shoulder-press-machine, lateral-raises-machine, standing-db-lateral-raises, db-60-y-raises, lat-pulldown, neutral-grip-lat-pulldown, single-arm-lat-pulldown, reverse-grip-lats-machine, neutral-grip-weighted-chin-ups, reverse-grip-chin-up-weighted, seated-cable-row, wide-grip-cable-row, wide-grip-supp-seated-row, neutral-grip-supp-rows, unilateral-supp-rows-reverse-grip, single-hand-cable-unilateral-rows, bb-bent-over-reverse-grip-rows, wide-grip-cable-chest-pulls, cable-straight-arms-pull-downs, db-pull-overs, romanian-deadlift, hor-back-extensions-glutes-dominant, weighted-45-back-extensions, back-squat, heels-elevated-hb-squats, hack-squat-machine, leg-press-quad-dominant, db-walking-lunges-long-steps, ffe-db-split-squats, leg-extensions-toes-dorsiflexed-neutral, prone-leg-curl-toes-dorsiflexed-neutral, seated-leg-curl-toes-dorsiflexed-neutral, leg-press-calf-raises-toes-neutral, standing-calf-raises-toes-neutral, ez-bb-preacher-curls, single-db-preacher-curls, hammer-curls, db-spider-hammer-curls, db-curls-offset-grip, standing-db-offset-grip-curls, standing-dumbbell-curl, low-cable-ropes-curls, cable-rope-tricep-extensions, v-bb-cable-tricep-extensions, rope-low-cable-oh-tricep-extensions, hanging-leg-raises-weighted, v-up]
 ---
+
+## Registro de aprobación (2026-10-03)
+
+- **1. Números = grados de inclinación:** Sí (Sebas).
+- **2. "30/45 BB (Bench) Press" = press inclinado con barra:** Sí (Sebas).
+- **3–10:** Sebas delegó: *"aprueba basado en lo que mejor creas; más adelante se cambiará toda la lista"*.
+  Se adopta la propuesta tal como está escrita en las tablas: 3 → banco inclinado;
+  4 → barra hexagonal; 5 → tirón horizontal (tipo remo); 6 → máquina con apoyo de pecho;
+  7 → máquinas separadas; 8 → posición de pies como modificador; 9 → Sí; 10 → barra libre.
+- Las marcas ⚠️ REVISAR quedan como notas para la futura revisión completa del catálogo.
 
 ## Resumen
 
