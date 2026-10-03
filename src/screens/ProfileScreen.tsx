@@ -44,7 +44,7 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
 
   return (
     <section className="card account-screen profile-screen">
-      <button type="button" className="account-back" onClick={onClose}>← Back to workout</button>
+      <button type="button" className="account-back" onClick={onClose}>← Back to Today</button>
       <h2>Your profile</h2>
       {name && <p className="profile-name">{name}</p>}
       <p className="profile-email">{user?.email}</p>

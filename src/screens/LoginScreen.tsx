@@ -75,7 +75,7 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
   if (!available) {
     return (
       <section className="card account-screen">
-        <button type="button" className="account-back" onClick={onClose}>← Back to workout</button>
+        <button type="button" className="account-back" onClick={onClose}>← Back to Today</button>
         <h2>Account</h2>
         <p className="account-message">Sign-in unavailable offline.</p>
       </section>
@@ -84,7 +84,7 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
 
   return (
     <section className="card account-screen">
-      <button type="button" className="account-back" onClick={onClose}>← Back to workout</button>
+      <button type="button" className="account-back" onClick={onClose}>← Back to Today</button>
       <h2>{mode === 'sign-in' ? 'Welcome back' : 'Create your account'}</h2>
       <div className="account-mode-tabs" role="tablist" aria-label="Account action">
         <button

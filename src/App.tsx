@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
 import { localIsoDate } from './lib/dates'
+import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
 import { useAuth } from './auth/AuthProvider'
 import { exitDemoMode, isDemoMode } from './utils/demoMode'
@@ -24,14 +25,8 @@ const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
 const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
 
-type ViewTab = 'track' | 'planned' | 'custom' | 'progress'
-
 const uiText = {
-  title: 'Gym Studio',
   subtitle: 'Performance tracking',
-  track: 'Track it as you go',
-  planned: 'Planned before you go',
-  customPlan: 'Make your plan',
   searchLabel: 'Search exercise',
   searchPlaceholder: 'Bench press, squat, row...',
   exercise: 'Exercise',
@@ -84,7 +79,7 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 
 export default function App() {
   const demoMode = isDemoMode()
-  const { status, user } = useAuth()
+  const { status, syncStatus } = useAuth()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
@@ -94,13 +89,10 @@ export default function App() {
   const [draftSets, setDraftSets] = useState<WorkoutSet[]>([createSet(8, 0), createSet(8, 0)])
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
-  const [activeTab, setActiveTab] = useState<ViewTab>('track')
-  const [accountOpen, setAccountOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<AppTab>('today')
+  const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const text = uiText
-  const nameCandidate = user?.user_metadata?.full_name ?? user?.user_metadata?.name
-  const userName = typeof nameCandidate === 'string' ? nameCandidate : user?.email ?? ''
-  const initials = userName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
 
   useEffect(() => {
     let cancelled = false
@@ -255,84 +247,90 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {demoMode && (
-        <aside className="demo-banner" aria-label="Demo mode">
-          <span>Demo data — not your real history</span>
-          <button type="button" onClick={exitDemoMode}>Exit demo</button>
-        </aside>
-      )}
       <div className="phone-frame">
         <header className="brand-header">
-          <div className="brand-row">
-            <span className="brand-mark">BF</span>
-            <span className="brand-name">Borcelle Fitness</span>
-            {!demoMode && (
-              <button
-                type="button"
-                className="account-button"
-                aria-label={status === 'signed-in' ? 'Open profile' : 'Sign in'}
-                onClick={() => setAccountOpen(true)}
-              >
-                {status === 'signed-in' && initials ? initials : (
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="8" r="3.5" />
-                    <path d="M5.5 20c.5-3.5 2.8-5.5 6.5-5.5s6 2 6.5 5.5" />
-                  </svg>
-                )}
-              </button>
-            )}
-          </div>
-          <div className="header-row-with-toggle">
-            <h1>{text.title}</h1>
-          </div>
-          <p className="eyebrow">{text.subtitle}</p>
-          <div className="tab-row four" aria-label="Workout tabs">
-            <button
-              type="button"
-              className={activeTab === 'track' ? 'tab-button active' : 'tab-button'}
-              onClick={() => {
-                setActiveTab('track')
-                void loadWorkoutHistory().then(setHistory)
-              }}
-            >
-              {text.track}
-            </button>
-            <button
-              type="button"
-              className={activeTab === 'planned' ? 'tab-button active' : 'tab-button'}
-              onClick={() => setActiveTab('planned')}
-            >
-              {text.planned}
-            </button>
-            <button
-              type="button"
-              className={activeTab === 'custom' ? 'tab-button active' : 'tab-button'}
-              onClick={() => setActiveTab('custom')}
-            >
-              {text.customPlan}
-            </button>
-            <button
-              type="button"
-              className={activeTab === 'progress' ? 'tab-button active' : 'tab-button'}
-              onClick={() => {
-                setProgressExerciseId('')
-                setActiveTab('progress')
-                void loadWorkoutHistory().then(setHistory)
-              }}
-            >
-              {text.progress}
-            </button>
-          </div>
+          <h1>{getNavigationTitle(activeTab)}</h1>
+          <span
+            className={`sync-indicator ${status === 'signed-in' ? syncStatus : demoMode ? 'demo' : 'local'}`}
+            role="status"
+            aria-label={status === 'signed-in' ? `Workout sync: ${syncStatus}` : demoMode ? 'Demo data' : 'Local workout data'}
+          />
         </header>
 
         <main className="app-content">
-          {accountOpen ? (
-            <Suspense fallback={<section className="card account-screen">Loading account…</section>}>
-              {status === 'signed-in'
-                ? <ProfileScreen onClose={() => setAccountOpen(false)} />
-                : <LoginScreen onClose={() => setAccountOpen(false)} />}
-            </Suspense>
-          ) : activeTab === 'track' ? (
+          {activeTab === 'today' && (
+            <section className="today-brand" aria-label="Gym Studio">
+              <div className="brand-row">
+                <span className="brand-mark" aria-hidden="true">BF</span>
+                <span className="brand-name">Borcelle Fitness</span>
+              </div>
+              <p className="eyebrow">{text.subtitle}</p>
+            </section>
+          )}
+          {activeTab === 'exercises' && (
+            <div className="exercise-mode-switch" role="group" aria-label="Exercise tools">
+              <button
+                type="button"
+                className={exerciseMode === 'lookup' ? 'active' : ''}
+                aria-pressed={exerciseMode === 'lookup'}
+                onClick={() => setExerciseMode('lookup')}
+              >
+                Find an exercise
+              </button>
+              <button
+                type="button"
+                className={exerciseMode === 'custom' ? 'active' : ''}
+                aria-pressed={exerciseMode === 'custom'}
+                onClick={() => setExerciseMode('custom')}
+              >
+                Build a custom day
+              </button>
+            </div>
+          )}
+          {activeTab === 'you' ? (
+            demoMode ? (
+              <section className="card account-screen">
+                <h2>Demo mode</h2>
+                <p className="account-message">Demo data — not your real history.</p>
+                <button type="button" className="secondary-button" onClick={exitDemoMode}>Exit demo</button>
+              </section>
+            ) : (
+              <Suspense fallback={<section className="card account-screen">Loading account…</section>}>
+                {status === 'signed-in'
+                  ? <ProfileScreen onClose={() => setActiveTab('today')} />
+                  : <LoginScreen onClose={() => setActiveTab('today')} />}
+              </Suspense>
+            )
+          ) : activeTab === 'progress' ? (
+            demoMode && !demoHistoryReady ? (
+              <section className="card" aria-live="polite">
+                <p className="empty-state">Loading demo history…</p>
+              </section>
+            ) : (
+              <Suspense fallback={<section className="card">Loading progress…</section>}>
+                <ProgressScreen
+                  entries={history}
+                  exercises={exercises}
+                  initialExerciseId={progressExerciseId || undefined}
+                  onOpenExercise={(exerciseId) => {
+                    setSelectedId(exerciseId)
+                    setExerciseMode('lookup')
+                    setActiveTab('exercises')
+                  }}
+                />
+              </Suspense>
+            )
+          ) : activeTab === 'today' ? (
+            demoMode && !demoHistoryReady ? (
+              <section className="card" aria-live="polite">
+                <p className="empty-state">Loading demo history…</p>
+              </section>
+            ) : (
+              <WorkoutPlan mode="preset" lockMode />
+            )
+          ) : exerciseMode === 'custom' ? (
+            <WorkoutPlan mode="custom" lockMode />
+          ) : (
             <>
               <section className="card search-panel">
                 <label className="field-label" htmlFor="exercise-search">{text.searchLabel}</label>
@@ -590,37 +588,58 @@ export default function App() {
                 </section>
               )}
             </>
-          ) : activeTab === 'progress' ? (
-            demoMode && !demoHistoryReady ? (
-              <section className="card" aria-live="polite">
-                <p className="empty-state">Loading demo history…</p>
-              </section>
-            ) : (
-              <Suspense fallback={<section className="card">Loading progress…</section>}>
-                <ProgressScreen
-                  entries={history}
-                  exercises={exercises}
-                  initialExerciseId={progressExerciseId || undefined}
-                  onOpenExercise={(exerciseId) => {
-                    setSelectedId(exerciseId)
-                    setActiveTab('track')
-                  }}
-                />
-              </Suspense>
-            )
-          ) : activeTab === 'planned' ? (
-            demoMode && !demoHistoryReady ? (
-              <section className="card" aria-live="polite">
-                <p className="empty-state">Loading demo history…</p>
-              </section>
-            ) : (
-              <WorkoutPlan mode="preset" lockMode />
-            )
-          ) : (
-            <WorkoutPlan mode="custom" lockMode />
           )}
         </main>
+        <nav className="bottom-tab-bar" aria-label="Primary navigation">
+          {navigationTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={activeTab === tab.id ? 'active' : ''}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              onClick={() => {
+                setActiveTab(tab.id)
+                if (tab.id === 'exercises') {
+                  setExerciseMode('lookup')
+                  void loadWorkoutHistory().then(setHistory)
+                }
+                if (tab.id === 'progress') {
+                  setProgressExerciseId('')
+                  void loadWorkoutHistory().then(setHistory)
+                }
+              }}
+            >
+              <NavigationIcon name={tab.icon} />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </nav>
       </div>
     </div>
+  )
+}
+
+function NavigationIcon({ name }: { name: (typeof navigationTabs)[number]['icon'] }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      {name === 'home' ? (
+        <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-6h-4v6H4a1 1 0 0 1-1-1z" />
+      ) : name === 'search' ? (
+        <>
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 5 5" />
+        </>
+      ) : name === 'chart' ? (
+        <>
+          <path d="M3 3v18h18" />
+          <path d="m7 14 4-4 3 3 6-7" />
+        </>
+      ) : (
+        <>
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21a8 8 0 0 1 16 0" />
+        </>
+      )}
+    </svg>
   )
 }
