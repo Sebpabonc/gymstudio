@@ -11,6 +11,7 @@ const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
 const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
 const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
 const WEIGHT_TARGETS_KEY = 'gym-studio.weight-targets'
+const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 
 export type SyncWorkoutEntry = WorkoutEntry & {
   updatedAt: string
@@ -47,12 +48,12 @@ function signalWorkoutHistorySaved() {
 
 const GUEST_CLAIMED_KEY = 'gym-studio.guest-claimed'
 const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
-const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY])
+const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY])
 
 let storageNamespace: string | null = null
 
 // Signed-in accounts get their own local namespace; signed-out use is the "guest" namespace
-// (the original, un-prefixed keys). Catalogue caches are shared reference data.
+// (the original, un-prefixed keys). Catalogue caches and device-level state are shared.
 export function setStorageNamespace(userId: string | null) {
   storageNamespace = userId
 }
@@ -143,6 +144,14 @@ export function setSessionStorageValue(key: string, value: string) {
   } catch {
     // Session storage is optional when browser storage is unavailable.
   }
+}
+
+export function hasDismissedWelcome() {
+  return localStorage.getItem(storageKey(WELCOME_DISMISSED_KEY)) === 'true'
+}
+
+export function dismissWelcome() {
+  localStorage.setItem(storageKey(WELCOME_DISMISSED_KEY), 'true')
 }
 
 type TrainingExerciseRow = {
