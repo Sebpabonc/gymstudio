@@ -1,0 +1,1207 @@
+[
+  {
+    "id": "pull-up",
+    "name_en": "Pull-Up",
+    "name_es": "Dominadas",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps",
+      "Forearms"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Cuélgate de la barra con agarre prono algo más ancho que los hombros y los brazos totalmente extendidos.",
+      "Mantén el pecho alto y las piernas juntas, con el abdomen firme para no balancearte.",
+      "Inicia bajando las escápulas y sube hasta pasar la barbilla sobre la barra; baja controlado hasta extender.",
+      "Evita el impulso con las piernas (kipping) y los medios recorridos que dejan los codos flexionados.",
+      "Baja de la barra con control al terminar la serie, sin soltarte de golpe desde arriba."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "pull-up-wide-grip",
+    "name_en": "Pull-Up (Wide Grip)",
+    "name_es": "Dominadas (agarre ancho)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Rear Delts",
+      "Biceps"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Agarra la barra en prono a unos 1,5 anchos de hombros y cuélgate con los brazos extendidos.",
+      "Saca el pecho hacia la barra y mantén los codos apuntando hacia los lados y abajo.",
+      "Tira de los codos hacia las costillas hasta acercar el pecho alto a la barra y baja en 2-3 segundos.",
+      "Evita abrir tanto el agarre que pierdas recorrido o que los hombros se suban hacia las orejas.",
+      "Elige un ancho que te permita completar el recorrido sin molestias en los hombros."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "neutral-grip-weighted-chin-ups",
+    "name_en": "Pull-Up (Neutral Grip)",
+    "name_es": "Dominadas (agarre neutro)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Upper Back",
+      "Forearms"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Cuélgate de los agarres paralelos con las palmas enfrentadas y los brazos extendidos.",
+      "Mantén las costillas abajo y una ligera inclinación del torso hacia atrás durante la subida.",
+      "Sube llevando los codos pegados al cuerpo hasta que la barbilla supere los agarres y baja sin prisa.",
+      "Evita encoger los hombros al inicio; deprime las escápulas antes de flexionar los codos.",
+      "Si usas lastre, asegura bien el cinturón o la mancuerna para que no se balancee entre las piernas."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "reverse-grip-chin-up-weighted",
+    "name_en": "Chin-Up",
+    "name_es": "Dominadas supinas",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats",
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Forearms"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Agarra la barra con las palmas hacia ti, a la anchura de los hombros, y cuélgate con brazos extendidos.",
+      "Mantén el torso estable y los codos por delante del cuerpo, apuntando al suelo.",
+      "Tira hasta llevar la barbilla sobre la barra apretando los dorsales y baja hasta extender por completo.",
+      "Evita quedarte a medio camino en la bajada; extender del todo trabaja el dorsal en estiramiento.",
+      "Si añades lastre, súbelo de forma progresiva y mantén la técnica limpia en todas las repeticiones."
+    ],
+    "aliases": [
+      "chin"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "machine-assisted-pull-up",
+    "name_en": "Machine Assisted Pull-Up",
+    "name_es": "Dominadas asistidas en máquina",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el contrapeso, apoya las rodillas o los pies en la plataforma y agarra las asas superiores.",
+      "Mantén el torso vertical y el pecho alto sin inclinarte hacia la plataforma.",
+      "Sube hasta que la barbilla pase las asas y baja despacio hasta extender los brazos por completo.",
+      "Evita usar tanta asistencia que la plataforma te impulse; reduce el contrapeso a medida que progresas.",
+      "Sube y baja de la plataforma con ambas manos agarradas para que no se mueva de golpe."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "band-assisted-pull-up",
+    "name_en": "Band Assisted Pull-Up",
+    "name_es": "Dominadas asistidas con banda",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps"
+    ],
+    "equipment": "band",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ata la banda a la barra y coloca una rodilla o un pie dentro antes de colgarte con agarre prono.",
+      "Mantén el cuerpo en línea y el abdomen firme para que la banda no te balancee.",
+      "Tira hasta la barbilla sobre la barra y baja controlando, sin dejar que la banda te dispare hacia arriba.",
+      "Evita depender de una banda muy gruesa; cambia a una más fina cuando completes tus repeticiones.",
+      "Revisa que la banda no tenga cortes y que esté bien anudada antes de cada serie."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "lat-pulldown",
+    "name_en": "Cable Lat Pulldown (Wide Grip)",
+    "name_es": "Jalón al pecho en polea (agarre ancho)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps",
+      "Rear Delts"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el rodillo sobre los muslos y agarra la barra en prono, más ancho que los hombros.",
+      "Inclina el torso unos grados hacia atrás con el pecho alto y la zona lumbar neutra.",
+      "Lleva la barra a la parte alta del pecho bajando los codos y sube controlando hasta estirar los dorsales.",
+      "Evita tirar la barra detrás de la nuca o balancear el torso hacia atrás para mover más peso.",
+      "Devuelve la barra arriba antes de levantarte para que las placas no caigan de golpe."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "neutral-grip-lat-pulldown",
+    "name_en": "Cable Lat Pulldown (Neutral Grip)",
+    "name_es": "Jalón al pecho en polea (agarre neutro)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Engancha el maneral de agarre neutro, siéntate con los muslos bajo el rodillo y los brazos estirados.",
+      "Mantén el pecho alto y los codos cerca del cuerpo, apuntando hacia el suelo.",
+      "Tira del maneral hasta el esternón llevando los codos a los costados y sube lento hasta extender.",
+      "Evita redondear la espalda al final del tirón para acercar el maneral al pecho.",
+      "Comprueba que el mosquetón del maneral esté bien cerrado antes de cargar la polea."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "single-arm-lat-pulldown",
+    "name_en": "Cable Lat Pulldown (Single-Arm)",
+    "name_es": "Jalón al pecho en polea (a una mano)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Siéntate bajo la polea alta con un agarre individual y el brazo totalmente estirado arriba.",
+      "Mantén el torso de frente y estable, sin girarte hacia el lado que trabaja.",
+      "Baja el codo hacia la cadera siguiendo una línea en diagonal y deja que el brazo suba estirando el dorsal.",
+      "Evita compensar inclinándote de lado; el movimiento debe venir del hombro y el codo.",
+      "Empieza con el brazo menos fuerte y haz las mismas repeticiones con el otro."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "cable-lat-pulldown-underhand-grip",
+    "name_en": "Cable Lat Pulldown (Underhand Grip)",
+    "name_es": "Jalón al pecho en polea (agarre supino)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Upper Back"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Agarra la barra recta con las palmas hacia ti, a la anchura de los hombros, y fija los muslos.",
+      "Mantén el pecho alto y una ligera inclinación atrás, sin arquear en exceso la zona lumbar.",
+      "Tira la barra hacia la parte baja del pecho llevando los codos junto al torso y sube con control.",
+      "Evita convertirlo en un curl de bíceps: piensa en bajar los codos, no en doblar las muñecas.",
+      "Usa un peso que puedas frenar en la subida sin que te levante del asiento."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "reverse-grip-lats-machine",
+    "name_en": "Machine Lat Pulldown (Underhand Grip)",
+    "name_es": "Jalón en máquina (agarre supino)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Upper Back"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que los agarres queden a tu alcance con los brazos extendidos y palmas hacia ti.",
+      "Apoya bien el pecho o los muslos según la máquina y mantén la espalda neutra.",
+      "Lleva los agarres hacia abajo y atrás siguiendo el arco de la máquina y sube lento hasta estirar.",
+      "Evita despegarte del asiento o del apoyo para ganar recorrido con impulso.",
+      "Verifica que el pasador del peso esté bien introducido antes de empezar."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "plate-loaded-lat-pulldown",
+    "name_en": "Plate-Loaded Lat Pulldown",
+    "name_es": "Jalón al pecho en máquina de discos",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps",
+      "Rear Delts"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Carga los discos por igual en ambos lados, fija los muslos bajo el rodillo y agarra las asas.",
+      "Mantén el pecho alto y el torso quieto durante todo el recorrido.",
+      "Tira de las asas hacia los costados del pecho y deja que suban despacio hasta estirar los brazos.",
+      "Evita soltar las asas de golpe arriba; controla la fase excéntrica en cada repetición.",
+      "Coloca y retira los discos con la máquina en reposo y alterna los lados para no desequilibrarla."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-bent-over-row",
+    "name_en": "Barbell Bent-Over Row",
+    "name_es": "Remo inclinado con barra",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back",
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps",
+      "Lower Back"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coge la barra en prono algo más ancho que los hombros e inclina el torso a unos 45° con rodillas flexionadas.",
+      "Mantén la espalda neutra y el cuello alineado, mirando al suelo un poco por delante de ti.",
+      "Lleva la barra hacia el ombligo juntando las escápulas y bájala hasta extender los brazos sin moverte.",
+      "Evita incorporar el torso en cada repetición para subir la barra con impulso.",
+      "Si no puedes mantener la espalda neutra, reduce la carga antes de seguir."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "bb-bent-over-reverse-grip-rows",
+    "name_en": "Barbell Bent-Over Row (Underhand Grip)",
+    "name_es": "Remo inclinado con barra (agarre supino)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps",
+      "Lower Back"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Agarra la barra con las palmas hacia delante a la anchura de los hombros y bisagra la cadera.",
+      "Mantén el torso inclinado y fijo, con el abdomen firme y la barra cerca de los muslos.",
+      "Tira la barra hacia la parte baja del abdomen llevando los codos atrás y pegados al cuerpo.",
+      "Evita flexionar las muñecas o convertir el remo en un curl con los bíceps.",
+      "Sube la barra del suelo con la espalda neutra y las piernas, no tirando con la espalda redondeada."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "barbell-pendlay-row",
+    "name_en": "Barbell Pendlay Row",
+    "name_es": "Remo Pendlay con barra",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back",
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps",
+      "Lower Back"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate con la barra en el suelo sobre la mitad del pie y el torso casi paralelo al suelo.",
+      "Mantén la espalda plana y la cadera alta, sin cambiar el ángulo del torso entre repeticiones.",
+      "Tira la barra explosivamente al abdomen y devuélvela al suelo en cada repetición, parando por completo.",
+      "Evita levantar el torso para ayudarte; si lo haces, la carga es demasiado alta.",
+      "Deja la barra en el suelo con control en lugar de soltarla para proteger la espalda y el equipo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "smith-machine-bent-over-row",
+    "name_en": "Smith Machine Bent-Over Row",
+    "name_es": "Remo inclinado en máquina Smith",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back",
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps"
+    ],
+    "equipment": "smith-machine",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta los topes a la altura de las rodillas, agarra la barra en prono e inclina el torso desde la cadera.",
+      "Colócate de modo que la barra suba en línea recta hacia tu abdomen sin chocar con los muslos.",
+      "Tira la barra al ombligo apretando las escápulas y bájala controlando hasta estirar los brazos.",
+      "Evita quedarte demasiado cerca o lejos de la barra; la guía fija obliga a ajustar bien la posición.",
+      "Gira la barra para engancharla en los ganchos al terminar antes de soltarla."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-seal-row",
+    "name_en": "Barbell Seal Row",
+    "name_es": "Remo foca con barra",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back",
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca abajo en un banco alto y plano con la barra debajo y los brazos colgando estirados.",
+      "Mantén el pecho y la cadera pegados al banco y la cabeza en línea con el torso.",
+      "Tira la barra hasta tocar la parte inferior del banco y bájala despacio hasta extender los brazos.",
+      "Evita levantar el pecho del banco para ganar recorrido; pierdes el apoyo y la tensión.",
+      "Asegúrate de que el banco esté estable sobre cajones o soportes antes de tumbarte."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-t-bar-row",
+    "name_en": "Barbell T-Bar Row",
+    "name_es": "Remo en T con barra",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back",
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps",
+      "Lower Back"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate a horcajadas sobre la barra anclada, con un maneral en V bajo los discos y las rodillas flexionadas.",
+      "Mantén el torso inclinado unos 45° y la espalda neutra durante todo el tirón.",
+      "Tira del maneral hacia el pecho bajo llevando los codos atrás y baja hasta estirar los brazos.",
+      "Evita cargar demasiados discos grandes que te limiten el recorrido o te obliguen a balancearte.",
+      "Fija bien el extremo de la barra en el anclaje o en una esquina para que no se desplace."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "plate-loaded-t-bar-row-chest-supported",
+    "name_en": "Plate-Loaded T-Bar Row (Chest-Supported)",
+    "name_es": "Remo en T en máquina de discos (con apoyo de pecho)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back",
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sube a la plataforma, apoya el pecho en el cojín y agarra las asas con los brazos estirados.",
+      "Mantén el pecho pegado al cojín y el cuello neutro sin levantar la cabeza.",
+      "Tira de las asas hacia el torso juntando las escápulas y baja la carga con control.",
+      "Evita despegar el pecho del cojín para empujar con las piernas al final del tirón.",
+      "Sube y baja de la plataforma con la carga apoyada en su posición de reposo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-meadows-row",
+    "name_en": "Barbell Meadows Row",
+    "name_es": "Remo Meadows con barra",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats",
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps",
+      "Forearms"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Colócate perpendicular a la barra anclada, agarra el extremo en prono y apoya el antebrazo libre en la rodilla.",
+      "Mantén la cadera alta, el torso inclinado y la espalda neutra sin rotar.",
+      "Tira del extremo de la barra hacia la cadera con el codo abierto y baja hasta estirar el dorsal.",
+      "Evita girar el torso hacia arriba para mover la carga; el giro debe ser mínimo.",
+      "Usa discos pequeños para tener más recorrido y ancla bien la barra antes de empezar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-row-single-arm",
+    "name_en": "Dumbbell Row (Single-Arm)",
+    "name_es": "Remo con mancuerna (a una mano)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Rear Delts",
+      "Biceps"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya una rodilla y una mano en el banco, con la mancuerna colgando bajo el hombro del brazo libre.",
+      "Mantén la espalda plana y paralela al suelo, con los hombros a la misma altura.",
+      "Lleva la mancuerna hacia la cadera rozando el costado y bájala hasta estirar el dorsal.",
+      "Evita rotar el torso hacia arriba en cada repetición para levantar más peso.",
+      "Recoge y deja la mancuerna en el suelo con la espalda neutra y apoyado en el banco."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-bent-over-row",
+    "name_en": "Dumbbell Bent-Over Row",
+    "name_es": "Remo inclinado con mancuernas",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back",
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps",
+      "Lower Back"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta una mancuerna en cada mano, flexiona algo las rodillas e inclina el torso desde la cadera.",
+      "Mantén la espalda neutra y el peso del cuerpo repartido en todo el pie.",
+      "Tira ambas mancuernas hacia la cintura con los codos cerca del cuerpo y bájalas despacio.",
+      "Evita dejar caer la cabeza o redondear los hombros hacia delante al bajar.",
+      "Si notas la zona lumbar fatigada antes que la espalda alta, usa la versión con apoyo de pecho."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-chest-supported-row",
+    "name_en": "Dumbbell Chest-Supported Row",
+    "name_es": "Remo con mancuernas con apoyo de pecho",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Lats",
+      "Rear Delts",
+      "Biceps"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca abajo en un banco inclinado a unos 30-45° con una mancuerna en cada mano.",
+      "Mantén el pecho apoyado y las puntas de los pies firmes en el suelo para no deslizarte.",
+      "Rema llevando los codos atrás hasta juntar las escápulas y baja hasta estirar los brazos.",
+      "Evita estirar el cuello para mirar al frente; mantén la mirada hacia el suelo.",
+      "Al terminar, deja las mancuernas en el suelo antes de incorporarte del banco."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "kettlebell-row-single-arm",
+    "name_en": "Kettlebell Row (Single-Arm)",
+    "name_es": "Remo con kettlebell (a una mano)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps",
+      "Forearms"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Adopta una postura escalonada, apoya la mano libre en un banco o en el muslo y coge la kettlebell por el asa.",
+      "Mantén el torso inclinado y estable, con la cadera cuadrada al suelo.",
+      "Tira de la kettlebell hacia la cadera manteniendo la muñeca recta y bájala con control.",
+      "Evita que la kettlebell se balancee entre repeticiones; detén cada repetición abajo.",
+      "Agarra el asa con firmeza y asegúrate de tener espacio libre alrededor al remar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "seated-cable-row",
+    "name_en": "Cable Seated Row",
+    "name_es": "Remo sentado en polea",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Lats",
+      "Biceps",
+      "Rear Delts"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con los pies en el apoyo, las rodillas algo flexionadas y el maneral en V con brazos estirados.",
+      "Mantén el torso erguido y quieto, con el pecho alto y los hombros lejos de las orejas.",
+      "Lleva el maneral al abdomen juntando las escápulas y estira los brazos dejando que avancen los hombros.",
+      "Evita balancear el torso adelante y atrás para mover el peso con la zona lumbar.",
+      "Agarra y suelta el maneral con las rodillas flexionadas para no tirar de la espalda baja."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "wide-grip-cable-row",
+    "name_en": "Cable Seated Row (Wide Grip)",
+    "name_es": "Remo sentado en polea (agarre ancho)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Lats",
+      "Biceps"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Engancha una barra larga, agárrala en prono más ancho que los hombros y siéntate con la espalda erguida.",
+      "Mantén los codos abiertos a unos 60-70° del torso y el pecho alto.",
+      "Tira la barra hacia la parte baja del pecho apretando la zona media de la espalda y vuelve lento.",
+      "Evita encoger los hombros al final del tirón; termina el movimiento con las escápulas, no con el cuello.",
+      "Elige un peso que puedas frenar en la vuelta sin que te arrastre hacia delante."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "cable-seated-row-underhand-grip",
+    "name_en": "Cable Seated Row (Underhand Grip)",
+    "name_es": "Remo sentado en polea (agarre supino)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Agarra una barra recta con las palmas hacia arriba a la anchura de los hombros y siéntate erguido.",
+      "Mantén los codos pegados al cuerpo y el torso fijo durante el tirón.",
+      "Tira la barra hacia el ombligo llevando los codos atrás y deja que vuelva hasta estirar los brazos.",
+      "Evita levantar los codos o abrirlos; perderías el énfasis en los dorsales.",
+      "Mantén las muñecas rectas y alineadas con los antebrazos durante toda la serie."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "single-hand-cable-unilateral-rows",
+    "name_en": "Cable Seated Row (Single-Arm)",
+    "name_es": "Remo sentado en polea (a una mano)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Siéntate frente a la polea con un agarre individual y el brazo estirado hacia delante.",
+      "Mantén los hombros alineados y el torso estable, permitiendo solo una rotación leve.",
+      "Tira del agarre hacia la cadera llevando el codo atrás y extiende el brazo dejando que el hombro avance.",
+      "Evita girar todo el torso para completar la repetición; la fuerza debe venir de la espalda.",
+      "Empieza por el lado más débil y apoya la mano libre en el muslo para estabilizarte."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "wide-grip-cable-chest-pulls",
+    "name_en": "Cable Pull to Chest (Wide Grip)",
+    "name_es": "Jalón en polea al pecho (agarre ancho)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Lats",
+      "Biceps"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate frente a la polea con una barra larga a la altura del pecho y agárrala en prono, ancho.",
+      "Mantén el torso erguido y el pecho alto, con los codos a la altura de los hombros o algo por debajo.",
+      "Tira la barra hacia el pecho abriendo los codos y juntando las escápulas; vuelve hasta estirar los brazos.",
+      "Evita echar el cuerpo hacia atrás para acercar la barra; el torso no debe moverse.",
+      "Ajusta la altura de la polea y el peso antes de empezar para tirar sin tensión en el cuello."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "wide-grip-supp-seated-row",
+    "name_en": "Machine Chest-Supported Row (Wide Grip)",
+    "name_es": "Remo con apoyo de pecho en máquina (agarre ancho)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Lats",
+      "Biceps"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento y el cojín para que los agarres anchos queden a la altura del pecho con brazos estirados.",
+      "Mantén el pecho apoyado en el cojín y los codos abiertos hacia los lados.",
+      "Rema hacia atrás hasta que los codos pasen el torso, aprieta las escápulas y vuelve con control.",
+      "Evita separar el pecho del cojín al final de cada repetición para ganar recorrido.",
+      "Revisa el pasador y la altura del asiento antes de cada serie."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "neutral-grip-supp-rows",
+    "name_en": "Machine Chest-Supported Row (Neutral Grip)",
+    "name_es": "Remo con apoyo de pecho en máquina (agarre neutro)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Lats",
+      "Biceps",
+      "Rear Delts"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con el pecho contra el cojín y agarra las asas verticales con las palmas enfrentadas.",
+      "Mantén la espalda neutra y los codos cerca del cuerpo durante todo el remo.",
+      "Tira de las asas hasta que los codos queden detrás del torso y estira los brazos sin soltar la tensión.",
+      "Evita encoger los hombros o adelantar la cabeza al final del tirón.",
+      "Deja que el peso vuelva a su sitio de forma controlada al terminar la serie."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "unilateral-supp-rows-reverse-grip",
+    "name_en": "Machine Chest-Supported Row (Underhand Grip, Single-Arm)",
+    "name_es": "Remo con apoyo de pecho en máquina (agarre supino, a una mano)",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Biceps"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya el pecho en el cojín y agarra una sola asa con la palma hacia arriba y el brazo estirado.",
+      "Mantén el pecho fijo y los hombros paralelos al cojín, sin girar el torso.",
+      "Lleva el codo atrás pegado al costado hacia la cadera y vuelve despacio hasta estirar el dorsal.",
+      "Evita empujar con la mano libre contra la máquina para ayudarte en el tirón.",
+      "Trabaja ambos lados con la misma carga y repeticiones para mantener el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "plate-loaded-low-row",
+    "name_en": "Plate-Loaded Low Row",
+    "name_es": "Remo bajo en máquina de discos",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats",
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Biceps",
+      "Rear Delts"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que el pecho quede contra el cojín y agarra las asas bajas con brazos estirados.",
+      "Mantén el pecho apoyado y el torso erguido sin inclinarte hacia atrás.",
+      "Tira de las asas hacia las caderas llevando los codos atrás y vuelve hasta estirar la espalda.",
+      "Evita acortar el recorrido; deja que las escápulas se separen en cada estiramiento.",
+      "Carga los discos de forma equilibrada y retíralos al acabar para dejar la máquina segura."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "plate-loaded-high-row",
+    "name_en": "Plate-Loaded High Row",
+    "name_es": "Remo alto en máquina de discos",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats",
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Biceps"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Fija los muslos bajo el rodillo y agarra las asas altas con los brazos estirados por encima de la cabeza.",
+      "Mantén el pecho alto y una ligera inclinación del torso hacia delante, sin arquear la zona lumbar.",
+      "Tira de las asas hacia abajo y atrás hasta los costados del pecho y vuelve controlando hasta arriba.",
+      "Evita dejar que el peso te levante del asiento en la fase de subida.",
+      "Ajusta el rodillo de los muslos para quedar bien sujeto antes de cargar discos pesados."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "inverted-row",
+    "name_en": "Inverted Row",
+    "name_es": "Remo invertido",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Upper Back"
+    ],
+    "secondary_muscles": [
+      "Lats",
+      "Rear Delts",
+      "Biceps"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate bajo una barra fija a la altura de la cadera, agárrala en prono y extiende el cuerpo con talones apoyados.",
+      "Mantén el cuerpo recto como una tabla, con glúteos y abdomen contraídos.",
+      "Tira hasta que el pecho toque la barra juntando las escápulas y baja hasta estirar los brazos.",
+      "Evita que la cadera se hunda o que suba antes que el pecho en el tirón.",
+      "Comprueba que la barra del rack o la Smith esté bien trabada antes de colgarte."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "db-pull-overs",
+    "name_en": "Dumbbell Pullover",
+    "name_es": "Pullover con mancuerna",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Chest",
+      "Triceps"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate en el banco y sujeta una mancuerna con ambas manos sobre el pecho, codos ligeramente flexionados.",
+      "Mantén las costillas abajo y la zona lumbar estable, sin arquearla al bajar el peso.",
+      "Lleva la mancuerna en arco detrás de la cabeza hasta notar estiramiento y regrésala sobre el pecho.",
+      "Evita flexionar y extender los codos en cada repetición; el ángulo del codo debe ser fijo.",
+      "Sujeta la mancuerna por debajo del disco superior con las manos entrelazadas para que no se suelte."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "ez-bar-pullover",
+    "name_en": "EZ-Bar Pullover",
+    "name_es": "Pullover con barra EZ",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Chest",
+      "Triceps"
+    ],
+    "equipment": "ez-bar",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate en un banco plano con la barra EZ sobre el pecho y un agarre estrecho en prono.",
+      "Mantén la cabeza apoyada, los pies firmes y los codos algo flexionados durante todo el arco.",
+      "Baja la barra por detrás de la cabeza hasta sentir el estiramiento y súbela hasta encima del pecho.",
+      "Evita bajar más allá de donde controlas la barra o arquear la espalda para alcanzar más recorrido.",
+      "Usa una carga moderada; la barra pasa sobre tu cara y debes poder frenarla en todo momento."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-pullover",
+    "name_en": "Machine Pullover",
+    "name_es": "Pullover en máquina",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Chest"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para alinear los hombros con el eje de la máquina y apoya los codos en las almohadillas.",
+      "Mantén la espalda contra el respaldo y el cinturón ajustado si la máquina lo tiene.",
+      "Empuja con los codos hacia abajo en arco hasta los costados y vuelve despacio hasta estirar los dorsales.",
+      "Evita tirar con las manos; la presión debe hacerse con la parte trasera de los brazos.",
+      "Ajusta bien el eje de giro; una mala alineación carga el hombro en lugar del dorsal."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-straight-arms-pull-downs",
+    "name_en": "Cable Straight-Arm Pulldown",
+    "name_es": "Jalón con brazos rectos en polea",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Rear Delts"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate frente a la polea alta con una barra recta o cuerda, brazos estirados y torso algo inclinado.",
+      "Mantén los codos casi bloqueados y la espalda neutra, con la cadera ligeramente hacia atrás.",
+      "Lleva la barra en arco hasta los muslos apretando los dorsales y deja que suba hasta la altura de los ojos.",
+      "Evita doblar los codos y convertir el ejercicio en un press de tríceps.",
+      "Da un paso atrás tras enganchar la barra para que la carga no te arrastre al empezar."
+    ],
+    "aliases": [
+      "straight-bb-straight-arms-pull-downs"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "band-straight-arm-pulldown",
+    "name_en": "Band Straight-Arm Pulldown",
+    "name_es": "Jalón con brazos rectos con banda",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Lats"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Rear Delts"
+    ],
+    "equipment": "band",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ancla la banda por encima de la cabeza, agárrala con ambas manos y aléjate hasta notar tensión.",
+      "Mantén los brazos estirados, el pecho alto y una leve bisagra de cadera.",
+      "Baja las manos en arco hasta las caderas y vuelve lento hasta la altura de los hombros.",
+      "Evita encoger los hombros cuando la banda tira hacia arriba al volver.",
+      "Revisa el anclaje y el estado de la banda; si se suelta puede golpearte."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-shrug",
+    "name_en": "Barbell Shrug",
+    "name_es": "Encogimientos con barra",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Traps"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Forearms"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coge la barra del rack a la altura de los muslos con agarre prono a la anchura de los hombros.",
+      "Mantén los brazos estirados, el pecho alto y la barbilla neutra, sin mirar hacia arriba.",
+      "Eleva los hombros hacia las orejas en línea recta, aguanta un segundo y bájalos del todo.",
+      "Evita girar los hombros en círculos; el movimiento es solo arriba y abajo.",
+      "Saca la barra de un rack a media altura en lugar de levantarla desde el suelo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-shrug",
+    "name_en": "Dumbbell Shrug",
+    "name_es": "Encogimientos con mancuernas",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Traps"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Forearms"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de pie con una mancuerna a cada lado y las palmas mirando hacia el cuerpo.",
+      "Mantén los brazos relajados y estirados, con el cuello largo y la mirada al frente.",
+      "Sube los hombros lo más alto posible, haz una pausa breve arriba y baja hasta estirar el trapecio.",
+      "Evita doblar los codos para ayudarte; los brazos solo funcionan como ganchos.",
+      "Usa correas si el agarre falla antes que el trapecio en lugar de soltar las mancuernas."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "hex-bar-shrug",
+    "name_en": "Hex-Bar Shrug",
+    "name_es": "Encogimientos con barra hexagonal",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Traps"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Forearms"
+    ],
+    "equipment": "hex-bar",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate dentro de la barra hexagonal, agarra las asas altas y levántala con las piernas.",
+      "Mantén el torso erguido y los hombros alineados con las asas, sin inclinarte.",
+      "Encoge los hombros verticalmente, sostén arriba y bájalos de forma controlada.",
+      "Evita echar los hombros hacia delante; piensa en llevarlos hacia las orejas en vertical.",
+      "Levanta y deja la barra en el suelo con la espalda neutra, igual que en un peso muerto."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "smith-machine-shrug",
+    "name_en": "Smith Machine Shrug",
+    "name_es": "Encogimientos en máquina Smith",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Traps"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Forearms"
+    ],
+    "equipment": "smith-machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta los topes a media altura del muslo, agarra la barra en prono y desengánchala girando las muñecas.",
+      "Mantén el cuerpo pegado a la barra y la espalda recta durante todo el movimiento.",
+      "Eleva los hombros siguiendo la guía de la barra, aprieta arriba y baja con un recorrido completo.",
+      "Evita acortar el recorrido con cargas excesivas; la amplitud importa más que el peso.",
+      "Coloca los topes de seguridad justo bajo la posición inicial antes de empezar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-shrug",
+    "name_en": "Cable Shrug",
+    "name_es": "Encogimientos en polea",
+    "body_region": "Back",
+    "primary_muscles": [
+      "Traps"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Forearms"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Engancha una barra recta en la polea baja, agárrala en prono y ponte de pie cerca de la polea.",
+      "Mantén los brazos estirados y el torso vertical sin inclinarte hacia la polea.",
+      "Sube los hombros hacia las orejas con la tensión constante del cable y bájalos despacio.",
+      "Evita rebotar abajo; aprovecha que el cable mantiene la tensión durante todo el recorrido.",
+      "Coloca los pies firmes y lo bastante cerca para que el cable no te desequilibre hacia delante."
+    ],
+    "aliases": [],
+    "origin": "new"
+  }
+]

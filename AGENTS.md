@@ -78,8 +78,10 @@ table needs `user_id`. Row Level Security enforces user isolation.
 - Project is linked via `supabase/config.toml`; schema changes live **only** in
   `supabase/migrations/` (numbered, never edited after being applied).
 - `public.exercises` is the **global exercise catalogue** (text ids = app ids,
-  read-only for users via RLS). Its data is generated from the approved fitness
-  doc with `python3 scripts/catalogue-from-approved.py` — never hand-edit the seed.
+  read-only for users via RLS). Its data comes from
+  `docs/fitness/approved/catalogue-v2/*.json` (spec: `docs/fitness/catalogue-v2-spec.md`,
+  checked in CI by `scripts/validate-catalogue.py`) and is turned into a migration with
+  `python3 scripts/catalogue-v2-seed.py` — never hand-edit seed SQL.
 - User-owned tables (`workout_*`, `profiles`) have RLS by `auth.uid()`; they are
   not used by the app yet (needs authentication — future phase).
 - The browser may only use the public `anon` key (`VITE_SUPABASE_URL`,

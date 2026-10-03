@@ -1,0 +1,1686 @@
+[
+  {
+    "id": "back-squat",
+    "name_en": "Barbell Back Squat",
+    "name_es": "Sentadilla trasera con barra",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors",
+      "Lower Back"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya la barra sobre los trapecios, pies al ancho de hombros y puntas un poco hacia afuera.",
+      "Mantén el pecho alto y la espalda neutra, con las rodillas siguiendo la dirección de los pies.",
+      "Baja controlando hasta al menos paralelo y sube empujando el suelo con todo el pie.",
+      "Evita que las rodillas se cierren hacia dentro al subir desde el fondo.",
+      "Entrena dentro de un rack con los seguros ajustados justo debajo de tu profundidad."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "heels-elevated-hb-squats",
+    "name_en": "Barbell Back Squat (High Bar, Heels Elevated)",
+    "name_es": "Sentadilla trasera con barra (barra alta, talones elevados)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Adductors"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca los talones sobre un disco o cuña y la barra alta sobre los trapecios.",
+      "Mantén el torso lo más vertical posible y deja que las rodillas avancen sobre los pies.",
+      "Desciende profundo y lento, y sube sin despegar los talones de la cuña.",
+      "Evita usar una cuña tan alta que el peso se vaya a las puntas de los pies.",
+      "Asegura que la cuña esté firme y no se deslice antes de cargar la barra."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "barbell-front-squat",
+    "name_en": "Barbell Front Squat",
+    "name_es": "Sentadilla frontal con barra",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Upper Back",
+      "Abs"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya la barra sobre los deltoides frontales con los codos altos, en agarre limpio o cruzado.",
+      "Mantén los codos arriba y el torso vertical durante toda la bajada.",
+      "Baja entre las piernas hasta romper el paralelo y sube guiando con los codos.",
+      "Evita que los codos caigan, porque la barra rodará hacia delante.",
+      "Si pierdes la barra, suéltala hacia delante y aléjate; usa los seguros del rack."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-goblet-squat",
+    "name_en": "Dumbbell Goblet Squat",
+    "name_es": "Sentadilla goblet con mancuerna",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors",
+      "Abs"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta una mancuerna vertical contra el pecho, con los pies algo más abiertos que los hombros.",
+      "Mantén la mancuerna pegada al pecho y el tronco erguido mientras bajas.",
+      "Baja hasta que los codos rocen el interior de las rodillas y sube empujando con los talones.",
+      "Evita separar la mancuerna del cuerpo, porque te tira el tronco hacia delante.",
+      "Elige un peso que puedas sostener con firmeza todo el set sin que resbale."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "smith-machine-squat",
+    "name_en": "Smith Machine Squat",
+    "name_es": "Sentadilla en máquina Smith",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors"
+    ],
+    "equipment": "smith-machine",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate bajo la barra con los pies ligeramente por delante de la línea de la barra.",
+      "Mantén la espalda apoyada en la trayectoria fija y las rodillas alineadas con los pies.",
+      "Baja controlado hasta la profundidad que domines y sube sin bloquear las rodillas de golpe.",
+      "Evita poner los pies justo debajo de la barra, que carga demasiado las rodillas.",
+      "Ajusta los topes de seguridad de la Smith y gira la barra para engancharla al terminar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-box-squat",
+    "name_en": "Barbell Box Squat",
+    "name_es": "Sentadilla a cajón con barra",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Lower Back"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca un cajón detrás a la altura de paralelo y adopta una postura algo más ancha de lo normal.",
+      "Lleva la cadera atrás manteniendo las tibias casi verticales y el pecho arriba.",
+      "Siéntate suavemente en el cajón, pausa un instante sin relajarte y sube con fuerza.",
+      "Evita dejarte caer sobre el cajón ni balancearte hacia atrás para impulsarte.",
+      "Comprueba que el cajón sea estable y no se deslice antes de empezar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "plate-loaded-pendulum-squat",
+    "name_en": "Plate-Loaded Pendulum Squat",
+    "name_es": "Sentadilla péndulo en máquina de discos",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Adductors"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya la espalda y los hombros en las almohadillas con los pies en el centro de la plataforma.",
+      "Mantén la espalda baja pegada al respaldo durante todo el arco del movimiento.",
+      "Baja profundo dejando que las rodillas avancen y sube sin bloquear del todo arriba.",
+      "Evita despegar los talones de la plataforma en la parte baja.",
+      "Usa el seguro de la máquina al entrar y salir para no quedar atrapado bajo la carga."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "plate-loaded-belt-squat",
+    "name_en": "Plate-Loaded Belt Squat",
+    "name_es": "Sentadilla con cinturón en máquina de discos",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el cinturón a la cadera y coloca los pies en la plataforma al ancho de hombros.",
+      "Mantén el torso erguido y sujeta las asas solo para equilibrarte, sin tirar de ellas.",
+      "Baja en vertical hasta la profundidad deseada y sube extendiendo cadera y rodillas a la vez.",
+      "Evita que el cinturón se suba a la cintura, debe quedar sobre la cadera.",
+      "Revisa que la cadena y el mosquetón estén bien cerrados antes de cargar peso."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "bodyweight-squat",
+    "name_en": "Bodyweight Squat",
+    "name_es": "Sentadilla con peso corporal",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de pie con los pies al ancho de hombros y los brazos al frente para equilibrarte.",
+      "Mantén la espalda recta y el peso repartido entre talón y antepié.",
+      "Baja hasta donde mantengas la técnica y sube a ritmo constante sin rebotar.",
+      "Evita levantar los talones o redondear la espalda al llegar abajo.",
+      "Realízala sobre un suelo antideslizante y con espacio libre a tu alrededor."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-sumo-squat",
+    "name_en": "Dumbbell Sumo Squat",
+    "name_es": "Sentadilla sumo con mancuerna",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Adductors",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Quads"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Abre los pies bien por fuera de los hombros con las puntas hacia afuera y sujeta la mancuerna colgando.",
+      "Mantén el tronco vertical y empuja las rodillas hacia afuera, en la línea de los pies.",
+      "Baja dejando la mancuerna entre las piernas y sube apretando glúteos e interior del muslo.",
+      "Evita abrir tanto la postura que las rodillas no puedan seguir a las puntas.",
+      "Sube a un escalón o disco si la mancuerna toca el suelo antes de tu rango completo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "hack-squat-machine",
+    "name_en": "Plate-Loaded Hack Squat",
+    "name_es": "Sentadilla hack en máquina de discos",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Adductors"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya espalda y hombros en las almohadillas con los pies a la mitad de la plataforma.",
+      "Mantén la cadera y la espalda baja pegadas al respaldo en todo el recorrido.",
+      "Baja hasta que los muslos pasen el paralelo y sube sin bloquear las rodillas arriba.",
+      "Evita colocar los pies tan altos que pierdas el trabajo de cuádriceps.",
+      "Quita y pon los seguros de la máquina con las piernas ya extendidas."
+    ],
+    "aliases": [
+      "hack-squats"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "leg-press-quad-dominant",
+    "name_en": "Plate-Loaded Leg Press",
+    "name_es": "Prensa de piernas en máquina de discos",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Adductors"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con la espalda y la cadera pegadas al respaldo y los pies al ancho de cadera.",
+      "Mantén las rodillas alineadas con las puntas de los pies durante toda la bajada.",
+      "Baja la plataforma controlando hasta unos 90° de rodilla y empuja con todo el pie.",
+      "Evita que la cadera se despegue del asiento al final de la bajada.",
+      "No bloquees las rodillas arriba y suelta los seguros solo con la plataforma sujeta."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "plate-loaded-leg-press-single-leg",
+    "name_en": "Plate-Loaded Leg Press (Single-Leg)",
+    "name_es": "Prensa de piernas en máquina de discos (a una pierna)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Coloca un pie en el centro de la plataforma y apoya el otro en el suelo o el marco.",
+      "Mantén la pelvis nivelada y la rodilla de trabajo en línea con el segundo dedo del pie.",
+      "Baja despacio hasta donde la cadera siga apoyada y empuja hasta casi extender.",
+      "Evita que la rodilla se vaya hacia dentro al empujar.",
+      "Empieza con poca carga y mantén los seguros cerca hasta dominar el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-seated-leg-press",
+    "name_en": "Machine Seated Leg Press",
+    "name_es": "Prensa de piernas sentado en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Adductors"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para empezar con las rodillas a unos 90° y los pies planos en la plataforma.",
+      "Mantén la espalda apoyada y sujeta las asas laterales para estabilizarte.",
+      "Empuja de forma fluida hasta casi extender y regresa sin dejar caer las placas.",
+      "Evita acercar tanto el asiento que la cadera se enrolle en la posición inicial.",
+      "No bloquees las rodillas arriba y deja la pila de placas apoyada al terminar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "db-walking-lunges-long-steps",
+    "name_en": "Dumbbell Lunge (Walking)",
+    "name_es": "Zancada con mancuernas (caminando)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Sujeta una mancuerna en cada mano a los lados y colócate en un pasillo despejado.",
+      "Mantén el torso erguido y la rodilla delantera alineada con el pie al avanzar.",
+      "Da un paso largo, baja hasta casi tocar el suelo con la rodilla trasera y avanza con la otra.",
+      "Evita dar pasos cortos que cargan la rodilla delantera y quitan trabajo al glúteo.",
+      "Asegura que el recorrido esté libre de obstáculos antes de empezar."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "dumbbell-lunge-forward",
+    "name_en": "Dumbbell Lunge (Forward)",
+    "name_es": "Zancada con mancuernas (hacia delante)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ponte de pie con los pies a la anchura de cadera y una mancuerna en cada mano.",
+      "Mantén el pecho alto y el peso repartido sobre el pie delantero al aterrizar.",
+      "Da un paso adelante, baja con control y empuja con el talón delantero para volver.",
+      "Evita aterrizar con un golpe seco sobre el talón o con el pie demasiado cerca.",
+      "Usa una carga moderada; el frenado hacia delante exige mucho control."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-lunge-reverse",
+    "name_en": "Dumbbell Lunge (Reverse)",
+    "name_es": "Zancada con mancuernas (hacia atrás)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Glutes",
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Colócate de pie con las mancuernas a los costados y el peso en el pie de apoyo.",
+      "Mantén la tibia delantera casi vertical y el tronco ligeramente inclinado.",
+      "Lleva una pierna atrás, baja la rodilla cerca del suelo y vuelve empujando con el pie delantero.",
+      "Evita apoyar el pie trasero sobre la misma línea, que te desequilibra.",
+      "Apoya la rodilla trasera con suavidad, nunca la golpees contra el suelo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-lunge-reverse",
+    "name_en": "Barbell Lunge (Reverse)",
+    "name_es": "Zancada con barra (hacia atrás)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Glutes",
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors",
+      "Abs"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Saca la barra del rack sobre los trapecios y da dos pasos atrás para tener espacio.",
+      "Mantén el abdomen firme y la barra quieta, sin inclinarla hacia un lado.",
+      "Retrocede un paso, baja vertical y regresa empujando con el pie delantero.",
+      "Evita ir con prisa; cada repetición debe empezar con los pies juntos y estables.",
+      "Trabaja dentro del rack con los seguros puestos por si pierdes el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-lunge-lateral",
+    "name_en": "Dumbbell Lunge (Lateral)",
+    "name_es": "Zancada con mancuerna (lateral)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Adductors",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Quads"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ponte de pie con los pies juntos sosteniendo una mancuerna contra el pecho.",
+      "Mantén la pierna estirada recta y el pie de apoyo totalmente plano.",
+      "Da un paso lateral amplio, lleva la cadera atrás sobre esa pierna y empuja para volver.",
+      "Evita que la rodilla flexionada se adelante mucho por delante de la punta del pie.",
+      "Aumenta la amplitud del paso de forma progresiva según tu movilidad de aductores."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-lunge-curtsy",
+    "name_en": "Dumbbell Lunge (Curtsy)",
+    "name_es": "Zancada con mancuerna (cruzada)",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Quads",
+      "Adductors",
+      "Abductors"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Sujeta una mancuerna contra el pecho con los pies a la anchura de cadera.",
+      "Mantén la cadera mirando al frente aunque la pierna trasera se cruce por detrás.",
+      "Cruza un pie en diagonal hacia atrás, baja con control y vuelve empujando con la pierna delantera.",
+      "Evita girar el tronco o la pelvis hacia el lado de la pierna que cruza.",
+      "Limita la amplitud del cruce si notas que pierdes el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-step-up",
+    "name_en": "Dumbbell Step-Up",
+    "name_es": "Subida al cajón con mancuernas",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Adductors"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Coloca un pie entero sobre un cajón a la altura de la rodilla con mancuernas a los lados.",
+      "Mantén el torso ligeramente inclinado y la rodilla de apoyo en línea con el pie.",
+      "Sube empujando solo con la pierna de arriba y baja lento hasta tocar el suelo.",
+      "Evita impulsarte con la pierna de abajo para ayudarte a subir.",
+      "Usa un cajón estable y antideslizante; nunca uno que pueda volcar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-bulgarian-split-squat",
+    "name_en": "Dumbbell Bulgarian Split Squat",
+    "name_es": "Sentadilla búlgara con mancuernas",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors",
+      "Hamstrings"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya el empeine trasero en un banco y coloca el pie delantero a un paso largo por delante.",
+      "Mantén la cadera cuadrada al frente y el peso sobre el pie delantero.",
+      "Baja en vertical hasta que el muslo delantero quede paralelo y sube sin rebotar.",
+      "Evita empujar con la pierna trasera; solo sirve de apoyo.",
+      "Ajusta la distancia al banco antes de coger peso para no perder el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-split-squat",
+    "name_en": "Dumbbell Split Squat",
+    "name_es": "Sentadilla dividida con mancuernas",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors",
+      "Hamstrings"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Colócate en posición de zancada con los dos pies en el suelo y mancuernas a los lados.",
+      "Mantén los pies separados a lo ancho de cadera, como sobre dos raíles.",
+      "Baja la rodilla trasera hacia el suelo sin mover los pies y sube a la posición inicial.",
+      "Evita que la rodilla delantera se cierre hacia dentro al subir.",
+      "Desciende con control para no golpear la rodilla trasera contra el suelo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "ffe-db-split-squats",
+    "name_en": "Dumbbell Split Squat (Front-Foot-Elevated)",
+    "name_es": "Sentadilla dividida con mancuernas (pie delantero elevado)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya el pie delantero sobre un disco o step bajo y coloca el pie trasero atrás.",
+      "Mantén el torso erguido y deja que la rodilla delantera avance sobre el pie.",
+      "Baja profundo aprovechando la elevación y sube empujando con el pie delantero.",
+      "Evita usar una plataforma alta o inestable que te saque del equilibrio.",
+      "Verifica que el disco o step no se deslice antes de añadir carga."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "smith-machine-split-squat",
+    "name_en": "Smith Machine Split Squat",
+    "name_es": "Sentadilla dividida en máquina Smith",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Adductors"
+    ],
+    "equipment": "smith-machine",
+    "movement_pattern": "lunge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Colócate bajo la barra en posición de zancada con el pie delantero algo adelantado.",
+      "Mantén el tronco recto bajo la barra y la cadera mirando al frente.",
+      "Baja en vertical siguiendo la guía de la máquina y sube con la pierna delantera.",
+      "Evita acortar tanto la zancada que el talón delantero se levante.",
+      "Coloca los topes de seguridad a una altura justo por debajo de tu bajada."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "leg-extensions-toes-dorsiflexed-neutral",
+    "name_en": "Machine Leg Extension",
+    "name_es": "Extensión de cuádriceps en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Alinea la rodilla con el eje de la máquina y apoya el rodillo justo encima del tobillo.",
+      "Mantén la espalda apoyada y sujeta las asas para que la cadera no se levante.",
+      "Extiende hasta arriba, aprieta un segundo y baja controlando la carga.",
+      "Evita lanzar el peso con impulso o dejar caer el rodillo de golpe.",
+      "Empieza con cargas moderadas si notas molestias en la rodilla y consulta a un profesional si duele."
+    ],
+    "aliases": [
+      "leg-extensions-toes-dorsiflexed-out"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "machine-leg-extension-single-leg",
+    "name_en": "Machine Leg Extension (Single-Leg)",
+    "name_es": "Extensión de cuádriceps en máquina (a una pierna)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ajusta el respaldo y el rodillo como en la versión normal y apoya solo una pierna.",
+      "Mantén la pierna libre relajada y la cadera fija contra el asiento.",
+      "Extiende la rodilla por completo y vuelve despacio hasta casi tocar la pila.",
+      "Evita girar el tronco hacia el lado que trabaja para mover más peso.",
+      "Reduce la carga respecto a la versión bilateral para no sobrecargar la rodilla."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "prone-leg-curl-toes-dorsiflexed-neutral",
+    "name_en": "Machine Lying Leg Curl",
+    "name_es": "Curl femoral tumbado en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Calves"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca abajo con las rodillas justo fuera del banco y el rodillo sobre los talones.",
+      "Mantén la cadera pegada al banco y sujeta las asas durante todo el recorrido.",
+      "Flexiona las rodillas llevando los talones hacia los glúteos y baja en dos o tres segundos.",
+      "Evita levantar la cadera del banco para completar la repetición.",
+      "No dejes que la carga extienda las rodillas de golpe al final de la bajada."
+    ],
+    "aliases": [
+      "prone-leg-curls-toes-dorsiflexed-neutral",
+      "leg-curl"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "seated-leg-curl-toes-dorsiflexed-neutral",
+    "name_en": "Machine Seated Leg Curl",
+    "name_es": "Curl femoral sentado en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Calves"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el respaldo para alinear la rodilla con el eje y baja el rodillo sobre los muslos.",
+      "Mantén la espalda apoyada y el tronco algo inclinado adelante para estirar más los isquios.",
+      "Flexiona hasta llevar los talones bajo el asiento y vuelve despacio hasta casi extender.",
+      "Evita dejar el rodillo de muslos suelto, porque la cadera se levantará.",
+      "Ajusta bien el rodillo inferior sobre el tobillo para que no se deslice a la pantorrilla."
+    ],
+    "aliases": [
+      "seated-leg-curls-toes-dorsiflexed-neutral",
+      "seated-leg-curls-toes-dorsiflexed-out"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "machine-seated-leg-curl-single-leg",
+    "name_en": "Machine Seated Leg Curl (Single-Leg)",
+    "name_es": "Curl femoral sentado en máquina (a una pierna)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Calves"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ajusta la máquina como en la versión bilateral y coloca solo una pierna sobre el rodillo.",
+      "Mantén ambos muslos sujetos por el rodillo superior y la cadera quieta.",
+      "Flexiona la rodilla al máximo, pausa breve y regresa lento hasta casi extender.",
+      "Evita rotar la pierna hacia fuera o hacia dentro para ayudarte.",
+      "Elige una carga menor y compensa con más control en la fase de bajada."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-standing-leg-curl",
+    "name_en": "Machine Standing Leg Curl",
+    "name_es": "Curl femoral de pie en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Calves"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya el muslo en la almohadilla y coloca el rodillo detrás del tobillo de la pierna que trabaja.",
+      "Mantén la cadera pegada al soporte y el tronco quieto sujetando las asas.",
+      "Lleva el talón hacia el glúteo y baja despacio sin dejar que la carga caiga.",
+      "Evita arquear la espalda baja para subir el talón más alto.",
+      "Ajusta la altura del soporte para que la rodilla quede alineada con el eje."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "nordic-hamstring-curl",
+    "name_en": "Nordic Hamstring Curl",
+    "name_es": "Curl nórdico de isquiotibiales",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Calves"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Arrodíllate sobre una colchoneta con los tobillos bien fijados bajo un soporte o por un compañero.",
+      "Mantén una línea recta de rodillas a cabeza, con glúteos y abdomen contraídos.",
+      "Déjate caer hacia delante lo más lento posible y vuelve ayudándote con las manos si hace falta.",
+      "Evita doblar la cadera para acortar la palanca durante la bajada.",
+      "Coloca las manos listas para frenar la caída y progresa el rango poco a poco."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-deadlift",
+    "name_en": "Barbell Deadlift",
+    "name_es": "Peso muerto con barra",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Lower Back",
+      "Quads",
+      "Traps",
+      "Forearms"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca los pies al ancho de cadera con la barra sobre el centro del pie y agárrala por fuera de las piernas.",
+      "Mantén la espalda neutra y la barra pegada al cuerpo durante todo el ascenso.",
+      "Empuja el suelo con las piernas, extiende la cadera arriba y baja deslizando la barra por los muslos.",
+      "Evita que la cadera suba antes que la barra y redondee la espalda.",
+      "Tensa el abdomen antes de cada repetición y deja la barra en el suelo en cada rep si pierdes la postura."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-deadlift-sumo",
+    "name_en": "Barbell Deadlift (Sumo)",
+    "name_es": "Peso muerto con barra (sumo)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Glutes",
+      "Adductors"
+    ],
+    "secondary_muscles": [
+      "Quads",
+      "Hamstrings",
+      "Lower Back"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Abre los pies bien por fuera de los hombros, puntas hacia afuera y agarra la barra entre las piernas.",
+      "Mantén el pecho alto y empuja las rodillas hacia afuera sobre las puntas de los pies.",
+      "Separa la barra del suelo empujando con las piernas y termina juntando la cadera con la barra.",
+      "Evita que las rodillas se cierren hacia dentro al despegar la barra.",
+      "Calienta los aductores con series ligeras antes de cargar la barra."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "hex-bar-deadlift",
+    "name_en": "Hex-Bar Deadlift",
+    "name_es": "Peso muerto con barra hexagonal",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Quads",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Lower Back",
+      "Traps",
+      "Forearms"
+    ],
+    "equipment": "hex-bar",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate en el centro de la barra hexagonal con los pies al ancho de cadera y agarra las asas.",
+      "Mantén los brazos estirados, el pecho alto y la espalda neutra al subir.",
+      "Empuja el suelo hasta quedar erguido y baja la barra controlando la cadera y las rodillas.",
+      "Evita descentrarte dentro de la barra, que la inclina hacia delante o atrás.",
+      "Revisa que los discos estén asegurados con collarines antes de levantar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "romanian-deadlift",
+    "name_en": "Barbell Romanian Deadlift",
+    "name_es": "Peso muerto rumano con barra",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Lower Back",
+      "Forearms"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Empieza de pie con la barra a la altura de la cadera y agarre por fuera de los muslos.",
+      "Mantén las rodillas ligeramente flexionadas y fijas, con la espalda neutra.",
+      "Lleva la cadera atrás deslizando la barra por las piernas hasta notar el estiramiento y sube.",
+      "Evita convertirlo en sentadilla doblando más las rodillas al bajar.",
+      "Baja solo hasta donde puedas mantener la espalda neutra, aunque no llegues a media tibia."
+    ],
+    "aliases": [
+      "bb-rdl"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "dumbbell-romanian-deadlift",
+    "name_en": "Dumbbell Romanian Deadlift",
+    "name_es": "Peso muerto rumano con mancuernas",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Lower Back",
+      "Forearms"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta una mancuerna en cada mano delante de los muslos con los pies al ancho de cadera.",
+      "Mantén las mancuernas pegadas a las piernas y los hombros hacia atrás.",
+      "Empuja la cadera atrás bajando las mancuernas por las tibias y vuelve apretando glúteos.",
+      "Evita dejar que las mancuernas se separen del cuerpo y cuelguen hacia delante.",
+      "Detén la bajada cuando la espalda empiece a redondearse."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-romanian-deadlift-single-leg",
+    "name_en": "Dumbbell Romanian Deadlift (Single-Leg)",
+    "name_es": "Peso muerto rumano con mancuerna (a una pierna)",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Hamstrings",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Lower Back",
+      "Abductors"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ponte sobre una pierna con la rodilla algo flexionada y la mancuerna en la mano contraria.",
+      "Mantén la cadera nivelada y la pierna libre alineada con el tronco al inclinarte.",
+      "Inclínate hasta que el tronco quede casi paralelo al suelo y vuelve empujando con el talón.",
+      "Evita abrir la cadera de la pierna trasera hacia el techo.",
+      "Toca una pared o un soporte con la mano libre si necesitas más equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-stiff-leg-deadlift",
+    "name_en": "Barbell Stiff-Leg Deadlift",
+    "name_es": "Peso muerto con piernas rígidas con barra",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Lower Back",
+      "Forearms"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate con la barra sobre el centro del pie y las piernas casi rectas, sin bloquear.",
+      "Mantén la espalda neutra y las rodillas casi extendidas en todo el recorrido.",
+      "Baja la barra cerca de las piernas hasta el suelo o tu límite y sube extendiendo la cadera.",
+      "Evita tirar con la espalda redondeada para alcanzar el suelo.",
+      "Usa discos de tamaño normal o eleva la barra si no llegas al suelo con buena postura."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-good-morning",
+    "name_en": "Barbell Good Morning",
+    "name_es": "Buenos días con barra",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Hamstrings",
+      "Lower Back"
+    ],
+    "secondary_muscles": [
+      "Glutes"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya la barra sobre los trapecios como en la sentadilla, con los pies al ancho de cadera.",
+      "Mantén la espalda neutra y las rodillas ligeramente flexionadas durante la bisagra.",
+      "Lleva la cadera atrás inclinando el tronco hasta casi paralelo y sube apretando glúteos.",
+      "Evita bajar el pecho redondeando la espalda en lugar de mover la cadera.",
+      "Empieza con cargas ligeras y hazlo dentro del rack con los seguros puestos."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-pull-through",
+    "name_en": "Cable Pull-Through",
+    "name_es": "Pull-through en polea",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de espaldas a la polea baja con la cuerda entre las piernas y da dos pasos adelante.",
+      "Mantén los brazos estirados y la espalda neutra mientras llevas la cadera atrás.",
+      "Deja que la cuerda pase entre las piernas y extiende la cadera apretando los glúteos.",
+      "Evita tirar de la cuerda con los brazos o hacer una sentadilla.",
+      "Termina erguido sin hiperextender la zona lumbar al final."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "hor-back-extensions-glutes-dominant",
+    "name_en": "Back Extension (Horizontal, Glute Focus)",
+    "name_es": "Hiperextensión (horizontal, enfoque glúteo)",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Lower Back"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el apoyo justo por debajo de la cadera para que pueda flexionarse libremente.",
+      "Mantén la parte alta de la espalda ligeramente redondeada y la mirada al suelo.",
+      "Baja flexionando la cadera y sube apretando los glúteos hasta alinear el cuerpo.",
+      "Evita subir arqueando la zona lumbar por encima de la línea del cuerpo.",
+      "Sube de forma controlada, sin balanceos que tiren de la espalda baja."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "weighted-45-back-extensions",
+    "name_en": "Back Extension (45°)",
+    "name_es": "Hiperextensión (45°)",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Lower Back",
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta la almohadilla a la altura de la cadera y fija los talones bajo los rodillos.",
+      "Mantén la columna neutra y los brazos cruzados o sujetando el lastre contra el pecho.",
+      "Baja flexionando la cadera hasta notar estiramiento y sube hasta alinear tronco y piernas.",
+      "Evita pasar de la línea recta arqueando fuerte la zona lumbar arriba.",
+      "Añade lastre solo cuando completes las repeticiones con técnica limpia."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "back-extension-single-leg",
+    "name_en": "Back Extension (Single-Leg)",
+    "name_es": "Hiperextensión (a una pierna)",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Lower Back"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Colócate en el banco de 45° con un solo pie fijado y la otra pierna suelta detrás.",
+      "Mantén la pelvis nivelada sin dejar que la cadera libre caiga o rote.",
+      "Desciende flexionando la cadera de apoyo y sube contrayendo el glúteo de esa pierna.",
+      "Evita girar el tronco para compensar la falta de fuerza de un lado.",
+      "Domina primero la versión a dos piernas antes de pasar a esta."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-reverse-hyperextension",
+    "name_en": "Machine Reverse Hyperextension",
+    "name_es": "Hiperextensión inversa en máquina",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Lower Back"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca abajo con la cadera en el borde del banco y los tobillos bajo el rodillo o la correa.",
+      "Mantén el tronco pegado al banco y sujeta las asas con firmeza.",
+      "Eleva las piernas hasta la línea del cuerpo con los glúteos y déjalas bajar controladas.",
+      "Evita balancear las piernas con impulso para subir más alto.",
+      "No pases de la horizontal al subir para no arquear en exceso la zona lumbar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-hip-thrust",
+    "name_en": "Barbell Hip Thrust",
+    "name_es": "Hip thrust con barra",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Quads"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya la parte baja de las escápulas en un banco y coloca la barra acolchada sobre la cadera.",
+      "Mantén la barbilla recogida y las costillas abajo durante la subida.",
+      "Empuja con los talones hasta alinear rodillas, cadera y hombros, pausa y baja controlado.",
+      "Evita terminar arqueando la zona lumbar en vez de extender la cadera.",
+      "Usa una almohadilla en la barra y un banco fijo que no se deslice."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-hip-thrust",
+    "name_en": "Machine Hip Thrust",
+    "name_es": "Hip thrust en máquina",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Quads"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya la espalda en el respaldo y ajusta el cinturón o la almohadilla sobre la cadera.",
+      "Mantén los pies planos y las tibias verticales en la posición alta.",
+      "Eleva la cadera hasta la extensión completa, aprieta un segundo y desciende despacio.",
+      "Evita empujar con las puntas de los pies, que desplaza el trabajo a los cuádriceps.",
+      "Ajusta bien el cinturón antes de cargar para que no se mueva durante la serie."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "smith-machine-hip-thrust",
+    "name_en": "Smith Machine Hip Thrust",
+    "name_es": "Hip thrust en máquina Smith",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Quads"
+    ],
+    "equipment": "smith-machine",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca un banco perpendicular a la Smith y sitúa la barra acolchada sobre el pliegue de la cadera.",
+      "Mantén la mirada al frente y el tronco rígido al subir y bajar.",
+      "Sube la cadera hasta alinearla con hombros y rodillas y baja hasta casi tocar el suelo.",
+      "Evita colocar los pies tan lejos que los isquios dominen el movimiento.",
+      "Gira la barra para desengancharla solo cuando estés bien colocado debajo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "hip-thrust-single-leg",
+    "name_en": "Hip Thrust (Single-Leg)",
+    "name_es": "Hip thrust (a una pierna)",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya la espalda alta en un banco con un pie en el suelo y la otra rodilla al pecho.",
+      "Mantén la pelvis nivelada sin que caiga hacia el lado de la pierna libre.",
+      "Empuja con el talón de apoyo hasta extender la cadera y baja de forma controlada.",
+      "Evita girar la cadera para ganar altura en la subida.",
+      "Coloca el banco contra una pared para que no se desplace."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-glute-bridge",
+    "name_en": "Barbell Glute Bridge",
+    "name_es": "Puente de glúteo con barra",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate en el suelo con la barra acolchada sobre la cadera y los pies cerca de los glúteos.",
+      "Mantén la espalda alta apoyada y las rodillas separadas al ancho de cadera.",
+      "Eleva la cadera hasta la extensión, mantén un segundo y baja hasta rozar el suelo.",
+      "Evita separar los talones del suelo al subir.",
+      "Usa discos grandes para poder rodar la barra sobre las piernas al colocarte."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "glute-bridge",
+    "name_en": "Glute Bridge",
+    "name_es": "Puente de glúteo",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca arriba con las rodillas flexionadas y los pies planos al ancho de cadera.",
+      "Mantén la pelvis ligeramente retroversa y el abdomen activo durante la subida.",
+      "Sube la cadera apretando glúteos hasta formar una línea recta y baja lento.",
+      "Evita empujar con la espalda baja en lugar de con los glúteos.",
+      "Realízalo sobre una colchoneta para proteger la columna del suelo duro."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "glute-bridge-single-leg",
+    "name_en": "Glute Bridge (Single-Leg)",
+    "name_es": "Puente de glúteo (a una pierna)",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Túmbate boca arriba con un pie apoyado cerca del glúteo y la otra pierna estirada en el aire.",
+      "Mantén ambas caderas a la misma altura durante todo el movimiento.",
+      "Eleva la cadera empujando con el talón de apoyo, pausa arriba y baja sin apoyarte del todo.",
+      "Evita que la cadera de la pierna libre se hunda al subir.",
+      "Detén la serie si notas calambre en los isquios y acerca más el pie al glúteo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-glute-kickback",
+    "name_en": "Cable Glute Kickback",
+    "name_es": "Patada de glúteo en polea",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ajusta la tobillera a la polea baja y sujétate al soporte con el tronco algo inclinado.",
+      "Mantén la pelvis quieta y el abdomen firme mientras la pierna va hacia atrás.",
+      "Lleva la pierna atrás y arriba apretando el glúteo y regresa sin que el peso toque la pila.",
+      "Evita arquear la zona lumbar para llevar la pierna más alto.",
+      "Comprueba que la tobillera esté bien cerrada antes de empezar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-glute-kickback",
+    "name_en": "Machine Glute Kickback",
+    "name_es": "Patada de glúteo en máquina",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Glutes"
+    ],
+    "secondary_muscles": [
+      "Hamstrings"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya el pecho o los antebrazos en el soporte y coloca el pie en la plataforma o rodillo.",
+      "Mantén la espalda neutra y la cadera de apoyo fija al soporte.",
+      "Empuja hacia atrás hasta extender la cadera y vuelve despacio hasta notar estiramiento.",
+      "Evita rotar la cadera hacia afuera al final de la patada.",
+      "Ajusta la altura del apoyo para que la rodilla de trabajo no choque con la máquina."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-hip-abduction",
+    "name_en": "Machine Hip Abduction",
+    "name_es": "Abducción de cadera en máquina",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Abductors",
+      "Glutes"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con la espalda apoyada y las almohadillas por fuera de las rodillas.",
+      "Mantén la cadera pegada al asiento y el tronco quieto durante la apertura.",
+      "Abre las piernas hasta tu rango máximo, pausa y ciérralas sin que las placas choquen.",
+      "Evita balancear el tronco hacia delante y atrás para mover más peso.",
+      "Ajusta la apertura inicial a tu movilidad para no forzar la cadera."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-hip-adduction",
+    "name_en": "Machine Hip Adduction",
+    "name_es": "Aducción de cadera en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Adductors"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con las almohadillas por dentro de las rodillas y elige una apertura cómoda.",
+      "Mantén la espalda apoyada y la pelvis estable en el asiento.",
+      "Cierra las piernas hasta juntar las almohadillas y ábrelas lento controlando el estiramiento.",
+      "Evita que las piernas se abran de golpe al final de cada repetición.",
+      "Empieza con una apertura reducida y amplíala poco a poco entre series."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-hip-abduction",
+    "name_en": "Cable Hip Abduction",
+    "name_es": "Abducción de cadera en polea",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Abductors",
+      "Glutes"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ponte de lado a la polea baja con la tobillera en el pie más alejado.",
+      "Mantén el tronco recto sin inclinarte hacia el lado contrario al de la pierna.",
+      "Separa la pierna hacia fuera con la punta al frente y vuelve controlando el cable.",
+      "Evita girar la punta del pie hacia arriba, que cambia el músculo trabajado.",
+      "Sujétate a la máquina con la mano cercana para mantener el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-hip-adduction",
+    "name_en": "Cable Hip Adduction",
+    "name_es": "Aducción de cadera en polea",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Adductors"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ponte de lado a la polea baja con la tobillera en el pie más cercano a la máquina.",
+      "Mantén la pierna de apoyo firme y la cadera mirando al frente.",
+      "Lleva la pierna por delante de la de apoyo cruzando la línea media y vuelve lento.",
+      "Evita inclinar el tronco para ayudar a cerrar la pierna.",
+      "Usa una carga ligera; los aductores se sobrecargan con facilidad."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "band-lateral-walk",
+    "name_en": "Band Lateral Walk",
+    "name_es": "Caminata lateral con banda",
+    "body_region": "Glutes",
+    "primary_muscles": [
+      "Abductors",
+      "Glutes"
+    ],
+    "secondary_muscles": [],
+    "equipment": "band",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca una banda elástica sobre las rodillas o los tobillos y flexiona un poco cadera y rodillas.",
+      "Mantén la tensión de la banda y la postura semiflexionada en todos los pasos.",
+      "Da pasos laterales cortos y controlados sin juntar los pies del todo.",
+      "Evita balancear el tronco de lado a lado al dar cada paso.",
+      "Revisa que la banda no esté agrietada antes de usarla."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "standing-calf-raises-toes-neutral",
+    "name_en": "Machine Standing Calf Raise",
+    "name_es": "Elevación de talones de pie en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Calves"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca los hombros bajo las almohadillas y la parte delantera de los pies en el borde del escalón.",
+      "Mantén las rodillas extendidas sin bloquear y el cuerpo erguido.",
+      "Baja los talones hasta el estiramiento, pausa y sube hasta la punta de los pies.",
+      "Evita rebotar abajo para usar el rebote elástico en lugar del músculo.",
+      "Apoya bien la planta en el escalón para que el pie no se resbale."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "leg-press-calf-raises-toes-neutral",
+    "name_en": "Plate-Loaded Leg Press Calf Raise",
+    "name_es": "Elevación de talones en prensa de discos",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Calves"
+    ],
+    "secondary_muscles": [],
+    "equipment": "plate-loaded",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate en la prensa con solo la parte delantera de los pies en el borde inferior de la plataforma.",
+      "Mantén las rodillas casi extendidas y fijas durante toda la serie.",
+      "Empuja con las puntas hasta la extensión del tobillo y vuelve despacio al estiramiento.",
+      "Evita doblar las rodillas para empujar la plataforma con los cuádriceps.",
+      "Deja los seguros de la prensa puestos por si los pies resbalan del borde."
+    ],
+    "aliases": [
+      "leg-press-calf-raises-neutral",
+      "calf"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "machine-seated-calf-raise",
+    "name_en": "Machine Seated Calf Raise",
+    "name_es": "Elevación de talones sentado en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Calves"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con la almohadilla sobre la parte baja de los muslos y las puntas en la plataforma.",
+      "Mantén el tronco erguido y las rodillas flexionadas a 90° en todo momento.",
+      "Baja los talones al máximo, pausa y sube hasta la contracción completa.",
+      "Evita impulsarte con el tronco o los brazos para mover la palanca.",
+      "Retira el seguro solo con la almohadilla bien ajustada sobre los muslos."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-donkey-calf-raise",
+    "name_en": "Machine Donkey Calf Raise",
+    "name_es": "Elevación de talones tipo burro en máquina",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Calves"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Inclínate con la cadera bajo la almohadilla y apoya los antebrazos en el soporte.",
+      "Mantén la espalda neutra y la cadera flexionada sin moverla durante la serie.",
+      "Baja los talones hasta un estiramiento profundo y sube hasta la punta de los pies.",
+      "Evita flexionar las rodillas para ayudarte a subir.",
+      "Ajusta la almohadilla a la cadera, nunca sobre la espalda baja."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "smith-machine-calf-raise",
+    "name_en": "Smith Machine Calf Raise",
+    "name_es": "Elevación de talones en máquina Smith",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Calves"
+    ],
+    "secondary_muscles": [],
+    "equipment": "smith-machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca un step bajo la barra y apoya la parte delantera de los pies en su borde.",
+      "Mantén el cuerpo vertical bajo la barra y las rodillas casi extendidas.",
+      "Sube a la punta de los pies, mantén un segundo y baja hasta el estiramiento.",
+      "Evita acortar el recorrido quedándote solo en la mitad alta.",
+      "Comprueba que el step no se desplace y ajusta los topes de la Smith."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-standing-calf-raise-single-leg",
+    "name_en": "Dumbbell Standing Calf Raise (Single-Leg)",
+    "name_es": "Elevación de talón de pie con mancuerna (a una pierna)",
+    "body_region": "Legs",
+    "primary_muscles": [
+      "Calves"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ponte sobre un escalón con un pie, la mancuerna en la mano de ese lado y la otra mano en un apoyo.",
+      "Mantén la rodilla de apoyo extendida y el tobillo alineado, sin vencerse hacia fuera.",
+      "Baja el talón por debajo del escalón y sube lo más alto posible con control.",
+      "Evita apoyarte demasiado en la mano libre para ayudarte a subir.",
+      "Usa un escalón firme y sujétate siempre a algo estable."
+    ],
+    "aliases": [],
+    "origin": "new"
+  }
+]

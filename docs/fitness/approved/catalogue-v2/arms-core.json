@@ -1,0 +1,1458 @@
+[
+  {
+    "id": "ez-bb-preacher-curls",
+    "name_en": "EZ-Bar Preacher Curl",
+    "name_es": "Curl predicador con barra Z",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "ez-bar",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que las axilas queden pegadas al borde superior del cojín predicador.",
+      "Mantén la parte trasera de los brazos apoyada en el cojín durante toda la serie.",
+      "Sube la barra Z hasta contraer el bíceps y baja en 2-3 segundos hasta casi extender los codos.",
+      "Evita levantar los codos del cojín o echar los hombros hacia delante para subir la barra.",
+      "No dejes caer la barra en el fondo: controla la extensión final para no forzar el codo."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "single-db-preacher-curls",
+    "name_en": "Dumbbell Preacher Curl (Single-Arm)",
+    "name_es": "Curl predicador con mancuerna (a una mano)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya el tríceps entero en el cojín con la axila sobre el borde y la mancuerna en supinación.",
+      "Mantén el hombro bajo y el torso quieto; la mano libre puede sujetar el cojín para estabilizarte.",
+      "Flexiona el codo hasta arriba sin despegar el brazo y baja despacio hasta casi la extensión.",
+      "Evita girar el torso o rotar la muñeca hacia dentro para terminar la repetición.",
+      "Usa un peso que puedas frenar abajo; un rebote en extensión completa carga mucho el codo."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "standing-dumbbell-curl",
+    "name_en": "Dumbbell Curl (Standing)",
+    "name_es": "Curl con mancuernas (de pie)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de pie con los pies a la anchura de la cadera y las mancuernas a los lados, palmas al frente.",
+      "Mantén los codos pegados al costado y el abdomen firme sin inclinarte hacia atrás.",
+      "Sube las mancuernas hasta la altura del hombro y bájalas en 2-3 segundos hasta extender.",
+      "Evita balancear el cuerpo o adelantar los codos para ayudarte con el impulso.",
+      "Si necesitas balancearte para subir, baja el peso y conserva la técnica limpia."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "standing-db-offset-grip-curls",
+    "name_en": "Dumbbell Curl (Standing, Offset Grip)",
+    "name_es": "Curl con mancuernas (de pie, agarre descentrado)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta cada mancuerna con el meñique pegado al disco interior, dejando más peso hacia el pulgar.",
+      "Mantén los codos fijos junto al torso y las muñecas neutras, sin doblarlas hacia atrás.",
+      "Sube girando la palma hacia arriba hasta el final y baja lento resistiendo la rotación.",
+      "Evita soltar la supinación arriba; el agarre descentrado busca justo esa torsión extra.",
+      "Elige un peso menor que en el curl normal: el agarre descentrado exige más a la muñeca."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "db-curls-offset-grip",
+    "name_en": "Dumbbell Curl (Incline, Offset Grip)",
+    "name_es": "Curl con mancuernas (inclinado, agarre descentrado)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Recuéstate en un banco inclinado con los brazos colgando y el meñique pegado al disco interior.",
+      "Mantén la espalda y la cabeza apoyadas y los brazos verticales detrás del torso.",
+      "Sube girando la palma hacia arriba sin adelantar el codo y baja hasta el estiramiento completo.",
+      "Evita despegar los hombros del banco o llevar los codos hacia delante al subir.",
+      "Baja siempre controlado: el estiramiento del bíceps en esta posición es intenso."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "hammer-curls",
+    "name_en": "Dumbbell Hammer Curl",
+    "name_es": "Curl martillo con mancuernas",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps",
+      "Forearms"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de pie con las mancuernas a los lados y las palmas mirándose entre sí.",
+      "Mantén las muñecas rectas y los codos pegados al cuerpo durante todo el recorrido.",
+      "Sube la mancuerna como un martillo hasta el hombro y baja en 2-3 segundos.",
+      "Evita girar la palma hacia arriba o mover el hombro hacia delante al subir.",
+      "No balancees el tronco; si pierdes la postura, reduce el peso."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "db-spider-hammer-curls",
+    "name_en": "Dumbbell Spider Curl (Neutral Grip)",
+    "name_es": "Curl araña con mancuernas (agarre neutro)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps",
+      "Forearms"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca abajo en un banco inclinado con el pecho apoyado y los brazos colgando verticales.",
+      "Mantén los brazos perpendiculares al suelo y las palmas enfrentadas durante toda la serie.",
+      "Sube las mancuernas sin mover los codos, aprieta arriba un segundo y baja lento.",
+      "Evita llevar los codos hacia atrás o hacia delante para ganar recorrido.",
+      "Apoya bien los pies y el pecho para que el banco no se desplace durante la serie."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "low-cable-ropes-curls",
+    "name_en": "Cable Hammer Curl (Rope)",
+    "name_es": "Curl martillo en polea (cuerda)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps",
+      "Forearms"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca la polea abajo, sujeta la cuerda con palmas enfrentadas y da un paso atrás.",
+      "Mantén los codos pegados al torso y el cuerpo erguido sin inclinarte hacia atrás.",
+      "Sube la cuerda hasta el pecho separando ligeramente los extremos y baja con control.",
+      "Evita que el cable te arrastre los codos hacia delante en la bajada.",
+      "Mantén la tensión del cable al final y no sueltes la cuerda de golpe al terminar."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "barbell-curl",
+    "name_en": "Barbell Curl",
+    "name_es": "Curl con barra",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta la barra con agarre supino a la anchura de los hombros y los brazos extendidos.",
+      "Mantén los glúteos y el abdomen activos para que el tronco no se arquee hacia atrás.",
+      "Sube la barra en arco hasta el pecho sin mover los codos y baja en 2-3 segundos.",
+      "Evita dar un golpe de cadera para arrancar la barra desde abajo.",
+      "Si notas tirantez en las muñecas con la barra recta, usa una barra Z."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "ez-bar-curl",
+    "name_en": "EZ-Bar Curl",
+    "name_es": "Curl con barra Z",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "ez-bar",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta la barra Z en las curvas interiores o exteriores con las palmas semisupinadas.",
+      "Mantén el pecho alto y los codos justo delante de las costillas.",
+      "Flexiona los codos hasta que la barra llegue cerca del pecho y baja hasta casi extender.",
+      "Evita encoger los hombros o llevar los codos hacia arriba al final del recorrido.",
+      "Mantén la espalda neutra; no compenses el peso inclinándote hacia atrás."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-curl-incline",
+    "name_en": "Dumbbell Curl (Incline)",
+    "name_es": "Curl con mancuernas (inclinado)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el banco a unos 45-60 grados, apoya la espalda y deja los brazos colgando con palmas al frente.",
+      "Mantén los hombros pegados al respaldo y los codos apuntando al suelo.",
+      "Sube las mancuernas sin adelantar los codos y baja hasta estirar el bíceps por completo.",
+      "Evita despegar la cabeza o los hombros del banco al acercarte al final de la serie.",
+      "Empieza con poco peso: la posición estirada carga mucho la parte delantera del hombro."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-concentration-curl",
+    "name_en": "Dumbbell Concentration Curl",
+    "name_es": "Curl concentrado con mancuerna",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Siéntate en un banco con las piernas abiertas y apoya el tríceps en la cara interna del muslo.",
+      "Mantén el tronco inclinado y quieto, con la mano libre apoyada en la otra rodilla.",
+      "Sube la mancuerna hacia el hombro girando el meñique hacia arriba y baja despacio.",
+      "Evita usar la pierna o el tronco para empujar la mancuerna hacia arriba.",
+      "Baja hasta casi extender el codo sin dejar caer el peso en el último tramo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-curl-straight-bar",
+    "name_en": "Cable Curl (Straight Bar)",
+    "name_es": "Curl en polea (barra recta)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca la polea abajo, sujeta la barra recta con palmas arriba y ponte cerca de la máquina.",
+      "Mantén los codos a los lados y el tronco erguido con las rodillas ligeramente flexionadas.",
+      "Sube la barra hasta el pecho, aprieta un segundo y baja resistiendo la tensión del cable.",
+      "Evita alejarte demasiado de la polea; el cable te tirará de los codos hacia delante.",
+      "Devuelve la barra a la polea con control al terminar, sin soltarla de golpe."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-bayesian-curl",
+    "name_en": "Cable Bayesian Curl",
+    "name_es": "Curl bayesiano en polea",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ponte de espaldas a una polea baja, sujeta el estribo y da un paso al frente con el brazo detrás.",
+      "Mantén el brazo por detrás del torso y el pecho abierto durante toda la repetición.",
+      "Flexiona el codo hasta arriba sin dejar que el brazo avance y vuelve al estiramiento lento.",
+      "Evita llevar el codo hacia delante al subir; pierdes el estiramiento que busca el ejercicio.",
+      "Usa una zancada estable para no perder el equilibrio cuando el cable tire hacia atrás."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-preacher-curl",
+    "name_en": "Machine Preacher Curl",
+    "name_es": "Curl predicador en máquina",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Biceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que el codo quede alineado con el eje de giro de la máquina.",
+      "Mantén los brazos apoyados en el cojín y el pecho en contacto con el soporte.",
+      "Sube las asas hasta la contracción completa y baja en 2-3 segundos sin soltar la tensión.",
+      "Evita levantar la cadera del asiento para terminar las últimas repeticiones.",
+      "No dejes que la pila de peso golpee abajo; controla la extensión del codo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-reverse-curl",
+    "name_en": "Barbell Reverse Curl",
+    "name_es": "Curl inverso con barra",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Forearms",
+      "Biceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "barbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta la barra con agarre prono a la anchura de los hombros y los brazos extendidos.",
+      "Mantén las muñecas rectas, alineadas con el antebrazo, durante todo el recorrido.",
+      "Sube la barra flexionando los codos hasta el pecho y bájala lentamente.",
+      "Evita doblar las muñecas hacia abajo cuando aparece la fatiga.",
+      "Usa menos peso que en el curl normal; el agarre prono limita la carga segura."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-rope-tricep-extensions",
+    "name_en": "Cable Triceps Pushdown (Rope)",
+    "name_es": "Extensión de tríceps en polea (cuerda)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca la polea alta, sujeta la cuerda con palmas enfrentadas y lleva los codos a los costados.",
+      "Mantén el pecho alto, una ligera inclinación del tronco y los codos fijos junto a las costillas.",
+      "Empuja hacia abajo separando los extremos de la cuerda al final y sube con control.",
+      "Evita que los codos se abran o suban hacia delante al regresar la cuerda.",
+      "Mantén los hombros abajo y lejos de las orejas para no cargar el cuello."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "v-bb-cable-tricep-extensions",
+    "name_en": "Cable Triceps Pushdown (V-Bar)",
+    "name_es": "Extensión de tríceps en polea (barra V)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca la polea alta, sujeta la barra V y deja los codos flexionados junto al torso.",
+      "Mantén las muñecas rectas y el tronco firme con una ligera inclinación al frente.",
+      "Extiende los codos hasta bloquear sin golpe y sube hasta que los antebrazos pasen la horizontal.",
+      "Evita inclinarte sobre la barra para empujar con el peso del cuerpo.",
+      "Coloca los pies firmes y separados para no perder el equilibrio con cargas altas."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "rope-low-cable-oh-tricep-extensions",
+    "name_en": "Cable Overhead Triceps Extension (Rope)",
+    "name_es": "Extensión de tríceps sobre la cabeza en polea (cuerda)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de espaldas a la polea, sujeta la cuerda detrás de la cabeza y adelanta un pie.",
+      "Mantén los codos apuntando al frente y cerca de la cabeza durante toda la serie.",
+      "Extiende los codos hacia arriba y adelante, y vuelve lento hasta sentir el estiramiento.",
+      "Evita abrir los codos hacia los lados o arquear la zona lumbar.",
+      "Activa el abdomen para proteger la espalda baja mientras el cable tira hacia atrás."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "ez-bar-skull-crusher",
+    "name_en": "EZ-Bar Skull Crusher",
+    "name_es": "Press francés con barra Z",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "ez-bar",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate en un banco plano con la barra Z sobre los hombros y los brazos extendidos.",
+      "Mantén los codos apuntando al techo y ligeramente inclinados hacia la cabeza.",
+      "Baja la barra hacia la frente o detrás de la cabeza flexionando solo los codos y vuelve a subir.",
+      "Evita abrir los codos hacia fuera o convertir el movimiento en un press.",
+      "Pide ayuda o usa un peso controlable: la barra pasa cerca de la cara."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-skull-crusher",
+    "name_en": "Dumbbell Skull Crusher",
+    "name_es": "Press francés con mancuernas",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate en un banco plano con una mancuerna en cada mano, palmas enfrentadas y brazos extendidos.",
+      "Mantén los brazos fijos y paralelos entre sí durante todo el movimiento.",
+      "Baja las mancuernas a los lados de la cabeza flexionando los codos y extiéndelos hasta arriba.",
+      "Evita que las mancuernas se separen o que los codos se abran al subir.",
+      "Baja despacio y sostén bien las mancuernas para no golpearte la cabeza."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-overhead-triceps-extension",
+    "name_en": "Dumbbell Overhead Triceps Extension (Seated)",
+    "name_es": "Extensión de tríceps sobre la cabeza con mancuerna (sentado)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate en un banco con respaldo y sujeta una mancuerna con ambas manos por encima de la cabeza.",
+      "Mantén la espalda apoyada, las costillas abajo y los codos apuntando al frente.",
+      "Baja la mancuerna detrás de la cabeza hasta sentir el estiramiento y extiende los codos.",
+      "Evita arquear la zona lumbar cuando la mancuerna está arriba.",
+      "Sujeta bien el disco superior con ambas palmas para que la mancuerna no se deslice."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-overhead-triceps-extension-single-arm",
+    "name_en": "Dumbbell Overhead Triceps Extension (Single-Arm)",
+    "name_es": "Extensión de tríceps sobre la cabeza con mancuerna (a una mano)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Sujeta la mancuerna con un brazo extendido sobre la cabeza, sentado o de pie con el abdomen firme.",
+      "Mantén el codo apuntando al techo y cerca de la cabeza; la otra mano puede sujetarlo.",
+      "Baja la mancuerna detrás de la nuca flexionando el codo y vuelve a extender por completo.",
+      "Evita que el codo se vaya hacia fuera o que el tronco se incline hacia un lado.",
+      "Trabaja con un peso ligero que controles; la mancuerna pasa por detrás de la cabeza."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "ez-bar-overhead-triceps-extension",
+    "name_en": "EZ-Bar Overhead Triceps Extension",
+    "name_es": "Extensión de tríceps sobre la cabeza con barra Z",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "ez-bar",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta la barra Z con agarre cerrado y llévala sobre la cabeza con los brazos extendidos.",
+      "Mantén los codos estrechos y apuntando al frente, con las costillas abajo.",
+      "Baja la barra detrás de la cabeza hasta el estiramiento y extiende sin mover los brazos.",
+      "Evita compensar la subida arqueando la espalda o abriendo los codos.",
+      "Hazlo sentado con respaldo si notas que la zona lumbar se arquea de pie."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-triceps-pushdown-straight-bar",
+    "name_en": "Cable Triceps Pushdown (Straight Bar)",
+    "name_es": "Extensión de tríceps en polea (barra recta)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca la polea alta y sujeta la barra recta con agarre prono a la anchura de los hombros.",
+      "Mantén los codos pegados a los costados y las muñecas alineadas con el antebrazo.",
+      "Empuja la barra hasta extender los codos por completo y sube hasta la altura del pecho.",
+      "Evita que la barra suba por encima del pecho y los codos se despeguen del cuerpo.",
+      "Mantén una postura estable con las rodillas flexionadas para no balancearte."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-triceps-pushdown-reverse-grip",
+    "name_en": "Cable Triceps Pushdown (Reverse Grip)",
+    "name_es": "Extensión de tríceps en polea (agarre supino)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Forearms"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca la polea alta y sujeta la barra con las palmas hacia arriba a la anchura de los hombros.",
+      "Mantén los codos junto al torso y las muñecas firmes, sin doblarlas hacia atrás.",
+      "Extiende los codos hasta abajo, aprieta el tríceps y vuelve despacio a 90 grados.",
+      "Evita mover los hombros hacia delante para sacar las últimas repeticiones.",
+      "Usa menos peso que con agarre prono para no sobrecargar las muñecas."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-triceps-pushdown-single-arm",
+    "name_en": "Cable Triceps Pushdown (Single-Arm)",
+    "name_es": "Extensión de tríceps en polea (a una mano)",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Coloca la polea alta con un estribo y sujétalo con el codo pegado al costado.",
+      "Mantén los hombros nivelados y el torso de frente a la polea sin girarte.",
+      "Extiende el codo hasta abajo y vuelve con control hasta que el antebrazo pase la horizontal.",
+      "Evita que el codo se separe del cuerpo o que el hombro se adelante.",
+      "Apoya la mano libre en la máquina para mantener el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-triceps-kickback",
+    "name_en": "Dumbbell Triceps Kickback",
+    "name_es": "Patada de tríceps con mancuerna",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Apoya una mano y una rodilla en el banco con la espalda plana y la mancuerna en la otra mano.",
+      "Mantén el brazo paralelo al suelo y el codo pegado al costado durante toda la serie.",
+      "Extiende el codo hasta que el brazo quede recto, aprieta un segundo y vuelve despacio.",
+      "Evita que el codo baje al extender o balancear la mancuerna con impulso.",
+      "Mantén la espalda neutra y no gires el tronco al mover el brazo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-triceps-kickback",
+    "name_en": "Cable Triceps Kickback",
+    "name_es": "Patada de tríceps en polea",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Coloca la polea baja, sujeta el cable sin asa o con estribo e inclina el tronco al frente.",
+      "Mantén el brazo pegado al cuerpo y paralelo al suelo con la espalda recta.",
+      "Extiende el codo hacia atrás hasta bloquear y vuelve lento sin soltar la tensión.",
+      "Evita mover el hombro o el brazo; solo debe moverse el antebrazo.",
+      "Apoya la mano libre en la máquina para mantener la espalda estable."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-jm-press",
+    "name_en": "Barbell JM Press",
+    "name_es": "Press JM con barra",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Chest",
+      "Front Delts"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate en un banco plano con agarre cerrado, algo más estrecho que los hombros.",
+      "Mantén los codos apuntando hacia los pies y los omóplatos apoyados en el banco.",
+      "Baja la barra hacia la parte alta del pecho o barbilla flexionando los codos y empuja hacia arriba.",
+      "Evita convertirlo en un press de banca: la barra no debe tocar el pecho.",
+      "Usa soportes de seguridad o un compañero; la barra baja cerca de la cara."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-triceps-extension",
+    "name_en": "Machine Triceps Extension",
+    "name_es": "Extensión de tríceps en máquina",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para alinear los codos con el eje de la máquina y apoya los brazos en el cojín.",
+      "Mantén la espalda contra el respaldo y los hombros abajo durante toda la serie.",
+      "Extiende los codos hasta abajo, aprieta el tríceps y vuelve despacio a la flexión.",
+      "Evita levantar los codos del cojín para empujar con los hombros.",
+      "No dejes que la pila de peso golpee al volver; controla toda la fase excéntrica."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-wrist-curl",
+    "name_en": "Barbell Wrist Curl",
+    "name_es": "Curl de muñeca con barra",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Forearms"
+    ],
+    "secondary_muscles": [],
+    "equipment": "barbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con los antebrazos apoyados en los muslos o el banco y las palmas hacia arriba.",
+      "Mantén los antebrazos fijos y solo las muñecas por fuera del borde de apoyo.",
+      "Deja que la barra ruede hacia los dedos y súbela flexionando las muñecas lo más alto posible.",
+      "Evita levantar los antebrazos o usar los bíceps para mover la barra.",
+      "Trabaja con un peso moderado y repeticiones altas para cuidar las muñecas."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-reverse-wrist-curl",
+    "name_en": "Barbell Reverse Wrist Curl",
+    "name_es": "Curl de muñeca inverso con barra",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Forearms"
+    ],
+    "secondary_muscles": [],
+    "equipment": "barbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya los antebrazos en los muslos o el banco con las palmas hacia abajo y las muñecas fuera.",
+      "Mantén los antebrazos pegados al apoyo y los dedos firmes alrededor de la barra.",
+      "Eleva el dorso de las manos todo lo posible y baja lentamente hasta el estiramiento.",
+      "Evita mover los codos o balancear la barra para ganar recorrido.",
+      "Empieza con muy poco peso: los extensores del antebrazo se fatigan rápido."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-farmers-hold",
+    "name_en": "Dumbbell Farmer's Hold",
+    "name_es": "Sostén del granjero con mancuernas",
+    "body_region": "Arms",
+    "primary_muscles": [
+      "Forearms"
+    ],
+    "secondary_muscles": [
+      "Traps",
+      "Abs"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "carry",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Levanta dos mancuernas pesadas desde el suelo con la espalda neutra y quédate de pie.",
+      "Mantén los hombros abajo y atrás, el pecho alto y los brazos rectos a los lados.",
+      "Aprieta el mango con fuerza y sostén la posición el tiempo marcado sin moverte.",
+      "Evita encoger los hombros o dejar que las mancuernas se balanceen.",
+      "Al terminar, baja las mancuernas flexionando cadera y rodillas, no redondeando la espalda."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "hanging-leg-raises-weighted",
+    "name_en": "Hanging Leg Raise",
+    "name_es": "Elevación de piernas colgado",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors",
+      "Obliques",
+      "Forearms"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Cuélgate de la barra con agarre firme, brazos extendidos y las piernas juntas.",
+      "Mantén los hombros activos y el cuerpo quieto, sin columpiarte antes de empezar.",
+      "Sube las piernas rectas enrollando la pelvis hacia arriba y bájalas en 2-3 segundos.",
+      "Evita usar el impulso del balanceo para subir las piernas.",
+      "Si aún no controlas el balanceo, empieza con elevaciones de rodillas."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "v-up",
+    "name_en": "V-Up",
+    "name_es": "Abdominales en V",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca arriba con piernas rectas y brazos extendidos por encima de la cabeza.",
+      "Mantén las piernas juntas y los brazos alineados con las orejas al subir.",
+      "Eleva tronco y piernas a la vez hasta tocar los pies y baja despacio sin desplomarte.",
+      "Evita tirar del cuello o doblar las rodillas para llegar arriba.",
+      "Mantén la zona lumbar controlada al bajar; si se arquea, reduce el recorrido."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "plank",
+    "name_en": "Plank",
+    "name_es": "Plancha",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Front Delts",
+      "Glutes"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya los antebrazos con los codos bajo los hombros y extiende las piernas sobre las puntas.",
+      "Mantén una línea recta de la cabeza a los talones con los glúteos apretados.",
+      "Sostén la posición respirando de forma continua y empujando el suelo con los antebrazos.",
+      "Evita que la cadera se hunda o suba demasiado hacia el techo.",
+      "Termina la serie cuando pierdas la alineación, aunque no hayas llegado al tiempo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "side-plank",
+    "name_en": "Side Plank",
+    "name_es": "Plancha lateral",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Abs",
+      "Glutes",
+      "Abductors"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Túmbate de lado con el codo bajo el hombro y los pies apilados o uno delante del otro.",
+      "Mantén cadera, hombros y tobillos alineados en una línea recta.",
+      "Eleva la cadera del suelo y sostén la posición sin rotar el tronco.",
+      "Evita dejar caer la cadera o llevarla hacia atrás.",
+      "Apoya la rodilla de abajo si no puedes mantener la línea con las piernas extendidas."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dead-bug",
+    "name_en": "Dead Bug",
+    "name_es": "Bicho muerto (dead bug)",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors",
+      "Obliques"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca arriba con brazos hacia el techo y caderas y rodillas a 90 grados.",
+      "Mantén la zona lumbar pegada al suelo durante todo el ejercicio.",
+      "Extiende el brazo y la pierna contrarios lentamente y vuelve antes de cambiar de lado.",
+      "Evita que la espalda baja se despegue del suelo al extender la pierna.",
+      "Reduce el recorrido de la pierna si no puedes mantener la espalda apoyada."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "bird-dog",
+    "name_en": "Bird Dog",
+    "name_es": "Perro de caza (bird dog)",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs",
+      "Lower Back"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Obliques"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate a cuatro patas con manos bajo los hombros y rodillas bajo las caderas.",
+      "Mantén la espalda plana y la pelvis nivelada, como si llevaras un vaso encima.",
+      "Extiende el brazo y la pierna contrarios hasta la horizontal, pausa y vuelve despacio.",
+      "Evita arquear la zona lumbar o girar la cadera al levantar la pierna.",
+      "Muévete lento y sin prisas; la estabilidad importa más que la altura."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-crunch",
+    "name_en": "Cable Crunch (Kneeling)",
+    "name_es": "Crunch en polea (de rodillas)",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Obliques"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Arrodíllate frente a la polea alta y sujeta la cuerda a los lados de la cabeza.",
+      "Mantén la cadera quieta y alta; el movimiento debe salir de la columna.",
+      "Enrolla el tronco llevando los codos hacia los muslos y vuelve controlando el cable.",
+      "Evita sentarte sobre los talones o tirar del peso con los brazos.",
+      "Elige un peso que te permita flexionar el tronco sin tirones bruscos."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "ab-wheel-rollout",
+    "name_en": "Ab Wheel Rollout",
+    "name_es": "Rueda abdominal",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Lats",
+      "Obliques",
+      "Hip Flexors"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Arrodíllate sobre una colchoneta y sujeta la rueda bajo los hombros con los brazos rectos.",
+      "Mantén la pelvis metida y las costillas abajo durante todo el recorrido.",
+      "Rueda hacia delante hasta donde controles y vuelve tirando con el abdomen.",
+      "Evita que la zona lumbar se hunda al alejarte de las rodillas.",
+      "Aumenta la distancia de forma progresiva; empieza con recorridos cortos."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "hanging-knee-raise",
+    "name_en": "Hanging Knee Raise",
+    "name_es": "Elevación de rodillas colgado",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors",
+      "Forearms"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Cuélgate de una barra con agarre al ancho de hombros y piernas relajadas.",
+      "Mantén los hombros activos y el cuerpo estable sin columpiarte.",
+      "Sube las rodillas hacia el pecho inclinando la pelvis hacia arriba y baja lento.",
+      "Evita quedarte en subir las rodillas a 90 grados sin enrollar la pelvis.",
+      "Baja de la barra con control si se te fatiga el agarre antes que el abdomen."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-pallof-press",
+    "name_en": "Cable Pallof Press",
+    "name_es": "Press Pallof en polea",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Obliques",
+      "Abs"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Ponte de lado a una polea a la altura del pecho y sujeta el asa junto al esternón.",
+      "Mantén los pies a la anchura de la cadera, rodillas suaves y hombros cuadrados al frente.",
+      "Extiende los brazos al frente resistiendo el giro, pausa dos segundos y vuelve al pecho.",
+      "Evita que el tronco rote hacia la polea al extender los brazos.",
+      "Aléjate de la polea solo hasta donde puedas resistir la rotación sin perder la postura."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-woodchop-high-to-low",
+    "name_en": "Cable Woodchop (High to Low)",
+    "name_es": "Leñador en polea (de arriba abajo)",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Abs",
+      "Front Delts"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "core",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Coloca la polea alta, ponte de lado y sujeta el asa con ambas manos por encima del hombro.",
+      "Mantén los brazos casi rectos y gira desde el tronco con la cadera acompañando.",
+      "Lleva el asa en diagonal hacia la rodilla contraria y vuelve controlando la rotación.",
+      "Evita tirar solo con los brazos o flexionar los codos para mover el cable.",
+      "Pivota el pie de atrás al girar para no forzar la rodilla ni la zona lumbar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "russian-twist",
+    "name_en": "Russian Twist",
+    "name_es": "Giro ruso",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Obliques"
+    ],
+    "secondary_muscles": [
+      "Abs",
+      "Hip Flexors"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con rodillas flexionadas, inclina el tronco atrás y junta las manos frente al pecho.",
+      "Mantén la espalda larga y el pecho alto, sin encorvarte.",
+      "Gira el tronco a un lado y al otro llevando las manos junto a la cadera con control.",
+      "Evita mover solo los brazos; el giro debe salir de las costillas.",
+      "Apoya los talones en el suelo si al elevar los pies pierdes la postura de la espalda."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "decline-sit-up",
+    "name_en": "Sit-Up (Decline)",
+    "name_es": "Abdominales (banco declinado)",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors",
+      "Obliques"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Engancha los pies en el banco declinado y túmbate con las manos cruzadas sobre el pecho.",
+      "Mantén la barbilla ligeramente recogida y el cuello relajado.",
+      "Sube enrollando el tronco vértebra a vértebra y baja despacio hasta casi tocar el banco.",
+      "Evita tirar de la cabeza con las manos o lanzarte con impulso.",
+      "Elige una inclinación que puedas controlar en la bajada antes de añadir peso."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "hollow-body-hold",
+    "name_en": "Hollow Body Hold",
+    "name_es": "Posición hueca (hollow hold)",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors",
+      "Obliques"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca arriba con brazos sobre la cabeza y piernas juntas extendidas.",
+      "Mantén la zona lumbar pegada al suelo y los hombros despegados.",
+      "Eleva brazos y piernas unos centímetros y sostén la forma de banana respirando.",
+      "Evita que la espalda baja se arquee al bajar las piernas.",
+      "Flexiona las rodillas o sube las piernas si no consigues mantener la lumbar apoyada."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "mountain-climber",
+    "name_en": "Mountain Climber",
+    "name_es": "Escaladores",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs",
+      "Hip Flexors"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Quads"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate en plancha alta con las manos bajo los hombros y el cuerpo en línea recta.",
+      "Mantén la cadera baja y estable mientras alternas las piernas.",
+      "Lleva una rodilla hacia el pecho y cambia de pierna con ritmo constante.",
+      "Evita subir la cadera hacia el techo cuando aumentas la velocidad.",
+      "Reduce el ritmo si notas que los hombros pierden la posición sobre las manos."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "crunch",
+    "name_en": "Crunch",
+    "name_es": "Crunch abdominal",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca arriba con rodillas flexionadas, pies apoyados y manos junto a las sienes.",
+      "Mantén el cuello neutro, con un espacio de un puño entre la barbilla y el pecho.",
+      "Eleva los hombros del suelo contrayendo el abdomen y baja despacio.",
+      "Evita tirar de la cabeza con las manos para subir.",
+      "Exhala al subir y no retengas la respiración durante la serie."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "lying-leg-raise",
+    "name_en": "Lying Leg Raise",
+    "name_es": "Elevación de piernas tumbado",
+    "body_region": "Core",
+    "primary_muscles": [
+      "Abs"
+    ],
+    "secondary_muscles": [
+      "Hip Flexors"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "core",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca arriba con las piernas rectas y las manos bajo los glúteos o a los lados.",
+      "Mantén la zona lumbar en contacto con el suelo en todo momento.",
+      "Sube las piernas hasta la vertical y bájalas lentamente sin tocar el suelo.",
+      "Evita arquear la espalda al bajar las piernas cerca del suelo.",
+      "Flexiona un poco las rodillas si la zona lumbar se despega del suelo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-farmers-carry",
+    "name_en": "Dumbbell Farmer's Carry",
+    "name_es": "Paseo del granjero con mancuernas",
+    "body_region": "Full Body",
+    "primary_muscles": [
+      "Forearms",
+      "Traps"
+    ],
+    "secondary_muscles": [
+      "Abs",
+      "Obliques",
+      "Glutes"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "carry",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Levanta una mancuerna pesada en cada mano con la espalda neutra y ponte de pie.",
+      "Mantén los hombros atrás, el pecho alto y la mirada al frente al caminar.",
+      "Camina con pasos cortos y firmes la distancia marcada sin detenerte.",
+      "Evita inclinarte hacia delante o dejar que los hombros se redondeen.",
+      "Deja una zona libre de obstáculos y suelta el peso flexionando cadera y rodillas."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-suitcase-carry",
+    "name_en": "Dumbbell Suitcase Carry",
+    "name_es": "Paseo de maleta con mancuerna",
+    "body_region": "Full Body",
+    "primary_muscles": [
+      "Obliques",
+      "Forearms"
+    ],
+    "secondary_muscles": [
+      "Abs",
+      "Traps",
+      "Glutes"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "carry",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Sujeta una sola mancuerna a un lado, como una maleta, con el brazo extendido.",
+      "Mantén los hombros nivelados y el tronco vertical sin inclinarte hacia el peso.",
+      "Camina a paso controlado la distancia marcada y repite con el otro lado.",
+      "Evita compensar inclinándote hacia el lado contrario a la mancuerna.",
+      "Empieza con un peso moderado; la estabilidad lateral es lo que se entrena."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "kettlebell-swing",
+    "name_en": "Kettlebell Swing",
+    "name_es": "Swing con kettlebell",
+    "body_region": "Full Body",
+    "primary_muscles": [
+      "Glutes",
+      "Hamstrings"
+    ],
+    "secondary_muscles": [
+      "Lower Back",
+      "Abs",
+      "Forearms"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate con pies al ancho de los hombros y la kettlebell un paso delante de ti.",
+      "Mantén la espalda neutra y bisagra de cadera, no una sentadilla, en cada repetición.",
+      "Lanza la kettlebell entre las piernas y extiende la cadera con fuerza hasta la altura del pecho.",
+      "Evita subir la kettlebell con los brazos o hiperextender la espalda arriba.",
+      "Asegura espacio libre alrededor y deja la kettlebell en el suelo con control al terminar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-thruster",
+    "name_en": "Dumbbell Thruster",
+    "name_es": "Thruster con mancuernas",
+    "body_region": "Full Body",
+    "primary_muscles": [
+      "Quads",
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Glutes",
+      "Triceps",
+      "Abs"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta las mancuernas sobre los hombros con codos al frente y pies al ancho de la cadera.",
+      "Mantén el pecho alto y el tronco firme durante la sentadilla.",
+      "Baja en sentadilla y, al subir, usa el impulso de piernas para empujar las mancuernas arriba.",
+      "Evita separar la sentadilla del press; el movimiento debe ser continuo.",
+      "Bloquea los brazos arriba con las costillas abajo para no arquear la zona lumbar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "burpee",
+    "name_en": "Burpee",
+    "name_es": "Burpee",
+    "body_region": "Full Body",
+    "primary_muscles": [
+      "Quads",
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps",
+      "Abs",
+      "Glutes"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "squat",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de pie con los pies a la anchura de la cadera y los brazos relajados.",
+      "Mantén el cuerpo alineado en la plancha, con la cadera ni hundida ni elevada.",
+      "Agáchate, salta a plancha, haz una flexión, vuelve los pies a las manos y salta arriba.",
+      "Evita aterrizar con las piernas rígidas o dejar caer el pecho al suelo sin control.",
+      "Aterriza suave con las rodillas flexionadas y baja el ritmo si pierdes la técnica."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-power-clean",
+    "name_en": "Barbell Power Clean",
+    "name_es": "Cargada de potencia con barra",
+    "body_region": "Full Body",
+    "primary_muscles": [
+      "Glutes",
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Hamstrings",
+      "Traps",
+      "Upper Back",
+      "Lower Back"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "hinge",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Colócate con la barra sobre el empeine, pies al ancho de la cadera y agarre algo más ancho.",
+      "Mantén la espalda neutra y la barra pegada al cuerpo durante todo el tirón.",
+      "Extiende cadera y rodillas con fuerza y recibe la barra sobre los hombros con los codos al frente.",
+      "Evita tirar con los brazos antes de extender por completo la cadera.",
+      "Aprende la técnica con poco peso o un entrenador y usa discos que puedan caer al suelo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "kettlebell-turkish-get-up",
+    "name_en": "Kettlebell Turkish Get-Up",
+    "name_es": "Levantamiento turco con kettlebell",
+    "body_region": "Full Body",
+    "primary_muscles": [
+      "Abs",
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Obliques",
+      "Glutes",
+      "Triceps"
+    ],
+    "equipment": "kettlebell",
+    "movement_pattern": "core",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Túmbate boca arriba con la kettlebell en una mano, brazo vertical y la rodilla del mismo lado flexionada.",
+      "Mantén el brazo bloqueado y la mirada en la kettlebell durante todo el levantamiento.",
+      "Sube por fases: codo, mano, puente, rodilla y de pie; deshaz los pasos en orden para bajar.",
+      "Evita apresurar las transiciones o dejar que el brazo se incline.",
+      "Practica primero sin peso o con un zapato encima del puño antes de cargar la kettlebell."
+    ],
+    "aliases": [],
+    "origin": "new"
+  }
+]
