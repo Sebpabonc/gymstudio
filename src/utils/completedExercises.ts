@@ -34,3 +34,25 @@ export function findNextPendingIndex(done: boolean[], currentIndex: number): num
   }
   return -1
 }
+
+export function findPrefillEntry(entries: WorkoutEntry[], exerciseId: string, dayKey?: string): WorkoutEntry | undefined {
+  const latestFirst = entries
+    .filter((entry) => entry.exerciseId === exerciseId && entry.sets.length > 0)
+    .sort((a, b) => b.date.localeCompare(a.date))
+  return (dayKey ? latestFirst.find((entry) => entry.dayKey === dayKey) : undefined) ?? latestFirst[0]
+}
+
+export function upsertScopedEntry(
+  history: WorkoutEntry[],
+  entry: WorkoutEntry,
+  scope: CompletionScope
+): { history: WorkoutEntry[]; entry: WorkoutEntry } {
+  const sameSlot = (item: WorkoutEntry) =>
+    item.exerciseId === entry.exerciseId && findCompletedEntry([item], scope) !== undefined
+  const existing = history.find(sameSlot)
+  const saved = existing ? { ...entry, id: existing.id } : entry
+  const nextHistory = [saved, ...history.filter((item) => !sameSlot(item))].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+  return { history: nextHistory, entry: saved }
+}

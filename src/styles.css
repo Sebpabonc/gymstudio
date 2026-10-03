@@ -2481,3 +2481,28 @@ button {
   justify-self: start;
   max-width: 100%;
 }
+
+.account-error.log-error {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.planned-set-field-pair input[aria-invalid='true'] {
+  border-color: #ffb4a9;
+}
+
+.log-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
+  transform: translateX(-50%);
+  z-index: 50;
+  max-width: calc(100vw - 2rem);
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--bg-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}

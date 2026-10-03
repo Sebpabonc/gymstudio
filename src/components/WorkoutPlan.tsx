@@ -16,7 +16,7 @@ import {
   upsertExerciseRecord,
 } from '../utils/storage'
 import { blockDateRange, blockWeek, defaultActiveBlock, formatBenchAngle } from '../utils/trainingBlocks'
-import { findCompletedEntry, findNextPendingIndex, formatLoggedTime, summarizeCompletedEntry } from '../utils/completedExercises'
+import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, formatLoggedTime, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import { isDemoMode } from '../utils/demoMode'
 import { filterLoggableSets, parseRepPrescription, workoutMaxWeight, workoutVolume } from '../utils/workoutSets'
 import { createSupersetEntries, groupSupersets } from '../utils/supersets'
@@ -258,6 +258,7 @@ export default function WorkoutPlan({
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
   const [activeSetIndexByExercise, setActiveSetIndexByExercise] = useState<Record<string, number>>({})
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
+  const [toast, setToast] = useState('')
 
   const text = {
     title: 'Planned before you go',
@@ -345,6 +346,12 @@ export default function WorkoutPlan({
     })
     return findCompletedEntry(matching, activeCompletionScope)
   }
+
+  useEffect(() => {
+    if (!toast) return undefined
+    const timer = window.setTimeout(() => setToast(''), 3000)
+    return () => window.clearTimeout(timer)
+  }, [toast])
 
   useEffect(() => {
     if (mode) {
@@ -548,12 +555,26 @@ export default function WorkoutPlan({
 
   const getDraftForExercise = (exerciseName: string, exercise?: PlanExercise) => {
     const key = getPlanDraftKey(exerciseName)
-    const best = bestProgressByName.get(key)
+    const best = bestProgressByName.get(normalizeExerciseName(exerciseName))
     const bestWeight = best ? workoutMaxWeight(best.sets) : 0
     const bestReps = best && best.sets.length ? Math.max(...best.sets.map((set) => set.reps), 0) : 8
     const fallbackReps = exercise ? getDefaultRepTarget(exercise) : bestReps
     const fallbackSetCount = exercise ? getDefaultSetCount(exercise) : 1
-    const baseSetWeights = Array.from({ length: fallbackSetCount }, () => Number(bestWeight) || 0)
+    const prefillExerciseId =
+      exercise?.exerciseId ??
+      exerciseCatalog.find((item) => normalizeExerciseName(item.name) === normalizeExerciseName(exerciseName))?.id
+    const prefill =
+      exercise && prefillExerciseId
+        ? findPrefillEntry(history, prefillExerciseId, planMode === 'preset' ? activeDay?.key : undefined)
+        : undefined
+    const baseSetWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
+      const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
+      return Number(source?.weight ?? bestWeight) || 0
+    })
+    const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
+      const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
+      return Number(source?.drop?.weight) || Number(((baseSetWeights[index] ?? 0) * 0.75).toFixed(2))
+    })
     const baseSetReps = Array.from({ length: fallbackSetCount }, (_, index) => {
       const prescribed = exercise?.repsPerSet?.[index] ?? exercise?.reps ?? ''
       return parseRepPrescription(prescribed)[0] || Number(fallbackReps) || 8
@@ -565,10 +586,10 @@ export default function WorkoutPlan({
     return (
       plannedDrafts[key] ?? {
         reps: baseSetReps[0] ?? (Number(fallbackReps) || 8),
-        weight: Number(bestWeight) || 0,
+        weight: baseSetWeights[0] ?? 0,
         setWeights: baseSetWeights,
         setReps: baseSetReps,
-        dropSetWeights: baseSetWeights.map((weight) => Number((weight * 0.75).toFixed(2))),
+        dropSetWeights: baseDropWeights,
         dropSetReps: baseDropSetReps,
         notes: '',
       }
@@ -682,6 +703,14 @@ export default function WorkoutPlan({
 
     if (validSets.length === 0) {
       setLogError((current) => ({ ...current, [exerciseKey]: 'Enter at least one set' }))
+      const firstEmpty = allSets.findIndex((set) => !(Number(set.weight) > 0))
+      setActiveSetIndexByExercise((current) => ({ ...current, [sectionKey]: Math.max(firstEmpty, 0) }))
+      window.setTimeout(() => {
+        const card = Array.from(document.querySelectorAll<HTMLElement>('[data-exercise-card]')).find(
+          (element) => element.dataset.exerciseCard === sectionKey
+        )
+        card?.querySelector<HTMLInputElement>('[data-log-weight]')?.focus()
+      }, 0)
       return
     }
 
@@ -698,18 +727,12 @@ export default function WorkoutPlan({
       notes: draft.notes?.trim() ?? '',
     }
 
-    const existingEntry = findCompletedEntry(
-      history.filter((entry) => entry.exerciseId === canonicalId),
-      activeCompletionScope
-    )
-    const entryToSave = existingEntry ? { ...nextEntry, id: existingEntry.id } : nextEntry
-
-    const nextHistory = [entryToSave, ...history.filter((entry) => entry.id !== existingEntry?.id)].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    )
+    const storedHistory = await loadWorkoutHistory()
+    const { history: nextHistory, entry: entryToSave } = upsertScopedEntry(storedHistory, nextEntry, activeCompletionScope)
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
+    setToast(`Logged · ${summarizeCompletedEntry(entryToSave)}`)
     setExerciseCatalog(await loadExercises())
 
     setPlannedDrafts((current) => {
@@ -799,19 +822,14 @@ export default function WorkoutPlan({
       return
     }
 
-    const existingIds = new Set<string>()
+    const storedHistory = await loadWorkoutHistory()
+    let nextHistory = storedHistory
     const entriesToSave = nextEntries.map((entry) => {
-      const existing = findCompletedEntry(
-        history.filter((item) => item.exerciseId === entry.exerciseId),
-        { ...activeCompletionScope, date }
-      )
-      if (!existing) return entry
-      existingIds.add(existing.id)
-      return { ...entry, id: existing.id }
+      const result = upsertScopedEntry(nextHistory, entry, { ...activeCompletionScope, date })
+      nextHistory = result.history
+      return result.entry
     })
-    const nextHistory = [...entriesToSave, ...history.filter((entry) => !existingIds.has(entry.id))].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    )
+    setToast(`Logged · ${entriesToSave.length} exercises`)
 
     setLogError((current) => ({
       ...current,
@@ -1364,6 +1382,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               <article
                 key={`${planMode}-${activeDay?.key ?? 'custom'}-${exercise.code ?? exercise.name}`}
                 className={cardClasses}
+                data-exercise-card={exerciseKey}
               >
                 <div className="planned-exercise-header">
                   <div className="planned-exercise-title-block">
@@ -1496,6 +1515,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                               type="number"
                                               min="0"
                                               value={setWeights[index] ?? 0}
+                                              data-log-weight
+                                              aria-invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
                                               aria-label={`Set ${index + 1} main weight`}
                                               onFocus={(event) => event.currentTarget.select()}
                                               onClick={(event) => event.currentTarget.select()}
@@ -1550,6 +1571,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                           type="number"
                                           min="0"
                                           value={setWeights[index] ?? 0}
+                                          data-log-weight
+                                          aria-invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
                                           aria-label={`Set ${index + 1} weight`}
                                           onFocus={(event) => event.currentTarget.select()}
                                           onClick={(event) => event.currentTarget.select()}
@@ -1586,7 +1609,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       )}
 
                       {isSetSectionVisible && logError[getPlanDraftKey(exercise.name)] && (
-                        <p role="alert" className="account-error">{logError[getPlanDraftKey(exercise.name)]}</p>
+                        <p role="alert" aria-live="assertive" className="account-error log-error">{logError[getPlanDraftKey(exercise.name)]}</p>
                       )}
 
                       {isSetSectionVisible && (
@@ -1754,7 +1777,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           )
                         })}
                       </div>
-                      {supersetError && <p role="alert" className="account-error">{supersetError}</p>}
+                      {supersetError && <p role="alert" aria-live="assertive" className="account-error log-error">{supersetError}</p>}
                       <button
                         type="button"
                         className="primary-button small-button"
@@ -1770,6 +1793,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           })}
         </div>
       </section>
+      {toast && <div className="log-toast" role="status" aria-live="polite">{toast}</div>}
     </div>
   )
 }
