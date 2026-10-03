@@ -502,6 +502,10 @@ button {
   margin-bottom: 8px;
 }
 
+.tips-box.collapsed .tips-header {
+  margin-bottom: 0;
+}
+
 .tips-box .field-label {
   margin: 0;
 }
@@ -546,6 +550,10 @@ button {
   color: var(--muted-strong);
   line-height: 1.45;
   font-size: 0.82rem;
+}
+
+.tips-list[hidden] {
+  display: none;
 }
 
 .tip-item {
@@ -1030,7 +1038,6 @@ button {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.training-block-header,
 .training-block-meta,
 .training-block-option {
   display: flex;
@@ -1040,11 +1047,46 @@ button {
   min-width: 0;
 }
 
-.training-block-header > div,
+.training-block-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.training-block-title,
 .training-block-option > span {
   display: grid;
   min-width: 0;
   gap: 4px;
+}
+
+.training-block-name {
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.training-block-status {
+  color: var(--text);
+  font-size: 0.64rem;
+  text-align: right;
+}
+
+.block-card-chevron {
+  flex: 0 0 auto;
+  transition: transform 150ms ease;
+}
+
+.training-block-header[aria-expanded='true'] .block-card-chevron {
+  transform: rotate(180deg);
 }
 
 .training-block-number {
@@ -1052,12 +1094,6 @@ button {
   font-size: 0.58rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.training-block-header h4 {
-  margin: 0;
-  overflow-wrap: anywhere;
-  font-size: 1rem;
 }
 
 .origin-badge {
@@ -1086,6 +1122,16 @@ button {
   font-size: 0.72rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+
+.training-block-content {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.training-block-content[hidden] {
+  display: none;
 }
 
 .about-block-toggle {
@@ -1735,10 +1781,17 @@ button {
 }
 
 .posture-tips-header {
+  appearance: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
@@ -1748,7 +1801,7 @@ button {
   border-radius: 8px;
 }
 
-.posture-tips-header span {
+.posture-tips-header > span:first-child {
   color: var(--muted-strong);
   font-size: var(--font-section);
   font-weight: var(--font-section-weight);
@@ -1771,6 +1824,10 @@ button {
   padding-left: 0;
   display: grid;
   gap: 10px;
+}
+
+.posture-tips-list[hidden] {
+  display: none;
 }
 
 .posture-tips-list li {

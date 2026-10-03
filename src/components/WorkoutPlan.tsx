@@ -5,10 +5,12 @@ import {
   fetchTrainingBlocks,
   getActiveBlockId,
   getExerciseDisplayName,
+  getSessionStorageValue,
   loadExercises,
   loadWorkoutHistory,
   normalizeExerciseName,
   saveWorkoutHistory,
+  setSessionStorageValue,
   storageKey,
   setActiveBlockId,
   upsertExerciseRecord,
@@ -43,6 +45,7 @@ type PlanDraft = {
 type PlanMode = 'preset' | 'custom'
 
 const CUSTOM_PLAN_KEY = 'gym-studio.custom-plan'
+const BLOCK_CARD_EXPANDED_KEY = 'gym-studio.block-card-expanded'
 
 const defaultCustomExercise: PlanExercise = {
   name: '',
@@ -246,6 +249,9 @@ export default function WorkoutPlan({
   const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
   const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
   const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
+  const [blockCardExpanded, setBlockCardExpanded] = useState(
+    () => getSessionStorageValue(BLOCK_CARD_EXPANDED_KEY) === 'true'
+  )
   const [blockSelectorOpen, setBlockSelectorOpen] = useState(false)
   const [blockInsightsOpen, setBlockInsightsOpen] = useState(false)
   const [history, setHistory] = useState<WorkoutEntry[]>([])
@@ -565,8 +571,16 @@ export default function WorkoutPlan({
 
     setPostureTipsVisible((current) => ({
       ...current,
-      [key]: !(current[key] ?? true),
+      [key]: !(current[key] ?? false),
     }))
+  }
+
+  const toggleBlockCard = () => {
+    setBlockCardExpanded((current) => {
+      const next = !current
+      setSessionStorageValue(BLOCK_CARD_EXPANDED_KEY, String(next))
+      return next
+    })
   }
 
   const toggleAllExercises = () => {
@@ -870,77 +884,86 @@ export default function WorkoutPlan({
 
       {planMode === 'preset' && activeBlock && (
         <section className="training-block-card" aria-label="Active training block">
-          <div className="training-block-header">
-            <div>
+          <button
+            type="button"
+            className="training-block-header"
+            onClick={toggleBlockCard}
+            aria-expanded={blockCardExpanded}
+            aria-controls="training-block-content"
+          >
+            <span className="training-block-title">
               <span className="training-block-number">Block {activeBlock.number}</span>
-              <h4>{activeBlock.name}</h4>
-            </div>
+              <span className="training-block-name">{activeBlock.name}</span>
+            </span>
             <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
-          </div>
-          <div className="training-block-meta">
-            <span>{blockDateRange(activeBlock)}</span>
-            <span>{activeBlock.method.replace(/-/g, ' ')}</span>
-            <strong>
+            <strong className="training-block-status">
               {activeBlockWeek
                 ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
                 : getTodayIsoDate() < activeBlock.startDate
                   ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
                   : 'Completed'}
             </strong>
-          </div>
-          <p>{activeBlock.summary}</p>
-          <button
-            type="button"
-            className="about-block-toggle"
-            onClick={() => setBlockInsightsOpen((current) => !current)}
-            aria-expanded={blockInsightsOpen}
-            aria-controls="training-block-insights"
-          >
-            About this block
-            <span className="block-insights-chevron" aria-hidden="true">⌄</span>
+            <span className="block-card-chevron" aria-hidden="true">⌄</span>
           </button>
-          <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
-            {activeBlock.insights.map((insight) => (
-              <section key={insight.title}>
-                <h5>{insight.title}</h5>
-                <p>{insight.body}</p>
-              </section>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="secondary-button block-change-button"
-            onClick={() => setBlockSelectorOpen((current) => !current)}
-            aria-expanded={blockSelectorOpen}
-          >
-            {text.changeBlock}
-          </button>
-          {blockSelectorOpen && (
-            <div className="training-block-options">
-              {trainingBlocks.map((block) => (
-                <button
-                  key={block.id}
-                  type="button"
-                  className={block.id === activeBlock.id ? 'training-block-option active' : 'training-block-option'}
-                  onClick={() => {
-                    setActiveBlockId(block.id)
-                    setSelectedBlockId(block.id)
-                    setSelectedDay(block.days[0]?.key ?? '')
-                    setCollapsedExercises({})
-                    setPlannedDrafts({})
-                    setBlockSelectorOpen(false)
-                  }}
-                >
-                  <span>
-                    <strong>{`Block ${block.number} · ${block.name}`}</strong>
-                    <small className="training-block-option-summary">{block.summary}</small>
-                    <small>{`${blockDateRange(block)} · ${block.method.replace(/-/g, ' ')}`}</small>
-                  </span>
-                  {block.id === activeBlock.id && <small>{text.currentBlock}</small>}
-                </button>
+          <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
+            <div className="training-block-meta">
+              <span>{blockDateRange(activeBlock)}</span>
+              <span>{activeBlock.method.replace(/-/g, ' ')}</span>
+            </div>
+            <p>{activeBlock.summary}</p>
+            <button
+              type="button"
+              className="about-block-toggle"
+              onClick={() => setBlockInsightsOpen((current) => !current)}
+              aria-expanded={blockInsightsOpen}
+              aria-controls="training-block-insights"
+            >
+              About this block
+              <span className="block-insights-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
+              {activeBlock.insights.map((insight) => (
+                <section key={insight.title}>
+                  <h5>{insight.title}</h5>
+                  <p>{insight.body}</p>
+                </section>
               ))}
             </div>
-          )}
+            <button
+              type="button"
+              className="secondary-button block-change-button"
+              onClick={() => setBlockSelectorOpen((current) => !current)}
+              aria-expanded={blockSelectorOpen}
+            >
+              {text.changeBlock}
+            </button>
+            {blockSelectorOpen && (
+              <div className="training-block-options">
+                {trainingBlocks.map((block) => (
+                  <button
+                    key={block.id}
+                    type="button"
+                    className={block.id === activeBlock.id ? 'training-block-option active' : 'training-block-option'}
+                    onClick={() => {
+                      setActiveBlockId(block.id)
+                      setSelectedBlockId(block.id)
+                      setSelectedDay(block.days[0]?.key ?? '')
+                      setCollapsedExercises({})
+                      setPlannedDrafts({})
+                      setBlockSelectorOpen(false)
+                    }}
+                  >
+                    <span>
+                      <strong>{`Block ${block.number} · ${block.name}`}</strong>
+                      <small className="training-block-option-summary">{block.summary}</small>
+                      <small>{`${blockDateRange(block)} · ${block.method.replace(/-/g, ' ')}`}</small>
+                    </span>
+                    {block.id === activeBlock.id && <small>{text.currentBlock}</small>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       )}
 
@@ -1122,7 +1145,7 @@ export default function WorkoutPlan({
             const isCollapsed = !!collapsedExercises[exerciseKey]
             const isSetSectionVisible = setSectionsVisible[exerciseKey] ?? false
             const isProgressSectionVisible = progressSectionsVisible[exerciseKey] ?? false
-            const isTipsVisible = postureTipsVisible[exerciseKey] ?? true
+            const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
             const postureTips = getPostureTips(exercise, libraryMatch)
             const cardClasses = [
               'planned-exercise-card',
@@ -1175,40 +1198,22 @@ export default function WorkoutPlan({
                     {exercise.notes && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
                     <div className="posture-tips-box">
-                      <div
+                      <button
+                        type="button"
                         className="posture-tips-header"
-                        role="button"
-                        tabIndex={0}
                         onClick={() => togglePostureTips(exercise.name)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault()
-                            togglePostureTips(exercise.name)
-                          }
-                        }}
-                        aria-label={isTipsVisible ? `Hide posture tips for ${exercise.name}` : `Show posture tips for ${exercise.name}`}
+                        aria-expanded={isTipsVisible}
+                        aria-controls={`posture-tips-${exerciseKey}`}
                       >
                         <span>{text.posture}</span>
-                        <button
-                          type="button"
-                          className="toggle-button"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            togglePostureTips(exercise.name)
-                          }}
-                          aria-label={isTipsVisible ? `Hide posture tips for ${exercise.name}` : `Show posture tips for ${exercise.name}`}
-                        >
-                          {isTipsVisible ? '−' : '+'}
-                        </button>
-                      </div>
+                        <span className="toggle-button" aria-hidden="true">{isTipsVisible ? '−' : '+'}</span>
+                      </button>
 
-                      {isTipsVisible && (
-                        <ul className="posture-tips-list">
-                          {postureTips.map((tip, index) => (
-                            <li key={`${exercise.name}-tip-${index}`}>{tip}</li>
-                          ))}
-                        </ul>
-                      )}
+                      <ul id={`posture-tips-${exerciseKey}`} className="posture-tips-list" hidden={!isTipsVisible}>
+                        {postureTips.map((tip, index) => (
+                          <li key={`${exercise.name}-tip-${index}`}>{tip}</li>
+                        ))}
+                      </ul>
                     </div>
 
                     <div className="plan-metrics">

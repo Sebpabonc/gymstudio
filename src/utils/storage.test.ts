@@ -6,12 +6,14 @@ import {
   addWorkoutEntry,
   fetchTrainingBlocks,
   getExerciseDisplayName,
+  getSessionStorageValue,
   loadExercises,
   loadWorkoutHistory,
   mapTrainingBlockRows,
   normalizeExerciseName,
   storageKey,
   setActiveBlockId,
+  setSessionStorageValue,
   getActiveBlockId,
   upsertExerciseRecord,
 } from './storage'
@@ -424,6 +426,19 @@ describe('training blocks', () => {
 })
 
 describe('demo storage namespace', () => {
+  it('isolates session values in demo mode', () => {
+    setSessionStorageValue('gym-studio.block-card-expanded', 'true')
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+
+    expect(getSessionStorageValue('gym-studio.block-card-expanded')).toBeNull()
+    setSessionStorageValue('gym-studio.block-card-expanded', 'false')
+    expect(sessionStorage.getItem('gym-studio.demo.block-card-expanded')).toBe('false')
+    expect(sessionStorage.getItem('gym-studio.block-card-expanded')).toBe('true')
+
+    sessionStorage.removeItem('gym-studio.demo-mode')
+    expect(getSessionStorageValue('gym-studio.block-card-expanded')).toBe('true')
+  })
+
   it('isolates demo history from the saved real history', async () => {
     const realHistory = [{
       id: 'real-entry',
