@@ -26,6 +26,10 @@ content (like the exercise catalogue): authored by the PT, approved, stored in S
   "weeks": 6,
   "origin": "coach",
   "summary": "One or two sentences: goal, rep ranges, techniques.",
+  "insights": [
+    { "title": "Goal", "body": "…" },
+    { "title": "How it works", "body": "…" }
+  ],
   "days": [
     {
       "key": "chest-back-a",
@@ -55,6 +59,8 @@ content (like the exercise catalogue): authored by the PT, approved, stored in S
 | `method` | `flat-pyramid`, `reverse-pyramid`, `ascending-pyramid`, `strength-hypertrophy`, or another lowercase-dash key explained in `strategy.md`. |
 | `start_date` | ISO date (Monday). New blocks continue every 6 weeks after the previous one. |
 | `origin` | `coach` (from the 2026 spreadsheet) or `pt` (new, PT-designed). |
+| `summary` | 1–2 plain-English sentences (≤ 260 characters), always visible in the app. |
+| `insights` | 5–6 expandable sections, in this order and with these titles: `Goal`, `How it works`, `A days vs B days`, `How to progress`, `What to expect`, and optionally `Key tips`. Each `body` is 2–4 sentences (≤ 600 characters), plain English for a non-professional, specific to this block's method and exercises, no medical advice. |
 | `days` | Exactly 6, in order: `chest-back-a`, `arms-a`, `lower-body-a`, `chest-back-b`, `arms-b`, `lower-body-b`. Names "Chest-Back A", "Arms A" (shoulders + arms), "Lower Body A", … |
 | `code` | Letter + number (`A1`, `B1`, `B2`…). Same letter with 2 numbers = superset. |
 | `exercise_id` | Must exist in the catalogue (`docs/fitness/approved/catalogue-v2/*.json`) or in `catalogue-additions.json`. |

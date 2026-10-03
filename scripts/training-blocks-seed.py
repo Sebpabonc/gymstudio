@@ -39,11 +39,13 @@ def main():
               ]) + ') on conflict (id) do nothing;')
 
     for b in blocks:
-        print(f"\ninsert into public.training_blocks (id, number, name, method, start_date, weeks, origin, summary) values ("
+        insights = text(json.dumps(b.get('insights', []), ensure_ascii=False)) + '::jsonb'
+        print(f"\ninsert into public.training_blocks (id, number, name, method, start_date, weeks, origin, summary, insights) values ("
               f"{text(b['id'])}, {b['number']}, {text(b['name'])}, {text(b['method'])}, {text(b['start_date'])}, "
-              f"{b['weeks']}, {text(b['origin'])}, {text(b['summary'])}) on conflict (id) do update set "
+              f"{b['weeks']}, {text(b['origin'])}, {text(b['summary'])}, {insights}) on conflict (id) do update set "
               "number = excluded.number, name = excluded.name, method = excluded.method, start_date = excluded.start_date, "
-              "weeks = excluded.weeks, origin = excluded.origin, summary = excluded.summary, updated_at = now();")
+              "weeks = excluded.weeks, origin = excluded.origin, summary = excluded.summary, insights = excluded.insights, "
+              "updated_at = now();")
         for position, day in enumerate(b['days'], 1):
             print(f"insert into public.training_block_days (block_id, key, position, name, focus) values ("
                   f"{text(b['id'])}, {text(day['key'])}, {position}, {text(day['name'])}, {text(day.get('focus'))}) "
