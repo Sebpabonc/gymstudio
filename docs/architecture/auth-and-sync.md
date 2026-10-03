@@ -28,8 +28,8 @@ React app ── src/lib/supabaseClient.ts (lazy, anon key only)
   with `supabase config push` after reviewing `supabase config diff`).
 - **Profiles:** `public.profiles` (001_init) is created by the `on_auth_user_created` trigger.
 - **History in the cloud:** `public.workout_entries` (migration 012): one row per logged
-  exercise and date, `sets` as jsonb, client-generated `id`, `updated_at` maintained by a
-  trigger, `deleted_at` for soft deletes. RLS: a user can only read/insert/update rows with
+  exercise and date, `sets` as jsonb, client-generated `id`, `updated_at` set to **server time on insert and update** by a
+  trigger (migration 013), `deleted_at` for soft deletes. RLS: a user can only read/insert/update rows with
   their own `user_id`.
   - Why not the normalized `workout_sessions` / `workout_sets` tables from 001_init: the app's
     unit of work is "one exercise logged on one day"; syncing it as one row keeps offline
@@ -37,6 +37,8 @@ React app ── src/lib/supabaseClient.ts (lazy, anon key only)
     unused (empty) and can be dropped later.
 - **Sync algorithm (last-write-wins by `updated_at`):**
   1. Local entries carry `updatedAt` and a `dirty` flag (set on every local change).
+  - Pulls are paginated (Supabase returns at most 1000 rows per request) and use
+    `updated_at >= lastPulledAt` (merge is idempotent), so no row is skipped.
   2. On sign-in, on app start (if signed in), after each save, and when the browser goes back
      online: push dirty entries (upsert by `id`), then pull rows with
      `updated_at > lastPulledAt`, merge by `id` (newer `updatedAt` wins; `deleted_at` removes
