@@ -16,6 +16,7 @@ export async function loadExerciseLibrary() {
     secondaryMuscles: exercise.secondary_muscles,
     equipment: exercise.equipment,
     postureTips: exercise.posture_tips,
+    squeezeCue: exercise.squeeze_cue,
     primaryMuscle: exercise.primary_muscles[0],
     secondaryMuscle: exercise.secondary_muscles[0],
   }))

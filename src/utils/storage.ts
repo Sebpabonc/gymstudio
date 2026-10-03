@@ -111,6 +111,7 @@ type CatalogueRow = {
   secondary_muscles: string[]
   equipment: string | null
   posture_tips: string[] | null
+  squeeze_cue: string | null
   aliases: string[]
 }
 
@@ -125,6 +126,7 @@ type CatalogueExercise = Pick<
   | 'secondaryMuscles'
   | 'equipment'
   | 'postureTips'
+  | 'squeezeCue'
 >
 
 type CatalogueCache = {
@@ -281,6 +283,7 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
       secondaryMuscles: exercise.secondaryMuscles ?? current?.secondaryMuscles,
       equipment: exercise.equipment ?? current?.equipment,
       postureTips: exercise.postureTips ?? current?.postureTips,
+      squeezeCue: exercise.squeezeCue ?? current?.squeezeCue,
       notes: exercise.notes ?? current?.notes,
       tips: exercise.tips?.length ? exercise.tips : current?.tips ?? [],
     })
@@ -308,6 +311,7 @@ function loadCatalogueCache(): CatalogueCache | null {
         secondaryMuscles: exercise.secondaryMuscles,
         equipment: exercise.equipment,
         postureTips: exercise.postureTips,
+        squeezeCue: exercise.squeezeCue,
       })),
       aliases: parsed.aliases ?? {},
     }
@@ -324,7 +328,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
     const { data, error } = await supabaseClient
       .from('exercises')
       .select(
-        'id, name_en, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, aliases'
+        'id, name_en, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, squeeze_cue, aliases'
       )
       .eq('is_active', true)
       .order('name_en')
@@ -345,6 +349,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
         secondaryMuscles: row.secondary_muscles ?? undefined,
         equipment: row.equipment ?? undefined,
         postureTips: row.posture_tips ?? undefined,
+        squeezeCue: row.squeeze_cue ?? undefined,
       }
     })
 
@@ -378,6 +383,7 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
           secondaryMuscles: exercise.secondaryMuscles,
           equipment: exercise.equipment,
           postureTips: exercise.postureTips,
+          squeezeCue: exercise.squeezeCue,
         })),
         aliases: catalogue.aliases,
       })

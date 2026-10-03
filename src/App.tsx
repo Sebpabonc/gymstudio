@@ -428,6 +428,13 @@ export default function App() {
 
                     {selectedExercise.notes && <p className="exercise-notes">{selectedExercise.notes}</p>}
 
+                    {selectedExercise.squeezeCue?.trim() && (
+                      <p className="squeeze-cue">
+                        <span className="squeeze-cue-label"><span aria-hidden="true">💪</span> Squeeze</span>
+                        <span>{selectedExercise.squeezeCue}</span>
+                      </p>
+                    )}
+
                     {getExerciseTips(selectedExercise).length ? (
                       <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
                         <div className="tips-header">

@@ -111,6 +111,9 @@ describe('loadExercises', () => {
 
     expect(exercises).toHaveLength(227)
     expect(exercises.find((exercise) => exercise.id === 'barbell-bench-press')?.postureTips).toHaveLength(5)
+    expect(exercises.find((exercise) => exercise.id === 'barbell-bench-press')?.squeezeCue).toContain(
+      'Squeeze your chest'
+    )
   })
 
   it('recovers from corrupted saved data', async () => {
@@ -200,6 +203,25 @@ describe('loadExercises', () => {
 
     expect(exercise?.postureTips).toEqual(cachedTips)
   })
+
+  it('preserves cached squeeze cues and leaves missing cues undefined', async () => {
+    localStorage.setItem(
+      'gym-studio.catalogue',
+      JSON.stringify({
+        fetchedAt: '2026-10-03T00:00:00Z',
+        exercises: [
+          { id: 'romanian-deadlift', name: 'Romanian Deadlift (Barbell)', primaryMuscle: 'Hamstrings', squeezeCue: 'Cached cue' },
+          { id: 'lat-pulldown', name: 'Lat Pulldown (Wide Grip)', primaryMuscle: 'Lats' },
+        ],
+        aliases: {},
+      })
+    )
+
+    const exercises = await loadExercises()
+
+    expect(exercises.find((exercise) => exercise.id === 'romanian-deadlift')?.squeezeCue).toBe('Cached cue')
+    expect(exercises.find((exercise) => exercise.id === 'lat-pulldown')?.squeezeCue).toBeUndefined()
+  })
 })
 
 describe('remote catalogue', () => {
@@ -219,6 +241,7 @@ describe('remote catalogue', () => {
         'Tip four',
         'Tip five',
       ],
+      squeeze_cue: 'Squeeze the target muscle at lockout.',
       aliases: ['bb-rdl'],
     },
     {
@@ -230,6 +253,7 @@ describe('remote catalogue', () => {
       secondary_muscles: ['Upper Back', 'Biceps'],
       equipment: 'cable',
       posture_tips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
+      squeeze_cue: null,
       aliases: [],
     },
   ]
@@ -242,7 +266,7 @@ describe('remote catalogue', () => {
 
     expect(supabaseMock.from).toHaveBeenCalledWith('exercises')
     expect(supabaseMock.select).toHaveBeenCalledWith(
-      'id, name_en, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, aliases'
+      'id, name_en, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, squeeze_cue, aliases'
     )
     expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
     expect(supabaseMock.order).toHaveBeenCalledWith('name_en')
@@ -255,7 +279,9 @@ describe('remote catalogue', () => {
       secondaryMuscles: ['Glutes', 'Lower Back'],
       equipment: 'barbell',
       postureTips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
+      squeezeCue: 'Squeeze the target muscle at lockout.',
     })
+    expect(catalogue?.find((exercise) => exercise.id === 'lat-pulldown')?.squeezeCue).toBeUndefined()
     expect(deadlift?.notes).toBeUndefined()
     expect(deadlift?.tips).toBeUndefined()
   })
@@ -288,6 +314,7 @@ describe('remote catalogue', () => {
     expect(deadlift?.equipment).toBe('barbell')
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
+    expect(deadlift?.squeezeCue).toBe('Squeeze the target muscle at lockout.')
   })
 })
 
