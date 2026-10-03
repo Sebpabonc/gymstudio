@@ -86,8 +86,9 @@ table needs `user_id`. Row Level Security enforces user isolation.
   global read-only reference data from `docs/fitness/approved/training-blocks/blocks.json`
   (spec: `docs/fitness/training-blocks-spec.md`, validated in CI by `scripts/validate-blocks.py`,
   seeded with `python3 scripts/training-blocks-seed.py`).
-- User-owned tables (`workout_*`, `profiles`) have RLS by `auth.uid()`; they are
-  not used by the app yet (needs authentication — future phase).
+- User data: `public.workout_entries` (synced workout history) and `public.profiles`, RLS by
+  `auth.uid()`. Auth + sync design: `docs/architecture/auth-and-sync.md`. The old
+  `workout_sessions` / `workout_sets` tables are unused.
 - The browser may only use the public `anon` key (`VITE_SUPABASE_URL`,
   `VITE_SUPABASE_ANON_KEY`). Never commit or ship the `service_role` key.
 - Copilot does not create or apply migrations unless the issue explicitly says so;
