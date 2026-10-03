@@ -93,7 +93,7 @@ button {
 
 .app-shell {
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,8 +131,9 @@ button {
   position: relative;
   width: min(calc(100vw - 18px), 390px);
   aspect-ratio: 390 / 844;
-  max-height: calc(100vh - 12px);
+  max-height: calc(100dvh - 12px);
   min-height: 0;
+  padding-top: env(safe-area-inset-top, 0px);
   background: linear-gradient(180deg, rgba(37, 37, 38, 0.95), rgba(18, 18, 18, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 34px;
@@ -172,24 +173,15 @@ button {
 }
 
 .brand-header {
-  padding: 30px 18px 10px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
-  padding-top: 26px;
-}
-
-.brand-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.header-row-with-toggle {
+  flex: 0 0 56px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .language-toggle {
@@ -205,68 +197,35 @@ button {
   text-transform: uppercase;
 }
 
-.brand-mark {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(122, 93, 96, 0.95), rgba(59, 59, 62, 0.95));
-  color: var(--text);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  box-shadow: 0 8px 18px rgba(25, 25, 28, 0.32);
-}
-
-.brand-name {
-  margin-left: auto;
-  font-size: var(--font-caption);
-  font-weight: var(--font-section-weight);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text);
-}
-
-.account-button {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  font-size: 0.66rem;
-  font-weight: 800;
-}
-
-.account-button svg {
-  width: 19px;
-  height: 19px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-}
-
 .brand-header h1 {
-  margin: 14px 0 0;
-  font-size: var(--font-display);
-  line-height: 0.95;
-  letter-spacing: -0.07em;
-  text-transform: uppercase;
-  font-weight: var(--font-display-weight);
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  font-weight: 700;
   color: var(--text);
 }
 
-.eyebrow {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: var(--font-caption);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.sync-indicator {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 50%;
+  background: #a8aaa6;
+}
+
+.sync-indicator.synced {
+  background: #7cbd91;
+}
+
+.sync-indicator.syncing,
+.sync-indicator.demo {
+  background: #e7bd72;
+}
+
+.sync-indicator.offline,
+.sync-indicator.error {
+  background: #e27e72;
 }
 
 .app-content {
@@ -274,6 +233,7 @@ button {
   gap: 12px;
   padding: 12px 12px 16px;
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-top: 14px;
@@ -1087,13 +1047,6 @@ button {
   font-size: 1rem;
 }
 
-.tab-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 16px;
-}
-
 .tab-button {
   appearance: none;
   border: 1px solid var(--line);
@@ -1112,6 +1065,71 @@ button {
   background: var(--button-dark);
   color: var(--button-text);
   border-color: transparent;
+}
+
+.exercise-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.exercise-mode-switch button {
+  min-height: 48px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted-strong);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.exercise-mode-switch button.active {
+  border-color: transparent;
+  background: var(--button-dark);
+  color: var(--button-text);
+}
+
+.bottom-tab-bar {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  flex: 0 0 auto;
+  padding: 4px 8px max(8px, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: rgba(24, 24, 25, 0.98);
+}
+
+.bottom-tab-bar button {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 4px 2px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.bottom-tab-bar button.active {
+  color: var(--text);
+  background: var(--brand-soft);
+}
+
+.bottom-tab-bar svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .plan-card {
@@ -2148,8 +2166,8 @@ button {
 
   .phone-frame {
     width: 100vw;
-    max-height: 100vh;
-    height: 100vh;
+    max-height: 100dvh;
+    height: 100dvh;
     border-radius: 0;
   }
 
@@ -2161,11 +2179,6 @@ button {
   .set-label {
     width: 64px;
   }
-}
-
-.tab-row.four {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
 }
 
 .progress-section {
