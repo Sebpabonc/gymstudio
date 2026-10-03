@@ -64,6 +64,36 @@ describe('loadExercises', () => {
     expect(loadExercises()).toHaveLength(exerciseLibrary.length)
   })
 
+  it('replaces saved legacy exercises with the canonical library entry', () => {
+    localStorage.setItem(
+      'gym-studio.exercises',
+      JSON.stringify([{ id: 'bb-bench-press', name: 'BB Bench Press', primaryMuscle: 'Chest' }])
+    )
+
+    const exercises = loadExercises()
+    const benchPresses = exercises.filter((exercise) => normalizeExerciseName(exercise.name) === 'barbell-bench-press')
+
+    expect(benchPresses).toHaveLength(1)
+    expect(benchPresses[0].id).toBe('barbell-bench-press')
+    expect(JSON.parse(localStorage.getItem('gym-studio.exercises')!).some(
+      (exercise: { id: string }) => exercise.id === 'bb-bench-press'
+    )).toBe(false)
+  })
+
+  it('loads saved legacy exercises idempotently', () => {
+    localStorage.setItem(
+      'gym-studio.exercises',
+      JSON.stringify([{ id: 'bb-bench-press', name: 'BB Bench Press', primaryMuscle: 'Chest' }])
+    )
+
+    const firstLoad = loadExercises()
+    const firstStoredValue = localStorage.getItem('gym-studio.exercises')
+    const secondLoad = loadExercises()
+
+    expect(secondLoad).toEqual(firstLoad)
+    expect(localStorage.getItem('gym-studio.exercises')).toBe(firstStoredValue)
+  })
+
   it('keeps user-added exercises alongside the library', () => {
     localStorage.setItem('gym-studio.exercises', JSON.stringify([{ name: 'My Custom Move', primaryMuscle: 'Core' }]))
     const names = loadExercises().map((e) => e.name)
@@ -99,6 +129,17 @@ describe('workout history', () => {
     expect(loadWorkoutHistory()).toEqual([])
   })
 
+  it('migrates legacy exercise ids in saved history', () => {
+    const legacyEntry = entry('legacy', '2026-09-01')
+    localStorage.setItem('gym-studio.history', JSON.stringify([legacyEntry]))
+
+    const migrated = loadWorkoutHistory()
+
+    expect(migrated[0].exerciseId).toBe('barbell-bench-press')
+    expect(JSON.parse(localStorage.getItem('gym-studio.history')!)).toEqual(migrated)
+    expect(loadWorkoutHistory()).toEqual(migrated)
+  })
+
   it('stores entries newest first', () => {
     addWorkoutEntry(entry('a', '2026-09-01'))
     addWorkoutEntry(entry('b', '2026-09-15'))
@@ -113,10 +154,7 @@ describe('exercise library data', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  // KNOWN BUG: "Barbell Bench Press" exists twice (ids `barbell-bench-press` and
-  // `bb-bench-press`). loadExercises merges by name, so one id disappears after the
-  // first launch and history saved under it is orphaned. Remove `.fails` once fixed.
-  it.fails('has unique names, because saved exercises are merged by name', () => {
+  it('has unique names, because saved exercises are merged by name', () => {
     const names = exerciseLibrary.map((e) => normalizeExerciseName(e.name))
     expect(new Set(names).size).toBe(names.length)
   })

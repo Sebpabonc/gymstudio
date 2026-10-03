@@ -93,7 +93,8 @@ const rawExerciseLibrary: Exercise[] = [
     tips: [
       'Mantén la espalda ligeramente arqueada y los pies bien apoyados en el suelo.',
       'Los omóplatos deben estar retraídos y bajos durante la fase de empuje.',
-      'Baja el peso controlando el recorrido sin dejar caer los codos.'
+      'Baja el peso controlando el recorrido sin dejar caer los codos.',
+      'Evita bloquear o hiperextender los codos al extender los brazos.'
     ]
   },
   {
@@ -181,15 +182,6 @@ const rawExerciseLibrary: Exercise[] = [
     ]
   }
   ,
-  {
-    id: 'bb-bench-press',
-    name: 'BB Bench Press',
-    primaryMuscle: 'Chest',
-    tips: [
-      'Mantén omóplatos retraídos y pecho alto.',
-      'Controla la bajada y evita hiperextender los codos.'
-    ],
-  },
   {
     id: 'bb-bent-over-reverse-grip-rows',
     name: 'BB Bent Over Reverse Grip Rows',
