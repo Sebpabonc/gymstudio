@@ -4,17 +4,42 @@ export const ALL_BODY_REGIONS = 'All'
 
 const bodyRegionOrder = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core', 'Full Body']
 
+const exerciseSearchAbbreviations: Record<string, string[]> = {
+  rdl: ['romanian', 'deadlift'],
+  sldl: ['stiff', 'leg', 'deadlift'],
+  ohp: ['overhead', 'press'],
+  db: ['dumbbell'],
+  bb: ['barbell'],
+  ez: ['ez', 'bar'],
+  bss: ['bulgarian', 'split', 'squat'],
+  lpd: ['lat', 'pulldown'],
+}
+
+function normalizeExerciseSearchText(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+function getExerciseSearchTerms(query: string) {
+  return query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => normalizeExerciseSearchText(word))
+    .filter(Boolean)
+    .flatMap((word) => exerciseSearchAbbreviations[word] ?? [word])
+}
+
 export function getAvailableBodyRegions(exercises: Exercise[]) {
   const presentRegions = new Set(exercises.map((exercise) => exercise.bodyRegion).filter(Boolean))
   return [ALL_BODY_REGIONS, ...bodyRegionOrder.filter((region) => presentRegions.has(region))]
 }
 
 export function filterExercises(exercises: Exercise[], query: string, bodyRegion = ALL_BODY_REGIONS) {
-  const normalizedQuery = query.trim().toLowerCase()
+  const searchTerms = getExerciseSearchTerms(query)
 
   return exercises.filter((exercise) => {
     if (bodyRegion !== ALL_BODY_REGIONS && exercise.bodyRegion !== bodyRegion) return false
-    if (!normalizedQuery) return true
+    if (!searchTerms.length) return true
 
     const searchableValues = [
       exercise.name,
@@ -23,8 +48,17 @@ export function filterExercises(exercises: Exercise[], query: string, bodyRegion
       exercise.equipment,
     ]
 
-    return searchableValues.some((value) => value?.toLowerCase().includes(normalizedQuery))
+    const normalizedValues = normalizeExerciseSearchText(searchableValues.filter(Boolean).join(' '))
+    return searchTerms.every((term) => normalizedValues.includes(term))
   })
+}
+
+export function getExerciseSubtitle(exercise: Exercise) {
+  const primaryMuscles = exercise.primaryMuscles ?? [exercise.primaryMuscle]
+  const additionalMuscles = primaryMuscles.filter(
+    (muscle) => muscle.trim().toLowerCase() !== exercise.bodyRegion?.trim().toLowerCase()
+  )
+  return [exercise.bodyRegion, ...additionalMuscles].filter(Boolean).join(' · ')
 }
 
 export function getExerciseTips(exercise: Exercise): Array<string | ExerciseTip> {

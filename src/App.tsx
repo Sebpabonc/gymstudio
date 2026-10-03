@@ -16,6 +16,7 @@ import {
   ALL_BODY_REGIONS,
   filterExercises,
   getAvailableBodyRegions,
+  getExerciseSubtitle,
   getExerciseTips,
 } from './utils/exerciseFilters'
 import { filterLoggableSets, formatWorkoutSet, workoutMaxWeight, workoutVolume } from './utils/workoutSets'
@@ -373,11 +374,7 @@ export default function App() {
                             }}
                           >
                             <span className="result-name">{getExerciseDisplayName(exercise)}</span>
-                            <span className="result-meta">
-                              {[exercise.bodyRegion, (exercise.primaryMuscles ?? [exercise.primaryMuscle]).join(', ')]
-                                .filter(Boolean)
-                                .join(' · ')}
-                            </span>
+                            <span className="result-meta">{getExerciseSubtitle(exercise)}</span>
                           </button>
                         ))
                       ) : (
