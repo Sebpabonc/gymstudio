@@ -79,12 +79,14 @@ export function blockReports(
         metric: start.metric,
       })
     }
+    const e1rmLifts = lifts.filter((lift) => lift.metric === 'e1rm')
+    const headlineLifts = e1rmLifts.length ? e1rmLifts : lifts
     return {
       blockId: block.id,
       blockNumber: block.number,
       method: block.method,
       lifts,
-      medianChangePercent: median(lifts.map((lift) => lift.changePercent)),
+      medianChangePercent: median(headlineLifts.map((lift) => lift.changePercent)),
       liftCount: lifts.length,
       improvedLiftCount: lifts.filter((lift) => lift.changePercent > 0).length,
     }
