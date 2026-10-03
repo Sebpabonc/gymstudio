@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { exerciseLibrary } from '../data/exerciseLibrary'
 import { WorkoutEntry } from '../types'
+import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
 import {
   addWorkoutEntry,
   getExerciseDisplayName,
@@ -9,6 +10,22 @@ import {
   normalizeExerciseName,
   upsertExerciseRecord,
 } from './storage'
+
+const supabaseMock = vi.hoisted(() => {
+  const response: { data: unknown[] | null; error: unknown | null } = { data: null, error: null }
+  const order = vi.fn(async () => response)
+  const eq = vi.fn(() => ({ order }))
+  const select = vi.fn(() => ({ eq }))
+  const from = vi.fn(() => ({ select }))
+  const client = { from }
+  return { response, order, eq, select, from, client, clientState: { current: client as typeof client | null } }
+})
+
+vi.mock('../lib/supabaseClient', () => ({
+  get supabaseClient() {
+    return supabaseMock.clientState.current
+  },
+}))
 
 function createMemoryStorage(): Storage {
   const data = new Map<string, string>()
@@ -33,6 +50,13 @@ const entry = (id: string, date: string): WorkoutEntry => ({
 
 beforeEach(() => {
   vi.stubGlobal('localStorage', createMemoryStorage())
+  supabaseMock.response.data = null
+  supabaseMock.response.error = null
+  supabaseMock.clientState.current = supabaseMock.client
+  supabaseMock.order.mockClear()
+  supabaseMock.eq.mockClear()
+  supabaseMock.select.mockClear()
+  supabaseMock.from.mockClear()
 })
 
 describe('normalizeExerciseName', () => {
@@ -101,6 +125,87 @@ describe('loadExercises', () => {
     const uniqueLibraryNames = new Set(exerciseLibrary.map((e) => normalizeExerciseName(e.name)))
     expect(names.length).toBe(uniqueLibraryNames.size + 1)
   })
+
+  it('uses the cached catalogue and keeps saved custom exercises', () => {
+    const catalogueExercise = {
+      id: 'lat-pulldown',
+      name: 'Lat Pulldown (Wide Grip)',
+      primaryMuscle: 'Lats',
+    }
+    localStorage.setItem(
+      'gym-studio.catalogue',
+      JSON.stringify({ fetchedAt: '2026-10-03T00:00:00Z', exercises: [catalogueExercise], aliases: {} })
+    )
+    localStorage.setItem(
+      'gym-studio.exercises',
+      JSON.stringify([...exerciseLibrary, { id: 'my-custom-move', name: 'My Custom Move', primaryMuscle: 'Core' }])
+    )
+
+    const exercises = loadExercises()
+    expect(exercises).toEqual([
+      expect.objectContaining(catalogueExercise),
+      expect.objectContaining({ id: 'my-custom-move', name: 'My Custom Move' }),
+    ])
+    expect(exercises.some((exercise) => exercise.name === 'Lat Pulldown')).toBe(false)
+  })
+})
+
+describe('remote catalogue', () => {
+  const rows = [
+    {
+      id: 'romanian-deadlift',
+      name_en: 'Romanian Deadlift (Barbell)',
+      primary_muscle: 'Hamstrings',
+      secondary_muscles: ['Glutes', 'Lower Back'],
+      aliases: ['bb-rdl'],
+    },
+    {
+      id: 'lat-pulldown',
+      name_en: 'Lat Pulldown (Wide Grip)',
+      primary_muscle: 'Lats',
+      secondary_muscles: ['Upper Back', 'Biceps'],
+      aliases: [],
+    },
+  ]
+
+  it('maps active rows and preserves bundled tips by id', async () => {
+    supabaseMock.response.data = rows
+
+    const catalogue = await fetchRemoteCatalogue()
+    const deadlift = catalogue?.find((exercise) => exercise.id === 'romanian-deadlift')
+    const bundledDeadlift = exerciseLibrary.find((exercise) => exercise.id === 'romanian-deadlift')
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('exercises')
+    expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
+    expect(supabaseMock.order).toHaveBeenCalledWith('name_en')
+    expect(deadlift).toMatchObject({
+      name: 'Romanian Deadlift (Barbell)',
+      primaryMuscle: 'Hamstrings',
+      secondaryMuscle: 'Glutes',
+      notes: bundledDeadlift?.notes,
+      tips: bundledDeadlift?.tips,
+    })
+  })
+
+  it('returns null when Supabase returns an error', async () => {
+    supabaseMock.response.error = new Error('offline')
+    expect(await fetchRemoteCatalogue()).toBeNull()
+  })
+
+  it('returns null when the Supabase client is unavailable', async () => {
+    supabaseMock.clientState.current = null
+    expect(await fetchRemoteCatalogue()).toBeNull()
+  })
+
+  it('caches the catalogue and its aliases for offline history migration', async () => {
+    supabaseMock.response.data = rows
+
+    await refreshCatalogue()
+
+    const cache = JSON.parse(localStorage.getItem('gym-studio.catalogue')!)
+    expect(cache.exercises).toHaveLength(2)
+    expect(cache.aliases).toEqual({ 'bb-rdl': 'romanian-deadlift' })
+  })
 })
 
 describe('upsertExerciseRecord', () => {
@@ -138,6 +243,29 @@ describe('workout history', () => {
     expect(migrated[0].exerciseId).toBe('barbell-bench-press')
     expect(JSON.parse(localStorage.getItem('gym-studio.history')!)).toEqual(migrated)
     expect(loadWorkoutHistory()).toEqual(migrated)
+  })
+
+  it('migrates catalogue aliases idempotently', () => {
+    const aliasedEntries = [
+      { ...entry('catalogue-alias', '2026-09-02'), exerciseId: 'bb-rdl' },
+      { ...entry('catalogue-alias-2', '2026-09-03'), exerciseId: 'hack-squats' },
+    ]
+    localStorage.setItem(
+      'gym-studio.catalogue',
+      JSON.stringify({
+        fetchedAt: '2026-10-03T00:00:00Z',
+        exercises: [],
+        aliases: { 'bb-rdl': 'romanian-deadlift', 'hack-squats': 'hack-squat-machine' },
+      })
+    )
+    localStorage.setItem('gym-studio.history', JSON.stringify(aliasedEntries))
+
+    const migrated = loadWorkoutHistory()
+
+    expect(migrated[0].exerciseId).toBe('romanian-deadlift')
+    expect(migrated[1].exerciseId).toBe('hack-squat-machine')
+    expect(loadWorkoutHistory()).toEqual(migrated)
+    expect(JSON.parse(localStorage.getItem('gym-studio.history')!)).toEqual(migrated)
   })
 
   it('stores entries newest first', () => {

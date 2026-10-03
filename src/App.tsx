@@ -1,7 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
-import { getExerciseDisplayName, loadExercises, loadWorkoutHistory, saveWorkoutHistory } from './utils/storage'
+import {
+  getExerciseDisplayName,
+  loadExercises,
+  loadWorkoutHistory,
+  refreshCatalogue,
+  saveWorkoutHistory,
+} from './utils/storage'
 
 type ViewTab = 'track' | 'planned' | 'custom'
 
@@ -62,7 +68,7 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 }
 
 export default function App() {
-  const [exercises] = useState<Exercise[]>(() => loadExercises())
+  const [exercises, setExercises] = useState<Exercise[]>(() => loadExercises())
   const [history, setHistory] = useState<WorkoutEntry[]>(() => loadWorkoutHistory())
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string>('')
@@ -72,7 +78,19 @@ export default function App() {
   const [chatInput, setChatInput] = useState('')
   const [chatReply, setChatReply] = useState('')
   const [activeTab, setActiveTab] = useState<ViewTab>('track')
+  const catalogueRefreshStarted = useRef(false)
   const text = uiText
+
+  useEffect(() => {
+    if (catalogueRefreshStarted.current) return
+    catalogueRefreshStarted.current = true
+
+    void refreshCatalogue().then((catalogue) => {
+      if (!catalogue) return
+      setExercises(loadExercises())
+      setHistory(loadWorkoutHistory())
+    })
+  }, [])
 
   const selectedExercise = useMemo(
     () => exercises.find((exercise) => exercise.id === selectedId) ?? exercises[0],
