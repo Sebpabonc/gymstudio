@@ -4,6 +4,8 @@ import App from './App'
 import './styles.css'
 import { initializeDemoMode } from './utils/demoMode'
 import { AuthProvider } from './auth/AuthProvider'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { installChunkErrorHandlers } from './utils/chunkReload'
 
 async function clearLegacyRuntimeState() {
   try {
@@ -23,11 +25,14 @@ async function clearLegacyRuntimeState() {
 
 void clearLegacyRuntimeState()
 initializeDemoMode()
+installChunkErrorHandlers()
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 )
