@@ -29,6 +29,10 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Public values (anon key is read-only via RLS). Set as repo Variables.
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
