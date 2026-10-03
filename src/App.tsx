@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
 import { localIsoDate } from './lib/dates'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
+import { useAuth } from './auth/AuthProvider'
 import { exitDemoMode, isDemoMode } from './utils/demoMode'
 import {
   fetchTrainingBlocks,
@@ -17,6 +18,9 @@ import {
   getAvailableBodyRegions,
   getExerciseTips,
 } from './utils/exerciseFilters'
+
+const LoginScreen = lazy(() => import('./screens/LoginScreen'))
+const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
 
 type ViewTab = 'track' | 'planned' | 'custom'
 
@@ -78,6 +82,7 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 
 export default function App() {
   const demoMode = isDemoMode()
+  const { status, user } = useAuth()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
@@ -88,7 +93,11 @@ export default function App() {
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<ViewTab>('track')
+  const [accountOpen, setAccountOpen] = useState(false)
   const text = uiText
+  const nameCandidate = user?.user_metadata?.full_name ?? user?.user_metadata?.name
+  const userName = typeof nameCandidate === 'string' ? nameCandidate : user?.email ?? ''
+  const initials = userName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
 
   useEffect(() => {
     let cancelled = false
@@ -253,6 +262,21 @@ export default function App() {
           <div className="brand-row">
             <span className="brand-mark">BF</span>
             <span className="brand-name">Borcelle Fitness</span>
+            {!demoMode && (
+              <button
+                type="button"
+                className="account-button"
+                aria-label={status === 'signed-in' ? 'Open profile' : 'Sign in'}
+                onClick={() => setAccountOpen(true)}
+              >
+                {status === 'signed-in' && initials ? initials : (
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="3.5" />
+                    <path d="M5.5 20c.5-3.5 2.8-5.5 6.5-5.5s6 2 6.5 5.5" />
+                  </svg>
+                )}
+              </button>
+            )}
           </div>
           <div className="header-row-with-toggle">
             <h1>{text.title}</h1>
@@ -287,7 +311,13 @@ export default function App() {
         </header>
 
         <main className="app-content">
-          {activeTab === 'track' ? (
+          {accountOpen ? (
+            <Suspense fallback={<section className="card account-screen">Loading account…</section>}>
+              {status === 'signed-in'
+                ? <ProfileScreen onClose={() => setAccountOpen(false)} />
+                : <LoginScreen onClose={() => setAccountOpen(false)} />}
+            </Suspense>
+          ) : activeTab === 'track' ? (
             <>
               <section className="card search-panel">
                 <label className="field-label" htmlFor="exercise-search">{text.searchLabel}</label>

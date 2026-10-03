@@ -228,6 +228,29 @@ button {
   color: var(--text);
 }
 
+.account-button {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.account-button svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
 .brand-header h1 {
   margin: 14px 0 0;
   font-size: var(--font-display);
@@ -254,6 +277,194 @@ button {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-top: 14px;
+}
+
+.account-screen {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.account-screen h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.account-back,
+.forgot-password {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.account-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.account-mode-tabs button {
+  min-width: 0;
+  padding: 9px 5px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.account-mode-tabs button.active {
+  background: var(--button-dark);
+  color: var(--button-text);
+}
+
+.account-form {
+  display: grid;
+  gap: 9px;
+}
+
+.account-label {
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.account-form input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text);
+}
+
+.account-form input:focus {
+  border-color: rgba(242, 181, 72, 0.8);
+}
+
+.password-field {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.password-field input {
+  border: 0;
+  background: transparent;
+}
+
+.password-field button {
+  flex: 0 0 auto;
+  margin-right: 8px;
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.forgot-password {
+  justify-self: end;
+  margin: 0 0 2px;
+}
+
+.account-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.account-divider::before,
+.account-divider::after {
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+  content: '';
+}
+
+.google-button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.google-mark {
+  color: #4285f4;
+  font-family: Arial, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.google-button:disabled,
+.account-form button:disabled,
+.profile-signout:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.account-error,
+.account-message {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.76rem;
+}
+
+.account-error {
+  color: #ffb4a9;
+}
+
+.account-message {
+  color: var(--muted-strong);
+}
+
+.profile-name {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.profile-email {
+  margin: -8px 0 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.profile-signout {
+  width: 100%;
 }
 
 .card {

@@ -9,7 +9,13 @@ export async function getSupabaseClient(): Promise<SupabaseClient | null> {
 
   if (!supabaseClient) {
     const { createClient } = await import('@supabase/supabase-js')
-    supabaseClient = createClient(url, anonKey)
+    supabaseClient = createClient(url, anonKey, {
+      auth: {
+        flowType: 'pkce',
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    })
   }
 
   return supabaseClient
