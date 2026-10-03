@@ -18,6 +18,7 @@ The app, its content and all repo docs are **English-only**.
 | Tech Lead / Architect | Claude | Technical design, architecture, issues with tasks + acceptance criteria, PR review, merging, unblocking Copilot | Make product decisions silently |
 | Developer | GitHub Copilot | Implementing issues inside the approved design, tests, small refactors needed by the task | Redesign architecture |
 | QA ("QAer") | Claude QA agent (`.claude/agents/qaer.md`), run when Sebas says "QAer" | End-to-end functional, design-consistency and content checks on the live app (`docs/qa/README.md`); writes `docs/qa/reports/`, files `qa` issues | Change code, content or data; sign in |
+| UX & AI team ("UXer") | Claude agent (`.claude/agents/uxer.md`) | UX research, design and AI-first product proposals in `docs/ux/proposals/` (see `docs/ux/README.md`) | Change code/content/data; decide architecture or cost |
 | PT / Fitness Expert | Specialist agent | Drafting fitness knowledge (technique, cues, classifications) | Modify code or app data directly |
 
 ## How work flows

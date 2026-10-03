@@ -14,3 +14,7 @@
 - When Sebas says **"QAer"**: run the QA agent defined in `.claude/agents/qaer.md` against the
   live app using the checklist in `docs/qa/README.md`, then review its report, commit it via PR,
   and turn confirmed findings into prioritized fix issues for Copilot.
+- When Sebas asks for UX improvements, research or AI ideas ("UXer"): run the agent in
+  `.claude/agents/uxer.md`; proposals land in `docs/ux/proposals/` and need his approval before
+  becoming Issues. AI features follow the guardrails in `docs/ux/README.md` (server-side key,
+  grounded answers, no medical advice, provider-agnostic).
