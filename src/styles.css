@@ -15,6 +15,8 @@
   --button-dark: linear-gradient(135deg, #7a5d60 0%, #2f2f31 100%);
   --button-text: #f5f5f5;
   --success: #dfe7df;
+  --nav-active: #c99ca1;
+  --nav-idle: rgba(243, 243, 241, 0.55);
 
   --font-display: clamp(1.7rem, 4.5vw, 2.08rem);
   --font-section: 0.65rem;
@@ -166,22 +168,126 @@ button {
   z-index: 5;
 }
 
-.brand-header,
 .app-content {
   position: relative;
   z-index: 1;
 }
 
-.brand-header {
-  flex: 0 0 56px;
-  min-height: 56px;
+.header-sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.brand-bar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  height: 48px;
+  margin: -14px -12px -60px;
   padding: 0 18px;
+  background: transparent;
+  pointer-events: none;
+  transition: background-color 0.18s ease;
+}
+
+.brand-bar.collapsed {
+  background: rgba(24, 24, 25, 0.96);
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
+}
+
+.brand-bar-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.brand-bar.collapsed .brand-bar-title {
+  opacity: 1;
+  transform: none;
+}
+
+.brand-bar-wordmark {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.brand-bar-screen {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.brand-header {
+  display: grid;
+  align-content: end;
+  gap: 2px;
+  min-height: 110px;
+  margin: 0 -12px;
+  padding: 24px 18px 8px;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.brand-header.collapsed {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.brand-tagline {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.brand-wordmark {
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.brand-header h1 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--muted-strong);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-bar,
+  .brand-bar-title,
+  .brand-header,
+  .bottom-tab-bar {
+    transition: none;
+  }
 }
 
 .language-toggle {
@@ -195,15 +301,6 @@ button {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-
-.brand-header h1 {
-  margin: 0;
-  font-size: 1.08rem;
-  line-height: 1.2;
-  letter-spacing: -0.03em;
-  font-weight: 700;
-  color: var(--text);
 }
 
 .sync-indicator {
@@ -231,7 +328,7 @@ button {
 .app-content {
   display: grid;
   gap: 12px;
-  padding: 12px 12px 16px;
+  padding: 12px 12px calc(60px + max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -1193,45 +1290,81 @@ button {
 }
 
 .bottom-tab-bar {
-  position: relative;
-  z-index: 2;
+  position: absolute;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  z-index: 4;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  flex: 0 0 auto;
-  padding: 4px 8px max(8px, env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--line);
-  background: rgba(24, 24, 25, 0.98);
+  grid-template-columns: repeat(4, 48px);
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  width: 228px;
+  height: 60px;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 30px;
+  background: rgba(24, 24, 25, 0.72);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transform: translateX(-50%);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .bottom-tab-bar {
+    background: rgba(24, 24, 25, 0.96);
+  }
+}
+
+.bottom-tab-bar.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(24px);
+  pointer-events: none;
 }
 
 .bottom-tab-bar button {
+  position: relative;
   display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 2px;
-  min-width: 0;
-  min-height: 52px;
-  padding: 4px 2px;
+  place-items: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
   border: 0;
-  border-radius: 10px;
+  border-radius: 50%;
   background: transparent;
-  color: var(--muted);
-  font-size: 0.62rem;
-  font-weight: 700;
+  color: var(--nav-idle);
 }
 
 .bottom-tab-bar button.active {
-  color: var(--text);
-  background: var(--brand-soft);
+  color: var(--nav-active);
+}
+
+.bottom-tab-bar button.active::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .bottom-tab-bar svg {
-  width: 21px;
-  height: 21px;
+  width: 24px;
+  height: 24px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.8;
+  stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.bottom-tab-bar button.active svg {
+  stroke-width: 2.1;
 }
 
 .plan-card {

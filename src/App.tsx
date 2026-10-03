@@ -1,10 +1,11 @@
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
 import AskExercise from './components/AskExercise'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
 import { useAuth } from './auth/AuthProvider'
+import { useTextEntryFocused } from './utils/textEntryFocus'
 import { exitDemoMode, isDemoMode } from './utils/demoMode'
 import {
   fetchTrainingBlocks,
@@ -100,10 +101,25 @@ export default function App() {
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<AppTab>('today')
+  const [headerCollapsed, setHeaderCollapsed] = useState(false)
+  const headerSentinelRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLElement>(null)
+  const dockHidden = useTextEntryFocused()
   const [showWelcome, setShowWelcome] = useState(() => !hasDismissedWelcome())
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const text = uiText
+
+  useEffect(() => {
+    const sentinel = headerSentinelRef.current
+    if (!sentinel || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(
+      ([entry]) => setHeaderCollapsed(!entry.isIntersecting),
+      { root: contentRef.current, threshold: 0 },
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -275,16 +291,24 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="phone-frame">
-        <header className="brand-header">
-          <h1>{getNavigationTitle(activeTab)}</h1>
-          <span
-            className={`sync-indicator ${status === 'signed-in' ? syncStatus : demoMode ? 'demo' : 'local'}`}
-            role="status"
-            aria-label={status === 'signed-in' ? `Workout sync: ${syncStatus}` : demoMode ? 'Demo data' : 'Local workout data'}
-          />
-        </header>
-
-        <main className="app-content">
+        <main className="app-content" ref={contentRef}>
+          <div className="header-sentinel" ref={headerSentinelRef} aria-hidden="true" />
+          <div className={`brand-bar${headerCollapsed ? ' collapsed' : ''}`}>
+            <span className="brand-bar-title" aria-hidden="true">
+              <span className="brand-bar-wordmark">Gym Studio</span>
+              <span className="brand-bar-screen">{getNavigationTitle(activeTab)}</span>
+            </span>
+            <span
+              className={`sync-indicator ${status === 'signed-in' ? syncStatus : demoMode ? 'demo' : 'local'}`}
+              role="status"
+              aria-label={status === 'signed-in' ? `Workout sync: ${syncStatus}` : demoMode ? 'Demo data' : 'Local workout data'}
+            />
+          </div>
+          <header className={`brand-header${headerCollapsed ? ' collapsed' : ''}`}>
+            <span className="brand-tagline" aria-hidden="true">Train with intent</span>
+            <span className="brand-wordmark" aria-hidden="true">Gym Studio</span>
+            <h1>{getNavigationTitle(activeTab)}</h1>
+          </header>
           {activeTab === 'exercises' && (
             <div className="exercise-mode-switch" role="group" aria-label="Exercise tools">
               <button
@@ -637,7 +661,7 @@ export default function App() {
             </>
           )}
         </main>
-        <nav className="bottom-tab-bar" aria-label="Primary navigation">
+        <nav className={`bottom-tab-bar${dockHidden ? ' hidden' : ''}`} aria-label="Primary navigation">
           {navigationTabs.map((tab) => (
             <button
               key={tab.id}
@@ -657,7 +681,7 @@ export default function App() {
               }}
             >
               <NavigationIcon name={tab.icon} />
-              <span>{tab.label}</span>
+              <span className="visually-hidden">{tab.label}</span>
             </button>
           ))}
         </nav>
