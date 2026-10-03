@@ -2319,3 +2319,45 @@ button {
   font-weight: 800;
   font-size: 1.1rem;
 }
+
+.guest-data-prompt {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.guest-data-card {
+  width: 100%;
+  max-width: 340px;
+  display: grid;
+  gap: 12px;
+  padding: 18px 16px;
+  background: var(--bg-soft);
+  box-shadow: var(--shadow);
+}
+
+.guest-data-card h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.guest-data-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.guest-data-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.guest-data-actions .secondary-button {
+  width: 100%;
+}

@@ -1,8 +1,16 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabaseClient, isGoogleProviderEnabled } from '../lib/supabaseClient'
+import GuestDataPrompt from '../components/GuestDataPrompt'
 import { isDemoMode } from '../utils/demoMode'
 import { syncWorkoutHistory } from '../utils/sync'
+import {
+  hasGuestWorkoutData,
+  isGuestDataClaimed,
+  markGuestDataClaimed,
+  moveGuestDataToAccount,
+  setStorageNamespace,
+} from '../utils/storage'
 
 export type AuthStatus = 'loading' | 'signed-out' | 'signed-in'
 export type WorkoutSyncStatus = 'syncing' | 'synced' | 'offline' | 'error'
@@ -83,6 +91,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authStateReducer, startingState)
   const [syncStatus, setSyncStatus] = useState<WorkoutSyncStatus>('syncing')
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
+  const [resolvedGuestPromptFor, setResolvedGuestPromptFor] = useState<string | null>(null)
+
+  const accountId = demoMode ? null : state.session?.user.id ?? null
+  // Must be set during render so child effects read the right account's data.
+  setStorageNamespace(accountId)
+  const guestPromptPending =
+    accountId !== null && resolvedGuestPromptFor !== accountId && !isGuestDataClaimed() && hasGuestWorkoutData()
+  const guestDataToMove = guestPromptPending
 
   useEffect(() => {
     if (demoMode) return
@@ -115,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const userId = state.session?.user.id
-    if (demoMode || !userId) {
+    if (demoMode || !userId || guestPromptPending) {
       return
     }
 
@@ -179,7 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener('online', syncWhenOnline)
       window.removeEventListener('offline', syncWhenOffline)
     }
-  }, [demoMode, state.session?.user.id])
+  }, [demoMode, state.session?.user.id, guestPromptPending])
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const client = await getClient()
@@ -217,6 +233,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return resultError(error)
   }, [])
 
+  const resolveGuestPrompt = (move: boolean) => {
+    if (!accountId) return
+    if (move) moveGuestDataToAccount(accountId)
+    else markGuestDataClaimed(accountId)
+    setResolvedGuestPromptFor(accountId)
+  }
+
   const value = useMemo<AuthContextValue>(() => ({
     ...state,
     user: state.session?.user ?? null,
@@ -238,7 +261,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
   ])
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      <React.Fragment key={`${accountId ?? 'guest'}${guestPromptPending ? ':pending' : ''}`}>{children}</React.Fragment>
+      {guestDataToMove && (
+        <GuestDataPrompt
+          accountLabel={state.session?.user.email ?? 'your account'}
+          onMove={() => resolveGuestPrompt(true)}
+          onKeep={() => resolveGuestPrompt(false)}
+        />
+      )}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

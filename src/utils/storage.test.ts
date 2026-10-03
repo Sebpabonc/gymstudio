@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { Exercise, WorkoutEntry } from '../types'
 import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
@@ -16,6 +16,10 @@ import {
   setSessionStorageValue,
   getActiveBlockId,
   upsertExerciseRecord,
+  setStorageNamespace,
+  hasGuestWorkoutData,
+  isGuestDataClaimed,
+  moveGuestDataToAccount,
 } from './storage'
 
 const supabaseMock = vi.hoisted(() => {
@@ -456,6 +460,34 @@ describe('demo storage namespace', () => {
 
     sessionStorage.removeItem('gym-studio.demo-mode')
     expect(await loadWorkoutHistory()).toEqual(realHistory)
+  })
+})
+
+describe('per-account storage namespaces', () => {
+  afterEach(() => setStorageNamespace(null))
+
+  it('keeps each account and the guest history separate', async () => {
+    await addWorkoutEntry(entry('guest-entry', '2026-09-01'))
+    setStorageNamespace('user-a')
+    expect(await loadWorkoutHistory()).toEqual([])
+    await addWorkoutEntry(entry('a-entry', '2026-09-02'))
+    setStorageNamespace('user-b')
+    expect(await loadWorkoutHistory()).toEqual([])
+    setStorageNamespace('user-a')
+    expect((await loadWorkoutHistory()).map((e) => e.id)).toEqual(['a-entry'])
+    setStorageNamespace(null)
+    expect((await loadWorkoutHistory()).map((e) => e.id)).toEqual(['guest-entry'])
+  })
+
+  it('moves guest workouts to the first account only once', async () => {
+    await addWorkoutEntry(entry('guest-entry', '2026-09-01'))
+    expect(hasGuestWorkoutData()).toBe(true)
+    setStorageNamespace('user-a')
+    moveGuestDataToAccount('user-a')
+    expect((await loadWorkoutHistory()).map((e) => e.id)).toEqual(['guest-entry'])
+    expect(isGuestDataClaimed()).toBe(true)
+    setStorageNamespace(null)
+    expect(hasGuestWorkoutData()).toBe(false)
   })
 })
 
