@@ -1291,15 +1291,6 @@ button {
   text-align: right;
 }
 
-.block-card-chevron {
-  flex: 0 0 auto;
-  transition: transform 150ms ease;
-}
-
-.training-block-header[aria-expanded='true'] .block-card-chevron {
-  transform: rotate(180deg);
-}
-
 .training-block-number {
   color: var(--muted);
   font-size: 0.58rem;
@@ -1359,15 +1350,6 @@ button {
   font-size: 0.68rem;
   font-weight: 700;
   text-align: left;
-}
-
-.block-insights-chevron {
-  flex: 0 0 auto;
-  transition: transform 150ms ease;
-}
-
-.about-block-toggle[aria-expanded='true'] .block-insights-chevron {
-  transform: rotate(180deg);
 }
 
 .training-block-insights {

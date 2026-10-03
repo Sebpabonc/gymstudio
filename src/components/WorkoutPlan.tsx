@@ -957,7 +957,9 @@ export default function WorkoutPlan({
                   ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
                   : 'Completed'}
             </strong>
-            <span className="block-card-chevron" aria-hidden="true">⌄</span>
+            <span className="toggle-button expand-toggle" aria-hidden="true">
+              {blockCardExpanded ? '−' : '+'}
+            </span>
           </button>
           <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
             <div className="training-block-meta">
@@ -973,7 +975,9 @@ export default function WorkoutPlan({
               aria-controls="training-block-insights"
             >
               About this block
-              <span className="block-insights-chevron" aria-hidden="true">⌄</span>
+              <span className="toggle-button expand-toggle" aria-hidden="true">
+                {blockInsightsOpen ? '−' : '+'}
+              </span>
             </button>
             <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
               {activeBlock.insights.map((insight) => (
