@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { WorkoutEntry } from '../types'
-import { findCompletedEntry, findNextPendingIndex, summarizeCompletedEntry } from './completedExercises'
+import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, summarizeCompletedEntry, upsertScopedEntry } from './completedExercises'
 
 const entry = (overrides: Partial<WorkoutEntry> = {}): WorkoutEntry => ({
   id: 'e1',
@@ -49,5 +49,49 @@ describe('completed exercises', () => {
     expect(findNextPendingIndex([true, true], 1)).toBe(-1)
     expect(findNextPendingIndex([true], 0)).toBe(-1)
     expect(findNextPendingIndex([], -1)).toBe(-1)
+  })
+})
+
+describe('findPrefillEntry', () => {
+  const make = (id: string, date: string, dayKey: string, weight: number): WorkoutEntry => ({
+    id,
+    exerciseId: 'press',
+    date,
+    dayKey,
+    sets: [{ id: `${id}-1`, reps: 8, weight }],
+  })
+
+  it('prefers the latest session of the same day, else the latest overall', () => {
+    const list = [make('a', '2026-09-01', 'A', 20), make('b', '2026-09-10', 'B', 24), make('c', '2026-09-20', 'A', 26)]
+    expect(findPrefillEntry(list, 'press', 'A')?.id).toBe('c')
+    expect(findPrefillEntry(list, 'press', 'B')?.id).toBe('b')
+    expect(findPrefillEntry(list, 'press', 'C')?.id).toBe('c')
+    expect(findPrefillEntry(list, 'other', 'A')).toBeUndefined()
+  })
+})
+
+describe('upsertScopedEntry', () => {
+  const scope = { date: '2026-10-04', blockId: 'b1', dayKey: 'd1' }
+  const make = (id: string): WorkoutEntry => ({
+    id,
+    exerciseId: 'press',
+    date: scope.date,
+    blockId: 'b1',
+    dayKey: 'd1',
+    sets: [{ id: `${id}-1`, reps: 8, weight: 20 }],
+  })
+
+  it('logging twice leaves a single completed entry', () => {
+    const first = upsertScopedEntry([], make('one'), scope)
+    const second = upsertScopedEntry(first.history, make('two'), scope)
+    expect(second.history).toHaveLength(1)
+    expect(second.entry.id).toBe('one')
+    expect(findCompletedEntry(second.history, scope)).toBe(second.entry)
+  })
+
+  it('collapses pre-existing duplicates and keeps other exercises', () => {
+    const other = { ...make('x'), exerciseId: 'row' }
+    const result = upsertScopedEntry([make('a'), make('b'), other], make('c'), scope)
+    expect(result.history.map((e) => e.exerciseId).sort()).toEqual(['press', 'row'])
   })
 })
