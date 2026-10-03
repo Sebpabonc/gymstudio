@@ -17,7 +17,7 @@ The app, its content and all repo docs are **English-only**.
 | Product Owner | Sebas | Product direction, scope, UX, business rules, product acceptance | Write code, run commands, open or merge PRs |
 | Tech Lead / Architect | Claude | Technical design, architecture, issues with tasks + acceptance criteria, PR review, merging, unblocking Copilot | Make product decisions silently |
 | Developer | GitHub Copilot | Implementing issues inside the approved design, tests, small refactors needed by the task | Redesign architecture |
-| QA | Claude / Copilot / Sebas | Verifying acceptance criteria and regressions before merge | — |
+| QA ("QAer") | Claude QA agent (`.claude/agents/qaer.md`), run when Sebas says "QAer" | End-to-end functional, design-consistency and content checks on the live app (`docs/qa/README.md`); writes `docs/qa/reports/`, files `qa` issues | Change code, content or data; sign in |
 | PT / Fitness Expert | Specialist agent | Drafting fitness knowledge (technique, cues, classifications) | Modify code or app data directly |
 
 ## How work flows
