@@ -225,6 +225,10 @@ function formatHistoryDate(value: string) {
   })
 }
 
+function getTodayIsoDate() {
+  return new Date().toISOString().slice(0, 10)
+}
+
 function splitExerciseTitle(name: string) {
   const openParenIndex = name.indexOf('(')
   const closeParenIndex = name.lastIndexOf(')')
@@ -236,6 +240,20 @@ function splitExerciseTitle(name: string) {
   }
 
   return { main: name, details: '' }
+}
+
+function sanitizeLoggedComment(rawNote: string | undefined, fragments: Array<string | undefined>) {
+  let text = rawNote?.trim() ?? ''
+  if (!text) return ''
+
+  for (const fragment of fragments) {
+    const value = fragment?.trim()
+    if (!value) continue
+
+    text = text.split(value).join(' ')
+  }
+
+  return text.replace(/\s+/g, ' ').trim()
 }
 
 export default function WorkoutPlan({
@@ -252,6 +270,8 @@ export default function WorkoutPlan({
   const [selectedLibraryExerciseId, setSelectedLibraryExerciseId] = useState('')
   const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>(() => loadExercises())
   const [history, setHistory] = useState<WorkoutEntry[]>(() => loadWorkoutHistory())
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
   const [plannedDrafts, setPlannedDrafts] = useState<
     Record<string, { reps: number; weight: number; setWeights: number[]; notes: string }>
   >({})
@@ -304,6 +324,11 @@ export default function WorkoutPlan({
     customRemove: 'Remove',
     customBadge: 'Manual',
     exerciseLabel: 'Exercise',
+    calendar: 'Calendar',
+    close: 'Close',
+    calendarSelect: 'Select date',
+    calendarHistory: 'Work done on this day',
+    calendarEmpty: 'No workouts logged on this date.',
   }
 
   const activeDay = useMemo(
@@ -318,6 +343,32 @@ export default function WorkoutPlan({
   }, [mode])
 
   const activeExercises = planMode === 'preset' ? activeDay.exercises : customPlan
+
+  const calendarHistoryItems = useMemo(
+    () =>
+      history
+        .filter((entry) => entry.date === selectedCalendarDate)
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .map((entry) => {
+          const exercise = exerciseCatalog.find((item) => item.id === entry.exerciseId)
+          const maxWeight = Math.max(...entry.sets.map((set) => set.weight), 0)
+          const totalVolume = entry.sets.reduce((total, set) => total + set.reps * set.weight, 0)
+
+          return {
+            id: entry.id,
+            name: exercise ? getExerciseDisplayName(exercise, 'en') : 'Unknown exercise',
+            setsCount: entry.sets.length,
+            maxWeight,
+            totalVolume,
+            comments: sanitizeLoggedComment(entry.notes, [
+              exercise?.overallStatement,
+              exercise?.notes,
+              ...(exercise?.tips?.map((tip) => (typeof tip === 'string' ? tip : tip.text)) ?? []),
+            ]),
+          }
+        }),
+    [exerciseCatalog, history, selectedCalendarDate]
+  )
 
   const latestProgressByName = useMemo(() => {
     const map = new Map<string, WorkoutEntry>()
@@ -541,7 +592,7 @@ export default function WorkoutPlan({
       exerciseId: canonical.id,
       date: new Date().toISOString().slice(0, 10),
       sets: validSets,
-      notes: [draft.notes?.trim(), exercise.goal, exercise.tip].filter(Boolean).join(' '),
+      notes: draft.notes?.trim() ?? '',
     }
 
     const nextHistory = [nextEntry, ...history].sort(
@@ -696,8 +747,79 @@ export default function WorkoutPlan({
     <div className="card plan-card">
       <div className="section-title-row">
         <h3>{text.title}</h3>
-        <span className="plan-badge">{planMode === 'preset' ? text.badge : text.customBadge}</span>
+        <div className="plan-header-actions">
+          <button
+            type="button"
+            className="calendar-icon-button"
+            onClick={() => setCalendarOpen((current) => !current)}
+            aria-label={text.calendar}
+            aria-expanded={calendarOpen}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M7 2v3M17 2v3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <span className="plan-badge">{planMode === 'preset' ? text.badge : text.customBadge}</span>
+        </div>
       </div>
+
+      {calendarOpen && (
+        <div className="calendar-popover" role="presentation" onClick={() => setCalendarOpen(false)}>
+          <section
+            className="calendar-popover-card"
+            aria-label={text.calendar}
+            role="dialog"
+            aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="calendar-popover-header">
+              <strong>{text.calendar}</strong>
+              <button type="button" className="toggle-button" onClick={() => setCalendarOpen(false)}>
+                {text.close}
+              </button>
+            </div>
+
+            <label className="calendar-field">
+              <span>{text.calendarSelect}</span>
+              <input
+                type="date"
+                value={selectedCalendarDate}
+                onChange={(event) => setSelectedCalendarDate(event.target.value)}
+              />
+            </label>
+
+            <div className="calendar-history">
+              <strong>{text.calendarHistory}</strong>
+              {calendarHistoryItems.length > 0 ? (
+                <div className="calendar-history-list">
+                  {calendarHistoryItems.map((item) => (
+                    <article key={item.id} className="calendar-history-item">
+                      <div className="calendar-history-row">
+                        <span>{item.name}</span>
+                        <strong>{item.maxWeight} kg</strong>
+                      </div>
+                      <div className="calendar-history-row muted-row">
+                        <small>{item.totalVolume} kg volume</small>
+                        <small>{item.setsCount} sets</small>
+                      </div>
+                      {item.comments ? <p>{item.comments}</p> : null}
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-state">{text.calendarEmpty}</p>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
 
       {!lockMode && (
         <div className="plan-mode-tabs" aria-label="Planning mode">
@@ -873,7 +995,13 @@ export default function WorkoutPlan({
               maxWeight: Math.max(...entry.sets.map((set) => set.weight), 0),
               totalVolume: entry.sets.reduce((total, set) => total + set.reps * set.weight, 0),
               setsCount: entry.sets.length,
-              comments: entry.notes?.trim() ?? '',
+              comments: sanitizeLoggedComment(entry.notes, [
+                exercise.goal,
+                exercise.tip,
+                libraryMatch?.overallStatement,
+                libraryMatch?.notes,
+                ...(libraryMatch?.tips?.map((tip) => (typeof tip === 'string' ? tip : tip.text)) ?? []),
+              ]),
             }))
             const muscleChips = [
               exercise.focus,

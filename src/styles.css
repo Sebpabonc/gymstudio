@@ -817,6 +817,130 @@ button {
   text-transform: uppercase;
 }
 
+.plan-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-icon-button {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted-strong);
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.calendar-icon-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.calendar-popover {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background: rgba(12, 12, 13, 0.56);
+}
+
+.calendar-popover-card {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  width: min(100%, 340px);
+  max-height: min(72vh, 560px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(41, 41, 43, 0.98);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.45);
+}
+
+.calendar-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.calendar-popover-header strong {
+  color: var(--muted-strong);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-field {
+  display: grid;
+  gap: 5px;
+}
+
+.calendar-field span {
+  color: var(--muted);
+  font-size: 0.54rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-field input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 8px 9px;
+  font-size: 0.76rem;
+}
+
+.calendar-history {
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-history > strong {
+  color: var(--muted-strong);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-history-list {
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-history-item {
+  display: grid;
+  gap: 6px;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.calendar-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.calendar-history-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
 .day-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
