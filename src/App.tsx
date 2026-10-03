@@ -156,6 +156,7 @@ export default function App() {
     if (!selectedExercise) return
     setDraftSets([createSet(8, 0), createSet(8, 0)])
     setDraftNotes('')
+    setTipsExpanded(false)
   }, [selectedExercise])
 
   const availableBodyRegions = useMemo(() => getAvailableBodyRegions(exercises), [exercises])
@@ -391,16 +392,14 @@ export default function App() {
                             className="toggle-button expand-toggle"
                             onClick={() => setTipsExpanded((current) => !current)}
                             aria-expanded={tipsExpanded}
+                            aria-controls={`track-posture-tips-${selectedExercise.id}`}
                           >
                             {tipsExpanded ? '−' : '+'}
                           </button>
                         </div>
 
-                        <ul className="tips-list">
-                          {(tipsExpanded
-                            ? getExerciseTips(selectedExercise)
-                            : getExerciseTips(selectedExercise).slice(0, 1)
-                          ).map((tip, index) => (
+                        <ul id={`track-posture-tips-${selectedExercise.id}`} className="tips-list" hidden={!tipsExpanded}>
+                          {getExerciseTips(selectedExercise).map((tip, index) => (
                             <li key={`${selectedExercise.id}-tip-${index}`} className="tip-item">
                               {typeof tip === 'string' ? tip : tip.text}
                             </li>

@@ -13,6 +13,22 @@ export function storageKey(key: string) {
   return isDemoMode() ? key.replace(/^gym-studio\./, 'gym-studio.demo.') : key
 }
 
+export function getSessionStorageValue(key: string) {
+  try {
+    return typeof sessionStorage === 'undefined' ? null : sessionStorage.getItem(storageKey(key))
+  } catch {
+    return null
+  }
+}
+
+export function setSessionStorageValue(key: string, value: string) {
+  try {
+    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem(storageKey(key), value)
+  } catch {
+    // Session storage is optional when browser storage is unavailable.
+  }
+}
+
 type TrainingExerciseRow = {
   code: string
   position?: number
