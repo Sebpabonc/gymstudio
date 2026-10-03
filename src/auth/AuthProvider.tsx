@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react'
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js'
-import { getSupabaseClient } from '../lib/supabaseClient'
+import { getSupabaseClient, isGoogleProviderEnabled } from '../lib/supabaseClient'
 import { isDemoMode } from '../utils/demoMode'
 
 export type AuthStatus = 'loading' | 'signed-out' | 'signed-in'
@@ -56,6 +56,16 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 function resultError(error: { message: string } | null | undefined): ActionResult {
   return { error: error?.message ?? null }
+}
+
+export async function startGoogleOAuth(client: SupabaseClient, redirectTo: string): Promise<ActionResult> {
+  if (!await isGoogleProviderEnabled()) return { error: 'provider is not enabled' }
+
+  const { error } = await client.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo },
+  })
+  return resultError(error)
 }
 
 async function getClient() {
@@ -123,11 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const client = await getClient()
     if (!client) return { error: 'Sign-in unavailable offline.' }
     const redirectTo = `${window.location.origin}${window.location.pathname}`
-    const { error } = await client.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo },
-    })
-    return resultError(error)
+    return startGoogleOAuth(client, redirectTo)
   }, [])
 
   const signOut = useCallback(async () => {
