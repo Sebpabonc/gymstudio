@@ -14,8 +14,8 @@ The UI is bilingual (Spanish/English display names).
 
 | Role | Who | Owns | Does not |
 |---|---|---|---|
-| Product Owner | Sebas | Product direction, scope, UX, business rules, final approval and merges | Write code or run commands |
-| Tech Lead / Architect | Claude | Technical design, architecture, issues with tasks + acceptance criteria, PR review, unblocking Copilot | Make product decisions silently |
+| Product Owner | Sebas | Product direction, scope, UX, business rules, product acceptance | Write code, run commands, open or merge PRs |
+| Tech Lead / Architect | Claude | Technical design, architecture, issues with tasks + acceptance criteria, PR review, merging, unblocking Copilot | Make product decisions silently |
 | Developer | GitHub Copilot | Implementing issues inside the approved design, tests, small refactors needed by the task | Redesign architecture |
 | QA | Claude / Copilot / Sebas | Verifying acceptance criteria and regressions before merge | — |
 | PT / Fitness Expert | Specialist agent | Drafting fitness knowledge (technique, cues, classifications) | Modify code or app data directly |
@@ -27,8 +27,9 @@ The UI is bilingual (Spanish/English display names).
    approach, tasks, acceptance criteria, dependencies and test requirements.
 3. Copilot implements it on a branch named `feat/<issue>-<slug>` or
    `fix/<issue>-<slug>` and opens a Pull Request that says `Closes #<issue>`.
-4. CI must pass. Claude reviews the PR against the issue and this file.
-5. Sebas accepts the result and merges. **Nothing is pushed directly to `main`.**
+4. CI must pass. Claude reviews the PR against the issue and this file, then
+   squash-merges it and reports the outcome to Sebas in product language.
+5. Sebas accepts the result at product level (the live app). **Nothing is pushed directly to `main`.**
 
 ## Copilot: decide vs. escalate
 
