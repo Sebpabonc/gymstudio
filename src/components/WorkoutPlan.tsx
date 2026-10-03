@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { localIsoDate } from '../lib/dates'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
 import {
   fetchTrainingBlocks,
@@ -177,8 +178,28 @@ function formatHistoryDate(value: string) {
   })
 }
 
+function groupSupersets<T extends { code?: string; technique?: string; name: string }>(exercises: T[]) {
+  const groups: { key: string; isSuperset: boolean; items: { exercise: T; exerciseIndex: number }[] }[] = []
+  exercises.forEach((exercise, exerciseIndex) => {
+    const letter = exercise.code?.slice(0, 1)
+    const last = groups[groups.length - 1]
+    const lastExercise = last?.items[last.items.length - 1].exercise
+    if (
+      exercise.technique === 'superset' &&
+      lastExercise?.technique === 'superset' &&
+      lastExercise.code?.slice(0, 1) === letter
+    ) {
+      last.items.push({ exercise, exerciseIndex })
+      last.isSuperset = true
+    } else {
+      groups.push({ key: `${exercise.code ?? exercise.name}`, isSuperset: false, items: [{ exercise, exerciseIndex }] })
+    }
+  })
+  return groups
+}
+
 function getTodayIsoDate() {
-  return new Date().toISOString().slice(0, 10)
+  return localIsoDate()
 }
 
 function splitExerciseTitle(name: string) {
@@ -587,7 +608,7 @@ export default function WorkoutPlan({
     const nextEntry: WorkoutEntry = {
       id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
       exerciseId: canonicalId,
-      date: new Date().toISOString().slice(0, 10),
+      date: localIsoDate(),
       sets: validSets,
       notes: draft.notes?.trim() ?? '',
     }
@@ -1029,7 +1050,8 @@ export default function WorkoutPlan({
         </div>
 
         <div className="day-exercises">
-          {activeExercises.map((exercise, exerciseIndex) => {
+          {groupSupersets(activeExercises).map((group) => {
+            const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
             const setCount = getDefaultSetCount(exercise)
             const setWeights = draft.setWeights.length ? draft.setWeights : Array.from({ length: setCount }, () => Number(draft.weight) || 0)
@@ -1073,23 +1095,9 @@ export default function WorkoutPlan({
             const isProgressSectionVisible = progressSectionsVisible[exerciseKey] ?? false
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? true
             const postureTips = getPostureTips(exercise, libraryMatch)
-            const groupLetter = exercise.code?.slice(0, 1)
-            const previousExercise = activeExercises[exerciseIndex - 1]
-            const nextExercise = activeExercises[exerciseIndex + 1]
-            const joinsPreviousSuperset =
-              exercise.technique === 'superset' &&
-              previousExercise?.technique === 'superset' &&
-              previousExercise.code?.slice(0, 1) === groupLetter
-            const joinsNextSuperset =
-              exercise.technique === 'superset' &&
-              nextExercise?.technique === 'superset' &&
-              nextExercise.code?.slice(0, 1) === groupLetter
             const cardClasses = [
               'planned-exercise-card',
               isCollapsed ? 'collapsed' : '',
-              exercise.technique === 'superset' ? 'superset-exercise-card' : '',
-              exercise.technique === 'superset' && !joinsPreviousSuperset ? 'superset-start' : '',
-              exercise.technique === 'superset' && !joinsNextSuperset ? 'superset-end' : '',
             ].filter(Boolean).join(' ')
 
             return (
@@ -1119,7 +1127,7 @@ export default function WorkoutPlan({
                 {!isCollapsed && (
                   <>
                     <div className="chip-row chip-row-tight">
-                      {joinsPreviousSuperset === false && exercise.technique === 'superset' && (
+                      {exercise.technique === 'superset' && !group.isSuperset && (
                         <span className="chip technique-chip">Superset</span>
                       )}
                       {exercise.technique && exercise.technique !== 'superset' && (
@@ -1316,6 +1324,19 @@ export default function WorkoutPlan({
                   </>
                 )}
               </article>
+            )
+            })
+
+            if (!group.isSuperset) return <React.Fragment key={group.key}>{cards}</React.Fragment>
+            const codes = group.items.map(({ exercise }) => exercise.code ?? exercise.name)
+            return (
+              <div key={group.key} className="superset-group">
+                <div className="superset-group-header">
+                  <span className="chip technique-chip">Superset</span>
+                  <p>Do {codes[0]}, rest ~10 s, then {codes.slice(1).join(', ')}; rest after the pair.</p>
+                </div>
+                {cards}
+              </div>
             )
           })}
         </div>
