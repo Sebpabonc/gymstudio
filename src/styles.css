@@ -2231,6 +2231,45 @@ button {
   color: #e6c27a;
 }
 
+.weight-target-chip {
+  font-size: var(--font-caption);
+  font-weight: 700;
+  color: #9fd6a6;
+  border: 1px solid rgba(159, 214, 166, 0.4);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px 12px;
+}
+
+.suggestion-actions .suggestion-button {
+  border: 0;
+  background: none;
+  padding: 0;
+}
+
+.suggestion-action-button {
+  appearance: none;
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-size: var(--font-caption);
+  font-weight: 700;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
 .session-dots {
   display: flex;
   gap: 8px;

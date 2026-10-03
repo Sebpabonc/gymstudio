@@ -2,6 +2,7 @@ import { Exercise, PlannedExercise, TrainingBlock, TrainingDay, WorkoutEntry } f
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { isDemoMode } from './demoMode'
+import { isTargetMet, WeightTarget, WeightTargets } from './weightTargets'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
@@ -9,6 +10,7 @@ const CATALOGUE_KEY = 'gym-studio.catalogue'
 const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
 const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
 const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
+const WEIGHT_TARGETS_KEY = 'gym-studio.weight-targets'
 
 export type SyncWorkoutEntry = WorkoutEntry & {
   updatedAt: string
@@ -684,4 +686,33 @@ export async function addWorkoutEntry(entry: WorkoutEntry) {
 
   saveWorkoutHistory(nextHistory)
   return nextHistory
+}
+
+export function loadWeightTargets(): WeightTargets {
+  const parsed = readJson<unknown>(storageKey(WEIGHT_TARGETS_KEY), {})
+  return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as WeightTargets) : {}
+}
+
+function saveWeightTargets(targets: WeightTargets) {
+  localStorage.setItem(storageKey(WEIGHT_TARGETS_KEY), JSON.stringify(targets))
+}
+
+export function applyWeightTarget(exerciseId: string, target: Omit<WeightTarget, 'appliedAt'>): WeightTargets {
+  const next = { ...loadWeightTargets(), [exerciseId]: { ...target, appliedAt: new Date().toISOString() } }
+  saveWeightTargets(next)
+  return next
+}
+
+export function removeWeightTarget(exerciseId: string): WeightTargets {
+  const { [exerciseId]: _removed, ...rest } = loadWeightTargets()
+  saveWeightTargets(rest)
+  return rest
+}
+
+// Removes the target when the logged sets reach it; returns the remaining targets.
+export function consumeWeightTarget(exerciseId: string, sets: { weight: number }[]): WeightTargets {
+  const targets = loadWeightTargets()
+  const target = targets[exerciseId]
+  if (!target || !isTargetMet(target, sets)) return targets
+  return removeWeightTarget(exerciseId)
 }

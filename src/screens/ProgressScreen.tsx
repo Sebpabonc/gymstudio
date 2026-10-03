@@ -34,7 +34,14 @@ import {
   visibleBlockReports,
 } from '../progress/viewModel'
 import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
-import { fetchTrainingBlocks, getExerciseDisplayName } from '../utils/storage'
+import {
+  applyWeightTarget,
+  fetchTrainingBlocks,
+  getExerciseDisplayName,
+  loadWeightTargets,
+  removeWeightTarget,
+} from '../utils/storage'
+import { baseWeightFromHistory } from '../utils/weightTargets'
 
 type Props = {
   entries: WorkoutEntry[]
@@ -114,6 +121,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   const [blocks, setBlocks] = useState<TrainingBlock[] | null>(null)
   const [dayType, setDayType] = useState<DayTypeFilter>('A')
   const [pickedId, setPickedId] = useState(initialExerciseId ?? '')
+  const [targets, setTargets] = useState(() => loadWeightTargets())
   const today = localIsoDate()
 
   useEffect(() => {
@@ -130,7 +138,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
 
   const data = useMemo(() => {
     if (!blocks) return null
-    const suggestions = limitSuggestions(progressSuggestions(entries, blocks, exercises, today))
+    const suggestions = limitSuggestions(progressSuggestions(entries, blocks, exercises, today, new Set(Object.keys(targets))))
     const week = reportingWeek(entries, today)
     const adherenceReport = adherence(entries, blocks, week)
     const records = personalRecords(entries, blocks)
@@ -139,7 +147,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
     const options = exercisesWithHistory(entries, exercises)
     const consistencyBlock = reportingBlock(blocks, entries, today)
     return { week, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options }
-  }, [blocks, entries, exercises, today])
+  }, [blocks, entries, exercises, today, targets])
 
   if (!blocks || !data) {
     return <section className="card" aria-live="polite"><p className="empty-state">Loading progress…</p></section>
@@ -170,15 +178,37 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
     if (id) onOpenExercise(id)
   }
 
+  const applySuggestion = (suggestion: Extract<ProgressSuggestion, { type: 'add-weight' }>) => {
+    setTargets(applyWeightTarget(suggestion.exerciseId, {
+      dayType: suggestion.dayType,
+      increaseKg: suggestion.increment,
+      baseWeightKg: baseWeightFromHistory(entries, blocks, suggestion.exerciseId, suggestion.dayType),
+    }))
+  }
+  const appliedTargets = Object.entries(targets)
+
   return (
     <>
       <SectionCard id="suggestions" title="Suggestions">
-        {suggestions.length ? (
+        {suggestions.length || appliedTargets.length ? (
           <ul className="progress-suggestions">
+            {appliedTargets.map(([exerciseId, target]) => (
+              <li key={`applied-${exerciseId}`} className="suggestion-actions">
+                <div className="suggestion-button static">
+                  <span className="suggestion-tag add-weight">Add weight</span>
+                  <span>
+                    {nameFor(exerciseId)}: Applied ✓ · next {target.dayType ? `${target.dayType} day` : 'session'} (+{target.increaseKg} kg)
+                  </span>
+                </div>
+                <button type="button" className="suggestion-action-button" onClick={() => setTargets(removeWeightTarget(exerciseId))}>
+                  Undo
+                </button>
+              </li>
+            ))}
             {suggestions.map((suggestion, index) => {
               const exerciseId = suggestionExerciseId(suggestion)
               return (
-                <li key={`${suggestion.type}-${exerciseId ?? 'all'}-${index}`}>
+                <li key={`${suggestion.type}-${exerciseId ?? 'all'}-${index}`} className={suggestion.type === 'add-weight' ? 'suggestion-actions' : undefined}>
                   {exerciseId ? (
                     <button type="button" className="suggestion-button" onClick={() => openSuggestion(suggestion)}>
                       <span className={`suggestion-tag ${suggestion.type}`}>
@@ -191,6 +221,11 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                       <span className="suggestion-tag fatigue">Fatigue</span>
                       <span>{suggestion.message}</span>
                     </div>
+                  )}
+                  {suggestion.type === 'add-weight' && (
+                    <button type="button" className="suggestion-action-button" onClick={() => applySuggestion(suggestion)}>
+                      Apply
+                    </button>
                   )}
                 </li>
               )

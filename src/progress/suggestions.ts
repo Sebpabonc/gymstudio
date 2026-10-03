@@ -65,7 +65,8 @@ export function progressSuggestions(
   entries: ProgressEntry[],
   blocks: TrainingBlock[],
   exercises: Exercise[],
-  today: string
+  today: string,
+  appliedExerciseIds: ReadonlySet<string> = new Set()
 ): ProgressSuggestion[] {
   const block = currentOrLatestBlock(blocks, today)
   if (!block) return []
@@ -97,6 +98,8 @@ export function progressSuggestions(
     if (!latest) continue
     const exercise = exerciseFor(exercises, latest.exerciseId)
     const name = exercise?.name ?? latest.exerciseId
+
+    if (appliedExerciseIds.has(exerciseId)) continue
 
     if (hitTarget(latest, block, daySessions.slice(0, -1))) {
       const increment = getIncrement(exercise)
