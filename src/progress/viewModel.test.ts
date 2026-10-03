@@ -7,7 +7,10 @@ import {
   exercisesWithHistory,
   limitSuggestions,
   muscleStatus,
+  formatWeekLabel,
   recentRecords,
+  reportingBlock,
+  reportingWeek,
   sessionDots,
   topLifts,
   visibleBlockReports,
@@ -115,5 +118,18 @@ describe('progress view model', () => {
     expect(model.path.startsWith('M')).toBe(true)
     expect(buildChartModel([], blocks).points).toEqual([])
     expect(chartSummary(points, 'Up.')).toContain('2 sessions')
+  })
+
+  it('falls back to the most recent week and block with sessions', () => {
+    const blocks = [block(1, '2026-01-05'), block(2, '2026-02-16')]
+    const entries = [entry('bench', '2026-01-06'), entry('bench', '2026-01-22')]
+    expect(reportingWeek(entries, '2026-03-04')).toBe('2026-01-19')
+    expect(reportingWeek(entries, '2026-01-22')).toBe('2026-01-19')
+    expect(reportingWeek([], '2026-03-04')).toBe('2026-03-02')
+    expect(reportingBlock(blocks, entries, '2026-03-04')?.id).toBe('b1')
+    expect(reportingBlock(blocks, [...entries, entry('bench', '2026-02-17')], '2026-02-20')?.id).toBe('b2')
+    expect(reportingBlock(blocks, [], '2026-03-04')).toBeNull()
+    expect(formatWeekLabel('2026-01-19', '2026-03-04')).toBe('Week of 19 Jan')
+    expect(formatWeekLabel('2026-03-02', '2026-03-04')).toBe('This week')
   })
 })

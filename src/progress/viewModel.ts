@@ -8,7 +8,7 @@ import {
   StrengthTrendPoint,
   WeeklyMuscleSets,
 } from './types'
-import { dateValue, findBlockForDate } from './utils'
+import { dateValue, findBlockForDate, startOfWeek } from './utils'
 
 export const MAX_SUGGESTIONS = 5
 export const MAX_RECORDS = 5
@@ -188,4 +188,36 @@ export function chartSummary(points: StrengthTrendPoint[], takeaway: string) {
   const first = sorted[0]
   const last = sorted[sorted.length - 1]
   return `${takeaway} ${sorted.length} sessions from ${first.date} (${first.e1rm.toFixed(1)} kg) to ${last.date} (${last.e1rm.toFixed(1)} kg).`
+}
+
+export function reportingWeek(entries: Pick<ProgressEntry, 'date'>[], today: string) {
+  const current = startOfWeek(today)
+  const end = dateValue(current) + 7 * DAY_MS
+  let latest: string | null = null
+  for (const entry of entries) {
+    const date = entry.date.slice(0, 10)
+    if (dateValue(date) >= dateValue(current) && dateValue(date) < end) return current
+    if (date < current && (latest === null || date > latest)) latest = date
+  }
+  return latest ? startOfWeek(latest) : current
+}
+
+export function reportingBlock(blocks: TrainingBlock[], entries: ProgressEntry[], today: string) {
+  const withSessions = new Set<string>()
+  for (const entry of entries) {
+    const block = (entry.blockId ? blocks.find((item) => item.id === entry.blockId) : undefined)
+      ?? findBlockForDate(blocks, entry.date)
+    if (block) withSessions.add(block.id)
+  }
+  const current = findBlockForDate(blocks, today)
+  if (current && withSessions.has(current.id)) return current
+  return [...blocks]
+    .filter((block) => withSessions.has(block.id) && block.startDate <= today)
+    .sort((a, b) => b.startDate.localeCompare(a.startDate))[0] ?? null
+}
+
+export function formatWeekLabel(weekStart: string, today: string) {
+  if (weekStart === startOfWeek(today)) return 'This week'
+  const label = new Date(`${weekStart}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+  return `Week of ${label}`
 }

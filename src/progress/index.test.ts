@@ -276,6 +276,25 @@ describe('progress calculations', () => {
     expect(missingStartSession.liftCount).toBe(0)
   })
 
+  it('ignores lifts with incomplete data and flat rep-only lifts in the block headline', () => {
+    const block = makeBlock()
+    const entries = [
+      makeEntry('press', '2026-01-05', [[40, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-01-12', [[40, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-02-02', [[44, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-02-09', [[44, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('row', '2026-01-05', [[30, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('row', '2026-01-12', [[30, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('curl', '2026-01-05', [[10, 20]], { dayKey: 'chest-back-a' }),
+      makeEntry('curl', '2026-01-12', [[10, 20]], { dayKey: 'chest-back-a' }),
+      makeEntry('curl', '2026-02-02', [[10, 20]], { dayKey: 'chest-back-a' }),
+      makeEntry('curl', '2026-02-09', [[10, 20]], { dayKey: 'chest-back-a' }),
+    ]
+    const report = blockReports(entries, [block])[0]
+    expect(report.lifts.map((lift) => lift.exerciseId).sort()).toEqual(['curl', 'press'])
+    expect(report.medianChangePercent).toBeCloseTo(10)
+  })
+
   it('counts fractional weekly sets, keeps drop pairs as one, and compares planned volume', () => {
     const block = makeBlock([{
       code: 'A1',

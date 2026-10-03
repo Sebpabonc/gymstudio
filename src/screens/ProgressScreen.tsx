@@ -22,7 +22,10 @@ import {
   muscleRows,
   muscleScale,
   muscleStatus,
+  formatWeekLabel,
   recentRecords,
+  reportingBlock,
+  reportingWeek,
   RECORD_LABELS,
   SETS_RANGE,
   sessionDots,
@@ -30,7 +33,6 @@ import {
   topLifts,
   visibleBlockReports,
 } from '../progress/viewModel'
-import { findBlockForDate } from '../progress/utils'
 import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { fetchTrainingBlocks, getExerciseDisplayName } from '../utils/storage'
 
@@ -129,19 +131,21 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   const data = useMemo(() => {
     if (!blocks) return null
     const suggestions = limitSuggestions(progressSuggestions(entries, blocks, exercises, today))
-    const adherenceReport = adherence(entries, blocks, today)
+    const week = reportingWeek(entries, today)
+    const adherenceReport = adherence(entries, blocks, week)
     const records = personalRecords(entries, blocks)
     const reports = visibleBlockReports(blockReports(entries, blocks, exercises), entries, blocks)
-    const weekly = weeklySets(entries, blocks, exercises, today)
+    const weekly = weeklySets(entries, blocks, exercises, week)
     const options = exercisesWithHistory(entries, exercises)
-    return { suggestions, adherenceReport, records, reports, weekly, options }
+    const consistencyBlock = reportingBlock(blocks, entries, today)
+    return { week, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options }
   }, [blocks, entries, exercises, today])
 
   if (!blocks || !data) {
     return <section className="card" aria-live="polite"><p className="empty-state">Loading progress…</p></section>
   }
 
-  const { suggestions, adherenceReport, records, reports, weekly, options } = data
+  const { week, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options } = data
   const nameFor = (id: string) => {
     const exercise = exercises.find((item) => item.id === id)
     return exercise ? getExerciseDisplayName(exercise) : id
@@ -154,8 +158,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
     records.filter((record) => record.exerciseId === selectedId && record.badges.length > 0).map((record) => record.date)
   )
   const chart = trend ? buildChartModel(trend.points, blocks, recordDates) : null
-  const currentBlock = findBlockForDate(blocks, today)
-  const blockAdherence = blockAdherenceFor(adherenceReport, currentBlock?.id)
+    const blockAdherence = blockAdherenceFor(adherenceReport, consistencyBlock?.id)
   const dots = sessionDots(adherenceReport)
   const rows = muscleRows(weekly)
   const scale = muscleScale(rows)
@@ -199,7 +202,8 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
       </SectionCard>
 
       <SectionCard id="consistency" title="Consistency">
-        <div className="session-dots" role="img" aria-label={`${adherenceReport.week.sessionsDone} of ${adherenceReport.week.sessionsPlanned} sessions done this week`}>
+        {hasHistory && <p className="chart-legend">{formatWeekLabel(week, today)}{consistencyBlock ? ` · Block ${consistencyBlock.number}` : ''}</p>}
+        <div className="session-dots" role="img" aria-label={`${adherenceReport.week.sessionsDone} of ${adherenceReport.week.sessionsPlanned} sessions done, ${formatWeekLabel(week, today).toLowerCase()}`}>
           {dots.map((done, index) => (
             <span key={index} className={done ? 'session-dot done' : 'session-dot'} />
           ))}
@@ -297,6 +301,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
       <SectionCard id="weekly-sets" title="Weekly sets by muscle">
         {rows.length ? (
           <>
+            <p className="chart-legend">{formatWeekLabel(week, today)}</p>
             <ul className="muscle-bars">
               {rows.map((row) => (
                 <li key={row.muscleGroup}>
