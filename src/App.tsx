@@ -8,6 +8,12 @@ import {
   refreshCatalogue,
   saveWorkoutHistory,
 } from './utils/storage'
+import {
+  ALL_BODY_REGIONS,
+  filterExercises,
+  getAvailableBodyRegions,
+  getExerciseTips,
+} from './utils/exerciseFilters'
 
 type ViewTab = 'track' | 'planned' | 'custom'
 
@@ -71,6 +77,7 @@ export default function App() {
   const [exercises, setExercises] = useState<Exercise[]>(() => loadExercises())
   const [history, setHistory] = useState<WorkoutEntry[]>(() => loadWorkoutHistory())
   const [search, setSearch] = useState('')
+  const [bodyRegion, setBodyRegion] = useState(ALL_BODY_REGIONS)
   const [selectedId, setSelectedId] = useState<string>('')
   const [draftSets, setDraftSets] = useState<WorkoutSet[]>([createSet(8, 0), createSet(8, 0)])
   const [draftNotes, setDraftNotes] = useState('')
@@ -114,23 +121,11 @@ export default function App() {
     setChatReply('')
   }, [selectedExercise])
 
-  const filteredExercises = useMemo(() => {
-    const query = search.trim().toLowerCase()
-
-    if (!query) {
-      return []
-    }
-
-    return exercises
-      .filter(
-        (exercise) =>
-          getExerciseDisplayName(exercise, 'en').toLowerCase().includes(query) ||
-          exercise.name.toLowerCase().includes(query) ||
-          exercise.primaryMuscle.toLowerCase().includes(query) ||
-          (exercise.secondaryMuscle ?? '').toLowerCase().includes(query)
-      )
-      .slice(0, 6)
-  }, [exercises, search])
+  const availableBodyRegions = useMemo(() => getAvailableBodyRegions(exercises), [exercises])
+  const filteredExercises = useMemo(
+    () => filterExercises(exercises, search, bodyRegion),
+    [exercises, search, bodyRegion]
+  )
 
   const exerciseHistory = useMemo(
     () =>
@@ -341,6 +336,19 @@ export default function App() {
             <>
               <section className="card search-panel">
                 <label className="field-label" htmlFor="exercise-search">{text.searchLabel}</label>
+                <div className="region-chips" role="group" aria-label="Body region">
+                  {availableBodyRegions.map((region) => (
+                    <button
+                      key={region}
+                      type="button"
+                      className={bodyRegion === region ? 'region-chip active' : 'region-chip'}
+                      aria-pressed={bodyRegion === region}
+                      onClick={() => setBodyRegion(region)}
+                    >
+                      {region}
+                    </button>
+                  ))}
+                </div>
                 <div className="search-shell">
                   <input
                     id="exercise-search"
@@ -351,25 +359,30 @@ export default function App() {
                     onChange={(event) => setSearch(event.target.value)}
                   />
 
-                  {filteredExercises.length > 0 && (
+                  {(search.trim() || bodyRegion !== ALL_BODY_REGIONS) && (
                     <div className="search-dropdown" role="listbox" aria-label="Exercise suggestions">
-                      {filteredExercises.map((exercise) => (
-                        <button
-                          key={exercise.id}
-                          type="button"
-                          className={selectedExercise?.id === exercise.id ? 'result-item active' : 'result-item'}
-                          onClick={() => {
-                            setSelectedId(exercise.id)
-                            setSearch('')
-                          }}
-                        >
-                          <span className="result-name">{getExerciseDisplayName(exercise, 'en')}</span>
-                          <span className="result-meta">
-                            {exercise.primaryMuscle}
-                            {exercise.secondaryMuscle ? ` · ${exercise.secondaryMuscle}` : ''}
-                          </span>
-                        </button>
-                      ))}
+                      {filteredExercises.length ? (
+                        filteredExercises.map((exercise) => (
+                          <button
+                            key={exercise.id}
+                            type="button"
+                            className={selectedExercise?.id === exercise.id ? 'result-item active' : 'result-item'}
+                            onClick={() => {
+                              setSelectedId(exercise.id)
+                              setSearch('')
+                            }}
+                          >
+                            <span className="result-name">{getExerciseDisplayName(exercise, 'en')}</span>
+                            <span className="result-meta">
+                              {[exercise.bodyRegion, (exercise.primaryMuscles ?? [exercise.primaryMuscle]).join(', ')]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="empty-state">No exercises found.</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -385,14 +398,37 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="chip-row">
-                      <span className="chip">{selectedExercise.primaryMuscle}</span>
-                      {selectedExercise.secondaryMuscle && <span className="chip subtle">{selectedExercise.secondaryMuscle}</span>}
-                    </div>
+                    {selectedExercise.primaryMuscles !== undefined || selectedExercise.secondaryMuscles !== undefined ? (
+                      <div className="muscle-groups">
+                        <div className="muscle-group">
+                          <span className="field-label">Primary muscles</span>
+                          <div className="chip-row muscle-chip-row">
+                            {(selectedExercise.primaryMuscles ?? [selectedExercise.primaryMuscle]).map((muscle) => (
+                              <span key={muscle} className="chip">{muscle}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="muscle-group">
+                          <span className="field-label">Secondary muscles</span>
+                          <div className="chip-row muscle-chip-row">
+                            {(selectedExercise.secondaryMuscles ??
+                              (selectedExercise.secondaryMuscle ? [selectedExercise.secondaryMuscle] : [])
+                            ).map((muscle) => (
+                              <span key={muscle} className="chip subtle">{muscle}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="chip-row">
+                        <span className="chip">{selectedExercise.primaryMuscle}</span>
+                        {selectedExercise.secondaryMuscle && <span className="chip subtle">{selectedExercise.secondaryMuscle}</span>}
+                      </div>
+                    )}
 
                     {selectedExercise.notes && <p className="exercise-notes">{selectedExercise.notes}</p>}
 
-                    {selectedExercise.tips?.length ? (
+                    {getExerciseTips(selectedExercise).length ? (
                       <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
                         <div className="tips-header">
                           <p className="field-label">{text.postureTips}</p>
@@ -407,7 +443,10 @@ export default function App() {
                         </div>
 
                         <ul className="tips-list">
-                          {(tipsExpanded ? selectedExercise.tips : selectedExercise.tips.slice(0, 1)).map((tip, index) => (
+                          {(tipsExpanded
+                            ? getExerciseTips(selectedExercise)
+                            : getExerciseTips(selectedExercise).slice(0, 1)
+                          ).map((tip, index) => (
                             <li key={`${selectedExercise.id}-tip-${index}`} className="tip-item">
                               {typeof tip === 'string' ? tip : tip.text}
                             </li>

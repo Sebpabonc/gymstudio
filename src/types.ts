@@ -10,6 +10,11 @@ export type Exercise = {
   nameEs?: string
   primaryMuscle: string
   secondaryMuscle?: string
+  bodyRegion?: string
+  primaryMuscles?: string[]
+  secondaryMuscles?: string[]
+  equipment?: string
+  postureTips?: string[]
   notes?: string
   overallStatement?: string
   tips?: Array<string | ExerciseTip>
