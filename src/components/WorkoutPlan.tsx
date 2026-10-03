@@ -1,37 +1,47 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Exercise, WorkoutEntry, WorkoutSet } from '../types'
+import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
 import {
+  fetchTrainingBlocks,
+  getActiveBlockId,
   getExerciseDisplayName,
   loadExercises,
   loadWorkoutHistory,
   normalizeExerciseName,
   saveWorkoutHistory,
+  setActiveBlockId,
   upsertExerciseRecord,
 } from '../utils/storage'
+import { blockDateRange, blockWeek, defaultActiveBlock } from '../utils/trainingBlocks'
 
-type PlannedExercise = {
+type PlanExercise = {
   name: string
   sets?: string
   reps?: string
+  repsPerSet?: string[]
   rest: string
   focus: string
   goal: string
   tip: string
+  exerciseId?: string
+  code?: string
+  technique?: BlockExercise['technique']
+  angleDegrees?: number
+  notes?: string
 }
 
-type PlannedDay = {
-  id: string
-  label: string
-  title: string
-  summary: string
-  exercises: PlannedExercise[]
+type PlanDraft = {
+  reps: number
+  weight: number
+  setWeights: number[]
+  setReps: number[]
+  notes: string
 }
 
 type PlanMode = 'preset' | 'custom'
 
 const CUSTOM_PLAN_KEY = 'gym-studio.custom-plan'
 
-const defaultCustomExercise: PlannedExercise = {
+const defaultCustomExercise: PlanExercise = {
   name: '',
   sets: '3',
   reps: '8-10',
@@ -41,7 +51,7 @@ const defaultCustomExercise: PlannedExercise = {
   tip: '',
 }
 
-function loadCustomPlan(): PlannedExercise[] {
+function loadCustomPlan(): PlanExercise[] {
   const raw = localStorage.getItem(CUSTOM_PLAN_KEY)
   if (!raw) return []
 
@@ -65,7 +75,7 @@ function loadCustomPlan(): PlannedExercise[] {
   }
 }
 
-function saveCustomPlan(exercises: PlannedExercise[]) {
+function saveCustomPlan(exercises: PlanExercise[]) {
   localStorage.setItem(CUSTOM_PLAN_KEY, JSON.stringify(exercises))
 }
 
@@ -130,82 +140,24 @@ function createTipIllustration(muscle: string, variant: number) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
-const sixDayProgram: PlannedDay[] = [
-  {
-    id: 'day-1',
-    label: 'Day 1',
-    title: 'Chest & Back A',
-    summary: 'Push + pull focus',
-    exercises: [
-      { name: 'Dumbbell Press (Neutral Grip, 45°)', sets: '4', reps: '8-10', rest: "1'30\"", focus: 'Chest', goal: 'Keep the shoulder stable and press with control.', tip: 'Keep the shoulder blades packed and the elbows in a safe angle through the press.' },
-      { name: 'Dumbbell Press (Neutral Grip, 30°)', sets: '3', reps: '10-12', rest: '10"', focus: 'Chest', goal: 'Stay tight and drive through the floor.', tip: 'Brace the core and avoid arching the low back as you press.' },
-      { name: 'Cable Fly (High)', sets: '3', reps: '10-12', rest: "1'", focus: 'Chest', goal: 'Stretch and squeeze with no torso swing.', tip: 'Keep the rib cage down and the movement driven by the chest, not the shoulders.' },
-      { name: 'Cable Row (Wide Grip)', sets: '4', reps: '8-10', rest: "1'30\"", focus: 'Back', goal: 'Pull with the elbows and keep the chest tall.', tip: 'Pull the elbow back and avoid shrugging through the top of the rep.' },
-      { name: 'Lat Pulldown (Neutral Grip)', sets: '3', reps: '10-12', rest: '10"', focus: 'Back', goal: 'Strong lat contraction with a controlled return.', tip: 'Keep the torso steady and finish the rep by squeezing the lats without leaning back.' },
-    ],
-  },
-  {
-    id: 'day-2',
-    label: 'Day 2',
-    title: 'Arms A',
-    summary: 'Shoulders + triceps',
-    exercises: [
-      { name: 'Shoulder Press Machine (Wide Grip)', sets: '4', reps: '6-8', rest: "1'30\"", focus: 'Shoulders', goal: 'Keep the core braced and avoid leaning back.', tip: 'Keep the rib cage down and let the shoulders do the work instead of the torso.' },
-      { name: 'Dumbbell Overhead Press (Neutral Grip)', sets: '3', reps: '8-10', rest: '10"', focus: 'Shoulders', goal: 'Press overhead with a stable base.', tip: 'Brace the abs and keep the glutes tight so the movement stays vertical.' },
-      { name: 'Lat Machine (Reverse Grip)', sets: '3', reps: '10-12', rest: '10"', focus: 'Back', goal: 'Drive the elbows and stay stable through the torso.', tip: 'Stay tall and keep the chest up while pulling the elbow down and back.' },
-      { name: 'Decline Press (Close Grip)', sets: '4', reps: '8-10', rest: '10"', focus: 'Triceps', goal: 'Press with control and keep elbows tucked.', tip: 'Control the lowering phase and keep the wrists stacked over the elbows.' },
-    ],
-  },
-  {
-    id: 'day-3',
-    label: 'Day 3',
-    title: 'Lower Body A',
-    summary: 'Quad + hamstring emphasis',
-    exercises: [
-      { name: 'Leg Press (Quad Dominant, 45°)', sets: '4', reps: '8-10', rest: "1'30\"", focus: 'Quads', goal: 'Full range and strong control in the lowering phase.', tip: 'Keep the feet stable and drive through the floor without shifting the hips.' },
-      { name: 'Walking Lunge (Dumbbell, Long Step)', sets: '3', reps: '10/leg', rest: '10"', focus: 'Legs', goal: 'Stay tall with a full stride and strong balance.', tip: 'Keep the chest lifted and the front knee tracking over the toes.' },
-      { name: 'Romanian Deadlift (Barbell)', sets: '4', reps: '6-8', rest: '10"', focus: 'Hamstrings', goal: 'Hinge from the hips with a neutral spine.', tip: 'Push the hips back, keep the back flat, and don’t round the low back.' },
-      { name: 'Calf Raise (Leg Press, Neutral)', sets: '4', reps: '12-15', rest: "1'", focus: 'Calves', goal: 'Drive through the whole foot and pause at the top.', tip: 'Use the full range and control the stretch at the bottom before the push.' },
-    ],
-  },
-  {
-    id: 'day-4',
-    label: 'Day 4',
-    title: 'Chest & Back B',
-    summary: 'Upper volume block',
-    exercises: [
-      { name: 'Dumbbell Press (Neutral Grip, 45°)', sets: '4', reps: '8-10', rest: "1'30\"", focus: 'Chest', goal: 'Keep the shoulder blades packed and the tension high.', tip: 'Keep the shoulder blades down and the elbows in a controlled path through the press.' },
-      { name: 'Dumbbell Press (Neutral Grip, 30°)', sets: '3', reps: '10-12', rest: '10"', focus: 'Chest', goal: 'Keep a strong midline and smooth tempo.', tip: 'Brace the abs and control the lowering portion without letting the ribs flare.' },
-      { name: 'Cable Row (Wide Grip)', sets: '4', reps: '8-10', rest: "1'30\"", focus: 'Back', goal: 'Drive elbows without jerking the torso.', tip: 'Keep the chest lifted and pull the elbows toward the pocket of your torso.' },
-      { name: 'Lat Pulldown (Neutral Grip)', sets: '3', reps: '10-12', rest: '10"', focus: 'Back', goal: 'Control the path and squeeze at the bottom.', tip: 'Avoid leaning back and focus on the lats working through the full range.' },
-      { name: 'Dumbbell Pullover', sets: '3', reps: '10-12', rest: "1'30\"", focus: 'Back', goal: 'Long stretch with a smooth eccentric.', tip: 'Keep the movement controlled and pause for a second at the bottom stretch.' },
-    ],
-  },
-  {
-    id: 'day-5',
-    label: 'Day 5',
-    title: 'Arms B',
-    summary: 'Press + pull volume',
-    exercises: [
-      { name: 'Shoulder Press Machine (Wide Grip)', sets: '4', reps: '6-8', rest: "1'30\"", focus: 'Shoulders', goal: 'Keep the torso quiet and the press controlled.', tip: 'Brace the abs and let the shoulders work without leaning back into the rack.' },
-      { name: 'Dumbbell Overhead Press (Neutral Grip)', sets: '3', reps: '8-10', rest: '10"', focus: 'Shoulders', goal: 'Stable base with active core tension.', tip: 'Keep the rib cage down and the glutes active through the whole rep.' },
-      { name: 'Lat Machine (Reverse Grip)', sets: '3', reps: '10-12', rest: '10"', focus: 'Back', goal: 'Strong pull pattern, controlled return.', tip: 'Pull the elbows down and back and don’t let the shoulders roll forward.' },
-      { name: 'Decline Press (Close Grip)', sets: '4', reps: '8-10', rest: '10"', focus: 'Triceps', goal: 'Drive through the chest and keep elbows tucked.', tip: 'Keep the wrists straight and control the lowering phase until the elbows are at a safe angle.' },
-    ],
-  },
-  {
-    id: 'day-6',
-    label: 'Day 6',
-    title: 'Lower Body B',
-    summary: 'Strength + leg volume',
-    exercises: [
-      { name: 'Leg Press (Quad Dominant, 45°)', sets: '4', reps: '8-10', rest: "1'30\"", focus: 'Quads', goal: 'Stay controlled through the full ROM.', tip: 'Keep the feet balanced and avoid shifting the knees inward on the way up.' },
-      { name: 'Walking Lunge (Dumbbell, Long Step)', sets: '3', reps: '10/leg', rest: '10"', focus: 'Legs', goal: 'Balance, control, and a strong stride.', tip: 'Keep the chest up and let the front knee track over the foot with control.' },
-      { name: 'Romanian Deadlift (Barbell)', sets: '4', reps: '6-8', rest: '10"', focus: 'Hamstrings', goal: 'Neutral spine and controlled hinge pattern.', tip: 'Push the hips back and keep the lumbar spine neutral the entire rep.' },
-      { name: 'Calf Raise (Leg Press, Neutral)', sets: '4', reps: '12-15', rest: "1'", focus: 'Calves', goal: 'Strong lockout and full stretch each rep.', tip: 'Drive through the whole foot and pause at the top before lowering.' },
-    ],
-  },
-]
+const techniqueDetails: Record<NonNullable<PlanExercise['technique']>, string> = {
+  straight: 'Straight sets: same reps and weight every set',
+  pyramid: 'Pyramid: reps down, weight up each set',
+  'reverse-pyramid': 'Reverse pyramid: heaviest set first, weight down each set',
+  'drop-set': 'Drop set: to failure, drop 20–30% and continue',
+  superset: 'Superset: back to back with the paired exercise',
+}
+
+function formatBlockStartDate(value: string) {
+  const date = new Date(`${value}T00:00:00Z`)
+  const weekday = new Intl.DateTimeFormat('en-GB', { weekday: 'short', timeZone: 'UTC' }).format(date)
+  const month = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' }).format(date)
+  return `${weekday} ${date.getUTCDate()} ${month}`
+}
+
+function getBlockExerciseName(exercise: BlockExercise, exercises: Exercise[]) {
+  return exercises.find((item) => item.id === exercise.exerciseId)?.name ?? exercise.exerciseId
+}
 
 function createSet(reps = 8, weight = 0): WorkoutSet {
   return {
@@ -264,36 +216,27 @@ export default function WorkoutPlan({
   lockMode?: boolean
 }) {
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
-  const [selectedDay, setSelectedDay] = useState(sixDayProgram[0].id)
-  const [customPlan, setCustomPlan] = useState<PlannedExercise[]>(() => loadCustomPlan())
-  const [customExerciseDraft, setCustomExerciseDraft] = useState<PlannedExercise>(defaultCustomExercise)
+  const [selectedDay, setSelectedDay] = useState('chest-back-a')
+  const [customPlan, setCustomPlan] = useState<PlanExercise[]>(() => loadCustomPlan())
+  const [customExerciseDraft, setCustomExerciseDraft] = useState<PlanExercise>(defaultCustomExercise)
   const [selectedLibraryExerciseId, setSelectedLibraryExerciseId] = useState('')
   const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
+  const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
+  const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
+  const [blockSelectorOpen, setBlockSelectorOpen] = useState(false)
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
-  const [plannedDrafts, setPlannedDrafts] = useState<
-    Record<string, { reps: number; weight: number; setWeights: number[]; notes: string }>
-  >({})
-  const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(sixDayProgram.flatMap((day) => day.exercises.map((exercise) => [normalizeExerciseName(exercise.name), true])))
-  )
-  const [setSectionsVisible, setSetSectionsVisible] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(sixDayProgram.flatMap((day) => day.exercises.map((exercise) => [normalizeExerciseName(exercise.name), false])))
-  )
-  const [progressSectionsVisible, setProgressSectionsVisible] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(sixDayProgram.flatMap((day) => day.exercises.map((exercise) => [normalizeExerciseName(exercise.name), false])))
-  )
-  const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(sixDayProgram.flatMap((day) => day.exercises.map((exercise) => [normalizeExerciseName(exercise.name), true])))
-  )
-  const [activeSetIndexByExercise, setActiveSetIndexByExercise] = useState<Record<string, number>>(() =>
-    Object.fromEntries(sixDayProgram.flatMap((day) => day.exercises.map((exercise) => [normalizeExerciseName(exercise.name), 0])))
-  )
+  const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
+  const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({})
+  const [setSectionsVisible, setSetSectionsVisible] = useState<Record<string, boolean>>({})
+  const [progressSectionsVisible, setProgressSectionsVisible] = useState<Record<string, boolean>>({})
+  const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
+  const [activeSetIndexByExercise, setActiveSetIndexByExercise] = useState<Record<string, number>>({})
 
   const text = {
     title: 'Planned before you go',
-    badge: '6 day split',
+    badge: '6-week block',
     sets: 'Sets',
     reps: 'Reps',
     rest: 'Rest',
@@ -305,7 +248,7 @@ export default function WorkoutPlan({
     log: 'Log this exercise',
     posture: 'POSTURE TIPS',
     noData: 'No logged data yet',
-    modePreset: '6-day plan',
+    modePreset: '6-week block',
     modeCustom: 'Make your own plan',
     customTitle: 'Make your own plan',
     customHint: 'Create and save exercises manually.',
@@ -329,12 +272,39 @@ export default function WorkoutPlan({
     calendarSelect: 'Select date',
     calendarHistory: 'Work done on this day',
     calendarEmpty: 'No workouts logged on this date.',
+    changeBlock: 'Change block',
+    currentBlock: 'Current',
+    coach: 'Coach',
+    pt: 'PT',
+    loadingBlocks: 'Loading training blocks…',
   }
 
-  const activeDay = useMemo(
-    () => sixDayProgram.find((day) => day.id === selectedDay) ?? sixDayProgram[0],
-    [selectedDay]
+  const activeBlock = useMemo(
+    () => trainingBlocks.find((block) => block.id === selectedBlockId) ?? defaultActiveBlock(trainingBlocks),
+    [selectedBlockId, trainingBlocks]
   )
+  const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
+  const activeBlockExercises = useMemo(
+    () =>
+      activeDay?.exercises.map((exercise) => ({
+        name: getBlockExerciseName(exercise, exerciseCatalog),
+        sets: String(exercise.sets),
+        reps: exercise.reps.join(' · '),
+        repsPerSet: exercise.reps,
+        rest: `${exercise.restSeconds} s`,
+        focus: activeDay.focus ?? '',
+        goal: '',
+        tip: '',
+        exerciseId: exercise.exerciseId,
+        code: exercise.code,
+        technique: exercise.technique,
+        angleDegrees: exercise.angleDegrees,
+        notes: exercise.notes,
+      })) ?? [],
+    [activeDay, exerciseCatalog]
+  )
+  const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
+  const activeBlockWeek = activeBlock ? blockWeek(activeBlock) : null
 
   useEffect(() => {
     if (mode) {
@@ -344,10 +314,17 @@ export default function WorkoutPlan({
 
   useEffect(() => {
     let cancelled = false
-    void Promise.all([loadExercises(), loadWorkoutHistory()]).then(([exercises, entries]) => {
+    void Promise.all([loadExercises(), loadWorkoutHistory(), fetchTrainingBlocks()]).then(([exercises, entries, blocks]) => {
       if (cancelled) return
       setExerciseCatalog(exercises)
       setHistory(entries)
+      setTrainingBlocks(blocks)
+      const savedBlock = blocks.find((block) => block.id === getActiveBlockId())
+      const nextBlock = savedBlock ?? defaultActiveBlock(blocks)
+      setSelectedBlockId(nextBlock?.id ?? '')
+      setSelectedDay((current) =>
+        nextBlock?.days.some((day) => day.key === current) ? current : nextBlock?.days[0]?.key ?? ''
+      )
     })
 
     return () => {
@@ -355,7 +332,15 @@ export default function WorkoutPlan({
     }
   }, [])
 
-  const activeExercises = planMode === 'preset' ? activeDay.exercises : customPlan
+  useEffect(() => {
+    if (planMode !== 'preset') return
+    setCollapsedExercises((current) => ({
+      ...Object.fromEntries(
+        activeBlockExercises.map((exercise) => [normalizeExerciseName(exercise.name), true] as const)
+      ),
+      ...current,
+    }))
+  }, [activeBlock?.id, activeDay?.key, activeBlockExercises, planMode])
 
   const calendarHistoryItems = useMemo(
     () =>
@@ -421,16 +406,11 @@ export default function WorkoutPlan({
     return map
   }, [exerciseCatalog, history])
 
-  const updatePlanDraft = (exerciseName: string, field: 'reps' | 'weight' | 'notes', value: string) => {
-    const key = normalizeExerciseName(exerciseName)
+  const updatePlanDraft = (exercise: PlanExercise, field: 'reps' | 'weight' | 'notes', value: string) => {
+    const key = normalizeExerciseName(exercise.name)
 
     setPlannedDrafts((current) => {
-      const currentDraft = current[key] ?? {
-        reps: 8,
-        weight: 0,
-        setWeights: [0],
-        notes: '',
-      }
+      const currentDraft = current[key] ?? getDraftForExercise(exercise.name, exercise)
 
       return {
         ...current,
@@ -446,22 +426,26 @@ export default function WorkoutPlan({
     })
   }
 
-  const updatePlanSetValue = (exerciseName: string, setIndex: number, field: 'reps' | 'weight', value: string, setCount: number = 1) => {
-    const key = normalizeExerciseName(exerciseName)
+  const updatePlanSetValue = (exercise: PlanExercise, setIndex: number, field: 'reps' | 'weight', value: string, setCount: number) => {
+    const key = normalizeExerciseName(exercise.name)
 
     setPlannedDrafts((current) => {
-      const currentDraft = current[key] ?? {
-        reps: 8,
-        weight: 0,
-        setWeights: [0],
-        notes: '',
-      }
+      const currentDraft = current[key] ?? getDraftForExercise(exercise.name, exercise)
 
-      const nextSetWeights = [...(currentDraft.setWeights.length ? currentDraft.setWeights : [currentDraft.weight])]
+      const nextSetWeights = Array.from(
+        { length: setCount },
+        (_, index) => currentDraft.setWeights[index] ?? currentDraft.weight
+      )
+      const nextSetReps = Array.from(
+        { length: setCount },
+        (_, index) => currentDraft.setReps[index] ?? currentDraft.reps
+      )
       const nextReps = Number(value) || 0
 
       if (field === 'weight') {
         nextSetWeights[setIndex] = Number(value) || 0
+      } else {
+        nextSetReps[setIndex] = nextReps
       }
 
       return {
@@ -471,24 +455,25 @@ export default function WorkoutPlan({
           reps: field === 'reps' ? nextReps : currentDraft.reps,
           weight: field === 'weight' ? nextSetWeights[0] ?? 0 : currentDraft.weight,
           setWeights: field === 'weight' ? nextSetWeights : currentDraft.setWeights,
+          setReps: field === 'reps' ? nextSetReps : currentDraft.setReps,
         },
       }
     })
   }
 
-  const getDefaultRepTarget = (exercise: PlannedExercise) => {
+  const getDefaultRepTarget = (exercise: PlanExercise) => {
     const raw = exercise.reps ?? '8'
     const match = raw.match(/(\d+)/)
     return match ? Number(match[1]) : 8
   }
 
-  const getDefaultSetCount = (exercise: PlannedExercise) => {
+  const getDefaultSetCount = (exercise: PlanExercise) => {
     const raw = exercise.sets ?? '1'
     const match = raw.match(/(\d+)/)
     return match ? Number(match[1]) : 1
   }
 
-  const getDraftForExercise = (exerciseName: string, exercise?: PlannedExercise) => {
+  const getDraftForExercise = (exerciseName: string, exercise?: PlanExercise) => {
     const key = normalizeExerciseName(exerciseName)
     const best = bestProgressByName.get(key)
     const bestWeight = best ? Math.max(...best.sets.map((set) => set.weight), 0) : 0
@@ -496,12 +481,17 @@ export default function WorkoutPlan({
     const fallbackReps = exercise ? getDefaultRepTarget(exercise) : bestReps
     const fallbackSetCount = exercise ? getDefaultSetCount(exercise) : 1
     const baseSetWeights = Array.from({ length: fallbackSetCount }, () => Number(bestWeight) || 0)
+    const baseSetReps = Array.from({ length: fallbackSetCount }, (_, index) => {
+      const prescribed = exercise?.repsPerSet?.[index] ?? exercise?.reps ?? ''
+      return Number(prescribed.match(/(\d+)/)?.[1]) || Number(fallbackReps) || 8
+    })
 
     return (
       plannedDrafts[key] ?? {
-        reps: Number(fallbackReps) || 8,
+        reps: baseSetReps[0] ?? (Number(fallbackReps) || 8),
         weight: Number(bestWeight) || 0,
         setWeights: baseSetWeights,
+        setReps: baseSetReps,
         notes: '',
       }
     )
@@ -516,7 +506,8 @@ export default function WorkoutPlan({
     }))
   }
 
-  const getPostureTips = (exercise: PlannedExercise) => {
+  const getPostureTips = (exercise: PlanExercise, libraryMatch?: Exercise) => {
+    if (exercise.exerciseId && libraryMatch?.postureTips?.length) return libraryMatch.postureTips
     return [exercise.goal, exercise.tip].filter(Boolean).map((tip) => tip.trim())
   }
 
@@ -564,17 +555,9 @@ export default function WorkoutPlan({
   }
 
   const collapseAllExerciseSections = () => {
-    const nextCollapsedState = sixDayProgram.flatMap((day) =>
-      day.exercises.map((exercise) => [normalizeExerciseName(exercise.name), true] as const)
-    )
-
-    const nextSetSectionState = sixDayProgram.flatMap((day) =>
-      day.exercises.map((exercise) => [normalizeExerciseName(exercise.name), false] as const)
-    )
-
-    const nextActiveSetState = sixDayProgram.flatMap((day) =>
-      day.exercises.map((exercise) => [normalizeExerciseName(exercise.name), 0] as const)
-    )
+    const nextCollapsedState = activeExercises.map((exercise) => [normalizeExerciseName(exercise.name), true] as const)
+    const nextSetSectionState = activeExercises.map((exercise) => [normalizeExerciseName(exercise.name), false] as const)
+    const nextActiveSetState = activeExercises.map((exercise) => [normalizeExerciseName(exercise.name), 0] as const)
 
     setCollapsedExercises(Object.fromEntries(nextCollapsedState))
     setSetSectionsVisible(Object.fromEntries(nextSetSectionState))
@@ -582,27 +565,28 @@ export default function WorkoutPlan({
     setActiveSetIndexByExercise(Object.fromEntries(nextActiveSetState))
   }
 
-  const logPlannedExercise = async (exercise: PlannedExercise) => {
+  const logPlannedExercise = async (exercise: PlanExercise) => {
     const exerciseKey = normalizeExerciseName(exercise.name)
-
-    const canonical = await upsertExerciseRecord({
-      name: exercise.name,
-      primaryMuscle: exercise.focus,
-      notes: exercise.goal,
-      tips: [exercise.tip],
-    })
+    const canonicalId =
+      exercise.exerciseId ??
+      (await upsertExerciseRecord({
+        name: exercise.name,
+        primaryMuscle: exercise.focus,
+        notes: exercise.goal,
+        tips: [exercise.tip],
+      })).id
 
     const draft = getDraftForExercise(exercise.name, exercise)
-    const repsPerSet = Number(draft.reps) || getDefaultRepTarget(exercise)
     const setCount = getDefaultSetCount(exercise) || 1
     const validSets = Array.from({ length: setCount }, (_, index) => {
       const currentWeight = draft.setWeights?.[index] ?? draft.weight ?? 0
-      return createSet(repsPerSet, Number(currentWeight) || 0)
+      const currentReps = draft.setReps?.[index] ?? draft.reps ?? getDefaultRepTarget(exercise)
+      return createSet(Number(currentReps) || getDefaultRepTarget(exercise), Number(currentWeight) || 0)
     })
 
     const nextEntry: WorkoutEntry = {
       id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
-      exerciseId: canonical.id,
+      exerciseId: canonicalId,
       date: new Date().toISOString().slice(0, 10),
       sets: validSets,
       notes: draft.notes?.trim() ?? '',
@@ -646,7 +630,7 @@ export default function WorkoutPlan({
     }))
   }
 
-  const updateCustomExerciseDraft = (field: keyof PlannedExercise, value: string) => {
+  const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => {
     setCustomExerciseDraft((current) => ({
       ...current,
       [field]: value,
@@ -665,7 +649,7 @@ export default function WorkoutPlan({
         : match.tips[0].text
       : '')
 
-    const nextExercise: PlannedExercise = {
+    const nextExercise: PlanExercise = {
       name: match.name,
       sets: '3',
       reps: '8-10',
@@ -694,7 +678,7 @@ export default function WorkoutPlan({
     const trimmedName = customExerciseDraft.name.trim()
     if (!trimmedName) return
 
-    const nextExercise: PlannedExercise = {
+    const nextExercise: PlanExercise = {
       ...customExerciseDraft,
       name: trimmedName,
       sets: customExerciseDraft.sets?.trim() || '3',
@@ -853,20 +837,77 @@ export default function WorkoutPlan({
         </div>
       )}
 
+      {planMode === 'preset' && activeBlock && (
+        <section className="training-block-card" aria-label="Active training block">
+          <div className="training-block-header">
+            <div>
+              <span className="training-block-number">Block {activeBlock.number}</span>
+              <h4>{activeBlock.name}</h4>
+            </div>
+            <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
+          </div>
+          <div className="training-block-meta">
+            <span>{blockDateRange(activeBlock)}</span>
+            <span>{activeBlock.method.replace(/-/g, ' ')}</span>
+            <strong>
+              {activeBlockWeek
+                ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
+                : getTodayIsoDate() < activeBlock.startDate
+                  ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
+                  : 'Completed'}
+            </strong>
+          </div>
+          <p>{activeBlock.summary}</p>
+          <button
+            type="button"
+            className="secondary-button block-change-button"
+            onClick={() => setBlockSelectorOpen((current) => !current)}
+            aria-expanded={blockSelectorOpen}
+          >
+            {text.changeBlock}
+          </button>
+          {blockSelectorOpen && (
+            <div className="training-block-options">
+              {trainingBlocks.map((block) => (
+                <button
+                  key={block.id}
+                  type="button"
+                  className={block.id === activeBlock.id ? 'training-block-option active' : 'training-block-option'}
+                  onClick={() => {
+                    setActiveBlockId(block.id)
+                    setSelectedBlockId(block.id)
+                    setSelectedDay(block.days[0]?.key ?? '')
+                    setCollapsedExercises({})
+                    setPlannedDrafts({})
+                    setBlockSelectorOpen(false)
+                  }}
+                >
+                  <span>
+                    <strong>{`Block ${block.number} · ${block.name}`}</strong>
+                    <small>{`${blockDateRange(block)} · ${block.method.replace(/-/g, ' ')}`}</small>
+                  </span>
+                  {block.id === activeBlock.id && <small>{text.currentBlock}</small>}
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {planMode === 'preset' ? (
         <div className="day-tabs" aria-label="Workout days">
-          {sixDayProgram.map((day) => (
+          {activeBlock?.days.map((day) => (
             <button
-              key={day.id}
+              key={day.key}
               type="button"
-              className={day.id === selectedDay ? 'day-tab active' : 'day-tab'}
+              className={day.key === (activeDay?.key ?? selectedDay) ? 'day-tab active' : 'day-tab'}
               onClick={() => {
-                setSelectedDay(day.id)
+                setSelectedDay(day.key)
                 collapseAllExerciseSections()
               }}
             >
-              <span className="day-tab-label">{day.label}</span>
-              {day.id === selectedDay && <span className="day-tab-summary">{day.summary}</span>}
+              <span className="day-tab-label">{`Day ${day.position} · ${day.name}`}</span>
+              {day.key === (activeDay?.key ?? selectedDay) && <span className="day-tab-summary">{day.focus}</span>}
             </button>
           ))}
         </div>
@@ -984,20 +1025,24 @@ export default function WorkoutPlan({
 
       <section className="day-plan-card">
         <div className="day-plan-header" aria-hidden="true" style={{ display: 'none' }}>
-          <h2>{activeDay.title}</h2>
+          <h2>{activeDay?.name}</h2>
         </div>
 
         <div className="day-exercises">
-          {activeExercises.map((exercise) => {
+          {activeExercises.map((exercise, exerciseIndex) => {
             const draft = getDraftForExercise(exercise.name, exercise)
             const setCount = getDefaultSetCount(exercise)
             const setWeights = draft.setWeights.length ? draft.setWeights : Array.from({ length: setCount }, () => Number(draft.weight) || 0)
+            const setReps = draft.setReps.length ? draft.setReps : Array.from({ length: setCount }, () => Number(draft.reps) || 8)
             const exerciseKey = normalizeExerciseName(exercise.name)
             const displayName = getExerciseDisplayName(exercise.name)
             const displayTitle = splitExerciseTitle(displayName)
-            const libraryMatch = exerciseCatalog.find((item) => normalizeExerciseName(item.name) === exerciseKey)
+            const libraryMatch =
+              exerciseCatalog.find((item) => item.id === exercise.exerciseId) ??
+              exerciseCatalog.find((item) => normalizeExerciseName(item.name) === exerciseKey)
             const exerciseHistory = history
               .filter((entry) => {
+                if (exercise.exerciseId) return entry.exerciseId === exercise.exerciseId
                 const match = exerciseCatalog.find((item) => item.id === entry.exerciseId)
                 return match && normalizeExerciseName(match.name) === exerciseKey
               })
@@ -1009,6 +1054,7 @@ export default function WorkoutPlan({
               totalVolume: entry.sets.reduce((total, set) => total + set.reps * set.weight, 0),
               setsCount: entry.sets.length,
               comments: sanitizeLoggedComment(entry.notes, [
+                exercise.notes,
                 exercise.goal,
                 exercise.tip,
                 libraryMatch?.overallStatement,
@@ -1026,15 +1072,34 @@ export default function WorkoutPlan({
             const isSetSectionVisible = setSectionsVisible[exerciseKey] ?? false
             const isProgressSectionVisible = progressSectionsVisible[exerciseKey] ?? false
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? true
-            const postureTips = getPostureTips(exercise)
+            const postureTips = getPostureTips(exercise, libraryMatch)
+            const groupLetter = exercise.code?.slice(0, 1)
+            const previousExercise = activeExercises[exerciseIndex - 1]
+            const nextExercise = activeExercises[exerciseIndex + 1]
+            const joinsPreviousSuperset =
+              exercise.technique === 'superset' &&
+              previousExercise?.technique === 'superset' &&
+              previousExercise.code?.slice(0, 1) === groupLetter
+            const joinsNextSuperset =
+              exercise.technique === 'superset' &&
+              nextExercise?.technique === 'superset' &&
+              nextExercise.code?.slice(0, 1) === groupLetter
+            const cardClasses = [
+              'planned-exercise-card',
+              isCollapsed ? 'collapsed' : '',
+              exercise.technique === 'superset' ? 'superset-exercise-card' : '',
+              exercise.technique === 'superset' && !joinsPreviousSuperset ? 'superset-start' : '',
+              exercise.technique === 'superset' && !joinsNextSuperset ? 'superset-end' : '',
+            ].filter(Boolean).join(' ')
 
             return (
               <article
-                key={`${planMode}-${activeDay.id}-${exercise.name}`}
-                className={isCollapsed ? 'planned-exercise-card collapsed' : 'planned-exercise-card'}
+                key={`${planMode}-${activeDay?.key ?? 'custom'}-${exercise.code ?? exercise.name}`}
+                className={cardClasses}
               >
                 <div className="planned-exercise-header">
                   <div className="planned-exercise-title-block">
+                    {exercise.code && <span className="plan-exercise-code">{exercise.code}</span>}
                     <div className="planned-exercise-name-wrap">
                       <strong className="planned-exercise-main-name">{displayTitle.main}</strong>
                       {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
@@ -1054,12 +1119,23 @@ export default function WorkoutPlan({
                 {!isCollapsed && (
                   <>
                     <div className="chip-row chip-row-tight">
+                      {joinsPreviousSuperset === false && exercise.technique === 'superset' && (
+                        <span className="chip technique-chip">Superset</span>
+                      )}
+                      {exercise.technique && exercise.technique !== 'superset' && (
+                        <span className="chip technique-chip">{exercise.technique.replace(/-/g, ' ')}</span>
+                      )}
+                      {exercise.angleDegrees && <span className="chip subtle">{`Bench ${exercise.angleDegrees}°`}</span>}
                       {muscleChips.map((muscle, index) => (
                         <span key={`${exerciseKey}-muscle-${index}`} className={index === 0 ? 'chip' : 'chip subtle'}>
                           {muscle}
                         </span>
                       ))}
                     </div>
+                    {exercise.technique && (
+                      <p className="technique-description">{techniqueDetails[exercise.technique]}</p>
+                    )}
+                    {exercise.notes && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
                     <div className="posture-tips-box">
                       <div
@@ -1145,9 +1221,9 @@ export default function WorkoutPlan({
                                       <input
                                         type="number"
                                         min="1"
-                                        value={draft.reps}
+                                        value={setReps[index] ?? draft.reps}
                                         aria-label={`Set ${index + 1} reps`}
-                                        onChange={(event) => updatePlanSetValue(exercise.name, index, 'reps', event.target.value, setCount)}
+                                        onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
                                       />
                                     </label>
                                     <label>
@@ -1159,7 +1235,7 @@ export default function WorkoutPlan({
                                         aria-label={`Set ${index + 1} weight`}
                                         onFocus={(event) => event.currentTarget.select()}
                                         onClick={(event) => event.currentTarget.select()}
-                                        onChange={(event) => updatePlanSetValue(exercise.name, index, 'weight', event.target.value, setCount)}
+                                        onChange={(event) => updatePlanSetValue(exercise, index, 'weight', event.target.value, setCount)}
                                       />
                                     </label>
                                   </div>
@@ -1182,7 +1258,7 @@ export default function WorkoutPlan({
                             rows={2}
                             value={draft.notes}
                             placeholder="Add notes for this exercise"
-                            onChange={(event) => updatePlanDraft(exercise.name, 'notes', event.target.value)}
+                            onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
                           />
                         </label>
                       )}

@@ -4,10 +4,14 @@ import { Exercise, WorkoutEntry } from '../types'
 import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
 import {
   addWorkoutEntry,
+  fetchTrainingBlocks,
   getExerciseDisplayName,
   loadExercises,
   loadWorkoutHistory,
+  mapTrainingBlockRows,
   normalizeExerciseName,
+  setActiveBlockId,
+  getActiveBlockId,
   upsertExerciseRecord,
 } from './storage'
 
@@ -280,6 +284,123 @@ describe('remote catalogue', () => {
     expect(deadlift?.equipment).toBe('barbell')
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
+  })
+})
+
+describe('training blocks', () => {
+  const trainingBlockRows = [
+    {
+      id: 'block-2',
+      number: 2,
+      name: 'Second block',
+      method: 'reverse-pyramid',
+      start_date: '2026-03-30',
+      weeks: 6,
+      origin: 'coach',
+      summary: 'Second summary',
+      days: [
+        {
+          key: 'arms-a',
+          position: 2,
+          name: 'Arms A',
+          focus: 'Arms',
+          exercises: [{
+            code: 'B1',
+            position: 2,
+            exercise_id: 'triceps-extension',
+            sets: 2,
+            reps: ['12+12', '12+12'],
+            rest_seconds: 90,
+            technique: 'drop-set',
+            angle_degrees: null,
+            notes: null,
+          }],
+        },
+        {
+          key: 'chest-back-a',
+          position: 1,
+          name: 'Chest-Back A',
+          focus: 'Chest and back',
+          exercises: [{
+            code: 'A1',
+            position: 1,
+            exercise_id: 'barbell-bench-press',
+            sets: 2,
+            reps: ['8', '10'],
+            rest_seconds: 120,
+            technique: 'reverse-pyramid',
+            angle_degrees: 30,
+            notes: 'Bench at 30 degrees.',
+          }],
+        },
+      ],
+    },
+    {
+      id: 'block-1',
+      number: 1,
+      name: 'First block',
+      method: 'straight',
+      start_date: '2026-02-16',
+      weeks: 6,
+      origin: 'pt',
+      summary: 'First summary',
+      days: [],
+    },
+  ]
+
+  it('maps and orders blocks, days, and exercises from Supabase rows', () => {
+    const blocks = mapTrainingBlockRows(trainingBlockRows)
+
+    expect(blocks.map((block) => block.number)).toEqual([1, 2])
+    expect(blocks[1].startDate).toBe('2026-03-30')
+    expect(blocks[1].origin).toBe('coach')
+    expect(blocks[1].days.map((day) => day.key)).toEqual(['chest-back-a', 'arms-a'])
+    expect(blocks[1].days[0].exercises[0]).toMatchObject({
+      code: 'A1',
+      exerciseId: 'barbell-bench-press',
+      reps: ['8', '10'],
+      restSeconds: 120,
+      technique: 'reverse-pyramid',
+      angleDegrees: 30,
+    })
+    expect(blocks[1].days[1].exercises[0].reps).toEqual(['12+12', '12+12'])
+  })
+
+  it('fetches and caches active blocks with nested ordered data', async () => {
+    supabaseMock.response.data = trainingBlockRows
+
+    const blocks = await fetchTrainingBlocks()
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('training_blocks')
+    expect(supabaseMock.select).toHaveBeenCalledWith(
+      'id, number, name, method, start_date, weeks, origin, summary, days:training_block_days(key, position, name, focus, exercises:training_block_exercises(code, position, exercise_id, sets, reps, rest_seconds, technique, angle_degrees, notes))'
+    )
+    expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
+    expect(supabaseMock.order).toHaveBeenCalledWith('number')
+    expect(blocks.map((block) => block.number)).toEqual([1, 2])
+    expect(JSON.parse(localStorage.getItem('gym-studio.training-blocks')!)).toEqual(blocks)
+  })
+
+  it('uses cached blocks offline and the bundled blocks when no cache exists', async () => {
+    supabaseMock.response.data = trainingBlockRows
+    await fetchTrainingBlocks()
+    supabaseMock.clientState.current = null
+
+    expect(await fetchTrainingBlocks()).toHaveLength(2)
+
+    localStorage.removeItem('gym-studio.training-blocks')
+    const bundledBlocks = await fetchTrainingBlocks()
+    expect(bundledBlocks).toHaveLength(9)
+    expect(bundledBlocks[5]).toMatchObject({
+      id: 'block-2026-10-05-hypertrophy-flat-pyramid-ii',
+      name: 'Hypertrophy Flat Pyramid II',
+      startDate: '2026-10-05',
+    })
+  })
+
+  it('persists the selected block id', () => {
+    setActiveBlockId('block-6')
+    expect(getActiveBlockId()).toBe('block-6')
   })
 })
 

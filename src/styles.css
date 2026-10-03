@@ -993,6 +993,113 @@ button {
   gap: 6px;
 }
 
+.training-block-card {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.training-block-header,
+.training-block-meta,
+.training-block-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.training-block-header > div,
+.training-block-option > span {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.training-block-number {
+  color: var(--muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.training-block-header h4 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+}
+
+.origin-badge {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.training-block-meta {
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+
+.training-block-meta strong {
+  color: var(--text);
+}
+
+.training-block-card > p {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.block-change-button {
+  justify-self: start;
+  padding: 7px 10px;
+  font-size: 0.66rem;
+}
+
+.training-block-options {
+  display: grid;
+  max-height: 280px;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.training-block-option {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  text-align: left;
+}
+
+.training-block-option.active {
+  border-color: rgba(141, 94, 99, 0.7);
+  background: var(--brand-soft);
+}
+
+.training-block-option strong {
+  font-size: 0.68rem;
+  overflow-wrap: anywhere;
+}
+
+.training-block-option small {
+  color: var(--muted);
+  font-size: 0.58rem;
+  overflow-wrap: anywhere;
+}
+
 .day-tab {
   appearance: none;
   border: 1px solid var(--line);
@@ -1010,10 +1117,11 @@ button {
 }
 
 .day-tab-label {
-  font-size: 0.82rem;
+  font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .day-tab-summary {
@@ -1187,6 +1295,41 @@ button {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.planned-exercise-card.superset-exercise-card {
+  border-color: rgba(141, 94, 99, 0.55);
+}
+
+.planned-exercise-card.superset-start {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.planned-exercise-card.superset-end {
+  margin-top: -10px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.plan-exercise-code {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.technique-chip {
+  text-transform: capitalize;
+}
+
+.technique-description,
+.planned-exercise-notes {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .planned-exercise-card.collapsed {

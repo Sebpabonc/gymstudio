@@ -234,7 +234,10 @@ export default function App() {
             <button
               type="button"
               className={activeTab === 'track' ? 'tab-button active' : 'tab-button'}
-              onClick={() => setActiveTab('track')}
+              onClick={() => {
+                setActiveTab('track')
+                void loadWorkoutHistory().then(setHistory)
+              }}
             >
               {text.track}
             </button>
