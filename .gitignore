@@ -24,10 +24,10 @@ dist/
 logs/
 *.log
 
+# Excel/Office lock files
+~$*
+
 # Misc
 /*.tgz
 coverage/
 
-# Lockfiles
-package-lock.json
-pnpm-lock.yaml
