@@ -7,7 +7,6 @@ export type ExerciseTip = {
 export type Exercise = {
   id: string
   name: string
-  nameEs?: string
   primaryMuscle: string
   secondaryMuscle?: string
   bodyRegion?: string

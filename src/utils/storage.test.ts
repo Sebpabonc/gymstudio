@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { exerciseLibrary } from '../data/exerciseLibrary'
-import { WorkoutEntry } from '../types'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { loadExerciseLibrary } from '../data/exerciseLibrary'
+import { Exercise, WorkoutEntry } from '../types'
 import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
 import {
   addWorkoutEntry,
@@ -19,6 +19,12 @@ const supabaseMock = vi.hoisted(() => {
   const from = vi.fn(() => ({ select }))
   const client = { from }
   return { response, order, eq, select, from, client, clientState: { current: client as typeof client | null } }
+})
+
+let exerciseLibrary: Exercise[]
+
+beforeAll(async () => {
+  exerciseLibrary = (await loadExerciseLibrary()).exerciseLibrary
 })
 
 vi.mock('../lib/supabaseClient', () => ({
@@ -65,12 +71,11 @@ describe('normalizeExerciseName', () => {
 
 describe('getExerciseDisplayName', () => {
   it('always returns the English exercise name', () => {
-    expect(getExerciseDisplayName('Lat Pulldown', 'en')).toBe('Lat Pulldown')
-    expect(getExerciseDisplayName('Romanian Deadlift', 'es')).toBe('Romanian Deadlift')
+    expect(getExerciseDisplayName('Lat Pulldown')).toBe('Lat Pulldown')
+    expect(getExerciseDisplayName('Romanian Deadlift')).toBe('Romanian Deadlift')
     expect(
       getExerciseDisplayName(
-        { id: 'catalogue-exercise', name: 'Barbell Row', nameEs: 'Remo con barra', primaryMuscle: 'Back' },
-        'es'
+        { id: 'catalogue-exercise', name: 'Barbell Row', primaryMuscle: 'Back' }
       )
     ).toBe('Barbell Row')
   })
@@ -78,32 +83,40 @@ describe('getExerciseDisplayName', () => {
   it('uses the name field when no translation is available', () => {
     expect(
       getExerciseDisplayName(
-        { id: 'catalogue-exercise', name: 'New Exercise', nameEs: 'Ejercicio nuevo', primaryMuscle: 'Core' },
-        'es'
+        { id: 'catalogue-exercise', name: 'New Exercise', primaryMuscle: 'Core' }
       )
     ).toBe('New Exercise')
   })
 })
 
 describe('loadExercises', () => {
-  it('seeds the built-in library on first launch', () => {
-    const exercises = loadExercises()
+  it('seeds the built-in library on first launch', async () => {
+    const exercises = await loadExercises()
     expect(exercises).toHaveLength(exerciseLibrary.length)
     expect(localStorage.getItem('gym-studio.exercises')).not.toBeNull()
   })
 
-  it('recovers from corrupted saved data', () => {
-    localStorage.setItem('gym-studio.exercises', '{not json')
-    expect(loadExercises()).toHaveLength(exerciseLibrary.length)
+  it('loads the complete bundled catalogue when there is no cache or Supabase client', async () => {
+    supabaseMock.clientState.current = null
+
+    const exercises = await loadExercises()
+
+    expect(exercises).toHaveLength(224)
+    expect(exercises.find((exercise) => exercise.id === 'barbell-bench-press')?.postureTips).toHaveLength(5)
   })
 
-  it('replaces saved legacy exercises with the canonical library entry', () => {
+  it('recovers from corrupted saved data', async () => {
+    localStorage.setItem('gym-studio.exercises', '{not json')
+    expect(await loadExercises()).toHaveLength(exerciseLibrary.length)
+  })
+
+  it('replaces saved legacy exercises with the canonical library entry', async () => {
     localStorage.setItem(
       'gym-studio.exercises',
       JSON.stringify([{ id: 'bb-bench-press', name: 'BB Bench Press', primaryMuscle: 'Chest' }])
     )
 
-    const exercises = loadExercises()
+    const exercises = await loadExercises()
     const benchPresses = exercises.filter((exercise) => normalizeExerciseName(exercise.name) === 'barbell-bench-press')
 
     expect(benchPresses).toHaveLength(1)
@@ -113,29 +126,29 @@ describe('loadExercises', () => {
     )).toBe(false)
   })
 
-  it('loads saved legacy exercises idempotently', () => {
+  it('loads saved legacy exercises idempotently', async () => {
     localStorage.setItem(
       'gym-studio.exercises',
       JSON.stringify([{ id: 'bb-bench-press', name: 'BB Bench Press', primaryMuscle: 'Chest' }])
     )
 
-    const firstLoad = loadExercises()
+    const firstLoad = await loadExercises()
     const firstStoredValue = localStorage.getItem('gym-studio.exercises')
-    const secondLoad = loadExercises()
+    const secondLoad = await loadExercises()
 
     expect(secondLoad).toEqual(firstLoad)
     expect(localStorage.getItem('gym-studio.exercises')).toBe(firstStoredValue)
   })
 
-  it('keeps user-added exercises alongside the library', () => {
+  it('keeps user-added exercises alongside the library', async () => {
     localStorage.setItem('gym-studio.exercises', JSON.stringify([{ name: 'My Custom Move', primaryMuscle: 'Core' }]))
-    const names = loadExercises().map((e) => e.name)
+    const names = (await loadExercises()).map((e) => e.name)
     expect(names).toContain('My Custom Move')
     const uniqueLibraryNames = new Set(exerciseLibrary.map((e) => normalizeExerciseName(e.name)))
     expect(names.length).toBe(uniqueLibraryNames.size + 1)
   })
 
-  it('uses the cached catalogue and keeps saved custom exercises', () => {
+  it('uses the cached catalogue and keeps saved custom exercises', async () => {
     const catalogueExercise = {
       id: 'lat-pulldown',
       name: 'Lat Pulldown (Wide Grip)',
@@ -147,10 +160,10 @@ describe('loadExercises', () => {
     )
     localStorage.setItem(
       'gym-studio.exercises',
-      JSON.stringify([...exerciseLibrary, { id: 'my-custom-move', name: 'My Custom Move', primaryMuscle: 'Core' }])
+      JSON.stringify([{ id: 'my-custom-move', name: 'My Custom Move', primaryMuscle: 'Core' }])
     )
 
-    const exercises = loadExercises()
+    const exercises = await loadExercises()
     expect(exercises).toEqual([
       expect.objectContaining(catalogueExercise),
       expect.objectContaining({ id: 'my-custom-move', name: 'My Custom Move' }),
@@ -158,8 +171,9 @@ describe('loadExercises', () => {
     expect(exercises.some((exercise) => exercise.name === 'Lat Pulldown')).toBe(false)
   })
 
-  it('ignores cached tips and notes and restores bundled content by exercise id', () => {
+  it('uses cached posture tips', async () => {
     const bundled = exerciseLibrary.find((exercise) => exercise.id === 'romanian-deadlift')!
+    const cachedTips = ['Cached one', 'Cached two', 'Cached three', 'Cached four', 'Cached five']
     localStorage.setItem(
       'gym-studio.catalogue',
       JSON.stringify({
@@ -168,17 +182,15 @@ describe('loadExercises', () => {
           id: bundled.id,
           name: 'Romanian Deadlift (Barbell)',
           primaryMuscle: 'Hamstrings',
-          notes: 'Stale cached notes',
-          tips: ['Stale cached tip'],
+          postureTips: cachedTips,
         }],
         aliases: {},
       })
     )
 
-    const exercise = loadExercises().find((item) => item.id === bundled.id)
+    const exercise = (await loadExercises()).find((item) => item.id === bundled.id)
 
-    expect(exercise?.notes).toBe(bundled.notes)
-    expect(exercise?.tips).toEqual(bundled.tips)
+    expect(exercise?.postureTips).toEqual(cachedTips)
   })
 })
 
@@ -187,7 +199,6 @@ describe('remote catalogue', () => {
     {
       id: 'romanian-deadlift',
       name_en: 'Romanian Deadlift (Barbell)',
-      name_es: 'Peso muerto rumano con barra',
       body_region: 'Legs',
       primary_muscle: 'Hamstrings',
       primary_muscles: ['Hamstrings', 'Glutes'],
@@ -205,7 +216,6 @@ describe('remote catalogue', () => {
     {
       id: 'lat-pulldown',
       name_en: 'Lat Pulldown (Wide Grip)',
-      name_es: null,
       body_region: 'Back',
       primary_muscle: 'Lats',
       primary_muscles: ['Lats'],
@@ -224,13 +234,12 @@ describe('remote catalogue', () => {
 
     expect(supabaseMock.from).toHaveBeenCalledWith('exercises')
     expect(supabaseMock.select).toHaveBeenCalledWith(
-      'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, aliases'
+      'id, name_en, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, aliases'
     )
     expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
     expect(supabaseMock.order).toHaveBeenCalledWith('name_en')
     expect(deadlift).toMatchObject({
       name: 'Romanian Deadlift (Barbell)',
-      nameEs: 'Peso muerto rumano con barra',
       primaryMuscle: 'Hamstrings',
       secondaryMuscle: 'Glutes',
       bodyRegion: 'Legs',
@@ -259,9 +268,7 @@ describe('remote catalogue', () => {
     await refreshCatalogue()
 
     const cache = JSON.parse(localStorage.getItem('gym-studio.catalogue')!)
-    const deadlift = loadExercises().find((exercise) => exercise.id === 'romanian-deadlift')
-    const bundledDeadlift = exerciseLibrary.find((exercise) => exercise.id === 'romanian-deadlift')
-
+    const deadlift = (await loadExercises()).find((exercise) => exercise.id === 'romanian-deadlift')
     expect(cache.exercises).toHaveLength(2)
     expect(cache.exercises[0]).not.toHaveProperty('tips')
     expect(cache.exercises[0]).not.toHaveProperty('notes')
@@ -272,49 +279,48 @@ describe('remote catalogue', () => {
     expect(deadlift?.secondaryMuscles).toEqual(['Glutes', 'Lower Back'])
     expect(deadlift?.equipment).toBe('barbell')
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
-    expect(deadlift?.tips).toEqual(bundledDeadlift?.tips)
-    expect(deadlift?.nameEs).toBe('Peso muerto rumano con barra')
+    expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
   })
 })
 
 describe('upsertExerciseRecord', () => {
-  it('adds a new exercise with a stable id derived from its name', () => {
-    const created = upsertExerciseRecord({ name: 'Cable Crunch', primaryMuscle: 'Core' })
-    expect(created.id).toBe('cable-crunch')
-    expect(loadExercises().some((e) => e.id === 'cable-crunch')).toBe(true)
+  it('avoids catalogue id collisions when deriving a custom exercise id', async () => {
+    const created = await upsertExerciseRecord({ name: 'Cable Crunch', primaryMuscle: 'Core' })
+    expect(created.id).toBe('cable-crunch-custom')
+    expect((await loadExercises()).some((e) => e.id === 'cable-crunch-custom')).toBe(true)
   })
 
-  it('updates an existing exercise matched by name instead of duplicating it', () => {
-    upsertExerciseRecord({ name: 'Cable Crunch', primaryMuscle: 'Core' })
-    upsertExerciseRecord({ name: 'cable crunch', primaryMuscle: 'Core', notes: 'Slow negative' })
-    const matches = loadExercises().filter((e) => normalizeExerciseName(e.name) === 'cable-crunch')
+  it('updates an existing exercise matched by name instead of duplicating it', async () => {
+    await upsertExerciseRecord({ name: 'Cable Crunch', primaryMuscle: 'Core' })
+    await upsertExerciseRecord({ name: 'cable crunch', primaryMuscle: 'Core', notes: 'Slow negative' })
+    const matches = (await loadExercises()).filter((e) => normalizeExerciseName(e.name) === 'cable-crunch')
     expect(matches).toHaveLength(1)
     expect(matches[0].notes).toBe('Slow negative')
   })
 })
 
 describe('workout history', () => {
-  it('is empty when nothing has been saved', () => {
-    expect(loadWorkoutHistory()).toEqual([])
+  it('is empty when nothing has been saved', async () => {
+    expect(await loadWorkoutHistory()).toEqual([])
   })
 
-  it('ignores corrupted history instead of crashing', () => {
+  it('ignores corrupted history instead of crashing', async () => {
     localStorage.setItem('gym-studio.history', 'oops')
-    expect(loadWorkoutHistory()).toEqual([])
+    expect(await loadWorkoutHistory()).toEqual([])
   })
 
-  it('migrates legacy exercise ids in saved history', () => {
+  it('migrates legacy exercise ids in saved history', async () => {
     const legacyEntry = entry('legacy', '2026-09-01')
     localStorage.setItem('gym-studio.history', JSON.stringify([legacyEntry]))
 
-    const migrated = loadWorkoutHistory()
+    const migrated = await loadWorkoutHistory()
 
     expect(migrated[0].exerciseId).toBe('barbell-bench-press')
     expect(JSON.parse(localStorage.getItem('gym-studio.history')!)).toEqual(migrated)
-    expect(loadWorkoutHistory()).toEqual(migrated)
+    expect(await loadWorkoutHistory()).toEqual(migrated)
   })
 
-  it('migrates catalogue aliases idempotently', () => {
+  it('migrates catalogue aliases idempotently', async () => {
     const aliasedEntries = [
       { ...entry('catalogue-alias', '2026-09-02'), exerciseId: 'bb-rdl' },
       { ...entry('catalogue-alias-2', '2026-09-03'), exerciseId: 'hack-squats' },
@@ -329,23 +335,44 @@ describe('workout history', () => {
     )
     localStorage.setItem('gym-studio.history', JSON.stringify(aliasedEntries))
 
-    const migrated = loadWorkoutHistory()
+    const migrated = await loadWorkoutHistory()
 
     expect(migrated[0].exerciseId).toBe('romanian-deadlift')
     expect(migrated[1].exerciseId).toBe('hack-squat-machine')
-    expect(loadWorkoutHistory()).toEqual(migrated)
+    expect(await loadWorkoutHistory()).toEqual(migrated)
     expect(JSON.parse(localStorage.getItem('gym-studio.history')!)).toEqual(migrated)
   })
 
-  it('stores entries newest first', () => {
-    addWorkoutEntry(entry('a', '2026-09-01'))
-    addWorkoutEntry(entry('b', '2026-09-15'))
-    addWorkoutEntry(entry('c', '2026-09-08'))
-    expect(loadWorkoutHistory().map((e) => e.id)).toEqual(['b', 'c', 'a'])
+  it('migrates bundled catalogue aliases while offline', async () => {
+    const aliasedEntry = { ...entry('bundled-alias', '2026-09-04'), exerciseId: 'bb-rdl' }
+    localStorage.setItem('gym-studio.history', JSON.stringify([aliasedEntry]))
+
+    expect((await loadWorkoutHistory())[0].exerciseId).toBe('romanian-deadlift')
+  })
+
+  it('stores entries newest first', async () => {
+    await addWorkoutEntry(entry('a', '2026-09-01'))
+    await addWorkoutEntry(entry('b', '2026-09-15'))
+    await addWorkoutEntry(entry('c', '2026-09-08'))
+    expect((await loadWorkoutHistory()).map((e) => e.id)).toEqual(['b', 'c', 'a'])
   })
 })
 
 describe('exercise library data', () => {
+  it('bundles all 224 approved exercises with five English posture tips each', () => {
+    expect(exerciseLibrary).toHaveLength(224)
+    expect(exerciseLibrary.find((exercise) => exercise.id === 'barbell-bench-press')).toMatchObject({
+      name: 'Barbell Bench Press',
+      bodyRegion: 'Chest',
+      postureTips: expect.arrayContaining([expect.any(String)]),
+    })
+    expect(exerciseLibrary.find((exercise) => exercise.id === 'barbell-bench-press')?.postureTips).toHaveLength(5)
+    for (const exercise of exerciseLibrary) {
+      expect(exercise.postureTips).toHaveLength(5)
+      expect(exercise.postureTips?.some((tip) => /[\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1\u00bf\u00a1]/i.test(tip))).toBe(false)
+    }
+  })
+
   it('has unique ids, because workout history references exercises by id', () => {
     const ids = exerciseLibrary.map((e) => e.id)
     expect(new Set(ids).size).toBe(ids.length)

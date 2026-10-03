@@ -268,8 +268,8 @@ export default function WorkoutPlan({
   const [customPlan, setCustomPlan] = useState<PlannedExercise[]>(() => loadCustomPlan())
   const [customExerciseDraft, setCustomExerciseDraft] = useState<PlannedExercise>(defaultCustomExercise)
   const [selectedLibraryExerciseId, setSelectedLibraryExerciseId] = useState('')
-  const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>(() => loadExercises())
-  const [history, setHistory] = useState<WorkoutEntry[]>(() => loadWorkoutHistory())
+  const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
+  const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
   const [plannedDrafts, setPlannedDrafts] = useState<
@@ -342,6 +342,19 @@ export default function WorkoutPlan({
     }
   }, [mode])
 
+  useEffect(() => {
+    let cancelled = false
+    void Promise.all([loadExercises(), loadWorkoutHistory()]).then(([exercises, entries]) => {
+      if (cancelled) return
+      setExerciseCatalog(exercises)
+      setHistory(entries)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const activeExercises = planMode === 'preset' ? activeDay.exercises : customPlan
 
   const calendarHistoryItems = useMemo(
@@ -356,7 +369,7 @@ export default function WorkoutPlan({
 
           return {
             id: entry.id,
-            name: exercise ? getExerciseDisplayName(exercise, 'en') : 'Unknown exercise',
+            name: exercise ? getExerciseDisplayName(exercise) : 'Unknown exercise',
             setsCount: entry.sets.length,
             maxWeight,
             totalVolume,
@@ -569,10 +582,10 @@ export default function WorkoutPlan({
     setActiveSetIndexByExercise(Object.fromEntries(nextActiveSetState))
   }
 
-  const logPlannedExercise = (exercise: PlannedExercise) => {
+  const logPlannedExercise = async (exercise: PlannedExercise) => {
     const exerciseKey = normalizeExerciseName(exercise.name)
 
-    const canonical = upsertExerciseRecord({
+    const canonical = await upsertExerciseRecord({
       name: exercise.name,
       primaryMuscle: exercise.focus,
       notes: exercise.goal,
@@ -601,7 +614,7 @@ export default function WorkoutPlan({
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    setExerciseCatalog(loadExercises())
+    setExerciseCatalog(await loadExercises())
 
     setPlannedDrafts((current) => {
       const currentDraft = current[exerciseKey]
@@ -646,11 +659,11 @@ export default function WorkoutPlan({
     const match = exerciseCatalog.find((exercise) => exercise.id === selectedLibraryExerciseId)
     if (!match) return
 
-    const tipText = match.tips?.length
+    const tipText = match.postureTips?.[0] ?? (match.tips?.length
       ? typeof match.tips[0] === 'string'
         ? match.tips[0]
         : match.tips[0].text
-      : ''
+      : '')
 
     const nextExercise: PlannedExercise = {
       name: match.name,
@@ -658,7 +671,7 @@ export default function WorkoutPlan({
       reps: '8-10',
       rest: "1'30\"",
       focus: match.primaryMuscle || 'General',
-      goal: match.overallStatement ?? match.notes ?? '',
+      goal: match.overallStatement ?? match.notes ?? match.name,
       tip: tipText ?? '',
     }
 
@@ -875,11 +888,11 @@ export default function WorkoutPlan({
                 {exerciseCatalog
                   .slice()
                   .sort((a, b) =>
-                    getExerciseDisplayName(a, 'en').localeCompare(getExerciseDisplayName(b, 'en'))
+                    getExerciseDisplayName(a).localeCompare(getExerciseDisplayName(b))
                   )
                   .map((exercise) => (
                     <option key={exercise.id} value={exercise.id}>
-                      {getExerciseDisplayName(exercise, 'en')}
+                      {getExerciseDisplayName(exercise)}
                     </option>
                   ))}
               </select>
@@ -956,7 +969,7 @@ export default function WorkoutPlan({
             <div className="custom-plan-list" aria-label="Custom exercises">
               {customPlan.map((exercise) => (
                 <div key={`custom-${exercise.name}`} className="custom-plan-item">
-                  <span>{getExerciseDisplayName(exercise.name, 'en')}</span>
+                  <span>{getExerciseDisplayName(exercise.name)}</span>
                   <button type="button" className="remove-set-button" onClick={() => removeCustomExercise(exercise.name)}>
                     {text.customRemove}
                   </button>
@@ -980,7 +993,7 @@ export default function WorkoutPlan({
             const setCount = getDefaultSetCount(exercise)
             const setWeights = draft.setWeights.length ? draft.setWeights : Array.from({ length: setCount }, () => Number(draft.weight) || 0)
             const exerciseKey = normalizeExerciseName(exercise.name)
-            const displayName = getExerciseDisplayName(exercise.name, 'en')
+            const displayName = getExerciseDisplayName(exercise.name)
             const displayTitle = splitExerciseTitle(displayName)
             const libraryMatch = exerciseCatalog.find((item) => normalizeExerciseName(item.name) === exerciseKey)
             const exerciseHistory = history
