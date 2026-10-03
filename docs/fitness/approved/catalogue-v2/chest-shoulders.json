@@ -1,0 +1,1446 @@
+[
+  {
+    "id": "barbell-bench-press",
+    "name_en": "Barbell Bench Press",
+    "name_es": "Press de banca con barra",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate con los ojos bajo la barra, pies firmes en el suelo y agarre algo más ancho que los hombros.",
+      "Junta las escápulas y mantén un ligero arco lumbar con glúteos y cabeza apoyados en el banco.",
+      "Baja la barra controlada hasta la parte baja del pecho y empuja hacia arriba y un poco hacia atrás.",
+      "Evita abrir los codos a 90°; mantenlos a unos 45-70° del torso al bajar.",
+      "Usa topes de seguridad o un compañero de spotting cuando trabajes cerca del fallo."
+    ],
+    "aliases": [
+      "bb-bench-press"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "incline-barbell-bench-press",
+    "name_en": "Barbell Bench Press (Incline)",
+    "name_es": "Press de banca con barra (inclinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el banco a una inclinación moderada y colócate con la barra sobre los ojos.",
+      "Mantén las escápulas retraídas y el pecho alto sin despegar los glúteos del asiento.",
+      "Baja la barra a la parte alta del pecho, bajo las clavículas, y empuja en línea recta hacia arriba.",
+      "No inclines el banco en exceso: el ejercicio se convierte en un press de hombros.",
+      "Desengancha y vuelve a enganchar la barra con los brazos extendidos, nunca con los codos doblados."
+    ],
+    "aliases": [
+      "bb-press"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "decline-bb-press",
+    "name_en": "Barbell Bench Press (Decline)",
+    "name_es": "Press de banca con barra (declinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Engancha bien los pies bajo los rodillos antes de tumbarte en el banco declinado.",
+      "Mantén las escápulas juntas y la cabeza apoyada en todo momento.",
+      "Baja la barra hasta la parte inferior del pecho y empuja hasta extender los brazos sin bloquear de golpe.",
+      "Evita rebotar la barra sobre el esternón para subirla.",
+      "Pide ayuda para sacar y devolver la barra: la posición declinada dificulta engancharla solo."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "incline-dumbbell-press",
+    "name_en": "Dumbbell Bench Press (Incline)",
+    "name_es": "Press de banca con mancuernas (inclinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate en el banco inclinado con las mancuernas sobre los muslos y súbelas con ayuda de las rodillas al tumbarte.",
+      "Mantén el pecho alto y las muñecas rectas, alineadas sobre los codos.",
+      "Baja las mancuernas a los lados de la parte alta del pecho y súbelas acercándolas ligeramente arriba.",
+      "No choques las mancuernas arriba ni pierdas tensión al final del recorrido.",
+      "Al terminar, lleva las mancuernas al pecho y siéntate con ellas sobre los muslos en vez de soltarlas a los lados."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "db-press-neutral-grip",
+    "name_en": "Dumbbell Bench Press (Incline, Neutral Grip)",
+    "name_es": "Press de banca con mancuernas (inclinado, agarre neutro)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate en el banco inclinado con las palmas enfrentadas y las mancuernas sobre el pecho.",
+      "Mantén los codos cerca del torso y los antebrazos verticales durante todo el recorrido.",
+      "Baja hasta que las mancuernas rocen los laterales del pecho y empuja de forma controlada.",
+      "Evita girar las muñecas a mitad del movimiento; conserva las palmas enfrentadas.",
+      "Elige un peso que puedas controlar al bajar; si las mancuernas se balancean, reduce la carga."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "close-grip-bench-press",
+    "name_en": "Barbell Bench Press (Close Grip)",
+    "name_es": "Press de banca con barra (agarre cerrado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Triceps",
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Agarra la barra con las manos a la anchura de los hombros, ni más juntas.",
+      "Mantén los codos pegados al cuerpo y las muñecas rectas sobre los antebrazos.",
+      "Baja la barra a la parte baja del pecho y extiende los codos empujando con los tríceps.",
+      "No juntes demasiado las manos: carga las muñecas sin trabajar más el tríceps.",
+      "Usa topes de seguridad ajustados a la altura del pecho si entrenas sin compañero."
+    ],
+    "aliases": [
+      "close-grip-press"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "close-grip-decline-press",
+    "name_en": "Barbell Bench Press (Decline, Close Grip)",
+    "name_es": "Press de banca con barra (declinado, agarre cerrado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Triceps",
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Fija los pies en los rodillos del banco declinado y agarra la barra a la anchura de los hombros.",
+      "Mantén los codos cerca del torso y la cabeza apoyada durante toda la serie.",
+      "Baja la barra hasta la parte inferior del pecho y empuja extendiendo los codos por completo.",
+      "Evita que los codos se abran hacia fuera al empujar.",
+      "Trabaja con un compañero que te ayude a sacar y devolver la barra en esta posición."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "plate-loaded-chest-press-wide-grip",
+    "name_en": "Plate-Loaded Chest Press (Wide Grip)",
+    "name_es": "Press de pecho en máquina de discos (agarre ancho)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que los agarres anchos queden a la altura de la mitad del pecho.",
+      "Mantén la espalda y la cabeza apoyadas y las escápulas juntas contra el respaldo.",
+      "Empuja los agarres hacia delante sin bloquear los codos y vuelve despacio hasta notar estiramiento.",
+      "No despegues los hombros del respaldo al final del empuje.",
+      "Carga y descarga los discos de forma equilibrada en ambos lados de la máquina."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "wide-grip-chest-press",
+    "name_en": "Machine Chest Press (Wide Grip)",
+    "name_es": "Press de pecho en máquina (agarre ancho)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Regula el asiento para que los agarres anchos queden a la altura del pecho medio.",
+      "Apoya bien la espalda y mantén el pecho alto durante todo el movimiento.",
+      "Empuja hasta casi extender los brazos y regresa lento hasta que las manos queden a la altura del pecho.",
+      "Evita que la pila de placas choque entre repeticiones; mantén la tensión.",
+      "Comprueba que el pasador de peso está bien insertado antes de empezar la serie."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "mid-cable-fly",
+    "name_en": "Cable Fly (Mid Height)",
+    "name_es": "Aperturas en polea (altura media)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca las poleas a la altura del pecho y da un paso adelante con un pie delante del otro.",
+      "Mantén un ligero ángulo fijo en los codos y el torso estable, sin balancearte.",
+      "Junta las manos delante del pecho en un arco amplio y vuelve controlado hasta notar estiramiento.",
+      "No conviertas la apertura en un press doblando y estirando los codos.",
+      "No lleves los brazos más atrás de la línea del cuerpo si notas tensión en el hombro."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "high-cable-fly",
+    "name_en": "Cable Fly (High to Low)",
+    "name_es": "Aperturas en polea (de arriba hacia abajo)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca las poleas en la posición más alta y adelanta un pie para tener una base estable.",
+      "Inclina ligeramente el torso hacia delante y mantén el pecho abierto.",
+      "Lleva las manos hacia abajo y al centro, a la altura de la cadera, y sube despacio.",
+      "Evita encorvar los hombros hacia delante al juntar las manos.",
+      "Usa un peso que te permita volver sin que los cables te tiren de los brazos hacia atrás."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "decline-dumbbell-fly",
+    "name_en": "Dumbbell Fly (Decline)",
+    "name_es": "Aperturas con mancuernas (declinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Fija los pies en el banco declinado y sube las mancuernas sobre el pecho con las palmas enfrentadas.",
+      "Mantén los codos ligeramente flexionados y fijos durante todo el recorrido.",
+      "Abre los brazos en arco hasta notar estiramiento en el pecho y ciérralos sobre el esternón.",
+      "No bajes las mancuernas por debajo de la línea del banco.",
+      "Empieza con poco peso: en declive las mancuernas son más difíciles de controlar."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "close-grip-dips",
+    "name_en": "Dip (Close Grip)",
+    "name_es": "Fondos en paralelas (agarre cerrado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Chest",
+      "Front Delts"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujétate en paralelas estrechas con los brazos extendidos y el cuerpo vertical.",
+      "Mantén el torso erguido y los codos apuntando hacia atrás, pegados al cuerpo.",
+      "Baja hasta que los codos formen unos 90° y empuja hasta extender los brazos.",
+      "Evita encoger los hombros hacia las orejas en la parte baja.",
+      "No bajes más allá de lo que puedas controlar sin molestias en la parte delantera del hombro."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "smith-machine-bench-press",
+    "name_en": "Smith Machine Bench Press",
+    "name_es": "Press de banca en máquina Smith",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "equipment": "smith-machine",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca el banco para que la barra baje justo a la parte baja del pecho.",
+      "Junta las escápulas y planta los pies firmes en el suelo.",
+      "Desbloquea girando la barra, baja controlado al pecho y empuja recto hacia arriba.",
+      "No coloques el banco demasiado atrás o adelante: la barra debe caer sobre el pecho, no el cuello.",
+      "Ajusta los topes de la Smith justo por encima del pecho antes de empezar."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "smith-machine-bench-press-incline",
+    "name_en": "Smith Machine Bench Press (Incline)",
+    "name_es": "Press de banca en máquina Smith (inclinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "equipment": "smith-machine",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sitúa el banco inclinado de forma que la barra baje a la parte alta del pecho.",
+      "Mantén las escápulas retraídas y los glúteos apoyados en el asiento.",
+      "Baja la barra hasta rozar el pecho bajo las clavículas y empuja de forma constante.",
+      "Evita despegar la espalda del banco para mover más peso.",
+      "Gira los ganchos para bloquear la barra en cuanto termines la última repetición."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-bench-press",
+    "name_en": "Dumbbell Bench Press",
+    "name_es": "Press de banca con mancuernas",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con las mancuernas en los muslos y túmbate llevándolas al pecho con ayuda de las rodillas.",
+      "Mantén las escápulas juntas y los antebrazos verticales sobre los codos.",
+      "Baja las mancuernas a los lados del pecho y súbelas en un ligero arco hacia el centro.",
+      "No dejes que las mancuernas se vayan hacia la cabeza o los pies al bajar.",
+      "Si una serie falla, baja las mancuernas al pecho y siéntate en vez de dejarlas caer abiertas."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-bench-press-decline",
+    "name_en": "Dumbbell Bench Press (Decline)",
+    "name_es": "Press de banca con mancuernas (declinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Fija los pies en el banco declinado con las mancuernas apoyadas en el pecho antes de tumbarte.",
+      "Mantén la cabeza apoyada y las muñecas firmes sobre los codos.",
+      "Baja las mancuernas hacia la parte inferior del pecho y empuja hasta casi extender los brazos.",
+      "Evita arquear la espalda en exceso para levantar el peso.",
+      "Pide a un compañero que te pase las mancuernas si te cuesta colocarlas en declive."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-chest-press-incline",
+    "name_en": "Machine Chest Press (Incline)",
+    "name_es": "Press de pecho en máquina (inclinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que los agarres queden a la altura de la parte alta del pecho.",
+      "Apoya espalda y cabeza en el respaldo y mantén el pecho abierto.",
+      "Empuja hacia arriba y adelante sin bloquear los codos y vuelve lento a la posición inicial.",
+      "No eleves los hombros hacia las orejas al empujar.",
+      "Revisa que el asiento esté bien fijado antes de cargar peso."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "plate-loaded-chest-press-incline",
+    "name_en": "Plate-Loaded Chest Press (Incline)",
+    "name_es": "Press de pecho en máquina de discos (inclinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con los agarres a la altura de la parte alta del pecho y los pies apoyados.",
+      "Mantén las escápulas juntas y la espalda pegada al respaldo.",
+      "Empuja los brazos de la máquina hacia arriba y desciende con control hasta notar estiramiento.",
+      "Evita bajar tan rápido que los discos golpeen al final del recorrido.",
+      "Retira los discos por igual de ambos lados para que la máquina no se desequilibre."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-fly",
+    "name_en": "Dumbbell Fly",
+    "name_es": "Aperturas con mancuernas",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate en el banco plano con las mancuernas sobre el pecho y las palmas enfrentadas.",
+      "Mantén los codos ligeramente doblados y fijos, y las escápulas juntas.",
+      "Abre los brazos en arco hasta la altura del pecho y vuelve a cerrar como abrazando un árbol.",
+      "No uses mancuernas tan pesadas que tengas que doblar los codos y convertirlo en un press.",
+      "No bajes los brazos más allá de la línea de los hombros."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-fly-incline",
+    "name_en": "Dumbbell Fly (Incline)",
+    "name_es": "Aperturas con mancuernas (inclinado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el banco a una inclinación baja y sube las mancuernas sobre la parte alta del pecho.",
+      "Mantén el pecho alto y los codos con una flexión ligera y constante.",
+      "Abre los brazos hasta notar estiramiento y ciérralos en arco sobre las clavículas.",
+      "Evita que las mancuernas bajen hacia la cabeza en lugar de hacia los lados.",
+      "Controla especialmente la bajada; es donde el hombro está más expuesto."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-fly-low-to-high",
+    "name_en": "Cable Fly (Low to High)",
+    "name_es": "Aperturas en polea (de abajo hacia arriba)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca las poleas en la posición más baja y da un paso adelante entre ellas.",
+      "Mantén el torso erguido, el pecho abierto y los codos ligeramente flexionados.",
+      "Sube las manos en arco hasta la altura de la barbilla y baja despacio.",
+      "No tires con los bíceps ni levantes los hombros al subir.",
+      "Coge y suelta los agarres con la polea en reposo para no perder el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "pec-deck-fly",
+    "name_en": "Pec Deck Fly",
+    "name_es": "Aperturas en máquina (pec deck)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que los agarres queden a la altura del pecho con los codos casi extendidos.",
+      "Mantén la espalda apoyada y las escápulas juntas durante toda la serie.",
+      "Junta los agarres delante del pecho, aprieta un segundo y abre con control.",
+      "Evita que los brazos se vayan muy atrás en la apertura con mucho peso.",
+      "Regula el tope de recorrido de la máquina para limitar la apertura si lo necesitas."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "push-up",
+    "name_en": "Push-Up",
+    "name_es": "Flexiones",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts",
+      "Abs"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya las manos algo más anchas que los hombros y extiende las piernas en plancha.",
+      "Mantén una línea recta de cabeza a talones apretando glúteos y abdomen.",
+      "Baja el pecho casi hasta el suelo y empuja hasta extender los brazos.",
+      "No dejes caer la cadera ni la saques hacia arriba.",
+      "Si pierdes la línea del cuerpo, apoya las rodillas o eleva las manos para terminar la serie."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "push-up-incline",
+    "name_en": "Push-Up (Incline)",
+    "name_es": "Flexiones (inclinadas)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya las manos en un banco o caja estable, algo más anchas que los hombros.",
+      "Mantén el cuerpo recto como una tabla, con el abdomen activo.",
+      "Lleva el pecho hacia el borde del banco y empuja hasta extender los brazos.",
+      "Evita adelantar la cabeza hacia el banco antes que el pecho.",
+      "Comprueba que el banco o la caja no se deslice antes de apoyarte."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "push-up-decline",
+    "name_en": "Push-Up (Decline)",
+    "name_es": "Flexiones (declinadas)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts",
+      "Abs"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya los pies en un banco y las manos en el suelo algo más anchas que los hombros.",
+      "Aprieta el abdomen para que la zona lumbar no se hunda.",
+      "Baja la cara y el pecho hacia el suelo de forma controlada y empuja hacia arriba.",
+      "No eleves la cadera para acortar el recorrido.",
+      "Empieza con los pies a poca altura y súbelos solo cuando controles la técnica."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "push-up-close-grip",
+    "name_en": "Push-Up (Close Grip)",
+    "name_es": "Flexiones (agarre cerrado)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Triceps",
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca las manos bajo los hombros o un poco más juntas, con los dedos hacia delante.",
+      "Mantén los codos pegados a las costillas y el cuerpo en línea recta.",
+      "Baja hasta que el pecho roce las manos y empuja extendiendo los codos.",
+      "Evita que los codos se abran hacia los lados al bajar.",
+      "Si notas las muñecas cargadas, separa un poco las manos o usa agarres de flexiones."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dip",
+    "name_en": "Dip",
+    "name_es": "Fondos en paralelas",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sube a las paralelas con los brazos extendidos y las piernas ligeramente hacia atrás.",
+      "Inclina el torso un poco hacia delante y mantén los hombros lejos de las orejas.",
+      "Baja hasta que los hombros queden a la altura de los codos y empuja hasta arriba.",
+      "No balancees las piernas para impulsarte en la subida.",
+      "Reduce el recorrido o usa asistencia si no controlas la parte baja."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "machine-dip-assisted",
+    "name_en": "Machine Dip (Assisted)",
+    "name_es": "Fondos en máquina (asistidos)",
+    "body_region": "Chest",
+    "primary_muscles": [
+      "Chest",
+      "Triceps"
+    ],
+    "secondary_muscles": [
+      "Front Delts"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Elige el contrapeso, apoya las rodillas en la plataforma y sujeta las paralelas con brazos extendidos.",
+      "Mantén el torso ligeramente inclinado y los hombros bajos y atrás.",
+      "Baja controlado hasta que los codos formen unos 90° y empuja hasta extender los brazos.",
+      "Recuerda que más contrapeso significa más ayuda; no lo subas para ir más rápido.",
+      "Sube y baja de la plataforma con cuidado, siempre sujeto a los agarres."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-shoulder-press",
+    "name_en": "Dumbbell Shoulder Press (Seated)",
+    "name_es": "Press de hombros con mancuernas (sentado)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate en un banco con respaldo casi vertical y lleva las mancuernas a la altura de los hombros.",
+      "Mantén la espalda apoyada, el abdomen firme y las muñecas sobre los codos.",
+      "Empuja las mancuernas hacia arriba hasta casi juntarlas y baja hasta la altura de las orejas.",
+      "No arquees la zona lumbar para despegar la espalda del respaldo.",
+      "Sube las mancuernas a los hombros apoyándolas primero en las rodillas."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "db-oh-press-neutral-grip",
+    "name_en": "Dumbbell Shoulder Press (Neutral Grip)",
+    "name_es": "Press de hombros con mancuernas (agarre neutro)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca las mancuernas a la altura de los hombros con las palmas enfrentadas.",
+      "Mantén los codos delante del cuerpo y el tronco firme, sin inclinarte atrás.",
+      "Empuja en línea recta por encima de la cabeza y baja controlado hasta la barbilla.",
+      "Evita abrir los codos a los lados; con agarre neutro deben quedar al frente.",
+      "Usa un banco con respaldo si notas que te balanceas al empujar."
+    ],
+    "aliases": [
+      "neutral-grip-db-oh-press"
+    ],
+    "origin": "existing"
+  },
+  {
+    "id": "neutral-grip-pin-loaded-shoulder-press",
+    "name_en": "Machine Shoulder Press (Neutral Grip)",
+    "name_es": "Press de hombros en máquina (agarre neutro)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que los agarres neutros queden a la altura de los hombros.",
+      "Apoya la espalda y la cabeza y mantén los codos ligeramente por delante del cuerpo.",
+      "Empuja hacia arriba sin bloquear los codos y baja despacio hasta la altura de los hombros.",
+      "No dejes que la pila de placas descanse entre repeticiones.",
+      "Comprueba la altura del asiento: si empiezas demasiado bajo, el hombro trabaja forzado."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "wide-grip-shoulder-press-machine",
+    "name_en": "Machine Shoulder Press (Wide Grip)",
+    "name_es": "Press de hombros en máquina (agarre ancho)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con los agarres anchos a la altura de las orejas y los pies firmes en el suelo.",
+      "Mantén la espalda contra el respaldo y las muñecas rectas.",
+      "Empuja hasta casi extender los brazos y desciende con control hasta la posición inicial.",
+      "Evita encoger los hombros hacia las orejas al empujar.",
+      "Fija bien el pasador del peso y el asiento antes de cada serie."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "plate-loaded-wide-grip-shoulder-press-machine",
+    "name_en": "Plate-Loaded Shoulder Press (Wide Grip)",
+    "name_es": "Press de hombros en máquina de discos (agarre ancho)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "equipment": "plate-loaded",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para empezar con los agarres anchos justo por encima de los hombros.",
+      "Mantén la espalda y la cabeza apoyadas y el abdomen activo.",
+      "Empuja los brazos de la máquina hacia arriba y baja despacio hasta notar el hombro estirado.",
+      "No arquees la espalda baja para terminar las últimas repeticiones.",
+      "Carga los discos igual en ambos lados y retíralos al terminar."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "lateral-raises-machine",
+    "name_en": "Machine Lateral Raise",
+    "name_es": "Elevaciones laterales en máquina",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Side Delts"
+    ],
+    "secondary_muscles": [],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ajusta el asiento para que el eje de la máquina quede alineado con tus hombros.",
+      "Apoya el pecho o la espalda en el soporte y mantén los hombros bajos.",
+      "Eleva los brazos hacia los lados hasta la altura de los hombros y baja lento.",
+      "No encojas los trapecios para subir más alto.",
+      "Elige un peso que puedas bajar con control, sin que las placas caigan de golpe."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "standing-db-lateral-raises",
+    "name_en": "Dumbbell Lateral Raise (Standing)",
+    "name_es": "Elevaciones laterales con mancuernas (de pie)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Side Delts"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de pie con los pies a la anchura de la cadera y las mancuernas a los lados.",
+      "Inclina el torso ligeramente adelante y mantén los codos un poco flexionados.",
+      "Eleva las mancuernas hacia los lados hasta la altura de los hombros y baja en 2-3 segundos.",
+      "Evita balancear el cuerpo para lanzar las mancuernas hacia arriba.",
+      "No subas las manos por encima de los hombros si notas pinzamiento o molestia."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "db-60-y-raises",
+    "name_en": "Dumbbell Y-Raise (Incline)",
+    "name_es": "Elevaciones en Y con mancuernas (banco inclinado)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Side Delts"
+    ],
+    "secondary_muscles": [
+      "Rear Delts",
+      "Upper Back"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca abajo en un banco muy inclinado con las mancuernas colgando y los pulgares hacia arriba.",
+      "Mantén el pecho apoyado en el banco y el cuello neutro durante todo el movimiento.",
+      "Eleva los brazos en forma de Y por delante de la cabeza hasta la altura de las orejas y baja lento.",
+      "No encojas los hombros hacia las orejas ni despegues el pecho del banco.",
+      "Usa mancuernas ligeras: este ejercicio se resiente rápido con exceso de carga."
+    ],
+    "aliases": [],
+    "origin": "existing"
+  },
+  {
+    "id": "barbell-overhead-press",
+    "name_en": "Barbell Overhead Press (Standing)",
+    "name_es": "Press militar con barra (de pie)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps",
+      "Upper Chest",
+      "Abs"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Saca la barra del rack a la altura de las clavículas, con agarre algo más ancho que los hombros.",
+      "Aprieta glúteos y abdomen para mantener las costillas abajo y la espalda neutra.",
+      "Empuja la barra en línea recta, mete la cabeza bajo ella arriba y baja a las clavículas.",
+      "Evita inclinarte hacia atrás para convertirlo en un press inclinado.",
+      "Coloca los soportes del rack a la altura del pecho para sacar y devolver la barra con seguridad."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-overhead-press-seated",
+    "name_en": "Barbell Overhead Press (Seated)",
+    "name_es": "Press militar con barra (sentado)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate en un banco con respaldo vertical bajo la barra del rack, con los pies firmes.",
+      "Mantén la espalda contra el respaldo y la cabeza neutra.",
+      "Baja la barra por delante de la cara hasta la barbilla y empuja hasta extender los brazos.",
+      "No bajes la barra por detrás de la nuca.",
+      "Ajusta los soportes para poder desenganchar la barra sin estirar los brazos al límite."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "smith-machine-shoulder-press",
+    "name_en": "Smith Machine Shoulder Press (Seated)",
+    "name_es": "Press de hombros en máquina Smith (sentado)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "equipment": "smith-machine",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca el banco vertical para que la barra baje justo por delante de tu cara.",
+      "Mantén la espalda apoyada y las muñecas rectas sobre los codos.",
+      "Desbloquea la barra, bájala hasta la barbilla y empuja hasta arriba sin bloquear.",
+      "Evita adelantar la cabeza hacia la barra al bajar.",
+      "Fija los topes de seguridad de la Smith a la altura de los hombros."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-shoulder-press-standing",
+    "name_en": "Dumbbell Shoulder Press (Standing)",
+    "name_es": "Press de hombros con mancuernas (de pie)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps",
+      "Abs"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de pie con los pies a la anchura de la cadera y las mancuernas sobre los hombros.",
+      "Aprieta abdomen y glúteos para no arquear la espalda baja.",
+      "Empuja las mancuernas sobre la cabeza y bájalas controladas hasta las orejas.",
+      "No impulses el peso con las piernas salvo que hagas un push press intencionado.",
+      "Elige un peso menor que en la versión sentada: la estabilidad es más exigente."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-arnold-press",
+    "name_en": "Dumbbell Arnold Press",
+    "name_es": "Press Arnold con mancuernas",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate con las mancuernas frente a la barbilla y las palmas mirando hacia ti.",
+      "Mantén la espalda apoyada y los codos al frente al empezar.",
+      "Gira las palmas hacia delante mientras empujas hacia arriba y deshaz el giro al bajar.",
+      "Evita separar el giro y el empuje en dos movimientos distintos.",
+      "Usa menos peso que en el press normal para controlar la rotación."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "landmine-press",
+    "name_en": "Landmine Press (Single Arm)",
+    "name_es": "Press landmine (a una mano)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts",
+      "Upper Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Abs"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Sujeta el extremo de la barra a la altura del hombro con una mano y el pie contrario adelantado.",
+      "Mantén el tronco firme y los hombros mirando al frente, sin girar.",
+      "Empuja la barra hacia arriba y adelante hasta extender el brazo y baja controlado al hombro.",
+      "No inclines el cuerpo hacia el lado contrario para empujar.",
+      "Asegura el extremo fijo de la barra en un soporte landmine o en una esquina estable."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-lateral-raise-seated",
+    "name_en": "Dumbbell Lateral Raise (Seated)",
+    "name_es": "Elevaciones laterales con mancuernas (sentado)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Side Delts"
+    ],
+    "secondary_muscles": [],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate en el borde de un banco con las mancuernas a los lados y los pies apoyados.",
+      "Mantén el torso erguido y los hombros bajos, lejos de las orejas.",
+      "Sube los brazos hacia los lados hasta la altura de los hombros y baja despacio.",
+      "Evita girar las mancuernas como si vertieras agua con el pulgar hacia abajo.",
+      "Trabaja con un peso ligero que te permita una pausa breve arriba."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-lateral-raise",
+    "name_en": "Cable Lateral Raise (Single Arm)",
+    "name_es": "Elevaciones laterales en polea (a una mano)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Side Delts"
+    ],
+    "secondary_muscles": [],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "unilateral",
+    "posture_tips": [
+      "Coloca la polea baja y agarra el estribo con la mano más alejada de la máquina.",
+      "Mantén el torso estable sujetándote a la máquina con la otra mano.",
+      "Eleva el brazo hacia el lado hasta la altura del hombro y baja controlando el cable.",
+      "No inclines el tronco para ganar recorrido.",
+      "Empieza con poco peso: la polea mantiene la tensión durante todo el recorrido."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-front-raise",
+    "name_en": "Dumbbell Front Raise",
+    "name_es": "Elevaciones frontales con mancuernas",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Upper Chest"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de pie con las mancuernas delante de los muslos y las palmas hacia ti.",
+      "Mantén el abdomen firme y los codos ligeramente flexionados.",
+      "Eleva las mancuernas al frente hasta la altura de los hombros y baja lento.",
+      "Evita echar el cuerpo hacia atrás para subir el peso.",
+      "Deja de subir a la altura de los ojos; ir más arriba no aporta más trabajo útil."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-front-raise",
+    "name_en": "Cable Front Raise",
+    "name_es": "Elevaciones frontales en polea",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Upper Chest"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte de espaldas a la polea baja con la cuerda o barra entre las piernas.",
+      "Mantén el torso erguido y los brazos casi extendidos.",
+      "Eleva el agarre al frente hasta la altura de los hombros y baja resistiendo el cable.",
+      "No dejes que el cable te tire hacia atrás al bajar.",
+      "Separa bien los pies para mantener el equilibrio frente a la tensión del cable."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-rear-delt-fly",
+    "name_en": "Dumbbell Rear Delt Fly (Bent-Over)",
+    "name_es": "Pájaros con mancuernas (inclinado)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Rear Delts"
+    ],
+    "secondary_muscles": [
+      "Upper Back"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Inclínate desde la cadera con la espalda recta y las mancuernas colgando bajo el pecho.",
+      "Mantén la espalda neutra y el cuello alineado con el torso.",
+      "Abre los brazos hacia los lados con los codos algo flexionados y baja despacio.",
+      "Evita juntar las escápulas en exceso; el movimiento debe salir del hombro.",
+      "Si te cuesta mantener la espalda recta, apoya la frente en un banco inclinado."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "dumbbell-rear-delt-fly-chest-supported",
+    "name_en": "Dumbbell Rear Delt Fly (Chest-Supported)",
+    "name_es": "Pájaros con mancuernas (pecho apoyado)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Rear Delts"
+    ],
+    "secondary_muscles": [
+      "Upper Back"
+    ],
+    "equipment": "dumbbell",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Túmbate boca abajo en un banco inclinado con las mancuernas colgando y las palmas enfrentadas.",
+      "Mantén el pecho pegado al banco y la barbilla neutra.",
+      "Eleva los brazos hacia los lados hasta la línea de los hombros y baja con control.",
+      "No despegues el pecho del banco para ganar impulso.",
+      "Usa mancuernas ligeras y prioriza el control sobre la carga."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-rear-delt-fly",
+    "name_en": "Cable Rear Delt Fly",
+    "name_es": "Pájaros en polea",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Rear Delts"
+    ],
+    "secondary_muscles": [
+      "Upper Back"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca las poleas a la altura de los hombros y cruza los cables agarrando cada uno con la mano contraria.",
+      "Mantén los brazos casi extendidos y el pecho abierto.",
+      "Abre los brazos hacia atrás y afuera hasta la línea del cuerpo y vuelve lento.",
+      "Evita doblar los codos para convertirlo en un remo.",
+      "Da un paso atrás estable antes de empezar para no perder el equilibrio."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "reverse-pec-deck-fly",
+    "name_en": "Reverse Pec Deck Fly",
+    "name_es": "Aperturas inversas en máquina (pec deck)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Rear Delts"
+    ],
+    "secondary_muscles": [
+      "Upper Back"
+    ],
+    "equipment": "machine",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Siéntate de cara al respaldo con los agarres a la altura de los hombros.",
+      "Mantén el pecho apoyado y los hombros bajos durante toda la serie.",
+      "Abre los brazos hacia atrás en arco hasta la línea del cuerpo y vuelve controlado.",
+      "No tires con los trapecios encogiendo los hombros.",
+      "Ajusta los brazos de la máquina a la posición inversa antes de sentarte."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-face-pull",
+    "name_en": "Cable Face Pull (Rope)",
+    "name_es": "Face pull en polea (cuerda)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Rear Delts"
+    ],
+    "secondary_muscles": [
+      "Upper Back",
+      "Traps"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull horizontal",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Coloca la polea a la altura de la cara o un poco más alta y sujeta la cuerda con las palmas hacia abajo.",
+      "Mantén el torso erguido y estable, sin echarte hacia atrás.",
+      "Tira de la cuerda hacia la cara separando las manos y gira los hombros hacia fuera al final.",
+      "Evita tirar hacia el pecho como en un remo; las manos acaban a la altura de las orejas.",
+      "Usa un peso moderado que te permita controlar la rotación final."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "band-pull-apart",
+    "name_en": "Band Pull-Apart",
+    "name_es": "Separaciones con banda elástica",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Rear Delts"
+    ],
+    "secondary_muscles": [
+      "Upper Back"
+    ],
+    "equipment": "band",
+    "movement_pattern": "isolation",
+    "mechanic": "isolation",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Sujeta la banda frente al pecho con los brazos extendidos y las manos a la anchura de los hombros.",
+      "Mantén las costillas abajo y los hombros lejos de las orejas.",
+      "Separa las manos llevando la banda hacia el pecho y vuelve sin perder tensión.",
+      "No dobles los codos para facilitar el movimiento.",
+      "Revisa la banda antes de usarla y descártala si tiene grietas o cortes."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "barbell-upright-row",
+    "name_en": "Barbell Upright Row",
+    "name_es": "Remo al mentón con barra",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Side Delts"
+    ],
+    "secondary_muscles": [
+      "Traps",
+      "Front Delts"
+    ],
+    "equipment": "barbell",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Agarra la barra con las manos algo más anchas que los hombros, delante de los muslos.",
+      "Mantén el torso erguido y la barra cerca del cuerpo.",
+      "Sube la barra guiando con los codos hasta la parte baja del pecho y baja lento.",
+      "Evita subir la barra hasta la barbilla con agarre estrecho.",
+      "Detén el recorrido a la altura del pecho si notas molestia en la parte alta del hombro."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "cable-upright-row",
+    "name_en": "Cable Upright Row",
+    "name_es": "Remo al mentón en polea",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Side Delts"
+    ],
+    "secondary_muscles": [
+      "Traps",
+      "Front Delts"
+    ],
+    "equipment": "cable",
+    "movement_pattern": "pull vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Ponte frente a la polea baja con una barra recta o cuerda y agarre algo más ancho que los hombros.",
+      "Mantén la espalda recta y los hombros relajados al empezar.",
+      "Eleva los codos hacia los lados hasta la altura de los hombros y baja resistiendo el cable.",
+      "No eleves las muñecas por encima de los codos.",
+      "Usa un peso moderado; la polea no debe arrastrarte hacia delante."
+    ],
+    "aliases": [],
+    "origin": "new"
+  },
+  {
+    "id": "push-up-pike",
+    "name_en": "Push-Up (Pike)",
+    "name_es": "Flexiones (en pica)",
+    "body_region": "Shoulders",
+    "primary_muscles": [
+      "Front Delts"
+    ],
+    "secondary_muscles": [
+      "Triceps",
+      "Upper Chest"
+    ],
+    "equipment": "bodyweight",
+    "movement_pattern": "push vertical",
+    "mechanic": "compound",
+    "laterality": "bilateral",
+    "posture_tips": [
+      "Apoya manos y pies en el suelo y eleva la cadera formando una V invertida.",
+      "Mantén la cadera alta y la espalda recta durante todo el movimiento.",
+      "Baja la cabeza hacia el suelo entre las manos y empuja hasta extender los brazos.",
+      "Evita bajar la cadera y convertirlo en una flexión normal.",
+      "Desciende despacio y no apoyes peso sobre la cabeza al llegar abajo."
+    ],
+    "aliases": [],
+    "origin": "new"
+  }
+]
