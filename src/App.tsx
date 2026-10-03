@@ -22,8 +22,9 @@ import { formatWorkoutSet, workoutMaxWeight, workoutVolume } from './utils/worko
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
+const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
 
-type ViewTab = 'track' | 'planned' | 'custom'
+type ViewTab = 'track' | 'planned' | 'custom' | 'progress'
 
 const uiText = {
   title: 'Gym Studio',
@@ -95,6 +96,7 @@ export default function App() {
   const [tipsExpanded, setTipsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<ViewTab>('track')
   const [accountOpen, setAccountOpen] = useState(false)
+  const [progressExerciseId, setProgressExerciseId] = useState('')
   const text = uiText
   const nameCandidate = user?.user_metadata?.full_name ?? user?.user_metadata?.name
   const userName = typeof nameCandidate === 'string' ? nameCandidate : user?.email ?? ''
@@ -283,7 +285,7 @@ export default function App() {
             <h1>{text.title}</h1>
           </div>
           <p className="eyebrow">{text.subtitle}</p>
-          <div className="tab-row" aria-label="Workout tabs">
+          <div className="tab-row four" aria-label="Workout tabs">
             <button
               type="button"
               className={activeTab === 'track' ? 'tab-button active' : 'tab-button'}
@@ -307,6 +309,17 @@ export default function App() {
               onClick={() => setActiveTab('custom')}
             >
               {text.customPlan}
+            </button>
+            <button
+              type="button"
+              className={activeTab === 'progress' ? 'tab-button active' : 'tab-button'}
+              onClick={() => {
+                setProgressExerciseId('')
+                setActiveTab('progress')
+                void loadWorkoutHistory().then(setHistory)
+              }}
+            >
+              {text.progress}
             </button>
           </div>
         </header>
@@ -532,6 +545,16 @@ export default function App() {
                   <section className="card progress-card">
                     <div className="section-title-row">
                       <h3>{text.progress}</h3>
+                      <button
+                        type="button"
+                        className="toggle-button"
+                        onClick={() => {
+                          setProgressExerciseId(selectedExercise.id)
+                          setActiveTab('progress')
+                        }}
+                      >
+                        See full progress
+                      </button>
                     </div>
 
                     {progressItems.length > 0 ? (
@@ -557,6 +580,24 @@ export default function App() {
                 </section>
               )}
             </>
+          ) : activeTab === 'progress' ? (
+            demoMode && !demoHistoryReady ? (
+              <section className="card" aria-live="polite">
+                <p className="empty-state">Loading demo history…</p>
+              </section>
+            ) : (
+              <Suspense fallback={<section className="card">Loading progress…</section>}>
+                <ProgressScreen
+                  entries={history}
+                  exercises={exercises}
+                  initialExerciseId={progressExerciseId || undefined}
+                  onOpenExercise={(exerciseId) => {
+                    setSelectedId(exerciseId)
+                    setActiveTab('track')
+                  }}
+                />
+              </Suspense>
+            )
           ) : activeTab === 'planned' ? (
             demoMode && !demoHistoryReady ? (
               <section className="card" aria-live="polite">
