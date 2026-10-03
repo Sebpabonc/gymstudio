@@ -23,3 +23,26 @@ export function formatWorkoutSet(set: WorkoutSet) {
   const main = `${set.reps} × ${set.weight} kg`
   return set.drop ? `${main} → ${set.drop.reps} × ${set.drop.weight} kg` : main
 }
+
+export function isBodyweightEquipment(equipment?: string) {
+  return equipment?.trim().toLowerCase() === 'bodyweight'
+}
+
+export function filterLoggableSets(sets: WorkoutSet[], equipment?: string): WorkoutSet[] {
+  const bodyweight = isBodyweightEquipment(equipment)
+
+  return sets.flatMap((set) => {
+    const reps = Number(set.reps) || 0
+    const weight = Number(set.weight) || 0
+    if (!(weight > 0 || (bodyweight && reps > 0))) return []
+
+    const { drop, ...rest } = set
+    const loggable: WorkoutSet = { ...rest, reps, weight }
+    const dropWeight = Number(drop?.weight) || 0
+    const dropReps = Number(drop?.reps) || 0
+    if (drop && (dropWeight > 0 || (bodyweight && dropReps > 0))) {
+      loggable.drop = { reps: dropReps, weight: dropWeight }
+    }
+    return [loggable]
+  })
+}
