@@ -1,0 +1,1466 @@
+[
+  {
+    "number": 1,
+    "source_tab": "TP 16-2-26",
+    "start_date": "2026-02-16",
+    "method": "Hypertrophy Flat Pyramid",
+    "days": [
+      {
+        "name": "Chest-Back A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "45 Db Press Neutral Grip",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "30 Db Press Neutral Grip",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "30 Db Flies",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "High Cable Flies",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 60
+          },
+          {
+            "code": "D1",
+            "source_name": "Wide Grip Cable Row",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Neutral Grip LPD",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "E2",
+            "source_name": "Db Pull Overs",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Arms A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Wide Grip Shoulder Press Machine",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "60 Db OH Press Neutral Grip",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "Standing Db Lateral Raises",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Reverse Grip Lats Machine",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "C2",
+            "source_name": "Standing Db Offset Grip Curls",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Close Grip Decline Press",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "D2",
+            "source_name": "Db Decline Skull Crushers",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Lower Body A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "45 Leg Press Quad Dominant",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Db Walking Lunges Long Steps",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "Leg Extensions Toes Dorsiflexed Neutral",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "BB RDL",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "C2",
+            "source_name": "Prone Leg Curl Toes Dorsiflexed Neutral",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Leg Press Calf Raises Toes Neutral",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 60
+          },
+          {
+            "code": "E1",
+            "source_name": "Weighted V Ups",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Chest-Back B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "45 Db Press Neutral Grip",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "30 Db Press Neutral Grip",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "30 Db Flies",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Wide Grip Cable Row",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Neutral Grip LPD",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "D2",
+            "source_name": "Db Pull Overs",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "BB Bent Over Reverse Grip Rows",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Arms B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Wide Grip Shoulder Press Machine",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "60 Db OH Press Neutral Grip",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "Standing Db Lateral Raises",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Reverse Grip Lats Machine",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "C2",
+            "source_name": "Standing Db Offset Grip Curls",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Close Grip Decline Press",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "D2",
+            "source_name": "Db Decline Skull Crushers",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Lower Body B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "45 Leg Press Quad Dominant",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Db Walking Lunges Long Steps",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "Leg Extensions Toes Dorsiflexed Neutral",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "BB RDL",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "C2",
+            "source_name": "Prone Leg Curl Toes Dorsiflexed Neutral",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Leg Press Calf Raises Toes Neutral",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 60
+          },
+          {
+            "code": "E1",
+            "source_name": "Weighted V Ups",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 60
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "number": 2,
+    "source_tab": "TP 30-3-26",
+    "start_date": "2026-03-30",
+    "method": "Hypertrophy Reverse Pyramid",
+    "days": [
+      {
+        "name": "Chest-Back A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "30 BB Bench Press",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Wide Grip Chest Press Drop Sets",
+            "sets": 3,
+            "reps": "12+12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Decline Db Flies",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 60
+          },
+          {
+            "code": "D1",
+            "source_name": "Neutral Grip Supp. Rows",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Cable Straight Arms Pull Downs Drop Sets",
+            "sets": 3,
+            "reps": "12+12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "F1",
+            "source_name": "Wide Grip LPD",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Arms A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "75 Neutral Grip Db OH Press",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Lateral Raises Machine Drop Sets",
+            "sets": 3,
+            "reps": "12+12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "EZ BB Preacher Curls",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "45 Hammer Curls Drop Sets",
+            "sets": 3,
+            "reps": "12+12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Close Grip Dips",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "F1",
+            "source_name": "V BB Cable Tricep Extensions Drop Sets",
+            "sets": 3,
+            "reps": "12+12",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Lower Body A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Heels Elevated HB Squats",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Leg Extensions Toes Dorsiflexed Out Drop Sets",
+            "sets": 3,
+            "reps": "12+12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Hor. Back Extensions Glutes Dominant",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Seated Leg Curl Toes Dorsiflexed Neutral Drop Sets",
+            "sets": 3,
+            "reps": "12+12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Standing Calf Raises Toes Neutral",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 60
+          },
+          {
+            "code": "F1",
+            "source_name": "Decline Reverse Crunches",
+            "sets": 4,
+            "reps": "20-20-20-20",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Chest-Back B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "30 BB Bench Press",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Wide Grip Chest Press Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Decline Db Flies",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 60
+          },
+          {
+            "code": "D1",
+            "source_name": "Neutral Grip Supp. Rows",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Cable Straight Arms Pull Downs Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "F1",
+            "source_name": "Wide Grip LPD",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Arms B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "75 Neutral Grip Db OH Press",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Lateral Raises Machine Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "EZ BB Preacher Curls",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "45 Hammer Curls Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Close Grip Dips",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "F1",
+            "source_name": "V BB Cable Tricep Extensions Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Lower Body B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Heels Elevated HB Squats",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Leg Extensions Toes Dorsiflexed Out Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Hor. Back Extensions Glutes Dominant",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Seated Leg Curl Toes Dorsiflexed Neutral Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Standing Calf Raises Toes Neutral",
+            "sets": 4,
+            "reps": "20-20-20-20",
+            "rest_seconds": 60
+          },
+          {
+            "code": "F1",
+            "source_name": "Decline Reverse Crunches",
+            "sets": 4,
+            "reps": "20-20-20-20",
+            "rest_seconds": 60
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "number": 3,
+    "source_tab": "TP 11-5-26",
+    "start_date": "2026-05-11",
+    "method": "Functinal Hypertrophy Flat Pyramid",
+    "days": [
+      {
+        "name": "Chest-Back A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "BB Bench Press",
+            "sets": 4,
+            "reps": "6-6-6-6",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "45 BB Press",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Wide Grip Supp. Seated Row",
+            "sets": 4,
+            "reps": "6-6-6-6",
+            "rest_seconds": 120
+          },
+          {
+            "code": "D1",
+            "source_name": "Neutral Grip Weighted Chin Ups",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Wide Grip Cable Chest Pulls",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Arms A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Plate Loaded Wide Grip Shoulder Press Machine",
+            "sets": 4,
+            "reps": "6-6-6-6",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "Reverse Grip Chin Up Weighted",
+            "sets": 4,
+            "reps": "6-6-6-6",
+            "rest_seconds": 120
+          },
+          {
+            "code": "C1",
+            "source_name": "Close Grip Bench Press",
+            "sets": 4,
+            "reps": "6-6-6-6",
+            "rest_seconds": 120
+          },
+          {
+            "code": "D1",
+            "source_name": "60 Db Curls Offset Grip",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 60
+          },
+          {
+            "code": "E1",
+            "source_name": "Rope Low Cable OH Tricep Extensions",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Lower Body A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Hack Squat Machine",
+            "sets": 4,
+            "reps": "6-6-6-6",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "Db Walking Lunges Long Steps",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Prone Leg Curl Toes Dorsiflexed Neutral",
+            "sets": 4,
+            "reps": "6-6-6-6",
+            "rest_seconds": 120
+          },
+          {
+            "code": "D1",
+            "source_name": "Weighted 45 Back Extensions",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Hanging Leg Raises Weighted",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Chest-Back B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "BB Bench Press",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "45 BB Press",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Wide Grip Supp. Seated Row",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "D1",
+            "source_name": "Neutral Grip Weighted Chin Ups",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Wide Grip Cable Chest Pulls",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Arms B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Plate Loaded Wide Grip Shoulder Press Machine",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "Reverse Grip Chin Up Weighted",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "C1",
+            "source_name": "Close Grip Bench Press",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "D1",
+            "source_name": "60 Db Curls Offset Grip",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 60
+          },
+          {
+            "code": "E1",
+            "source_name": "Rope Low Cable OH Tricep Extensions",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Lower Body B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Hack Squat Machine",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "Db Walking Lunges Long Steps",
+            "sets": 4,
+            "reps": "10-10-10-10",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Prone Leg Curl Toes Dorsiflexed Neutral",
+            "sets": 4,
+            "reps": "8-8-8-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "D1",
+            "source_name": "Weighted 45 Back Extensions",
+            "sets": 4,
+            "reps": "12-12-12-12",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Hanging Leg Raises Weighted",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 60
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "number": 4,
+    "source_tab": "TP 6-7-26",
+    "start_date": "2026-07-06",
+    "method": "Hypertrophy Pyramid",
+    "days": [
+      {
+        "name": "Chest-Back A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Plate Loaded Chest Press Wide Grip",
+            "sets": 4,
+            "reps": "15-12-10-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "45 Db Press Neutral Grip",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "45 Db Flies",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Unilateral Handle LPD",
+            "sets": 4,
+            "reps": "15-12-10-8",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Unilateral Supp. Rows Reverse Grip",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "D2",
+            "source_name": "Straight BB Straight Arms Pull Downs",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Arms A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Neutral Grip Pin Loaded Shoulder Press",
+            "sets": 4,
+            "reps": "15-12-10-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "75 Db OH Press Neutral Grip",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "Standing Db Lateral Raises",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Standing Db Offset Grip Curls",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "C2",
+            "source_name": "30 Db Spider Hammer Curls",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Cable Rope Tricep Extensions",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "D2",
+            "source_name": "Db Skull Crushers",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Lower Body A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Heels Elevated HB Squats",
+            "sets": 4,
+            "reps": "15-12-10-8",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "FFE Db Split Squats",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "Leg Extensions Toes Dorsiflexed Neutral",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Seated Leg Curls Toes Dorsiflexed Neutral",
+            "sets": 3,
+            "reps": "10-10-10",
+            "rest_seconds": 10
+          },
+          {
+            "code": "C2",
+            "source_name": "Seated Leg Curls Toes Dorsiflexed Out",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Weighted V Ups",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Chest-Back B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Plate Loaded Chest Press Wide Grip",
+            "sets": 4,
+            "reps": "20-15-12-10",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "45 Db Press Neutral Grip",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "45 Db Flies",
+            "sets": 3,
+            "reps": "20-20-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Unilateral Handle LPD",
+            "sets": 4,
+            "reps": "20-15-12-10",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Unilateral Supp. Rows Reverse Grip",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "D2",
+            "source_name": "Straight BB Straight Arms Pull Downs",
+            "sets": 3,
+            "reps": "20-20-20",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Arms B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Neutral Grip Pin Loaded Shoulder Press",
+            "sets": 4,
+            "reps": "20-15-12-10",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "75 Db OH Press Neutral Grip",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "Standing Db Lateral Raises",
+            "sets": 3,
+            "reps": "20-20-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Standing Db Offset Grip Curls",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "C2",
+            "source_name": "30 Db Spider Hammer Curls",
+            "sets": 3,
+            "reps": "20-20-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Cable Rope Tricep Extensions",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "D2",
+            "source_name": "Db Skull Crushers",
+            "sets": 3,
+            "reps": "20-20-20",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Lower Body B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Heels Elevated HB Squats",
+            "sets": 4,
+            "reps": "20-15-12-10",
+            "rest_seconds": 120
+          },
+          {
+            "code": "B1",
+            "source_name": "FFE Db Split Squats",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "B2",
+            "source_name": "Leg Extensions Toes Dorsiflexed Neutral",
+            "sets": 3,
+            "reps": "20-20-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Seated Leg Curls Toes Dorsiflexed Neutral",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 10
+          },
+          {
+            "code": "C2",
+            "source_name": "Seated Leg Curls Toes Dorsiflexed Out",
+            "sets": 3,
+            "reps": "20-20-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Weighted V Ups",
+            "sets": 4,
+            "reps": "20-20-20-20",
+            "rest_seconds": 60
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "number": 5,
+    "source_tab": "TP 17-8-26",
+    "start_date": "2026-08-17",
+    "method": "Hypertrophy Reverse Pyramid",
+    "days": [
+      {
+        "name": "Chest-Back A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "30 BB Bench Press",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Middle Cable Flies Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Decline BB Press",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 60
+          },
+          {
+            "code": "D1",
+            "source_name": "Wide Grip LPD",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Cable Straight Arms Pull Downs Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "F1",
+            "source_name": "Single Hand Cable Unilateral Rows",
+            "sets": 3,
+            "reps": "12-12-12",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Arms A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "60 Neutral Grip Db OH Press",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Db 60 Y Raises Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Single Db Preacher Curls",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Low Cable Ropes Curls Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Close Grip Press",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "F1",
+            "source_name": "V BB Cable Tricep Extensions Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Lower Body A",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Hack Squats",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Leg Extensions Toes Dorsiflexed Out Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Hor. Back Extensions Glutes Dominant",
+            "sets": 4,
+            "reps": "8-10-12-15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Prone Leg Curls Toes Dorsiflexed Neutral Drop Sets",
+            "sets": 3,
+            "reps": "15+15",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Leg Press Calf Raises Neutral",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 60
+          },
+          {
+            "code": "F1",
+            "source_name": "Decline Weighted Crunches",
+            "sets": 4,
+            "reps": "15-15-15-15",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Chest-Back B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "30 BB Bench Press",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Middle Cable Flies Drop Sets",
+            "sets": 3,
+            "reps": "20+20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Decline BB Press",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 60
+          },
+          {
+            "code": "D1",
+            "source_name": "Wide Grip LPD",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Cable Straight Arms Pull Downs Drop Sets",
+            "sets": 3,
+            "reps": "20+20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "F1",
+            "source_name": "Single Hand Cable Unilateral Rows",
+            "sets": 3,
+            "reps": "15-15-15",
+            "rest_seconds": 60
+          }
+        ]
+      },
+      {
+        "name": "Arms B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "60 Neutral Grip Db OH Press",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Db 60 Y Raises Drop Sets",
+            "sets": 3,
+            "reps": "20+20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Single Db Preacher Curls",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Low Cable Ropes Curls Drop Sets",
+            "sets": 3,
+            "reps": "20+20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Close Grip Press",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "F1",
+            "source_name": "V BB Cable Tricep Extensions Drop Sets",
+            "sets": 3,
+            "reps": "20+20",
+            "rest_seconds": 90
+          }
+        ]
+      },
+      {
+        "name": "Lower Body B",
+        "exercises": [
+          {
+            "code": "A1",
+            "source_name": "Hack Squats",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "B1",
+            "source_name": "Leg Extensions Toes Dorsiflexed Out Drop Sets",
+            "sets": 3,
+            "reps": "20+20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "C1",
+            "source_name": "Hor. Back Extensions Glutes Dominant",
+            "sets": 4,
+            "reps": "10-12-15-20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "D1",
+            "source_name": "Prone Leg Curls Toes Dorsiflexed Neutral Drop Sets",
+            "sets": 3,
+            "reps": "20+20",
+            "rest_seconds": 90
+          },
+          {
+            "code": "E1",
+            "source_name": "Leg Press Calf Raises Neutral",
+            "sets": 4,
+            "reps": "20-20-20-20",
+            "rest_seconds": 60
+          },
+          {
+            "code": "F1",
+            "source_name": "Decline Weighted Crunches",
+            "sets": 4,
+            "reps": "20-20-20-20",
+            "rest_seconds": 60
+          }
+        ]
+      }
+    ]
+  }
+]
