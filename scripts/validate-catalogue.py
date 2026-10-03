@@ -28,7 +28,7 @@ PATTERNS = {
 }
 REQUIRED = [
     'id', 'name_en', 'name_es', 'body_region', 'primary_muscles', 'secondary_muscles', 'equipment',
-    'movement_pattern', 'mechanic', 'laterality', 'posture_tips', 'aliases', 'origin',
+    'movement_pattern', 'mechanic', 'laterality', 'posture_tips', 'squeeze_cue', 'aliases', 'origin',
 ]
 ID_RE = re.compile(r'^[a-z0-9]+(-[a-z0-9]+)*$')
 SPANISH_CHARS = re.compile(r'[áéíóúñ¿¡ÁÉÍÓÚÑ]')
@@ -91,6 +91,13 @@ def main():
                 problems.append(f'{where}: tip over 140 chars')
             if SPANISH_CHARS.search(tip):
                 problems.append(f'{where}: tip is not in English: {tip[:50]!r}')
+        cue = ex['squeeze_cue'] or ''
+        if not 25 <= len(cue) <= 140:
+            problems.append(f'{where}: squeeze_cue must be 25-140 chars')
+        if SPANISH_CHARS.search(cue):
+            problems.append(f'{where}: squeeze_cue not in English')
+        if cue in tips:
+            problems.append(f'{where}: squeeze_cue repeats a posture tip')
         if len(set(tips)) != len(tips):
             problems.append(f'{where}: repeated tip')
         for name_key in ('name_en', 'name_es'):

@@ -17,12 +17,13 @@
     "mechanic": "compound",
     "laterality": "bilateral",
     "posture_tips": [
-      "Set the bar on your upper traps, feet shoulder-width apart and toes turned out slightly.",
-      "Keep your chest up and spine neutral, with your knees tracking over your toes.",
-      "Descend under control to at least parallel, then drive up by pushing the floor away with your whole foot.",
+      "Set the bar on your upper traps, brace your core, and stand feet shoulder-width apart with toes turned out slightly.",
+      "Keep your chest proud and spine neutral, with your knees tracking in line with your toes.",
+      "Lower in 2-3 seconds to at least parallel, then drive up by pushing the floor away with your whole foot.",
       "Don't let your knees cave inward as you drive out of the bottom.",
       "Squat inside a rack with the safety pins set just below your bottom position."
     ],
+    "squeeze_cue": "Drive up by squeezing your quads and glutes together, as if spreading the floor apart with your feet.",
     "aliases": [],
     "origin": "existing"
   },
@@ -45,10 +46,11 @@
     "posture_tips": [
       "Put your heels on a plate or wedge and rest the bar high on your traps.",
       "Keep your torso as upright as possible and let your knees travel forward over your toes.",
-      "Sink deep and slow, then stand up without lifting your heels off the wedge.",
+      "Lower in about 3 seconds into a deep squat, then stand up without lifting your heels off the wedge.",
       "Don't use a wedge so tall that your weight shifts onto the balls of your feet.",
       "Make sure the wedge is solid and won't slide before you load the bar."
     ],
+    "squeeze_cue": "Sit deep to feel your quads load up, then squeeze them hard to straighten your knees as you rise.",
     "aliases": [],
     "origin": "existing"
   },
@@ -72,10 +74,11 @@
     "posture_tips": [
       "Rack the bar on your front delts with elbows high, using a clean grip or crossed-arm grip.",
       "Keep your elbows up and your torso upright the whole way down.",
-      "Sit down between your legs to just below parallel, then lead the drive up with your elbows.",
+      "Lower in 2-3 seconds to just below parallel, sitting between your legs, then drive up leading with your elbows.",
       "Don't let your elbows drop, or the bar will roll forward off your shoulders.",
       "If you lose the bar, push it forward and step back; always set the rack safeties."
     ],
+    "squeeze_cue": "Feel your quads take the load at the bottom and squeeze them to drive your elbows and chest straight up.",
     "aliases": [],
     "origin": "new"
   },
@@ -99,10 +102,11 @@
     "posture_tips": [
       "Hold one dumbbell vertically against your chest, feet slightly wider than shoulder-width.",
       "Keep the dumbbell tight to your chest and your torso tall as you descend.",
-      "Lower until your elbows brush the inside of your knees, then drive up through your heels.",
+      "Lower in 2-3 seconds until your elbows brush the inside of your knees, then drive up through your whole foot.",
       "Don't let the dumbbell drift away from your body, which pulls your torso forward.",
       "Pick a weight you can hold securely for the whole set without it slipping."
     ],
+    "squeeze_cue": "Squeeze your glutes and quads to stand, as if pushing your knees out and the floor away.",
     "aliases": [],
     "origin": "new"
   },
@@ -125,10 +129,11 @@
     "posture_tips": [
       "Step under the bar with your feet slightly in front of the bar path.",
       "Keep your back braced along the fixed bar path and your knees in line with your toes.",
-      "Lower under control to a depth you own, then stand up without snapping your knees locked.",
+      "Lower in 2-3 seconds to a depth you own, then stand up without snapping your knees locked.",
       "Don't place your feet directly under the bar; it overloads your knees.",
       "Set the Smith machine safety stops and rotate the bar to rehook it when you finish."
     ],
+    "squeeze_cue": "Squeeze your quads to straighten your legs, as if pressing your back up into the bar and the floor down.",
     "aliases": [],
     "origin": "new"
   },
@@ -153,10 +158,11 @@
     "posture_tips": [
       "Place a box behind you at parallel height and take a slightly wider stance than usual.",
       "Sit your hips back, keeping your shins near vertical and your chest up.",
-      "Sit softly onto the box, pause briefly while staying tight, then drive up hard.",
+      "Sit back onto the box in about 2 seconds, pause one beat while staying braced, then drive up hard.",
       "Don't crash onto the box or rock backward to build momentum.",
       "Check that the box is stable and won't slide before you start."
     ],
+    "squeeze_cue": "Squeeze your glutes to drive your hips up off the box, as if pushing your knees out against a band.",
     "aliases": [],
     "origin": "new"
   },
@@ -179,10 +185,11 @@
     "posture_tips": [
       "Set your back and shoulders against the pads with your feet in the middle of the platform.",
       "Keep your lower back pressed into the pad throughout the whole arc.",
-      "Sink deep, letting your knees travel forward, and drive up without fully locking out.",
+      "Lower in about 3 seconds as deep as your back stays on the pad, then drive up without fully locking out.",
       "Don't let your heels lift off the platform at the bottom.",
       "Use the machine's safety lock getting in and out so you never get stuck under the load."
     ],
+    "squeeze_cue": "Feel your quads stretch at the bottom, then squeeze them hard to push the platform away through midfoot.",
     "aliases": [],
     "origin": "new"
   },
@@ -205,10 +212,11 @@
     "posture_tips": [
       "Fasten the belt around your hips and set your feet shoulder-width on the platform.",
       "Keep your torso tall and hold the handles only for balance, not to pull yourself up.",
-      "Sink straight down to your target depth and stand by extending hips and knees together.",
+      "Sink straight down in 2-3 seconds to your target depth, then stand by extending hips and knees together.",
       "Don't let the belt ride up to your waist; it should sit on your hips.",
       "Check that the chain and carabiner are securely closed before adding weight."
     ],
+    "squeeze_cue": "Squeeze your glutes and quads to stand tall, as if pushing the platform down through the floor.",
     "aliases": [],
     "origin": "new"
   },
@@ -229,12 +237,13 @@
     "mechanic": "compound",
     "laterality": "bilateral",
     "posture_tips": [
-      "Stand with feet shoulder-width apart and arms reaching forward for balance.",
+      "Stand with feet shoulder-width apart, toes slightly out, and arms reaching forward for balance.",
       "Keep your back straight and your weight spread evenly between heel and forefoot.",
-      "Lower as far as your form allows and stand at a steady tempo without bouncing.",
+      "Lower in about 2 seconds as deep as your form allows, then stand at a steady pace without bouncing.",
       "Don't let your heels rise or your back round at the bottom.",
       "Train on a non-slip surface with clear space around you."
     ],
+    "squeeze_cue": "Squeeze your glutes and quads as you stand, as if pushing the floor away to grow taller.",
     "aliases": [],
     "origin": "new"
   },
@@ -257,10 +266,11 @@
     "posture_tips": [
       "Set your feet well outside your shoulders, toes turned out, holding one dumbbell hanging down.",
       "Keep your torso upright and push your knees out in line with your toes.",
-      "Lower the dumbbell between your legs, then stand by squeezing your glutes and inner thighs.",
+      "Lower the dumbbell between your legs in 2-3 seconds, then stand by driving your knees out over your toes.",
       "Don't go so wide that your knees can't follow your toes.",
       "Stand on a step or plates if the dumbbell hits the floor before you reach full depth."
     ],
+    "squeeze_cue": "Stand by squeezing your inner thighs and glutes, as if dragging your feet together across the floor.",
     "aliases": [],
     "origin": "new"
   },
@@ -283,10 +293,11 @@
     "posture_tips": [
       "Set your back and shoulders against the pads with your feet midway up the platform.",
       "Keep your hips and lower back pressed into the pad through the full range.",
-      "Lower until your thighs pass parallel, then drive up without locking your knees at the top.",
+      "Lower in 2-3 seconds until your thighs pass parallel, then drive up without locking your knees at the top.",
       "Don't set your feet so high that you take the work off your quads.",
       "Engage and release the safety handles only with your legs already extended."
     ],
+    "squeeze_cue": "Squeeze your quads to push the platform away, imagining your kneecaps pulling up toward your hips.",
     "aliases": [
       "hack-squats"
     ],
@@ -311,10 +322,11 @@
     "posture_tips": [
       "Sit with your back and hips flat against the pad and your feet hip-width apart.",
       "Keep your knees tracking over your toes throughout the descent.",
-      "Lower the sled under control to about 90 degrees of knee bend, then press through your whole foot.",
+      "Lower the sled in 2-3 seconds to about 90 degrees of knee bend, then press through your whole foot.",
       "Don't let your hips peel off the seat at the bottom of the rep.",
       "Don't lock out your knees at the top, and release the safeties only with the sled under control."
     ],
+    "squeeze_cue": "Squeeze your quads to press the sled away, as if trying to push your feet through the platform.",
     "aliases": [],
     "origin": "existing"
   },
@@ -337,10 +349,11 @@
     "posture_tips": [
       "Place one foot in the middle of the platform and rest the other on the floor or frame.",
       "Keep your pelvis level and your working knee in line with your second toe.",
-      "Lower slowly as far as your hips stay down, then press until your leg is almost straight.",
+      "Lower in 2-3 seconds as far as your hips stay down, then press until your leg is almost straight.",
       "Don't let your knee collapse inward as you press.",
       "Start light and keep the safeties within reach until your balance is solid."
     ],
+    "squeeze_cue": "Press through your whole foot and squeeze the quad and glute of your working leg as you drive the sled.",
     "aliases": [],
     "origin": "new"
   },
@@ -363,10 +376,11 @@
     "posture_tips": [
       "Set the seat so your knees start at about 90 degrees with your feet flat on the platform.",
       "Keep your back against the pad and hold the side handles to stay stable.",
-      "Press smoothly until your legs are almost straight, then return without dropping the stack.",
+      "Press smoothly until your legs are almost straight, then return in 2-3 seconds without dropping the stack.",
       "Don't set the seat so close that your hips tuck under at the start.",
       "Don't lock your knees at the top, and set the stack down gently when you finish."
     ],
+    "squeeze_cue": "Squeeze your quads to push the platform away, imagining your thighs straightening like pistons.",
     "aliases": [],
     "origin": "new"
   },
@@ -390,10 +404,11 @@
     "posture_tips": [
       "Hold a dumbbell in each hand at your sides and line up in a clear walkway.",
       "Keep your torso tall and your front knee in line with your foot as you step.",
-      "Take a long step, lower until your back knee nearly touches the floor, then step through.",
+      "Take a long step, lower in about 2 seconds until your back knee nearly touches, then step through.",
       "Don't take short steps; they load the front knee and take work off the glutes.",
       "Make sure your path is clear of obstacles before you start."
     ],
+    "squeeze_cue": "Drive through your front heel and squeeze that glute as you step through, as if pulling the floor under you.",
     "aliases": [],
     "origin": "existing"
   },
@@ -417,10 +432,11 @@
     "posture_tips": [
       "Stand with feet hip-width apart and a dumbbell in each hand.",
       "Keep your chest up and your weight centered over the front foot as you land.",
-      "Step forward, lower under control, then push through your front heel to return.",
+      "Step forward, lower in about 2 seconds until your back knee nearly touches, then push through your front foot.",
       "Don't slam down on your heel or land with your front foot too close.",
       "Keep the load moderate; braking the forward step takes a lot of control."
     ],
+    "squeeze_cue": "Push back from the front foot by squeezing your quad and glute, as if shoving the floor away from you.",
     "aliases": [],
     "origin": "new"
   },
@@ -444,10 +460,11 @@
     "posture_tips": [
       "Stand with dumbbells at your sides and your weight on your standing foot.",
       "Keep your front shin close to vertical and your torso leaning slightly forward.",
-      "Step one leg back, lower your knee near the floor, then drive through your front foot to return.",
+      "Step back, lower in about 2 seconds until your knee is near the floor, then drive through your front foot.",
       "Don't place your back foot on the same line as your front foot; it throws off your balance.",
       "Lower your back knee gently and never bang it into the floor."
     ],
+    "squeeze_cue": "Squeeze your front glute to pull yourself back up, as if dragging your front heel toward you.",
     "aliases": [],
     "origin": "new"
   },
@@ -472,10 +489,11 @@
     "posture_tips": [
       "Unrack the bar onto your traps and take two steps back to clear space.",
       "Brace your core and keep the bar level, without tipping it to one side.",
-      "Step back, drop straight down, then drive through your front foot to return.",
+      "Step back, drop straight down in about 2 seconds, then drive through your front foot to return.",
       "Don't rush; start every rep with your feet together and stable.",
       "Work inside the rack with the safeties set in case you lose your balance."
     ],
+    "squeeze_cue": "Squeeze the glute of your front leg to stand, as if pulling your front heel back toward your back foot.",
     "aliases": [],
     "origin": "new"
   },
@@ -498,10 +516,11 @@
     "posture_tips": [
       "Stand with your feet together, holding one dumbbell against your chest.",
       "Keep the straight leg fully extended and your working foot flat on the floor.",
-      "Take a wide step to the side, sit your hips back over that leg, then push off to return.",
+      "Step wide to the side, sit your hips back over that foot in about 2 seconds, then push off to return.",
       "Don't let the bent knee drift far past your toes.",
       "Widen your step gradually as your adductor mobility improves."
     ],
+    "squeeze_cue": "Push off by squeezing your inner thigh and glute, as if sliding the bent leg back to your standing foot.",
     "aliases": [],
     "origin": "new"
   },
@@ -525,10 +544,11 @@
     "posture_tips": [
       "Hold one dumbbell against your chest with your feet hip-width apart.",
       "Keep your hips facing forward even as your back leg crosses behind you.",
-      "Cross one foot diagonally behind you, lower under control, then drive up through the front leg.",
+      "Cross one foot diagonally behind you, lower in about 2 seconds, then drive up through the front leg.",
       "Don't twist your torso or pelvis toward the crossing leg.",
       "Shorten the crossover if you feel your balance slipping."
     ],
+    "squeeze_cue": "Squeeze the glute of your front leg as you stand, feeling it work on the outer side of your hip.",
     "aliases": [],
     "origin": "new"
   },
@@ -552,10 +572,11 @@
     "posture_tips": [
       "Place your whole foot on a knee-height box with dumbbells at your sides.",
       "Keep your torso leaning slightly forward and your working knee in line with your foot.",
-      "Step up using only the top leg, then lower slowly until your foot touches the floor.",
+      "Step up using only the top leg, then lower in 2-3 seconds until your trailing foot touches the floor.",
       "Don't push off the bottom leg to help yourself up.",
       "Use a stable, non-slip box that can't tip over."
     ],
+    "squeeze_cue": "Squeeze the glute and quad of your top leg to stand tall, as if pulling the box down toward you.",
     "aliases": [],
     "origin": "new"
   },
@@ -579,10 +600,11 @@
     "posture_tips": [
       "Rest the top of your back foot on a bench and plant your front foot a long stride ahead.",
       "Keep your hips square and your weight over the front foot.",
-      "Drop straight down until your front thigh is parallel, then stand up without bouncing.",
+      "Lower in 2-3 seconds until your front thigh is parallel, then stand up without bouncing.",
       "Don't push with your back leg; it's only there for balance.",
       "Set your distance from the bench before picking up weight so you don't lose your balance."
     ],
+    "squeeze_cue": "Feel the stretch in your front glute at the bottom, then squeeze it to stand as if pushing the floor away.",
     "aliases": [],
     "origin": "new"
   },
@@ -606,10 +628,11 @@
     "posture_tips": [
       "Get into a staggered stance with both feet on the floor and dumbbells at your sides.",
       "Keep your feet hip-width apart, as if standing on two rails.",
-      "Lower your back knee toward the floor without moving your feet, then return to the start.",
+      "Lower your back knee toward the floor in about 2 seconds without moving your feet, then drive back up.",
       "Don't let your front knee cave inward as you stand up.",
       "Lower under control so your back knee doesn't hit the floor."
     ],
+    "squeeze_cue": "Squeeze the quad and glute of your front leg to rise, as if driving your front foot down through the floor.",
     "aliases": [],
     "origin": "new"
   },
@@ -632,10 +655,11 @@
     "posture_tips": [
       "Put your front foot on a plate or low step and set your back foot behind you.",
       "Keep your torso upright and let your front knee travel forward over your foot.",
-      "Use the elevation to sink deep, then drive up through your front foot.",
+      "Lower in about 3 seconds into the deepest position you control, then drive up through your front foot.",
       "Don't use a tall or wobbly platform that throws off your balance.",
       "Check that the plate or step won't slide before adding load."
     ],
+    "squeeze_cue": "Sink into the deep stretch, then squeeze your front quad to drive your knee straight as you stand.",
     "aliases": [],
     "origin": "existing"
   },
@@ -658,10 +682,11 @@
     "posture_tips": [
       "Step under the bar in a split stance with your front foot slightly forward.",
       "Keep your torso straight under the bar and your hips facing forward.",
-      "Drop straight down along the machine's track and drive up with the front leg.",
+      "Drop straight down along the track in about 2 seconds, then drive up with the front leg.",
       "Don't shorten your stance so much that your front heel lifts.",
       "Set the safety stops just below the bottom of your rep."
     ],
+    "squeeze_cue": "Squeeze your front leg's quad and glute to drive up, as if pushing the bar up the track with that leg.",
     "aliases": [],
     "origin": "new"
   },
@@ -681,10 +706,11 @@
     "posture_tips": [
       "Line your knee up with the machine's pivot and set the roller just above your ankle.",
       "Keep your back against the pad and grip the handles so your hips stay down.",
-      "Extend all the way up, squeeze for a second, and lower the weight under control.",
+      "Extend all the way up in 1 second, hold the top for 1 second, and lower in 2-3 seconds.",
       "Don't swing the weight up or let the roller drop.",
       "Use moderate loads if your knees feel irritated, and see a professional if it hurts."
     ],
+    "squeeze_cue": "Lock out and squeeze your quads hard for a second, as if pulling your kneecaps up toward your hips.",
     "aliases": [
       "leg-extensions-toes-dorsiflexed-out"
     ],
@@ -706,10 +732,11 @@
     "posture_tips": [
       "Set the back pad and roller as for the two-leg version and load only one leg.",
       "Keep the free leg relaxed and your hips pinned to the seat.",
-      "Fully extend your knee and lower slowly until the stack almost touches.",
+      "Extend your knee fully, pause for a second, and lower in 2-3 seconds until the stack almost touches.",
       "Don't twist your torso toward the working side to move more weight.",
       "Use a lighter load than the two-leg version so you don't overload the knee."
     ],
+    "squeeze_cue": "At full extension, squeeze the working quad as hard as you can, as if flexing it for a photo.",
     "aliases": [],
     "origin": "new"
   },
@@ -731,10 +758,11 @@
     "posture_tips": [
       "Lie face down with your knees just off the bench edge and the roller over your heels.",
       "Keep your hips pressed into the bench and hold the handles throughout.",
-      "Curl your heels toward your glutes, then lower over two to three seconds.",
+      "Curl your heels toward your glutes in 1 second, pause, then lower over 2-3 seconds.",
       "Don't lift your hips off the bench to finish the rep.",
       "Don't let the weight yank your knees straight at the bottom."
     ],
+    "squeeze_cue": "Squeeze your hamstrings to pull your heels toward your glutes, as if trying to kick yourself in the backside.",
     "aliases": [
       "prone-leg-curls-toes-dorsiflexed-neutral",
       "leg-curl"
@@ -759,10 +787,11 @@
     "posture_tips": [
       "Set the back pad so your knee lines up with the pivot, and lower the thigh pad onto your legs.",
       "Keep your back supported and lean slightly forward to stretch your hamstrings more.",
-      "Curl until your heels are under the seat, then return slowly to almost straight.",
+      "Curl until your heels are under the seat, pause, then return in 2-3 seconds to almost straight.",
       "Don't leave the thigh pad loose, or your hips will lift.",
       "Set the lower roller snugly above your ankle so it doesn't slide onto your calf."
     ],
+    "squeeze_cue": "Squeeze your hamstrings to dig your heels under the seat, as if dragging your heels through sand.",
     "aliases": [
       "seated-leg-curls-toes-dorsiflexed-neutral",
       "seated-leg-curls-toes-dorsiflexed-out"
@@ -787,10 +816,11 @@
     "posture_tips": [
       "Set the machine as for the two-leg version and place just one leg on the roller.",
       "Keep both thighs held down by the top pad and your hips still.",
-      "Curl your knee as far as it goes, pause briefly, and return slowly to almost straight.",
+      "Curl as far as your knee goes, pause briefly, and return in 2-3 seconds to almost straight.",
       "Don't rotate your leg in or out to help the weight move.",
       "Pick a lighter load and make up for it with extra control on the way down."
     ],
+    "squeeze_cue": "Curl by squeezing the hamstring of your working leg, as if pulling your heel down and back through the floor.",
     "aliases": [],
     "origin": "new"
   },
@@ -812,10 +842,11 @@
     "posture_tips": [
       "Rest your thigh on the pad and set the roller behind the ankle of your working leg.",
       "Keep your hips against the pad and your torso still by holding the handles.",
-      "Curl your heel toward your glute and lower slowly without letting the weight drop.",
+      "Curl your heel toward your glute, pause, and lower in 2-3 seconds without letting the weight drop.",
       "Don't arch your lower back to get your heel higher.",
       "Adjust the pad height so your knee lines up with the machine's pivot."
     ],
+    "squeeze_cue": "Squeeze your hamstring to bring your heel up, as if trying to touch your glute with it.",
     "aliases": [],
     "origin": "new"
   },
@@ -838,10 +869,11 @@
     "posture_tips": [
       "Kneel on a mat with your ankles locked under a pad or held down by a partner.",
       "Keep a straight line from knees to head, with glutes and abs tight.",
-      "Lower yourself forward as slowly as possible and use your hands to push back up if needed.",
+      "Lower yourself forward as slowly as possible, aiming for 3-5 seconds, then push back up with your hands.",
       "Don't bend at the hips to shorten the lever as you lower.",
       "Keep your hands ready to catch yourself and build the range gradually."
     ],
+    "squeeze_cue": "Fight the fall by squeezing your hamstrings hard, as if pulling your heels down into the pad.",
     "aliases": [],
     "origin": "new"
   },
@@ -867,10 +899,11 @@
     "posture_tips": [
       "Set your feet hip-width with the bar over midfoot and grip it just outside your legs.",
       "Keep your spine neutral and the bar dragging close to your body all the way up.",
-      "Push the floor away, lock out your hips at the top, and slide the bar down your thighs to lower.",
+      "Push the floor away, lock out your hips, then lower in 1-2 seconds by sliding the bar down your thighs.",
       "Don't let your hips shoot up before the bar moves and round your back.",
       "Brace before every rep and reset the bar on the floor whenever your position slips."
     ],
+    "squeeze_cue": "Finish by squeezing your glutes hard to bring your hips to the bar, standing tall without leaning back.",
     "aliases": [],
     "origin": "new"
   },
@@ -895,10 +928,11 @@
     "posture_tips": [
       "Set your feet well outside your shoulders, toes out, and grip the bar between your legs.",
       "Keep your chest up and push your knees out over your toes.",
-      "Push the floor apart to break the bar off the ground and finish by driving your hips to the bar.",
+      "Push the floor apart to break the bar off the ground, drive your hips to the bar, and lower in 1-2 seconds.",
       "Don't let your knees cave in as the bar leaves the floor.",
       "Warm up your adductors with light sets before loading the bar."
     ],
+    "squeeze_cue": "Squeeze your glutes and inner thighs to drive your hips into the bar, as if closing a door with your hips.",
     "aliases": [],
     "origin": "new"
   },
@@ -924,10 +958,11 @@
     "posture_tips": [
       "Stand in the center of the hex bar with feet hip-width apart and grab the handles.",
       "Keep your arms long, chest up, and spine neutral as you stand.",
-      "Push the floor away until you're standing tall, then lower by bending hips and knees together.",
+      "Push the floor away until you're standing tall, then lower in about 2 seconds, bending hips and knees together.",
       "Don't stand off-center in the bar, which tips it forward or back.",
       "Make sure the plates are secured with collars before you lift."
     ],
+    "squeeze_cue": "Push the floor away by squeezing your quads, then squeeze your glutes to finish standing fully tall.",
     "aliases": [],
     "origin": "new"
   },
@@ -951,10 +986,11 @@
     "posture_tips": [
       "Start standing with the bar at hip height and a grip just outside your thighs.",
       "Keep a soft, fixed bend in your knees and a neutral spine.",
-      "Push your hips back, sliding the bar down your legs until you feel the stretch, then stand up.",
+      "Push your hips back in 2-3 seconds, sliding the bar down your legs until your hamstrings stretch, then stand.",
       "Don't turn it into a squat by bending your knees more on the way down.",
       "Only lower as far as your back stays neutral, even if you don't reach mid-shin."
     ],
+    "squeeze_cue": "Feel your hamstrings stretch like rubber bands, then snap your hips forward by squeezing your glutes.",
     "aliases": [
       "bb-rdl"
     ],
@@ -980,10 +1016,11 @@
     "posture_tips": [
       "Hold a dumbbell in each hand in front of your thighs with feet hip-width apart.",
       "Keep the dumbbells close to your legs and your shoulders pulled back.",
-      "Push your hips back, lowering the dumbbells along your shins, then stand up squeezing your glutes.",
+      "Push your hips back in 2-3 seconds, lowering the dumbbells along your shins, then drive your hips forward.",
       "Don't let the dumbbells drift away from your body and hang forward.",
       "Stop the descent as soon as your back starts to round."
     ],
+    "squeeze_cue": "Feel your hamstrings load like a drawn bow, then squeeze your glutes to drive your hips through to stand.",
     "aliases": [],
     "origin": "new"
   },
@@ -1007,10 +1044,11 @@
     "posture_tips": [
       "Stand on one leg with a slight knee bend and hold the dumbbell in the opposite hand.",
       "Keep your hips level and your free leg in line with your torso as you hinge.",
-      "Hinge until your torso is nearly parallel to the floor, then drive through your heel to stand.",
+      "Hinge in 2-3 seconds until your torso is nearly parallel to the floor, then drive through your heel to stand.",
       "Don't let the hip of your back leg open up toward the ceiling.",
       "Touch a wall or support with your free hand if you need more balance."
     ],
+    "squeeze_cue": "Feel the stretch in your standing hamstring, then squeeze that glute to pull your torso back up.",
     "aliases": [],
     "origin": "new"
   },
@@ -1034,10 +1072,11 @@
     "posture_tips": [
       "Stand with the bar over midfoot and your legs nearly straight but not locked.",
       "Keep your spine neutral and your knees nearly straight throughout.",
-      "Lower the bar close to your legs to the floor or your limit, then stand by extending your hips.",
+      "Lower the bar along your legs in 2-3 seconds to your limit, then stand by extending your hips.",
       "Don't pull with a rounded back just to reach the floor.",
       "Use standard-size plates, or raise the bar if you can't reach the floor with good form."
     ],
+    "squeeze_cue": "Feel your hamstrings stretch from knee to glute, then squeeze them to pull your hips back over your feet.",
     "aliases": [],
     "origin": "new"
   },
@@ -1060,10 +1099,11 @@
     "posture_tips": [
       "Set the bar on your traps as for a squat, with your feet hip-width apart.",
       "Keep your spine neutral and a slight bend in your knees throughout the hinge.",
-      "Push your hips back until your torso is nearly parallel, then stand up squeezing your glutes.",
+      "Push your hips back in 2-3 seconds until your torso is nearly parallel, then drive your hips forward to stand.",
       "Don't lower your chest by rounding your back instead of hinging at the hips.",
       "Start light and work inside the rack with the safeties set."
     ],
+    "squeeze_cue": "Feel your hamstrings stretch as you bow, then squeeze your glutes to drive your hips forward and stand.",
     "aliases": [],
     "origin": "new"
   },
@@ -1085,10 +1125,11 @@
     "posture_tips": [
       "Face away from a low pulley with the rope between your legs and take two steps forward.",
       "Keep your arms straight and your spine neutral as you push your hips back.",
-      "Let the rope travel between your legs, then extend your hips by squeezing your glutes.",
+      "Let the rope travel back between your legs in about 2 seconds, then drive your hips forward to stand.",
       "Don't pull the rope with your arms or turn it into a squat.",
       "Finish standing tall without overextending your lower back at the top."
     ],
+    "squeeze_cue": "Snap your hips forward and squeeze your glutes hard at the top, as if pinching a coin between them.",
     "aliases": [],
     "origin": "new"
   },
@@ -1111,10 +1152,11 @@
     "posture_tips": [
       "Set the pad just below your hips so they can bend freely.",
       "Keep your upper back slightly rounded and your eyes on the floor.",
-      "Lower by bending at the hips, then rise by squeezing your glutes until your body is in line.",
+      "Lower in about 2 seconds by bending at the hips, then rise until your body forms a straight line and pause.",
       "Don't arch your lower back past a straight line at the top.",
       "Rise under control, without swinging that pulls on your lower back."
     ],
+    "squeeze_cue": "Squeeze your glutes to lift your torso, as if pressing your hips down into the pad.",
     "aliases": [],
     "origin": "existing"
   },
@@ -1137,10 +1179,11 @@
     "posture_tips": [
       "Set the pad at hip height and lock your heels under the rollers.",
       "Keep your spine neutral with arms crossed or the weight held against your chest.",
-      "Hinge down until you feel a stretch, then rise until your torso lines up with your legs.",
+      "Hinge down in about 2 seconds until you feel a stretch, then rise until your torso lines up with your legs.",
       "Don't go past a straight line by hard-arching your lower back at the top.",
       "Add weight only once you can complete all reps with clean form."
     ],
+    "squeeze_cue": "Rise by squeezing your glutes and lower back together, holding the top like a rigid plank for a second.",
     "aliases": [],
     "origin": "existing"
   },
@@ -1163,10 +1206,11 @@
     "posture_tips": [
       "Set up on the 45-degree bench with one foot locked in and the other leg free behind you.",
       "Keep your pelvis level without letting the free hip drop or rotate.",
-      "Lower by hinging at your working hip, then rise by squeezing that side's glute.",
+      "Lower in about 2 seconds by hinging at your working hip, then rise until your body forms a straight line.",
       "Don't twist your torso to make up for a weaker side.",
       "Master the two-leg version before progressing to this one."
     ],
+    "squeeze_cue": "Squeeze the glute of your locked-in leg to lift your torso, as if pushing that hip down into the pad.",
     "aliases": [],
     "origin": "new"
   },
@@ -1189,10 +1233,11 @@
     "posture_tips": [
       "Lie face down with your hips at the bench edge and your ankles under the roller or strap.",
       "Keep your torso flat on the bench and grip the handles firmly.",
-      "Raise your legs to body level using your glutes and lower them under control.",
+      "Raise your legs to body level in 1 second, pause, and lower them in about 2 seconds.",
       "Don't swing your legs with momentum to get them higher.",
       "Don't raise your legs past horizontal, to avoid overarching your lower back."
     ],
+    "squeeze_cue": "Squeeze your glutes to lift your legs, as if pressing your heels up toward the ceiling behind you.",
     "aliases": [],
     "origin": "new"
   },
@@ -1215,10 +1260,11 @@
     "posture_tips": [
       "Rest your lower shoulder blades on a bench and set the padded bar over your hips.",
       "Keep your chin tucked and your ribs down as you drive up.",
-      "Push through your heels until knees, hips, and shoulders line up, pause, then lower slowly.",
+      "Push through your heels until knees, hips and shoulders line up, pause 1 second, then lower in 2 seconds.",
       "Don't finish by arching your lower back instead of extending your hips.",
       "Use a bar pad and a fixed bench that won't slide."
     ],
+    "squeeze_cue": "Squeeze your glutes as if cracking a walnut between them at the top, and hold it for a full second.",
     "aliases": [],
     "origin": "new"
   },
@@ -1241,10 +1287,11 @@
     "posture_tips": [
       "Set your back against the pad and position the belt or pad over your hips.",
       "Keep your feet flat and your shins vertical at the top.",
-      "Drive your hips to full extension, squeeze for a second, and lower slowly.",
+      "Drive your hips to full extension, hold the top for a second, and lower in about 2 seconds.",
       "Don't push through your toes, which shifts the work to your quads.",
       "Tighten the belt before loading so it doesn't shift during the set."
     ],
+    "squeeze_cue": "At the top, squeeze your glutes hard as if trying to pinch a coin between them, and hold it.",
     "aliases": [],
     "origin": "new"
   },
@@ -1267,10 +1314,11 @@
     "posture_tips": [
       "Set a bench perpendicular to the Smith machine and place the padded bar in your hip crease.",
       "Keep your gaze forward and your torso rigid going up and down.",
-      "Drive your hips up in line with shoulders and knees, then lower until you nearly touch the floor.",
+      "Drive your hips up in line with shoulders and knees, pause, then lower in 2 seconds until you nearly touch down.",
       "Don't set your feet so far out that your hamstrings take over.",
       "Rotate the bar to unhook it only once you're set up properly underneath."
     ],
+    "squeeze_cue": "Drive your hips into the bar and squeeze your glutes at the top, as if tucking your tailbone under.",
     "aliases": [],
     "origin": "new"
   },
@@ -1292,10 +1340,11 @@
     "posture_tips": [
       "Rest your upper back on a bench with one foot on the floor and the other knee pulled in.",
       "Keep your pelvis level without letting it drop toward the free leg.",
-      "Drive through your working heel to full hip extension, then lower under control.",
+      "Drive through your working heel to full hip extension, pause 1 second, then lower in about 2 seconds.",
       "Don't rotate your hips to gain height at the top.",
       "Push the bench against a wall so it can't slide."
     ],
+    "squeeze_cue": "Squeeze the glute of your working leg at the top, as if trying to push that hip up to the ceiling.",
     "aliases": [],
     "origin": "new"
   },
@@ -1317,10 +1366,11 @@
     "posture_tips": [
       "Lie on the floor with the padded bar over your hips and your feet close to your glutes.",
       "Keep your upper back on the floor and your knees hip-width apart.",
-      "Drive your hips to full extension, hold for a second, and lower until you brush the floor.",
+      "Drive your hips to full extension, hold for a second, and lower in about 2 seconds until you brush the floor.",
       "Don't let your heels lift off the floor as you drive up.",
       "Use full-size plates so you can roll the bar over your legs to set up."
     ],
+    "squeeze_cue": "Squeeze your glutes hard at the top as if wringing out a towel between them, then hold it.",
     "aliases": [],
     "origin": "new"
   },
@@ -1342,10 +1392,11 @@
     "posture_tips": [
       "Lie on your back with knees bent and feet flat, hip-width apart.",
       "Keep your pelvis slightly tucked and your core engaged as you lift.",
-      "Raise your hips by squeezing your glutes until your body forms a straight line, then lower slowly.",
+      "Raise your hips until knees, hips and shoulders form a line, hold 1-2 seconds, then lower in 2 seconds.",
       "Don't drive with your lower back instead of your glutes.",
       "Do it on a mat to protect your spine from a hard floor."
     ],
+    "squeeze_cue": "Squeeze your glutes at the top as if holding a coin between them, without arching your lower back.",
     "aliases": [],
     "origin": "new"
   },
@@ -1367,10 +1418,11 @@
     "posture_tips": [
       "Lie on your back with one foot planted near your glute and the other leg extended in the air.",
       "Keep both hips at the same height throughout.",
-      "Drive your hips up through your working heel, pause, and lower without fully resting.",
+      "Drive your hips up through your working heel, pause 1-2 seconds, and lower without fully resting.",
       "Don't let the hip on your free-leg side sag as you lift.",
       "Stop the set if your hamstring cramps, and bring your foot closer to your glute."
     ],
+    "squeeze_cue": "Squeeze the glute of your planted leg to lift your hips, as if pressing that heel through the floor.",
     "aliases": [],
     "origin": "new"
   },
@@ -1392,10 +1444,11 @@
     "posture_tips": [
       "Strap the ankle cuff to a low pulley and hold the frame with your torso leaning slightly forward.",
       "Keep your pelvis still and your core tight as your leg moves back.",
-      "Kick your leg back and up by squeezing your glute, and return without the stack touching down.",
+      "Kick your leg back and up in 1 second, pause, and return in 2 seconds without the stack touching down.",
       "Don't arch your lower back to get your leg higher.",
       "Check that the ankle cuff is securely fastened before you start."
     ],
+    "squeeze_cue": "Squeeze your glute to push your heel back, as if kicking a door shut behind you.",
     "aliases": [],
     "origin": "new"
   },
@@ -1417,10 +1470,11 @@
     "posture_tips": [
       "Rest your chest or forearms on the pad and place your foot on the platform or roller.",
       "Keep your spine neutral and your standing hip fixed against the pad.",
-      "Push back until your hip is fully extended, then return slowly until you feel a stretch.",
+      "Push back to full hip extension, pause a second, then return in about 2 seconds until you feel a stretch.",
       "Don't rotate your hip outward at the end of the kick.",
       "Adjust the pad height so your working knee doesn't hit the machine."
     ],
+    "squeeze_cue": "Drive your heel back and squeeze your glute at full extension, as if stamping a footprint on the wall behind.",
     "aliases": [],
     "origin": "new"
   },
@@ -1441,10 +1495,11 @@
     "posture_tips": [
       "Sit with your back against the pad and the pads on the outside of your knees.",
       "Keep your hips planted on the seat and your torso still as you press out.",
-      "Open your legs to your full range, pause, and close them without letting the plates slam.",
+      "Open your legs to your full range, pause a second, and close them in 2 seconds without letting the plates touch.",
       "Don't rock your torso back and forth to move more weight.",
       "Set the starting width to match your mobility so you don't force your hips."
     ],
+    "squeeze_cue": "Squeeze the sides of your hips to push your knees out, as if spreading the pads apart with your outer glutes.",
     "aliases": [],
     "origin": "new"
   },
@@ -1464,10 +1519,11 @@
     "posture_tips": [
       "Sit with the pads on the inside of your knees and pick a comfortable starting width.",
       "Keep your back supported and your pelvis stable on the seat.",
-      "Squeeze your legs until the pads meet, then open slowly, controlling the stretch.",
+      "Bring the pads together, pause, then open in 2-3 seconds, controlling the stretch.",
       "Don't let your legs fly open at the end of each rep.",
       "Start with a narrow width and widen it gradually from set to set."
     ],
+    "squeeze_cue": "Squeeze your inner thighs to bring the pads together, as if crushing a ball between your knees.",
     "aliases": [],
     "origin": "new"
   },
@@ -1488,10 +1544,11 @@
     "posture_tips": [
       "Stand side-on to a low pulley with the ankle cuff on your far foot.",
       "Keep your torso upright without leaning away from the working leg.",
-      "Sweep your leg out with your toes pointing forward and return while controlling the cable.",
+      "Sweep your leg out with your toes pointing forward, pause, and return in about 2 seconds against the cable.",
       "Don't turn your toes up toward the ceiling; it shifts the work to other muscles.",
       "Hold the machine with your near hand to stay balanced."
     ],
+    "squeeze_cue": "Sweep your leg out by squeezing the side of your hip, feeling it work just below your belt line.",
     "aliases": [],
     "origin": "new"
   },
@@ -1511,10 +1568,11 @@
     "posture_tips": [
       "Stand side-on to a low pulley with the ankle cuff on the foot nearest the machine.",
       "Keep your standing leg firm and your hips facing forward.",
-      "Sweep your leg across in front of your standing leg past the midline, then return slowly.",
+      "Sweep your leg across in front of your standing leg past the midline, pause, then return over 2 seconds.",
       "Don't lean your torso to help pull the leg across.",
       "Keep the load light; the adductors are easy to overload."
     ],
+    "squeeze_cue": "Squeeze your inner thigh to pull your leg across, as if dragging your foot through thick mud.",
     "aliases": [],
     "origin": "new"
   },
@@ -1535,10 +1593,11 @@
     "posture_tips": [
       "Loop a band around your knees or ankles and sit into a slight hip and knee bend.",
       "Keep tension on the band and hold your half-squat position on every step.",
-      "Take short, controlled side steps without bringing your feet fully together.",
+      "Take short, slow side steps, 10-20 each way, without letting your feet come fully together.",
       "Don't sway your torso side to side with each step.",
       "Check the band for cracks or tears before using it."
     ],
+    "squeeze_cue": "Push your knees out against the band and feel the sides of your hips burn with every step.",
     "aliases": [],
     "origin": "new"
   },
@@ -1558,10 +1617,11 @@
     "posture_tips": [
       "Set your shoulders under the pads and the balls of your feet on the edge of the step.",
       "Keep your knees straight but not locked and your body tall.",
-      "Lower your heels into a stretch, pause, and rise all the way onto your toes.",
+      "Lower your heels in 2 seconds into a stretch, pause, then rise all the way onto your toes and hold a second.",
       "Don't bounce at the bottom and let tendon recoil do the work for your calves.",
       "Plant the balls of your feet firmly on the step so they don't slip off."
     ],
+    "squeeze_cue": "Rise onto your big toes and squeeze your calves hard at the top, as if trying to grow an inch taller.",
     "aliases": [],
     "origin": "existing"
   },
@@ -1581,10 +1641,11 @@
     "posture_tips": [
       "Sit in the leg press with only the balls of your feet on the bottom edge of the platform.",
       "Keep your knees nearly straight and locked in position for the whole set.",
-      "Press through the balls of your feet to full ankle extension, then return slowly to the stretch.",
+      "Press to full ankle extension, hold a second, then return in about 2 seconds to a deep stretch.",
       "Don't bend your knees to push the sled with your quads.",
       "Keep the leg press safeties engaged in case your feet slip off the edge."
     ],
+    "squeeze_cue": "Squeeze your calves at the top as you point your toes, like a ballet dancer rising onto tiptoe.",
     "aliases": [
       "leg-press-calf-raises-neutral",
       "calf"
@@ -1607,10 +1668,11 @@
     "posture_tips": [
       "Sit with the pad across your lower thighs and the balls of your feet on the platform.",
       "Keep your torso upright and your knees bent at 90 degrees the whole time.",
-      "Drop your heels as low as they go, pause, and rise to a full contraction.",
+      "Drop your heels as low as they go in 2 seconds, pause in the stretch, and rise to a full contraction.",
       "Don't heave with your torso or arms to move the lever.",
       "Release the safety only once the pad is snug on your thighs."
     ],
+    "squeeze_cue": "Rise to the top and squeeze your calves hard, as if trying to push the pad up with your big toes.",
     "aliases": [],
     "origin": "new"
   },
@@ -1630,10 +1692,11 @@
     "posture_tips": [
       "Lean forward with your hips under the pad and your forearms on the support.",
       "Keep your spine neutral and your hips bent and still for the whole set.",
-      "Lower your heels into a deep stretch and rise all the way onto your toes.",
+      "Lower your heels in about 2 seconds into a deep stretch, pause, and rise all the way onto your toes.",
       "Don't bend your knees to help yourself up.",
       "Set the pad on your hips, never on your lower back."
     ],
+    "squeeze_cue": "Feel your calves stretch at the bottom, then squeeze them at the top as if reaching tiptoe for a shelf.",
     "aliases": [],
     "origin": "new"
   },
@@ -1653,10 +1716,11 @@
     "posture_tips": [
       "Place a step under the bar and set the balls of your feet on its edge.",
       "Keep your body vertical under the bar and your knees nearly straight.",
-      "Rise onto your toes, hold for a second, and lower into the stretch.",
+      "Rise onto your toes, hold for a second, and lower in about 2 seconds into a full stretch.",
       "Don't cut the range short by staying in the top half only.",
       "Make sure the step can't slide, and set the Smith machine safety stops."
     ],
+    "squeeze_cue": "Squeeze your calves at the top as if trying to lift the bar higher with just your ankles.",
     "aliases": [],
     "origin": "new"
   },
@@ -1676,10 +1740,11 @@
     "posture_tips": [
       "Stand on a step on one foot, dumbbell in the same-side hand and the other hand on a support.",
       "Keep your working knee straight and your ankle aligned, without rolling outward.",
-      "Lower your heel below the step and rise as high as you can under control.",
+      "Lower your heel below the step in about 2 seconds, pause, and rise as high as you can under control.",
       "Don't lean on your free hand to help yourself up.",
       "Use a solid step and always hold on to something stable."
     ],
+    "squeeze_cue": "Rise high and squeeze your calf at the top, as if pushing the ball of your foot through the step.",
     "aliases": [],
     "origin": "new"
   }
