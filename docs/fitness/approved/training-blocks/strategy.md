@@ -8,6 +8,9 @@ date: 2026-10-03
 
 > **Approved by Sebas on 2026-10-03.** All 9 blocks approved; required equipment confirmed available.
 > Block 6 starts Monday 5 October 2026 (PO decision) and blocks 7–9 follow every 6 weeks.
+> 2026-10-04: PT added explicit bench angles to every bench/seat exercise (all blocks), a bench-angle
+> rotation for blocks 7–9, short day focus labels and de-duplicated notes, at the PO's request; Tech
+> Lead verified blocks 1–6 keep their exercises unchanged.
 > 2026-10-04: PT added block summaries and expandable insights (Goal, How it works, A vs B days,
 > How to progress, What to expect, Key tips); used at the PO's request.
 > The 3 proposed exercises were added to the catalogue (`approved/catalogue-v2/arms-core.json`).
@@ -118,15 +121,63 @@ intensity — so no two consecutive blocks use the same method. Each block chang
   phase. Flat 10–12 reps (A) / 12–15 (B) with supersets. New: pendulum squat, Bulgarian split
   squats, T-bar row, incline machine press, rear-delt work on arms day, cable crunches.
 - **Block 7 — Strength-Hypertrophy II (16 Nov 2026).** Heavy block like the coach's block 3:
-  flat 6s (A) / 8s (B), 2-minute rests, 5–6 exercises. New: back squat, barbell row, seated barbell
-  overhead press, weighted dips and wide pull-ups, JM press, ab wheel.
+  flat 6s (A) / 8s (B), 2-minute rests, 5–6 exercises. New: back squat, barbell row, flat Smith
+  machine bench press, 30° incline dumbbell press, seated barbell overhead press (upright seat),
+  weighted dips and wide pull-ups, 30° chest-supported dumbbell row, JM press, ab wheel.
 - **Block 8 — Hypertrophy Pyramid II (28 Dec 2026).** Ascending pyramids 15-12-10-8 (A) /
-  20-15-12-10 (B) on the first lift, then supersets. **Week 1 is a lighter week** (it falls on the
+  20-15-12-10 (B) on the first lift, then supersets. Chest leads with a 45° incline barbell press,
+  then a decline (−15°) dumbbell press + decline fly superset; arms day adds 45° Y-raises, 45° spider
+  curls and decline skull crushers. **Week 1 is a lighter week** (it falls on the
   holidays, after 10 months of training): do the same sessions but stop every set about 3 reps
   short of failure and skip the last set of each exercise; return to full sessions in week 2.
 - **Block 9 — Hypertrophy Reverse Pyramid III (8 Feb 2027).** Reverse pyramids 8-10-12-15 (A) /
   10-12-15-20 (B) and drop sets 12+12 (A) / 15+15 (B), using the strength from block 7. New: flat
-  barbell bench, barbell T-bar row, standing overhead press, front squat, Smith hip thrust.
+  barbell bench, 15° low-incline flies, barbell T-bar row, 45° chest-supported dumbbell row, 60°
+  incline curls, standing overhead press, front squat, Smith hip thrust.
+
+## Bench angle strategy
+
+> 2026-10-04 (approved): every exercise done on an adjustable bench or
+> seat now states its angle (`angle_degrees`), and blocks 7–9 were adjusted to rotate angles.
+
+**What each angle emphasises.** The bench angle changes which part of a muscle does most of the
+work. The exercise stays the same; the target shifts.
+
+| Angle | Setting | Main emphasis |
+|---|---|---|
+| −15° to −30° | Decline | Lower chest; on skull crushers, a longer stretch and steadier elbows for the triceps |
+| 0° | Flat | Mid chest (the biggest part of the pec), the heaviest pressing; flat skull crushers and pullovers |
+| 15° | Low incline | Upper and mid chest together, with little extra shoulder |
+| 30° | Incline | Upper chest; chest-supported rows (upper back, lats) and spider curls with the chest on the pad |
+| 45° | Steep incline | Upper chest plus front shoulders; chest-supported Y-raises, rear-delt work, rows and spider curls; incline curls (biceps stretch) |
+| 60° | Very steep | Incline curls with a deep long-head biceps stretch; mostly shoulders on presses |
+| 75–90° | Upright seat | Seated shoulder presses (75° lets the bar clear the face, 90° is fully upright), seated raises and overhead triceps extensions |
+
+**The rotation across blocks 6–9.** The main chest press never uses the same angle in two
+blocks in a row (30° → 0° → 45° → 0°), and from block 7 on every chest day uses at least two
+different angles. Block 6 was already reviewed, so it keeps its exercises; its upper-chest focus at
+30° is balanced by the incline machine, low-to-high cable flies and the pec deck. Machines with a
+fixed path (pec deck, chest-supported T-bar, preacher bench) have no bench angle to set.
+
+| Block | Chest (main / others) | Shoulders | Back | Arms |
+|---|---|---|---|---|
+| 6 — Flat pyramid II | **30°** DB press / incline machine, cable, pec deck | Smith seated press 75° | Chest-supported T-bar (machine) | Incline curl 45°; EZ skull crusher flat 0° |
+| 7 — Strength II | **0°** Smith flat press / 30° DB press, dips | Seated BB press 90°; seated lateral raise 90° | Chest-supported DB row 30° | JM press 0°; seated overhead extension 90° |
+| 8 — Pyramid II | **45°** incline BB press / −15° DB press + fly | DB press 75°; Y-raise 45° | EZ pullover 0° | Spider curl 45°; decline skull crusher −15° |
+| 9 — Reverse pyramid III | **0°** BB bench / 15° incline fly, incline machine | Standing press; rear-delt fly 30° | Chest-supported DB row 45° | Incline curl 60°; seated overhead extension 90° |
+
+Over the four blocks, chest is trained flat, low incline, incline, steep incline and decline;
+biceps get both a stretched position (45°/60° incline curls) and a shortened one (45° spider
+curls); triceps alternate flat, decline and overhead work; the upper back is rowed with the chest
+supported at both 30° and 45°.
+
+**How to set the bench.** Most adjustable benches have numbered notches; count from flat
+(often roughly 0, 15, 30, 45, 60, 75, 90). If yours has no numbers, use a free phone angle app (a
+level or inclinometer): lay the phone on the back pad and adjust until it reads the target. Within
+about 5° of the target is fine. For declines, use a decline bench or the decline setting on an
+adjustable bench, hook your feet in, and keep the weights moderate until the position feels
+stable. Set the angle before your warm-up sets and use the same notch every week so your weights
+are comparable.
 
 ## How to use it in the app
 

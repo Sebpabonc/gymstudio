@@ -15,12 +15,24 @@ TECHNIQUES = {'straight', 'superset', 'drop-set', 'pyramid', 'reverse-pyramid'}
 CODE_RE = re.compile(r'^[A-H][1-3]$')
 REPS_RE = re.compile(r'^\d{1,2}(\+\d{1,2})?$')
 SPANISH = re.compile(r'[áéíóúñ¿¡]')
+BENCH_WORDS = re.compile(r'Bench|Incline|Decline|Chest-Supported|Pullover|Skull Crusher|Y-Raise|Fly|Seated|Preacher|Spider', re.I)
+FREE_WEIGHTS = {'dumbbell', 'barbell', 'ez-bar', 'smith-machine', 'kettlebell'}
+
+
+def needs_bench_angle(name, equipment):
+    """Free-weight exercises done on an adjustable bench/seat must state the angle."""
+    if equipment not in FREE_WEIGHTS or not BENCH_WORDS.search(name):
+        return False
+    return not re.search(r'Standing|Preacher', name, re.I)
 
 
 def main():
     folder = Path(sys.argv[1] if len(sys.argv) > 1 else DEFAULT_DIR)
     problems = []
-    catalogue_ids = {e['id'] for f in CATALOGUE_DIR.glob('*.json') for e in json.loads(f.read_text())}
+    catalogue = [e for f in CATALOGUE_DIR.glob('*.json') for e in json.loads(f.read_text())]
+    catalogue_ids = {e['id'] for e in catalogue}
+    names = {e['id']: e['name_en'] for e in catalogue}
+    equipment = {e['id']: e['equipment'] for e in catalogue}
     additions_file = folder / 'catalogue-additions.json'
     additions = json.loads(additions_file.read_text()) if additions_file.exists() else []
     addition_ids = {e['id'] for e in additions}
@@ -73,6 +85,8 @@ def main():
         if [d.get('key') for d in days] != DAY_KEYS:
             problems.append(f'{where}: days must be {DAY_KEYS}')
         for day in days:
+            if len(day.get('focus') or '') > 28:
+                problems.append(f"{where}/{day.get('key')}: focus over 28 characters")
             codes = set()
             for ex in day.get('exercises', []):
                 at = f"{where}/{day.get('key')}/{ex.get('code')}"
@@ -102,8 +116,13 @@ def main():
                 if not isinstance(ex.get('rest_seconds'), int):
                     problems.append(f'{at}: rest_seconds')
                 angle = ex.get('angle_degrees')
-                if angle is not None and not (0 < angle < 90):
-                    problems.append(f'{at}: angle_degrees')
+                if angle is not None and not (-45 <= angle <= 90):
+                    problems.append(f'{at}: angle_degrees must be between -45 and 90')
+                name = names.get(ex.get('exercise_id'), '')
+                if angle is None and needs_bench_angle(name, equipment.get(ex.get('exercise_id'), '')):
+                    problems.append(f"{at}: {name!r} is done on a bench/seat — angle_degrees is required")
+                if len(ex.get('notes') or '') > 80:
+                    problems.append(f'{at}: notes over 80 characters')
                 if SPANISH.search(ex.get('notes') or ''):
                     problems.append(f'{at}: notes not in English')
             letters = {}
