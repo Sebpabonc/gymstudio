@@ -12,6 +12,13 @@ export default defineConfig({
   server: {
     port: 5173,
     headers: noCacheHeaders,
+    watch: {
+      ignored: [
+        '**/dist/**',
+        '**/android/app/src/main/assets/public/**',
+        '**/ios/App/App/public/**',
+      ],
+    },
   },
   preview: {
     headers: noCacheHeaders,
