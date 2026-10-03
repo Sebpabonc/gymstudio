@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabaseClient, isGoogleProviderEnabled } from '../lib/supabaseClient'
+import GuestDataPrompt from '../components/GuestDataPrompt'
 import { isDemoMode } from '../utils/demoMode'
 import { syncWorkoutHistory } from '../utils/sync'
 import {
@@ -264,15 +265,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={value}>
       <React.Fragment key={`${accountId ?? 'guest'}${guestPromptPending ? ':pending' : ''}`}>{children}</React.Fragment>
       {guestDataToMove && (
-        <div className="guest-data-prompt" role="dialog" aria-modal="true" aria-label="Move workouts to your account"
-          style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.6)', padding: 16 }}>
-          <div style={{ background: '#1b1b1f', color: '#fff', borderRadius: 12, padding: 20, maxWidth: 360 }}>
-            <p>Move the workouts on this device to {state.session?.user.email ?? 'your account'}?</p>
-            <p>This only happens once. Otherwise they stay on this device as guest data.</p>
-            <button type="button" onClick={() => resolveGuestPrompt(true)}>Move workouts</button>{' '}
-            <button type="button" onClick={() => resolveGuestPrompt(false)}>Keep as guest</button>
-          </div>
-        </div>
+        <GuestDataPrompt
+          accountLabel={state.session?.user.email ?? 'your account'}
+          onMove={() => resolveGuestPrompt(true)}
+          onKeep={() => resolveGuestPrompt(false)}
+        />
       )}
     </AuthContext.Provider>
   )
