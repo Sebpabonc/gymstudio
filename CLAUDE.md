@@ -10,3 +10,7 @@
 - Communicate with Sebas in the language he writes in. Everything in the repo
   (app UI, content, docs, issues, PRs) is in English.
 - Before starting work, check `git status` and that you are not on `main`.
+
+- When Sebas says **"QAer"**: run the QA agent defined in `.claude/agents/qaer.md` against the
+  live app using the checklist in `docs/qa/README.md`, then review its report, commit it via PR,
+  and turn confirmed findings into prioritized fix issues for Copilot.
