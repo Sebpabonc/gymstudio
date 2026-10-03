@@ -19,6 +19,19 @@ export function workoutMaxWeight(sets: WorkoutSet[]) {
   return Math.max(...sets.map((set) => set.weight), 0)
 }
 
+export function copyWeightToUntouchedSets(
+  weights: number[],
+  touched: boolean[],
+  sourceIndex: number,
+  weight: number
+) {
+  return weights.map((currentWeight, index) => {
+    if (index === sourceIndex) return weight
+    if (sourceIndex === 0 && weight > 0 && !touched[index]) return weight
+    return currentWeight
+  })
+}
+
 export function formatWorkoutSet(set: WorkoutSet) {
   const main = `${set.reps} × ${set.weight} kg`
   return set.drop ? `${main} → ${set.drop.reps} × ${set.drop.weight} kg` : main

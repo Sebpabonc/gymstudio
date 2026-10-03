@@ -21,7 +21,13 @@ import { applyTargetToWeights, targetAppliesToDay } from '../utils/weightTargets
 import { blockDateRange, blockWeek, defaultActiveBlock, formatBenchAngle } from '../utils/trainingBlocks'
 import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, formatLoggedTime, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import { isDemoMode } from '../utils/demoMode'
-import { filterLoggableSets, parseRepPrescription, workoutMaxWeight, workoutVolume } from '../utils/workoutSets'
+import {
+  copyWeightToUntouchedSets,
+  filterLoggableSets,
+  parseRepPrescription,
+  workoutMaxWeight,
+  workoutVolume,
+} from '../utils/workoutSets'
 import { createSupersetEntries, groupSupersets } from '../utils/supersets'
 
 type PlanExercise = {
@@ -44,6 +50,7 @@ type PlanDraft = {
   reps: number
   weight: number
   setWeights: number[]
+  setWeightTouched: boolean[]
   setReps: number[]
   dropSetWeights: number[]
   dropSetReps: number[]
@@ -498,9 +505,13 @@ export default function WorkoutPlan({
     setPlannedDrafts((current) => {
       const currentDraft = current[key] ?? getDraftForExercise(exercise.name, exercise)
 
-      const nextSetWeights = Array.from(
+      let nextSetWeights = Array.from(
         { length: setCount },
         (_, index) => currentDraft.setWeights[index] ?? currentDraft.weight
+      )
+      const nextSetWeightTouched = Array.from(
+        { length: setCount },
+        (_, index) => currentDraft.setWeightTouched[index] ?? (nextSetWeights[index] !== 0)
       )
       const nextSetReps = Array.from(
         { length: setCount },
@@ -519,6 +530,15 @@ export default function WorkoutPlan({
       if (field === 'weight' || field === 'dropWeight') {
         const weights = field === 'weight' ? nextSetWeights : nextDropSetWeights
         weights[setIndex] = Number(value) || 0
+        if (field === 'weight') {
+          nextSetWeightTouched[setIndex] = true
+          nextSetWeights = copyWeightToUntouchedSets(
+            nextSetWeights,
+            nextSetWeightTouched,
+            setIndex,
+            Number(value) || 0
+          )
+        }
       } else {
         const reps = field === 'reps' ? nextSetReps : nextDropSetReps
         reps[setIndex] = nextReps
@@ -531,6 +551,7 @@ export default function WorkoutPlan({
           reps: field === 'reps' ? nextReps : currentDraft.reps,
           weight: field === 'weight' ? nextSetWeights[0] ?? 0 : currentDraft.weight,
           setWeights: field === 'weight' ? nextSetWeights : currentDraft.setWeights,
+          setWeightTouched: field === 'weight' ? nextSetWeightTouched : currentDraft.setWeightTouched,
           setReps: field === 'reps' ? nextSetReps : currentDraft.setReps,
           dropSetWeights: field === 'dropWeight' ? nextDropSetWeights : currentDraft.dropSetWeights,
           dropSetReps: field === 'dropReps' ? nextDropSetReps : currentDraft.dropSetReps,
@@ -599,6 +620,7 @@ export default function WorkoutPlan({
         reps: baseSetReps[0] ?? (Number(fallbackReps) || 8),
         weight: baseSetWeights[0] ?? 0,
         setWeights: baseSetWeights,
+        setWeightTouched: baseSetWeights.map((weight) => weight !== 0),
         setReps: baseSetReps,
         dropSetWeights: baseDropWeights,
         dropSetReps: baseDropSetReps,

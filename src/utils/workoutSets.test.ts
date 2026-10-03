@@ -1,8 +1,27 @@
 import { describe, expect, it } from 'vitest'
 import { WorkoutSet } from '../types'
-import { filterLoggableSets, formatWorkoutSet, parseRepPrescription, workoutMaxWeight, workoutVolume } from './workoutSets'
+import {
+  copyWeightToUntouchedSets,
+  filterLoggableSets,
+  formatWorkoutSet,
+  parseRepPrescription,
+  workoutMaxWeight,
+  workoutVolume,
+} from './workoutSets'
 
 describe('workout sets', () => {
+  it('copies the first set weight only to untouched rows', () => {
+    expect(copyWeightToUntouchedSets([20, 0, 22, 0], [true, false, true, false], 0, 20))
+      .toEqual([20, 20, 22, 20])
+    expect(copyWeightToUntouchedSets([20, 20, 22, 20], [true, false, true, false], 0, 24))
+      .toEqual([24, 24, 22, 24])
+  })
+
+  it('does not copy non-positive weights or edits to later sets', () => {
+    expect(copyWeightToUntouchedSets([20, 0, 0], [true, false, false], 0, 0)).toEqual([0, 0, 0])
+    expect(copyWeightToUntouchedSets([20, 0, 0], [true, false, false], 2, 22)).toEqual([20, 0, 22])
+  })
+
   it('parses both parts of a drop-set prescription', () => {
     expect(parseRepPrescription('12+12')).toEqual([12, 12])
     expect(parseRepPrescription('15+15')).toEqual([15, 15])
