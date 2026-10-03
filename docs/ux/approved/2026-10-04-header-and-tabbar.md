@@ -1,6 +1,13 @@
 # Header brand and minimal tab bar (2026-10-04)
 
-**Author:** UXer · **Status:** Proposal, waiting for a PO decision · **Mockups:** [`2026-10-04-header-and-tabbar-mockups.html`](./2026-10-04-header-and-tabbar-mockups.html)
+**Author:** UXer · **Status:** Approved by Sebas (PO), 2026-10-04 · **Mockups:** [`2026-10-04-header-and-tabbar-mockups.html`](./2026-10-04-header-and-tabbar-mockups.html)
+
+## PO decision (2026-10-04)
+- **Header: Option 2**, a large GYM STUDIO title that collapses into a 48 px inline bar on scroll.
+- **Tab bar: Option 3**, a floating minimal dock with icons only and a dot on the active tab.
+- Active colour `--nav-active: #c99ca1` (Tech Lead default for WCAG contrast; the PO can change it).
+- Mitigations for Option 3's main risk (Tech Lead): the content gets enough bottom padding to scroll every
+  "+" button and set input above the dock, and the dock hides while a text or number input has focus.
 
 ## Problem (PO feedback after PR #86)
 1. **The brand disappeared.** PR #86 replaced the tall header (BF monogram, "Borcelle Fitness · Performance
