@@ -24,6 +24,7 @@ Each file is a JSON array of exercise objects (UTF-8, 2-space indent).
   "mechanic": "compound",
   "laterality": "bilateral",
   "posture_tips": ["…", "…", "…", "…", "…"],
+  "squeeze_cue": "Squeeze your chest as if trying to make your biceps touch at the top.",
   "aliases": [],
   "origin": "new"
 }
@@ -43,6 +44,7 @@ Each file is a JSON array of exercise objects (UTF-8, 2-space indent).
 | `mechanic` | `compound` or `isolation`. |
 | `laterality` | `bilateral` or `unilateral`. |
 | `posture_tips` | **Exactly 5**, **English**, one sentence each, ≤ 140 characters, imperative ("Keep…", "Plant…"). Order: 1) starting position, 2) posture/alignment during the movement, 3) execution (range and control), 4) common mistake to avoid, 5) safety. No medical advice. |
+| `squeeze_cue` | **Required.** One English sentence (≤ 140 chars, imperative) telling the user exactly which muscle to contract and how/where to feel it at the hardest point of the rep (mind-muscle connection), e.g. "Squeeze your chest as if trying to make your biceps touch at the top." Must not repeat a posture tip. |
 | `aliases` | Old ids merged into this exercise (carry over v1 aliases). |
 | `origin` | `existing` (v1 id kept) or `new`. |
 

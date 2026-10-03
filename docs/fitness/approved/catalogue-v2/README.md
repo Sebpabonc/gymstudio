@@ -15,5 +15,8 @@
 - **English rewrite (2026-10-03):** the PO made the app English-only. The PT rewrote all
   1,120 posture tips in English (coaching cues, same order and meaning); Tech Lead verified
   that only `posture_tips` changed and the validator now rejects Spanish tips.
+- **Squeeze cues + tip review (2026-10-04):** at the PO's request the PT added a mind-muscle
+  `squeeze_cue` to all 227 exercises and improved the posture tips (tempo/range in tip 3);
+  Tech Lead verified only `posture_tips`/`squeeze_cue` changed.
 - **To change content:** edit the JSON via a PT draft → approval → re-run
   `python3 scripts/catalogue-v2-seed.py` into a new migration.
