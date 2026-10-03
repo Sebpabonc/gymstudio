@@ -47,6 +47,7 @@ type TrainingBlockRow = {
   weeks: number
   origin: TrainingBlock['origin']
   summary: string
+  insights?: TrainingBlock['insights'] | null
   days?: TrainingDayRow[]
   training_block_days?: TrainingDayRow[]
 }
@@ -136,6 +137,7 @@ export function mapTrainingBlockRows(rows: unknown[]): TrainingBlock[] {
         weeks: row.weeks,
         origin: row.origin,
         summary: row.summary,
+        insights: row.insights ?? [],
         days,
       }
     })
@@ -147,7 +149,10 @@ function loadTrainingBlockCache(): TrainingBlock[] | null {
     const parsed = JSON.parse(localStorage.getItem(storageKey(TRAINING_BLOCKS_KEY)) ?? 'null')
     if (!Array.isArray(parsed) || parsed.length === 0) return null
     if (parsed.some((block) => typeof block?.id !== 'string' || !Array.isArray(block?.days))) return null
-    return parsed as TrainingBlock[]
+    return parsed.map((block) => ({
+      ...block,
+      insights: Array.isArray(block.insights) ? block.insights : [],
+    })) as TrainingBlock[]
   } catch {
     return null
   }
@@ -170,7 +175,7 @@ export async function fetchTrainingBlocks(): Promise<TrainingBlock[]> {
       const { data, error } = await supabaseClient
         .from('training_blocks')
         .select(
-          'id, number, name, method, start_date, weeks, origin, summary, days:training_block_days(key, position, name, focus, exercises:training_block_exercises(code, position, exercise_id, sets, reps, rest_seconds, technique, angle_degrees, notes))'
+          'id, number, name, method, start_date, weeks, origin, summary, insights, days:training_block_days(key, position, name, focus, exercises:training_block_exercises(code, position, exercise_id, sets, reps, rest_seconds, technique, angle_degrees, notes))'
         )
         .eq('is_active', true)
         .order('number')

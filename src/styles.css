@@ -1088,6 +1088,55 @@ button {
   overflow-wrap: anywhere;
 }
 
+.about-block-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.block-insights-chevron {
+  flex: 0 0 auto;
+  transition: transform 150ms ease;
+}
+
+.about-block-toggle[aria-expanded='true'] .block-insights-chevron {
+  transform: rotate(180deg);
+}
+
+.training-block-insights {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.training-block-insights[hidden] {
+  display: none;
+}
+
+.training-block-insights h5 {
+  margin: 0 0 3px;
+  color: var(--text);
+  font-size: 0.68rem;
+}
+
+.training-block-insights p {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 0.66rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 .block-change-button {
   justify-self: start;
   padding: 7px 10px;
@@ -1119,6 +1168,14 @@ button {
 .training-block-option strong {
   font-size: 0.68rem;
   overflow-wrap: anywhere;
+}
+
+.training-block-option-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .training-block-option small {

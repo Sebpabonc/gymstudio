@@ -18,6 +18,7 @@ function testBlock(exercises: TrainingBlock['days'][number]['exercises']): Train
     weeks: 6,
     origin: 'coach',
     summary: '',
+    insights: [],
     days: [{ key: 'chest-back-a', position: 1, name: 'Chest-Back A', exercises }],
   }]
 }

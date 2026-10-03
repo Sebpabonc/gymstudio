@@ -64,5 +64,6 @@ export type TrainingBlock = {
   weeks: number
   origin: 'coach' | 'pt'
   summary: string
+  insights: { title: string; body: string }[]
   days: TrainingDay[]
 }
