@@ -26,3 +26,11 @@ export function summarizeCompletedEntry(entry: WorkoutEntry) {
 export function formatLoggedTime(timestamp: number) {
   return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
+
+export function findNextPendingIndex(done: boolean[], currentIndex: number): number {
+  for (let offset = 1; offset <= done.length; offset += 1) {
+    const index = (currentIndex + offset) % done.length
+    if (index !== currentIndex && !done[index]) return index
+  }
+  return -1
+}

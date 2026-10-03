@@ -16,7 +16,7 @@ import {
   upsertExerciseRecord,
 } from '../utils/storage'
 import { blockDateRange, blockWeek, defaultActiveBlock, formatBenchAngle } from '../utils/trainingBlocks'
-import { findCompletedEntry, formatLoggedTime, summarizeCompletedEntry } from '../utils/completedExercises'
+import { findCompletedEntry, findNextPendingIndex, formatLoggedTime, summarizeCompletedEntry } from '../utils/completedExercises'
 import { isDemoMode } from '../utils/demoMode'
 import { filterLoggableSets, parseRepPrescription, workoutMaxWeight, workoutVolume } from '../utils/workoutSets'
 
@@ -672,6 +672,7 @@ export default function WorkoutPlan({
 
   const logPlannedExercise = async (exercise: PlanExercise) => {
     const exerciseKey = getPlanDraftKey(exercise.name)
+    const sectionKey = normalizeExerciseName(exercise.name)
     const canonicalId =
       exercise.exerciseId ??
       (await upsertExerciseRecord({
@@ -746,33 +747,35 @@ export default function WorkoutPlan({
 
     setSetSectionsVisible((current) => ({
       ...current,
-      [exerciseKey]: false,
+      [sectionKey]: false,
     }))
 
     setProgressSectionsVisible((current) => ({
       ...current,
-      [exerciseKey]: false,
+      [sectionKey]: false,
     }))
 
     setActiveSetIndexByExercise((current) => ({
       ...current,
-      [exerciseKey]: 0,
+      [sectionKey]: 0,
     }))
 
     setLoggedAtByExercise((current) => ({ ...current, [entryToSave.id]: Date.now() }))
 
-    const currentIndex = activeExercises.findIndex((item) => normalizeExerciseName(item.name) === exerciseKey)
-    const nextExercise = activeExercises
-      .slice(currentIndex + 1)
-      .find((item) => !findExerciseCompletion(item, nextHistory))
+    const currentIndex = activeExercises.findIndex((item) => normalizeExerciseName(item.name) === sectionKey)
+    const nextIndex = findNextPendingIndex(
+      activeExercises.map((item) => !!findExerciseCompletion(item, nextHistory)),
+      currentIndex
+    )
+    const nextExercise = nextIndex >= 0 ? activeExercises[nextIndex] : undefined
     setCollapsedExercises((current) => ({
       ...current,
-      [exerciseKey]: true,
+      [sectionKey]: true,
       ...(nextExercise ? { [normalizeExerciseName(nextExercise.name)]: false } : {}),
     }))
   }
 
-  const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => {
+const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => {
     setCustomExerciseDraft((current) => ({
       ...current,
       [field]: value,
@@ -1069,6 +1072,7 @@ export default function WorkoutPlan({
       )}
 
       {planMode === 'preset' ? (
+        <>
         <div className="day-tabs" aria-label="Workout days">
           {activeBlock?.days.map((day) => (
             <button
@@ -1094,14 +1098,15 @@ export default function WorkoutPlan({
                 ).length
                 return (
                   <span className="day-tab-progress" aria-label={`${done} of ${day.exercises.length} exercises done`}>
-                    {`${done}/${day.exercises.length} done`}
+                    {`${done}/${day.exercises.length}`}
                   </span>
                 )
               })()}
-              {day.key === (activeDay?.key ?? selectedDay) && <span className="day-tab-summary">{day.focus}</span>}
             </button>
           ))}
         </div>
+        {activeDay?.focus && <p className="day-focus-label">{activeDay.focus}</p>}
+        </>
       ) : (
         <section className="custom-plan-builder">
           <div className="custom-plan-header">
@@ -1291,14 +1296,14 @@ export default function WorkoutPlan({
                       <strong className="planned-exercise-main-name">{displayTitle.main}</strong>
                       {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
                     </div>
+                      {completedEntry && (
+                        <span className="done-badge" role="status">
+                          <span aria-hidden="true">✓ </span>
+                          Done{loggedAtByExercise[completedEntry.id] ? ` · ${formatLoggedTime(loggedAtByExercise[completedEntry.id])}` : ''}
+                          <span className="done-summary"> · {summarizeCompletedEntry(completedEntry)}</span>
+                        </span>
+                      )}
                   </div>
-                  {completedEntry && (
-                    <span className="done-badge" role="status">
-                      <span aria-hidden="true">✓ </span>
-                      Done{loggedAtByExercise[completedEntry.id] ? ` · ${formatLoggedTime(loggedAtByExercise[completedEntry.id])}` : ''}
-                      <span className="done-summary"> · {summarizeCompletedEntry(completedEntry)}</span>
-                    </span>
-                  )}
                   <button
                     type="button"
                     className="toggle-button collapse-trigger"
