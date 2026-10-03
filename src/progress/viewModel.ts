@@ -46,6 +46,15 @@ export function recentRecords(records: PersonalRecordSession[], max = MAX_RECORD
 }
 
 export const RECORD_LABELS = { weight: 'Weight PR', reps: 'Rep PR', e1rm: 'e1RM PR' } as const
+export const RECORD_TOOLTIPS = {
+  weight: 'Highest weight lifted while meeting the minimum rep target.',
+  reps: 'Most reps completed at a weight equal to or heavier than before.',
+  e1rm: 'Estimated one-rep max: your estimated maximum weight for one repetition.',
+} as const
+
+export function formatBlockMethod(method: string) {
+  return method.replace(/[-_]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
 
 export function visibleBlockReports(reports: BlockReport[], entries: ProgressEntry[], blocks: TrainingBlock[]) {
   const loggedBlockIds = new Set<string>()
@@ -96,9 +105,9 @@ export function exercisesWithHistory(entries: ProgressEntry[], exercises: Exerci
 }
 
 export function filterExerciseOptions(exercises: Exercise[], query: string) {
-  const normalized = query.trim().toLocaleLowerCase()
+  const normalized = query.trim().toLowerCase()
   if (!normalized) return exercises
-  return exercises.filter((exercise) => `${exercise.name} ${exercise.id}`.toLocaleLowerCase().includes(normalized))
+  return exercises.filter((exercise) => `${exercise.name} ${exercise.id}`.toLowerCase().includes(normalized))
 }
 
 export function weeklyPRCount(records: PersonalRecordSession[], weekStart: string) {

@@ -6,6 +6,7 @@ import {
   defaultExerciseId,
   filterExerciseOptions,
   exercisesWithHistory,
+  formatBlockMethod,
   limitSuggestions,
   muscleStatus,
   formatWeekLabel,
@@ -15,6 +16,7 @@ import {
   sessionDots,
   topLifts,
   visibleBlockReports,
+  RECORD_TOOLTIPS,
   weeklyPRCount,
   weeklySummary,
 } from './viewModel'
@@ -56,7 +58,7 @@ const entry = (exerciseId: string, date: string): ProgressEntry => ({
 describe('progress view model', () => {
   it('limits suggestions to five', () => {
     const suggestions: ProgressSuggestion[] = Array.from({ length: 8 }, (_, index) => ({
-      type: 'plateau', exerciseId: `e${index}`, dayType: 'A', message: 'x',
+      type: 'plateau', exerciseId: `e${index}`, dayType: 'A', message: 'x', why: 'y',
     }))
     expect(limitSuggestions(suggestions)).toHaveLength(5)
   })
@@ -96,6 +98,13 @@ describe('progress view model', () => {
     expect(muscleStatus({ band: 'high', done: 24, planned: 24 })).toBe('Above range (planned)')
     expect(muscleStatus({ band: 'high', done: 26, planned: 20 })).toBe('Above range')
     expect(muscleStatus({ band: 'in-range', done: 12, planned: 12 })).toBe('In range')
+  })
+
+  it('uses plain block method labels and explains personal record types', () => {
+    expect(formatBlockMethod('reverse-pyramid')).toBe('Reverse Pyramid')
+    expect(RECORD_TOOLTIPS.e1rm).toContain('Estimated one-rep max')
+    expect(RECORD_TOOLTIPS.weight).toContain('Highest weight')
+    expect(RECORD_TOOLTIPS.reps).toContain('Most reps')
   })
 
   it('orders chart exercises by most recent session and filters them by search', () => {

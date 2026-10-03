@@ -15,8 +15,10 @@ import {
   chartSummary,
   CHART_SIZE,
   defaultExerciseId,
+  filterExerciseOptions,
   exercisesWithHistory,
   formatChange,
+  formatBlockMethod,
   formatPercent,
   limitSuggestions,
   muscleRows,
@@ -27,12 +29,16 @@ import {
   reportingBlock,
   reportingWeek,
   RECORD_LABELS,
+  RECORD_TOOLTIPS,
   SETS_RANGE,
   sessionDots,
   suggestionExerciseId,
   topLifts,
   visibleBlockReports,
+  weeklyPRCount,
+  weeklySummary,
 } from '../progress/viewModel'
+import { startOfWeek } from '../progress/utils'
 import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import {
   applyWeightTarget,
@@ -54,8 +60,8 @@ function formatDate(value: string) {
   return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
-function SectionCard({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
-  const [open, setOpen] = useState(true)
+function SectionCard({ id, title, children, defaultOpen = false }: { id: string; title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen)
   return (
     <section className="card progress-section">
       <div className="section-title-row">
@@ -100,8 +106,19 @@ function StrengthChart({ model, title, summary }: { model: ReturnType<typeof bui
       {model.yTicks.map((tick) => (
         <g key={tick.value}>
           <line x1={left} x2={width - right} y1={tick.y} y2={tick.y} className="chart-grid" />
-          <text x={left - 4} y={tick.y + 3} textAnchor="end" className="chart-label">{tick.value}</text>
+          <text x={left - 4} y={tick.y + 3} textAnchor="end" className="chart-label">{tick.value} kg</text>
         </g>
+      ))}
+      {model.xTicks.map((tick, index) => (
+        <text
+          key={tick.date}
+          x={tick.x}
+          y={height - 4}
+          textAnchor={index === 0 ? 'start' : index === model.xTicks.length - 1 ? 'end' : 'middle'}
+          className="chart-label"
+        >
+          {tick.label}
+        </text>
       ))}
       <path d={model.path} className="chart-line" />
       {model.points.map((point) => (
@@ -121,6 +138,8 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   const [blocks, setBlocks] = useState<TrainingBlock[] | null>(null)
   const [dayType, setDayType] = useState<DayTypeFilter>('A')
   const [pickedId, setPickedId] = useState(initialExerciseId ?? '')
+  const [exerciseSearch, setExerciseSearch] = useState('')
+  const [exercisePickerOpen, setExercisePickerOpen] = useState(false)
   const [targets, setTargets] = useState(() => loadWeightTargets())
   const today = localIsoDate()
 
@@ -140,20 +159,23 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
     if (!blocks) return null
     const suggestions = limitSuggestions(progressSuggestions(entries, blocks, exercises, today, new Set(Object.keys(targets))))
     const week = reportingWeek(entries, today)
+    const currentWeek = startOfWeek(today)
+    const currentWeekAdherence = adherence(entries, blocks, currentWeek)
     const adherenceReport = adherence(entries, blocks, week)
     const records = personalRecords(entries, blocks)
+    const prCount = weeklyPRCount(records, currentWeek)
     const reports = visibleBlockReports(blockReports(entries, blocks, exercises), entries, blocks)
     const weekly = weeklySets(entries, blocks, exercises, week)
     const options = exercisesWithHistory(entries, exercises)
     const consistencyBlock = reportingBlock(blocks, entries, today)
-    return { week, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options }
+    return { week, currentWeek, currentWeekAdherence, prCount, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options }
   }, [blocks, entries, exercises, today, targets])
 
   if (!blocks || !data) {
     return <section className="card" aria-live="polite"><p className="empty-state">Loading progress…</p></section>
   }
 
-  const { week, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options } = data
+  const { week, currentWeek, currentWeekAdherence, prCount, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options } = data
   const nameFor = (id: string) => {
     const exercise = exercises.find((item) => item.id === id)
     return exercise ? getExerciseDisplayName(exercise) : id
@@ -161,13 +183,15 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   const selectedId = options.some((exercise) => exercise.id === pickedId)
     ? pickedId
     : defaultExerciseId(entries, exercises, blocks, today)
+  const filteredOptions = filterExerciseOptions(options, exerciseSearch)
   const trend = selectedId ? strengthTrend(entries, blocks, selectedId, today, dayType, exercises) : null
   const recordDates = new Set(
     records.filter((record) => record.exerciseId === selectedId && record.badges.length > 0).map((record) => record.date)
   )
   const chart = trend ? buildChartModel(trend.points, blocks, recordDates) : null
-    const blockAdherence = blockAdherenceFor(adherenceReport, consistencyBlock?.id)
+  const blockAdherence = blockAdherenceFor(adherenceReport, consistencyBlock?.id)
   const dots = sessionDots(adherenceReport)
+  const headlineDots = sessionDots(currentWeekAdherence)
   const rows = muscleRows(weekly)
   const scale = muscleScale(rows)
   const recent = recentRecords(records)
@@ -189,6 +213,22 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
 
   return (
     <>
+      <section className="card progress-headline" aria-label="Weekly progress">
+        <h2 className="progress-headline-text">{weeklySummary(currentWeekAdherence.week.sessionsDone, currentWeekAdherence.week.sessionsPlanned, prCount)}</h2>
+        <div
+          className="progress-session-days"
+          role="img"
+          aria-label={`${currentWeekAdherence.week.sessionsDone} of ${currentWeekAdherence.week.sessionsPlanned} sessions done, ${formatWeekLabel(currentWeek, today).toLowerCase()}`}
+        >
+          {headlineDots.map((done, index) => (
+            <span key={index} className="progress-session-day">
+              <span>D{index + 1}</span>
+              <span className={done ? 'session-dot done' : 'session-dot'} />
+            </span>
+          ))}
+        </div>
+      </section>
+
       <SectionCard id="suggestions" title="Suggestions">
         {suggestions.length || appliedTargets.length ? (
           <ul className="progress-suggestions">
@@ -208,18 +248,23 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
             {suggestions.map((suggestion, index) => {
               const exerciseId = suggestionExerciseId(suggestion)
               return (
-                <li key={`${suggestion.type}-${exerciseId ?? 'all'}-${index}`} className={suggestion.type === 'add-weight' ? 'suggestion-actions' : undefined}>
+                <li key={`${suggestion.type}-${exerciseId ?? 'all'}-${index}`} className="suggestion-actions">
                   {exerciseId ? (
-                    <button type="button" className="suggestion-button" onClick={() => openSuggestion(suggestion)}>
+                    <div className="suggestion-copy">
                       <span className={`suggestion-tag ${suggestion.type}`}>
                         {suggestion.type === 'add-weight' ? 'Add weight' : 'Plateau'}
                       </span>
                       <span>{suggestion.message}</span>
-                    </button>
+                      <p className="suggestion-why"><strong>Why?</strong> {suggestion.why}</p>
+                      <button type="button" className="suggestion-exercise-link" onClick={() => openSuggestion(suggestion)}>
+                        Open {nameFor(exerciseId)}
+                      </button>
+                    </div>
                   ) : (
-                    <div className="suggestion-button static">
+                    <div className="suggestion-copy">
                       <span className="suggestion-tag fatigue">Fatigue</span>
                       <span>{suggestion.message}</span>
+                      <p className="suggestion-why"><strong>Why?</strong> {suggestion.why}</p>
                     </div>
                   )}
                   {suggestion.type === 'add-weight' && (
@@ -260,20 +305,52 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
         {!hasHistory && <p className="empty-state">Log a few sessions to see your consistency.</p>}
       </SectionCard>
 
-      <SectionCard id="strength" title="Strength trend">
+      <SectionCard id="strength" title="Strength trend" defaultOpen>
         {options.length ? (
           <>
-            <label className="field-label" htmlFor="progress-exercise">Exercise</label>
-            <select
-              id="progress-exercise"
-              className="search-input"
-              value={selectedId}
-              onChange={(event) => setPickedId(event.target.value)}
+            <span className="field-label">Exercise</span>
+            <button
+              type="button"
+              className="exercise-picker-button"
+              aria-expanded={exercisePickerOpen}
+              aria-controls="progress-exercise-picker"
+              onClick={() => {
+                setExercisePickerOpen((open) => !open)
+                setExerciseSearch('')
+              }}
             >
-              {options.map((exercise) => (
-                <option key={exercise.id} value={exercise.id}>{getExerciseDisplayName(exercise)}</option>
-              ))}
-            </select>
+              {nameFor(selectedId)} <span aria-hidden="true">{exercisePickerOpen ? '−' : '+'}</span>
+            </button>
+            {exercisePickerOpen && (
+              <div id="progress-exercise-picker" className="exercise-picker-panel">
+                <label className="field-label" htmlFor="progress-exercise-search">Search exercises</label>
+                <input
+                  id="progress-exercise-search"
+                  className="search-input"
+                  type="search"
+                  placeholder="Search by exercise name"
+                  value={exerciseSearch}
+                  onChange={(event) => setExerciseSearch(event.target.value)}
+                />
+                <div className="search-dropdown" aria-label="Exercises sorted by most recent session">
+                  {filteredOptions.length ? filteredOptions.map((exercise) => (
+                    <button
+                      key={exercise.id}
+                      type="button"
+                      className={exercise.id === selectedId ? 'result-item active' : 'result-item'}
+                      aria-pressed={exercise.id === selectedId}
+                      onClick={() => {
+                        setPickedId(exercise.id)
+                        setExerciseSearch('')
+                        setExercisePickerOpen(false)
+                      }}
+                    >
+                      <span className="result-name">{getExerciseDisplayName(exercise)}</span>
+                    </button>
+                  )) : <p className="empty-state">No exercises found.</p>}
+                </div>
+              </div>
+            )}
             <div className="plan-mode-tabs day-toggle" role="group" aria-label="Day type">
               {(['A', 'B', 'all'] as const).map((value) => (
                 <button
@@ -323,7 +400,15 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                   <small>{formatDate(record.date)}</small>
                 </div>
                 <div className="chip-row">
-                  {record.badges.map((badge) => <span key={badge} className="chip">{RECORD_LABELS[badge]}</span>)}
+                  {record.badges.map((badge) => (
+                    <span key={badge} className="record-badge">
+                      <span className="chip">{RECORD_LABELS[badge]}</span>
+                      <details className="record-help">
+                        <summary aria-label={`Explain ${RECORD_LABELS[badge]}`} title={RECORD_TOOLTIPS[badge]}>ⓘ</summary>
+                        <span className="record-help-text" role="tooltip">{RECORD_TOOLTIPS[badge]}</span>
+                      </details>
+                    </span>
+                  ))}
                 </div>
               </li>
             ))}
@@ -369,7 +454,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
             {reports.map((report) => (
               <li key={report.blockId} className="block-report">
                 <div className="section-title-row">
-                  <strong>Block {report.blockNumber} · {report.method}</strong>
+                  <strong>Block {report.blockNumber} · {formatBlockMethod(report.method)}</strong>
                   <span className="block-headline">{formatChange(report.medianChangePercent)}</span>
                 </div>
                 {topLifts(report).length ? (
