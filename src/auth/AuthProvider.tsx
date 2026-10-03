@@ -3,6 +3,13 @@ import type { Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabaseClient, isGoogleProviderEnabled } from '../lib/supabaseClient'
 import { isDemoMode } from '../utils/demoMode'
 import { syncWorkoutHistory } from '../utils/sync'
+import {
+  hasGuestWorkoutData,
+  isGuestDataClaimed,
+  markGuestDataClaimed,
+  moveGuestDataToAccount,
+  setStorageNamespace,
+} from '../utils/storage'
 
 export type AuthStatus = 'loading' | 'signed-out' | 'signed-in'
 export type WorkoutSyncStatus = 'syncing' | 'synced' | 'offline' | 'error'
@@ -83,6 +90,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authStateReducer, startingState)
   const [syncStatus, setSyncStatus] = useState<WorkoutSyncStatus>('syncing')
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
+  const [resolvedGuestPromptFor, setResolvedGuestPromptFor] = useState<string | null>(null)
+
+  const accountId = demoMode ? null : state.session?.user.id ?? null
+  // Must be set during render so child effects read the right account's data.
+  setStorageNamespace(accountId)
+  const guestPromptPending =
+    accountId !== null && resolvedGuestPromptFor !== accountId && !isGuestDataClaimed() && hasGuestWorkoutData()
+  const guestDataToMove = guestPromptPending
 
   useEffect(() => {
     if (demoMode) return
@@ -115,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const userId = state.session?.user.id
-    if (demoMode || !userId) {
+    if (demoMode || !userId || guestPromptPending) {
       return
     }
 
@@ -179,7 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener('online', syncWhenOnline)
       window.removeEventListener('offline', syncWhenOffline)
     }
-  }, [demoMode, state.session?.user.id])
+  }, [demoMode, state.session?.user.id, guestPromptPending])
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const client = await getClient()
@@ -217,6 +232,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return resultError(error)
   }, [])
 
+  const resolveGuestPrompt = (move: boolean) => {
+    if (!accountId) return
+    if (move) moveGuestDataToAccount(accountId)
+    else markGuestDataClaimed(accountId)
+    setResolvedGuestPromptFor(accountId)
+  }
+
   const value = useMemo<AuthContextValue>(() => ({
     ...state,
     user: state.session?.user ?? null,
@@ -238,7 +260,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
   ])
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      <React.Fragment key={`${accountId ?? 'guest'}${guestPromptPending ? ':pending' : ''}`}>{children}</React.Fragment>
+      {guestDataToMove && (
+        <div className="guest-data-prompt" role="dialog" aria-modal="true" aria-label="Move workouts to your account"
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.6)', padding: 16 }}>
+          <div style={{ background: '#1b1b1f', color: '#fff', borderRadius: 12, padding: 20, maxWidth: 360 }}>
+            <p>Move the workouts on this device to {state.session?.user.email ?? 'your account'}?</p>
+            <p>This only happens once. Otherwise they stay on this device as guest data.</p>
+            <button type="button" onClick={() => resolveGuestPrompt(true)}>Move workouts</button>{' '}
+            <button type="button" onClick={() => resolveGuestPrompt(false)}>Keep as guest</button>
+          </div>
+        </div>
+      )}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

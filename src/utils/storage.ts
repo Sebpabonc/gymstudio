@@ -43,8 +43,88 @@ function signalWorkoutHistorySaved() {
   }
 }
 
+const GUEST_CLAIMED_KEY = 'gym-studio.guest-claimed'
+const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
+const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY])
+
+let storageNamespace: string | null = null
+
+// Signed-in accounts get their own local namespace; signed-out use is the "guest" namespace
+// (the original, un-prefixed keys). Catalogue caches are shared reference data.
+export function setStorageNamespace(userId: string | null) {
+  storageNamespace = userId
+}
+
 export function storageKey(key: string) {
-  return isDemoMode() ? key.replace(/^gym-studio\./, 'gym-studio.demo.') : key
+  if (isDemoMode()) return key.replace(/^gym-studio\./, 'gym-studio.demo.')
+  if (storageNamespace && !SHARED_KEYS.has(key)) {
+    return key.replace(/^gym-studio\./, `gym-studio.user.${storageNamespace}.`)
+  }
+  return key
+}
+
+function readJson<T>(key: string, fallback: T): T {
+  try {
+    return JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback
+  } catch {
+    return fallback
+  }
+}
+
+export function hasGuestWorkoutData() {
+  if (isDemoMode()) return false
+  const history = readJson<unknown>(HISTORY_KEY, [])
+  return Array.isArray(history) && history.length > 0
+}
+
+export function isGuestDataClaimed() {
+  return localStorage.getItem(GUEST_CLAIMED_KEY) !== null
+}
+
+export function markGuestDataClaimed(userId: string) {
+  localStorage.setItem(GUEST_CLAIMED_KEY, userId)
+}
+
+// Moves the guest workouts and personal settings into the account's namespace (the active one).
+export function moveGuestDataToAccount(userId: string) {
+  const guestHistory = readJson<WorkoutEntry[]>(HISTORY_KEY, [])
+  const guestMetadata = readJson<Partial<SyncMetadata>>(SYNC_METADATA_KEY, {})
+  const accountHistory = readJson<WorkoutEntry[]>(storageKey(HISTORY_KEY), [])
+  const accountIds = new Set(accountHistory.map((entry) => entry.id))
+  const moved = guestHistory.filter((entry) => !accountIds.has(entry.id))
+  const merged = [...accountHistory, ...moved].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
+  const metadata = loadSyncMetadata()
+  const now = new Date().toISOString()
+  for (const entry of moved) {
+    metadata.entries[entry.id] = { updatedAt: guestMetadata.entries?.[entry.id]?.updatedAt ?? now, dirty: true }
+  }
+  localStorage.setItem(storageKey(HISTORY_KEY), JSON.stringify(merged))
+  saveSyncMetadata(metadata)
+
+  const guestExercises = readJson<Exercise[]>(EXERCISES_KEY, [])
+  const accountExercises = readJson<Exercise[]>(storageKey(EXERCISES_KEY), [])
+  if (guestExercises.length) {
+    const ids = new Set(accountExercises.map((exercise) => exercise.id))
+    localStorage.setItem(
+      storageKey(EXERCISES_KEY),
+      JSON.stringify([...accountExercises, ...guestExercises.filter((exercise) => !ids.has(exercise.id))])
+    )
+  }
+
+  for (const key of [CUSTOM_PLAN_STORAGE_KEY, ACTIVE_BLOCK_KEY]) {
+    const value = localStorage.getItem(key)
+    if (value !== null && localStorage.getItem(storageKey(key)) === null) {
+      localStorage.setItem(storageKey(key), value)
+    }
+  }
+
+  for (const key of [HISTORY_KEY, SYNC_METADATA_KEY, EXERCISES_KEY, CUSTOM_PLAN_STORAGE_KEY, ACTIVE_BLOCK_KEY]) {
+    localStorage.removeItem(key)
+  }
+  markGuestDataClaimed(userId)
 }
 
 export function getSessionStorageValue(key: string) {
