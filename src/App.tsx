@@ -305,7 +305,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="phone-frame">
-        <main className="app-content" ref={contentRef}>
+        <main className={`app-content${restTimer ? ' with-rest-timer' : ''}`} ref={contentRef}>
           <div className="header-sentinel" ref={headerSentinelRef} aria-hidden="true" />
           <div className={`brand-bar${headerCollapsed ? ' collapsed' : ''}`}>
             <span className="brand-bar-title" aria-hidden="true">

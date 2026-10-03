@@ -56,9 +56,9 @@ export default function RestTimer({
   const isPaused = isRestTimerPaused(timer)
 
   return (
-    <div className="rest-timer-pill" role="status" aria-live="polite">
+    <div className="rest-timer-pill">
       {isDone ? (
-        <span className="rest-timer-done">Rest done</span>
+        <span className="rest-timer-done" role="status">Rest done</span>
       ) : (
         <button
           type="button"
