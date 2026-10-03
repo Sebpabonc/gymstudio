@@ -23,6 +23,7 @@ export type WorkoutSet = {
   id: string
   reps: number
   weight: number
+  drop?: { reps: number; weight: number }
 }
 
 export type WorkoutEntry = {
@@ -30,6 +31,8 @@ export type WorkoutEntry = {
   exerciseId: string
   date: string
   sets: WorkoutSet[]
+  blockId?: string
+  dayKey?: string
   notes?: string
 }
 

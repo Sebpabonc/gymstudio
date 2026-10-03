@@ -17,6 +17,7 @@ import {
 } from '../utils/storage'
 import { blockDateRange, blockWeek, defaultActiveBlock } from '../utils/trainingBlocks'
 import { isDemoMode } from '../utils/demoMode'
+import { parseRepPrescription, workoutMaxWeight, workoutVolume } from '../utils/workoutSets'
 
 type PlanExercise = {
   name: string
@@ -39,6 +40,8 @@ type PlanDraft = {
   weight: number
   setWeights: number[]
   setReps: number[]
+  dropSetWeights: number[]
+  dropSetReps: number[]
   notes: string
 }
 
@@ -386,8 +389,8 @@ export default function WorkoutPlan({
         .sort((a, b) => a.id.localeCompare(b.id))
         .map((entry) => {
           const exercise = exerciseCatalog.find((item) => item.id === entry.exerciseId)
-          const maxWeight = Math.max(...entry.sets.map((set) => set.weight), 0)
-          const totalVolume = entry.sets.reduce((total, set) => total + set.reps * set.weight, 0)
+          const maxWeight = workoutMaxWeight(entry.sets)
+          const totalVolume = workoutVolume(entry.sets)
 
           return {
             id: entry.id,
@@ -432,8 +435,8 @@ export default function WorkoutPlan({
 
       const key = normalizeExerciseName(match.name)
       const current = map.get(key)
-      const currentBestWeight = current ? Math.max(...current.sets.map((set) => set.weight), 0) : 0
-      const nextBestWeight = Math.max(...entry.sets.map((set) => set.weight), 0)
+      const currentBestWeight = current ? workoutMaxWeight(current.sets) : 0
+      const nextBestWeight = workoutMaxWeight(entry.sets)
 
       if (!current || nextBestWeight > currentBestWeight) {
         map.set(key, entry)
@@ -443,8 +446,11 @@ export default function WorkoutPlan({
     return map
   }, [exerciseCatalog, history])
 
+  const getPlanDraftKey = (exerciseName: string) =>
+    `${planMode === 'preset' ? `${activeBlock?.id ?? ''}:${activeDay?.key ?? ''}` : 'custom'}:${normalizeExerciseName(exerciseName)}`
+
   const updatePlanDraft = (exercise: PlanExercise, field: 'reps' | 'weight' | 'notes', value: string) => {
-    const key = normalizeExerciseName(exercise.name)
+    const key = getPlanDraftKey(exercise.name)
 
     setPlannedDrafts((current) => {
       const currentDraft = current[key] ?? getDraftForExercise(exercise.name, exercise)
@@ -463,8 +469,14 @@ export default function WorkoutPlan({
     })
   }
 
-  const updatePlanSetValue = (exercise: PlanExercise, setIndex: number, field: 'reps' | 'weight', value: string, setCount: number) => {
-    const key = normalizeExerciseName(exercise.name)
+  const updatePlanSetValue = (
+    exercise: PlanExercise,
+    setIndex: number,
+    field: 'reps' | 'weight' | 'dropReps' | 'dropWeight',
+    value: string,
+    setCount: number
+  ) => {
+    const key = getPlanDraftKey(exercise.name)
 
     setPlannedDrafts((current) => {
       const currentDraft = current[key] ?? getDraftForExercise(exercise.name, exercise)
@@ -477,12 +489,22 @@ export default function WorkoutPlan({
         { length: setCount },
         (_, index) => currentDraft.setReps[index] ?? currentDraft.reps
       )
+      const nextDropSetWeights = Array.from(
+        { length: setCount },
+        (_, index) => currentDraft.dropSetWeights[index] ?? (currentDraft.setWeights[index] ?? currentDraft.weight) * 0.75
+      )
+      const nextDropSetReps = Array.from(
+        { length: setCount },
+        (_, index) => currentDraft.dropSetReps[index] ?? currentDraft.setReps[index] ?? currentDraft.reps
+      )
       const nextReps = Number(value) || 0
 
-      if (field === 'weight') {
-        nextSetWeights[setIndex] = Number(value) || 0
+      if (field === 'weight' || field === 'dropWeight') {
+        const weights = field === 'weight' ? nextSetWeights : nextDropSetWeights
+        weights[setIndex] = Number(value) || 0
       } else {
-        nextSetReps[setIndex] = nextReps
+        const reps = field === 'reps' ? nextSetReps : nextDropSetReps
+        reps[setIndex] = nextReps
       }
 
       return {
@@ -493,6 +515,8 @@ export default function WorkoutPlan({
           weight: field === 'weight' ? nextSetWeights[0] ?? 0 : currentDraft.weight,
           setWeights: field === 'weight' ? nextSetWeights : currentDraft.setWeights,
           setReps: field === 'reps' ? nextSetReps : currentDraft.setReps,
+          dropSetWeights: field === 'dropWeight' ? nextDropSetWeights : currentDraft.dropSetWeights,
+          dropSetReps: field === 'dropReps' ? nextDropSetReps : currentDraft.dropSetReps,
         },
       }
     })
@@ -500,8 +524,13 @@ export default function WorkoutPlan({
 
   const getDefaultRepTarget = (exercise: PlanExercise) => {
     const raw = exercise.reps ?? '8'
-    const match = raw.match(/(\d+)/)
-    return match ? Number(match[1]) : 8
+    return parseRepPrescription(raw)[0] ?? 8
+  }
+
+  const getDefaultDropRepTarget = (exercise: PlanExercise, index: number) => {
+    const raw = exercise.repsPerSet?.[index] ?? exercise.reps ?? '8'
+    const reps = parseRepPrescription(raw)
+    return reps[1] ?? reps[0] ?? 8
   }
 
   const getDefaultSetCount = (exercise: PlanExercise) => {
@@ -511,17 +540,20 @@ export default function WorkoutPlan({
   }
 
   const getDraftForExercise = (exerciseName: string, exercise?: PlanExercise) => {
-    const key = normalizeExerciseName(exerciseName)
+    const key = getPlanDraftKey(exerciseName)
     const best = bestProgressByName.get(key)
-    const bestWeight = best ? Math.max(...best.sets.map((set) => set.weight), 0) : 0
+    const bestWeight = best ? workoutMaxWeight(best.sets) : 0
     const bestReps = best && best.sets.length ? Math.max(...best.sets.map((set) => set.reps), 0) : 8
     const fallbackReps = exercise ? getDefaultRepTarget(exercise) : bestReps
     const fallbackSetCount = exercise ? getDefaultSetCount(exercise) : 1
     const baseSetWeights = Array.from({ length: fallbackSetCount }, () => Number(bestWeight) || 0)
     const baseSetReps = Array.from({ length: fallbackSetCount }, (_, index) => {
       const prescribed = exercise?.repsPerSet?.[index] ?? exercise?.reps ?? ''
-      return Number(prescribed.match(/(\d+)/)?.[1]) || Number(fallbackReps) || 8
+      return parseRepPrescription(prescribed)[0] || Number(fallbackReps) || 8
     })
+    const baseDropSetReps = Array.from({ length: fallbackSetCount }, (_, index) =>
+      exercise ? getDefaultDropRepTarget(exercise, index) : baseSetReps[index]
+    )
 
     return (
       plannedDrafts[key] ?? {
@@ -529,6 +561,8 @@ export default function WorkoutPlan({
         weight: Number(bestWeight) || 0,
         setWeights: baseSetWeights,
         setReps: baseSetReps,
+        dropSetWeights: baseSetWeights.map((weight) => Number((weight * 0.75).toFixed(2))),
+        dropSetReps: baseDropSetReps,
         notes: '',
       }
     )
@@ -611,7 +645,7 @@ export default function WorkoutPlan({
   }
 
   const logPlannedExercise = async (exercise: PlanExercise) => {
-    const exerciseKey = normalizeExerciseName(exercise.name)
+    const exerciseKey = getPlanDraftKey(exercise.name)
     const canonicalId =
       exercise.exerciseId ??
       (await upsertExerciseRecord({
@@ -626,7 +660,14 @@ export default function WorkoutPlan({
     const validSets = Array.from({ length: setCount }, (_, index) => {
       const currentWeight = draft.setWeights?.[index] ?? draft.weight ?? 0
       const currentReps = draft.setReps?.[index] ?? draft.reps ?? getDefaultRepTarget(exercise)
-      return createSet(Number(currentReps) || getDefaultRepTarget(exercise), Number(currentWeight) || 0)
+      const set = createSet(Number(currentReps) || getDefaultRepTarget(exercise), Number(currentWeight) || 0)
+      if (exercise.technique === 'drop-set') {
+        set.drop = {
+          reps: Number(draft.dropSetReps?.[index]) || getDefaultDropRepTarget(exercise, index),
+          weight: Number(draft.dropSetWeights?.[index]) || 0,
+        }
+      }
+      return set
     })
 
     const nextEntry: WorkoutEntry = {
@@ -634,6 +675,9 @@ export default function WorkoutPlan({
       exerciseId: canonicalId,
       date: localIsoDate(),
       sets: validSets,
+      ...(planMode === 'preset' && activeBlock && activeDay
+        ? { blockId: activeBlock.id, dayKey: activeDay.key }
+        : {}),
       notes: draft.notes?.trim() ?? '',
     }
 
@@ -1108,6 +1152,12 @@ export default function WorkoutPlan({
             const setCount = getDefaultSetCount(exercise)
             const setWeights = draft.setWeights.length ? draft.setWeights : Array.from({ length: setCount }, () => Number(draft.weight) || 0)
             const setReps = draft.setReps.length ? draft.setReps : Array.from({ length: setCount }, () => Number(draft.reps) || 8)
+            const dropSetWeights = draft.dropSetWeights.length
+              ? draft.dropSetWeights
+              : setWeights.map((weight) => Number((weight * 0.75).toFixed(2)))
+            const dropSetReps = draft.dropSetReps.length
+              ? draft.dropSetReps
+              : Array.from({ length: setCount }, (_, index) => getDefaultDropRepTarget(exercise, index))
             const exerciseKey = normalizeExerciseName(exercise.name)
             const displayName = getExerciseDisplayName(exercise.name)
             const displayTitle = splitExerciseTitle(displayName)
@@ -1124,8 +1174,8 @@ export default function WorkoutPlan({
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
               id: entry.id,
               date: entry.date,
-              maxWeight: Math.max(...entry.sets.map((set) => set.weight), 0),
-              totalVolume: entry.sets.reduce((total, set) => total + set.reps * set.weight, 0),
+              maxWeight: workoutMaxWeight(entry.sets),
+              totalVolume: workoutVolume(entry.sets),
               setsCount: entry.sets.length,
               comments: sanitizeLoggedComment(entry.notes, [
                 exercise.notes,
@@ -1257,34 +1307,96 @@ export default function WorkoutPlan({
                               >
                                 <span className="planned-set-label">Set {index + 1}</span>
                                 {isOpen ? (
-                                  <div className="planned-set-field-pair">
-                                    <label>
-                                      <span>Reps</span>
-                                      <input
-                                        type="number"
-                                        min="1"
-                                        value={setReps[index] ?? draft.reps}
-                                        aria-label={`Set ${index + 1} reps`}
-                                        onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
-                                      />
-                                    </label>
-                                    <label>
-                                      <span>Weight</span>
-                                      <input
-                                        type="number"
-                                        min="0"
-                                        value={setWeights[index] ?? 0}
-                                        aria-label={`Set ${index + 1} weight`}
-                                        onFocus={(event) => event.currentTarget.select()}
-                                        onClick={(event) => event.currentTarget.select()}
-                                        onChange={(event) => updatePlanSetValue(exercise, index, 'weight', event.target.value, setCount)}
-                                      />
-                                    </label>
-                                  </div>
+                                  exercise.technique === 'drop-set' ? (
+                                    <div className="planned-drop-set-inputs">
+                                      <div className="planned-set-input-group">
+                                        <strong>Main</strong>
+                                        <div className="planned-set-field-pair">
+                                          <label>
+                                            <span>Reps</span>
+                                            <input
+                                              type="number"
+                                              min="1"
+                                              value={setReps[index] ?? draft.reps}
+                                              aria-label={`Set ${index + 1} main reps`}
+                                              onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
+                                            />
+                                          </label>
+                                          <label>
+                                            <span>kg</span>
+                                            <input
+                                              type="number"
+                                              min="0"
+                                              value={setWeights[index] ?? 0}
+                                              aria-label={`Set ${index + 1} main weight`}
+                                              onFocus={(event) => event.currentTarget.select()}
+                                              onClick={(event) => event.currentTarget.select()}
+                                              onChange={(event) => updatePlanSetValue(exercise, index, 'weight', event.target.value, setCount)}
+                                            />
+                                          </label>
+                                        </div>
+                                      </div>
+                                      <div className="planned-set-input-group">
+                                        <strong>Drop</strong>
+                                        <div className="planned-set-field-pair">
+                                          <label>
+                                            <span>Reps</span>
+                                            <input
+                                              type="number"
+                                              min="1"
+                                              value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
+                                              aria-label={`Set ${index + 1} drop reps`}
+                                              onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', event.target.value, setCount)}
+                                            />
+                                          </label>
+                                          <label>
+                                            <span>kg</span>
+                                            <input
+                                              type="number"
+                                              min="0"
+                                              value={dropSetWeights[index] ?? 0}
+                                              aria-label={`Set ${index + 1} drop weight`}
+                                              onFocus={(event) => event.currentTarget.select()}
+                                              onClick={(event) => event.currentTarget.select()}
+                                              onChange={(event) => updatePlanSetValue(exercise, index, 'dropWeight', event.target.value, setCount)}
+                                            />
+                                          </label>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="planned-set-field-pair">
+                                      <label>
+                                        <span>Reps</span>
+                                        <input
+                                          type="number"
+                                          min="1"
+                                          value={setReps[index] ?? draft.reps}
+                                          aria-label={`Set ${index + 1} reps`}
+                                          onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
+                                        />
+                                      </label>
+                                      <label>
+                                        <span>Weight</span>
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          value={setWeights[index] ?? 0}
+                                          aria-label={`Set ${index + 1} weight`}
+                                          onFocus={(event) => event.currentTarget.select()}
+                                          onClick={(event) => event.currentTarget.select()}
+                                          onChange={(event) => updatePlanSetValue(exercise, index, 'weight', event.target.value, setCount)}
+                                        />
+                                      </label>
+                                    </div>
+                                  )
                                 ) : (
                                   <div className="planned-progress-meta">
                                     <small>{text.ready}</small>
-                                    <strong>{setWeights[index] ?? 0} kg</strong>
+                                    <strong>
+                                      {setWeights[index] ?? 0}
+                                      {exercise.technique === 'drop-set' ? ` → ${dropSetWeights[index] ?? 0}` : ''} kg
+                                    </strong>
                                   </div>
                                 )}
                               </div>

@@ -45,6 +45,7 @@ describe('generateDemoHistory', () => {
     expect(sessionDates.size).toBeLessThan(180)
     expect(history.length).toBeGreaterThan(600)
     expect(history.every((entry) => exerciseIds.has(entry.exerciseId))).toBe(true)
+    expect(history.every((entry) => entry.blockId && entry.dayKey)).toBe(true)
     expect(history.every((entry) => new Date(`${entry.date}T00:00:00Z`).getUTCDay() !== 0)).toBe(true)
     expect(history.every((entry) => entry.date <= '2026-10-03')).toBe(true)
     expect(approvedBlocks.find((block) => blockWeek(block, latestDate) !== null)?.number).toBe(5)
@@ -131,6 +132,27 @@ describe('generateDemoHistory', () => {
     expect(descending.sets[1].weight).toBeGreaterThan(descending.sets[2].weight)
     expect(dropSet.sets.map((set) => set.reps)).toEqual([12, expect.any(Number)])
     expect(dropSet.sets[1].reps).toBeLessThanOrEqual(12)
+    expect(dropSet.sets[0].drop).toEqual({ reps: 12, weight: expect.any(Number) })
+    expect(dropSet.sets).toHaveLength(2)
     expect(bodyweight.sets.every((set) => set.weight === 0)).toBe(true)
+  })
+
+  it('records the planned block and day for a Block 2 drop-set exercise', () => {
+    const dropSetEntry = generateDemoHistory({
+      blocks: approvedBlocks,
+      endDate: '2026-05-10',
+      months: 2,
+      seed: 'block-day-drop-set',
+    }).find((entry) =>
+      entry.blockId === 'block-2026-03-30-hypertrophy-reverse-pyramid' &&
+      entry.dayKey === 'chest-back-a' &&
+      entry.exerciseId === 'wide-grip-chest-press'
+    )
+
+    expect(dropSetEntry).toBeDefined()
+    expect(dropSetEntry?.sets[0]).toMatchObject({
+      reps: 12,
+      drop: { reps: 12 },
+    })
   })
 })

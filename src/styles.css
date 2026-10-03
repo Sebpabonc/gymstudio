@@ -1829,6 +1829,22 @@ button {
   gap: 8px;
 }
 
+.planned-drop-set-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.planned-set-input-group {
+  display: grid;
+  gap: 6px;
+}
+
+.planned-set-input-group > strong {
+  color: var(--muted-strong);
+  font-size: 0.62rem;
+}
+
 .planned-progress-row label,
 .planned-set-field-pair label {
   display: grid;
