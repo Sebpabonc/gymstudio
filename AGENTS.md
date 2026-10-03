@@ -73,6 +73,20 @@ boundary; users own workouts/sessions/sets; the exercise catalogue is shared
 reference data. Child records inherit ownership through their parent — not every
 table needs `user_id`. Row Level Security enforces user isolation.
 
+## Database (Supabase)
+
+- Project is linked via `supabase/config.toml`; schema changes live **only** in
+  `supabase/migrations/` (numbered, never edited after being applied).
+- `public.exercises` is the **global exercise catalogue** (text ids = app ids,
+  read-only for users via RLS). Its data is generated from the approved fitness
+  doc with `python3 scripts/catalogue-from-approved.py` — never hand-edit the seed.
+- User-owned tables (`workout_*`, `profiles`) have RLS by `auth.uid()`; they are
+  not used by the app yet (needs authentication — future phase).
+- The browser may only use the public `anon` key (`VITE_SUPABASE_URL`,
+  `VITE_SUPABASE_ANON_KEY`). Never commit or ship the `service_role` key.
+- Copilot does not create or apply migrations unless the issue explicitly says so;
+  the Tech Lead applies migrations to the remote project.
+
 ## Fitness knowledge
 
 Fitness content (technique, cues, muscle targeting) is never turned into app
