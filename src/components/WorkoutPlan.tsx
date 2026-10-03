@@ -41,6 +41,8 @@ import {
   createSessionSummary,
   getPersonalRecordBadges,
   getPersonalRecords,
+  SessionStart,
+  sessionDurationMs,
   SessionSummary,
   undoLoggedEntries,
   UndoSnapshot,
@@ -302,7 +304,7 @@ export default function WorkoutPlan({
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
-  const sessionStartedAt = useRef<number | null>(null)
+  const sessionStartedAt = useRef<SessionStart | null>(null)
 
   const text = {
     badge: '6-week block',
@@ -782,6 +784,17 @@ export default function WorkoutPlan({
     })
   }
 
+  const getSessionScopeKey = (scope: typeof activeCompletionScope, currentMode: PlanMode) =>
+    `${currentMode}:${scope.date}:${scope.blockId ?? ''}:${scope.dayKey ?? ''}`
+
+  const startSession = (loggedAt: number, scope: typeof activeCompletionScope) => {
+    if (planMode !== 'preset') return
+    const scopeKey = getSessionScopeKey(scope, planMode)
+    if (sessionStartedAt.current?.scopeKey !== scopeKey) {
+      sessionStartedAt.current = { scopeKey, timestamp: loggedAt }
+    }
+  }
+
   const maybeShowSessionSummary = (
     previousHistory: WorkoutEntry[],
     nextHistory: WorkoutEntry[],
@@ -799,15 +812,15 @@ export default function WorkoutPlan({
         entry.dayKey === activeCompletionScope.dayKey
     )
     const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
+    const scopeKey = getSessionScopeKey(activeCompletionScope, planMode)
     setSessionSummary({
       ...createSessionSummary(
         entries,
-        loggedAt - (sessionStartedAt.current ?? loggedAt),
+        sessionDurationMs(sessionStartedAt.current, scopeKey, loggedAt),
         getPersonalRecords(nextHistory, trainingBlocks)
       ),
       nextSession: nextDay ? `Day ${nextDay.position} · ${nextDay.name}` : undefined,
     })
-    sessionStartedAt.current = null
   }
 
   const undoLastLog = () => {
@@ -817,7 +830,6 @@ export default function WorkoutPlan({
     saveWorkoutHistory(nextHistory)
     setToast(null)
     setSessionSummary(null)
-    sessionStartedAt.current = null
   }
 
   const logPlannedExercise = async (exercise: PlanExercise) => {
@@ -878,7 +890,7 @@ export default function WorkoutPlan({
     const storedHistory = await loadWorkoutHistory()
     const { history: nextHistory, entry: entryToSave } = upsertScopedEntry(storedHistory, nextEntry, activeCompletionScope)
     const loggedAt = Date.now()
-    sessionStartedAt.current ??= loggedAt
+    startSession(loggedAt, activeCompletionScope)
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
@@ -983,8 +995,8 @@ export default function WorkoutPlan({
       return result.entry
     })
     const loggedAt = Date.now()
-    sessionStartedAt.current ??= loggedAt
     const scope = { ...activeCompletionScope, date }
+    startSession(loggedAt, scope)
     showLogToast(entriesToSave, storedHistory, nextHistory, scope)
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
 

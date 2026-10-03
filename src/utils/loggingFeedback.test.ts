@@ -5,6 +5,7 @@ import {
   captureUndoSnapshots,
   createSessionSummary,
   getPersonalRecordBadges,
+  sessionDurationMs,
   undoLoggedEntries,
 } from './loggingFeedback'
 
@@ -43,6 +44,13 @@ describe('logging feedback', () => {
     const snapshots = captureUndoSnapshots([], [logged], scope)
 
     expect(undoLoggedEntries([later, logged], snapshots)).toEqual([later])
+  })
+
+  it('measures duration only within the same session scope', () => {
+    const start = { scopeKey: 'preset:2026-10-03:block-1:day-1', timestamp: 1000 }
+
+    expect(sessionDurationMs(start, start.scopeKey, 61_000)).toBe(60_000)
+    expect(sessionDurationMs(start, 'preset:2026-10-03:block-1:day-2', 61_000)).toBe(0)
   })
 
   it('summarizes set count, main and drop-set volume, duration and PRs', () => {

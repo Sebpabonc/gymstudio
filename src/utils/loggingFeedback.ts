@@ -18,6 +18,15 @@ export type SessionSummary = {
   prs: Array<{ exerciseId: string; badges: PersonalRecordType[] }>
 }
 
+export type SessionStart = {
+  scopeKey: string
+  timestamp: number
+}
+
+export function sessionDurationMs(start: SessionStart | null, scopeKey: string, endedAt: number) {
+  return Math.max(0, endedAt - (start?.scopeKey === scopeKey ? start.timestamp : endedAt))
+}
+
 export function captureUndoSnapshots(
   history: WorkoutEntry[],
   loggedEntries: WorkoutEntry[],
