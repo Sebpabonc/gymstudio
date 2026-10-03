@@ -1157,9 +1157,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               {pinnedBlockId === activeBlock.id && <span>Pinned block</span>}
               <span>
                 {trainingBlockDateStatus(activeBlock, today) === 'Current'
-                  ? `Current · Week ${activeBlockWeek} of ${activeBlock.weeks}`
+                  ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
                   : trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
-                    ? `Upcoming · Starts ${formatBlockStartDate(activeBlock.startDate)}`
+                    ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
                     : 'Completed'}
               </span>
             </strong>
