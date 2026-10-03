@@ -82,6 +82,10 @@ table needs `user_id`. Row Level Security enforces user isolation.
   `docs/fitness/approved/catalogue-v2/*.json` (spec: `docs/fitness/catalogue-v2-spec.md`,
   checked in CI by `scripts/validate-catalogue.py`) and is turned into a migration with
   `python3 scripts/catalogue-v2-seed.py` — never hand-edit seed SQL.
+- Training blocks (`training_blocks`, `training_block_days`, `training_block_exercises`) are
+  global read-only reference data from `docs/fitness/approved/training-blocks/blocks.json`
+  (spec: `docs/fitness/training-blocks-spec.md`, validated in CI by `scripts/validate-blocks.py`,
+  seeded with `python3 scripts/training-blocks-seed.py`).
 - User-owned tables (`workout_*`, `profiles`) have RLS by `auth.uid()`; they are
   not used by the app yet (needs authentication — future phase).
 - The browser may only use the public `anon` key (`VITE_SUPABASE_URL`,
