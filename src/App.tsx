@@ -19,7 +19,13 @@ import {
   getExerciseSubtitle,
   getExerciseTips,
 } from './utils/exerciseFilters'
-import { filterLoggableSets, formatWorkoutSet, workoutMaxWeight, workoutVolume } from './utils/workoutSets'
+import {
+  copyWeightToUntouchedSets,
+  filterLoggableSets,
+  formatWorkoutSet,
+  workoutMaxWeight,
+  workoutVolume,
+} from './utils/workoutSets'
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
@@ -93,6 +99,7 @@ export default function App() {
   const [bodyRegion, setBodyRegion] = useState(ALL_BODY_REGIONS)
   const [selectedId, setSelectedId] = useState<string>('')
   const [draftSets, setDraftSets] = useState<WorkoutSet[]>([createSet(8, 0), createSet(8, 0)])
+  const [setWeightTouched, setSetWeightTouched] = useState<boolean[]>([false, false])
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<ViewTab>('track')
@@ -168,6 +175,7 @@ export default function App() {
   useEffect(() => {
     if (!selectedExercise) return
     setDraftSets([createSet(8, 0), createSet(8, 0)])
+    setSetWeightTouched([false, false])
     setDraftNotes('')
     setTipsExpanded(false)
   }, [selectedExercise])
@@ -202,24 +210,37 @@ export default function App() {
   }))
 
   const updateSet = (index: number, field: 'reps' | 'weight', value: string) => {
-    setDraftSets((current) =>
-      current.map((set, setIndex) => {
-        if (setIndex !== index) return set
-
-        return {
-          ...set,
-          [field]: Number(value) || 0,
-        }
+    if (field === 'weight') {
+      const nextTouched = setWeightTouched.map((touched, setIndex) => touched || setIndex === index)
+      setSetWeightTouched(nextTouched)
+      setDraftSets((current) => {
+        const nextWeights = copyWeightToUntouchedSets(
+          current.map((set) => set.weight),
+          nextTouched,
+          index,
+          Number(value) || 0
+        )
+        return current.map((set, setIndex) => ({ ...set, weight: nextWeights[setIndex] }))
       })
+      return
+    }
+
+    setDraftSets((current) =>
+      current.map((set, setIndex) => setIndex === index ? { ...set, reps: Number(value) || 0 } : set)
     )
   }
 
   const addSet = () => {
-    setDraftSets((current) => [...current, createSet(8, 0)])
+    setDraftSets((current) => [...current, createSet(8, Number(current[0]?.weight) || 0)])
+    setSetWeightTouched((current) => [...current, false])
   }
 
   const removeSet = (setId: string) => {
     setDraftSets((current) => (current.length > 1 ? current.filter((set) => set.id !== setId) : current))
+    setSetWeightTouched((current) => {
+      const index = draftSets.findIndex((set) => set.id === setId)
+      return index < 0 ? current : current.filter((_, setIndex) => setIndex !== index)
+    })
   }
 
   const [saveError, setSaveError] = useState('')
@@ -251,6 +272,7 @@ export default function App() {
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
     setDraftSets([createSet(8, 0), createSet(8, 0)])
+    setSetWeightTouched([false, false])
     setDraftNotes('')
   }
 
