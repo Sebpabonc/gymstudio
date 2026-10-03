@@ -2914,11 +2914,11 @@
     ]
   },
   {
-    "id": "block-2026-09-28-hypertrophy-flat-pyramid-ii",
+    "id": "block-2026-10-05-hypertrophy-flat-pyramid-ii",
     "number": 6,
     "name": "Hypertrophy Flat Pyramid II",
     "method": "flat-pyramid",
-    "start_date": "2026-09-28",
+    "start_date": "2026-10-05",
     "weeks": 6,
     "origin": "pt",
     "summary": "Back to volume after the block 5 reverse pyramid, as the coach did after each intensity block: flat pyramids (same reps and load every set) of 10-12 reps on A days and 12-15 on B days, with supersets for density. New exercise choices throughout so it is not a copy of block 1.",
@@ -3576,11 +3576,11 @@
     ]
   },
   {
-    "id": "block-2026-11-09-strength-hypertrophy-ii",
+    "id": "block-2026-11-16-strength-hypertrophy-ii",
     "number": 7,
     "name": "Strength-Hypertrophy II",
     "method": "strength-hypertrophy",
-    "start_date": "2026-11-09",
+    "start_date": "2026-11-16",
     "weeks": 6,
     "origin": "pt",
     "summary": "Heavy block after the volume block, mirroring the coach's block 3: big compounds in flat sets of 6 (A) and 8 (B) with 2-minute rests, secondary lifts at 8 and isolation at 10 (A) / 10-12 (B). No supersets or drop sets; the goal is to raise the loads you will use in blocks 8 and 9.",
@@ -4140,11 +4140,11 @@
     ]
   },
   {
-    "id": "block-2026-12-21-hypertrophy-pyramid-ii",
+    "id": "block-2026-12-28-hypertrophy-pyramid-ii",
     "number": 8,
     "name": "Hypertrophy Pyramid II",
     "method": "ascending-pyramid",
-    "start_date": "2026-12-21",
+    "start_date": "2026-12-28",
     "weeks": 6,
     "origin": "pt",
     "summary": "Ascending pyramids after the heavy block, as the coach did in block 4: the first lift of each muscle goes 15-12-10-8 on A and 20-15-12-10 on B, adding load every set, followed by supersets. Week 1 falls on the holidays and is a lighter week (see strategy).",
@@ -4766,11 +4766,11 @@
     ]
   },
   {
-    "id": "block-2027-02-01-hypertrophy-reverse-pyramid-iii",
+    "id": "block-2027-02-08-hypertrophy-reverse-pyramid-iii",
     "number": 9,
     "name": "Hypertrophy Reverse Pyramid III",
     "method": "reverse-pyramid",
-    "start_date": "2027-02-01",
+    "start_date": "2027-02-08",
     "weeks": 6,
     "origin": "pt",
     "summary": "Reverse pyramids and drop sets after the ascending-pyramid block, as the coach followed block 4 with block 5: heaviest set first (8-10-12-15 on A, 10-12-15-20 on B, load drops each set), drop sets of 12+12 (A) / 15+15 (B), and a straight finisher. Flat barbell bench and front squats replace the coach's incline bench and hack squat.",

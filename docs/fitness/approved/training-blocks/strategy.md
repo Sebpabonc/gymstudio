@@ -6,6 +6,10 @@ date: 2026-10-03
 
 # Training strategy — 2026/27 blocks
 
+> **Approved by Sebas on 2026-10-03.** All 9 blocks approved; required equipment confirmed available.
+> Block 6 starts Monday 5 October 2026 (PO decision) and blocks 7–9 follow every 6 weeks.
+> The 3 proposed exercises were added to the catalogue (`approved/catalogue-v2/arms-core.json`).
+
 ## The weekly split and why
 
 Each week has six sessions, done in this order:
@@ -108,17 +112,17 @@ The new blocks continue the same rotation — volume → strength → pyramid vo
 intensity — so no two consecutive blocks use the same method. Each block changes most exercises
 (machines, cables, dumbbells and barbells, like the coach) so it is not a copy of an earlier one.
 
-- **Block 6 — Hypertrophy Flat Pyramid II (28 Sep 2026).** Volume after the block 5 intensity
+- **Block 6 — Hypertrophy Flat Pyramid II (5 Oct 2026).** Volume after the block 5 intensity
   phase. Flat 10–12 reps (A) / 12–15 (B) with supersets. New: pendulum squat, Bulgarian split
   squats, T-bar row, incline machine press, rear-delt work on arms day, cable crunches.
-- **Block 7 — Strength-Hypertrophy II (9 Nov 2026).** Heavy block like the coach's block 3:
+- **Block 7 — Strength-Hypertrophy II (16 Nov 2026).** Heavy block like the coach's block 3:
   flat 6s (A) / 8s (B), 2-minute rests, 5–6 exercises. New: back squat, barbell row, seated barbell
   overhead press, weighted dips and wide pull-ups, JM press, ab wheel.
-- **Block 8 — Hypertrophy Pyramid II (21 Dec 2026).** Ascending pyramids 15-12-10-8 (A) /
+- **Block 8 — Hypertrophy Pyramid II (28 Dec 2026).** Ascending pyramids 15-12-10-8 (A) /
   20-15-12-10 (B) on the first lift, then supersets. **Week 1 is a lighter week** (it falls on the
   holidays, after 10 months of training): do the same sessions but stop every set about 3 reps
   short of failure and skip the last set of each exercise; return to full sessions in week 2.
-- **Block 9 — Hypertrophy Reverse Pyramid III (1 Feb 2027).** Reverse pyramids 8-10-12-15 (A) /
+- **Block 9 — Hypertrophy Reverse Pyramid III (8 Feb 2027).** Reverse pyramids 8-10-12-15 (A) /
   10-12-15-20 (B) and drop sets 12+12 (A) / 15+15 (B), using the strength from block 7. New: flat
   barbell bench, barbell T-bar row, standing overhead press, front squat, Smith hip thrust.
 

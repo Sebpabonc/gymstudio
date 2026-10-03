@@ -26,6 +26,9 @@ jobs:
       - name: Validate exercise catalogue
         run: python3 scripts/validate-catalogue.py
 
+      - name: Validate training blocks
+        run: python3 scripts/validate-blocks.py
+
       - name: Typecheck
         run: npm run typecheck
 
