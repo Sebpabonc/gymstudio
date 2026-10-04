@@ -4186,3 +4186,15 @@ body {
   height: auto;
   padding-block: 2px;
 }
+
+/* Block chooser (Tech Lead review of #78): rows size to their content so cards never overlap. */
+.block-selector-options {
+  grid-auto-rows: max-content;
+  align-content: start;
+}
+
+.block-selector-option {
+  align-items: flex-start;
+  height: auto;
+  min-width: 0;
+}
