@@ -85,8 +85,15 @@ body::before {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
 }
 
 button {
@@ -664,7 +671,6 @@ button {
 
 .search-input {
   padding: 12px 14px;
-  font-size: 0.96rem;
 }
 
 .search-input::placeholder,
@@ -1536,7 +1542,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 8px 9px;
-  font-size: 0.76rem;
 }
 
 .calendar-history {
@@ -1894,7 +1899,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 8px 9px;
-  font-size: 0.76rem;
 }
 
 .custom-plan-header {
@@ -1940,7 +1944,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 8px 9px;
-  font-size: 0.76rem;
 }
 
 .custom-plan-full {
@@ -2243,7 +2246,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 9px 10px;
-  font-size: 0.82rem;
 }
 
 .superset-set-grid {
@@ -2303,7 +2305,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 8px 9px;
-  font-size: 0.76rem;
   resize: vertical;
   min-height: 52px;
 }
