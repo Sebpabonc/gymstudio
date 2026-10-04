@@ -2750,6 +2750,9 @@ button[class] {
 }
 
 .progress-section {
+  --font-section: 0.75rem;
+  --font-caption: 0.6875rem;
+
   display: grid;
   gap: 10px;
 }
@@ -2773,6 +2776,8 @@ button[class] {
 }
 
 .progress-headline {
+  --font-caption: 0.6875rem;
+
   display: grid;
   gap: 12px;
 }
@@ -2946,6 +2951,10 @@ button[class] {
   min-height: 44px;
 }
 
+.progress-section .day-toggle .tab-button {
+  font-size: var(--font-caption);
+}
+
 .session-dots {
   display: flex;
   gap: 8px;
@@ -2983,7 +2992,7 @@ button[class] {
 
 .chart-label {
   fill: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .chart-grid {
@@ -3016,7 +3025,7 @@ button[class] {
 
 .chart-legend {
   margin: 0;
-  font-size: var(--font-caption);
+  font-size: 0.75rem;
   color: var(--muted);
 }
 
@@ -3036,9 +3045,40 @@ button[class] {
   font-size: var(--font-body);
 }
 
+.record-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.record-list li > div:first-child {
+  min-width: 0;
+}
+
+.record-list li > div:first-child strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-list li > .chip-row {
+  width: 100%;
+  justify-content: flex-end;
+}
+
 .record-list small {
   display: block;
   color: var(--muted);
+}
+
+.record-list .record-badge .chip {
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.progress-section .metric-card span {
+  font-size: var(--font-caption);
 }
 
 .record-badge {
