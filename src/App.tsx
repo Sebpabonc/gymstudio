@@ -4,6 +4,7 @@ import ExerciseSearchSuggestions from './components/ExerciseSearchSuggestions'
 import RestTimer from './components/RestTimer'
 import { syncRestTimerActivity } from './native/restTimerActivity'
 import { openExternal } from './native/openExternal'
+import { localizeCatalogue, useSpanishContentReady } from './i18n/content'
 import { exerciseImageQuery, exerciseImageSearchUrl } from './utils/exerciseImages'
 import AskExercise from './components/AskExercise'
 import ExerciseSetTable from './components/ExerciseSetTable'
@@ -74,7 +75,7 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 export default function App() {
   const demoMode = isDemoMode()
   const { status, syncStatus } = useAuth()
-  const [exercises, setExercises] = useState<Exercise[]>([])
+  const [rawExercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
   const [search, setSearch] = useState('')
@@ -100,6 +101,8 @@ export default function App() {
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const { t, language, setLanguage } = useT()
+  const spanishReady = useSpanishContentReady(language)
+  const exercises = useMemo(() => localizeCatalogue(rawExercises, language), [rawExercises, language, spanishReady])
 
   const restLabel = useRef(t('rest.label'))
   const updateRestTimer = useCallback((timer: RestTimerState | null) => {

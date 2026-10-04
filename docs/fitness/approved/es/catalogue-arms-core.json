@@ -1,0 +1,612 @@
+{
+  "ez-bb-preacher-curls": {
+    "squeeze_cue": "Lleva los nudillos hacia tu cara y aprieta fuerte el bíceps arriba, como si sacaras músculo para una foto.",
+    "posture_tips": [
+      "Ajusta el asiento para que tus axilas queden bien pegadas al borde superior del banco predicador.",
+      "Mantén la parte trasera de los brazos apoyada contra el cojín durante toda la serie.",
+      "Sube hasta que los antebrazos queden casi verticales, pausa un segundo y baja en 3 segundos hasta justo antes de bloquear el codo.",
+      "No despegues los codos del cojín ni lleves los hombros hacia adelante para terminar la repetición.",
+      "Nunca dejes caer la barra abajo; controla el estiramiento final para cuidar tus codos."
+    ]
+  },
+  "single-db-preacher-curls": {
+    "squeeze_cue": "Guía con el meñique al subir y aprieta el bíceps a tope arriba, como si quisieras tocarlo con la muñeca.",
+    "posture_tips": [
+      "Apoya todo el tríceps en el cojín con la axila sobre el borde y la mancuerna con la palma hacia arriba.",
+      "Mantén el hombro abajo y el torso quieto; apoya la mano libre en el cojín para tener estabilidad.",
+      "Sube en aproximadamente 1 segundo sin levantar el brazo y baja en 3 segundos hasta justo antes de la extensión completa.",
+      "No gires el torso ni voltees la muñeca hacia adentro para terminar la repetición.",
+      "Elige un peso que puedas frenar abajo; rebotar desde la extensión completa carga mucho el codo."
+    ]
+  },
+  "standing-dumbbell-curl": {
+    "squeeze_cue": "Lleva el meñique hacia el hombro y aprieta fuerte el bíceps arriba, sosteniendo un segundo.",
+    "posture_tips": [
+      "Párate con los pies al ancho de la cadera, las mancuernas a los lados y las palmas hacia adelante.",
+      "Mantén los codos pegados a los costados y el abdomen firme, sin inclinarte hacia atrás.",
+      "Sube hasta la altura del hombro en aproximadamente 1 segundo, sostén un instante y baja en 2-3 segundos hasta extender por completo.",
+      "No balancees el cuerpo ni lleves los codos hacia adelante para ganar impulso.",
+      "Si tienes que balancearte para terminar la repetición, baja el peso; el impulso pasa la carga a tu zona lumbar."
+    ]
+  },
+  "standing-db-offset-grip-curls": {
+    "squeeze_cue": "Gira el meñique hacia arriba y hacia afuera al final y aprieta el pico del bíceps, como si exprimieras una toalla.",
+    "posture_tips": [
+      "Agarra cada mancuerna con el meñique contra el disco interior para que haya más peso del lado del pulgar.",
+      "Mantén los codos fijos a los costados y las muñecas neutras, sin doblarlas hacia atrás.",
+      "Sube mientras giras la palma completamente hacia arriba, pausa un segundo y baja en 2-3 segundos resistiendo el giro.",
+      "No relajes la supinación arriba; ese giro extra es la razón de ser del agarre descentrado.",
+      "Usa menos peso que en un curl normal; el agarre descentrado exige más a tu muñeca."
+    ]
+  },
+  "db-curls-offset-grip": {
+    "squeeze_cue": "Desde el estiramiento profundo, gira el meñique hacia arriba y aprieta fuerte el bíceps donde se une con el codo al final.",
+    "posture_tips": [
+      "Recuéstate en un banco inclinado con los brazos colgando y el meñique contra el disco interior.",
+      "Mantén la espalda y la cabeza en el banco y los brazos colgando rectos hacia abajo, por detrás del torso.",
+      "Sube mientras giras la palma hacia arriba sin que el codo se vaya hacia adelante y baja en 3 segundos hasta un estiramiento completo.",
+      "No despegues los hombros del banco ni lleves los codos hacia adelante al subir.",
+      "Baja siempre con control; el estiramiento del bíceps en esta posición es intenso."
+    ]
+  },
+  "hammer-curls": {
+    "squeeze_cue": "Sube la mancuerna con el pulgar arriba y aprieta la parte externa del brazo y el antebrazo, como si agarraras un martillo.",
+    "posture_tips": [
+      "Párate con las mancuernas a los lados y las palmas mirándose entre sí.",
+      "Mantén las muñecas rectas y los codos pegados al cuerpo todo el tiempo.",
+      "Sube la mancuerna hasta el hombro en aproximadamente 1 segundo y baja en 2-3 segundos hasta extender por completo.",
+      "No gires la palma hacia arriba ni lleves el hombro hacia adelante al subir.",
+      "No balancees el torso; si tu postura se pierde, reduce el peso."
+    ]
+  },
+  "db-spider-hammer-curls": {
+    "squeeze_cue": "Lleva los pulgares hacia los hombros y aprieta fuerte el bíceps y la parte externa del antebrazo, sosteniendo un segundo.",
+    "posture_tips": [
+      "Acuéstate boca abajo en un banco inclinado con los brazos colgando rectos hacia el piso.",
+      "Mantén los brazos perpendiculares al piso y las palmas mirándose entre sí toda la serie.",
+      "Sube sin mover los codos, sostén arriba un segundo y baja en 2-3 segundos hasta tener los brazos rectos.",
+      "No lleves los codos hacia atrás ni los empujes hacia adelante para ganar recorrido.",
+      "Apoya bien los pies y el pecho para que el banco no se mueva durante la serie."
+    ]
+  },
+  "low-cable-ropes-curls": {
+    "squeeze_cue": "Separa los extremos de la cuerda arriba y aprieta la parte externa del bíceps y los antebrazos, como si partieras la cuerda en dos.",
+    "posture_tips": [
+      "Coloca la polea abajo, toma la cuerda con las palmas mirándose entre sí y da un paso atrás.",
+      "Mantén los codos pegados al torso y párate derecho sin inclinarte hacia atrás.",
+      "Sube la cuerda hasta el pecho en aproximadamente 1 segundo, separa los extremos y baja en 2-3 segundos.",
+      "No dejes que el cable te arrastre los codos hacia adelante al bajar.",
+      "Mantén la tensión en el cable al terminar la serie y no dejes que la cuerda regrese de golpe."
+    ]
+  },
+  "barbell-curl": {
+    "squeeze_cue": "Sube la barra hasta el pecho y aprieta fuerte ambos bíceps, como si intentaras doblar la barra hacia tu cara.",
+    "posture_tips": [
+      "Agarra la barra con las palmas hacia arriba al ancho de los hombros y los brazos completamente extendidos.",
+      "Aprieta los glúteos y el abdomen para que el torso no se arquee hacia atrás.",
+      "Sube la barra en arco hasta el pecho sin mover los codos y baja en 2-3 segundos hasta tener los brazos rectos.",
+      "No empujes la barra con la cadera para sacarla desde abajo.",
+      "Si la barra recta te molesta en las muñecas, cambia a una barra Z."
+    ]
+  },
+  "ez-bar-curl": {
+    "squeeze_cue": "Sube la barra y aprieta fuerte el bíceps arriba, como si quisieras juntar los antebrazos con los brazos.",
+    "posture_tips": [
+      "Agarra la barra Z en las curvas internas o externas con las palmas ligeramente giradas hacia adentro.",
+      "Mantén el pecho arriba y los codos justo delante de las costillas.",
+      "Sube hasta que la barra se acerque al pecho, pausa un segundo y baja en 2-3 segundos hasta justo antes de bloquear los codos.",
+      "No encojas los hombros ni dejes que los codos suban al final.",
+      "Aprieta el abdomen y mantén la columna neutra; inclinarte hacia atrás para hacer trampa carga tu zona lumbar."
+    ]
+  },
+  "dumbbell-curl-incline": {
+    "squeeze_cue": "Sube desde el estiramiento completo y aprieta fuerte el bíceps arriba, sintiendo cómo se contrae desde el codo.",
+    "posture_tips": [
+      "Pon el banco a unos 45-60 grados, recuéstate y deja colgar los brazos con las palmas hacia adelante.",
+      "Mantén los hombros contra el respaldo y los codos apuntando al piso.",
+      "Sube sin que los codos se vayan hacia adelante y baja en 3 segundos hasta que el bíceps quede completamente estirado.",
+      "No levantes la cabeza ni los hombros del banco cuando la serie se ponga difícil.",
+      "Empieza con poco peso; la posición de estiramiento pone mucha carga en la parte frontal del hombro."
+    ]
+  },
+  "dumbbell-concentration-curl": {
+    "squeeze_cue": "Gira el meñique hacia arriba al final y aprieta fuerte el pico del bíceps, como si lo presumieras frente al espejo.",
+    "posture_tips": [
+      "Siéntate en un banco con las piernas separadas y apoya el tríceps contra la parte interna del muslo.",
+      "Mantén el torso inclinado hacia adelante y quieto, con la mano libre sobre la otra rodilla.",
+      "Sube hacia el hombro girando el meñique hacia arriba, sostén un segundo y baja en 2-3 segundos.",
+      "No uses la pierna ni el torso para empujar la mancuerna hacia arriba.",
+      "Baja hasta justo antes de bloquear el codo sin dejar caer el peso al final."
+    ]
+  },
+  "cable-curl-straight-bar": {
+    "squeeze_cue": "Sube la barra hasta el pecho y aprieta fuerte el bíceps, como si intentaras doblar la barra hacia arriba por el centro.",
+    "posture_tips": [
+      "Coloca la polea abajo, toma la barra recta con las palmas hacia arriba y párate cerca de las placas.",
+      "Mantén los codos a los costados, el torso erguido y las rodillas ligeramente flexionadas.",
+      "Sube la barra hasta el pecho, sostén un segundo y baja en 2-3 segundos resistiendo la tensión del cable.",
+      "No te pares muy lejos de la polea; el cable jalará tus codos hacia adelante.",
+      "Al terminar, regresa la barra a las placas con control; no la sueltes de golpe."
+    ]
+  },
+  "cable-bayesian-curl": {
+    "squeeze_cue": "Sube con el brazo detrás de ti y aprieta fuerte el bíceps arriba, sintiendo cómo el estiramiento se convierte en un pico.",
+    "posture_tips": [
+      "Ponte de espaldas a una polea baja, toma el agarre y da un paso al frente con el brazo quedando atrás.",
+      "Mantén el brazo detrás del torso y el pecho abierto en cada repetición.",
+      "Sube por completo sin que el brazo se vaya hacia adelante y regresa en 3 segundos hasta un estiramiento completo.",
+      "No lleves el codo hacia adelante al subir; pierdes el estiramiento en el que se basa este ejercicio.",
+      "Usa una postura de zancada estable para que el cable no te desequilibre."
+    ]
+  },
+  "machine-preacher-curl": {
+    "squeeze_cue": "Lleva los agarres hacia los hombros y aprieta fuerte el bíceps, sosteniendo un segundo arriba.",
+    "posture_tips": [
+      "Ajusta el asiento para que tu codo quede alineado con el eje de giro de la máquina.",
+      "Mantén los brazos sobre el cojín y el pecho en contacto con el apoyo.",
+      "Sube hasta la contracción completa, sostén un segundo y baja en 2-3 segundos sin dejar que las placas descansen.",
+      "No levantes la cadera del asiento para sacar las últimas repeticiones.",
+      "No dejes que las placas golpeen abajo; controla la extensión del codo."
+    ]
+  },
+  "barbell-reverse-curl": {
+    "squeeze_cue": "Sube guiando con los nudillos y aprieta fuerte la parte superior del antebrazo y la parte externa del bíceps arriba.",
+    "posture_tips": [
+      "Agarra la barra con las palmas hacia abajo al ancho de los hombros y los brazos completamente extendidos.",
+      "Mantén las muñecas rectas y alineadas con los antebrazos todo el tiempo.",
+      "Sube la barra hasta el pecho doblando solo los codos y baja en 2-3 segundos hasta tener los brazos rectos.",
+      "No dejes que las muñecas se doblen hacia abajo cuando llegue la fatiga.",
+      "Usa menos peso que en un curl normal; el agarre prono limita cuánto puedes manejar con seguridad."
+    ]
+  },
+  "cable-rope-tricep-extensions": {
+    "squeeze_cue": "Separa la cuerda abajo y aprieta fuerte la parte trasera de los brazos, como si quisieras tocarte la cadera.",
+    "posture_tips": [
+      "Coloca la polea arriba, toma la cuerda con las palmas mirándose entre sí y lleva los codos a los costados.",
+      "Mantén el pecho arriba, una ligera inclinación hacia adelante y los codos fijos junto a las costillas.",
+      "Empuja hacia abajo y separa la cuerda al final, sostén un segundo y regresa en 2 segundos hasta unos 90 grados.",
+      "No dejes que los codos se abran ni se vayan hacia adelante cuando la cuerda sube.",
+      "Mantén los hombros abajo y lejos de las orejas para quitarle tensión al cuello."
+    ]
+  },
+  "v-bb-cable-tricep-extensions": {
+    "squeeze_cue": "Bloquea los codos y aprieta fuerte la parte trasera de los brazos, como si doblaras la barra V contra el piso.",
+    "posture_tips": [
+      "Coloca la polea arriba, toma la barra V y empieza con los codos flexionados a los costados.",
+      "Mantén las muñecas rectas y el torso firme con una ligera inclinación hacia adelante.",
+      "Extiende hasta bloquear sin dar un golpe seco, sostén un segundo y sube en 2 segundos hasta que los antebrazos pasen la horizontal.",
+      "No te inclines sobre la barra para empujarla con tu peso corporal.",
+      "Apoya bien los pies y sepáralos para que las cargas pesadas no te desequilibren."
+    ]
+  },
+  "rope-low-cable-oh-tricep-extensions": {
+    "squeeze_cue": "Extiende por completo sobre la cabeza, separa los extremos de la cuerda y aprieta la parte trasera de los brazos hasta la axila.",
+    "posture_tips": [
+      "Ponte de espaldas a la polea, sostén la cuerda detrás de la cabeza y coloca un pie adelante del otro.",
+      "Mantén los codos apuntando al frente y cerca de la cabeza durante toda la serie.",
+      "Extiende los codos hacia arriba y adelante en aproximadamente 1 segundo y regresa en 2-3 segundos hasta un estiramiento profundo.",
+      "No dejes que los codos se abran ni que la zona lumbar se arquee.",
+      "Aprieta el abdomen para proteger tu zona lumbar mientras el cable te jala hacia atrás."
+    ]
+  },
+  "ez-bar-skull-crusher": {
+    "squeeze_cue": "Empuja la barra hasta bloquear los codos y aprieta la parte trasera de los brazos, como si quisieras partir la barra a la mitad.",
+    "posture_tips": [
+      "Acuéstate en un banco plano sosteniendo la barra Z sobre los hombros con los brazos extendidos.",
+      "Mantén los codos apuntando al techo, ligeramente inclinados hacia atrás en dirección a tu cabeza.",
+      "Baja la barra hacia la frente en 2-3 segundos doblando solo los codos y luego extiende hasta bloquear.",
+      "No abras los codos ni conviertas el movimiento en un press.",
+      "Usa un compañero que te asista o un peso que controles por completo; la barra pasa cerca de tu cara."
+    ]
+  },
+  "dumbbell-skull-crusher": {
+    "squeeze_cue": "Extiende hasta bloquear y aprieta fuerte la parte trasera de los brazos, como si empujaras las mancuernas contra el techo.",
+    "posture_tips": [
+      "Acuéstate en un banco plano con una mancuerna en cada mano, palmas mirándose entre sí y brazos extendidos.",
+      "Mantén los brazos fijos y paralelos entre sí todo el tiempo.",
+      "Baja las mancuernas junto a tu cabeza en 2-3 segundos doblando los codos y luego extiende hasta bloquear.",
+      "No dejes que las mancuernas se separen ni que los codos se abran al subir.",
+      "Baja despacio y agarra con firmeza para no golpearte la cabeza."
+    ]
+  },
+  "dumbbell-overhead-triceps-extension": {
+    "squeeze_cue": "Lleva la mancuerna hasta bloquear y aprieta fuerte la parte trasera de los brazos, como si la empujaras a través del techo.",
+    "posture_tips": [
+      "Siéntate en un banco con respaldo y sostén una mancuerna sobre la cabeza con ambas manos.",
+      "Mantén la espalda en el respaldo, las costillas abajo y los codos apuntando al frente.",
+      "Baja la mancuerna detrás de la cabeza en 2-3 segundos hasta un estiramiento profundo y luego extiende los codos por completo.",
+      "No arquees la zona lumbar cuando la mancuerna esté sobre la cabeza.",
+      "Sujeta firmemente el disco superior con ambas palmas para que la mancuerna no se resbale."
+    ]
+  },
+  "dumbbell-overhead-triceps-extension-single-arm": {
+    "squeeze_cue": "Bloquea el codo sobre la cabeza y aprieta fuerte la parte trasera del brazo, desde el codo hasta la axila.",
+    "posture_tips": [
+      "Sostén la mancuerna sobre la cabeza con un brazo extendido, sentado o de pie, con el abdomen firme.",
+      "Mantén el codo apuntando al techo y cerca de la cabeza; puedes sostenerlo con la otra mano.",
+      "Baja la mancuerna detrás de la cabeza en 2-3 segundos doblando el codo y luego extiende por completo otra vez.",
+      "No dejes que el codo se abra ni que el torso se incline hacia un lado.",
+      "Trabaja con un peso ligero que controles; la mancuerna pasa por detrás de tu cabeza."
+    ]
+  },
+  "ez-bar-overhead-triceps-extension": {
+    "squeeze_cue": "Empuja hasta bloquear sobre la cabeza y aprieta la parte trasera de los brazos, como si quisieras doblar la barra sobre tu cabeza.",
+    "posture_tips": [
+      "Toma la barra Z con agarre cerrado y súbela sobre la cabeza con los brazos extendidos.",
+      "Mantén los codos cerrados y apuntando al frente, con las costillas abajo.",
+      "Baja la barra detrás de la cabeza en 2-3 segundos hasta sentir el estiramiento y extiende sin mover los brazos.",
+      "No compenses al subir arqueando la espalda ni abriendo los codos.",
+      "Hazlo sentado con respaldo si tu zona lumbar se arquea cuando estás de pie."
+    ]
+  },
+  "cable-triceps-pushdown-straight-bar": {
+    "squeeze_cue": "Bloquea los codos y aprieta la parte trasera de los brazos, como si doblaras la barra en forma de U.",
+    "posture_tips": [
+      "Coloca la polea arriba y toma la barra recta con las palmas hacia abajo al ancho de los hombros.",
+      "Mantén los codos pegados a los costados y las muñecas alineadas con los antebrazos.",
+      "Empuja la barra hasta extender por completo los codos, sostén un segundo y deja que suba en 2 segundos hasta la altura del pecho.",
+      "No dejes que la barra suba más allá del pecho ni que los codos se separen de los costados.",
+      "Mantén una postura estable con las rodillas ligeramente flexionadas para no balancearte."
+    ]
+  },
+  "cable-triceps-pushdown-reverse-grip": {
+    "squeeze_cue": "Empuja con las palmas hasta bloquear y aprieta la parte trasera de los brazos, sintiendo cómo se tensa la parte interna del tríceps.",
+    "posture_tips": [
+      "Coloca la polea arriba y toma la barra con las palmas hacia arriba al ancho de los hombros.",
+      "Mantén los codos junto al torso y las muñecas firmes, sin doblarlas hacia atrás.",
+      "Extiende los codos por completo hacia abajo, sostén un segundo y regresa en 2 segundos hasta unos 90 grados.",
+      "No lleves los hombros hacia adelante ni te inclines sobre la barra para sacar las últimas repeticiones.",
+      "Usa menos peso que con agarre prono para no sobrecargar tus muñecas."
+    ]
+  },
+  "cable-triceps-pushdown-single-arm": {
+    "squeeze_cue": "Bloquea el codo y aprieta fuerte la parte trasera del brazo, como si empujaras la mano más allá de tu cadera.",
+    "posture_tips": [
+      "Coloca la polea arriba con un agarre individual y sostenlo con el codo pegado al costado.",
+      "Mantén los hombros nivelados y el torso de frente a la polea sin girarte.",
+      "Extiende el codo por completo, sostén un segundo y regresa en 2 segundos hasta que el antebrazo pase la horizontal.",
+      "No dejes que el codo se aleje del cuerpo ni que el hombro se vaya hacia adelante.",
+      "Apoya la mano libre en la máquina y planta los pies para que el cable no te desequilibre."
+    ]
+  },
+  "dumbbell-triceps-kickback": {
+    "squeeze_cue": "Estira el brazo hacia atrás y aprieta fuerte la parte trasera del brazo, como si lo fijaras en línea recta.",
+    "posture_tips": [
+      "Apoya una mano y una rodilla en el banco con la espalda plana y la mancuerna en la otra mano.",
+      "Mantén el brazo paralelo al piso y el codo pegado al costado toda la serie.",
+      "Extiende el codo hasta que el brazo quede recto, sostén un segundo y regresa en 2 segundos a 90 grados.",
+      "No dejes que el codo baje al extender ni balancees la mancuerna con impulso.",
+      "Mantén la columna neutra y no gires el torso mientras mueves el brazo."
+    ]
+  },
+  "cable-triceps-kickback": {
+    "squeeze_cue": "Lleva la mano hacia atrás hasta bloquear y aprieta fuerte la parte trasera del brazo, como si empujaras el cable a través de una pared.",
+    "posture_tips": [
+      "Coloca la polea abajo, sostén el cable directamente o con un agarre e inclina el torso hacia adelante desde la cadera.",
+      "Mantén el brazo pegado al cuerpo y paralelo al piso, con la espalda plana.",
+      "Extiende el codo hacia atrás hasta bloquear, sostén un segundo y regresa en 2 segundos sin perder la tensión.",
+      "No muevas el hombro ni el brazo; solo debe moverse el antebrazo.",
+      "Apoya la mano libre en la máquina para mantener la espalda estable."
+    ]
+  },
+  "barbell-jm-press": {
+    "squeeze_cue": "Empuja la barra de vuelta y aprieta fuerte la parte trasera de los brazos al bloquear, como si quisieras separar la barra en dos.",
+    "posture_tips": [
+      "Acuéstate en un banco plano con un agarre cerrado, un poco más estrecho que el ancho de los hombros.",
+      "Mantén los codos apuntando hacia tus pies y las escápulas firmes sobre el banco.",
+      "Baja la barra en 2-3 segundos hacia la parte alta del pecho doblando los codos y luego empuja hasta bloquear.",
+      "No lo conviertas en un press de banca; la barra no debe tocar tu pecho.",
+      "Usa topes de seguridad o un compañero que te asista; la barra baja cerca de tu cara."
+    ]
+  },
+  "machine-triceps-extension": {
+    "squeeze_cue": "Empuja los agarres hasta extender por completo y aprieta fuerte la parte trasera de los brazos, sosteniendo un segundo.",
+    "posture_tips": [
+      "Ajusta el asiento para que los codos queden alineados con el eje de la máquina y apoya los brazos en el cojín.",
+      "Mantén la espalda contra el respaldo y los hombros abajo durante toda la serie.",
+      "Extiende los codos por completo, sostén un segundo y regresa en 2-3 segundos hasta una flexión profunda.",
+      "No despegues los codos del cojín para empujar con los hombros.",
+      "No dejes que las placas golpeen al regresar; controla toda la fase excéntrica."
+    ]
+  },
+  "barbell-wrist-curl": {
+    "squeeze_cue": "Sube las muñecas lo más alto posible y aprieta la parte interna de los antebrazos, como si aplastaras la barra con las palmas.",
+    "posture_tips": [
+      "Siéntate con los antebrazos sobre los muslos o un banco, palmas hacia arriba.",
+      "Mantén los antebrazos fijos y solo las muñecas fuera del borde.",
+      "Deja que la barra ruede hasta la punta de los dedos, cierra la mano y sube las muñecas; 1 segundo al subir y 2 al bajar.",
+      "No levantes los antebrazos ni uses el bíceps para mover la barra.",
+      "Usa un peso moderado y muchas repeticiones para cuidar tus muñecas."
+    ]
+  },
+  "barbell-reverse-wrist-curl": {
+    "squeeze_cue": "Lleva el dorso de las manos hacia ti y aprieta fuerte la parte superior de los antebrazos, sosteniendo un segundo.",
+    "posture_tips": [
+      "Apoya los antebrazos en los muslos o un banco, palmas hacia abajo, con las muñecas fuera del borde.",
+      "Mantén los antebrazos pegados al apoyo y los dedos bien cerrados alrededor de la barra.",
+      "Sube el dorso de las manos lo más alto posible, sostén un segundo y baja en 2 segundos hasta el estiramiento.",
+      "No muevas los codos ni balancees la barra para ganar recorrido.",
+      "Empieza con muy poco peso; los extensores del antebrazo se fatigan rápido."
+    ]
+  },
+  "dumbbell-farmers-hold": {
+    "squeeze_cue": "Aprieta los agarres como si les sacaras agua y siente cómo los antebrazos y los trapecios superiores se bloquean.",
+    "posture_tips": [
+      "Levanta dos mancuernas pesadas del piso con la columna neutra y párate derecho.",
+      "Mantén los hombros abajo y atrás, el pecho arriba y los brazos rectos a los costados.",
+      "Aprieta fuerte los agarres y quédate quieto el tiempo indicado, respirando de forma constante con el abdomen firme.",
+      "No encojas los hombros ni dejes que las mancuernas se balanceen.",
+      "Al terminar, baja las mancuernas flexionando cadera y rodillas, no redondeando la espalda."
+    ]
+  },
+  "hanging-leg-raises-weighted": {
+    "squeeze_cue": "Lleva la pelvis hacia las costillas arriba y aprieta el abdomen bajo, como si le mostraras la hebilla del cinturón al techo.",
+    "posture_tips": [
+      "Cuélgate de la barra con un agarre firme, los brazos rectos y las piernas juntas.",
+      "Mantén los hombros activos y el cuerpo quieto; frena cualquier balanceo antes de empezar.",
+      "Sube las piernas rectas mientras enrollas la pelvis hacia arriba en aproximadamente 1 segundo y baja en 2-3 segundos.",
+      "No uses el impulso del balanceo para subir las piernas.",
+      "Cambia a elevaciones de rodillas colgado si no puedes frenar el balanceo, y bájate de la barra con control."
+    ]
+  },
+  "v-up": {
+    "squeeze_cue": "Busca tocar las puntas de los pies y aprieta fuerte el abdomen, como si cerraras costillas y cadera igual que una navaja.",
+    "posture_tips": [
+      "Acuéstate boca arriba con las piernas rectas y los brazos extendidos sobre la cabeza.",
+      "Mantén las piernas juntas y los brazos alineados con las orejas al subir.",
+      "Sube el torso y las piernas a la vez para tocarte los pies y baja en 2-3 segundos sin desplomarte.",
+      "No jales el cuello ni dobles las rodillas para llegar arriba.",
+      "Controla la zona lumbar al bajar; si se arquea, acorta el recorrido."
+    ]
+  },
+  "plank": {
+    "squeeze_cue": "Jala los codos hacia los pies sin moverte y aprieta el abdomen como si te prepararas para recibir un golpe.",
+    "posture_tips": [
+      "Apoya los antebrazos con los codos bajo los hombros y extiende las piernas sobre las puntas de los pies.",
+      "Mantén una línea recta de la cabeza a los talones con los glúteos apretados.",
+      "Sostén la posición respirando de forma constante con el abdomen firme mientras empujas el piso con los antebrazos.",
+      "No dejes que la cadera se hunda ni que suba hacia el techo.",
+      "Termina la serie en cuanto pierdas la alineación, aunque el cronómetro no haya terminado."
+    ]
+  },
+  "side-plank": {
+    "squeeze_cue": "Empuja la cadera de abajo hacia el techo y aprieta el costado de la cintura, como si te levantaran con una cuerda.",
+    "posture_tips": [
+      "Acuéstate de lado con el codo bajo el hombro y los pies uno sobre otro o escalonados.",
+      "Mantén cadera, hombros y tobillos en una sola línea recta.",
+      "Levanta la cadera del piso y sostén, respirando de forma constante sin girar el torso.",
+      "No dejes que la cadera caiga ni se vaya hacia atrás.",
+      "Apoya la rodilla de abajo si no puedes mantener la línea con las piernas rectas."
+    ]
+  },
+  "dead-bug": {
+    "squeeze_cue": "Presiona la zona lumbar contra el piso y aprieta el abdomen como si cerraras un cierre desde las costillas hasta la cadera.",
+    "posture_tips": [
+      "Acuéstate boca arriba con los brazos hacia el techo y la cadera y las rodillas a 90 grados.",
+      "Mantén la zona lumbar pegada al piso durante todo el ejercicio.",
+      "Extiende despacio el brazo y la pierna contrarios en 2-3 segundos mientras exhalas y regresa antes de cambiar de lado.",
+      "No dejes que la zona lumbar se despegue del piso al extender la pierna.",
+      "Acorta el alcance de la pierna si no puedes mantener la espalda plana."
+    ]
+  },
+  "bird-dog": {
+    "squeeze_cue": "Estírate largo a través del talón y aprieta el glúteo y la zona lumbar mientras el abdomen mantiene la cadera nivelada.",
+    "posture_tips": [
+      "Ponte en cuatro apoyos con las manos bajo los hombros y las rodillas bajo la cadera.",
+      "Mantén la espalda plana y la pelvis nivelada, como si tuvieras un vaso encima.",
+      "Extiende el brazo y la pierna contrarios hasta la horizontal, sostén dos segundos y regresa despacio.",
+      "No arquees la zona lumbar ni gires la cadera al subir la pierna.",
+      "Muévete lento y con intención; la estabilidad importa más que la altura."
+    ]
+  },
+  "cable-crunch": {
+    "squeeze_cue": "Lleva las costillas hacia la cadera y aprieta fuerte el abdomen abajo, como si te enrollaras en una bola.",
+    "posture_tips": [
+      "Arrodíllate frente a una polea alta y sostén la cuerda junto a tu cabeza.",
+      "Mantén la cadera quieta y alta; el movimiento debe salir de la columna.",
+      "Enrolla el torso hacia abajo en aproximadamente 1 segundo, codos hacia los muslos, y regresa en 2 segundos contra el cable.",
+      "No te sientes sobre los talones ni jales el peso con los brazos.",
+      "Elige un peso que te permita flexionar la columna de forma fluida y sin tirones."
+    ]
+  },
+  "ab-wheel-rollout": {
+    "squeeze_cue": "Regresa la rueda apretando el abdomen, como si arrastraras las costillas hacia las rodillas.",
+    "posture_tips": [
+      "Arrodíllate sobre un tapete y sostén la rueda bajo los hombros con los brazos rectos.",
+      "Mantén la pelvis metida y las costillas abajo durante todo el recorrido.",
+      "Rueda hacia adelante en 2-3 segundos hasta donde puedas controlar y regresa usando el abdomen.",
+      "No dejes que la zona lumbar se hunda cuando la rueda se aleja de tus rodillas.",
+      "Aumenta el recorrido poco a poco; empieza con extensiones cortas."
+    ]
+  },
+  "hanging-knee-raise": {
+    "squeeze_cue": "Lleva las rodillas hacia el pecho y aprieta el abdomen bajo, como si metieras la pelvis bajo las costillas.",
+    "posture_tips": [
+      "Cuélgate de una barra con agarre al ancho de los hombros y las piernas relajadas.",
+      "Mantén los hombros activos y el cuerpo estable sin balancearte.",
+      "Lleva las rodillas hacia el pecho mientras inclinas la pelvis hacia arriba y baja en 2-3 segundos.",
+      "No te quedes en rodillas a 90 grados sin enrollar la pelvis hacia arriba.",
+      "Bájate de la barra con control si tu agarre se rinde antes que tu abdomen."
+    ]
+  },
+  "cable-pallof-press": {
+    "squeeze_cue": "Empuja el agarre al frente y aprieta fuerte el abdomen y los costados, como si una pared te impidiera girar.",
+    "posture_tips": [
+      "Párate de lado a una polea a la altura del pecho y sostén el agarre contra el esternón.",
+      "Mantén los pies al ancho de la cadera, las rodillas sueltas y los hombros de frente.",
+      "Extiende los brazos al frente resistiendo el giro, sostén dos segundos y regresa al pecho.",
+      "No dejes que el torso gire hacia la polea al extender los brazos.",
+      "Aléjate de la polea solo hasta donde puedas resistir el giro con buena postura."
+    ]
+  },
+  "cable-woodchop-high-to-low": {
+    "squeeze_cue": "Gira hacia abajo cruzando el cuerpo y aprieta el costado de la cintura, como si llevaras el hombro hacia la cadera contraria.",
+    "posture_tips": [
+      "Coloca la polea arriba, párate de lado y toma el agarre con ambas manos por encima del hombro.",
+      "Mantén los brazos casi rectos y gira desde el torso, dejando que la cadera acompañe.",
+      "Jala el agarre en diagonal hacia la rodilla contraria en aproximadamente 1 segundo y controla el regreso en 2 segundos.",
+      "No jales solo con los brazos ni dobles los codos para mover el cable.",
+      "Gira el pie de atrás al rotar para quitarle tensión a la rodilla y la zona lumbar."
+    ]
+  },
+  "russian-twist": {
+    "squeeze_cue": "Gira las costillas hacia cada lado y aprieta el costado de la cintura, como si exprimieras tu torso igual que una toalla.",
+    "posture_tips": [
+      "Siéntate con las rodillas flexionadas, inclina el torso hacia atrás y junta las manos frente al pecho.",
+      "Mantén la columna larga y el pecho arriba sin encorvarte.",
+      "Gira de lado a lado a un ritmo controlado, llevando las manos junto a cada cadera con una breve pausa.",
+      "No muevas solo los brazos; el giro debe salir de la caja torácica.",
+      "Deja los talones en el piso si levantar los pies te hace perder la posición de la espalda."
+    ]
+  },
+  "decline-sit-up": {
+    "squeeze_cue": "Sube y aprieta fuerte el abdomen, como si llevaras las costillas hacia el ombligo.",
+    "posture_tips": [
+      "Engancha los pies en el banco declinado y recuéstate con las manos cruzadas sobre el pecho.",
+      "Mantén la barbilla ligeramente metida y el cuello relajado.",
+      "Sube vértebra por vértebra en aproximadamente 1 segundo y baja en 2-3 segundos hasta casi tocar el banco.",
+      "No jales la cabeza con las manos ni te impulses hacia arriba.",
+      "Elige una inclinación que puedas controlar al bajar antes de agregar peso."
+    ]
+  },
+  "hollow-body-hold": {
+    "squeeze_cue": "Presiona la zona lumbar hacia abajo y aprieta bien el abdomen, como si te prepararas para que te levanten igual que una banana rígida.",
+    "posture_tips": [
+      "Acuéstate boca arriba con los brazos sobre la cabeza y las piernas juntas y extendidas.",
+      "Mantén la zona lumbar pegada al piso y los hombros despegados.",
+      "Sube brazos y piernas unos centímetros y sostén la forma de banana, respirando de forma corta con el abdomen firme.",
+      "No dejes que la zona lumbar se arquee cuando bajas las piernas.",
+      "Flexiona las rodillas o sube más las piernas si no puedes mantener la zona lumbar abajo."
+    ]
+  },
+  "mountain-climber": {
+    "squeeze_cue": "Lleva cada rodilla hacia el pecho y aprieta el abdomen bajo, como si clavaras la rodilla en tus costillas.",
+    "posture_tips": [
+      "Empieza en plancha alta con las manos bajo los hombros y el cuerpo en línea recta.",
+      "Mantén la cadera baja y estable mientras alternas las piernas.",
+      "Lleva una rodilla hacia el pecho y cambia de pierna a un ritmo constante que puedas sostener sin rebotar la cadera.",
+      "No dejes que la cadera suba cuando aceleras.",
+      "Baja el ritmo si tus hombros empiezan a alejarse de tus manos."
+    ]
+  },
+  "crunch": {
+    "squeeze_cue": "Lleva las costillas hacia la cadera y aprieta el abdomen como si te prepararas para recibir un golpe.",
+    "posture_tips": [
+      "Acuéstate boca arriba con las rodillas flexionadas, los pies apoyados y las manos junto a las sienes.",
+      "Mantén el cuello neutro, con el espacio de un puño entre la barbilla y el pecho.",
+      "Despega las escápulas del piso en aproximadamente 1 segundo contrayendo el abdomen y baja en 2 segundos.",
+      "No jales la cabeza con las manos para subir.",
+      "Exhala al subir y no aguantes la respiración durante la serie."
+    ]
+  },
+  "lying-leg-raise": {
+    "squeeze_cue": "Sube las piernas y aprieta el abdomen bajo, como si hundieras el ombligo contra el piso.",
+    "posture_tips": [
+      "Acuéstate boca arriba con las piernas rectas y las manos bajo los glúteos o a los costados.",
+      "Mantén la zona lumbar en contacto con el piso en todo momento.",
+      "Sube las piernas hasta la vertical en aproximadamente 1 segundo y bájalas en 3 segundos sin tocar el piso.",
+      "No arquees la espalda cuando las piernas se acercan al piso.",
+      "Flexiona un poco las rodillas si tu zona lumbar se despega del piso."
+    ]
+  },
+  "dumbbell-farmers-carry": {
+    "squeeze_cue": "Aprieta los agarres y lleva las escápulas hacia abajo, sintiendo cómo los antebrazos y los trapecios se bloquean.",
+    "posture_tips": [
+      "Levanta una mancuerna pesada en cada mano con la columna neutra y párate derecho.",
+      "Mantén los hombros atrás, el pecho arriba y la mirada al frente mientras caminas.",
+      "Camina la distancia indicada con pasos cortos y firmes a un ritmo constante, respirando con el abdomen firme.",
+      "No te inclines hacia adelante ni dejes que los hombros se redondeen.",
+      "Despeja tu camino de obstáculos y deja las pesas en el piso flexionando cadera y rodillas."
+    ]
+  },
+  "dumbbell-suitcase-carry": {
+    "squeeze_cue": "Aprieta el costado de la cintura opuesto al peso, como si llevaras las costillas del lado libre hacia tu cadera.",
+    "posture_tips": [
+      "Sostén una sola mancuerna a un lado como si fuera una maleta, con el brazo recto.",
+      "Mantén los hombros nivelados y el torso erguido sin inclinarte hacia el peso.",
+      "Camina la distancia indicada a un ritmo controlado y luego repite del otro lado.",
+      "No te inclines lejos de la mancuerna ni subas la cadera para compensar.",
+      "Empieza con un peso moderado; lo que entrenas es la estabilidad lateral."
+    ]
+  },
+  "kettlebell-swing": {
+    "squeeze_cue": "Lleva la cadera al frente con fuerza arriba y aprieta fuerte los glúteos, como si cascaras una nuez entre ellos.",
+    "posture_tips": [
+      "Párate con los pies al ancho de los hombros y la kettlebell un paso delante de ti.",
+      "Mantén la columna neutra y flexiona desde la cadera en cada repetición; esto no es una sentadilla.",
+      "Lleva la pesa hacia atrás entre las piernas y extiende la cadera con fuerza para subirla a la altura del pecho, terminando erguido.",
+      "No subas la pesa con los brazos ni te inclines hacia atrás arriba.",
+      "Despeja el espacio a tu alrededor y deja la kettlebell en el piso con control al terminar."
+    ]
+  },
+  "dumbbell-thruster": {
+    "squeeze_cue": "Empuja con los talones, aprieta cuádriceps y glúteos y termina llevando las mancuernas hacia el techo.",
+    "posture_tips": [
+      "Sostén las mancuernas a la altura de los hombros, codos al frente y pies al ancho de la cadera.",
+      "Mantén el pecho arriba y el torso firme durante la sentadilla.",
+      "Baja en sentadilla, luego sube con fuerza y usa el impulso de las piernas para empujar las mancuernas sobre la cabeza.",
+      "No separes la sentadilla y el press en dos movimientos; debe ser un solo movimiento continuo.",
+      "Bloquea arriba con las costillas abajo para que tu zona lumbar no se arquee."
+    ]
+  },
+  "burpee": {
+    "squeeze_cue": "Arriba de cada flexión, aprieta el pecho como si jalaras las manos una hacia la otra sobre el piso.",
+    "posture_tips": [
+      "Párate con los pies al ancho de la cadera, luego baja en sentadilla y apoya las manos en el piso justo por fuera de los pies.",
+      "Mantén el cuerpo alineado en la plancha, sin que la cadera se hunda ni suba.",
+      "Baja en sentadilla, salta atrás a plancha, haz una flexión, salta con los pies hacia las manos y salta hacia arriba.",
+      "No aterrices con las piernas rígidas ni dejes que el pecho se estrelle contra el piso.",
+      "Aterriza suave con las rodillas flexionadas y baja el ritmo si tu técnica se deteriora."
+    ]
+  },
+  "barbell-power-clean": {
+    "squeeze_cue": "Empuja el piso y aprieta fuerte los glúteos mientras la cadera dispara la barra hacia arriba, como si saltaras en vertical.",
+    "posture_tips": [
+      "Colócate con la barra sobre la mitad del pie, pies al ancho de la cadera y agarre justo por fuera de las piernas.",
+      "Mantén la columna neutra y la barra cerca del cuerpo durante todo el jalón.",
+      "Extiende por completo cadera y rodillas con fuerza y recibe la barra sobre los hombros con los codos al frente.",
+      "No jales con los brazos antes de extender por completo la cadera.",
+      "Aprende el movimiento con poco peso o con un entrenador, y usa discos bumper que se puedan soltar."
+    ]
+  },
+  "kettlebell-turkish-get-up": {
+    "squeeze_cue": "Empuja la kettlebell hacia el techo y aprieta el hombro y el abdomen para mantener el brazo bloqueado en vertical.",
+    "posture_tips": [
+      "Acuéstate boca arriba con la kettlebell en una mano, el brazo vertical y la rodilla del mismo lado flexionada.",
+      "Mantén el brazo bloqueado y la mirada en la kettlebell durante todo el levantamiento.",
+      "Sube por etapas: codo, mano, puente, rodilla, de pie; invierte los pasos en orden para bajar.",
+      "No apresures las transiciones ni dejes que el brazo se incline fuera de la vertical.",
+      "Practica primero sin peso o con un zapato en equilibrio sobre el puño antes de usar la kettlebell."
+    ]
+  },
+  "dumbbell-skull-crusher-decline": {
+    "squeeze_cue": "Extiende hasta bloquear y aprieta fuerte la parte trasera de los brazos, como si quisieras tocar el techo con las mancuernas.",
+    "posture_tips": [
+      "Engancha los pies bajo el cojín del banco declinado y sube las mancuernas sobre el pecho, palmas mirándose entre sí.",
+      "Mantén los brazos ligeramente inclinados hacia atrás en dirección a tu cabeza y quietos toda la serie.",
+      "Baja las mancuernas junto a las orejas en 2-3 segundos doblando solo los codos y luego extiende por completo.",
+      "No abras los codos ni conviertas la repetición en un press moviendo los brazos.",
+      "Entrega las mancuernas o llévalas al pecho antes de incorporarte; nunca te sientes con los brazos extendidos."
+    ]
+  },
+  "reverse-crunch-decline": {
+    "squeeze_cue": "Lleva la cadera hacia las costillas y aprieta el abdomen bajo, como si despegaras la columna del cojín.",
+    "posture_tips": [
+      "Acuéstate con la cabeza en la parte alta del banco declinado y agárrate del banco detrás de la cabeza con las rodillas a 90 grados.",
+      "Mantén la zona lumbar pegada al cojín y la cabeza apoyada en el banco.",
+      "Enrolla la cadera hacia el pecho hasta que se despegue del cojín y bájala en 2-3 segundos.",
+      "No balancees las piernas ni uses impulso para levantar la cadera.",
+      "Empieza con una inclinación suave y auméntala solo cuando controles cada repetición."
+    ]
+  },
+  "crunch-decline": {
+    "squeeze_cue": "Sube y aprieta fuerte el abdomen, como si arrugaras las costillas hacia la cadera.",
+    "posture_tips": [
+      "Engancha los pies en el banco declinado y sostén un disco o una mancuerna contra el pecho.",
+      "Mantén la barbilla ligeramente metida y la zona lumbar cerca del cojín.",
+      "Sube los hombros en aproximadamente 1 segundo hasta acortar por completo el abdomen y baja en 2-3 segundos.",
+      "No subas hasta quedar sentado; detente antes de que el torso quede vertical para que el abdomen siga trabajando.",
+      "Agrega peso solo cuando puedas bajar cada repetición despacio sin forzar el cuello."
+    ]
+  }
+}

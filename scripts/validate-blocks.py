@@ -140,6 +140,26 @@ def main():
                 if paired and ex.get('technique') != 'superset':
                     problems.append(f"{where}/{day.get('key')}/{ex.get('code')}: paired code but technique is not superset")
 
+    # Spanish block texts (docs/fitness/approved/es/blocks.json) must match block ids, day keys and codes.
+    es_file = Path('docs/fitness/approved/es/blocks.json')
+    if es_file.exists():
+        by_id = {b['id']: b for b in blocks}
+        for block_id, es in json.loads(es_file.read_text(encoding='utf-8')).items():
+            block = by_id.get(block_id)
+            if not block:
+                problems.append(f'es/blocks.json: unknown block {block_id}')
+                continue
+            if es.get('insights') and len(es['insights']) != len(block.get('insights') or []):
+                problems.append(f'es/blocks.json: {block_id} insights count differs from English')
+            keys = {d['key']: {e['code'] for e in d['exercises']} for d in block['days']}
+            for day_key in (es.get('days') or {}):
+                if day_key not in keys:
+                    problems.append(f'es/blocks.json: {block_id} unknown day {day_key}')
+            for note_key in (es.get('notes') or {}):
+                day_key, _, code = note_key.partition('/')
+                if code not in keys.get(day_key, set()):
+                    problems.append(f'es/blocks.json: {block_id} unknown exercise {note_key}')
+
     print(f'{len(blocks)} blocks, {len(additions)} catalogue additions')
     if problems:
         print(f'\n{len(problems)} problem(s):')

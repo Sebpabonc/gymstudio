@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { localizeBlocks, useSpanishContentReady } from '../i18n/content'
 import { explainSuggestion, mapAiGatewayError } from '../ai/gateway'
 import type { AuthStatus } from '../auth/AuthProvider'
 import AiConsentPrompt from '../components/AiConsentPrompt'
@@ -259,7 +260,9 @@ function StrengthChart({ model, title, summary }: { model: ReturnType<typeof bui
 export default function ProgressScreen({ entries, exercises, initialExerciseId, onOpenExercise, onSignIn, authStatus }: Props) {
   const { t, language } = useT()
   const demoMode = isDemoMode()
-  const [blocks, setBlocks] = useState<TrainingBlock[] | null>(null)
+  const [rawBlocks, setBlocks] = useState<TrainingBlock[] | null>(null)
+  const spanishReady = useSpanishContentReady(language)
+  const blocks = useMemo(() => (rawBlocks ? localizeBlocks(rawBlocks, language) : null), [rawBlocks, language, spanishReady])
   const [dayType, setDayType] = useState<DayTypeFilter>('A')
   const [pickedId, setPickedId] = useState(initialExerciseId ?? '')
   const [exerciseSearch, setExerciseSearch] = useState('')
