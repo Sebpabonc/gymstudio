@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
     date?: string
     blockId?: string
     dayKey?: string
+    language?: string
   }
   try {
     body = await req.json()
@@ -110,6 +111,7 @@ Deno.serve(async (req) => {
   }
   if (feature !== 'session_summary' && !ID_RE.test(exerciseId)) return json(400, { error: 'invalid_exercise' })
   if (feature === 'session_summary' && !DATE_RE.test(date)) return json(400, { error: 'invalid_date' })
+  const language = body.language === 'es' ? 'es' : 'en'
 
   // Limits: per-user daily count and global monthly spend.
   const now = new Date()
@@ -201,6 +203,9 @@ Deno.serve(async (req) => {
       max_completion_tokens: MAX_OUTPUT_TOKENS,
       messages: [
         { role: 'system', content: systemPrompt },
+        ...(language === 'es'
+          ? [{ role: 'system', content: 'Reply in natural Latin American Spanish (same rules and length limits). Keep exercise names as given.' }]
+          : []),
         { role: 'system', content: `Data (JSON):\n${JSON.stringify(context)}` },
         { role: 'user', content: userMessage },
       ],
