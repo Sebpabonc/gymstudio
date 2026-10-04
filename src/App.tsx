@@ -55,7 +55,7 @@ const uiText = {
   trackTitle: 'Track it as you go',
   notes: 'Notes',
   notesPlaceholder: 'How did it feel? Any adjustments?',
-  saveWorkout: 'Save workout',
+  saveWorkout: 'Log workout',
   progress: 'Progress',
   noPrevious: 'No previous workout recorded yet.',
   addSet: '+ Add set',

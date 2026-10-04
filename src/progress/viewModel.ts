@@ -10,6 +10,8 @@ import {
 } from './types'
 import { dateValue, findBlockForDate, startOfWeek } from './utils'
 
+export { formatBlockMethod } from '../utils/trainingBlocks'
+
 export const MAX_SUGGESTIONS = 5
 export const MAX_RECORDS = 5
 export const MAX_BLOCK_LIFTS = 3
@@ -51,10 +53,6 @@ export const RECORD_TOOLTIPS = {
   reps: 'Most reps completed at a weight equal to or heavier than before.',
   e1rm: 'Estimated one-rep max: your estimated maximum weight for one repetition.',
 } as const
-
-export function formatBlockMethod(method: string) {
-  return method.replace(/[-_]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
-}
 
 export function visibleBlockReports(reports: BlockReport[], entries: ProgressEntry[], blocks: TrainingBlock[]) {
   const loggedBlockIds = new Set<string>()
