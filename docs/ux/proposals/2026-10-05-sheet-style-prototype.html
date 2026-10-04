@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sheet Container Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ---- GymStudio tokens, copied from src/styles.css (unchanged) ---- */
+:root{
+  --bg-dark:#1f1f20; --bg-soft:#2b2b2d;
+  --panel:rgba(255,255,255,.07); --panel-strong:rgba(255,255,255,.12);
+  --line:rgba(255,255,255,.14); --hairline:rgba(255,255,255,.08);
+  --text:#f3f3f1; --muted:#c8c7c4; --muted-strong:#efefeb;
+  --brand:#8d5e63; --brand-strong:#5a474b; --brand-soft:rgba(141,94,99,.18);
+  --button-dark:linear-gradient(135deg,#7a5d60 0%,#2f2f31 100%);
+  --nav-active:#c99ca1; --nav-idle:rgba(243,243,241,.55);
+  --cue:#e8b86a;
+  /* proposal-only: the sheet */
+  --sheet-bg:var(--bg-soft); --sheet-radius:44px; --gutter:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#141415;color:var(--text);font-family:Inter,"Segoe UI",sans-serif;font-weight:500;font-size:14px;line-height:1.45}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+input{font:inherit;color:inherit}
+
+/* ---------- page around the phone ---------- */
+.page{max-width:1180px;margin:0 auto;padding:32px 16px 64px}
+.intro h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.intro p{color:var(--muted);max-width:760px;margin-top:6px}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}
+.seg{display:inline-flex;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px;flex-wrap:wrap}
+.seg button{min-height:44px;padding:0 16px;border-radius:999px;color:var(--muted);font-weight:700;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--brand);color:#fff}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+.layout{display:grid;grid-template-columns:390px 1fr;gap:40px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}.phone{margin:0 auto}}
+.notes{background:var(--bg-dark);border:1px solid var(--line);border-radius:22px;padding:24px;font-size:14px}
+.notes h2{font-size:16px;font-weight:800;margin:18px 0 6px}
+.notes h2:first-child{margin-top:0}
+.notes ul{padding-left:18px;color:var(--muted)}
+.notes li{margin:4px 0}
+.notes b{color:var(--text)}
+.notes table{border-collapse:collapse;width:100%;font-size:13px;color:var(--muted)}
+.notes td,.notes th{border-bottom:1px solid var(--hairline);padding:6px 4px;text-align:left}
+.notes th{color:var(--text)}
+
+/* ---------- phone ---------- */
+.phone{width:390px;height:844px;border-radius:44px;border:10px solid #000;box-shadow:0 28px 80px rgba(0,0,0,.5);position:relative;overflow:hidden;background:var(--bg-dark);font-size:12.16px}
+.scroller{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding-bottom:140px}
+.scroller::-webkit-scrollbar{display:none}
+
+/* collapsing header (approved Option 2) */
+.hero{padding:44px var(--gutter) 18px}
+.hero .tag{font-size:10px;letter-spacing:.2em;color:var(--muted);font-weight:600}
+.hero .word{font-size:34px;font-weight:800;letter-spacing:-.05em;line-height:1.05;margin-top:4px}
+.hero .screen-name{font-size:16px;font-weight:700;margin-top:2px}
+.bar{position:absolute;top:0;left:0;right:0;height:48px;display:flex;align-items:center;gap:8px;padding:0 var(--gutter);background:rgba(31,31,32,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--hairline);z-index:5;opacity:0;transform:translateY(-8px);transition:opacity .18s,transform .18s;pointer-events:none}
+.bar.show{opacity:1;transform:none}
+.bar .w{font-size:12.8px;font-weight:800;letter-spacing:-.03em}
+.bar .s{font-size:12.8px;color:var(--muted)}
+.sync{position:absolute;top:18px;right:18px;width:8px;height:8px;border-radius:50%;background:#d9a441;z-index:6}
+
+/* dock (approved Option 3) */
+.dock{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);width:228px;height:60px;border-radius:30px;background:rgba(24,24,25,.72);backdrop-filter:blur(18px);border:1px solid var(--hairline);display:flex;justify-content:space-around;align-items:center;padding:0 6px;z-index:8;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.dock button{width:50px;height:50px;display:grid;place-items:center;position:relative;color:var(--nav-idle)}
+.dock button svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.6;fill:none}
+.dock button[aria-current="page"]{color:var(--nav-active)}
+.dock button[aria-current="page"] svg{stroke-width:2.1}
+.dock button[aria-current="page"]::after{content:"";position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--nav-active)}
+
+/* rest timer pill (unchanged) */
+.rest{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);display:none;gap:6px;align-items:center;background:rgba(24,24,25,.92);border:1px solid var(--line);border-radius:18px;padding:5px;z-index:9;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.rest.on{display:flex}
+.rest .t{padding:0 10px;font-weight:800;font-size:14px;min-width:70px}
+.rest button{min-height:44px;padding:0 12px;border-radius:13px;background:var(--panel-strong);font-weight:700;font-size:12px}
+
+/* ---------- shared atoms (current app look) ---------- */
+.lbl{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;min-height:28px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.08);font-size:12px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.badge{display:inline-flex;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:9px;font-weight:700}
+.round-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.04);display:grid;place-items:center;font-size:16px;font-weight:700;flex:none}
+.sec-btn{min-height:44px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px}
+.primary{width:100%;min-height:48px;border-radius:14px;background:var(--button-dark);color:#f5f5f5;font-weight:800;font-size:12px;letter-spacing:.06em}
+.code{font-size:9.92px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.ex-name{font-size:12.77px;font-weight:700;letter-spacing:-.02em}
+.ex-detail{font-size:12.16px;color:var(--muted-strong)}
+.done-pill{display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:3px 8px;border:1px solid var(--muted);border-radius:999px;font-size:11px;color:var(--muted)}
+.done-pill b{color:var(--text)}
+.muted{color:var(--muted)}
+h2.h{font-size:16px;font-weight:700}
+.daytabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px}
+.daytab{min-height:52px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
+.daytab b{font-size:11.5px;font-weight:800}
+.daytab span{font-size:9.3px;font-weight:800;color:var(--muted-strong)}
+.daytab[aria-pressed="true"]{border-color:var(--nav-active);background:var(--brand-soft)}
+
+/* set table (unchanged layout) */
+.sets{width:100%;margin-top:12px}
+.sets .hd,.sets .row{display:grid;grid-template-columns:28px 48px 1fr 52px 44px;gap:6px;align-items:center}
+.sets .hd{font-size:10px;font-weight:700;color:var(--muted);padding:0 0 6px}
+.sets .row{min-height:52px;border-top:1px solid var(--hairline)}
+.sets .row.ok{background:rgba(141,94,99,.16)}
+.kg{display:grid;grid-template-columns:32px 1fr 32px;align-items:center;gap:2px}
+.kg button{height:44px;font-size:18px;font-weight:800}
+.num{width:100%;height:44px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.05);text-align:center;font-size:16px;font-weight:700}
+.tick{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:18px;font-weight:800}
+.row.ok .tick{background:var(--nav-active);color:#1f1f20;border-color:var(--nav-active)}
+.same{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted);margin-top:12px}
+.cue{margin-top:12px;font-size:12.16px;line-height:1.5}
+.cue b{color:var(--cue)}
+.subrow{display:flex;align-items:center;justify-content:space-between;min-height:52px}
+.subrow .t{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.ai{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:11.2px;font-weight:700}
+.link{color:var(--nav-active);font-weight:700;font-size:12px;min-height:44px}
+
+/* ===============================================================
+   CONTAINERS — the only thing that differs between the two modes
+   =============================================================== */
+
+/* NOW: boxes inside boxes (matches the live app) */
+.now .sheet{padding:0 var(--gutter)}
+.now .sec{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:22px;padding:14px 12px;margin-bottom:12px}
+.now .dayplan{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:12px;margin-top:12px}
+.now .ex{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}
+.now .ss{background:rgba(141,94,99,.12);border:1px solid rgba(201,156,161,.3);border-radius:16px;padding:10px;margin-bottom:8px}
+.now .ss .ex{background:rgba(31,31,32,.6)}
+.now .inner{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px}
+.now .cue{background:rgba(232,184,106,.08);border:1px solid rgba(232,184,106,.35);border-radius:12px;padding:10px 12px}
+.now .subrow{padding:0 12px;border:1px solid var(--line);border-radius:12px;margin-top:10px;background:rgba(255,255,255,.03)}
+.now .listrow{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px}
+.now .sheet-top{display:none}
+
+/* PROPOSED: one sheet, content directly on it */
+.sheet-mode .hero{padding-bottom:40px}
+.sheet-mode .sheet{background:var(--sheet-bg);border-radius:var(--sheet-radius) var(--sheet-radius) 0 0;margin-top:-22px;min-height:700px;position:relative;box-shadow:0 -1px 0 var(--hairline),0 -18px 40px rgba(0,0,0,.25);padding-top:8px}
+.sheet-mode .sheet-top{display:block;width:36px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 6px}
+.sheet-mode .sec{padding:18px var(--gutter);border-bottom:1px solid var(--hairline)}
+.sheet-mode .sec:last-child{border-bottom:0}
+.sheet-mode .dayplan{margin-top:14px;margin-left:calc(-1 * var(--gutter));margin-right:calc(-1 * var(--gutter))}
+.sheet-mode .ex{padding:14px var(--gutter);border-top:1px solid var(--hairline)}
+.sheet-mode .ex.open{background:rgba(255,255,255,.03)}
+.sheet-mode .ss{position:relative;background:rgba(141,94,99,.07);border-top:1px solid var(--hairline)}
+.sheet-mode .ss::before{content:"";position:absolute;left:8px;top:12px;bottom:12px;width:3px;border-radius:2px;background:var(--nav-active)}
+.sheet-mode .ss .ex{padding-left:calc(var(--gutter) + 8px);border-top:1px solid var(--hairline)}
+.sheet-mode .ss .ex:first-of-type{border-top:0}
+.sheet-mode .ss-head{padding:12px var(--gutter) 0 calc(var(--gutter) + 8px)}
+.sheet-mode .inner{margin-top:14px}
+.sheet-mode .cue{background:rgba(232,184,106,.07);border-radius:12px;padding:10px 12px}
+.sheet-mode .subrow{border-top:1px solid var(--hairline)}
+.sheet-mode .listrow{padding:14px var(--gutter);border-top:1px solid var(--hairline);margin:0 calc(-1 * var(--gutter))}
+
+.ss-head{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted);padding-bottom:8px}
+.ex-head{display:flex;gap:12px;align-items:center}
+.ex-head .grow{flex:1;min-width:0}
+.logrounds .ex-head .ex-name{font-size:13.12px}
+.rounds .rd{display:grid;grid-template-columns:62px 1fr 44px;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--hairline)}
+.rounds .rd.ok{background:rgba(141,94,99,.16)}
+.rounds .pair{display:grid;gap:6px}
+.rounds .pair div{display:grid;grid-template-columns:24px 1fr 1fr;gap:6px;align-items:center;font-size:10px;font-weight:800;color:var(--muted)}
+.rounds .rd .num{height:44px}
+.rounds .rlab{font-weight:800;font-size:12px}
+
+/* progress */
+.dots{display:grid;grid-template-columns:repeat(6,1fr);text-align:center;margin-top:12px;font-size:11px;color:var(--muted)}
+.dots i{display:block;width:22px;height:22px;border-radius:50%;border:2px solid var(--muted);margin:6px auto 0}
+.dots i.on{background:var(--brand);border-color:var(--brand)}
+.sechead{display:flex;justify-content:space-between;align-items:center;min-height:44px}
+.sechead .lbl{color:var(--text);letter-spacing:.16em;font-size:12px}
+.sugg{padding:12px 0;border-top:1px solid var(--hairline)}
+.sugg:first-child{border-top:0}
+.chart{width:100%;height:auto;margin-top:12px}
+.pr{display:flex;justify-content:space-between;align-items:center;min-height:48px;border-top:1px solid var(--hairline)}
+.ab{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.ab button{min-height:44px;border-radius:12px;border:1px solid var(--line);font-weight:800}
+.ab button[aria-pressed="true"]{background:var(--button-dark)}
+.select{display:flex;justify-content:space-between;align-items:center;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:12px;margin-top:8px;font-size:12px}
+
+/* exercises */
+.search{width:100%;height:48px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.05);padding:0 14px;font-size:16px;margin-top:8px}
+.regions{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:4px;scrollbar-width:none}
+.regions .chip{min-height:36px;white-space:nowrap}
+.regions .chip[aria-pressed="true"]{background:var(--brand-soft);border-color:var(--nav-active)}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.stat b{display:block;font-size:18px;font-weight:800}
+
+.screen{display:none}
+.screen.on{display:block}
+.hint{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="intro">
+    <h1>Sheet container prototype</h1>
+    <p>UXer proposal, 5 Oct 2026, for Sebas. <b>Scope: containers only.</b> Colours, fonts, type sizes, the collapsing GYM STUDIO header, the floating dock, chips, buttons, the set table, the superset "Log rounds" panel, Ask AI and the rest timer are all unchanged. The only change is that content sits directly on one rounded sheet (rows and hairline dividers) instead of boxes inside boxes. Use the toggle to compare.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Container style">
+      <button type="button" data-mode="now" aria-pressed="false">Now (boxes)</button>
+      <button type="button" data-mode="sheet" aria-pressed="true">Proposed (sheet)</button>
+    </div>
+    <div class="seg" role="group" aria-label="Jump to screen">
+      <button type="button" data-jump="today" aria-pressed="true">Today</button>
+      <button type="button" data-jump="open">Open exercise</button>
+      <button type="button" data-jump="rounds">Superset rounds</button>
+      <button type="button" data-jump="progress">Progress</button>
+      <button type="button" data-jump="exercises">Exercises</button>
+      <button type="button" data-jump="you">You</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="phone sheet-mode" id="phone">
+        <div class="sync" title="Synced"></div>
+        <div class="bar" id="bar"><span class="w">GYM STUDIO</span><span class="s" id="barName">Today</span></div>
+        <div class="scroller" id="scroller">
+          <div class="hero">
+            <div class="tag">TRAIN WITH INTENT</div>
+            <div class="word">GYM STUDIO</div>
+            <div class="screen-name" id="heroName">Today</div>
+          </div>
+
+          <main class="sheet" id="sheet">
+            <div class="sheet-top" aria-hidden="true"></div>
+
+            <!-- TODAY -->
+            <section class="screen on" data-screen="today">
+              <div class="sec">
+                <div style="display:flex;gap:12px;align-items:flex-start">
+                  <div style="flex:1">
+                    <div class="lbl" style="font-size:10px">6-week block</div>
+                    <div style="font-size:13.76px;font-weight:700;margin-top:4px">Hypertrophy Flat Pyramid II</div>
+                    <div style="font-size:9.92px;font-weight:600;margin-top:2px">Starts Mon 5 Oct</div>
+                    <div style="display:flex;gap:6px;align-items:center;margin-top:8px"><span class="lbl" style="font-size:9px">Block 6</span><span class="badge">PT</span></div>
+                  </div>
+                  <button class="round-btn" type="button" aria-label="Block details">+</button>
+                </div>
+                <button class="sec-btn" type="button" style="margin-top:10px">Change block</button>
+              </div>
+
+              <div class="sec">
+                <div class="daytabs" style="margin-top:0" id="daytabs"></div>
+                <h2 class="h" style="font-size:14.4px;margin-top:16px">Day 1 · Chest-Back A</h2>
+                <div style="font-size:10.24px;color:var(--muted-strong)">Chest &amp; back · heavy</div>
+                <div class="dayplan" id="dayplan"></div>
+              </div>
+            </section>
+
+            <!-- PROGRESS -->
+            <section class="screen" data-screen="progress">
+              <div class="sec">
+                <h2 class="h">This week: 1 of 6 sessions · 0 PRs · in progress</h2>
+                <div class="dots"><div>D1<i class="on"></i></div><div>D2<i></i></div><div>D3<i></i></div><div>D4<i></i></div><div>D5<i></i></div><div>D6<i></i></div></div>
+              </div>
+              <div class="sec" data-coll>
+                <div class="sechead"><span class="lbl">Suggestions</span><button class="round-btn" type="button" data-toggle>−</button></div>
+                <div class="body">
+                  <div class="sugg"><div class="ex-name">Plate-Loaded T-Bar Row</div><div class="muted" style="margin-top:2px">All 4 sets hit 12 reps last time. Try a little more weight next session.</div><button class="ai" type="button" style="margin-top:8px">Ask AI why</button></div>
+                  <div class="sugg"><div class="ex-name">Pec Deck Fly</div><div class="muted" style="margin-top:2px">Reps dropped on the last set. Keep the weight and aim for the full reps.</div><button class="ai" type="button" style="margin-top:8px">Ask AI why</button></div>
+                  <div class="hint" style="text-align:left">Sample suggestion text for the prototype.</div>
+                </div>
+              </div>
+              <div class="sec" data-coll="closed">
+                <div class="sechead"><span class="lbl">Consistency</span><button class="round-btn" type="button" data-toggle>+</button></div>
+                <div class="body" hidden><div class="muted" style="padding:6px 0">1 of 6 sessions done this week.</div></div>
+              </div>
+              <div class="sec" data-coll>
+                <div class="sechead"><span class="lbl">Strength trend</span><button class="round-btn" type="button" data-toggle>−</button></div>
+                <div class="body">
+                  <div class="lbl" style="margin-top:6px">Exercise</div>
+                  <div class="select">Barbell Bench Press (Incline) <span>+</span></div>
+                  <div class="ab"><button type="button" aria-pressed="true">A</button><button type="button">B</button><button type="button">All</button></div>
+                  <svg class="chart" viewBox="0 0 330 180" role="img" aria-label="Estimated one-rep max trend, rising from 66.5 to 79.2 kg over blocks 2 to 5">
+                    <rect x="40" y="10" width="62" height="140" fill="rgba(141,94,99,.12)"/>
+                    <rect x="150" y="10" width="70" height="140" fill="rgba(141,94,99,.12)"/>
+                    <g stroke="rgba(255,255,255,.08)"><line x1="40" y1="10" x2="325" y2="10"/><line x1="40" y1="80" x2="325" y2="80"/><line x1="40" y1="150" x2="325" y2="150"/></g>
+                    <g fill="#c8c7c4" font-size="10" font-family="Inter,sans-serif"><text x="0" y="14">82 kg</text><text x="0" y="84">73 kg</text><text x="0" y="154">64 kg</text><text x="42" y="24">B2</text><text x="104" y="24">B3</text><text x="152" y="24">B4</text><text x="222" y="24">B5</text><text x="40" y="172">20 Apr</text><text x="150" y="172">1 Jun</text><text x="280" y="172">21 Sept</text></g>
+                    <polyline fill="none" stroke="#f3f3f1" stroke-width="2" points="44,52 56,46 66,36 80,96 92,96 104,96 160,112 172,102 196,96 230,90 252,84 274,60 300,40 320,24"/>
+                    <circle cx="66" cy="36" r="4.5" fill="#d9a441"/>
+                  </svg>
+                  <p style="margin-top:8px">Barbell Bench Press (Incline): est. 1RM +19% this block (66.5 → 79.2 kg).</p>
+                  <p class="muted" style="font-size:11px;margin-top:4px">● Personal record · shaded bands are training blocks</p>
+                  <button class="link" type="button">Open exercise</button>
+                </div>
+              </div>
+              <div class="sec" data-coll="closed">
+                <div class="sechead"><span class="lbl">Personal records</span><button class="round-btn" type="button" data-toggle>+</button></div>
+                <div class="body" hidden>
+                  <div class="pr"><span>Barbell Bench Press</span><b>85 kg</b></div>
+                  <div class="pr"><span>Barbell Bench Press (Incline)</span><b>82 kg</b></div>
+                  <div class="hint" style="text-align:left">Sample rows.</div>
+                </div>
+              </div>
+              <div class="sec" data-coll="closed">
+                <div class="sechead"><span class="lbl">Weekly sets by muscle</span><button class="round-btn" type="button" data-toggle>+</button></div>
+                <div class="body" hidden><div class="muted" style="padding:6px 0">Unchanged content, shown on the sheet.</div></div>
+              </div>
+              <div class="sec" data-coll="closed">
+                <div class="sechead"><span class="lbl">Block report card</span><button class="round-btn" type="button" data-toggle>+</button></div>
+                <div class="body" hidden><div class="muted" style="padding:6px 0">Unchanged content, shown on the sheet.</div></div>
+              </div>
+            </section>
+
+            <!-- EXERCISES -->
+            <section class="screen" data-screen="exercises">
+              <div class="sec">
+                <h2 class="h">Find an exercise</h2>
+                <button class="sec-btn" type="button" style="margin-top:10px">Build a custom day</button>
+                <div class="lbl" style="margin-top:16px">Search exercise</div>
+                <input class="search" id="search" type="search" placeholder="Search by name or muscle" aria-label="Search exercise">
+                <div class="regions" id="regions"></div>
+              </div>
+              <div class="sec" id="exlist"></div>
+            </section>
+
+            <!-- YOU -->
+            <section class="screen" data-screen="you">
+              <div class="sec">
+                <h2 class="h">Demo mode</h2>
+                <p class="muted" style="margin-top:6px">Demo data — not your real history.</p>
+                <button class="sec-btn" type="button" style="margin-top:12px">Exit demo</button>
+              </div>
+            </section>
+          </main>
+        </div>
+
+        <div class="rest" id="rest" role="timer" aria-live="off">
+          <span class="t">⏱ <span id="restT">1:30</span></span>
+          <button type="button" id="restPlus">+15s</button>
+          <button type="button" id="restSkip">Skip</button>
+        </div>
+
+        <nav class="dock" aria-label="Main">
+          <button type="button" data-tab="today" aria-label="Today" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></button>
+          <button type="button" data-tab="exercises" aria-label="Exercises"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+          <button type="button" data-tab="progress" aria-label="Progress"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></button>
+          <button type="button" data-tab="you" aria-label="You"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+        </nav>
+      </div>
+      <p class="hint">Tap a row's + to open it, ✓ to finish a set (starts the rest timer). Scroll to see the header collapse.</p>
+    </div>
+
+    <aside class="notes" aria-label="Design notes">
+      <h2>What changes</h2>
+      <ul>
+        <li><b>Boxes → one sheet.</b> Below the GYM STUDIO header, a single surface (<code>--bg-soft #2b2b2d</code>, an existing token) with a 44 px top radius overlaps the header by 22 px. All content sits on it.</li>
+        <li><b>Rows, not cards.</b> Sections and exercises are separated by 1 px hairlines (<code>rgba(255,255,255,.08)</code>, the dock's border value) and 16 px gutters. Today goes from up to 6 nested boxes to 1 level.</li>
+        <li><b>Superset</b> keeps its mauve identity as a side rail (<code>--nav-active</code>) plus a faint tint, with no border box.</li>
+        <li><b>Open exercise</b> is a faint full-width band; the set table, squeeze cue (tint, no border), tips, progress and Ask AI sit on it as rows.</li>
+        <li>Inputs, buttons, chips, the "Log rounds" panel and tick buttons keep their own outlines: they are controls, not containers.</li>
+      </ul>
+      <h2>What does not change</h2>
+      <ul>
+        <li>Dark theme and every colour token, Inter, the current type sizes (PO decision), the collapsing header, the floating dock, the rest timer pill, set table columns.</li>
+      </ul>
+      <h2>Contrast (WCAG 2.2) on the sheet <code>#2b2b2d</code></h2>
+      <table>
+        <tr><th>Pair</th><th>Ratio</th></tr>
+        <tr><td>Text #f3f3f1</td><td>12.7 : 1 (AAA)</td></tr>
+        <tr><td>Muted #c8c7c4</td><td>8.4 : 1 (AAA)</td></tr>
+        <tr><td>Active / rail #c99ca1</td><td>5.9 : 1 (AA)</td></tr>
+        <tr><td>Cue label #e8b86a</td><td>7.7 : 1 (AAA)</td></tr>
+        <tr><td>Log exercise text #f5f5f5 on button gradient</td><td>5.4–12.3 : 1 (AA+)</td></tr>
+        <tr><td>Hairline vs sheet</td><td>decorative (not required)</td></tr>
+      </table>
+      <h2>Touch &amp; input</h2>
+      <ul>
+        <li>All +/−, ticks, steppers, segmented and dock buttons ≥ 44 px. Number and search inputs are 16 px (no iOS zoom).</li>
+      </ul>
+      <h2>Prototype limits</h2>
+      <ul>
+        <li>D1 (T-Bar Row) uses the real plan; other rows and Progress suggestions/PRs use sample values. Nothing is saved.</li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+  const phone=$('#phone'), scroller=$('#scroller');
+  const state={mode:'sheet',screen:'today',open:new Set(),done:{},rounds:{B:new Set(),E:new Set()},openRounds:new Set()};
+
+  const EX={
+    A1:{name:'Dumbbell Bench Press',detail:'Incline',done:'4 sets · top 20 kg',chips:['Straight Sets','Chest'],scheme:'4 sets · sample values',sets:4,reps:10,prev:'20 × 10',kg:20},
+    B1:{name:'Dumbbell Bench Press',chips:['Superset','Chest'],scheme:'3 rounds · sample values',sets:3,reps:10,prev:'—',kg:0},
+    B2:{name:'Cable Fly',detail:'High to Low',chips:['Superset','Chest'],scheme:'3 rounds · sample values',sets:3,reps:12,prev:'—',kg:0},
+    C1:{name:'Pec Deck Fly',chips:['Straight Sets','Chest'],scheme:'3 sets · sample values',sets:3,reps:12,prev:'—',kg:0},
+    D1:{name:'Plate-Loaded T-Bar Row',detail:'Chest-Supported',chips:['Straight Sets','Upper Back','Lats'],scheme:'4 sets · 12·12·12·12 reps · 90 s rest',sets:4,reps:12,prev:'—',kg:0,
+        cue:'Drive your elbows behind your body and squeeze your shoulder blades together hard while your chest stays glued to the pad.'},
+    E1:{name:'Cable Lat Pulldown',detail:'Underhand Grip',chips:['Superset','Lats'],scheme:'3 rounds · sample values',sets:3,reps:12,prev:'—',kg:0},
+    E2:{name:'Machine Pullover',chips:['Superset','Lats'],scheme:'3 rounds · sample values',sets:3,reps:12,prev:'—',kg:0}
+  };
+
+  // Day tabs
+  $('#daytabs').innerHTML=['1/7<br>Today','0/7','0/7','0/7','0/7','0/7'].map((p,i)=>
+    `<button class="daytab" type="button" aria-pressed="${i===0}"><b>D${i+1}</b><span>${p}</span></button>`).join('');
+
+  function exRow(code){
+    const e=EX[code], open=state.open.has(code);
+    let h=`<div class="ex${open?' open':''}" id="ex-${code}"><div class="ex-head"><div class="grow">
+      <div class="code">${code}</div><div class="ex-name">${e.name}</div>${e.detail?`<div class="ex-detail">${e.detail}</div>`:''}
+      ${e.done?`<span class="done-pill"><b>✓ Done</b> · ${e.done}</span>`:''}
+      </div><button class="round-btn" type="button" data-open="${code}" aria-expanded="${open}" aria-label="${open?'Collapse':'Expand'} ${e.name}">${open?'−':'+'}</button></div>`;
+    if(open){
+      const d=state.done[code]||(state.done[code]=new Set());
+      h+=`<div class="chips">${e.chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>
+      <div class="muted" style="margin-top:8px">${e.scheme}</div>
+      ${e.cue?`<div class="cue"><b>Squeeze —</b> ${e.cue}</div>`:''}
+      <div class="inner"><button class="same" type="button">Same as set 1</button>
+      <div class="sets"><div class="hd"><span>Set</span><span>Previous</span><span style="text-align:center">kg</span><span style="text-align:center">Reps</span><span style="text-align:center">✓</span></div>
+      ${Array.from({length:e.sets},(_,i)=>`<div class="row${d.has(i)?' ok':''}"><b>${i+1}</b><span class="muted">${e.prev}</span>
+        <div class="kg"><button type="button" aria-label="Less weight" data-step="-2.5">−</button><input class="num" inputmode="decimal" value="${e.kg}" aria-label="Set ${i+1} weight in kg"><button type="button" aria-label="More weight" data-step="2.5">+</button></div>
+        <input class="num" inputmode="numeric" value="${e.reps}" aria-label="Set ${i+1} reps">
+        <button class="tick" type="button" data-tick="${code}:${i}" aria-pressed="${d.has(i)}" aria-label="Set ${i+1} done">✓</button></div>`).join('')}
+      </div><button class="primary" type="button" style="margin-top:12px">Log exercise</button></div>
+      <div class="subrow"><span class="t">Posture tips</span><button class="round-btn" type="button" style="border:0;color:var(--nav-active)">+</button></div>
+      <div class="subrow"><span class="t" style="text-transform:none;letter-spacing:0;font-size:12px">Progress</span><button class="round-btn" type="button" style="border:0;color:var(--nav-active)">+</button></div>
+      <div class="subrow"><button class="ai" type="button">Ask AI</button><button class="link" type="button" data-rest>Start rest</button></div>`;
+    }
+    return h+'</div>';
+  }
+
+  function ssGroup(key,a,b){
+    const done=state.rounds[key], open=state.openRounds.has(key);
+    let h=`<div class="ss"><div class="ss-head"><span class="chip" style="font-size:8.64px;min-height:24px;padding:4px 10px">Superset</span>Do ${a}, rest ~10 s, then ${b}; rest after the pair.</div>
+      ${exRow(a)}${exRow(b)}
+      <div class="ex logrounds" id="rounds-${key}"><div class="ex-head"><div class="grow"><div class="ex-name">Log rounds</div></div>
+        <span class="muted" style="font-size:11.5px">${done.size}/3 rounds</span>
+        <button class="round-btn" type="button" data-rounds="${key}" aria-expanded="${open}" aria-label="${open?'Close':'Open'} rounds">${open?'−':'+'}</button></div>`;
+    if(open){
+      h+=`<div class="rounds inner">${[0,1,2].map(r=>`<div class="rd${done.has(r)?' ok':''}"><span class="rlab">Round ${r+1}</span>
+        <div class="pair"><div><span>${a}</span><input class="num" inputmode="decimal" value="0" aria-label="Round ${r+1} ${a} kg"><input class="num" inputmode="numeric" value="${EX[a].reps}" aria-label="Round ${r+1} ${a} reps"></div>
+        <div><span>${b}</span><input class="num" inputmode="decimal" value="0" aria-label="Round ${r+1} ${b} kg"><input class="num" inputmode="numeric" value="${EX[b].reps}" aria-label="Round ${r+1} ${b} reps"></div></div>
+        <button class="tick" type="button" data-round="${key}:${r}" aria-pressed="${done.has(r)}" aria-label="Round ${r+1} done">✓</button></div>`).join('')}
+        <div class="muted" style="font-size:11px;padding-top:6px">kg · reps for each exercise; one tick per round.</div></div>`;
+    }
+    return h+'</div></div>';
+  }
+
+  function renderToday(){
+    $('#dayplan').innerHTML=exRow('A1')+ssGroup('B','B1','B2')+exRow('C1')+exRow('D1')+ssGroup('E','E1','E2');
+  }
+
+  // Exercises list
+  const LIB=[['Barbell Bench Press','Chest','Chest · Triceps, Front Delts'],['Dumbbell Bench Press','Chest','Chest · Triceps'],['Cable Fly','Chest','Chest'],['Pec Deck Fly','Chest','Chest'],['Plate-Loaded T-Bar Row','Back','Upper Back · Lats'],['Cable Lat Pulldown','Back','Lats · Biceps'],['Machine Pullover','Back','Lats']];
+  const REG=['All','Chest','Back','Shoulders','Arms','Legs','Glutes','Core','Full Body'];
+  let region='All', openLib=null;
+  $('#regions').innerHTML=REG.map(r=>`<button class="chip" type="button" data-region="${r}" aria-pressed="${r==='All'}">${r}</button>`).join('');
+  function renderLib(){
+    const q=$('#search').value.trim().toLowerCase();
+    const rows=LIB.filter(([n,reg,m])=>(region==='All'||reg===region)&&(!q||(n+' '+m).toLowerCase().includes(q)));
+    $('#exlist').innerHTML=`<div class="lbl">Exercise</div>`+(rows.length?rows.map(([n,,m])=>{
+      const o=openLib===n;
+      return `<div class="listrow"><div class="ex-head"><div class="grow"><div class="ex-name">${n}</div><div class="muted">${m}</div></div><button class="round-btn" type="button" data-lib="${n}" aria-expanded="${o}">${o?'−':'+'}</button></div>
+      ${o&&n==='Barbell Bench Press'?`<div class="cue"><b>Squeeze —</b> Squeeze your chest as if trying to bend the bar into a U and bring your biceps toward each other as you press up.</div>
+        <div class="stat"><div><div class="lbl">Last max</div><b>85 kg</b></div><div><div class="lbl">Last volume</div><b>2720 kg</b></div></div>
+        <div class="subrow"><span class="t">Posture tips</span><button class="round-btn" type="button" style="border:0;color:var(--nav-active)">+</button></div>
+        <div class="subrow"><button class="ai" type="button">Ask AI</button><button class="link" type="button">See full progress</button></div>`:o?`<div class="muted" style="margin-top:8px">Details as today (prototype shows them for Barbell Bench Press).</div>`:''}</div>`}).join(''):'<p class="muted" style="padding:12px 0">No exercises match.</p>');
+  }
+
+  // Rest timer
+  let restLeft=0, restInt=null;
+  function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+  function startRest(s){restLeft=s;$('#rest').classList.add('on');$('#restT').textContent=fmt(restLeft);clearInterval(restInt);
+    restInt=setInterval(()=>{restLeft--; if(restLeft<=0){stopRest();return;} $('#restT').textContent=fmt(restLeft);},1000);}
+  function stopRest(){clearInterval(restInt);$('#rest').classList.remove('on');}
+  $('#restPlus').onclick=()=>{restLeft+=15;$('#restT').textContent=fmt(restLeft)};
+  $('#restSkip').onclick=stopRest;
+
+  // Navigation
+  const NAMES={today:'Today',progress:'Progress',exercises:'Exercises',you:'You'};
+  function show(screen){
+    state.screen=screen;
+    $$('.screen').forEach(s=>s.classList.toggle('on',s.dataset.screen===screen));
+    $$('.dock button').forEach(b=>b.dataset.tab===screen?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+    $('#heroName').textContent=NAMES[screen]; $('#barName').textContent=NAMES[screen];
+    scroller.scrollTop=0; onScroll();
+  }
+  function setMode(m){
+    state.mode=m; phone.classList.toggle('sheet-mode',m==='sheet'); phone.classList.toggle('now',m==='now');
+    $$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));
+  }
+  function jump(j){
+    $$('[data-jump]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.jump===j));
+    if(j==='open'||j==='rounds'||j==='today'){
+      state.open.clear(); state.openRounds.clear();
+      if(j==='open') state.open.add('D1');
+      if(j==='rounds') state.openRounds.add('B');
+      renderToday(); show('today');
+      const t=j==='open'?$('#ex-D1'):j==='rounds'?$('#rounds-B'):null;
+      if(t) scroller.scrollTop+=t.getBoundingClientRect().top-scroller.getBoundingClientRect().top-(j==='rounds'?260:60);
+    } else show(j);
+  }
+  function onScroll(){ $('#bar').classList.toggle('show',scroller.scrollTop>80); }
+  scroller.addEventListener('scroll',onScroll,{passive:true});
+
+  document.addEventListener('click',e=>{
+    const t=e.target.closest('button'); if(!t) return;
+    const d=t.dataset;
+    if(d.mode) setMode(d.mode);
+    else if(d.jump) jump(d.jump);
+    else if(d.tab){ $$('[data-jump]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.jump===d.tab)); show(d.tab); }
+    else if(d.open){ state.open.has(d.open)?state.open.delete(d.open):state.open.add(d.open); renderToday(); }
+    else if(d.rounds){ state.openRounds.has(d.rounds)?state.openRounds.delete(d.rounds):state.openRounds.add(d.rounds); renderToday(); }
+    else if(d.tick){ const [c,i]=d.tick.split(':'); const s=state.done[c]; if(s.has(+i)) s.delete(+i); else { s.add(+i); startRest(90); } renderToday(); }
+    else if(d.round){ const [k,r]=d.round.split(':'); const s=state.rounds[k]; if(s.has(+r)) s.delete(+r); else { s.add(+r); startRest(90); } renderToday(); }
+    else if(d.step){ const inp=t.parentElement.querySelector('input'); inp.value=Math.max(0,(parseFloat(inp.value)||0)+parseFloat(d.step)); }
+    else if(d.rest!==undefined) startRest(90);
+    else if(d.toggle!==undefined){ const sec=t.closest('[data-coll]'), body=sec.querySelector('.body'); body.hidden=!body.hidden; t.textContent=body.hidden?'+':'−'; }
+    else if(d.region){ region=d.region; $$('[data-region]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.region===region)); renderLib(); }
+    else if(d.lib){ openLib=openLib===d.lib?null:d.lib; renderLib(); }
+  });
+  $('#search').addEventListener('input',renderLib);
+
+  renderToday(); renderLib(); setMode('sheet');
+})();
+</script>
+</body>
+</html>
