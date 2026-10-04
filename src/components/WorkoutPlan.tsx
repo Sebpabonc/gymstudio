@@ -24,6 +24,7 @@ import {
   blockWeek,
   defaultActiveBlock,
   formatBenchAngle,
+  formatBlockMethod,
   nextUnloggedDay,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
@@ -1338,7 +1339,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
             <div className="training-block-meta">
               <span>{blockDateRange(activeBlock)}</span>
-              <span>{activeBlock.method.replace(/-/g, ' ')}</span>
+              <span>{formatBlockMethod(activeBlock.method)}</span>
             </div>
             <p>{activeBlock.summary}</p>
             <button
@@ -1389,7 +1390,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <span>
                       <strong>{`Block ${block.number} · ${block.name}`}</strong>
                       <small className="training-block-option-summary">{block.summary}</small>
-                      <small>{`${blockDateRange(block)} · ${block.method.replace(/-/g, ' ')}`}</small>
+                      <small>{`${blockDateRange(block)} · ${formatBlockMethod(block.method)}`}</small>
                     </span>
                     <small className="training-block-option-status">
                       {`${trainingBlockDateStatus(block, today)}${pinnedBlockId === block.id ? ' · Pinned block' : ''}`}
@@ -1635,13 +1636,19 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 className={cardClasses}
                 data-exercise-card={exerciseKey}
               >
-                <div className="planned-exercise-header">
-                  <div className="planned-exercise-title-block">
+                <button
+                  type="button"
+                  className="planned-exercise-header"
+                  onClick={() => toggleExerciseCollapse(exercise.name)}
+                  aria-expanded={!isCollapsed}
+                  aria-label={isCollapsed ? `Expand ${exercise.name}` : `Collapse ${exercise.name}`}
+                >
+                  <span className="planned-exercise-title-block">
                     {exercise.code && <span className="plan-exercise-code">{exercise.code}</span>}
-                    <div className="planned-exercise-name-wrap">
+                    <span className="planned-exercise-name-wrap">
                       <strong className="planned-exercise-main-name">{displayTitle.main}</strong>
                       {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
-                    </div>
+                    </span>
                       {completedEntry && (
                         <span className="done-badge" role="status">
                           <span aria-hidden="true">✓ </span>
@@ -1654,17 +1661,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           {badge === 'e1rm' ? 'e1RM' : badge === 'weight' ? 'Weight' : 'Rep'} PR
                         </span>
                       ))}
-                  </div>
-                  <button
-                    type="button"
-                    className="toggle-button collapse-trigger"
-                    onClick={() => toggleExerciseCollapse(exercise.name)}
-                    aria-expanded={!isCollapsed}
-                    aria-label={isCollapsed ? `Expand ${exercise.name}` : `Collapse ${exercise.name}`}
-                  >
+                  </span>
+                  <span className="toggle-button expand-toggle" aria-hidden="true">
                     {isCollapsed ? '+' : '−'}
-                  </button>
-                </div>
+                  </span>
+                </button>
 
                 {!isCollapsed && (
                   <>

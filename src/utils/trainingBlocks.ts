@@ -22,6 +22,11 @@ function sortedBlocks(blocks: TrainingBlock[]) {
 
 export type TrainingBlockDateStatus = 'Current' | 'Upcoming' | 'Completed'
 
+export function formatBlockMethod(method: string) {
+  const label = method.replace(/[-_]+/g, ' ').trim().toLowerCase()
+  return label ? `${label[0].toUpperCase()}${label.slice(1)}` : ''
+}
+
 export function trainingBlockDateStatus(block: TrainingBlock, today: string | Date = new Date()): TrainingBlockDateStatus {
   const todayValue = dateValue(today)
   if (todayValue < dateValue(block.startDate)) return 'Upcoming'
