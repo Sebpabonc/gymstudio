@@ -1,0 +1,652 @@
+{
+  "back-squat": {
+    "squeeze_cue": "Sube apretando cuádriceps y glúteos a la vez, como si separaras el piso con los pies.",
+    "posture_tips": [
+      "Apoya la barra en la parte alta de los trapecios, activa el core y abre los pies al ancho de hombros con las puntas un poco hacia afuera.",
+      "Mantén el pecho arriba y la columna neutra, con las rodillas alineadas con las puntas de los pies.",
+      "Baja en 2-3 segundos hasta al menos la paralela y sube empujando el piso con todo el pie.",
+      "No dejes que las rodillas se vayan hacia adentro al salir desde abajo.",
+      "Haz la sentadilla dentro de un rack con las barras de seguridad justo por debajo de tu punto más bajo."
+    ]
+  },
+  "heels-elevated-hb-squats": {
+    "squeeze_cue": "Baja profundo para sentir cómo se cargan los cuádriceps y apriétalos fuerte para estirar las rodillas al subir.",
+    "posture_tips": [
+      "Pon los talones sobre un disco o una cuña y apoya la barra alta sobre los trapecios.",
+      "Mantén el torso lo más vertical posible y deja que las rodillas avancen por encima de las puntas de los pies.",
+      "Baja en unos 3 segundos a una sentadilla profunda y sube sin despegar los talones de la cuña.",
+      "No uses una cuña tan alta que el peso se te vaya a la parte delantera del pie.",
+      "Asegúrate de que la cuña esté firme y no se deslice antes de cargar la barra."
+    ]
+  },
+  "barbell-front-squat": {
+    "squeeze_cue": "Siente cómo los cuádriceps toman la carga abajo y apriétalos para llevar codos y pecho directo hacia arriba.",
+    "posture_tips": [
+      "Apoya la barra sobre los deltoides frontales con los codos altos, con agarre olímpico o con brazos cruzados.",
+      "Mantén los codos arriba y el torso vertical durante toda la bajada.",
+      "Baja en 2-3 segundos justo por debajo de la paralela, sentándote entre las piernas, y sube guiando con los codos.",
+      "No dejes caer los codos o la barra se te rodará hacia adelante por los hombros.",
+      "Si pierdes la barra, empújala hacia adelante y da un paso atrás; pon siempre las barras de seguridad del rack."
+    ]
+  },
+  "dumbbell-goblet-squat": {
+    "squeeze_cue": "Aprieta glúteos y cuádriceps para subir, como si empujaras las rodillas hacia afuera y el piso lejos de ti.",
+    "posture_tips": [
+      "Sostén una mancuerna en vertical contra el pecho, con los pies un poco más abiertos que el ancho de hombros.",
+      "Mantén la mancuerna pegada al pecho y el torso alto mientras bajas.",
+      "Baja en 2-3 segundos hasta que los codos rocen la parte interna de las rodillas y sube empujando con todo el pie.",
+      "No dejes que la mancuerna se aleje del cuerpo, porque te jala el torso hacia adelante.",
+      "Elige un peso que puedas sostener firme toda la serie sin que se te resbale."
+    ]
+  },
+  "smith-machine-squat": {
+    "squeeze_cue": "Aprieta los cuádriceps para estirar las piernas, como si empujaras la espalda contra la barra y el piso hacia abajo.",
+    "posture_tips": [
+      "Colócate bajo la barra con los pies un poco por delante de la trayectoria de la barra.",
+      "Mantén la espalda firme siguiendo la trayectoria fija de la barra y las rodillas alineadas con las puntas de los pies.",
+      "Baja en 2-3 segundos hasta una profundidad que controles y sube sin bloquear las rodillas de golpe.",
+      "No pongas los pies justo debajo de la barra; sobrecarga las rodillas.",
+      "Pon los topes de seguridad de la Smith y gira la barra para engancharla al terminar."
+    ]
+  },
+  "barbell-box-squat": {
+    "squeeze_cue": "Aprieta los glúteos para despegar la cadera del cajón, como si empujaras las rodillas hacia afuera contra una banda.",
+    "posture_tips": [
+      "Pon un cajón detrás de ti a la altura de la paralela y abre los pies un poco más de lo habitual.",
+      "Lleva la cadera hacia atrás, con las espinillas casi verticales y el pecho arriba.",
+      "Siéntate en el cajón en unos 2 segundos, pausa un instante sin perder la tensión y sube con fuerza.",
+      "No te dejes caer sobre el cajón ni te balancees hacia atrás para tomar impulso.",
+      "Verifica que el cajón esté estable y no se deslice antes de empezar."
+    ]
+  },
+  "plate-loaded-pendulum-squat": {
+    "squeeze_cue": "Siente el estiramiento de los cuádriceps abajo y apriétalos fuerte para empujar la plataforma con el medio del pie.",
+    "posture_tips": [
+      "Apoya espalda y hombros contra los cojines, con los pies en el centro de la plataforma.",
+      "Mantén la zona lumbar pegada al respaldo durante todo el arco.",
+      "Baja en unos 3 segundos tan profundo como tu espalda siga pegada y sube sin bloquear del todo.",
+      "No dejes que los talones se despeguen de la plataforma abajo.",
+      "Usa el seguro de la máquina al entrar y salir para nunca quedarte atrapado bajo la carga."
+    ]
+  },
+  "plate-loaded-belt-squat": {
+    "squeeze_cue": "Aprieta glúteos y cuádriceps para pararte bien alto, como si empujaras la plataforma a través del piso.",
+    "posture_tips": [
+      "Ajusta el cinturón alrededor de la cadera y pon los pies al ancho de hombros en la plataforma.",
+      "Mantén el torso alto y usa las manijas solo para equilibrio, no para jalarte hacia arriba.",
+      "Baja recto en 2-3 segundos hasta tu profundidad objetivo y sube extendiendo cadera y rodillas a la vez.",
+      "No dejes que el cinturón se suba a la cintura; debe quedar sobre la cadera.",
+      "Revisa que la cadena y el mosquetón estén bien cerrados antes de agregar peso."
+    ]
+  },
+  "bodyweight-squat": {
+    "squeeze_cue": "Aprieta glúteos y cuádriceps al subir, como si empujaras el piso para crecer más alto.",
+    "posture_tips": [
+      "Párate con los pies al ancho de hombros, puntas un poco hacia afuera y brazos estirados al frente para equilibrarte.",
+      "Mantén la espalda recta y el peso repartido entre talón y parte delantera del pie.",
+      "Baja en unos 2 segundos tan profundo como te permita la técnica y sube a ritmo constante sin rebotar.",
+      "No dejes que los talones se levanten ni que la espalda se redondee abajo.",
+      "Entrena sobre una superficie antideslizante y con espacio libre alrededor."
+    ]
+  },
+  "dumbbell-sumo-squat": {
+    "squeeze_cue": "Sube apretando la cara interna de los muslos y los glúteos, como si arrastraras los pies uno hacia el otro por el piso.",
+    "posture_tips": [
+      "Abre los pies bastante más que los hombros, puntas hacia afuera, sosteniendo una mancuerna colgando.",
+      "Mantén el torso vertical y empuja las rodillas hacia afuera alineadas con las puntas de los pies.",
+      "Baja la mancuerna entre las piernas en 2-3 segundos y sube llevando las rodillas hacia afuera sobre las puntas.",
+      "No abras tanto que las rodillas no puedan seguir a las puntas de los pies.",
+      "Súbete a un escalón o discos si la mancuerna toca el piso antes de llegar a tu profundidad completa."
+    ]
+  },
+  "hack-squat-machine": {
+    "squeeze_cue": "Aprieta los cuádriceps para empujar la plataforma, imaginando que las rótulas suben hacia la cadera.",
+    "posture_tips": [
+      "Apoya espalda y hombros contra los cojines, con los pies a media altura de la plataforma.",
+      "Mantén la cadera y la zona lumbar pegadas al respaldo en todo el recorrido.",
+      "Baja en 2-3 segundos hasta que los muslos pasen la paralela y sube sin bloquear las rodillas arriba.",
+      "No pongas los pies tan arriba que les quites el trabajo a los cuádriceps.",
+      "Pon y quita los seguros solo con las piernas ya extendidas."
+    ]
+  },
+  "leg-press-quad-dominant": {
+    "squeeze_cue": "Aprieta los cuádriceps para alejar el carro, como si quisieras atravesar la plataforma con los pies.",
+    "posture_tips": [
+      "Siéntate con la espalda y la cadera bien apoyadas en el respaldo y los pies al ancho de cadera.",
+      "Mantén las rodillas alineadas con las puntas de los pies durante toda la bajada.",
+      "Baja el carro en 2-3 segundos hasta unos 90 grados de flexión de rodilla y empuja con todo el pie.",
+      "No dejes que la cadera se despegue del asiento al final de la bajada.",
+      "No bloquees las rodillas arriba y quita los seguros solo con el carro bajo control."
+    ]
+  },
+  "plate-loaded-leg-press-single-leg": {
+    "squeeze_cue": "Empuja con todo el pie y aprieta el cuádriceps y el glúteo de la pierna que trabaja mientras empujas el carro.",
+    "posture_tips": [
+      "Pon un pie en el centro de la plataforma y apoya el otro en el piso o en el marco.",
+      "Mantén la pelvis nivelada y la rodilla que trabaja alineada con el segundo dedo del pie.",
+      "Baja en 2-3 segundos hasta donde tu cadera siga abajo y empuja hasta que la pierna quede casi recta.",
+      "No dejes que la rodilla se vaya hacia adentro al empujar.",
+      "Empieza liviano y ten los seguros a mano hasta que tu equilibrio sea firme."
+    ]
+  },
+  "machine-seated-leg-press": {
+    "squeeze_cue": "Aprieta los cuádriceps para alejar la plataforma, imaginando que tus muslos se estiran como pistones.",
+    "posture_tips": [
+      "Ajusta el asiento para que las rodillas empiecen a unos 90 grados, con los pies planos en la plataforma.",
+      "Mantén la espalda contra el respaldo y sujeta las manijas laterales para estar estable.",
+      "Empuja de forma fluida hasta que las piernas queden casi rectas y regresa en 2-3 segundos sin soltar las placas.",
+      "No pongas el asiento tan cerca que la cadera se te meta hacia abajo al empezar.",
+      "No bloquees las rodillas arriba y apoya las placas con suavidad al terminar."
+    ]
+  },
+  "db-walking-lunges-long-steps": {
+    "squeeze_cue": "Empuja con el talón delantero y aprieta ese glúteo al avanzar, como si jalaras el piso por debajo de ti.",
+    "posture_tips": [
+      "Sostén una mancuerna en cada mano a los costados y ubícate en un pasillo despejado.",
+      "Mantén el torso alto y la rodilla delantera alineada con el pie al dar el paso.",
+      "Da un paso largo, baja en unos 2 segundos hasta que la rodilla trasera casi toque el piso y avanza.",
+      "No des pasos cortos; cargan la rodilla delantera y le quitan trabajo a los glúteos.",
+      "Asegúrate de que tu camino esté libre de obstáculos antes de empezar."
+    ]
+  },
+  "dumbbell-lunge-forward": {
+    "squeeze_cue": "Empuja hacia atrás desde el pie delantero apretando cuádriceps y glúteo, como si alejaras el piso de ti.",
+    "posture_tips": [
+      "Párate con los pies al ancho de cadera y una mancuerna en cada mano.",
+      "Mantén el pecho arriba y el peso centrado sobre el pie delantero al apoyar.",
+      "Da un paso al frente, baja en unos 2 segundos hasta que la rodilla trasera casi toque y empuja con el pie delantero.",
+      "No caigas de golpe sobre el talón ni apoyes el pie delantero demasiado cerca.",
+      "Usa una carga moderada; frenar el paso hacia adelante exige mucho control."
+    ]
+  },
+  "dumbbell-lunge-reverse": {
+    "squeeze_cue": "Aprieta el glúteo delantero para volver a subir, como si arrastraras el talón delantero hacia ti.",
+    "posture_tips": [
+      "Párate con las mancuernas a los costados y el peso en el pie de apoyo.",
+      "Mantén la espinilla delantera casi vertical y el torso ligeramente inclinado hacia adelante.",
+      "Da un paso atrás, baja en unos 2 segundos hasta que la rodilla quede cerca del piso y empuja con el pie delantero.",
+      "No pongas el pie trasero en la misma línea que el delantero; te desequilibra.",
+      "Baja la rodilla trasera con suavidad y nunca la golpees contra el piso."
+    ]
+  },
+  "barbell-lunge-reverse": {
+    "squeeze_cue": "Aprieta el glúteo de la pierna delantera para subir, como si jalaras el talón delantero hacia el pie trasero.",
+    "posture_tips": [
+      "Saca la barra del rack sobre los trapecios y da dos pasos atrás para tener espacio.",
+      "Activa el core y mantén la barra nivelada, sin inclinarla hacia un lado.",
+      "Da un paso atrás, baja recto en unos 2 segundos y empuja con el pie delantero para volver.",
+      "No te apresures; empieza cada repetición con los pies juntos y estables.",
+      "Trabaja dentro del rack con las barras de seguridad puestas por si pierdes el equilibrio."
+    ]
+  },
+  "dumbbell-lunge-lateral": {
+    "squeeze_cue": "Empuja para volver apretando la cara interna del muslo y el glúteo, como si deslizaras la pierna flexionada hacia el pie de apoyo.",
+    "posture_tips": [
+      "Párate con los pies juntos, sosteniendo una mancuerna contra el pecho.",
+      "Mantén la pierna recta totalmente extendida y el pie que trabaja plano en el piso.",
+      "Da un paso amplio al costado, lleva la cadera atrás sobre ese pie en unos 2 segundos y empuja para volver.",
+      "No dejes que la rodilla flexionada pase mucho más allá de las puntas de los pies.",
+      "Amplía el paso poco a poco a medida que mejora la movilidad de tus aductores."
+    ]
+  },
+  "dumbbell-lunge-curtsy": {
+    "squeeze_cue": "Aprieta el glúteo de la pierna delantera al subir y siéntelo trabajar en la parte externa de la cadera.",
+    "posture_tips": [
+      "Sostén una mancuerna contra el pecho con los pies al ancho de cadera.",
+      "Mantén la cadera mirando al frente aunque la pierna trasera se cruce por detrás.",
+      "Cruza un pie en diagonal por detrás, baja en unos 2 segundos y sube empujando con la pierna delantera.",
+      "No gires el torso ni la pelvis hacia la pierna que cruza.",
+      "Acorta el cruce si sientes que pierdes el equilibrio."
+    ]
+  },
+  "dumbbell-step-up": {
+    "squeeze_cue": "Aprieta el glúteo y el cuádriceps de la pierna de arriba para pararte alto, como si jalaras el cajón hacia ti.",
+    "posture_tips": [
+      "Apoya todo el pie sobre un cajón a la altura de la rodilla, con las mancuernas a los costados.",
+      "Mantén el torso un poco inclinado hacia adelante y la rodilla que trabaja alineada con el pie.",
+      "Sube usando solo la pierna de arriba y baja en 2-3 segundos hasta que el pie de atrás toque el piso.",
+      "No te impulses con la pierna de abajo para ayudarte a subir.",
+      "Usa un cajón estable y antideslizante que no se pueda voltear."
+    ]
+  },
+  "dumbbell-bulgarian-split-squat": {
+    "squeeze_cue": "Siente el estiramiento del glúteo delantero abajo y apriétalo para subir, como si empujaras el piso lejos de ti.",
+    "posture_tips": [
+      "Apoya el empeine del pie trasero en una banca y planta el pie delantero a un paso largo de distancia.",
+      "Mantén la cadera mirando al frente y el peso sobre el pie delantero.",
+      "Baja en 2-3 segundos hasta que el muslo delantero quede paralelo y sube sin rebotar.",
+      "No empujes con la pierna trasera; solo está ahí para darte equilibrio.",
+      "Ajusta tu distancia a la banca antes de tomar el peso para no perder el equilibrio."
+    ]
+  },
+  "dumbbell-split-squat": {
+    "squeeze_cue": "Aprieta el cuádriceps y el glúteo de la pierna delantera para subir, como si hundieras el pie delantero en el piso.",
+    "posture_tips": [
+      "Colócate en posición escalonada con ambos pies en el piso y las mancuernas a los costados.",
+      "Mantén los pies al ancho de cadera, como si estuvieras parado sobre dos rieles.",
+      "Baja la rodilla trasera hacia el piso en unos 2 segundos sin mover los pies y vuelve a subir con fuerza.",
+      "No dejes que la rodilla delantera se vaya hacia adentro al subir.",
+      "Baja con control para que la rodilla trasera no golpee el piso."
+    ]
+  },
+  "ffe-db-split-squats": {
+    "squeeze_cue": "Baja al estiramiento profundo y aprieta el cuádriceps delantero para estirar la rodilla al subir.",
+    "posture_tips": [
+      "Pon el pie delantero sobre un disco o un escalón bajo y coloca el pie trasero detrás de ti.",
+      "Mantén el torso vertical y deja que la rodilla delantera avance por encima del pie.",
+      "Baja en unos 3 segundos a la posición más profunda que controles y sube empujando con el pie delantero.",
+      "No uses una plataforma alta o inestable que te haga perder el equilibrio.",
+      "Verifica que el disco o el escalón no se deslice antes de agregar carga."
+    ]
+  },
+  "smith-machine-split-squat": {
+    "squeeze_cue": "Aprieta el cuádriceps y el glúteo de la pierna delantera para subir, como si empujaras la barra por el riel con esa pierna.",
+    "posture_tips": [
+      "Colócate bajo la barra en posición de zancada, con el pie delantero un poco adelantado.",
+      "Mantén el torso recto bajo la barra y la cadera mirando al frente.",
+      "Baja recto siguiendo el riel en unos 2 segundos y sube con la pierna delantera.",
+      "No acortes tanto la postura que se te levante el talón delantero.",
+      "Pon los topes de seguridad justo por debajo del punto más bajo de tu repetición."
+    ]
+  },
+  "leg-extensions-toes-dorsiflexed-neutral": {
+    "squeeze_cue": "Extiende del todo y aprieta fuerte los cuádriceps un segundo, como si jalaras las rótulas hacia la cadera.",
+    "posture_tips": [
+      "Alinea la rodilla con el eje de la máquina y pon el rodillo justo por encima del tobillo.",
+      "Mantén la espalda contra el respaldo y sujeta las manijas para que la cadera no se levante.",
+      "Extiende por completo en 1 segundo, sostén arriba 1 segundo y baja en 2-3 segundos.",
+      "No balancees el peso hacia arriba ni dejes caer el rodillo.",
+      "Usa cargas moderadas si sientes las rodillas irritadas y consulta a un profesional si te duele."
+    ]
+  },
+  "machine-leg-extension-single-leg": {
+    "squeeze_cue": "En la extensión completa, aprieta el cuádriceps que trabaja lo más fuerte que puedas, como si lo marcaras para una foto.",
+    "posture_tips": [
+      "Ajusta el respaldo y el rodillo igual que en la versión a dos piernas y carga solo una pierna.",
+      "Mantén la pierna libre relajada y la cadera pegada al asiento.",
+      "Extiende la rodilla por completo, pausa un segundo y baja en 2-3 segundos hasta que las placas casi se toquen.",
+      "No gires el torso hacia el lado que trabaja para mover más peso.",
+      "Usa menos carga que en la versión a dos piernas para no sobrecargar la rodilla."
+    ]
+  },
+  "prone-leg-curl-toes-dorsiflexed-neutral": {
+    "squeeze_cue": "Aprieta los isquiotibiales para llevar los talones hacia los glúteos, como si quisieras patearte el trasero.",
+    "posture_tips": [
+      "Acuéstate boca abajo con las rodillas justo fuera del borde del banco y el rodillo sobre los talones.",
+      "Mantén la cadera pegada al banco y sujeta las manijas todo el tiempo.",
+      "Lleva los talones hacia los glúteos en 1 segundo, pausa y baja en 2-3 segundos.",
+      "No levantes la cadera del banco para terminar la repetición.",
+      "No dejes que el peso te jale las rodillas de golpe hasta estirarlas abajo."
+    ]
+  },
+  "seated-leg-curl-toes-dorsiflexed-neutral": {
+    "squeeze_cue": "Aprieta los isquiotibiales para llevar los talones bajo el asiento, como si los arrastraras por la arena.",
+    "posture_tips": [
+      "Ajusta el respaldo para que la rodilla quede alineada con el eje y baja el cojín de muslos sobre tus piernas.",
+      "Mantén la espalda apoyada e inclínate un poco hacia adelante para estirar más los isquiotibiales.",
+      "Flexiona hasta que los talones queden bajo el asiento, pausa y regresa en 2-3 segundos hasta casi estirar.",
+      "No dejes flojo el cojín de muslos o se te levantará la cadera.",
+      "Ajusta el rodillo inferior firme por encima del tobillo para que no se deslice hacia la pantorrilla."
+    ]
+  },
+  "machine-seated-leg-curl-single-leg": {
+    "squeeze_cue": "Flexiona apretando el isquiotibial de la pierna que trabaja, como si jalaras el talón hacia abajo y atrás a través del piso.",
+    "posture_tips": [
+      "Ajusta la máquina igual que en la versión a dos piernas y pon solo una pierna sobre el rodillo.",
+      "Mantén ambos muslos sujetos por el cojín superior y la cadera quieta.",
+      "Flexiona hasta donde llegue tu rodilla, pausa brevemente y regresa en 2-3 segundos hasta casi estirar.",
+      "No gires la pierna hacia adentro ni hacia afuera para ayudar a mover el peso.",
+      "Elige una carga menor y compénsala con más control en la bajada."
+    ]
+  },
+  "machine-standing-leg-curl": {
+    "squeeze_cue": "Aprieta el isquiotibial para subir el talón, como si quisieras tocarte el glúteo con él.",
+    "posture_tips": [
+      "Apoya el muslo en el cojín y pon el rodillo detrás del tobillo de la pierna que trabaja.",
+      "Mantén la cadera contra el cojín y el torso quieto sujetando las manijas.",
+      "Lleva el talón hacia el glúteo, pausa y baja en 2-3 segundos sin dejar caer el peso.",
+      "No arquees la zona lumbar para subir más el talón.",
+      "Ajusta la altura del cojín para que la rodilla quede alineada con el eje de la máquina."
+    ]
+  },
+  "nordic-hamstring-curl": {
+    "squeeze_cue": "Resiste la caída apretando fuerte los isquiotibiales, como si hundieras los talones en el cojín.",
+    "posture_tips": [
+      "Arrodíllate sobre una colchoneta con los tobillos trabados bajo un cojín o sujetos por un compañero.",
+      "Mantén una línea recta de rodillas a cabeza, con glúteos y abdomen apretados.",
+      "Déjate caer hacia adelante lo más lento posible, buscando 3-5 segundos, y vuelve a subir empujando con las manos.",
+      "No te dobles de la cadera para acortar la palanca al bajar.",
+      "Ten las manos listas para frenarte y aumenta el rango poco a poco."
+    ]
+  },
+  "barbell-deadlift": {
+    "squeeze_cue": "Termina apretando fuerte los glúteos para llevar la cadera a la barra, quedando erguido sin echarte hacia atrás.",
+    "posture_tips": [
+      "Pon los pies al ancho de cadera con la barra sobre el medio del pie y agárrala justo por fuera de las piernas.",
+      "Mantén la columna neutra y la barra rozando el cuerpo durante toda la subida.",
+      "Empuja el piso, bloquea la cadera arriba y baja en 1-2 segundos deslizando la barra por los muslos.",
+      "No dejes que la cadera se dispare antes de que la barra se mueva y redondees la espalda.",
+      "Activa el core antes de cada repetición y vuelve a acomodar la barra en el piso cuando pierdas la posición."
+    ]
+  },
+  "barbell-deadlift-sumo": {
+    "squeeze_cue": "Aprieta glúteos y cara interna de los muslos para llevar la cadera a la barra, como si cerraras una puerta con la cadera.",
+    "posture_tips": [
+      "Abre los pies bastante más que los hombros, puntas hacia afuera, y agarra la barra entre las piernas.",
+      "Mantén el pecho arriba y empuja las rodillas hacia afuera sobre las puntas de los pies.",
+      "Separa el piso con los pies para despegar la barra, lleva la cadera hacia ella y baja en 1-2 segundos.",
+      "No dejes que las rodillas se vayan hacia adentro cuando la barra sale del piso.",
+      "Calienta los aductores con series livianas antes de cargar la barra."
+    ]
+  },
+  "hex-bar-deadlift": {
+    "squeeze_cue": "Empuja el piso apretando los cuádriceps y luego aprieta los glúteos para terminar completamente erguido.",
+    "posture_tips": [
+      "Párate en el centro de la barra hexagonal con los pies al ancho de cadera y toma las manijas.",
+      "Mantén los brazos largos, el pecho arriba y la columna neutra al subir.",
+      "Empuja el piso hasta quedar erguido y baja en unos 2 segundos flexionando cadera y rodillas a la vez.",
+      "No te pares descentrado en la barra, porque se inclina hacia adelante o hacia atrás.",
+      "Asegúrate de que los discos estén asegurados con topes antes de levantar."
+    ]
+  },
+  "romanian-deadlift": {
+    "squeeze_cue": "Siente cómo se estiran los isquiotibiales como ligas y lleva la cadera al frente de golpe apretando los glúteos.",
+    "posture_tips": [
+      "Empieza de pie con la barra a la altura de la cadera y un agarre justo por fuera de los muslos.",
+      "Mantén una flexión de rodillas leve y fija y la columna neutra.",
+      "Lleva la cadera atrás en 2-3 segundos deslizando la barra por las piernas hasta estirar los isquiotibiales y sube.",
+      "No lo conviertas en sentadilla flexionando más las rodillas al bajar.",
+      "Baja solo hasta donde tu espalda siga neutra, aunque no llegues a media espinilla."
+    ]
+  },
+  "dumbbell-romanian-deadlift": {
+    "squeeze_cue": "Siente cómo los isquiotibiales se cargan como un arco tenso y aprieta los glúteos para llevar la cadera al frente y subir.",
+    "posture_tips": [
+      "Sostén una mancuerna en cada mano frente a los muslos con los pies al ancho de cadera.",
+      "Mantén las mancuernas cerca de las piernas y los hombros hacia atrás.",
+      "Lleva la cadera atrás en 2-3 segundos bajando las mancuernas por las espinillas y lleva la cadera al frente.",
+      "No dejes que las mancuernas se alejen del cuerpo y queden colgando hacia adelante.",
+      "Detén la bajada en cuanto la espalda empiece a redondearse."
+    ]
+  },
+  "dumbbell-romanian-deadlift-single-leg": {
+    "squeeze_cue": "Siente el estiramiento del isquiotibial de apoyo y aprieta ese glúteo para volver a subir el torso.",
+    "posture_tips": [
+      "Párate en una pierna con la rodilla un poco flexionada y sostén la mancuerna con la mano contraria.",
+      "Mantén la cadera nivelada y la pierna libre alineada con el torso al inclinarte.",
+      "Inclínate en 2-3 segundos hasta que el torso quede casi paralelo al piso y sube empujando con el talón.",
+      "No dejes que la cadera de la pierna trasera se abra hacia el techo.",
+      "Apóyate en una pared o soporte con la mano libre si necesitas más equilibrio."
+    ]
+  },
+  "barbell-stiff-leg-deadlift": {
+    "squeeze_cue": "Siente el estiramiento de los isquiotibiales de la rodilla al glúteo y apriétalos para llevar la cadera de vuelta sobre los pies.",
+    "posture_tips": [
+      "Párate con la barra sobre el medio del pie y las piernas casi rectas pero sin bloquear.",
+      "Mantén la columna neutra y las rodillas casi rectas todo el tiempo.",
+      "Baja la barra por las piernas en 2-3 segundos hasta tu límite y sube extendiendo la cadera.",
+      "No jales con la espalda redondeada solo para llegar al piso.",
+      "Usa discos de tamaño estándar o eleva la barra si no llegas al piso con buena técnica."
+    ]
+  },
+  "barbell-good-morning": {
+    "squeeze_cue": "Siente cómo se estiran los isquiotibiales al inclinarte y aprieta los glúteos para llevar la cadera al frente y subir.",
+    "posture_tips": [
+      "Apoya la barra sobre los trapecios como en la sentadilla, con los pies al ancho de cadera.",
+      "Mantén la columna neutra y una leve flexión de rodillas durante toda la bisagra.",
+      "Lleva la cadera atrás en 2-3 segundos hasta que el torso quede casi paralelo y sube llevando la cadera al frente.",
+      "No bajes el pecho redondeando la espalda en lugar de flexionar desde la cadera.",
+      "Empieza liviano y trabaja dentro del rack con las barras de seguridad puestas."
+    ]
+  },
+  "cable-pull-through": {
+    "squeeze_cue": "Lleva la cadera al frente de golpe y aprieta fuerte los glúteos arriba, como si apretaras una moneda entre ellos.",
+    "posture_tips": [
+      "Dale la espalda a una polea baja con la cuerda entre las piernas y da dos pasos al frente.",
+      "Mantén los brazos rectos y la columna neutra al llevar la cadera atrás.",
+      "Deja que la cuerda vaya hacia atrás entre las piernas en unos 2 segundos y lleva la cadera al frente para subir.",
+      "No jales la cuerda con los brazos ni lo conviertas en sentadilla.",
+      "Termina erguido sin hiperextender la zona lumbar arriba."
+    ]
+  },
+  "hor-back-extensions-glutes-dominant": {
+    "squeeze_cue": "Aprieta los glúteos para subir el torso, como si presionaras la cadera contra el cojín.",
+    "posture_tips": [
+      "Ajusta el cojín justo debajo de la cadera para que pueda flexionarse libremente.",
+      "Mantén la espalda alta un poco redondeada y la mirada al piso.",
+      "Baja en unos 2 segundos flexionando la cadera y sube hasta que el cuerpo forme una línea recta, con pausa.",
+      "No arquees la zona lumbar más allá de la línea recta arriba.",
+      "Sube con control, sin balanceos que te tiren de la zona lumbar."
+    ]
+  },
+  "weighted-45-back-extensions": {
+    "squeeze_cue": "Sube apretando glúteos y zona lumbar a la vez y sostén arriba un segundo, rígido como una plancha.",
+    "posture_tips": [
+      "Ajusta el cojín a la altura de la cadera y traba los talones bajo los rodillos.",
+      "Mantén la columna neutra con los brazos cruzados o el peso sujeto contra el pecho.",
+      "Baja en unos 2 segundos hasta sentir el estiramiento y sube hasta que el torso quede alineado con las piernas.",
+      "No pases de la línea recta arqueando fuerte la zona lumbar arriba.",
+      "Agrega peso solo cuando puedas completar todas las repeticiones con buena técnica."
+    ]
+  },
+  "back-extension-single-leg": {
+    "squeeze_cue": "Aprieta el glúteo de la pierna trabada para subir el torso, como si presionaras esa cadera contra el cojín.",
+    "posture_tips": [
+      "Colócate en el banco de 45 grados con un pie trabado y la otra pierna libre detrás de ti.",
+      "Mantén la pelvis nivelada sin dejar que la cadera libre caiga o gire.",
+      "Baja en unos 2 segundos flexionando la cadera que trabaja y sube hasta que el cuerpo forme una línea recta.",
+      "No gires el torso para compensar un lado más débil.",
+      "Domina la versión a dos piernas antes de avanzar a esta."
+    ]
+  },
+  "machine-reverse-hyperextension": {
+    "squeeze_cue": "Aprieta los glúteos para subir las piernas, como si empujaras los talones hacia el techo detrás de ti.",
+    "posture_tips": [
+      "Acuéstate boca abajo con la cadera en el borde del banco y los tobillos bajo el rodillo o la correa.",
+      "Mantén el torso plano sobre el banco y sujeta las manijas con firmeza.",
+      "Sube las piernas a la altura del cuerpo en 1 segundo, pausa y bájalas en unos 2 segundos.",
+      "No balancees las piernas con impulso para subirlas más.",
+      "No subas las piernas por encima de la horizontal, para no arquear de más la zona lumbar."
+    ]
+  },
+  "barbell-hip-thrust": {
+    "squeeze_cue": "Aprieta los glúteos arriba como si rompieras una nuez entre ellos y sostén un segundo completo.",
+    "posture_tips": [
+      "Apoya la parte baja de los omóplatos en una banca y coloca la barra con protector sobre la cadera.",
+      "Mantén el mentón metido y las costillas abajo al subir.",
+      "Empuja con los talones hasta alinear rodillas, cadera y hombros, pausa 1 segundo y baja en 2 segundos.",
+      "No termines arqueando la zona lumbar en lugar de extender la cadera.",
+      "Usa un protector para la barra y una banca fija que no se deslice."
+    ]
+  },
+  "machine-hip-thrust": {
+    "squeeze_cue": "Arriba, aprieta fuerte los glúteos como si sostuvieras una moneda entre ellos, y mantén.",
+    "posture_tips": [
+      "Apoya la espalda en el respaldo y coloca el cinturón o cojín sobre la cadera.",
+      "Mantén los pies planos y las espinillas verticales arriba.",
+      "Lleva la cadera a extensión completa, sostén arriba un segundo y baja en unos 2 segundos.",
+      "No empujes con las puntas de los pies, porque el trabajo se pasa a los cuádriceps.",
+      "Ajusta el cinturón antes de cargar para que no se mueva durante la serie."
+    ]
+  },
+  "smith-machine-hip-thrust": {
+    "squeeze_cue": "Lleva la cadera contra la barra y aprieta los glúteos arriba, como si metieras el coxis hacia abajo.",
+    "posture_tips": [
+      "Pon una banca perpendicular a la Smith y coloca la barra con protector en el pliegue de la cadera.",
+      "Mantén la mirada al frente y el torso rígido al subir y bajar.",
+      "Sube la cadera hasta alinearla con hombros y rodillas, pausa y baja en 2 segundos hasta casi tocar abajo.",
+      "No pongas los pies tan adelante que los isquiotibiales se lleven el trabajo.",
+      "Gira la barra para desengancharla solo cuando estés bien colocado debajo."
+    ]
+  },
+  "hip-thrust-single-leg": {
+    "squeeze_cue": "Aprieta el glúteo de la pierna que trabaja arriba, como si quisieras llevar esa cadera al techo.",
+    "posture_tips": [
+      "Apoya la espalda alta en una banca con un pie en el piso y la otra rodilla recogida.",
+      "Mantén la pelvis nivelada sin dejar que caiga hacia la pierna libre.",
+      "Empuja con el talón que trabaja hasta extender por completo la cadera, pausa 1 segundo y baja en unos 2 segundos.",
+      "No gires la cadera para ganar altura arriba.",
+      "Pega la banca contra una pared para que no se deslice."
+    ]
+  },
+  "barbell-glute-bridge": {
+    "squeeze_cue": "Aprieta fuerte los glúteos arriba como si exprimieras una toalla entre ellos, y mantén.",
+    "posture_tips": [
+      "Acuéstate en el piso con la barra con protector sobre la cadera y los pies cerca de los glúteos.",
+      "Mantén la espalda alta en el piso y las rodillas al ancho de cadera.",
+      "Lleva la cadera a extensión completa, sostén un segundo y baja en unos 2 segundos hasta rozar el piso.",
+      "No dejes que los talones se despeguen del piso al subir.",
+      "Usa discos de tamaño completo para poder rodar la barra sobre las piernas al colocarte."
+    ]
+  },
+  "glute-bridge": {
+    "squeeze_cue": "Aprieta los glúteos arriba como si sostuvieras una moneda entre ellos, sin arquear la zona lumbar.",
+    "posture_tips": [
+      "Acuéstate boca arriba con las rodillas flexionadas y los pies planos, al ancho de cadera.",
+      "Mantén la pelvis un poco retraída y el core activo al subir.",
+      "Sube la cadera hasta alinear rodillas, cadera y hombros, sostén 1-2 segundos y baja en 2 segundos.",
+      "No empujes con la zona lumbar en lugar de con los glúteos.",
+      "Hazlo sobre una colchoneta para proteger la columna de un piso duro."
+    ]
+  },
+  "glute-bridge-single-leg": {
+    "squeeze_cue": "Aprieta el glúteo de la pierna apoyada para subir la cadera, como si hundieras ese talón en el piso.",
+    "posture_tips": [
+      "Acuéstate boca arriba con un pie apoyado cerca del glúteo y la otra pierna estirada en el aire.",
+      "Mantén ambas caderas a la misma altura todo el tiempo.",
+      "Sube la cadera empujando con el talón que trabaja, pausa 1-2 segundos y baja sin descansar del todo.",
+      "No dejes que la cadera del lado de la pierna libre se caiga al subir.",
+      "Detén la serie si te da un calambre en el isquiotibial y acerca el pie al glúteo."
+    ]
+  },
+  "cable-glute-kickback": {
+    "squeeze_cue": "Aprieta el glúteo para empujar el talón hacia atrás, como si cerraras una puerta de una patada detrás de ti.",
+    "posture_tips": [
+      "Ajusta la tobillera a una polea baja y sujétate del marco con el torso un poco inclinado hacia adelante.",
+      "Mantén la pelvis quieta y el core apretado mientras la pierna va hacia atrás.",
+      "Lleva la pierna atrás y arriba en 1 segundo, pausa y regresa en 2 segundos sin que las placas se apoyen.",
+      "No arquees la zona lumbar para subir más la pierna.",
+      "Verifica que la tobillera esté bien ajustada antes de empezar."
+    ]
+  },
+  "machine-glute-kickback": {
+    "squeeze_cue": "Empuja el talón hacia atrás y aprieta el glúteo en la extensión completa, como si dejaras tu huella en la pared de atrás.",
+    "posture_tips": [
+      "Apoya el pecho o los antebrazos en el cojín y pon el pie en la plataforma o el rodillo.",
+      "Mantén la columna neutra y la cadera de apoyo fija contra el cojín.",
+      "Empuja hasta la extensión completa de cadera, pausa un segundo y regresa en unos 2 segundos hasta sentir el estiramiento.",
+      "No gires la cadera hacia afuera al final de la patada.",
+      "Ajusta la altura del cojín para que la rodilla que trabaja no choque con la máquina."
+    ]
+  },
+  "machine-hip-abduction": {
+    "squeeze_cue": "Aprieta los costados de la cadera para llevar las rodillas afuera, como si separaras los cojines con la parte externa de los glúteos.",
+    "posture_tips": [
+      "Siéntate con la espalda contra el respaldo y los cojines por fuera de las rodillas.",
+      "Mantén la cadera fija en el asiento y el torso quieto al abrir.",
+      "Abre las piernas en todo tu rango, pausa un segundo y cierra en 2 segundos sin que las placas se toquen.",
+      "No balancees el torso hacia adelante y atrás para mover más peso.",
+      "Ajusta la apertura inicial a tu movilidad para no forzar la cadera."
+    ]
+  },
+  "machine-hip-adduction": {
+    "squeeze_cue": "Aprieta la cara interna de los muslos para juntar los cojines, como si aplastaras una pelota entre las rodillas.",
+    "posture_tips": [
+      "Siéntate con los cojines por dentro de las rodillas y elige una apertura inicial cómoda.",
+      "Mantén la espalda apoyada y la pelvis estable en el asiento.",
+      "Junta los cojines, pausa y abre en 2-3 segundos controlando el estiramiento.",
+      "No dejes que las piernas se abran de golpe al final de cada repetición.",
+      "Empieza con poca apertura y auméntala poco a poco de una serie a otra."
+    ]
+  },
+  "cable-hip-abduction": {
+    "squeeze_cue": "Lleva la pierna afuera apretando el costado de la cadera y siéntelo trabajar justo debajo de la línea del cinturón.",
+    "posture_tips": [
+      "Párate de lado a una polea baja con la tobillera en el pie más alejado.",
+      "Mantén el torso vertical sin inclinarte lejos de la pierna que trabaja.",
+      "Lleva la pierna hacia afuera con la punta mirando al frente, pausa y regresa en unos 2 segundos resistiendo el cable.",
+      "No gires la punta del pie hacia el techo; el trabajo se pasa a otros músculos.",
+      "Sujétate de la máquina con la mano más cercana para mantener el equilibrio."
+    ]
+  },
+  "cable-hip-adduction": {
+    "squeeze_cue": "Aprieta la cara interna del muslo para cruzar la pierna, como si arrastraras el pie por lodo espeso.",
+    "posture_tips": [
+      "Párate de lado a una polea baja con la tobillera en el pie más cercano a la máquina.",
+      "Mantén firme la pierna de apoyo y la cadera mirando al frente.",
+      "Cruza la pierna por delante de la de apoyo pasando la línea media, pausa y regresa en 2 segundos.",
+      "No inclines el torso para ayudarte a cruzar la pierna.",
+      "Usa poca carga; los aductores se sobrecargan con facilidad."
+    ]
+  },
+  "band-lateral-walk": {
+    "squeeze_cue": "Empuja las rodillas hacia afuera contra la banda y siente arder los costados de la cadera en cada paso.",
+    "posture_tips": [
+      "Coloca una banda alrededor de las rodillas o los tobillos y flexiona un poco cadera y rodillas.",
+      "Mantén la banda en tensión y conserva la media sentadilla en cada paso.",
+      "Da pasos laterales cortos y lentos, 10-20 hacia cada lado, sin juntar del todo los pies.",
+      "No balancees el torso de lado a lado en cada paso.",
+      "Revisa que la banda no tenga grietas ni roturas antes de usarla."
+    ]
+  },
+  "standing-calf-raises-toes-neutral": {
+    "squeeze_cue": "Sube sobre los dedos gordos y aprieta fuerte las pantorrillas arriba, como si quisieras crecer un par de centímetros.",
+    "posture_tips": [
+      "Coloca los hombros bajo los cojines y la parte delantera de los pies en el borde del escalón.",
+      "Mantén las rodillas rectas pero sin bloquear y el cuerpo erguido.",
+      "Baja los talones en 2 segundos hasta estirar, pausa, sube del todo sobre las puntas y sostén un segundo.",
+      "No rebotes abajo dejando que el rebote del tendón haga el trabajo de tus pantorrillas.",
+      "Apoya bien firme la parte delantera de los pies en el escalón para que no se resbalen."
+    ]
+  },
+  "leg-press-calf-raises-toes-neutral": {
+    "squeeze_cue": "Aprieta las pantorrillas arriba al estirar las puntas, como una bailarina de ballet subiendo de puntillas.",
+    "posture_tips": [
+      "Siéntate en la prensa con solo la parte delantera de los pies en el borde inferior de la plataforma.",
+      "Mantén las rodillas casi rectas y fijas en esa posición toda la serie.",
+      "Empuja hasta extender por completo el tobillo, sostén un segundo y regresa en unos 2 segundos a un estiramiento profundo.",
+      "No flexiones las rodillas para empujar el carro con los cuádriceps.",
+      "Mantén puestos los seguros de la prensa por si los pies se resbalan del borde."
+    ]
+  },
+  "machine-seated-calf-raise": {
+    "squeeze_cue": "Sube hasta arriba y aprieta fuerte las pantorrillas, como si quisieras levantar el cojín con los dedos gordos.",
+    "posture_tips": [
+      "Siéntate con el cojín sobre la parte baja de los muslos y la parte delantera de los pies en la plataforma.",
+      "Mantén el torso erguido y las rodillas flexionadas a 90 grados todo el tiempo.",
+      "Baja los talones lo más que puedas en 2 segundos, pausa en el estiramiento y sube hasta la contracción completa.",
+      "No te impulses con el torso ni con los brazos para mover la palanca.",
+      "Quita el seguro solo cuando el cojín esté bien ajustado sobre los muslos."
+    ]
+  },
+  "machine-donkey-calf-raise": {
+    "squeeze_cue": "Siente el estiramiento de las pantorrillas abajo y apriétalas arriba como si te pusieras de puntillas para alcanzar un estante.",
+    "posture_tips": [
+      "Inclínate hacia adelante con la cadera bajo el cojín y los antebrazos en el soporte.",
+      "Mantén la columna neutra y la cadera flexionada y quieta toda la serie.",
+      "Baja los talones en unos 2 segundos hasta un estiramiento profundo, pausa y sube del todo sobre las puntas.",
+      "No flexiones las rodillas para ayudarte a subir.",
+      "Coloca el cojín sobre la cadera, nunca sobre la zona lumbar."
+    ]
+  },
+  "smith-machine-calf-raise": {
+    "squeeze_cue": "Aprieta las pantorrillas arriba como si quisieras subir más la barra usando solo los tobillos.",
+    "posture_tips": [
+      "Pon un escalón bajo la barra y apoya la parte delantera de los pies en su borde.",
+      "Mantén el cuerpo vertical bajo la barra y las rodillas casi rectas.",
+      "Sube sobre las puntas, sostén un segundo y baja en unos 2 segundos hasta el estiramiento completo.",
+      "No acortes el rango quedándote solo en la mitad de arriba.",
+      "Asegúrate de que el escalón no se deslice y pon los topes de seguridad de la Smith."
+    ]
+  },
+  "dumbbell-standing-calf-raise-single-leg": {
+    "squeeze_cue": "Sube alto y aprieta la pantorrilla arriba, como si empujaras la parte delantera del pie a través del escalón.",
+    "posture_tips": [
+      "Párate en un escalón sobre un pie, con la mancuerna en la mano del mismo lado y la otra mano en un apoyo.",
+      "Mantén recta la rodilla que trabaja y el tobillo alineado, sin que se vaya hacia afuera.",
+      "Baja el talón por debajo del escalón en unos 2 segundos, pausa y sube lo más alto que puedas con control.",
+      "No te apoyes en la mano libre para ayudarte a subir.",
+      "Usa un escalón firme y sujétate siempre de algo estable."
+    ]
+  }
+}

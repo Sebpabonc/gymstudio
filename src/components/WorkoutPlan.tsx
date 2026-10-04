@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { mapAiGatewayError, summariseSession } from '../ai/gateway'
 import type { AuthStatus } from '../auth/AuthProvider'
 import AskExercise from './AskExercise'
+import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, useT } from '../i18n'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
 import { openExternal } from '../native/openExternal'
@@ -355,8 +356,12 @@ export default function WorkoutPlan({
   const [selectedLibraryExerciseId, setSelectedLibraryExerciseId] = useState('')
   const [logError, setLogError] = useState<Record<string, string>>({})
   const [weightTargets, setWeightTargets] = useState(() => loadWeightTargets())
-  const [exerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
-  const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
+  const [rawExerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
+  const [rawTrainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
+  // Spanish fitness content (PT-approved) overlays the English source; ids, keys and codes are unchanged.
+  const spanishReady = useSpanishContentReady(language)
+  const exerciseCatalog = useMemo(() => localizeCatalogue(rawExerciseCatalog, language), [rawExerciseCatalog, language, spanishReady])
+  const trainingBlocks = useMemo(() => localizeBlocks(rawTrainingBlocks, language), [rawTrainingBlocks, language, spanishReady])
   const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
   const [pinnedBlockId, setPinnedBlockId] = useState(() => getActiveBlockId() ?? '')
   const [blockCardExpanded, setBlockCardExpanded] = useState(

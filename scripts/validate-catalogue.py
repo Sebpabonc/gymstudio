@@ -135,6 +135,18 @@ def main():
         if not re.fullmatch(r'[a-z0-9 -]{3,80}', query or '') or not 3 <= len(query.split()) <= 8:
             problems.append(f'{ex_id}: image query must be 3-8 lowercase words (letters, digits, hyphens)')
 
+    # Spanish versions (docs/fitness/approved/es/catalogue-*.json): only known ids, same number of tips.
+    by_id = {ex['id']: ex for _, ex in exercises}
+    for es_file in sorted(Path('docs/fitness/approved/es').glob('catalogue-*.json')):
+        for ex_id, es in json.loads(es_file.read_text(encoding='utf-8')).items():
+            if ex_id not in by_id:
+                problems.append(f'{es_file.name}: unknown exercise id {ex_id}')
+                continue
+            if len(es.get('posture_tips') or []) != len(by_id[ex_id].get('posture_tips') or []):
+                problems.append(f'{es_file.name}: {ex_id} needs {len(by_id[ex_id]["posture_tips"])} Spanish tips')
+            if not (es.get('squeeze_cue') or '').strip():
+                problems.append(f'{es_file.name}: {ex_id} is missing the Spanish squeeze cue')
+
     print(f'{len(exercises)} exercises in {folder}')
     print('by region:', dict(Counter(ex.get('body_region') for _, ex in exercises)))
     print('by origin:', dict(Counter(ex.get('origin') for _, ex in exercises)))
