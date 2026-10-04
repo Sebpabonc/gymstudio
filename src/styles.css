@@ -4130,7 +4130,7 @@ body {
 .free-set-header,
 .set-row {
   display: grid;
-  grid-template-columns: 32px minmax(44px, 1fr) minmax(56px, 1fr) minmax(48px, 0.9fr) 24px 24px;
+  grid-template-columns: 32px minmax(56px, 1fr) minmax(136px, 1.6fr) minmax(48px, 0.9fr) 44px 36px;
   align-items: center;
   gap: 4px;
   min-width: 0;
@@ -4148,6 +4148,10 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.set-row.completed {
+  background: rgba(180, 211, 184, 0.08);
+}
+
 .set-label {
   height: auto;
   border: 0;
@@ -4162,17 +4166,9 @@ body {
   text-align: center;
 }
 
-.free-set-complete {
-  display: grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  color: var(--nav-active);
-  font-size: 0.82rem;
-}
-
 .free-set-remove {
-  width: 44px;
+  width: 36px;
+  min-width: 36px;
   height: 44px;
   padding: 0;
   border: 0;
@@ -4190,8 +4186,19 @@ body {
 
   .free-set-header,
   .set-row {
-    grid-template-columns: 28px minmax(44px, 1fr) minmax(50px, 1fr) minmax(44px, 0.9fr) 20px 44px;
+    grid-template-columns: 28px minmax(38px, 0.9fr) minmax(108px, 1.8fr) minmax(38px, 0.9fr) 36px 32px;
     gap: 3px;
+  }
+
+  .set-row .complete-set-button {
+    width: 36px;
+    min-width: 36px;
+    height: 40px;
+  }
+
+  .set-row .free-set-remove {
+    width: 32px;
+    min-width: 32px;
   }
 }
 

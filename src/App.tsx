@@ -3,6 +3,7 @@ import WorkoutPlan from './components/WorkoutPlan'
 import ExerciseSearchSuggestions from './components/ExerciseSearchSuggestions'
 import RestTimer from './components/RestTimer'
 import AskExercise from './components/AskExercise'
+import ExerciseSetTable from './components/ExerciseSetTable'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
@@ -34,7 +35,6 @@ import {
   filterLoggableSets,
   formatWorkoutSet,
   getPreviousWorkoutSets,
-  isBodyweightEquipment,
   workoutMaxWeight,
   workoutVolume,
 } from './utils/workoutSets'
@@ -103,6 +103,7 @@ export default function App() {
   const [bodyRegion, setBodyRegion] = useState(ALL_BODY_REGIONS)
   const [selectedId, setSelectedId] = useState<string>('')
   const [draftSets, setDraftSets] = useState<WorkoutSet[]>([createSet(8, 0), createSet(8, 0)])
+  const [completedSets, setCompletedSets] = useState<boolean[]>([false, false])
   const [setWeightTouched, setSetWeightTouched] = useState<boolean[]>([false, false])
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
@@ -203,6 +204,7 @@ export default function App() {
   useEffect(() => {
     if (!selectedExercise) return
     setDraftSets([createSet(8, 0), createSet(8, 0)])
+    setCompletedSets([false, false])
     setSetWeightTouched([false, false])
     setDraftNotes('')
     setTipsExpanded(false)
@@ -261,15 +263,16 @@ export default function App() {
 
   const addSet = () => {
     setDraftSets((current) => [...current, createSet(8, Number(current[0]?.weight) || 0)])
+    setCompletedSets((current) => [...current, false])
     setSetWeightTouched((current) => [...current, false])
   }
 
   const removeSet = (setId: string) => {
+    const index = draftSets.findIndex((set) => set.id === setId)
+    if (index < 0 || draftSets.length <= 1) return
     setDraftSets((current) => (current.length > 1 ? current.filter((set) => set.id !== setId) : current))
-    setSetWeightTouched((current) => {
-      const index = draftSets.findIndex((set) => set.id === setId)
-      return index < 0 ? current : current.filter((_, setIndex) => setIndex !== index)
-    })
+    setCompletedSets((current) => current.filter((_, setIndex) => setIndex !== index))
+    setSetWeightTouched((current) => current.filter((_, setIndex) => setIndex !== index))
   }
 
   const [saveError, setSaveError] = useState('')
@@ -309,6 +312,7 @@ export default function App() {
     saveWorkoutHistory(nextHistory)
     setSaveConfirmation(`Logged · ${summarizeCompletedEntry(nextEntry)}`)
     setDraftSets([createSet(8, 0), createSet(8, 0)])
+    setCompletedSets([false, false])
     setSetWeightTouched([false, false])
     setDraftNotes('')
   }
@@ -586,68 +590,16 @@ export default function App() {
                       <h3>{text.trackTitle}</h3>
                     </div>
 
-                    <div className="free-set-table">
-                      <div className="free-set-header" aria-hidden="true">
-                        <span>Set</span>
-                        <span>Previous</span>
-                        <span>kg</span>
-                        <span>Reps</span>
-                        <span>✓</span>
-                        <span />
-                      </div>
-                      {draftSets.map((set, index) => {
-                        const previousSet = previousSets[index]
-                        const complete = set.weight > 0 || (isBodyweightEquipment(selectedExercise.equipment) && set.reps > 0)
-                        return (
-                          <div className="set-row" key={set.id}>
-                            <span className="set-label">{index + 1}</span>
-                            {previousSet ? (
-                              <button
-                                type="button"
-                                className="previous-set-value"
-                                aria-label={`Copy previous set ${index + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
-                                onClick={() => {
-                                  updateSet(index, 'weight', String(previousSet.weight))
-                                  updateSet(index, 'reps', String(previousSet.reps))
-                                }}
-                              >
-                                {`${previousSet.weight} × ${previousSet.reps}`}
-                              </button>
-                            ) : (
-                              <span className="previous-set-value">—</span>
-                            )}
-                            <input
-                              className="free-set-input"
-                              type="number"
-                              min={0}
-                              step="0.5"
-                              value={set.weight}
-                              aria-label={`Set ${index + 1} weight in kilograms`}
-                              onChange={(event) => updateSet(index, 'weight', event.target.value)}
-                            />
-                            <input
-                              className="free-set-input"
-                              type="number"
-                              min={0}
-                              value={set.reps}
-                              aria-label={`Set ${index + 1} reps`}
-                              onChange={(event) => updateSet(index, 'reps', event.target.value)}
-                            />
-                            <span className="free-set-complete" aria-label={complete ? 'Set entered' : 'Set not entered'}>
-                              {complete ? '✓' : ''}
-                            </span>
-                            <button
-                              type="button"
-                              className="free-set-remove"
-                              aria-label={`Remove set ${index + 1}`}
-                              onClick={() => removeSet(set.id)}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
+                    <ExerciseSetTable
+                      sets={draftSets}
+                      previousSets={previousSets}
+                      completedSets={completedSets}
+                      onUpdateSet={updateSet}
+                      onToggleComplete={(index) =>
+                        setCompletedSets((current) => current.map((complete, setIndex) => setIndex === index ? !complete : complete))
+                      }
+                      onRemoveSet={removeSet}
+                    />
 
                     <div className="action-row">
                       <button type="button" className="secondary-button" onClick={addSet}>
