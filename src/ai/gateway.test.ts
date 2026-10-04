@@ -27,7 +27,7 @@ describe('AI gateway wrappers', () => {
       body: {
         feature: 'explain_suggestion',
         exerciseId: 'barbell-bench-press',
-        suggestionText: 'Ready to add 2.5 kg.',
+        suggestion: 'Ready to add 2.5 kg.',
       },
     })
   })

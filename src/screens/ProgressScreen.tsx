@@ -94,7 +94,7 @@ function AiSuggestionExplanation({
     setPending(true)
     setError('')
     try {
-      const response = await explainSuggestion(exerciseId, suggestionText)
+      const response = await explainSuggestion(exerciseId, suggestionText.slice(0, 300))
       setAnswer(response.answer)
       setRemainingToday(response.remainingToday)
     } catch (requestError) {
@@ -140,7 +140,7 @@ function AiSuggestionExplanation({
         disabled={demoMode || status === 'loading' || pending || !!answer}
         onClick={demoMode || status === 'signed-out' ? onSignIn : explain}
       >
-        {demoMode || status === 'signed-out' ? 'Sign in to use AI' : 'Why?'}
+        {demoMode || status === 'signed-out' ? 'Sign in to use AI' : 'Ask AI why'}
       </button>
       {showConsent && (
         <div className="ask-exercise-consent ai-inline-consent">

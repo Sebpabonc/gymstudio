@@ -68,7 +68,7 @@ export function explainSuggestion(
   exerciseId: string,
   suggestionText: string
 ): Promise<AiGatewayResponse> {
-  return invokeAiGateway({ feature: 'explain_suggestion', exerciseId, suggestionText })
+  return invokeAiGateway({ feature: 'explain_suggestion', exerciseId, suggestion: suggestionText })
 }
 
 export function summariseSession(
