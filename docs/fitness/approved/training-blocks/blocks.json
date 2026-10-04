@@ -1000,8 +1000,8 @@
             ],
             "rest_seconds": 60,
             "technique": "straight",
-            "angle_degrees": null,
-            "notes": ""
+            "angle_degrees": -15,
+            "notes": "Curl your hips up off the pad; lower your legs slowly."
           }
         ]
       },
@@ -1282,8 +1282,8 @@
             ],
             "rest_seconds": 60,
             "technique": "straight",
-            "angle_degrees": null,
-            "notes": ""
+            "angle_degrees": -15,
+            "notes": "Curl your hips up off the pad; lower your legs slowly."
           }
         ]
       }
@@ -2754,7 +2754,7 @@
             ],
             "rest_seconds": 60,
             "technique": "straight",
-            "angle_degrees": null,
+            "angle_degrees": -15,
             "notes": "Hold a plate on your chest."
           }
         ]
@@ -3036,7 +3036,7 @@
             ],
             "rest_seconds": 60,
             "technique": "straight",
-            "angle_degrees": null,
+            "angle_degrees": -15,
             "notes": "Hold a plate on your chest."
           }
         ]
@@ -5324,7 +5324,7 @@
             ],
             "rest_seconds": 60,
             "technique": "straight",
-            "angle_degrees": null,
+            "angle_degrees": -20,
             "notes": "Hold a plate on your chest when bodyweight gets easy."
           }
         ]
@@ -5620,7 +5620,7 @@
             ],
             "rest_seconds": 60,
             "technique": "straight",
-            "angle_degrees": null,
+            "angle_degrees": -20,
             "notes": "Hold a plate on your chest when bodyweight gets easy."
           }
         ]

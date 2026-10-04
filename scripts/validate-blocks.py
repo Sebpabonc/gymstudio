@@ -21,6 +21,9 @@ FREE_WEIGHTS = {'dumbbell', 'barbell', 'ez-bar', 'smith-machine', 'kettlebell'}
 
 def needs_bench_angle(name, equipment):
     """Free-weight exercises done on an adjustable bench/seat must state the angle."""
+    # Incline/decline work on an adjustable bench (incl. bodyweight ab benches); fixed machines are exempt.
+    if re.search(r'Incline|Decline', name, re.I) and equipment not in {'machine', 'cable', 'plate-loaded'}:
+        return True
     if equipment not in FREE_WEIGHTS or not BENCH_WORDS.search(name):
         return False
     return not re.search(r'Standing|Preacher', name, re.I)
@@ -119,6 +122,10 @@ def main():
                 if angle is not None and not (-45 <= angle <= 90):
                     problems.append(f'{at}: angle_degrees must be between -45 and 90')
                 name = names.get(ex.get('exercise_id'), '')
+                if angle is not None and re.search(r'Decline', name, re.I) and angle >= 0:
+                    problems.append(f'{at}: {name!r} is a decline exercise — angle_degrees must be negative')
+                if angle is not None and re.search(r'Incline', name, re.I) and angle <= 0:
+                    problems.append(f'{at}: {name!r} is an incline exercise — angle_degrees must be positive')
                 if angle is None and needs_bench_angle(name, equipment.get(ex.get('exercise_id'), '')):
                     problems.append(f"{at}: {name!r} is done on a bench/seat — angle_degrees is required")
                 if len(ex.get('notes') or '') > 80:
