@@ -4547,3 +4547,191 @@ body:has([aria-modal='true']) .rest-timer-pill {
     width: 40px;
   }
 }
+
+/* ------------------------------------------------------------------
+   Layout toggle (PO 2026-10-05): "boxes" (default) vs "sheet".
+   ------------------------------------------------------------------ */
+.brand-bar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.layout-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(10, 10, 11, 0.62);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .layout-toggle {
+    background: rgba(10, 10, 11, 0.94);
+  }
+}
+
+.layout-toggle button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--nav-idle);
+  transition: color 0.16s ease, background-color 0.16s ease;
+}
+
+.layout-toggle button[aria-pressed='true'] {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--nav-active);
+}
+
+.layout-toggle button[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--nav-active);
+}
+
+.layout-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.layout-toggle button[aria-pressed='true'] svg {
+  stroke-width: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-toggle button {
+    transition: none;
+  }
+}
+
+/* Boxes mode: the surface is invisible, so the classic layout is unchanged. */
+.screen-surface {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Sheet mode: one rounded surface, content as rows with hairline dividers. */
+.layout-sheet .screen-surface {
+  --hairline: rgba(255, 255, 255, 0.07);
+  margin: -6px -12px 0;
+  padding: 20px 16px 28px;
+  border-radius: 32px 32px 0 0;
+  background: var(--bg-soft);
+  box-shadow: 0 -1px 0 var(--hairline), 0 -16px 36px rgba(0, 0, 0, 0.35);
+  min-height: calc(100vh - 150px);
+  min-height: calc(100dvh - 150px);
+  gap: 0;
+  align-content: start;
+}
+
+.layout-sheet .screen-surface > *:not(:first-child) {
+  border-top: 1px solid var(--hairline);
+}
+
+.layout-sheet .screen-surface .card,
+.layout-sheet .screen-surface .training-block-card,
+.layout-sheet .screen-surface .day-plan-card,
+.layout-sheet .screen-surface .plan-card {
+  padding: 16px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.layout-sheet .screen-surface .card + .card,
+.layout-sheet .screen-surface .progress-section + .progress-section {
+  border-top: 1px solid var(--hairline);
+}
+
+.layout-sheet .screen-surface .day-plan-card {
+  padding: 4px 0 0;
+}
+
+.layout-sheet .screen-surface .day-plan-card .day-exercises {
+  gap: 0;
+}
+
+/* Exercise rows */
+.layout-sheet .day-plan-card .planned-exercise-card {
+  margin: 0 -16px;
+  padding: 14px 16px;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.layout-sheet .day-plan-card .planned-exercise-card:not(.collapsed) {
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 3px 0 0 var(--nav-active);
+}
+
+/* Supersets: tint + mauve rail instead of a box */
+.layout-sheet .day-plan-card .superset-group {
+  margin: 0 -16px;
+  padding: 10px 0 6px;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  background: rgba(141, 94, 99, 0.07);
+  box-shadow: inset 3px 0 0 var(--nav-active);
+  gap: 0;
+}
+
+.layout-sheet .day-plan-card .superset-group .superset-group-header {
+  padding: 0 16px 6px 20px;
+}
+
+.layout-sheet .day-plan-card .superset-group .planned-exercise-card {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.layout-sheet .day-plan-card .superset-group .planned-exercise-card:not(.collapsed) {
+  box-shadow: none;
+}
+
+/* Inner panels become rows */
+.layout-sheet .planned-exercise-card .planned-set-section,
+.layout-sheet .planned-exercise-card .exercise-detail-row,
+.layout-sheet .superset-log-box {
+  padding-inline: 0;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+}
+
+.layout-sheet .superset-log-box {
+  margin: 4px 16px 0 20px;
+}
+
+.layout-sheet .planned-exercise-card .planned-squeeze-cue {
+  border-color: transparent;
+}

@@ -14,6 +14,7 @@ const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
 const WEIGHT_TARGETS_KEY = 'gym-studio.weight-targets'
 const ASK_EXERCISE_AI_CONSENT_KEY = 'gym-studio.ai-consent.ask-exercise'
 const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
+const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
 
 export type SyncWorkoutEntry = WorkoutEntry & {
@@ -51,7 +52,7 @@ function signalWorkoutHistorySaved() {
 
 const GUEST_CLAIMED_KEY = 'gym-studio.guest-claimed'
 const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
-const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY])
+const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY])
 
 let storageNamespace: string | null = null
 
@@ -202,6 +203,25 @@ export function setAskExerciseAiConsent(choice: AskExerciseAiConsent) {
     localStorage.setItem(storageKey(ASK_EXERCISE_AI_CONSENT_KEY), choice)
   } catch {
     // Consent cannot be remembered when browser storage is unavailable.
+  }
+}
+
+export type LayoutMode = 'boxes' | 'sheet'
+
+/** Device-level UI preference: classic boxes or the sheet layout (PO 2026-10-05). */
+export function getLayoutMode(): LayoutMode {
+  try {
+    return localStorage.getItem(storageKey(LAYOUT_MODE_KEY)) === 'sheet' ? 'sheet' : 'boxes'
+  } catch {
+    return 'boxes'
+  }
+}
+
+export function setLayoutMode(mode: LayoutMode) {
+  try {
+    localStorage.setItem(storageKey(LAYOUT_MODE_KEY), mode)
+  } catch {
+    // The choice just isn't remembered when storage is unavailable.
   }
 }
 
