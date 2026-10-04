@@ -36,13 +36,6 @@ export function copySetOneWeight(weights: number[]) {
   return weights.length === 0 ? [] : weights.map(() => weights[0])
 }
 
-export function getWeightStepForEquipment(equipment?: string) {
-  const normalized = equipment?.trim().toLowerCase()
-  if (normalized === 'dumbbell' || normalized === 'kettlebell') return 2
-  if (normalized === 'bodyweight' || normalized === 'band') return 1
-  return 2.5
-}
-
 export function stepWorkoutValue(value: number, direction: -1 | 1, step: number, min = 0) {
   const precision = Math.max(step.toString().split('.')[1]?.length ?? 0, 0)
   const nextValue = Math.max(min, (Number(value) || 0) + direction * step)

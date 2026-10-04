@@ -32,7 +32,6 @@ import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
   filterLoggableSets,
-  getWeightStepForEquipment,
   parseRepPrescription,
   selectCompletedSets,
   stepWorkoutValue,
@@ -77,7 +76,6 @@ function SteppedNumberInput({
   step,
   min,
   label,
-  unit,
   onChange,
   onFocus,
   onClick,
@@ -88,7 +86,6 @@ function SteppedNumberInput({
   step: number
   min: number
   label: string
-  unit: string
   onChange: (value: string) => void
   onFocus?: React.FocusEventHandler<HTMLInputElement>
   onClick?: React.MouseEventHandler<HTMLInputElement>
@@ -96,7 +93,7 @@ function SteppedNumberInput({
   dataLogWeight?: boolean
 }) {
   return (
-    <div className="set-stepper" data-unit={unit}>
+    <div className="set-stepper">
       <button
         type="button"
         className="stepper-button"
@@ -107,7 +104,7 @@ function SteppedNumberInput({
       </button>
       <input
         type="number"
-        inputMode={unit === 'reps' ? 'numeric' : 'decimal'}
+        inputMode="decimal"
         min={min}
         step={step}
         value={value}
@@ -1521,7 +1518,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               (_, index) => draft.setDone[index] ?? false
             )
             const completedSetCount = completedRows.filter(Boolean).length
-            const weightStep = getWeightStepForEquipment(libraryMatch?.equipment)
             const cardClasses = [
               'planned-exercise-card',
               isCollapsed ? 'collapsed' : '',
@@ -1653,68 +1649,69 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       </div>
 
                       <div className="planned-set-grid">
+                        <div className="planned-set-column-headers" aria-hidden="true">
+                          <span />
+                          <span>kg</span>
+                          <span>Reps</span>
+                          <span />
+                        </div>
                         {Array.from({ length: setCount }, (_, index) => (
                           <div
                             key={`${exercise.name}-set-${index + 1}`}
                             className={`planned-set-row${completedRows[index] ? ' completed' : ''}`}
                           >
-                            <div className="planned-set-row-heading">
-                              <span className="planned-set-label">Set {index + 1}</span>
-                              <button
-                                type="button"
-                                className="complete-set-button"
-                                aria-label={`${completedRows[index] ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
-                                aria-pressed={completedRows[index]}
-                                onClick={() => togglePlanSetDone(exercise, index, setCount)}
-                              >
-                                ✓
-                              </button>
-                            </div>
-                            <div className="planned-set-controls">
-                              <SteppedNumberInput
-                                value={setWeights[index] ?? 0}
-                                step={weightStep}
-                                min={0}
-                                label={`Set ${index + 1} weight in kilograms`}
-                                unit="kg"
-                                dataLogWeight
-                                invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
-                                onFocus={(event) => event.currentTarget.select()}
-                                onClick={(event) => event.currentTarget.select()}
-                                onChange={(value) => updatePlanSetValue(exercise, index, 'weight', value, setCount)}
-                              />
-                              <SteppedNumberInput
-                                value={setReps[index] ?? draft.reps}
-                                step={1}
-                                min={1}
-                                label={`Set ${index + 1} reps`}
-                                unit="reps"
-                                onChange={(value) => updatePlanSetValue(exercise, index, 'reps', value, setCount)}
-                              />
-                            </div>
+                            <span className="planned-set-label">Set {index + 1}</span>
+                            <SteppedNumberInput
+                              value={setWeights[index] ?? 0}
+                              step={2.5}
+                              min={0}
+                              label={`Set ${index + 1} weight in kilograms`}
+                              dataLogWeight
+                              invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
+                              onFocus={(event) => event.currentTarget.select()}
+                              onClick={(event) => event.currentTarget.select()}
+                              onChange={(value) => updatePlanSetValue(exercise, index, 'weight', value, setCount)}
+                            />
+                            <input
+                              className="set-reps-input"
+                              type="number"
+                              inputMode="numeric"
+                              min="1"
+                              value={setReps[index] ?? draft.reps}
+                              aria-label={`Set ${index + 1} reps`}
+                              onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
+                            />
+                            <button
+                              type="button"
+                              className="complete-set-button"
+                              aria-label={`${completedRows[index] ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
+                              aria-pressed={completedRows[index]}
+                              onClick={() => togglePlanSetDone(exercise, index, setCount)}
+                            >
+                              ✓
+                            </button>
                             {exercise.technique === 'drop-set' && (
                               <div className="planned-drop-set-row">
                                 <strong>Drop</strong>
-                                <div className="planned-set-controls">
-                                  <SteppedNumberInput
-                                    value={dropSetWeights[index] ?? 0}
-                                    step={weightStep}
-                                    min={0}
-                                    label={`Set ${index + 1} drop weight in kilograms`}
-                                    unit="kg"
-                                    onFocus={(event) => event.currentTarget.select()}
-                                    onClick={(event) => event.currentTarget.select()}
-                                    onChange={(value) => updatePlanSetValue(exercise, index, 'dropWeight', value, setCount)}
-                                  />
-                                  <SteppedNumberInput
-                                    value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
-                                    step={1}
-                                    min={1}
-                                    label={`Set ${index + 1} drop reps`}
-                                    unit="reps"
-                                    onChange={(value) => updatePlanSetValue(exercise, index, 'dropReps', value, setCount)}
-                                  />
-                                </div>
+                                <SteppedNumberInput
+                                  value={dropSetWeights[index] ?? 0}
+                                  step={2.5}
+                                  min={0}
+                                  label={`Set ${index + 1} drop weight in kilograms`}
+                                  onFocus={(event) => event.currentTarget.select()}
+                                  onClick={(event) => event.currentTarget.select()}
+                                  onChange={(value) => updatePlanSetValue(exercise, index, 'dropWeight', value, setCount)}
+                                />
+                                <input
+                                  className="set-reps-input"
+                                  type="number"
+                                  inputMode="numeric"
+                                  min="1"
+                                  value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
+                                  aria-label={`Set ${index + 1} drop reps`}
+                                  onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', event.target.value, setCount)}
+                                />
+                                <span aria-hidden="true" />
                               </div>
                             )}
                           </div>
@@ -1835,6 +1832,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       </button>
                     ))}
                   </div>
+                  <div
+                    className="superset-set-column-headers"
+                    aria-hidden="true"
+                  >
+                    {supersetExercises.map((exercise) => (
+                      <div key={`${group.key}-${exercise.code}-column-headings`}>
+                        <span>kg</span>
+                        <span>Reps</span>
+                      </div>
+                    ))}
+                  </div>
                   <div className="superset-set-grid">
                     {Array.from({ length: supersetSetCount }, (_, setIndex) => (
                       <div
@@ -1872,31 +1880,30 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                               parseRepPrescription(prescribedReps)[0] ??
                               getDefaultRepTarget(exercise)
                             const weight = draft.setWeights[setIndex] ?? draft.weight ?? 0
-                            const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
                             return (
                               <div className="superset-set-exercise" key={`${group.key}-${code}`}>
                                 <strong className="superset-exercise-label">{code} · {displayName}</strong>
                                 <div className="planned-set-controls">
                                   <SteppedNumberInput
                                     value={weight}
-                                    step={getWeightStepForEquipment(equipment)}
+                                    step={2.5}
                                     min={0}
                                     label={`Set ${setIndex + 1}, ${code} weight in kilograms`}
-                                    unit="kg"
                                     onFocus={(event) => event.currentTarget.select()}
                                     onClick={(event) => event.currentTarget.select()}
                                     onChange={(value) =>
                                       updatePlanSetValue(exercise, setIndex, 'weight', value, supersetSetCount)
                                     }
                                   />
-                                  <SteppedNumberInput
+                                  <input
+                                    className="set-reps-input"
+                                    type="number"
+                                    inputMode="numeric"
+                                    min="1"
                                     value={reps}
-                                    step={1}
-                                    min={1}
-                                    label={`Set ${setIndex + 1}, ${code} reps`}
-                                    unit="reps"
-                                    onChange={(value) =>
-                                      updatePlanSetValue(exercise, setIndex, 'reps', value, supersetSetCount)
+                                    aria-label={`Set ${setIndex + 1}, ${code} reps`}
+                                    onChange={(event) =>
+                                      updatePlanSetValue(exercise, setIndex, 'reps', event.target.value, supersetSetCount)
                                     }
                                   />
                                 </div>

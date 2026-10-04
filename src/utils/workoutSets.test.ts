@@ -5,7 +5,6 @@ import {
   copyWeightToUntouchedSets,
   filterLoggableSets,
   formatWorkoutSet,
-  getWeightStepForEquipment,
   parseRepPrescription,
   selectCompletedSets,
   stepWorkoutValue,
@@ -31,10 +30,7 @@ describe('workout sets', () => {
     expect(copySetOneWeight([])).toEqual([])
   })
 
-  it('uses equipment-based weight steps and clamps decrements at zero', () => {
-    expect(getWeightStepForEquipment('dumbbell')).toBe(2)
-    expect(getWeightStepForEquipment('BARBELL')).toBe(2.5)
-    expect(getWeightStepForEquipment('bodyweight')).toBe(1)
+  it('steps values and clamps decrements at zero', () => {
     expect(stepWorkoutValue(20, 1, 2.5)).toBe(22.5)
     expect(stepWorkoutValue(1, -1, 2.5)).toBe(0)
     expect(stepWorkoutValue(8, -1, 1, 1)).toBe(7)

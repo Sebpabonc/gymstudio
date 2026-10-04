@@ -2183,15 +2183,38 @@ button {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
+  min-width: 0;
+}
+
+.planned-set-column-headers,
+.planned-set-row,
+.planned-drop-set-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) minmax(44px, 48px) 44px;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.planned-set-column-headers {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .planned-set-row {
-  display: grid;
-  gap: 8px;
-  padding: 8px 10px;
+  width: 100%;
+  padding: 2px 4px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.02);
+}
+
+.planned-set-row > *,
+.planned-drop-set-row > * {
+  min-width: 0;
 }
 
 .planned-set-row.completed,
@@ -2221,6 +2244,7 @@ button {
 }
 
 .planned-set-label {
+  min-width: 0;
   color: var(--muted-strong);
   font-size: 0.68rem;
   font-weight: 700;
@@ -2235,26 +2259,11 @@ button {
 }
 
 .set-stepper {
-  position: relative;
   display: grid;
-  grid-template-columns: 44px minmax(36px, 1fr) 44px;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
-}
-
-.set-stepper::after {
-  position: absolute;
-  top: -5px;
-  left: 50%;
-  padding: 0 3px;
-  transform: translateX(-50%);
-  background: var(--bg-soft);
-  color: var(--muted);
-  content: attr(data-unit);
-  font-size: 0.54rem;
-  line-height: 1;
-  pointer-events: none;
 }
 
 .set-stepper input {
@@ -2266,7 +2275,21 @@ button {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
   padding: 6px 2px;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.set-reps-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 6px 3px;
+  font-size: 1rem;
   font-weight: 700;
   text-align: center;
 }
@@ -2274,8 +2297,8 @@ button {
 .stepper-button,
 .complete-set-button {
   display: inline-flex;
-  width: 44px;
-  min-width: 44px;
+  width: 36px;
+  min-width: 36px;
   height: 44px;
   align-items: center;
   justify-content: center;
@@ -2296,6 +2319,8 @@ button {
 }
 
 .complete-set-button {
+  width: 44px;
+  min-width: 44px;
   font-size: 1rem;
 }
 
@@ -2316,16 +2341,30 @@ button {
 }
 
 .planned-drop-set-row {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  align-items: center;
-  gap: 6px;
-  padding-left: 12px;
+  grid-column: 1 / -1;
+  padding-left: 8px;
 }
 
 .planned-drop-set-row > strong {
+  min-width: 0;
   color: var(--muted);
   font-size: 0.62rem;
+}
+
+.superset-set-column-headers,
+.superset-set-column-headers > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.superset-set-column-headers {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .superset-copy-actions {
@@ -2633,45 +2672,12 @@ button {
     padding: 6px;
   }
 
-  .planned-set-row,
   .superset-set-row {
     padding: 6px;
   }
 
   .planned-set-row {
-    grid-template-columns: 30px minmax(0, 1fr) 44px;
-    align-items: center;
-    gap: 4px;
     padding: 0 4px;
-    margin-inline: -43px;
-    border: 0;
-    outline: 1px solid var(--line);
-  }
-
-  .planned-set-row-heading {
-    display: contents;
-  }
-
-  .planned-set-row .planned-set-label {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .planned-set-row .complete-set-button {
-    grid-column: 3;
-    grid-row: 1;
-  }
-
-  .planned-set-row > .planned-set-controls {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .planned-drop-set-row {
-    grid-column: 1 / -1;
-    grid-template-columns: 30px minmax(0, 1fr);
-    gap: 4px;
-    padding-left: 12px;
   }
 
   .planned-set-controls {
@@ -2683,7 +2689,8 @@ button {
   }
 
   .superset-set-exercises,
-  .superset-notes-grid {
+  .superset-notes-grid,
+  .superset-set-column-headers {
     grid-template-columns: minmax(0, 1fr);
   }
 
