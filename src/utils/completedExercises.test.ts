@@ -36,6 +36,8 @@ describe('completed exercises', () => {
 
   it('summarizes sets and top weight', () => {
     expect(summarizeCompletedEntry(entry())).toBe('2 sets · top 26 kg')
+    expect(summarizeCompletedEntry(entry({ sets: [{ id: 'a', reps: 10, weight: 22.5 }] })))
+      .toBe('1 set · top 22.5 kg')
     expect(summarizeCompletedEntry(entry({ sets: [{ id: 'a', reps: 12, weight: 0 }] }))).toBe('1 set')
   })
 
