@@ -41,12 +41,8 @@ body {
   margin: 0;
   min-height: 100vh;
   height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.12), transparent 22%),
-    linear-gradient(180deg, #dfe0df 0%, #b8b9b7 100%);
+  display: block;
+  background: linear-gradient(180deg, #252526, #121212);
   color: var(--text);
   font-family: Inter, 'Segoe UI', sans-serif;
   font-size: var(--font-body);
@@ -106,7 +102,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 0;
 }
 
 .demo-banner {
@@ -138,15 +134,16 @@ button {
 
 .phone-frame {
   position: relative;
-  width: min(calc(100vw - 18px), 390px);
-  aspect-ratio: 390 / 844;
-  max-height: calc(100dvh - 12px);
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  max-height: none;
   min-height: 0;
   padding-top: env(safe-area-inset-top, 0px);
   background: linear-gradient(180deg, rgba(37, 37, 38, 0.95), rgba(18, 18, 18, 0.96));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 34px;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -159,20 +156,6 @@ button {
   inset: 0;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 26%, rgba(255, 255, 255, 0.02));
   pointer-events: none;
-}
-
-.phone-frame::after {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 26px;
-  border-radius: 999px;
-  background: rgba(9, 9, 9, 0.92);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  z-index: 5;
 }
 
 .app-content {
@@ -198,8 +181,8 @@ button {
   justify-content: space-between;
   gap: 12px;
   height: 48px;
-  margin: -14px -12px -60px;
-  padding: 0 18px;
+  margin: 0 -12px -60px;
+  padding: 0 max(18px, calc((100% - 720px) / 2));
   background: transparent;
   pointer-events: none;
   transition: background-color 0.18s ease;
@@ -208,6 +191,7 @@ button {
 .brand-bar.collapsed {
   background: rgba(24, 24, 25, 0.96);
   border-bottom: 1px solid var(--line);
+  pointer-events: auto;
 }
 
 .brand-bar-title {
@@ -242,7 +226,9 @@ button {
   align-content: end;
   gap: 2px;
   min-height: 110px;
-  margin: 0 -12px;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
   padding: 24px 18px 8px;
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
@@ -335,12 +321,17 @@ button {
 .app-content {
   display: grid;
   gap: 12px;
-  padding: 12px 12px calc(60px + max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
+  padding: 0 12px calc(60px + max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-top: 14px;
+}
+
+.app-content > :not(.brand-bar):not(.header-sentinel) {
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
 }
 
 .account-screen {
@@ -2702,17 +2693,6 @@ button {
   .day-plan-header {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .app-shell {
-    padding: 0;
-  }
-
-  .phone-frame {
-    width: 100vw;
-    max-height: 100dvh;
-    height: 100dvh;
-    border-radius: 0;
   }
 
   .set-row {
