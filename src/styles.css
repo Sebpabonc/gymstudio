@@ -2156,6 +2156,7 @@ button {
 
 .planned-set-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -2185,22 +2186,194 @@ button {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
+  min-width: 0;
+}
+
+.planned-set-column-headers,
+.planned-set-row,
+.planned-drop-set-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) minmax(44px, 48px) 44px;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.planned-set-column-headers {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .planned-set-row {
-  display: grid;
-  gap: 6px;
-  padding: 8px 10px;
+  width: 100%;
+  padding: 2px 4px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.02);
 }
 
+.planned-set-row > *,
+.planned-drop-set-row > * {
+  min-width: 0;
+}
+
+.planned-set-row.completed,
+.superset-set-row.completed {
+  background: rgba(180, 211, 184, 0.08);
+}
+
+.planned-set-row.completed {
+  outline-color: rgba(180, 211, 184, 0.75);
+}
+
+.superset-set-row.completed {
+  border-color: rgba(180, 211, 184, 0.55);
+}
+
+.planned-set-row:not(.completed) .set-stepper input,
+.superset-set-row:not(.completed) .set-stepper input {
+  opacity: 0.62;
+}
+
+.planned-set-row-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+}
+
 .planned-set-label {
+  min-width: 0;
   color: var(--muted-strong);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.planned-set-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.set-stepper {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.set-stepper input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 6px 2px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.set-reps-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 6px 3px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.stepper-button,
+.complete-set-button {
+  display: inline-flex;
+  width: 36px;
+  min-width: 36px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+
+.stepper-button:active,
+.complete-set-button[aria-pressed='true'] {
+  border-color: rgba(180, 211, 184, 0.75);
+  background: rgba(180, 211, 184, 0.2);
+  color: var(--success);
+}
+
+.complete-set-button {
+  width: 44px;
+  min-width: 44px;
+  font-size: 1rem;
+}
+
+.same-as-set-one-button {
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted-strong);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.same-as-set-one-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.planned-drop-set-row {
+  grid-column: 1 / -1;
+  padding-left: 8px;
+}
+
+.planned-drop-set-row > strong {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.superset-set-column-headers,
+.superset-set-column-headers > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.superset-set-column-headers {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.superset-copy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .planned-set-field-pair {
@@ -2491,8 +2664,34 @@ button {
 }
 
 @media (max-width: 420px) {
+  .day-plan-card,
+  .planned-exercise-card {
+    padding: 8px;
+  }
+
+  .planned-progress-box {
+    padding: 6px;
+  }
+
+  .superset-set-row {
+    padding: 6px;
+  }
+
+  .planned-set-row {
+    padding: 0 4px;
+  }
+
+  .planned-set-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .superset-group {
+    padding: 8px;
+  }
+
   .superset-set-exercises,
-  .superset-notes-grid {
+  .superset-notes-grid,
+  .superset-set-column-headers {
     grid-template-columns: minmax(0, 1fr);
   }
 

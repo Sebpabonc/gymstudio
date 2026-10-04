@@ -32,6 +32,20 @@ export function copyWeightToUntouchedSets(
   })
 }
 
+export function copySetOneWeight(weights: number[]) {
+  return weights.length === 0 ? [] : weights.map(() => weights[0])
+}
+
+export function stepWorkoutValue(value: number, direction: -1 | 1, step: number, min = 0) {
+  const precision = Math.max(step.toString().split('.')[1]?.length ?? 0, 0)
+  const nextValue = Math.max(min, (Number(value) || 0) + direction * step)
+  return Number(nextValue.toFixed(precision))
+}
+
+export function selectCompletedSets(sets: WorkoutSet[], completed: boolean[]) {
+  return sets.filter((_, index) => completed[index])
+}
+
 export function formatWorkoutSet(set: WorkoutSet) {
   const main = `${set.reps} × ${set.weight} kg`
   return set.drop ? `${main} → ${set.drop.reps} × ${set.drop.weight} kg` : main

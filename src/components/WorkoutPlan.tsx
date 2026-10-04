@@ -29,9 +29,12 @@ import {
 } from '../utils/trainingBlocks'
 import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, formatLoggedTime, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import {
+  copySetOneWeight,
   copyWeightToUntouchedSets,
   filterLoggableSets,
   parseRepPrescription,
+  selectCompletedSets,
+  stepWorkoutValue,
   workoutMaxWeight,
   workoutVolume,
 } from '../utils/workoutSets'
@@ -62,10 +65,67 @@ type PlanDraft = {
   setReps: number[]
   dropSetWeights: number[]
   dropSetReps: number[]
+  setDone: boolean[]
   notes: string
 }
 
 type PlanMode = 'preset' | 'custom'
+
+function SteppedNumberInput({
+  value,
+  step,
+  min,
+  label,
+  onChange,
+  onFocus,
+  onClick,
+  invalid = false,
+  dataLogWeight = false,
+}: {
+  value: number
+  step: number
+  min: number
+  label: string
+  onChange: (value: string) => void
+  onFocus?: React.FocusEventHandler<HTMLInputElement>
+  onClick?: React.MouseEventHandler<HTMLInputElement>
+  invalid?: boolean
+  dataLogWeight?: boolean
+}) {
+  return (
+    <div className="set-stepper">
+      <button
+        type="button"
+        className="stepper-button"
+        aria-label={`Decrease ${label}`}
+        onClick={() => onChange(String(stepWorkoutValue(value, -1, step, min)))}
+      >
+        −
+      </button>
+      <input
+        type="number"
+        inputMode="decimal"
+        min={min}
+        step={step}
+        value={value}
+        aria-label={label}
+        aria-invalid={invalid}
+        data-log-weight={dataLogWeight ? true : undefined}
+        onFocus={onFocus}
+        onClick={onClick}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <button
+        type="button"
+        className="stepper-button"
+        aria-label={`Increase ${label}`}
+        onClick={() => onChange(String(stepWorkoutValue(value, 1, step, min)))}
+      >
+        +
+      </button>
+    </div>
+  )
+}
 
 const CUSTOM_PLAN_KEY = 'gym-studio.custom-plan'
 const BLOCK_CARD_EXPANDED_KEY = 'gym-studio.block-card-expanded'
@@ -277,10 +337,9 @@ export default function WorkoutPlan({
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
   const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
   const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({})
-  const [setSectionsVisible, setSetSectionsVisible] = useState<Record<string, boolean>>({})
+  const [completedSupersetSets, setCompletedSupersetSets] = useState<Record<string, boolean[]>>({})
   const [progressSectionsVisible, setProgressSectionsVisible] = useState<Record<string, boolean>>({})
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
-  const [activeSetIndexByExercise, setActiveSetIndexByExercise] = useState<Record<string, number>>({})
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState('')
 
@@ -294,7 +353,6 @@ export default function WorkoutPlan({
     comments: 'Comments',
     noProgressHistory: 'No historical progress logged yet.',
     ready: 'Ready',
-    log: 'Log this exercise',
     posture: 'POSTURE TIPS',
     noData: 'No logged data yet',
     modePreset: '6-week block',
@@ -639,9 +697,46 @@ export default function WorkoutPlan({
         setReps: baseSetReps,
         dropSetWeights: baseDropWeights,
         dropSetReps: baseDropSetReps,
+        setDone: Array.from({ length: fallbackSetCount }, () => false),
         notes: '',
       }
     )
+  }
+
+  const copyPlanSetOneWeight = (exercise: PlanExercise, setCount: number) => {
+    const key = getPlanDraftKey(exercise.name)
+    const currentDraft = getDraftForExercise(exercise.name, exercise)
+    const weights = Array.from(
+      { length: setCount },
+      (_, index) => currentDraft.setWeights[index] ?? currentDraft.weight
+    )
+    if (!(weights[0] > 0)) return
+
+    const nextWeights = copySetOneWeight(weights)
+    setPlannedDrafts((current) => ({
+      ...current,
+      [key]: {
+        ...(current[key] ?? currentDraft),
+        weight: nextWeights[0],
+        setWeights: nextWeights,
+        setWeightTouched: nextWeights.map((_, index) => index === 0),
+      },
+    }))
+  }
+
+  const togglePlanSetDone = (exercise: PlanExercise, setIndex: number, setCount: number) => {
+    const key = getPlanDraftKey(exercise.name)
+    const currentDraft = getDraftForExercise(exercise.name, exercise)
+    const nextCompleted = Array.from(
+      { length: setCount },
+      (_, index) => currentDraft.setDone[index] ?? false
+    )
+    nextCompleted[setIndex] = !nextCompleted[setIndex]
+    setPlannedDrafts((current) => ({
+      ...current,
+      [key]: { ...(current[key] ?? currentDraft), setDone: nextCompleted },
+    }))
+    if (nextCompleted.every(Boolean)) void logPlannedExercise(exercise, nextCompleted)
   }
 
   const toggleExerciseCollapse = (exerciseName: string) => {
@@ -656,15 +751,6 @@ export default function WorkoutPlan({
   const getPostureTips = (exercise: PlanExercise, libraryMatch?: Exercise) => {
     if (exercise.exerciseId && libraryMatch?.postureTips?.length) return libraryMatch.postureTips
     return [exercise.goal, exercise.tip].filter(Boolean).map((tip) => tip.trim())
-  }
-
-  const toggleSetSection = (exerciseName: string) => {
-    const key = normalizeExerciseName(exerciseName)
-
-    setSetSectionsVisible((current) => ({
-      ...current,
-      [key]: !(current[key] ?? false),
-    }))
   }
 
   const toggleProgressSection = (exerciseName: string) => {
@@ -722,16 +808,14 @@ export default function WorkoutPlan({
 
   const collapseAllExerciseSections = () => {
     const nextCollapsedState = activeExercises.map((exercise) => [normalizeExerciseName(exercise.name), true] as const)
-    const nextSetSectionState = activeExercises.map((exercise) => [normalizeExerciseName(exercise.name), false] as const)
-    const nextActiveSetState = activeExercises.map((exercise) => [normalizeExerciseName(exercise.name), 0] as const)
 
     setCollapsedExercises(Object.fromEntries(nextCollapsedState))
-    setSetSectionsVisible(Object.fromEntries(nextSetSectionState))
-    setProgressSectionsVisible(Object.fromEntries(nextSetSectionState))
-    setActiveSetIndexByExercise(Object.fromEntries(nextActiveSetState))
+    setProgressSectionsVisible(Object.fromEntries(
+      activeExercises.map((exercise) => [normalizeExerciseName(exercise.name), false] as const)
+    ))
   }
 
-  const logPlannedExercise = async (exercise: PlanExercise) => {
+  const logPlannedExercise = async (exercise: PlanExercise, completedRows?: boolean[]) => {
     const exerciseKey = getPlanDraftKey(exercise.name)
     const sectionKey = normalizeExerciseName(exercise.name)
     const canonicalId =
@@ -758,12 +842,13 @@ export default function WorkoutPlan({
       return set
     })
     const equipment = exerciseCatalog.find((item) => item.id === canonicalId)?.equipment
-    const validSets = filterLoggableSets(allSets, equipment)
+    const validSets = filterLoggableSets(
+      selectCompletedSets(allSets, completedRows ?? draft.setDone),
+      equipment
+    )
 
     if (validSets.length === 0) {
       setLogError((current) => ({ ...current, [exerciseKey]: 'Enter at least one set' }))
-      const firstEmpty = allSets.findIndex((set) => !(Number(set.weight) > 0))
-      setActiveSetIndexByExercise((current) => ({ ...current, [sectionKey]: Math.max(firstEmpty, 0) }))
       window.setTimeout(() => {
         const card = Array.from(document.querySelectorAll<HTMLElement>('[data-exercise-card]')).find(
           (element) => element.dataset.exerciseCard === sectionKey
@@ -806,23 +891,14 @@ export default function WorkoutPlan({
         [exerciseKey]: {
           ...currentDraft,
           notes: '',
+          setDone: Array.from({ length: setCount }, () => false),
         },
       }
     })
 
-    setSetSectionsVisible((current) => ({
-      ...current,
-      [sectionKey]: false,
-    }))
-
     setProgressSectionsVisible((current) => ({
       ...current,
       [sectionKey]: false,
-    }))
-
-    setActiveSetIndexByExercise((current) => ({
-      ...current,
-      [sectionKey]: 0,
     }))
 
     setLoggedAtByExercise((current) => ({ ...current, [entryToSave.id]: Date.now() }))
@@ -840,7 +916,7 @@ export default function WorkoutPlan({
     }))
   }
 
-  const logSuperset = async (exercises: PlanExercise[], groupKey: string) => {
+  const logSuperset = async (exercises: PlanExercise[], groupKey: string, completedRows: boolean[]) => {
     const setCount = Math.max(...exercises.map(getDefaultSetCount))
     const entryInputs = await Promise.all(exercises.map(async (exercise) => {
       const canonicalId =
@@ -867,7 +943,7 @@ export default function WorkoutPlan({
       })
       return {
         exerciseId: canonicalId,
-        sets: allSets,
+        sets: selectCompletedSets(allSets, completedRows),
         equipment: exerciseCatalog.find((item) => item.id === canonicalId)?.equipment,
         notes: draft.notes,
       }
@@ -911,7 +987,7 @@ export default function WorkoutPlan({
           : [key, draft]
       )
     ))
-    setSetSectionsVisible((current) => ({ ...current, [`superset:${groupKey}`]: false }))
+    setCompletedSupersetSets((current) => ({ ...current, [groupKey]: [] }))
     setLoggedAtByExercise((current) => ({
       ...current,
       ...Object.fromEntries(entriesToSave.map((entry) => [entry.id, Date.now()])),
@@ -972,10 +1048,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
     saveCustomPlan(nextPlan)
     setSelectedLibraryExerciseId('')
     setCollapsedExercises((current) => ({ ...current, [key]: true }))
-    setSetSectionsVisible((current) => ({ ...current, [key]: false }))
     setProgressSectionsVisible((current) => ({ ...current, [key]: false }))
     setPostureTipsVisible((current) => ({ ...current, [key]: true }))
-    setActiveSetIndexByExercise((current) => ({ ...current, [key]: 0 }))
   }
 
   const addCustomExercise = () => {
@@ -1000,10 +1074,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
     saveCustomPlan(nextPlan)
     setCustomExerciseDraft(defaultCustomExercise)
     setCollapsedExercises((current) => ({ ...current, [key]: true }))
-    setSetSectionsVisible((current) => ({ ...current, [key]: false }))
     setProgressSectionsVisible((current) => ({ ...current, [key]: false }))
     setPostureTipsVisible((current) => ({ ...current, [key]: true }))
-    setActiveSetIndexByExercise((current) => ({ ...current, [key]: 0 }))
   }
 
   const removeCustomExercise = (exerciseName: string) => {
@@ -1014,12 +1086,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
     saveCustomPlan(nextPlan)
 
     setCollapsedExercises((current) => {
-      const next = { ...current }
-      delete next[key]
-      return next
-    })
-
-    setSetSectionsVisible((current) => {
       const next = { ...current }
       delete next[key]
       return next
@@ -1037,11 +1103,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       return next
     })
 
-    setActiveSetIndexByExercise((current) => {
-      const next = { ...current }
-      delete next[key]
-      return next
-    })
   }
 
   return (
@@ -1447,14 +1508,16 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               (libraryMatch?.primaryMuscle ? [libraryMatch.primaryMuscle] : [])
             ).slice(0, 2)
             const benchAngleLabel = formatBenchAngle(exercise.angleDegrees)
-            const activeSetIndex = activeSetIndexByExercise[exerciseKey] ?? 0
-            const safeSetIndex = Math.min(Math.max(activeSetIndex, 0), Math.max(setCount - 1, 0))
             const isCollapsed = !!collapsedExercises[exerciseKey]
-            const isSetSectionVisible = setSectionsVisible[exerciseKey] ?? false
             const isProgressSectionVisible = progressSectionsVisible[exerciseKey] ?? false
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
             const postureTips = getPostureTips(exercise, libraryMatch)
             const completedEntry = findExerciseCompletion(exercise, history)
+            const completedRows = Array.from(
+              { length: setCount },
+              (_, index) => draft.setDone[index] ?? false
+            )
+            const completedSetCount = completedRows.filter(Boolean).length
             const cardClasses = [
               'planned-exercise-card',
               isCollapsed ? 'collapsed' : '',
@@ -1577,148 +1640,109 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         )}
                         <button
                           type="button"
-                          className="toggle-button set-section-toggle"
-                          onClick={() => toggleSetSection(exercise.name)}
-                          aria-label={isSetSectionVisible ? `Hide sets for ${exercise.name}` : `Show sets for ${exercise.name}`}
+                          className="same-as-set-one-button"
+                          disabled={!(Number(setWeights[0]) > 0)}
+                          onClick={() => copyPlanSetOneWeight(exercise, setCount)}
                         >
-                          {isSetSectionVisible ? '−' : '+'}
+                          Same as set 1
                         </button>
                       </div>
 
-                      {isSetSectionVisible && (
-                        <div className="planned-set-grid">
-                          {Array.from({ length: setCount }, (_, index) => {
-                            const isOpen = index === safeSetIndex
-
-                            return (
-                              <div
-                                key={`${exercise.name}-set-${index + 1}`}
-                                className={isOpen ? 'planned-set-row' : 'planned-set-row collapsed'}
-                                onClick={() => !isOpen && setActiveSetIndexByExercise((current) => ({ ...current, [exerciseKey]: index }))}
-                              >
-                                <span className="planned-set-label">Set {index + 1}</span>
-                                {isOpen ? (
-                                  exercise.technique === 'drop-set' ? (
-                                    <div className="planned-drop-set-inputs">
-                                      <div className="planned-set-input-group">
-                                        <strong>Main</strong>
-                                        <div className="planned-set-field-pair">
-                                          <label>
-                                            <span>Reps</span>
-                                            <input
-                                              type="number"
-                                              min="1"
-                                              value={setReps[index] ?? draft.reps}
-                                              aria-label={`Set ${index + 1} main reps`}
-                                              onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
-                                            />
-                                          </label>
-                                          <label>
-                                            <span>kg</span>
-                                            <input
-                                              type="number"
-                                              min="0"
-                                              value={setWeights[index] ?? 0}
-                                              data-log-weight
-                                              aria-invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
-                                              aria-label={`Set ${index + 1} main weight`}
-                                              onFocus={(event) => event.currentTarget.select()}
-                                              onClick={(event) => event.currentTarget.select()}
-                                              onChange={(event) => updatePlanSetValue(exercise, index, 'weight', event.target.value, setCount)}
-                                            />
-                                          </label>
-                                        </div>
-                                      </div>
-                                      <div className="planned-set-input-group">
-                                        <strong>Drop</strong>
-                                        <div className="planned-set-field-pair">
-                                          <label>
-                                            <span>Reps</span>
-                                            <input
-                                              type="number"
-                                              min="1"
-                                              value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
-                                              aria-label={`Set ${index + 1} drop reps`}
-                                              onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', event.target.value, setCount)}
-                                            />
-                                          </label>
-                                          <label>
-                                            <span>kg</span>
-                                            <input
-                                              type="number"
-                                              min="0"
-                                              value={dropSetWeights[index] ?? 0}
-                                              aria-label={`Set ${index + 1} drop weight`}
-                                              onFocus={(event) => event.currentTarget.select()}
-                                              onClick={(event) => event.currentTarget.select()}
-                                              onChange={(event) => updatePlanSetValue(exercise, index, 'dropWeight', event.target.value, setCount)}
-                                            />
-                                          </label>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div className="planned-set-field-pair">
-                                      <label>
-                                        <span>Reps</span>
-                                        <input
-                                          type="number"
-                                          min="1"
-                                          value={setReps[index] ?? draft.reps}
-                                          aria-label={`Set ${index + 1} reps`}
-                                          onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
-                                        />
-                                      </label>
-                                      <label>
-                                        <span>Weight</span>
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          value={setWeights[index] ?? 0}
-                                          data-log-weight
-                                          aria-invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
-                                          aria-label={`Set ${index + 1} weight`}
-                                          onFocus={(event) => event.currentTarget.select()}
-                                          onClick={(event) => event.currentTarget.select()}
-                                          onChange={(event) => updatePlanSetValue(exercise, index, 'weight', event.target.value, setCount)}
-                                        />
-                                      </label>
-                                    </div>
-                                  )
-                                ) : (
-                                  <div className="planned-progress-meta">
-                                    <small>{text.ready}</small>
-                                    <strong>
-                                      {setWeights[index] ?? 0}
-                                      {exercise.technique === 'drop-set' ? ` → ${dropSetWeights[index] ?? 0}` : ''} kg
-                                    </strong>
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          })}
+                      <div className="planned-set-grid">
+                        <div className="planned-set-column-headers" aria-hidden="true">
+                          <span />
+                          <span>kg</span>
+                          <span>Reps</span>
+                          <span />
                         </div>
-                      )}
+                        {Array.from({ length: setCount }, (_, index) => (
+                          <div
+                            key={`${exercise.name}-set-${index + 1}`}
+                            className={`planned-set-row${completedRows[index] ? ' completed' : ''}`}
+                          >
+                            <span className="planned-set-label">Set {index + 1}</span>
+                            <SteppedNumberInput
+                              value={setWeights[index] ?? 0}
+                              step={2.5}
+                              min={0}
+                              label={`Set ${index + 1} weight in kilograms`}
+                              dataLogWeight
+                              invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
+                              onFocus={(event) => event.currentTarget.select()}
+                              onClick={(event) => event.currentTarget.select()}
+                              onChange={(value) => updatePlanSetValue(exercise, index, 'weight', value, setCount)}
+                            />
+                            <input
+                              className="set-reps-input"
+                              type="number"
+                              inputMode="numeric"
+                              min="1"
+                              value={setReps[index] ?? draft.reps}
+                              aria-label={`Set ${index + 1} reps`}
+                              onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
+                            />
+                            <button
+                              type="button"
+                              className="complete-set-button"
+                              aria-label={`${completedRows[index] ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
+                              aria-pressed={completedRows[index]}
+                              onClick={() => {
+                                // Ticking a set starts the rest before the next one.
+                                if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90)
+                                togglePlanSetDone(exercise, index, setCount)
+                              }}
+                            >
+                              ✓
+                            </button>
+                            {exercise.technique === 'drop-set' && (
+                              <div className="planned-drop-set-row">
+                                <strong>Drop</strong>
+                                <SteppedNumberInput
+                                  value={dropSetWeights[index] ?? 0}
+                                  step={2.5}
+                                  min={0}
+                                  label={`Set ${index + 1} drop weight in kilograms`}
+                                  onFocus={(event) => event.currentTarget.select()}
+                                  onClick={(event) => event.currentTarget.select()}
+                                  onChange={(value) => updatePlanSetValue(exercise, index, 'dropWeight', value, setCount)}
+                                />
+                                <input
+                                  className="set-reps-input"
+                                  type="number"
+                                  inputMode="numeric"
+                                  min="1"
+                                  value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
+                                  aria-label={`Set ${index + 1} drop reps`}
+                                  onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', event.target.value, setCount)}
+                                />
+                                <span aria-hidden="true" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
 
-                      {isSetSectionVisible && (
-                        <label className="planned-notes-field">
-                          <span>Notes</span>
-                          <textarea
-                            rows={2}
-                            value={draft.notes}
-                            placeholder="Add notes for this exercise"
-                            onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
-                          />
-                        </label>
-                      )}
+                      <label className="planned-notes-field">
+                        <span>Notes</span>
+                        <textarea
+                          rows={2}
+                          value={draft.notes}
+                          placeholder="Add notes for this exercise"
+                          onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
+                        />
+                      </label>
 
-                      {isSetSectionVisible && logError[getPlanDraftKey(exercise.name)] && (
+                      {logError[getPlanDraftKey(exercise.name)] && (
                         <p role="alert" aria-live="assertive" className="account-error log-error">{logError[getPlanDraftKey(exercise.name)]}</p>
                       )}
 
-                      {isSetSectionVisible && (
-                        <button type="button" className="primary-button small-button" onClick={() => logPlannedExercise(exercise)}>
-                          {text.log}
+                      {(completedSetCount < setCount || logError[getPlanDraftKey(exercise.name)]) && (
+                        <button
+                          type="button"
+                          className="primary-button small-button"
+                          onClick={() => void logPlannedExercise(exercise, completedRows)}
+                        >
+                          Finish exercise
                         </button>
                       )}
 
@@ -1778,8 +1802,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const codes = group.items.map(({ exercise }) => exercise.code ?? exercise.name)
             const supersetExercises = group.items.map(({ exercise }) => exercise)
             const supersetSetCount = Math.max(...supersetExercises.map(getDefaultSetCount))
-            const supersetSectionKey = `superset:${group.key}`
-            const isSupersetLogVisible = setSectionsVisible[supersetSectionKey] ?? false
+            const supersetCompletedRows = Array.from(
+              { length: supersetSetCount },
+              (_, index) => completedSupersetSets[group.key]?.[index] ?? false
+            )
+            const supersetCompletedCount = supersetCompletedRows.filter(Boolean).length
             const supersetError = supersetExercises
               .map((exercise) => logError[getPlanDraftKey(exercise.name)])
               .find(Boolean)
@@ -1793,103 +1820,133 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 {cards}
                 <div className="planned-progress-box superset-log-box">
                   <div className="planned-set-header">
-                    <span>{text.setLog}</span>
+                    <span>Superset sets</span>
+                  </div>
+                  <div className="superset-copy-actions">
+                    {supersetExercises.map((exercise) => (
+                      <button
+                        key={`${group.key}-${exercise.code}-copy`}
+                        type="button"
+                        className="same-as-set-one-button"
+                        disabled={!((getDraftForExercise(exercise.name, exercise).setWeights[0] ?? 0) > 0)}
+                        aria-label={`Copy ${exercise.code ?? exercise.name} set 1 weight to all sets`}
+                        onClick={() => copyPlanSetOneWeight(exercise, supersetSetCount)}
+                      >
+                        Same as set 1 · {exercise.code ?? exercise.name}
+                      </button>
+                    ))}
+                  </div>
+                  <div
+                    className="superset-set-column-headers"
+                    aria-hidden="true"
+                  >
+                    {supersetExercises.map((exercise) => (
+                      <div key={`${group.key}-${exercise.code}-column-headings`}>
+                        <span>kg</span>
+                        <span>Reps</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="superset-set-grid">
+                    {Array.from({ length: supersetSetCount }, (_, setIndex) => (
+                      <div
+                        className={`superset-set-row${supersetCompletedRows[setIndex] ? ' completed' : ''}`}
+                        key={`${group.key}-set-${setIndex + 1}`}
+                      >
+                        <div className="planned-set-row-heading">
+                          <span className="planned-set-label">Set {setIndex + 1}</span>
+                          <button
+                            type="button"
+                            className="complete-set-button"
+                            aria-label={`${supersetCompletedRows[setIndex] ? 'Unmark' : 'Mark'} superset set ${setIndex + 1} complete`}
+                            aria-pressed={supersetCompletedRows[setIndex]}
+                            onClick={() => {
+                              const nextCompleted = [...supersetCompletedRows]
+                              nextCompleted[setIndex] = !nextCompleted[setIndex]
+                              setCompletedSupersetSets((current) => ({ ...current, [group.key]: nextCompleted }))
+                              // Rest is taken after the pair, using the last exercise's prescribed rest.
+                              if (nextCompleted[setIndex]) {
+                                onStartRest(supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90)
+                              }
+                              if (nextCompleted.every(Boolean)) {
+                                void logSuperset(supersetExercises, group.key, nextCompleted)
+                              }
+                            }}
+                          >
+                            ✓
+                          </button>
+                        </div>
+                        <div className="superset-set-exercises">
+                          {supersetExercises.map((exercise) => {
+                            const draft = getDraftForExercise(exercise.name, exercise)
+                            const code = exercise.code ?? exercise.name
+                            const displayName = getExerciseDisplayName(exercise.name)
+                            const prescribedReps =
+                              exercise.repsPerSet?.[setIndex] ?? exercise.reps ?? ''
+                            const reps =
+                              draft.setReps[setIndex] ??
+                              parseRepPrescription(prescribedReps)[0] ??
+                              getDefaultRepTarget(exercise)
+                            const weight = draft.setWeights[setIndex] ?? draft.weight ?? 0
+                            return (
+                              <div className="superset-set-exercise" key={`${group.key}-${code}`}>
+                                <strong className="superset-exercise-label">{code} · {displayName}</strong>
+                                <div className="planned-set-controls">
+                                  <SteppedNumberInput
+                                    value={weight}
+                                    step={2.5}
+                                    min={0}
+                                    label={`Set ${setIndex + 1}, ${code} weight in kilograms`}
+                                    onFocus={(event) => event.currentTarget.select()}
+                                    onClick={(event) => event.currentTarget.select()}
+                                    onChange={(value) =>
+                                      updatePlanSetValue(exercise, setIndex, 'weight', value, supersetSetCount)
+                                    }
+                                  />
+                                  <input
+                                    className="set-reps-input"
+                                    type="number"
+                                    inputMode="numeric"
+                                    min="1"
+                                    value={reps}
+                                    aria-label={`Set ${setIndex + 1}, ${code} reps`}
+                                    onChange={(event) =>
+                                      updatePlanSetValue(exercise, setIndex, 'reps', event.target.value, supersetSetCount)
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="superset-notes-grid">
+                    {supersetExercises.map((exercise) => {
+                      const draft = getDraftForExercise(exercise.name, exercise)
+                      return (
+                        <label className="planned-notes-field" key={`${group.key}-${exercise.code}-notes`}>
+                          <span>{exercise.code ?? exercise.name} notes</span>
+                          <textarea
+                            rows={2}
+                            value={draft.notes}
+                            placeholder={`Add notes for ${getExerciseDisplayName(exercise.name)}`}
+                            onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
+                          />
+                        </label>
+                      )
+                    })}
+                  </div>
+                  {supersetError && <p role="alert" aria-live="assertive" className="account-error log-error">{supersetError}</p>}
+                  {(supersetCompletedCount < supersetSetCount || supersetError) && (
                     <button
                       type="button"
-                      className="toggle-button set-section-toggle"
-                      onClick={() =>
-                        setSetSectionsVisible((current) => ({
-                          ...current,
-                          [supersetSectionKey]: !isSupersetLogVisible,
-                        }))
-                      }
-                      aria-label={isSupersetLogVisible ? 'Hide superset sets' : 'Show superset sets'}
-                      aria-expanded={isSupersetLogVisible}
+                      className="primary-button small-button"
+                      onClick={() => void logSuperset(supersetExercises, group.key, supersetCompletedRows)}
                     >
-                      {isSupersetLogVisible ? '−' : '+'}
+                      Finish superset
                     </button>
-                  </div>
-                  {isSupersetLogVisible && (
-                    <>
-                      <div className="superset-set-grid">
-                        {Array.from({ length: supersetSetCount }, (_, setIndex) => (
-                          <div className="superset-set-row" key={`${group.key}-set-${setIndex + 1}`}>
-                            <span className="planned-set-label">Set {setIndex + 1}</span>
-                            <div className="superset-set-exercises">
-                              {supersetExercises.map((exercise) => {
-                                const draft = getDraftForExercise(exercise.name, exercise)
-                                const code = exercise.code ?? exercise.name
-                                const displayName = getExerciseDisplayName(exercise.name)
-                                const prescribedReps =
-                                  exercise.repsPerSet?.[setIndex] ?? exercise.reps ?? ''
-                                const reps =
-                                  draft.setReps[setIndex] ??
-                                  parseRepPrescription(prescribedReps)[0] ??
-                                  getDefaultRepTarget(exercise)
-                                const weight = draft.setWeights[setIndex] ?? draft.weight ?? 0
-                                return (
-                                  <div className="superset-set-exercise" key={`${group.key}-${code}`}>
-                                    <strong className="superset-exercise-label">{code} · {displayName}</strong>
-                                    <div className="planned-set-field-pair">
-                                      <label>
-                                        <span>Reps</span>
-                                        <input
-                                          type="number"
-                                          min="1"
-                                          value={reps}
-                                          aria-label={`Set ${setIndex + 1}, ${code} ${displayName}, reps`}
-                                          onChange={(event) =>
-                                            updatePlanSetValue(exercise, setIndex, 'reps', event.target.value, supersetSetCount)
-                                          }
-                                        />
-                                      </label>
-                                      <label>
-                                        <span>kg</span>
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          value={weight}
-                                          aria-label={`Set ${setIndex + 1}, ${code} ${displayName}, kg`}
-                                          onFocus={(event) => event.currentTarget.select()}
-                                          onClick={(event) => event.currentTarget.select()}
-                                          onChange={(event) =>
-                                            updatePlanSetValue(exercise, setIndex, 'weight', event.target.value, supersetSetCount)
-                                          }
-                                        />
-                                      </label>
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="superset-notes-grid">
-                        {supersetExercises.map((exercise) => {
-                          const draft = getDraftForExercise(exercise.name, exercise)
-                          return (
-                            <label className="planned-notes-field" key={`${group.key}-${exercise.code}-notes`}>
-                              <span>{exercise.code ?? exercise.name} notes</span>
-                              <textarea
-                                rows={2}
-                                value={draft.notes}
-                                placeholder={`Add notes for ${getExerciseDisplayName(exercise.name)}`}
-                                onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
-                              />
-                            </label>
-                          )
-                        })}
-                      </div>
-                      {supersetError && <p role="alert" aria-live="assertive" className="account-error log-error">{supersetError}</p>}
-                      <button
-                        type="button"
-                        className="primary-button small-button"
-                        onClick={() => void logSuperset(supersetExercises, group.key)}
-                      >
-                        Log superset
-                      </button>
-                    </>
                   )}
                 </div>
               </div>
