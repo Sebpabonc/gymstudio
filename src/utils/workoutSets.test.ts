@@ -43,7 +43,8 @@ describe('workout sets', () => {
       { id: 'set-3', reps: 10, weight: 24 },
     ]
     expect(selectCompletedSets(sets, [true, false])).toEqual([sets[0]])
-    expect(selectCompletedSets(sets, [])).toEqual([])
+    expect(selectCompletedSets(sets, [])).toEqual(sets)
+    expect(selectCompletedSets(sets, [false, false])).toEqual(sets)
     const dropSet: WorkoutSet = {
       id: 'drop-set',
       reps: 12,
