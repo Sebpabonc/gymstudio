@@ -16,7 +16,7 @@ const exerciseSearchAbbreviations: Record<string, string[]> = {
 }
 
 function normalizeExerciseSearchText(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]/g, '')
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
 function getExerciseSearchTerms(query: string) {
@@ -43,6 +43,7 @@ export function filterExercises(exercises: Exercise[], query: string, bodyRegion
 
     const searchableValues = [
       exercise.name,
+      exercise.nameEs,
       ...(exercise.primaryMuscles ?? [exercise.primaryMuscle]),
       ...(exercise.secondaryMuscles ?? (exercise.secondaryMuscle ? [exercise.secondaryMuscle] : [])),
       exercise.equipment,
