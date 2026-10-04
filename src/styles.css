@@ -3360,7 +3360,10 @@ body {
 }
 
 .app-shell {
+  position: fixed;
+  inset: 0;
   height: 100dvh;
+  min-width: 0;
   padding: 0;
 }
 
@@ -3368,6 +3371,7 @@ body {
   width: 100%;
   height: 100dvh;
   max-height: none;
+  min-width: 0;
   aspect-ratio: auto;
   border: 0;
   border-radius: 0;
@@ -3379,7 +3383,9 @@ body {
 }
 
 .app-content {
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
+  min-width: 0;
   padding-right: 16px;
   padding-left: 16px;
 }
@@ -3387,6 +3393,7 @@ body {
 .app-content > :not(.brand-bar):not(.header-sentinel) {
   width: 100%;
   max-width: 640px;
+  min-width: 0;
   margin-right: auto;
   margin-left: auto;
 }
@@ -3641,6 +3648,18 @@ body {
 
 .planned-set-row.completed {
   background: var(--brand-soft);
+}
+
+.superset-set-grid {
+  gap: 0;
+}
+
+.superset-set-row {
+  padding: 6px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  background: transparent;
 }
 
 .planned-set-label {
