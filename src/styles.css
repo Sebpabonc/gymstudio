@@ -4160,6 +4160,11 @@ body {
   font-size: 0.66rem;
 }
 
+.set-row .set-label {
+  width: 100%;
+  min-width: 0;
+}
+
 .free-set-input {
   width: 100%;
   min-width: 0;
@@ -4186,13 +4191,19 @@ body {
 
   .free-set-header,
   .set-row {
-    grid-template-columns: 28px minmax(38px, 0.9fr) minmax(108px, 1.8fr) minmax(38px, 0.9fr) 36px 32px;
+    grid-template-columns: 28px minmax(42px, 0.5fr) minmax(120px, 2fr) minmax(42px, 0.5fr) 36px 32px;
     gap: 3px;
   }
 
   .set-row .complete-set-button {
     width: 36px;
     min-width: 36px;
+    height: 40px;
+  }
+
+  .set-row .stepper-button {
+    width: 40px;
+    min-width: 40px;
     height: 40px;
   }
 
