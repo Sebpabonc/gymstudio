@@ -18,6 +18,16 @@ All AI features go through one Supabase Edge Function, `ai-gateway`
 { "feature": "ask_exercise", "exerciseId": "barbell-bench-press", "question": "Where should I feel this?" }
 ```
 200 → `{ "answer": "...", "remainingToday": 19 }`.
+Other features (AI Phase 1, 2026-10-04; same limits, same ledger):
+```json
+{ "feature": "explain_suggestion", "exerciseId": "barbell-bench-press", "suggestion": "Add 2.5 kg next session" }
+{ "feature": "session_summary", "date": "2026-10-05", "blockId": "block-…", "dayKey": "chest-back-a" }
+```
+Both return `{ "answer": "...", "remainingToday": n }`. `explain_suggestion` is grounded in the exercise
+and the caller's last 8 sessions of it (≤80 words). `session_summary` uses the caller's entries for that
+date (optionally block/day) plus the previous session of each exercise (≤120 words, up to 4 "- " bullets).
+Extra errors: 400 `invalid_suggestion` / `invalid_date`, 404 `no_session`.
+
 Errors: 401 `sign_in_required`, 400 `invalid_question` (max 300 chars) / `invalid_exercise` /
 `unknown_feature`, 404 `exercise_not_found`, 429 `daily_limit` / `monthly_budget_reached`,
 502 `ai_unavailable`, 503 `ai_not_configured`.
