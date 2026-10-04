@@ -106,7 +106,6 @@ export default function App() {
   const [setWeightTouched, setSetWeightTouched] = useState<boolean[]>([false, false])
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
-  const [squeezeCueExpanded, setSqueezeCueExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<AppTab>('today')
   const [restTimer, setRestTimer] = useState<RestTimerState | null>(() => loadRestTimerState())
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
@@ -207,7 +206,6 @@ export default function App() {
     setSetWeightTouched([false, false])
     setDraftNotes('')
     setTipsExpanded(false)
-    setSqueezeCueExpanded(false)
   }, [selectedExercise])
 
   const availableBodyRegions = useMemo(() => getAvailableBodyRegions(exercises), [exercises])
@@ -507,14 +505,9 @@ export default function App() {
                     {selectedExercise.notes && <p className="exercise-notes">{selectedExercise.notes}</p>}
 
                     {selectedExercise.squeezeCue?.trim() && (
-                      <button
-                        type="button"
-                        className={`squeeze-cue-button${squeezeCueExpanded ? ' expanded' : ''}`}
-                        aria-expanded={squeezeCueExpanded}
-                        onClick={() => setSqueezeCueExpanded((current) => !current)}
-                      >
+                      <p className="squeeze-cue-button expanded">
                         <strong>Squeeze — </strong>{selectedExercise.squeezeCue}
-                      </button>
+                      </p>
                     )}
 
                     <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>

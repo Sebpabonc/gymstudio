@@ -3915,11 +3915,11 @@ body {
   text-align: left;
 }
 
-.planned-squeeze-cue:not(.expanded),
-.squeeze-cue-button:not(.expanded) {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.planned-squeeze-cue,
+.squeeze-cue-button {
+  margin: 0;
+  white-space: normal;
+  line-height: 1.45;
 }
 
 .planned-squeeze-cue strong,
@@ -4251,4 +4251,276 @@ body {
   align-items: flex-start;
   height: auto;
   min-width: 0;
+}
+
+/* ------------------------------------------------------------------
+   Hierarchy mix (PO 2026-10-04): between the original nested boxes and the flat
+   breathing-room layout. Three readable layers:
+   1) day / block panels  2) exercise cards  3) inner panels inside an open card.
+   ------------------------------------------------------------------ */
+.training-block-card,
+.day-plan-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+
+.day-plan-card .day-exercises {
+  display: grid;
+  gap: 10px;
+}
+
+/* Layer 2: exercise cards float slightly above the panel. */
+.day-plan-card .planned-exercise-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--bg-soft);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.day-plan-card .planned-exercise-card:not(.collapsed) {
+  border-color: rgba(201, 156, 161, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(201, 156, 161, 0.12);
+}
+
+/* Supersets: a tinted group box holding its cards. */
+.day-plan-card .superset-group {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(201, 156, 161, 0.28);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(141, 94, 99, 0.14) 0%, rgba(141, 94, 99, 0.05) 100%);
+}
+
+/* Layer 3: inner panels inside an open card. */
+.planned-exercise-card .planned-squeeze-cue {
+  padding: 10px 12px;
+  border: 1px solid rgba(214, 170, 92, 0.35);
+  border-radius: 12px;
+  background: rgba(214, 170, 92, 0.1);
+  text-align: left;
+}
+
+.planned-exercise-card .planned-set-section,
+.planned-exercise-card .exercise-detail-row {
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.planned-exercise-card .exercise-detail-row + .exercise-detail-row {
+  margin-top: -2px;
+}
+
+/* Set rows inside the set panel: dividers instead of another box level. */
+.planned-set-section .planned-set-row {
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+}
+
+.planned-set-section .planned-set-row:first-of-type {
+  border-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-plan-card .planned-exercise-card {
+    transition: none;
+  }
+}
+
+/* Set rows must fit inside the set panel at 375 px: flexible stepper column. */
+.planned-set-section .planned-set-row,
+.planned-set-section .planned-set-column-headers {
+  grid-template-columns: 20px minmax(34px, 44px) minmax(0, 1fr) 46px 44px;
+  gap: 4px;
+}
+
+.planned-set-section .set-stepper {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  gap: 3px;
+  min-width: 0;
+}
+
+.planned-set-section .set-stepper input,
+.planned-set-section .set-reps-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.planned-set-section .planned-set-row .set-stepper .stepper-button {
+  min-width: 0;
+  width: 34px;
+}
+
+.planned-set-section .planned-set-row .complete-set-button {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 400px) {
+  .planned-exercise-card .planned-set-section {
+    padding: 8px 6px;
+  }
+
+  .planned-set-section .planned-set-row,
+  .planned-set-section .planned-set-column-headers {
+    grid-template-columns: 14px minmax(30px, 40px) minmax(0, 1fr) 42px 40px;
+    gap: 3px;
+  }
+
+  .planned-set-section .set-stepper {
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
+    gap: 2px;
+  }
+
+  .planned-set-section .planned-set-row .set-stepper .stepper-button {
+    width: 30px;
+  }
+}
+
+/* Superset logging (PO 2026-10-04: "not user friendly"): collapsible "Log rounds" panel,
+   one ✓ per round, compact rows per exercise using the same columns as the set table. */
+.superset-log-box {
+  display: grid;
+  gap: 8px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.superset-log-toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 44px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.superset-log-title {
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.superset-log-progress {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.superset-log-body {
+  display: grid;
+  gap: 8px;
+  padding: 0 6px 6px 0;
+}
+
+.superset-round-columns,
+.superset-round-row {
+  display: grid;
+  grid-template-columns: 24px minmax(34px, 48px) minmax(0, 1fr) 46px;
+  align-items: center;
+  gap: 4px;
+}
+
+.superset-round-columns span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  text-align: center;
+}
+
+.superset-round {
+  display: grid;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.superset-round.completed {
+  opacity: 0.6;
+}
+
+.superset-round-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.superset-round-label {
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.superset-round-code {
+  color: var(--nav-active);
+  font-weight: 800;
+  font-size: 0.74rem;
+}
+
+.superset-round-row .previous-set-value {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.superset-round-row .set-stepper {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  gap: 3px;
+  min-width: 0;
+}
+
+.superset-round-row .set-stepper .stepper-button {
+  min-width: 0;
+  width: 34px;
+}
+
+.superset-round-row .set-stepper input,
+.superset-round-row .set-reps-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.superset-notes summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--muted-strong);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.superset-notes .planned-notes-field {
+  margin-top: 6px;
+}
+
+@media (max-width: 400px) {
+  .superset-round-columns,
+  .superset-round-row {
+    grid-template-columns: 22px minmax(30px, 40px) minmax(0, 1fr) 42px;
+    gap: 3px;
+  }
+
+  .superset-round-row .set-stepper {
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
+  }
+
+  .superset-round-row .set-stepper .stepper-button {
+    width: 30px;
+  }
 }
