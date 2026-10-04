@@ -4524,3 +4524,25 @@ body {
     width: 30px;
   }
 }
+
+/* #143: while a modal sheet is open (session summary, block chooser, Ask AI), hide the floating
+   dock and rest pill so they never cover or intercept the sheet's buttons. */
+body:has([aria-modal='true']) .bottom-tab-bar,
+body:has([aria-modal='true']) .rest-timer-pill {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* #147: stepper buttons at least 40 px wide on small phones. */
+@media (max-width: 400px) {
+  .planned-set-section .set-stepper,
+  .superset-round-row .set-stepper {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+  }
+
+  .planned-set-section .planned-set-row .set-stepper .stepper-button,
+  .superset-round-row .set-stepper .stepper-button {
+    width: 40px;
+  }
+}
