@@ -8,7 +8,7 @@
   PRs is your job (after CI is green and your review passes). Ask him only for
   product decisions and actions that need his own login.
 - Communicate with Sebas in the language he writes in. Everything in the repo
-  (app UI, content, docs, issues, PRs) is in English.
+  (content, docs, issues, PRs) is in English; the app UI is bilingual EN/ES via `src/i18n/` (both dictionaries must have the same keys).
 - Before starting work, check `git status` and that you are not on `main`.
 
 - When Sebas says **"QAer"**: run the QA agent defined in `.claude/agents/qaer.md` against the
