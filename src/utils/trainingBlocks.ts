@@ -23,8 +23,15 @@ function sortedBlocks(blocks: TrainingBlock[]) {
 export type TrainingBlockDateStatus = 'Current' | 'Upcoming' | 'Completed'
 
 export function formatBlockMethod(method: string) {
-  const label = method.replace(/[-_]+/g, ' ').trim().toLowerCase()
-  return label ? `${label[0].toUpperCase()}${label.slice(1)}` : ''
+  const words = method
+    .replace(/[-_]+/g, ' ')
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+  if (!words[0]) return ''
+  return words
+    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
+    .join(' ')
 }
 
 export function trainingBlockDateStatus(block: TrainingBlock, today: string | Date = new Date()): TrainingBlockDateStatus {
