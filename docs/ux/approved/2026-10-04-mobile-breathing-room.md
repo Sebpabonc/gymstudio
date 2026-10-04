@@ -1,6 +1,6 @@
 # Mobile breathing room: a roomier, calmer phone UI (2026-10-04)
 
-**Author:** UXer · **Status:** Proposal, waiting for a PO decision ·
+**Author:** UXer · **Status:** Approved with changes (see PO decisions) ·
 **Mockups:** [`2026-10-04-mobile-breathing-room-mockups.html`](./2026-10-04-mobile-breathing-room-mockups.html)
 
 > Proposal only. Nothing here is committed work until Sebas approves it. This proposal keeps the
@@ -8,6 +8,15 @@
 > icon dock) from [`approved/2026-10-04-header-and-tabbar.md`](../approved/2026-10-04-header-and-tabbar.md).
 > It builds on the approved audit ([`approved/2026-10-04-ux-audit.md`](../approved/2026-10-04-ux-audit.md)),
 > mainly P1 (faster set entry) and the touch-target item (#9). It does not add or remove information.
+
+## PO decisions (Sebas, 2026-10-04): approved with changes
+1. **Day selector:** D1–D6 buttons with the full day name written below (option A).
+2. **Exercise list: hybrid.** Keep a card per exercise that still expands and collapses, but only **one level of boxes**. Inside the card there are no nested bordered boxes; use spacing and dividers instead. Supersets use the side rail, not a box around the cards. Collapsible sections inside the expanded card (posture tips, progress) keep the +/− control.
+3. **Font size: keep the current type scale.** Do NOT apply the proposed type tokens (§6 type scale, §7 font changes). Exception (functional bug, #113): form controls are at least 16 px so iOS does not zoom.
+4. **Expanded exercise:** the set table comes first. The Squeeze cue is shown as one line (tap to expand). Tips, history and Ask AI are rows underneath.
+5. **"Previous" column** in the set table (last session's weight × reps): yes.
+6. **Chips:** keep the descriptive chips (technique, angle, muscle) as they are. No conversion to plain text.
+7. **Full screen everywhere (added by the PO):** on the web the app must fill the whole screen at every width, with no framed phone mockup on desktop. Backgrounds, header and dock span the viewport; on wide screens the content column is centred with a max width for readability.
 
 ## 1. PO request
 
