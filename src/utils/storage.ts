@@ -15,6 +15,7 @@ const WEIGHT_TARGETS_KEY = 'gym-studio.weight-targets'
 const ASK_EXERCISE_AI_CONSENT_KEY = 'gym-studio.ai-consent.ask-exercise'
 const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
+const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
 
 export type SyncWorkoutEntry = WorkoutEntry & {
@@ -52,7 +53,7 @@ function signalWorkoutHistorySaved() {
 
 const GUEST_CLAIMED_KEY = 'gym-studio.guest-claimed'
 const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
-const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY])
+const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY, LANGUAGE_KEY])
 
 let storageNamespace: string | null = null
 
@@ -225,6 +226,24 @@ export function setLayoutMode(mode: LayoutMode) {
   }
 }
 
+/** Device-level language preference; null until the user picks one. */
+export function getLanguage(): 'en' | 'es' | null {
+  try {
+    const value = localStorage.getItem(storageKey(LANGUAGE_KEY))
+    return value === 'en' || value === 'es' ? value : null
+  } catch {
+    return null
+  }
+}
+
+export function setLanguage(language: 'en' | 'es') {
+  try {
+    localStorage.setItem(storageKey(LANGUAGE_KEY), language)
+  } catch {
+    // The choice just isn't remembered when storage is unavailable.
+  }
+}
+
 export function hasDismissedWelcome() {
   return localStorage.getItem(storageKey(WELCOME_DISMISSED_KEY)) === 'true'
 }
@@ -275,6 +294,7 @@ type TrainingBlockRow = {
 type CatalogueRow = {
   id: string
   name_en: string
+  name_es?: string | null
   primary_muscle: string
   body_region: string | null
   primary_muscles: string[] | null
@@ -289,6 +309,7 @@ type CatalogueExercise = Pick<
   Exercise,
   | 'id'
   | 'name'
+  | 'nameEs'
   | 'primaryMuscle'
   | 'secondaryMuscle'
   | 'bodyRegion'
@@ -323,8 +344,9 @@ export function normalizeExerciseName(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-export function getExerciseDisplayName(value: string | Exercise) {
-  return typeof value === 'string' ? value : value.name
+export function getExerciseDisplayName(value: string | Exercise, language: 'en' | 'es' = 'en') {
+  if (typeof value === 'string') return value
+  return language === 'es' && value.nameEs?.trim() ? value.nameEs : value.name
 }
 
 export function mapTrainingBlockRows(rows: unknown[]): TrainingBlock[] {
@@ -451,6 +473,7 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
     normalized.set(key, {
       id: exercise.id || current?.id || key,
       name: exercise.name,
+      nameEs: exercise.nameEs ?? current?.nameEs,
       primaryMuscle: exercise.primaryMuscle || current?.primaryMuscle || 'Other',
       secondaryMuscle: exercise.secondaryMuscle ?? current?.secondaryMuscle,
       bodyRegion: exercise.bodyRegion ?? current?.bodyRegion,
@@ -479,6 +502,7 @@ function loadCatalogueCache(): CatalogueCache | null {
       exercises: parsed.exercises.map((exercise) => ({
         id: exercise.id,
         name: exercise.name,
+        nameEs: exercise.nameEs,
         primaryMuscle: exercise.primaryMuscle,
         secondaryMuscle: exercise.secondaryMuscle,
         bodyRegion: exercise.bodyRegion,
@@ -503,7 +527,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
     const { data, error } = await supabaseClient
       .from('exercises')
       .select(
-        'id, name_en, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, squeeze_cue, aliases'
+        'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, squeeze_cue, aliases'
       )
       .eq('is_active', true)
       .order('name_en')
@@ -517,6 +541,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
       return {
         id: row.id,
         name: row.name_en,
+        nameEs: row.name_es ?? undefined,
         primaryMuscle: row.primary_muscles?.[0] ?? row.primary_muscle,
         secondaryMuscle: row.secondary_muscles?.[0],
         bodyRegion: row.body_region ?? undefined,
@@ -551,6 +576,7 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
         exercises: catalogue.exercises.map((exercise) => ({
           id: exercise.id,
           name: exercise.name,
+          nameEs: exercise.nameEs,
           primaryMuscle: exercise.primaryMuscle,
           secondaryMuscle: exercise.secondaryMuscle,
           bodyRegion: exercise.bodyRegion,
@@ -809,3 +835,4 @@ export function consumeWeightTarget(exerciseId: string, sets: { weight: number }
   if (!target || !isTargetMet(target, sets)) return targets
   return removeWeightTarget(exerciseId)
 }
+export const mergeExercisesForTest = mergeExercises

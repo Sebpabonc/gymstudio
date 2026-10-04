@@ -28,6 +28,7 @@ describe('askExercise', () => {
         feature: 'ask_exercise',
         exerciseId: 'barbell-bench-press',
         question: 'Where should I feel this?',
+        language: 'en',
       },
     })
   })

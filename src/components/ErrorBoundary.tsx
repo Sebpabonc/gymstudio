@@ -1,15 +1,18 @@
 import React from 'react'
+import { getLanguage } from '../utils/storage'
+import { createTranslator, detectLanguage } from '../i18n/translate'
 import { isChunkLoadError, reloadOnceForChunkError } from '../utils/chunkReload'
 
 type State = { hasError: boolean }
 
 export function ErrorFallback() {
+  const t = createTranslator(getLanguage() ?? detectLanguage())
   return (
     <div role="alert" style={{ padding: '2rem 1rem', textAlign: 'center' }}>
-      <h1>Something went wrong</h1>
-      <p>The app could not be displayed. Reloading usually fixes it.</p>
+      <h1>{t('error.title')}</h1>
+      <p>{t('error.body')}</p>
       <button type="button" onClick={() => window.location.reload()}>
-        Reload app
+        {t('error.reload')}
       </button>
     </div>
   )

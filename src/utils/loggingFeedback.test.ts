@@ -77,6 +77,12 @@ describe('logging feedback', () => {
       volume: 275,
       prs: [{ exerciseId: 'press', badges: ['weight', 'reps'] }],
     })
+    expect(createSessionSummary([logged], 90_000, history, [], 'es')).toEqual({
+      duration: '2 min',
+      sets: 2,
+      volume: 275,
+      prs: [{ exerciseId: 'press', badges: ['weight', 'reps'] }],
+    })
   })
 
   it('does not carry a same-date PR across different workout days', () => {

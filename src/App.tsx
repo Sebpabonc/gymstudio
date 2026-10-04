@@ -27,6 +27,7 @@ import {
   getLayoutMode,
   setLayoutMode,
 } from './utils/storage'
+import { formatShortDate, TranslationKey, useT } from './i18n'
 import { RestTimerState, startRestTimer } from './utils/restTimer'
 import { summarizeCompletedEntry } from './utils/completedExercises'
 import {
@@ -48,27 +49,6 @@ const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
 const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
 
-const uiText = {
-  searchLabel: 'Search exercise',
-  searchPlaceholder: 'Bench press, squat, row...',
-  exercise: 'Exercise',
-  today: 'Today',
-  postureTips: 'Posture tips',
-  lastMax: 'Last max',
-  lastVolume: 'Last volume',
-  previousPerformance: 'Previous performance',
-  trackTitle: 'Track it as you go',
-  notes: 'Notes',
-  notesPlaceholder: 'How did it feel? Any adjustments?',
-  saveWorkout: 'Log workout',
-  progress: 'Progress',
-  noPrevious: 'No previous workout recorded yet.',
-  addSet: '+ Add set',
-  remove: 'Remove',
-  noTrend: 'Your trend will appear here as you log workouts.',
-  emptyState: 'Select an exercise to begin.',
-} as const
-
 function createSet(reps = 8, weight = 0): WorkoutSet {
   return {
     id:
@@ -78,13 +58,6 @@ function createSet(reps = 8, weight = 0): WorkoutSet {
     reps,
     weight,
   }
-}
-
-function formatDate(value: string) {
-  return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  })
 }
 
 function normalizeExerciseTip(tip: string | ExerciseTip) {
@@ -126,21 +99,21 @@ export default function App() {
   }
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
-  const text = uiText
+  const { t, language, setLanguage } = useT()
 
-  const restLabel = useRef('Rest')
+  const restLabel = useRef(t('rest.label'))
   const updateRestTimer = useCallback((timer: RestTimerState | null) => {
     saveRestTimerState(timer)
     setRestTimer(timer)
     void syncRestTimerActivity(timer, restLabel.current, false)
   }, [])
   const startRest = useCallback((durationSeconds: number, label?: string) => {
-    restLabel.current = label || 'Rest'
+    restLabel.current = label || t('rest.label')
     const timer = startRestTimer(durationSeconds)
     saveRestTimerState(timer)
     setRestTimer(timer)
     void syncRestTimerActivity(timer, restLabel.current, true)
-  }, [])
+  }, [t])
 
   useEffect(() => {
     const sentinel = headerSentinelRef.current
@@ -305,7 +278,7 @@ export default function App() {
     const validSets = filterLoggableSets(draftSets, selectedExercise.equipment)
 
     if (validSets.length === 0) {
-      setSaveError('Enter at least one set')
+      setSaveError(t('exercises.enterOneSet'))
       return
     }
 
@@ -325,7 +298,7 @@ export default function App() {
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    setSaveConfirmation(`Logged · ${summarizeCompletedEntry(nextEntry)}`)
+    setSaveConfirmation(t('exercises.logged', { summary: summarizeCompletedEntry(nextEntry) }))
     setDraftSets([createSet(8, 0), createSet(8, 0)])
     setCompletedSets([false, false])
     setSetWeightTouched([false, false])
@@ -340,13 +313,31 @@ export default function App() {
           <div className={`brand-bar${headerCollapsed ? ' collapsed' : ''}`}>
             <span className="brand-bar-title" aria-hidden="true">
               <span className="brand-bar-wordmark">Gym Studio</span>
-              <span className="brand-bar-screen">{getNavigationTitle(activeTab)}</span>
+              <span className="brand-bar-screen">{getNavigationTitle(activeTab, t)}</span>
             </span>
             <span className="brand-bar-actions">
-            <span className="layout-toggle" role="group" aria-label="Layout">
+            <span className="layout-toggle language-toggle" role="group" aria-label={t('lang.label')}>
               <button
                 type="button"
-                aria-label="Boxes layout"
+                aria-label={t('lang.en')}
+                aria-pressed={language === 'en'}
+                onClick={() => setLanguage('en')}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                aria-label={t('lang.es')}
+                aria-pressed={language === 'es'}
+                onClick={() => setLanguage('es')}
+              >
+                ES
+              </button>
+            </span>
+            <span className="layout-toggle" role="group" aria-label={t('layout.label')}>
+              <button
+                type="button"
+                aria-label={t('layout.boxes')}
                 aria-pressed={layoutMode === 'boxes'}
                 onClick={() => chooseLayoutMode('boxes')}
               >
@@ -354,7 +345,7 @@ export default function App() {
               </button>
               <button
                 type="button"
-                aria-label="Sheet layout"
+                aria-label={t('layout.sheet')}
                 aria-pressed={layoutMode === 'sheet'}
                 onClick={() => chooseLayoutMode('sheet')}
               >
@@ -364,25 +355,25 @@ export default function App() {
             <span
               className={`sync-indicator ${status === 'signed-in' ? syncStatus : demoMode ? 'demo' : 'local'}`}
               role="status"
-              aria-label={status === 'signed-in' ? `Workout sync: ${syncStatus}` : demoMode ? 'Demo data' : 'Local workout data'}
+              aria-label={status === 'signed-in' ? t('sync.aria.signedIn', { status: t(`sync.${syncStatus}`) }) : demoMode ? t('sync.aria.demo') : t('sync.aria.local')}
             />
             </span>
           </div>
           <header className={`brand-header${headerCollapsed ? ' collapsed' : ''}`}>
-            <span className="brand-tagline" aria-hidden="true">Train with intent</span>
+            <span className="brand-tagline" aria-hidden="true">{t('header.tagline')}</span>
             <span className="brand-wordmark" aria-hidden="true">Gym Studio</span>
-            <h1>{getNavigationTitle(activeTab)}</h1>
+            <h1>{getNavigationTitle(activeTab, t)}</h1>
           </header>
           <div className="screen-surface">
           {activeTab === 'exercises' && (
-            <div className="exercise-mode-switch" role="group" aria-label="Exercise tools">
+            <div className="exercise-mode-switch" role="group" aria-label={t('exercises.tools')}>
               <button
                 type="button"
                 className={exerciseMode === 'lookup' ? 'active' : ''}
                 aria-pressed={exerciseMode === 'lookup'}
                 onClick={() => setExerciseMode('lookup')}
               >
-                Find an exercise
+                {t('exercises.find')}
               </button>
               <button
                 type="button"
@@ -390,19 +381,19 @@ export default function App() {
                 aria-pressed={exerciseMode === 'custom'}
                 onClick={() => setExerciseMode('custom')}
               >
-                Build a custom day
+                {t('exercises.custom')}
               </button>
             </div>
           )}
           {activeTab === 'you' ? (
             demoMode ? (
               <section className="card account-screen">
-                <h2>Demo mode</h2>
-                <p className="account-message">Demo data — not your real history.</p>
-                <button type="button" className="secondary-button" onClick={exitDemoMode}>Exit demo</button>
+                <h2>{t('demo.title')}</h2>
+                <p className="account-message">{t('demo.message')}</p>
+                <button type="button" className="secondary-button" onClick={exitDemoMode}>{t('demo.exit')}</button>
               </section>
             ) : (
-              <Suspense fallback={<section className="card account-screen">Loading account…</section>}>
+              <Suspense fallback={<section className="card account-screen">{t('account.loading')}</section>}>
                 {status === 'signed-in'
                   ? <ProfileScreen onClose={() => setActiveTab('today')} />
                   : <LoginScreen onClose={() => setActiveTab('today')} />}
@@ -411,10 +402,10 @@ export default function App() {
           ) : activeTab === 'progress' ? (
             demoMode && !demoHistoryReady ? (
               <section className="card" aria-live="polite">
-                <p className="empty-state">Loading demo history…</p>
+                <p className="empty-state">{t('demo.loadingHistory')}</p>
               </section>
             ) : (
-              <Suspense fallback={<section className="card">Loading progress…</section>}>
+              <Suspense fallback={<section className="card">{t('app.loadingProgress')}</section>}>
                 <ProgressScreen
                   entries={history}
                   exercises={exercises}
@@ -432,17 +423,17 @@ export default function App() {
           ) : activeTab === 'today' ? (
             demoMode && !demoHistoryReady ? (
               <section className="card" aria-live="polite">
-                <p className="empty-state">Loading demo history…</p>
+                <p className="empty-state">{t('demo.loadingHistory')}</p>
               </section>
             ) : (
               <>
                 {showWelcome && (
                   <section className="card welcome-card" aria-labelledby="welcome-title">
-                    <h2 id="welcome-title">Welcome to GymStudio</h2>
+                    <h2 id="welcome-title">{t('welcome.title')}</h2>
                     <ul>
-                      <li>Follow a training plan built around your week.</li>
-                      <li>Log sets, reps, and weight as you train.</li>
-                      <li>Track your workouts and progress over time.</li>
+                      <li>{t('welcome.plan')}</li>
+                      <li>{t('welcome.log')}</li>
+                      <li>{t('welcome.track')}</li>
                     </ul>
                     <div className="welcome-actions">
                       <button
@@ -453,9 +444,9 @@ export default function App() {
                           setShowWelcome(false)
                         }}
                       >
-                        Got it
+                        {t('welcome.gotIt')}
                       </button>
-                      {!demoMode && <a className="secondary-button" href="?demo=1">Try the demo</a>}
+                      {!demoMode && <a className="secondary-button" href="?demo=1">{t('welcome.demo')}</a>}
                     </div>
                   </section>
                 )}
@@ -467,8 +458,8 @@ export default function App() {
           ) : (
             <>
               <section className="card search-panel">
-                <label className="field-label" htmlFor="exercise-search">{text.searchLabel}</label>
-                <div className="region-chips" role="group" aria-label="Body region">
+                <label className="field-label" htmlFor="exercise-search">{t('exercises.searchLabel')}</label>
+                <div className="region-chips" role="group" aria-label={t('exercises.bodyRegion')}>
                   {availableBodyRegions.map((region) => (
                     <button
                       key={region}
@@ -477,7 +468,7 @@ export default function App() {
                       aria-pressed={bodyRegion === region}
                       onClick={() => setBodyRegion(region)}
                     >
-                      {region}
+                      {t(`region.${region}` as TranslationKey)}
                     </button>
                   ))}
                 </div>
@@ -486,7 +477,7 @@ export default function App() {
                     id="exercise-search"
                     className="search-input"
                     type="search"
-                    placeholder={text.searchPlaceholder}
+                    placeholder={t('exercises.searchPlaceholder')}
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                   />
@@ -509,20 +500,20 @@ export default function App() {
                   <section className="card exercise-card">
                     <div className="exercise-header">
                       <div>
-                        <p className="field-label">{text.exercise}</p>
+                        <p className="field-label">{t('exercises.exercise')}</p>
                         <h2>
                           <a
                             className="exercise-image-link"
                             href={exerciseImageSearchUrl(exerciseImageQuery(selectedExercise.id, getExerciseDisplayName(selectedExercise), selectedExercise.equipment))}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label={`See ${getExerciseDisplayName(selectedExercise)} on Google Images`}
+                            aria-label={t('exercises.seeImages', { name: getExerciseDisplayName(selectedExercise, language) })}
                             onClick={(event) => {
                               event.preventDefault()
                               void openExternal(event.currentTarget.href)
                             }}
                           >
-                            {getExerciseDisplayName(selectedExercise)}
+                            {getExerciseDisplayName(selectedExercise, language)}
                             <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
                               <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
                               <circle cx="9" cy="10" r="1.6" />
@@ -536,7 +527,7 @@ export default function App() {
                     {selectedExercise.primaryMuscles !== undefined || selectedExercise.secondaryMuscles !== undefined ? (
                       <div className="muscle-groups">
                         <div className="muscle-group">
-                          <span className="field-label">Primary muscles</span>
+                          <span className="field-label">{t('exercises.primaryMuscles')}</span>
                           <div className="chip-row muscle-chip-row">
                             {(selectedExercise.primaryMuscles ?? [selectedExercise.primaryMuscle]).map((muscle) => (
                               <span key={muscle} className="chip">{muscle}</span>
@@ -544,7 +535,7 @@ export default function App() {
                           </div>
                         </div>
                         <div className="muscle-group">
-                          <span className="field-label">Secondary muscles</span>
+                          <span className="field-label">{t('exercises.secondaryMuscles')}</span>
                           <div className="chip-row muscle-chip-row">
                             {(selectedExercise.secondaryMuscles ??
                               (selectedExercise.secondaryMuscle ? [selectedExercise.secondaryMuscle] : [])
@@ -565,13 +556,13 @@ export default function App() {
 
                     {selectedExercise.squeezeCue?.trim() && (
                       <p className="squeeze-cue-button expanded">
-                        <strong>Squeeze — </strong>{selectedExercise.squeezeCue}
+                        <strong>{t('exercises.squeeze')}</strong>{selectedExercise.squeezeCue}
                       </p>
                     )}
 
                     <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
                       <div className="tips-header">
-                        <p className="field-label">{text.postureTips}</p>
+                        <p className="field-label">{t('exercises.postureTips')}</p>
                         <div className="exercise-ai-controls">
                           {selectedExerciseTips.length > 0 && (
                             <button
@@ -586,7 +577,7 @@ export default function App() {
                           )}
                           <AskExercise
                             exerciseId={selectedExercise.id}
-                            exerciseName={getExerciseDisplayName(selectedExercise)}
+                            exerciseName={getExerciseDisplayName(selectedExercise, language)}
                             onSignIn={() => setActiveTab('you')}
                           />
                         </div>
@@ -604,11 +595,11 @@ export default function App() {
 
                     <div className="summary-grid">
                       <div className="metric-card">
-                        <span>{text.lastMax}</span>
+                        <span>{t('exercises.lastMax')}</span>
                         <strong>{previousMax ? `${previousMax} kg` : '—'}</strong>
                       </div>
                       <div className="metric-card">
-                        <span>{text.lastVolume}</span>
+                        <span>{t('exercises.lastVolume')}</span>
                         <strong>{previousVolume ? `${previousVolume} kg` : '—'}</strong>
                       </div>
                     </div>
@@ -616,15 +607,15 @@ export default function App() {
 
                   <section className="card previous-card">
                     <div className="section-title-row">
-                      <h3>{text.previousPerformance}</h3>
+                      <h3>{t('exercises.previousPerformance')}</h3>
                     </div>
 
                     {previousWorkout ? (
                       <>
                         <div className="last-session-line">
-                          <span>{formatDate(previousWorkout.date)}</span>
+                          <span>{formatShortDate(language, previousWorkout.date)}</span>
                           <strong>
-                            {previousWorkout.sets.length} {previousWorkout.sets.length === 1 ? 'set' : 'sets'}
+                            {previousWorkout.sets.length} {previousWorkout.sets.length === 1 ? t('exercises.setOne') : t('exercises.setMany')}
                           </strong>
                         </div>
                         <div className="last-sets">
@@ -636,13 +627,13 @@ export default function App() {
                         </div>
                       </>
                     ) : (
-                      <p className="empty-state">{text.noPrevious}</p>
+                      <p className="empty-state">{t('exercises.noPrevious')}</p>
                     )}
                   </section>
 
                   <section className="card log-card">
                     <div className="section-title-row">
-                      <h3>{text.trackTitle}</h3>
+                      <h3>{t('exercises.trackTitle')}</h3>
                     </div>
 
                     <ExerciseSetTable
@@ -658,30 +649,30 @@ export default function App() {
 
                     <div className="action-row">
                       <button type="button" className="secondary-button" onClick={addSet}>
-                        {text.addSet}
+                        {t('exercises.addSet')}
                       </button>
                     </div>
 
-                    <label className="field-label" htmlFor="workout-notes">{text.notes}</label>
+                    <label className="field-label" htmlFor="workout-notes">{t('exercises.notes')}</label>
                     <textarea
                       id="workout-notes"
                       className="notes-input"
                       rows={3}
                       value={draftNotes}
                       onChange={(event) => setDraftNotes(event.target.value)}
-                      placeholder={text.notesPlaceholder}
+                      placeholder={t('exercises.notesPlaceholder')}
                     />
 
                     {saveError && <p role="alert" className="account-error">{saveError}</p>}
 
                     <button type="button" className="primary-button" onClick={saveWorkout}>
-                      {text.saveWorkout}
+                      {t('exercises.logWorkout')}
                     </button>
                   </section>
 
                   <section className="card progress-card">
                     <div className="section-title-row">
-                      <h3>{text.progress}</h3>
+                      <h3>{t('exercises.progress')}</h3>
                       <button
                         type="button"
                         className="toggle-button"
@@ -690,7 +681,7 @@ export default function App() {
                           setActiveTab('progress')
                         }}
                       >
-                        See full progress
+                        {t('exercises.seeFullProgress')}
                       </button>
                     </div>
 
@@ -699,28 +690,28 @@ export default function App() {
                         {progressItems.map((item) => (
                           <div className="progress-item" key={item.id}>
                             <div>
-                              <span>{formatDate(item.date)}</span>
+                              <span>{formatShortDate(language, item.date)}</span>
                               <strong>{item.maxWeight} kg</strong>
                             </div>
-                            <small>{item.totalVolume} kg volume</small>
+                            <small>{t('exercises.volumeSuffix', { value: item.totalVolume })}</small>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="empty-state">{text.noTrend}</p>
+                      <p className="empty-state">{t('exercises.noTrend')}</p>
                     )}
                   </section>
                 </>
               ) : (
                 <section className="card">
-                  <p className="empty-state">{text.emptyState}</p>
+                  <p className="empty-state">{t('exercises.empty')}</p>
                 </section>
               )}
             </>
           )}
           </div>
         </main>
-        <nav className={`bottom-tab-bar${dockHidden ? ' hidden' : ''}`} aria-label="Primary navigation">
+        <nav className={`bottom-tab-bar${dockHidden ? ' hidden' : ''}`} aria-label={t('nav.aria')}>
           {navigationTabs.map((tab) => (
             <button
               key={tab.id}
@@ -740,7 +731,7 @@ export default function App() {
               }}
             >
               <NavigationIcon name={tab.icon} />
-              <span className="visually-hidden">{tab.label}</span>
+              <span className="visually-hidden">{t(tab.labelKey)}</span>
             </button>
           ))}
         </nav>

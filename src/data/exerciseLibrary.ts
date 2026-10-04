@@ -11,6 +11,7 @@ export async function loadExerciseLibrary() {
   const exerciseLibrary: Exercise[] = catalogue.map((exercise) => ({
     id: exercise.id,
     name: exercise.name_en,
+    nameEs: exercise.name_es || undefined,
     bodyRegion: exercise.body_region,
     primaryMuscles: exercise.primary_muscles,
     secondaryMuscles: exercise.secondary_muscles,

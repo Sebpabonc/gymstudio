@@ -1,3 +1,4 @@
+import { type Language, localeFor, translate } from '../i18n/translate'
 import { WorkoutEntry } from '../types'
 import { workoutMaxWeight } from './workoutSets'
 
@@ -16,15 +17,18 @@ export function findCompletedEntry(entries: WorkoutEntry[], scope: CompletionSco
   )
 }
 
-export function summarizeCompletedEntry(entry: WorkoutEntry) {
+export function summarizeCompletedEntry(entry: WorkoutEntry, language: Language = 'en') {
   const count = entry.sets.length
   const top = workoutMaxWeight(entry.sets)
-  const base = `${count} ${count === 1 ? 'set' : 'sets'}`
-  return top > 0 ? `${base} · top ${top} kg` : base
+  const base = translate(language, count === 1 ? 'workout.set.one' : 'workout.set.other', { count })
+  return top > 0 ? translate(language, 'workout.completed.top', { sets: base, weight: top }) : base
 }
 
-export function formatLoggedTime(timestamp: number) {
-  return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+export function formatLoggedTime(timestamp: number, language: Language = 'en') {
+  return new Date(timestamp).toLocaleTimeString(localeFor(language), {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export function findNextPendingIndex(done: boolean[], currentIndex: number): number {

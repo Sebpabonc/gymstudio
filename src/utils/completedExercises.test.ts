@@ -39,6 +39,7 @@ describe('completed exercises', () => {
     expect(summarizeCompletedEntry(entry({ sets: [{ id: 'a', reps: 10, weight: 22.5 }] })))
       .toBe('1 set · top 22.5 kg')
     expect(summarizeCompletedEntry(entry({ sets: [{ id: 'a', reps: 12, weight: 0 }] }))).toBe('1 set')
+    expect(summarizeCompletedEntry(entry(), 'es')).toBe('2 series · mejor 26 kg')
   })
 
   it('picks the next pending exercise after the current one', () => {

@@ -1,4 +1,6 @@
+import { formatNumber } from '../i18n/format'
 import { Exercise, TrainingBlock } from '../types'
+import { getExerciseDisplayName } from '../utils/storage'
 import {
   DayType,
   DayTypeFilter,
@@ -8,10 +10,12 @@ import {
 } from './types'
 import {
   currentOrLatestBlock,
+  defaultProgressI18n,
   findEntryBlock,
   getDayType,
   groupExerciseSessions,
   isDeloadWeek,
+  ProgressI18n,
   sessionE1RM,
 } from './utils'
 
@@ -21,7 +25,8 @@ export function strengthTrend(
   exerciseId: string,
   today: string,
   dayType: DayTypeFilter = 'A',
-  exercises: Exercise[] = []
+  exercises: Exercise[] = [],
+  { language, t }: ProgressI18n = defaultProgressI18n
 ): StrengthTrend {
   const points: StrengthTrendPoint[] = groupExerciseSessions(entries)
     .filter((session) => session.exerciseId === exerciseId)
@@ -45,15 +50,22 @@ export function strengthTrend(
   const comparablePoints = blockPoints.filter((point) => point.dayType !== null)
   const first = comparablePoints[0]
   const latest = comparablePoints[comparablePoints.length - 1]
-  const name = exercises.find((exercise) => exercise.id === exerciseId)?.name ?? exerciseId
-  let takeaway = `${name}: not enough data for a strength trend.`
+  const exercise = exercises.find((item) => item.id === exerciseId)
+  const name = exercise ? getExerciseDisplayName(exercise, language) : exerciseId
+  let takeaway = t('progress.trend.notEnough', { exercise: name })
 
   if (latest && comparablePoints.length === 1) {
-    takeaway = `${name}: first session sets your baseline.`
+    takeaway = t('progress.trend.firstSession', { exercise: name })
   } else if (first && latest) {
     const percent = ((latest.e1rm - first.e1rm) / first.e1rm) * 100
-    const sign = percent > 0 ? '+' : ''
-    takeaway = `${name}: est. 1RM ${sign}${Math.round(percent)}% this block (${first.e1rm.toFixed(1)} → ${latest.e1rm.toFixed(1)} kg).`
+    const sign = percent > 0 ? '+' : percent < 0 ? '−' : ''
+    takeaway = t('progress.trend.blockChange', {
+      exercise: name,
+      percent: `${sign}${formatNumber(language, Math.round(percent))}`,
+      start: formatNumber(language, first.e1rm, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+      end: formatNumber(language, latest.e1rm, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+      unit: t('progress.unit.kg'),
+    })
   } else if (!comparablePoints.length && block) {
     const previousTrend = [...blocks]
       .sort((a, b) => b.startDate.localeCompare(a.startDate))
@@ -69,8 +81,13 @@ export function strengthTrend(
       const previousFirst = previousTrend.points[0]
       const previousLatest = previousTrend.points[previousTrend.points.length - 1]
       const percent = ((previousLatest.e1rm - previousFirst.e1rm) / previousFirst.e1rm) * 100
-      const sign = percent > 0 ? '+' : ''
-      takeaway = `${name}: Not in Block ${block.number} · last trend ${sign}${Math.round(percent)}% in Block ${previousTrend.block.number}.`
+      const sign = percent > 0 ? '+' : percent < 0 ? '−' : ''
+      takeaway = t('progress.trend.previousBlock', {
+        exercise: name,
+        currentBlock: block.number,
+        percent: `${sign}${formatNumber(language, Math.round(percent))}`,
+        previousBlock: previousTrend.block.number,
+      })
     }
   }
 
@@ -87,7 +104,8 @@ export function getStrengthTrendPoints(
   blocks: TrainingBlock[],
   exerciseId: string,
   dayType: DayType | 'all' = 'A',
-  exercises: Exercise[] = []
+  exercises: Exercise[] = [],
+  i18n: ProgressI18n = defaultProgressI18n
 ) {
-  return strengthTrend(entries, blocks, exerciseId, '9999-12-31', dayType, exercises).points
+  return strengthTrend(entries, blocks, exerciseId, '9999-12-31', dayType, exercises, i18n).points
 }

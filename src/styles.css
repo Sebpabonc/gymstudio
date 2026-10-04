@@ -4900,3 +4900,26 @@ body:has([aria-modal='true']) .rest-timer-pill {
 a.planned-exercise-main-name {
   font-weight: 700;
 }
+
+/* EN | ES language toggle: same glass pill as the layout toggle, with text labels. */
+.language-toggle button {
+  width: 36px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 400px) {
+  .brand-bar-actions {
+    gap: 6px;
+  }
+
+  .language-toggle button {
+    width: 32px;
+  }
+
+  .layout-toggle:not(.language-toggle) button {
+    width: 38px;
+  }
+}

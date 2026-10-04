@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { createTranslator } from './i18n'
 import { getNavigationTitle, navigationTabs } from './navigation'
 
 describe('primary navigation', () => {
@@ -15,5 +16,10 @@ describe('primary navigation', () => {
     for (const tab of navigationTabs) {
       expect(getNavigationTitle(tab.id)).toBe(tab.label)
     }
+  })
+
+  it('translates the header title', () => {
+    const t = createTranslator('es')
+    expect(navigationTabs.map((tab) => getNavigationTitle(tab.id, t))).toEqual(['Hoy', 'Ejercicios', 'Progreso', 'Tú'])
   })
 })

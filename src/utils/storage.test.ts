@@ -26,6 +26,8 @@ import {
   hasGuestWorkoutData,
   isGuestDataClaimed,
   moveGuestDataToAccount,
+  getLanguage,
+  setLanguage,
 } from './storage'
 
 const supabaseMock = vi.hoisted(() => {
@@ -81,6 +83,31 @@ beforeEach(() => {
   supabaseMock.from.mockClear()
 })
 
+describe('language preference', () => {
+  afterEach(() => setStorageNamespace(null))
+
+  it('is null until chosen, then persists and ignores invalid values', () => {
+    expect(getLanguage()).toBeNull()
+    setLanguage('es')
+    expect(getLanguage()).toBe('es')
+    localStorage.setItem('gym-studio.language', 'fr')
+    expect(getLanguage()).toBeNull()
+  })
+
+  it('is shared across accounts on the device', () => {
+    setLanguage('es')
+    setStorageNamespace('user-1')
+    expect(storageKey('gym-studio.language')).toBe('gym-studio.language')
+    expect(getLanguage()).toBe('es')
+  })
+})
+
+describe('bundled catalogue Spanish names', () => {
+  it('maps name_es onto nameEs', () => {
+    expect(exerciseLibrary.every((exercise) => exercise.nameEs)).toBe(true)
+  })
+})
+
 describe('normalizeExerciseName', () => {
   it('turns names into lowercase dash-separated keys', () => {
     expect(normalizeExerciseName('  Dumbbell Press (Neutral Grip, 45°) ')).toBe('dumbbell-press-neutral-grip-45')
@@ -88,7 +115,7 @@ describe('normalizeExerciseName', () => {
 })
 
 describe('getExerciseDisplayName', () => {
-  it('always returns the English exercise name', () => {
+  it('returns the localized exercise name when available', () => {
     expect(getExerciseDisplayName('Lat Pulldown')).toBe('Lat Pulldown')
     expect(getExerciseDisplayName('Romanian Deadlift')).toBe('Romanian Deadlift')
     expect(
@@ -96,6 +123,12 @@ describe('getExerciseDisplayName', () => {
         { id: 'catalogue-exercise', name: 'Barbell Row', primaryMuscle: 'Back' }
       )
     ).toBe('Barbell Row')
+    expect(
+      getExerciseDisplayName(
+        { id: 'catalogue-exercise', name: 'Barbell Row', nameEs: 'Remo con barra', primaryMuscle: 'Back' },
+        'es'
+      )
+    ).toBe('Remo con barra')
   })
 
   it('uses the name field when no translation is available', () => {
@@ -239,6 +272,7 @@ describe('remote catalogue', () => {
     {
       id: 'romanian-deadlift',
       name_en: 'Romanian Deadlift (Barbell)',
+      name_es: 'Peso muerto rumano (barra)',
       body_region: 'Legs',
       primary_muscle: 'Hamstrings',
       primary_muscles: ['Hamstrings', 'Glutes'],
@@ -257,6 +291,7 @@ describe('remote catalogue', () => {
     {
       id: 'lat-pulldown',
       name_en: 'Lat Pulldown (Wide Grip)',
+      name_es: null,
       body_region: 'Back',
       primary_muscle: 'Lats',
       primary_muscles: ['Lats'],
@@ -276,12 +311,13 @@ describe('remote catalogue', () => {
 
     expect(supabaseMock.from).toHaveBeenCalledWith('exercises')
     expect(supabaseMock.select).toHaveBeenCalledWith(
-      'id, name_en, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, squeeze_cue, aliases'
+      'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, squeeze_cue, aliases'
     )
     expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
     expect(supabaseMock.order).toHaveBeenCalledWith('name_en')
     expect(deadlift).toMatchObject({
       name: 'Romanian Deadlift (Barbell)',
+      nameEs: 'Peso muerto rumano (barra)',
       primaryMuscle: 'Hamstrings',
       secondaryMuscle: 'Glutes',
       bodyRegion: 'Legs',
@@ -292,6 +328,7 @@ describe('remote catalogue', () => {
       squeezeCue: 'Squeeze the target muscle at lockout.',
     })
     expect(catalogue?.find((exercise) => exercise.id === 'lat-pulldown')?.squeezeCue).toBeUndefined()
+    expect(catalogue?.find((exercise) => exercise.id === 'lat-pulldown')?.nameEs).toBeUndefined()
     expect(deadlift?.notes).toBeUndefined()
     expect(deadlift?.tips).toBeUndefined()
   })
@@ -705,5 +742,16 @@ describe('exercise library data', () => {
       expect(exercise.name.trim()).not.toBe('')
       expect(exercise.primaryMuscle.trim()).not.toBe('')
     }
+  })
+})
+
+describe('catalogue merge keeps Spanish names', () => {
+  it('keeps nameEs from the bundled catalogue when an old cache entry has none', async () => {
+    const { mergeExercisesForTest } = await import('./storage')
+    const merged = mergeExercisesForTest(
+      [{ id: 'barbell-bench-press', name: 'Barbell Bench Press', nameEs: 'Press de banca con barra', primaryMuscle: 'Chest', tips: [] }],
+      [{ id: 'barbell-bench-press', name: 'Barbell Bench Press', primaryMuscle: 'Chest' }]
+    )
+    expect(merged[0].nameEs).toBe('Press de banca con barra')
   })
 })

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { mapAiGatewayError, summariseSession } from '../ai/gateway'
 import type { AuthStatus } from '../auth/AuthProvider'
 import AskExercise from './AskExercise'
+import { formatNumber, formatShortDate, formatWeekdayDate, useT } from '../i18n'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
 import { openExternal } from '../native/openExternal'
 import AiConsentPrompt from './AiConsentPrompt'
@@ -110,6 +111,8 @@ function SteppedNumberInput({
   step,
   min,
   label,
+  decreaseLabel,
+  increaseLabel,
   onChange,
   onFocus,
   onClick,
@@ -120,6 +123,8 @@ function SteppedNumberInput({
   step: number
   min: number
   label: string
+  decreaseLabel: string
+  increaseLabel: string
   onChange: (value: string) => void
   onFocus?: React.FocusEventHandler<HTMLInputElement>
   onClick?: React.MouseEventHandler<HTMLInputElement>
@@ -131,7 +136,7 @@ function SteppedNumberInput({
       <button
         type="button"
         className="stepper-button"
-        aria-label={`Decrease ${label}`}
+        aria-label={decreaseLabel}
         onClick={() => onChange(String(stepWorkoutValue(value, -1, step, min)))}
       >
         −
@@ -152,7 +157,7 @@ function SteppedNumberInput({
       <button
         type="button"
         className="stepper-button"
-        aria-label={`Increase ${label}`}
+        aria-label={increaseLabel}
         onClick={() => onChange(String(stepWorkoutValue(value, 1, step, min)))}
       >
         +
@@ -263,19 +268,19 @@ function createTipIllustration(muscle: string, variant: number) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
-const techniqueLabels: Record<NonNullable<PlanExercise['technique']>, string> = {
-  straight: 'Straight sets',
-  superset: 'Superset',
-  'drop-set': 'Drop set',
-  pyramid: 'Pyramid',
-  'reverse-pyramid': 'Reverse pyramid',
+function formatTechniqueLabel(technique: NonNullable<PlanExercise['technique']>, t: ReturnType<typeof useT>['t']) {
+  const keys: Record<NonNullable<PlanExercise['technique']>, Parameters<typeof t>[0]> = {
+    straight: 'workout.technique.straight',
+    superset: 'workout.technique.superset',
+    'drop-set': 'workout.technique.dropSet',
+    pyramid: 'workout.technique.pyramid',
+    'reverse-pyramid': 'workout.technique.reversePyramid',
+  }
+  return t(keys[technique])
 }
 
-function formatBlockStartDate(value: string) {
-  const date = new Date(`${value}T00:00:00Z`)
-  const weekday = new Intl.DateTimeFormat('en-GB', { weekday: 'short', timeZone: 'UTC' }).format(date)
-  const month = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' }).format(date)
-  return `${weekday} ${date.getUTCDate()} ${month}`
+function formatBlockStartDate(language: ReturnType<typeof useT>['language'], value: string) {
+  return formatWeekdayDate(language, `${value}T00:00:00Z`)
 }
 
 function getBlockExerciseName(exercise: BlockExercise, exercises: Exercise[]) {
@@ -293,11 +298,8 @@ function createSet(reps = 8, weight = 0): WorkoutSet {
   }
 }
 
-function formatHistoryDate(value: string) {
-  return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  })
+function formatHistoryDate(language: ReturnType<typeof useT>['language'], value: string) {
+  return formatShortDate(language, value)
 }
 
 function getTodayIsoDate() {
@@ -344,6 +346,7 @@ export default function WorkoutPlan({
   onSignIn: () => void
   onStartRest: (durationSeconds: number, label?: string) => void
 }) {
+  const { t, language, locale } = useT()
   const demoMode = isDemoMode()
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
@@ -385,20 +388,20 @@ export default function WorkoutPlan({
   const requestAiSummary = async () => {
     if (!sessionSummary || aiSummaryPending || aiSummary) return
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      setAiSummaryError(mapAiGatewayError('offline'))
+      setAiSummaryError(mapAiGatewayError('offline', language))
       return
     }
     const requestId = aiSummaryRequestId.current
     setAiSummaryPending(true)
     setAiSummaryError('')
     try {
-      const response = await summariseSession(sessionSummary.date, sessionSummary.blockId, sessionSummary.dayKey)
+      const response = await summariseSession(sessionSummary.date, sessionSummary.blockId, sessionSummary.dayKey, language)
       if (requestId !== aiSummaryRequestId.current) return
       setAiSummary(response.answer)
       setAiRemainingToday(response.remainingToday)
     } catch (requestError) {
       if (requestId !== aiSummaryRequestId.current) return
-      setAiSummaryError(requestError instanceof Error ? requestError.message : 'AI is unavailable right now. Try again.')
+      setAiSummaryError(requestError instanceof Error ? requestError.message : t('workout.ai.error.unavailable'))
     } finally {
       if (requestId === aiSummaryRequestId.current) setAiSummaryPending(false)
     }
@@ -423,7 +426,7 @@ export default function WorkoutPlan({
 
   const openAiSummary = () => {
     if (demoMode) return
-    if (status !== 'signed-in') {
+    if (authStatus !== 'signed-in') {
       onSignIn()
       return
     }
@@ -448,46 +451,58 @@ export default function WorkoutPlan({
   }, [blockSelectorOpen])
 
   const text = {
-    badge: '6-week block',
-    sets: 'Sets',
-    reps: 'Reps',
-    rest: 'Rest',
-    setLog: 'Set log',
-    progress: 'Progress',
-    comments: 'Comments',
-    noProgressHistory: 'No historical progress logged yet.',
-    ready: 'Ready',
-    posture: 'POSTURE TIPS',
-    noData: 'No logged data yet',
-    modePreset: '6-week block',
-    modeCustom: 'Make your plan',
-    customTitle: 'Make your plan',
-    customHint: 'Create and save exercises manually.',
-    customName: 'Exercise name',
-    customSets: 'Sets',
-    customReps: 'Reps',
-    customRest: 'Rest',
-    customFocus: 'Muscle',
-    customGoal: 'Goal',
-    customTip: 'Tip',
-    customAdd: 'Add exercise',
-    customLibrary: 'Pick from library',
-    customLibraryPlaceholder: 'Select an exercise',
-    customAddLibrary: 'Add from library',
-    customEmpty: 'No exercises added yet.',
-    customRemove: 'Remove',
-    customBadge: 'Manual',
-    exerciseLabel: 'Exercise',
-    calendar: 'Calendar',
-    close: 'Close',
-    calendarSelect: 'Select date',
-    calendarHistory: 'Work done on this day',
-    calendarEmpty: 'No workouts logged on this date.',
-    changeBlock: 'Change block',
-    coach: 'Coach',
-    pt: 'PT',
-    loadingBlocks: 'Loading training blocks…',
+    badge: t('workout.badge.block'),
+    sets: t('workout.label.sets'),
+    reps: t('workout.label.reps'),
+    repsShort: t('workout.label.repsShort'),
+    rest: t('workout.label.rest'),
+    progress: t('workout.label.progress'),
+    comments: t('workout.label.comments'),
+    noProgressHistory: t('workout.progress.empty'),
+    posture: t('workout.posture.title'),
+    modePreset: t('workout.mode.preset'),
+    modeCustom: t('workout.mode.custom'),
+    customTitle: t('workout.custom.title'),
+    customHint: t('workout.custom.hint'),
+    customName: t('workout.custom.name'),
+    customSets: t('workout.custom.sets'),
+    customReps: t('workout.custom.reps'),
+    customRest: t('workout.custom.rest'),
+    customFocus: t('workout.custom.focus'),
+    customGoal: t('workout.custom.goal'),
+    customTip: t('workout.custom.tip'),
+    customAdd: t('workout.custom.add'),
+    customLibrary: t('workout.custom.library'),
+    customLibraryPlaceholder: t('workout.custom.libraryPlaceholder'),
+    customAddLibrary: t('workout.custom.addLibrary'),
+    customEmpty: t('workout.custom.empty'),
+    customRemove: t('workout.custom.remove'),
+    customBadge: t('workout.custom.badge'),
+    calendar: t('workout.calendar.title'),
+    close: t('workout.action.close'),
+    calendarSelect: t('workout.calendar.selectDate'),
+    calendarHistory: t('workout.calendar.history'),
+    calendarEmpty: t('workout.calendar.empty'),
+    changeBlock: t('workout.block.change'),
+    coach: t('workout.block.coach'),
+    pt: t('workout.block.pt'),
   }
+  const setLabel = (count: number) => t(count === 1 ? 'workout.set.one' : 'workout.set.other', { count })
+  const roundWord = (count: number) => t(count === 1 ? 'workout.round.word.one' : 'workout.round.word.other')
+  const displayExerciseName = (exerciseOrName: Exercise | string) => {
+    // Plan rows store the English name; in Spanish show the catalogue's Spanish name when there is one.
+    if (typeof exerciseOrName === 'string' && language === 'es') {
+      const key = normalizeExerciseName(exerciseOrName)
+      const match = exerciseCatalog.find((item) => normalizeExerciseName(item.name) === key)
+      if (match?.nameEs?.trim()) return match.nameEs
+    }
+    return getExerciseDisplayName(exerciseOrName, language)
+  }
+  const blockStatusKey = {
+    Current: 'workout.block.status.current',
+    Upcoming: 'workout.block.status.upcoming',
+    Completed: 'workout.block.status.completed',
+  } as const
 
   const today = getTodayIsoDate()
   const activeBlock = useMemo(
@@ -603,7 +618,7 @@ export default function WorkoutPlan({
 
           return {
             id: entry.id,
-            name: exercise ? getExerciseDisplayName(exercise) : 'Unknown exercise',
+            name: exercise ? displayExerciseName(exercise) : t('workout.exercise.unknown'),
             setsCount: entry.sets.length,
             maxWeight,
             totalVolume,
@@ -614,7 +629,7 @@ export default function WorkoutPlan({
             ]),
           }
         }),
-    [exerciseCatalog, history, selectedCalendarDate]
+    [displayExerciseName, exerciseCatalog, history, selectedCalendarDate, t]
   )
 
   const latestProgressByName = useMemo(() => {
@@ -934,19 +949,22 @@ export default function WorkoutPlan({
     scope: typeof activeCompletionScope
   ) => {
     const exerciseNames = entries.map(
-      (entry) => exerciseCatalog.find((exercise) => exercise.id === entry.exerciseId)?.name ?? entry.exerciseId
+      (entry) => {
+        const exercise = exerciseCatalog.find((item) => item.id === entry.exerciseId)
+        return exercise ? displayExerciseName(exercise) : entry.exerciseId
+      }
     )
     const setCount = entries.reduce((total, entry) => total + entry.sets.length, 0)
     const recordMessages = entries.flatMap((entry) =>
       getPersonalRecordBadges(entry, nextHistory, trainingBlocks).map((badge) => {
-        if (badge === 'weight') return `New weight PR ${workoutMaxWeight(entry.sets)} kg`
-        if (badge === 'reps') return 'New rep PR'
-        return 'New e1RM PR'
+        if (badge === 'weight') return t('workout.toast.pr.weight', { weight: workoutMaxWeight(entry.sets) })
+        if (badge === 'reps') return t('workout.toast.pr.reps')
+        return t('workout.toast.pr.e1rm')
       })
     )
 
     setToast({
-      message: `${exerciseNames.join(' + ')} logged · ${setCount} ${setCount === 1 ? 'set' : 'sets'}${
+      message: `${t('workout.toast.logged', { exercises: exerciseNames.join(' + ') })} · ${setLabel(setCount)}${
         recordMessages.length ? ` · ${recordMessages.join(' · ')} 🎉` : ''
       }`,
       undoSnapshots: captureUndoSnapshots(previousHistory, entries, scope),
@@ -988,9 +1006,10 @@ export default function WorkoutPlan({
         entries,
         sessionDurationMs(sessionStartedAt.current, scopeKey, loggedAt),
         nextHistory,
-        trainingBlocks
+        trainingBlocks,
+        language
       ),
-      nextSession: nextDay ? `Day ${nextDay.position} · ${nextDay.name}` : undefined,
+      nextSession: nextDay ? t('workout.day.title', { position: nextDay.position, name: nextDay.name }) : undefined,
       date: activeCompletionScope.date,
       blockId: activeCompletionScope.blockId,
       dayKey: activeCompletionScope.dayKey,
@@ -1045,7 +1064,7 @@ export default function WorkoutPlan({
     )
 
     if (validSets.length === 0) {
-      setLogError((current) => ({ ...current, [exerciseKey]: 'Enter at least one set' }))
+      setLogError((current) => ({ ...current, [exerciseKey]: t('workout.error.enterSet') }))
       window.setTimeout(() => {
         const card = Array.from(document.querySelectorAll<HTMLElement>('[data-exercise-card]')).find(
           (element) => element.dataset.exerciseCard === sectionKey
@@ -1075,7 +1094,7 @@ export default function WorkoutPlan({
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    onStartRest(exercise.restSeconds ?? 90, getExerciseDisplayName(exercise.name))
+    onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
     showLogToast([entryToSave], storedHistory, nextHistory, activeCompletionScope)
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
     setWeightTargets(consumeWeightTarget(entryToSave.exerciseId, entryToSave.sets))
@@ -1154,7 +1173,7 @@ export default function WorkoutPlan({
     if (nextEntries.length === 0) {
       setLogError((current) => ({
         ...current,
-        ...Object.fromEntries(exercises.map((exercise) => [getPlanDraftKey(exercise.name), 'Enter at least one set'])),
+        ...Object.fromEntries(exercises.map((exercise) => [getPlanDraftKey(exercise.name), t('workout.error.enterSet')])),
       }))
       return
     }
@@ -1180,7 +1199,10 @@ export default function WorkoutPlan({
     saveWorkoutHistory(nextHistory)
     for (const entry of entriesToSave) setWeightTargets(consumeWeightTarget(entry.exerciseId, entry.sets))
     if (entriesToSave.length === exercises.length) {
-      onStartRest(exercises[exercises.length - 1]?.restSeconds ?? 90, exercises.map((item) => getExerciseDisplayName(item.name)).join(' + '))
+      onStartRest(
+        exercises[exercises.length - 1]?.restSeconds ?? 90,
+        exercises.map((item) => displayExerciseName(item.name)).join(' + ')
+      )
     }
 
     const exerciseKeys = exercises.map((exercise) => normalizeExerciseName(exercise.name))
@@ -1375,8 +1397,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         <strong>{item.maxWeight} kg</strong>
                       </div>
                       <div className="calendar-history-row muted-row">
-                        <small>{item.totalVolume} kg volume</small>
-                        <small>{item.setsCount} sets</small>
+                        <small>{t('workout.volume.value', { value: formatNumber(language, item.totalVolume) })}</small>
+                        <small>{setLabel(item.setsCount)}</small>
                       </div>
                       {item.comments ? <p>{item.comments}</p> : null}
                     </article>
@@ -1391,7 +1413,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       )}
 
       {!lockMode && (
-        <div className="plan-mode-tabs" aria-label="Planning mode">
+        <div className="plan-mode-tabs" aria-label={t('workout.mode.aria')}>
           <button
             type="button"
             className={planMode === 'preset' ? 'tab-button active' : 'tab-button'}
@@ -1411,7 +1433,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
 
       {planMode === 'preset' && activeBlock && (
         <>
-          <section className="training-block-card" aria-label="Active training block">
+          <section className="training-block-card" aria-label={t('workout.block.activeAria')}>
             <button
               type="button"
               className="training-block-header"
@@ -1420,22 +1442,23 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               aria-controls="training-block-content"
             >
               <span className="training-block-primary">
+                {/* TODO(i18n): PT will provide approved translations */}
                 <span className="training-block-name">{activeBlock.name}</span>
                 <strong className="training-block-status">
                   {trainingBlockDateStatus(activeBlock, today) === 'Current'
-                    ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
+                    ? t('workout.block.weekOf', { week: activeBlockWeek ?? 1, total: activeBlock.weeks })
                     : trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
-                      ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
-                      : 'Completed'}
+                      ? t('workout.block.starts', { date: formatBlockStartDate(language, activeBlock.startDate) })
+                      : t('workout.block.completed')}
                 </strong>
                 <span className="toggle-button expand-toggle" aria-hidden="true">
                   {blockCardExpanded ? '−' : '+'}
                 </span>
               </span>
               <span className="training-block-badges">
-                <span className="training-block-number">Block {activeBlock.number}</span>
+                <span className="training-block-number">{t('workout.block.number', { number: activeBlock.number })}</span>
                 <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
-                {pinnedBlockId === activeBlock.id && <span className="training-block-number">Pinned block</span>}
+                {pinnedBlockId === activeBlock.id && <span className="training-block-number">{t('workout.block.pinned')}</span>}
               </span>
             </button>
             <button
@@ -1448,13 +1471,14 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               {text.changeBlock}
             </button>
             <p className="training-block-origin-legend">
-              <span>Coach</span> = Designed by your coach · <span>PT</span> = Designed by the PT
+              <span>{text.coach}</span> = {t('workout.block.origin.coach')} · <span>{text.pt}</span> = {t('workout.block.origin.pt')}
             </p>
             <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
               <div className="training-block-meta">
-                <span>{blockDateRange(activeBlock)}</span>
-                <span>{formatBlockMethod(activeBlock.method)}</span>
+                <span>{blockDateRange(activeBlock, language)}</span>
+                <span>{formatBlockMethod(activeBlock.method, language)}</span>
               </div>
+              {/* TODO(i18n): PT will provide approved translations */}
               <p>{activeBlock.summary}</p>
               <button
                 type="button"
@@ -1463,7 +1487,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 aria-expanded={blockInsightsOpen}
                 aria-controls="training-block-insights"
               >
-                About this block
+                {t('workout.block.about')}
                 <span className="toggle-button expand-toggle" aria-hidden="true">
                   {blockInsightsOpen ? '−' : '+'}
                 </span>
@@ -1471,6 +1495,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
                 {activeBlock.insights.map((insight) => (
                   <section key={insight.title}>
+                    {/* TODO(i18n): PT will provide approved translations */}
                     <h5>{insight.title}</h5>
                     <p>{insight.body}</p>
                   </section>
@@ -1478,7 +1503,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               </div>
               {pinnedBlockId === activeBlock.id && (
                 <button type="button" className="secondary-button block-change-button" onClick={useDateBasedBlock}>
-                  Use date-based block
+                  {t('workout.block.useDateBased')}
                 </button>
               )}
             </div>
@@ -1493,18 +1518,18 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 onClick={(event) => event.stopPropagation()}
               >
                 <header className="block-selector-header">
-                  <h2 id="block-selector-title">Change block</h2>
+                  <h2 id="block-selector-title">{text.changeBlock}</h2>
                   <button
                     type="button"
                     className="session-summary-close"
                     onClick={() => setBlockSelectorOpen(false)}
-                    aria-label="Close block chooser"
+                    aria-label={t('workout.block.closeChooser')}
                   >
                     ×
                   </button>
                 </header>
                 <p className="block-selector-legend">
-                  <span>Coach</span> = Designed by your coach · <span>PT</span> = Designed by the PT
+                  <span>{text.coach}</span> = {t('workout.block.origin.coach')} · <span>{text.pt}</span> = {t('workout.block.origin.pt')}
                 </p>
                 <div className="block-selector-options">
                   {trainingBlocks.map((block) => (
@@ -1525,13 +1550,15 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     >
                       <span className="block-selector-option-content">
                         <span className="block-selector-option-heading">
-                          <strong>{`Block ${block.number} · ${block.name}`}</strong>
+                          {/* TODO(i18n): PT will provide approved translations */}
+                          <strong>{t('workout.block.optionTitle', { number: block.number, name: block.name })}</strong>
                           <span className="origin-badge">{block.origin === 'pt' ? text.pt : text.coach}</span>
                         </span>
-                        <small>{`${blockDateRange(block)} · ${formatBlockMethod(block.method)}`}</small>
+                        <small>{`${blockDateRange(block, language)} · ${formatBlockMethod(block.method, language)}`}</small>
+                        {/* TODO(i18n): PT will provide approved translations */}
                         <small className="block-selector-option-summary">{block.summary}</small>
                       </span>
-                      <small className="block-selector-option-status">{trainingBlockDateStatus(block, today)}</small>
+                      <small className="block-selector-option-status">{t(blockStatusKey[trainingBlockDateStatus(block, today)])}</small>
                     </button>
                   ))}
                 </div>
@@ -1543,20 +1570,24 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
 
       {planMode === 'preset' ? (
         <>
-        <div className="day-tabs" aria-label="Workout days">
+        <div className="day-tabs" aria-label={t('workout.day.tabsAria')}>
           {activeBlock?.days.map((day) => (
             <button
               key={day.key}
               type="button"
               className={day.key === (activeDay?.key ?? selectedDay) ? 'day-tab active' : 'day-tab'}
-              aria-label={`Day ${day.position} · ${day.name}${todayDay?.key === day.key ? ' · Today' : ''}`}
+              aria-label={t('workout.day.aria', {
+                position: day.position,
+                name: day.name,
+                today: todayDay?.key === day.key ? ` · ${t('workout.day.today')}` : '',
+              })}
               aria-pressed={day.key === (activeDay?.key ?? selectedDay)}
               onClick={() => {
                 setSelectedDay(day.key)
                 collapseAllExerciseSections()
               }}
             >
-              <span className="day-tab-label">{`D${day.position}`}</span>
+              <span className="day-tab-label">{t('workout.day.short', { position: day.position })}</span>
               {(() => {
                 const date = localIsoDate()
                 const done = day.exercises.filter((item) =>
@@ -1571,15 +1602,25 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 return (
                   <>
                     <span className="day-tab-progress">{`${done}/${day.exercises.length}`}</span>
-                    {todayDay?.key === day.key && <span className="day-tab-today">Today</span>}
+                    {todayDay?.key === day.key && <span className="day-tab-today">{t('workout.day.today')}</span>}
                   </>
                 )
               })()}
             </button>
           ))}
         </div>
-        {activeDay && <h2 className="selected-day-name">{`Day ${activeDay.position} · ${activeDay.name}`}</h2>}
-        {activeDay?.focus && <p className="day-focus-label">{activeDay.focus}</p>}
+        {activeDay && (
+          <>
+            {/* TODO(i18n): PT will provide approved translations */}
+            <h2 className="selected-day-name">{t('workout.day.title', { position: activeDay.position, name: activeDay.name })}</h2>
+          </>
+        )}
+        {activeDay?.focus && (
+          <>
+            {/* TODO(i18n): PT will provide approved translations */}
+            <p className="day-focus-label">{activeDay.focus}</p>
+          </>
+        )}
         </>
       ) : (
         <section className="custom-plan-builder">
@@ -1598,11 +1639,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 {exerciseCatalog
                   .slice()
                   .sort((a, b) =>
-                    getExerciseDisplayName(a).localeCompare(getExerciseDisplayName(b))
+                    displayExerciseName(a).localeCompare(displayExerciseName(b), locale)
                   )
                   .map((exercise) => (
                     <option key={exercise.id} value={exercise.id}>
-                      {getExerciseDisplayName(exercise)}
+                      {displayExerciseName(exercise)}
                     </option>
                   ))}
               </select>
@@ -1676,10 +1717,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           </button>
 
           {customPlan.length > 0 ? (
-            <div className="custom-plan-list" aria-label="Custom exercises">
+            <div className="custom-plan-list" aria-label={t('workout.custom.listAria')}>
               {customPlan.map((exercise) => (
                 <div key={`custom-${exercise.name}`} className="custom-plan-item">
-                  <span>{getExerciseDisplayName(exercise.name)}</span>
+                  <span>{displayExerciseName(exercise.name)}</span>
                   <button type="button" className="remove-set-button" onClick={() => removeCustomExercise(exercise.name)}>
                     {text.customRemove}
                   </button>
@@ -1709,11 +1750,12 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               ? draft.dropSetReps
               : Array.from({ length: setCount }, (_, index) => getDefaultDropRepTarget(exercise, index))
             const exerciseKey = normalizeExerciseName(exercise.name)
-            const displayName = getExerciseDisplayName(exercise.name)
-            const displayTitle = splitExerciseTitle(displayName)
             const libraryMatch =
               exerciseCatalog.find((item) => item.id === exercise.exerciseId) ??
               exerciseCatalog.find((item) => normalizeExerciseName(item.name) === exerciseKey)
+            const displayName =
+              language === 'es' && libraryMatch?.nameEs?.trim() ? libraryMatch.nameEs : displayExerciseName(exercise.name)
+            const displayTitle = splitExerciseTitle(displayName)
             const exerciseHistory = history
               .filter((entry) => {
                 if (exercise.exerciseId) return entry.exerciseId === exercise.exerciseId
@@ -1742,7 +1784,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               libraryMatch?.primaryMuscles ??
               (libraryMatch?.primaryMuscle ? [libraryMatch.primaryMuscle] : [])
             ).slice(0, 2)
-            const benchAngleLabel = formatBenchAngle(exercise.angleDegrees)
+            const benchAngleLabel = formatBenchAngle(exercise.angleDegrees, language)
             const isCollapsed = !!collapsedExercises[exerciseKey]
             const isProgressSectionVisible = progressSectionsVisible[exerciseKey] ?? false
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
@@ -1781,7 +1823,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         href={exerciseImageSearchUrl(exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment))}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={`See ${displayName} on Google Images`}
+                        aria-label={t('workout.exercise.imageSearch', { name: displayName })}
                         onClick={(event) => {
                           event.stopPropagation()
                           event.preventDefault()
@@ -1800,13 +1842,14 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       {completedEntry && (
                         <span className="done-badge" role="status">
                           <span aria-hidden="true">✓ </span>
-                          Done{loggedAtByExercise[completedEntry.id] ? ` · ${formatLoggedTime(loggedAtByExercise[completedEntry.id])}` : ''}
-                          <span className="done-summary"> · {summarizeCompletedEntry(completedEntry)}</span>
+                          {t('workout.status.done')}
+                          {loggedAtByExercise[completedEntry.id] ? ` · ${formatLoggedTime(loggedAtByExercise[completedEntry.id], language)}` : ''}
+                          <span className="done-summary"> · {summarizeCompletedEntry(completedEntry, language)}</span>
                         </span>
                       )}
                       {recordBadges.map((badge) => (
                         <span key={`${completedEntry?.id}-${badge}`} className="personal-record-badge">
-                          {badge === 'e1rm' ? 'e1RM' : badge === 'weight' ? 'Weight' : 'Rep'} PR
+                          {badge === 'e1rm' ? t('workout.pr.e1rm') : badge === 'weight' ? t('workout.pr.weight') : t('workout.pr.reps')}
                         </span>
                       ))}
                   </span>
@@ -1814,7 +1857,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     type="button"
                     className="toggle-button expand-toggle"
                     aria-expanded={!isCollapsed}
-                    aria-label={isCollapsed ? `Expand ${exercise.name}` : `Collapse ${exercise.name}`}
+                    aria-label={isCollapsed
+                      ? t('workout.exercise.expand', { name: displayName })
+                      : t('workout.exercise.collapse', { name: displayName })}
+                    
                     onClick={(event) => {
                       event.stopPropagation()
                       toggleExerciseCollapse(exercise.name)
@@ -1827,7 +1873,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 {!isCollapsed && (
                   <>
                     <div className="chip-row chip-row-tight">
-                      {exercise.technique && <span className="chip technique-chip">{techniqueLabels[exercise.technique]}</span>}
+                      {exercise.technique && <span className="chip technique-chip">{formatTechniqueLabel(exercise.technique, t)}</span>}
                       {benchAngleLabel && <span className="chip subtle">{benchAngleLabel}</span>}
                       {muscleChips.map((muscle, index) => (
                         <span key={`${exerciseKey}-muscle-${index}`} className={index === 0 ? 'chip' : 'chip subtle'}>
@@ -1836,13 +1882,16 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       ))}
                     </div>
                     <p className="planned-meta-line">
-                      {`${setCount} ${setCount === 1 ? 'set' : 'sets'} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} reps · ${exercise.rest} rest`}
+                      {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
                     </p>
+                    {/* TODO(i18n): PT will provide approved translations */}
                     {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
                     {libraryMatch?.squeezeCue?.trim() && (
                       <p className="planned-squeeze-cue expanded">
-                        <strong>Squeeze — </strong>{libraryMatch.squeezeCue}
+                        <strong>{t('workout.squeezeCue')} — </strong>
+                        {/* TODO(i18n): PT will provide approved translations */}
+                        {libraryMatch.squeezeCue}
                       </p>
                     )}
 
@@ -1851,7 +1900,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         <div className="planned-set-header">
                           {getAppliedTarget(exercise, exercise.exerciseId) && (
                             <span className="weight-target-chip">
-                              +{getAppliedTarget(exercise, exercise.exerciseId)?.increaseKg} kg applied
+                              {t('workout.target.applied', { value: getAppliedTarget(exercise, exercise.exerciseId)?.increaseKg ?? 0 })}
                             </span>
                           )}
                           <button
@@ -1860,16 +1909,16 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             disabled={!(Number(setWeights[0]) > 0)}
                             onClick={() => copyPlanSetOneWeight(exercise, setCount)}
                           >
-                            Same as set 1
+                            {t('workout.set.sameAsFirst')}
                           </button>
                         </div>
 
                         <div className="planned-set-grid">
                           <div className="planned-set-column-headers" aria-hidden="true">
-                            <span>Set</span>
-                            <span>Previous</span>
+                            <span>{t('workout.label.set')}</span>
+                            <span>{t('workout.label.previous')}</span>
                             <span>kg</span>
-                            <span>Reps</span>
+                            <span>{text.repsShort}</span>
                             <span>✓</span>
                           </div>
                           {Array.from({ length: setCount }, (_, index) => {
@@ -1884,7 +1933,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   <button
                                     type="button"
                                     className="previous-set-value"
-                                    aria-label={`Copy previous set ${index + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
+                                    aria-label={t('workout.set.copyPrevious', {
+                                      set: index + 1,
+                                      weight: previousSet.weight,
+                                      reps: previousSet.reps,
+                                    })}
                                     onClick={() => {
                                       updatePlanSetValue(exercise, index, 'weight', String(previousSet.weight), setCount)
                                       updatePlanSetValue(exercise, index, 'reps', String(previousSet.reps), setCount)
@@ -1899,7 +1952,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   value={setWeights[index] ?? 0}
                                   step={2.5}
                                   min={0}
-                                  label={`Set ${index + 1} weight in kilograms`}
+                                  label={t('workout.set.weightLabel', { set: index + 1 })}
+                                  decreaseLabel={t('workout.set.weightDecrease', { set: index + 1 })}
+                                  increaseLabel={t('workout.set.weightIncrease', { set: index + 1 })}
                                   dataLogWeight
                                   invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
                                   onFocus={(event) => event.currentTarget.select()}
@@ -1912,16 +1967,19 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   inputMode="numeric"
                                   min="1"
                                   value={setReps[index] ?? draft.reps}
-                                  aria-label={`Set ${index + 1} reps`}
+                                  aria-label={t('workout.set.repsLabel', { set: index + 1 })}
                                   onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
                                 />
                                 <button
                                   type="button"
                                   className="complete-set-button"
-                                  aria-label={`${completedRows[index] ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
+                                  aria-label={t(
+                                    completedRows[index] ? 'workout.set.complete.unmark' : 'workout.set.complete.mark',
+                                    { set: index + 1 }
+                                  )}
                                   aria-pressed={completedRows[index]}
                                   onClick={() => {
-                                    if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90, getExerciseDisplayName(exercise.name))
+                                    if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
                                     togglePlanSetDone(exercise, index, setCount)
                                   }}
                                 >
@@ -1929,12 +1987,14 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                 </button>
                                 {exercise.technique === 'drop-set' && (
                                   <div className="planned-drop-set-row">
-                                    <strong>Drop</strong>
+                                    <strong>{t('workout.technique.drop')}</strong>
                                     <SteppedNumberInput
                                       value={dropSetWeights[index] ?? 0}
                                       step={2.5}
                                       min={0}
-                                      label={`Set ${index + 1} drop weight in kilograms`}
+                                      label={t('workout.set.dropWeightLabel', { set: index + 1 })}
+                                      decreaseLabel={t('workout.set.dropWeightDecrease', { set: index + 1 })}
+                                      increaseLabel={t('workout.set.dropWeightIncrease', { set: index + 1 })}
                                       onFocus={(event) => event.currentTarget.select()}
                                       onClick={(event) => event.currentTarget.select()}
                                       onChange={(value) => updatePlanSetValue(exercise, index, 'dropWeight', value, setCount)}
@@ -1945,7 +2005,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                       inputMode="numeric"
                                       min="1"
                                       value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
-                                      aria-label={`Set ${index + 1} drop reps`}
+                                      aria-label={t('workout.set.dropRepsLabel', { set: index + 1 })}
                                       onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', event.target.value, setCount)}
                                     />
                                     <span aria-hidden="true" />
@@ -1966,7 +2026,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             className="primary-button small-button"
                             onClick={() => void logPlannedExercise(exercise, completedRows)}
                           >
-                            Log exercise
+                            {t('workout.action.logExercise')}
                           </button>
                         )}
                       </div>
@@ -1984,7 +2044,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       </button>
                       <ul id={`posture-tips-${exerciseKey}`} className="posture-tips-list" hidden={!isTipsVisible}>
                         {postureTips.map((tip, index) => (
-                          <li key={`${exercise.name}-tip-${index}`}>{tip}</li>
+                          <li key={`${exercise.name}-tip-${index}`}>
+                            {/* TODO(i18n): PT will provide approved translations */}
+                            {tip}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -2002,12 +2065,12 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           {progressItems.map((item) => (
                             <article key={item.id} className="planned-history-item">
                               <div className="planned-history-topline">
-                                <span>{formatHistoryDate(item.date)}</span>
-                                <strong>{item.maxWeight} kg</strong>
+                                <span>{formatHistoryDate(language, item.date)}</span>
+                                <strong>{formatNumber(language, item.maxWeight)} kg</strong>
                               </div>
                               <div className="planned-history-meta">
-                                <small>{item.totalVolume} kg volume</small>
-                                <small>{item.setsCount} sets</small>
+                                <small>{t('workout.volume.value', { value: formatNumber(language, item.totalVolume) })}</small>
+                                <small>{setLabel(item.setsCount)}</small>
                               </div>
                               {item.comments ? (
                                 <p className="planned-history-comment">
@@ -2023,7 +2086,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       <div className="exercise-detail-row">
                         <AskExercise
                           exerciseId={libraryMatch.id}
-                          exerciseName={libraryMatch.name}
+                          exerciseName={displayExerciseName(libraryMatch)}
                           onSignIn={onSignIn}
                         />
                       </div>
@@ -2031,17 +2094,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <button
                       type="button"
                       className="rest-start-button"
-                      onClick={() => onStartRest(exercise.restSeconds ?? 90, getExerciseDisplayName(exercise.name))}
+                      onClick={() => onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))}
                     >
-                      Start rest
+                      {t('workout.action.startRest')}
                     </button>
                     {!group.isSuperset && (
                       <label className="planned-notes-field">
-                        <span>Notes</span>
+                        <span>{t('workout.label.notes')}</span>
                         <textarea
                           rows={2}
                           value={draft.notes}
-                          placeholder="Add notes for this exercise"
+                          placeholder={t('workout.notes.placeholderExercise')}
                           onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
                         />
                       </label>
@@ -2072,9 +2135,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             return (
               <div key={group.key} className={groupDone ? 'superset-group completed' : 'superset-group'}>
                 <div className="superset-group-header">
-                  <span className="chip technique-chip">Superset</span>
-                  {groupDone && <span className="done-badge" role="status"><span aria-hidden="true">✓ </span>Done</span>}
-                  <p>Do {codes[0]}, rest ~10 s, then {codes.slice(1).join(', ')}; rest after the pair.</p>
+                  <span className="chip technique-chip">{t('workout.technique.superset')}</span>
+                  {groupDone && <span className="done-badge" role="status"><span aria-hidden="true">✓ </span>{t('workout.status.done')}</span>}
+                  <p>{t('workout.superset.instructions', { first: codes[0], others: codes.slice(1).join(', ') })}</p>
                 </div>
                 {cards}
                 <div className={`superset-log-box${supersetLogOpen[group.key] ? ' open' : ''}`}>
@@ -2085,8 +2148,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     aria-controls={`superset-log-${group.key}`}
                     onClick={() => setSupersetLogOpen((current) => ({ ...current, [group.key]: !current[group.key] }))}
                   >
-                    <span className="superset-log-title">Log rounds</span>
-                    <span className="superset-log-progress">{supersetCompletedCount}/{supersetSetCount} rounds</span>
+                    <span className="superset-log-title">{t('workout.superset.logRounds')}</span>
+                    <span className="superset-log-progress">{`${supersetCompletedCount}/${supersetSetCount} ${roundWord(supersetSetCount).toLowerCase()}`}</span>
                     <span className="toggle-button expand-toggle" aria-hidden="true">
                       {supersetLogOpen[group.key] ? '−' : '+'}
                     </span>
@@ -2101,13 +2164,13 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         )}
                         onClick={() => supersetExercises.forEach((exercise) => copyPlanSetOneWeight(exercise, supersetSetCount))}
                       >
-                        Copy round 1 weights to all
+                        {t('workout.superset.copyRoundOne')}
                       </button>
                       <div className="superset-round-columns" aria-hidden="true">
                         <span />
-                        <span>Previous</span>
+                        <span>{t('workout.label.previous')}</span>
                         <span>kg</span>
-                        <span>Reps</span>
+                        <span>{text.repsShort}</span>
                       </div>
                       {Array.from({ length: supersetSetCount }, (_, setIndex) => (
                         <div
@@ -2115,11 +2178,16 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           key={`${group.key}-set-${setIndex + 1}`}
                         >
                           <div className="superset-round-header">
-                            <span className="superset-round-label">Round {setIndex + 1}</span>
+                            <span className="superset-round-label">{t('workout.round.label', { count: setIndex + 1 })}</span>
                             <button
                               type="button"
                               className="complete-set-button"
-                              aria-label={`${supersetCompletedRows[setIndex] ? 'Unmark' : 'Mark'} superset set ${setIndex + 1} complete`}
+                              aria-label={t(
+                                supersetCompletedRows[setIndex]
+                                  ? 'workout.superset.complete.unmark'
+                                  : 'workout.superset.complete.mark',
+                                { set: setIndex + 1 }
+                              )}
                               aria-pressed={supersetCompletedRows[setIndex]}
                               onClick={() => {
                                 const nextCompleted = [...supersetCompletedRows]
@@ -2129,7 +2197,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                 if (nextCompleted[setIndex]) {
                                   onStartRest(
                                     supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90,
-                                    supersetExercises.map((item) => getExerciseDisplayName(item.name)).join(' + ')
+                                    supersetExercises.map((item) => displayExerciseName(item.name)).join(' + ')
                                   )
                                 }
                                 if (nextCompleted.every(Boolean)) {
@@ -2152,12 +2220,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             const weight = draft.setWeights[setIndex] ?? draft.weight ?? 0
                             return (
                               <div className="superset-round-row" key={`${group.key}-${code}`}>
-                                <span className="superset-round-code" title={getExerciseDisplayName(exercise.name)}>{code}</span>
+                                <span className="superset-round-code" title={displayExerciseName(exercise.name)}>{code}</span>
                                 {previousSet ? (
                                   <button
                                     type="button"
                                     className="previous-set-value"
-                                    aria-label={`Copy previous ${code} set ${setIndex + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
+                                    aria-label={t('workout.superset.copyPrevious', {
+                                      code,
+                                      set: setIndex + 1,
+                                      weight: previousSet.weight,
+                                      reps: previousSet.reps,
+                                    })}
                                     onClick={() => {
                                       updatePlanSetValue(exercise, setIndex, 'weight', String(previousSet.weight), supersetSetCount)
                                       updatePlanSetValue(exercise, setIndex, 'reps', String(previousSet.reps), supersetSetCount)
@@ -2172,7 +2245,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   value={weight}
                                   step={2.5}
                                   min={0}
-                                  label={`Set ${setIndex + 1}, ${code} weight in kilograms`}
+                                  label={t('workout.superset.weightLabel', { set: setIndex + 1, code })}
+                                  decreaseLabel={t('workout.superset.weightDecrease', { set: setIndex + 1, code })}
+                                  increaseLabel={t('workout.superset.weightIncrease', { set: setIndex + 1, code })}
                                   onFocus={(event) => event.currentTarget.select()}
                                   onClick={(event) => event.currentTarget.select()}
                                   onChange={(value) => updatePlanSetValue(exercise, setIndex, 'weight', value, supersetSetCount)}
@@ -2183,7 +2258,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   inputMode="numeric"
                                   min="1"
                                   value={reps}
-                                  aria-label={`Set ${setIndex + 1}, ${code} reps`}
+                                  aria-label={t('workout.superset.repsLabel', { set: setIndex + 1, code })}
                                   onChange={(event) =>
                                     updatePlanSetValue(exercise, setIndex, 'reps', event.target.value, supersetSetCount)
                                   }
@@ -2194,16 +2269,16 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         </div>
                       ))}
                       <details className="superset-notes">
-                        <summary>Notes</summary>
+                        <summary>{t('workout.label.notes')}</summary>
                         {supersetExercises.map((exercise) => {
                           const draft = getDraftForExercise(exercise.name, exercise)
                           return (
                             <label className="planned-notes-field" key={`${group.key}-${exercise.code}-notes`}>
-                              <span>{exercise.code ?? exercise.name} · {getExerciseDisplayName(exercise.name)}</span>
+                              <span>{exercise.code ?? exercise.name} · {displayExerciseName(exercise.name)}</span>
                               <textarea
                                 rows={2}
                                 value={draft.notes}
-                                placeholder="Add a note"
+                                placeholder={t('workout.notes.placeholder')}
                                 onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
                               />
                             </label>
@@ -2217,7 +2292,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           className="primary-button small-button"
                           onClick={() => void logSuperset(supersetExercises, group.key, supersetCompletedRows)}
                         >
-                          Finish superset
+                          {t('workout.superset.finish')}
                         </button>
                       )}
                     </div>
@@ -2239,38 +2314,39 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             onClick={(event) => event.stopPropagation()}
           >
             <header className="session-summary-header">
-              <h2 id="session-summary-title">Session complete</h2>
+              <h2 id="session-summary-title">{t('workout.session.complete')}</h2>
               <button
                 type="button"
                 className="session-summary-close"
                 onClick={dismissSessionSummary}
-                aria-label="Close session summary"
+                aria-label={t('workout.session.close')}
               >
                 ×
               </button>
             </header>
             <div className="session-summary-metrics">
-              <div><strong>{sessionSummary.duration}</strong><span>Duration</span></div>
-              <div><strong>{sessionSummary.sets}</strong><span>Sets</span></div>
-              <div><strong>{sessionSummary.volume.toLocaleString('en-US')} kg</strong><span>Volume</span></div>
+              <div><strong>{sessionSummary.duration}</strong><span>{t('workout.session.duration')}</span></div>
+              <div><strong>{sessionSummary.sets}</strong><span>{text.sets}</span></div>
+              <div><strong>{formatNumber(language, sessionSummary.volume)} kg</strong><span>{t('workout.session.volume')}</span></div>
             </div>
-            <section className="session-summary-records" aria-label="Personal records">
-              <h3>Personal records</h3>
+            <section className="session-summary-records" aria-label={t('workout.session.records')}>
+              <h3>{t('workout.session.records')}</h3>
               {sessionSummary.prs.length > 0 ? (
                 <ul>
                   {sessionSummary.prs.map(({ exerciseId, badges }) => {
-                    const exerciseName = exerciseCatalog.find((exercise) => exercise.id === exerciseId)?.name ?? exerciseId
+                    const exercise = exerciseCatalog.find((item) => item.id === exerciseId)
+                    const exerciseName = exercise ? displayExerciseName(exercise) : exerciseId
                     const labels = badges.map((badge) =>
-                      badge === 'e1rm' ? 'e1RM PR' : badge === 'weight' ? 'Weight PR' : 'Rep PR'
+                      badge === 'e1rm' ? t('workout.pr.e1rm') : badge === 'weight' ? t('workout.pr.weight') : t('workout.pr.reps')
                     )
                     return <li key={exerciseId}>{exerciseName} · {labels.join(', ')}</li>
                   })}
                 </ul>
               ) : (
-                <p>No new personal records this session.</p>
+                <p>{t('workout.session.noRecords')}</p>
               )}
             </section>
-            {sessionSummary.nextSession && <p className="session-summary-next">{`Next session: ${sessionSummary.nextSession}`}</p>}
+            {sessionSummary.nextSession && <p className="session-summary-next">{t('workout.session.next', { session: sessionSummary.nextSession })}</p>}
             {!aiSummary && (
               <div className="ai-session-summary">
                 <button
@@ -2279,43 +2355,53 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                   disabled={demoMode || authStatus === 'loading' || aiSummaryPending}
                   onClick={demoMode || authStatus === 'signed-out' ? onSignIn : openAiSummary}
                 >
-                  {demoMode || authStatus === 'signed-out' ? 'Sign in to use AI' : aiSummaryPending ? 'Thinking…' : 'AI coach summary'}
+                  {demoMode || authStatus === 'signed-out'
+                    ? t('workout.ai.signIn')
+                    : aiSummaryPending
+                      ? t('workout.ai.thinking')
+                      : t('workout.ai.summary')}
                 </button>
                 {showAiConsent && (
                   <div className="ask-exercise-consent ai-inline-consent">
                     {aiConsent === null ? (
                       <AiConsentPrompt onChoice={chooseAiConsent} />
                     ) : (
-                      <p className="ask-exercise-consent-message">AI is off for this account because you chose not to turn it on.</p>
+                      <p className="ask-exercise-consent-message">{t('workout.ai.off')}</p>
                     )}
                   </div>
                 )}
                 {aiSummaryError && (
                   <div className="ai-inline-error" role="alert">
                     <p>{aiSummaryError}</p>
-                    {aiSummaryError === 'Sign in to ask AI.' && (
-                      <button type="button" className="secondary-button" onClick={onSignIn}>Sign in</button>
+                  {aiSummaryError === mapAiGatewayError('sign_in_required', language) && (
+                    <button type="button" className="secondary-button" onClick={onSignIn}>{t('workout.action.signIn')}</button>
                     )}
                   </div>
                 )}
               </div>
             )}
             {aiSummary && (
-              <section className="ai-session-summary" aria-label="AI coach summary" aria-live="polite">
-                <h3>AI coach summary</h3>
+              <section className="ai-session-summary" aria-label={t('workout.ai.summary')} aria-live="polite">
+                <h3>{t('workout.ai.summary')}</h3>
                 <ul className="ai-summary-bullets">
                   {aiSummary.split(/\n+/).map((line) => line.trim()).filter(Boolean).map((line, index) => (
                     <li key={index}>{line.replace(/^(?:[-*•]|\d+[.)])\s*/, '')}</li>
                   ))}
                 </ul>
-                {aiRemainingToday !== null && <small>{aiRemainingToday} questions left today</small>}
-                <small>AI answers can be wrong. Not medical advice.</small>
+                {aiRemainingToday !== null && (
+                  <small>
+                    {t(aiRemainingToday === 1 ? 'workout.ai.leftToday.one' : 'workout.ai.leftToday.other', {
+                      count: aiRemainingToday,
+                    })}
+                  </small>
+                )}
+                <small>{t('workout.ai.disclaimer')}</small>
               </section>
             )}
             {toast && (
               <div className="log-toast in-summary" role="status" aria-live="polite">
                 <span>{toast.message}</span>
-                <button type="button" onClick={undoLastLog}>Undo</button>
+                <button type="button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
               </div>
             )}
           </section>
@@ -2324,7 +2410,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       {toast && !sessionSummary && (
         <div className="log-toast" role="status" aria-live="polite">
           <span>{toast.message}</span>
-          <button type="button" onClick={undoLastLog}>Undo</button>
+          <button type="button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
         </div>
       )}
     </div>

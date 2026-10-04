@@ -42,8 +42,9 @@ describe('training block dates', () => {
     expect(formatBlockMethod('reverse-pyramid')).toBe('Reverse Pyramid')
     expect(formatBlockMethod('flat-pyramid')).toBe('Flat Pyramid')
     expect(formatBlockMethod('strength_hypertrophy')).toBe('Strength Hypertrophy')
-    expect(formatBlockMethod('  DUP   training ')).toBe('Dup Training')
+    expect(formatBlockMethod('  DUP   training ')).toBe('DUP Training')
     expect(formatBlockMethod('')).toBe('')
+    expect(formatBlockMethod('reverse-pyramid', 'es')).toBe('Pirámide inversa')
   })
 
   it('selects the next block during a gap when it starts within a week', () => {
@@ -80,6 +81,7 @@ describe('training block dates', () => {
 
   it('formats an inclusive six-week date range in English', () => {
     expect(blockDateRange(blocks[1])).toBe('5 Oct – 15 Nov 2026')
+    expect(blockDateRange(blocks[1], 'es')).toBe('5 oct – 15 nov 2026')
   })
 })
 
@@ -150,6 +152,7 @@ describe('bench angle labels', () => {
     expect(formatBenchAngle(30)).toBe('Incline 30°')
     expect(formatBenchAngle(90)).toBe('Upright seat')
     expect(formatBenchAngle(-15)).toBe('Decline 15°')
+    expect(formatBenchAngle(30, 'es')).toBe('Inclinado 30°')
   })
 
   it('omits a label when the angle is not set', () => {

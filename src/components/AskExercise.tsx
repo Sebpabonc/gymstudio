@@ -1,19 +1,16 @@
 import React, { FormEvent, useState } from 'react'
-import { askExercise } from '../ai/gateway'
+import { askExercise, mapAiGatewayError } from '../ai/gateway'
 import { useAuth } from '../auth/AuthProvider'
 import { isDemoMode } from '../utils/demoMode'
 import type { AskExerciseAiConsent } from '../utils/storage'
 import AiConsentPrompt from './AiConsentPrompt'
+import { useT } from '../i18n'
 import {
   getAskExerciseAiConsent,
   setAskExerciseAiConsent,
 } from '../utils/storage'
 
-const suggestedQuestions = [
-  'Where should I feel this?',
-  'How do I fix my form?',
-  'What weight should I try next?',
-]
+const suggestedQuestionKeys = ['ai.q1', 'ai.q2', 'ai.q3'] as const
 
 type AskExerciseProps = {
   exerciseId: string
@@ -27,6 +24,7 @@ function initialConsent(): AskExerciseAiConsent | null {
 
 export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskExerciseProps) {
   const { status } = useAuth()
+  const { t, language } = useT()
   const demoMode = isDemoMode()
   const [open, setOpen] = useState(false)
   const [consent, setConsent] = useState<AskExerciseAiConsent | null>(null)
@@ -35,7 +33,7 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
   const [remainingToday, setRemainingToday] = useState<number | null>(null)
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
-  const needsSignIn = error === 'Sign in to ask AI.'
+  const needsSignIn = error === mapAiGatewayError('sign_in_required', language)
 
   const openSheet = () => {
     if (demoMode) return
@@ -71,17 +69,17 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
     setAnswer('')
     setRemainingToday(null)
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      setError("You're offline.")
+      setError(mapAiGatewayError('offline', language))
       return
     }
 
     setPending(true)
     try {
-      const response = await askExercise(exerciseId, trimmedQuestion)
+      const response = await askExercise(exerciseId, trimmedQuestion, language)
       setAnswer(response.answer)
       setRemainingToday(response.remainingToday)
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'AI is unavailable right now. Try again.')
+      setError(requestError instanceof Error ? requestError.message : mapAiGatewayError('unknown', language))
     } finally {
       setPending(false)
     }
@@ -95,7 +93,7 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
         disabled={demoMode || status === 'loading'}
         onClick={openSheet}
       >
-        {demoMode || status === 'signed-out' ? 'Sign in to ask AI' : 'Ask AI'}
+        {demoMode || status === 'signed-out' ? t('ai.signInToAsk') : t('ai.ask')}
       </button>
       {open && (
         <div className="ask-exercise-overlay" role="presentation" onClick={closeSheet}>
@@ -108,11 +106,11 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
           >
             <div className="ask-exercise-sheet-header">
               <div>
-                <p className="field-label">Ask AI</p>
+                <p className="field-label">{t('ai.ask')}</p>
                 <h2 id="ask-exercise-title">{exerciseName}</h2>
               </div>
               <button type="button" className="toggle-button" onClick={closeSheet} disabled={pending}>
-                Close
+                {t('ai.close')}
               </button>
             </div>
 
@@ -121,23 +119,23 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
                 <AiConsentPrompt onChoice={chooseConsent} />
               </div>
             ) : consent === 'declined' ? (
-              <p className="ask-exercise-consent-message">AI is off for this account because you chose not to turn it on.</p>
+              <p className="ask-exercise-consent-message">{t('ai.declinedMessage')}</p>
             ) : (
               <>
-                <div className="ask-exercise-suggestions" aria-label="Suggested questions">
-                  {suggestedQuestions.map((suggestion) => (
+                <div className="ask-exercise-suggestions" aria-label={t('ai.suggestedQuestions')}>
+                  {suggestedQuestionKeys.map((key) => (
                     <button
-                      key={suggestion}
+                      key={key}
                       type="button"
                       className="chip ask-exercise-suggestion"
-                      onClick={() => setQuestion(suggestion)}
+                      onClick={() => setQuestion(t(key))}
                     >
-                      {suggestion}
+                      {t(key)}
                     </button>
                   ))}
                 </div>
                 <form className="ask-exercise-form" onSubmit={submitQuestion}>
-                  <label className="field-label" htmlFor="ask-exercise-question">Your question</label>
+                  <label className="field-label" htmlFor="ask-exercise-question">{t('ai.yourQuestion')}</label>
                   <textarea
                     id="ask-exercise-question"
                     maxLength={300}
@@ -149,7 +147,7 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
                   <div className="ask-exercise-form-footer">
                     <span id="ask-exercise-counter">{question.length}/300</span>
                     <button type="submit" className="primary-button" disabled={pending || !question.trim()}>
-                      {pending ? 'Sending…' : 'Send'}
+                      {pending ? t('ai.sending') : t('ai.send')}
                     </button>
                   </div>
                 </form>
@@ -165,7 +163,7 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
                           onSignIn()
                         }}
                       >
-                        Sign in
+                        {t('ai.signIn')}
                       </button>
                     )}
                   </div>
@@ -173,13 +171,13 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
                 {answer && (
                   <div className="ask-exercise-answer" aria-live="polite">
                     <p>{answer}</p>
-                    {remainingToday !== null && <small>{remainingToday} questions left today</small>}
+                    {remainingToday !== null && <small>{t('ai.questionsLeft', { count: remainingToday })}</small>}
                   </div>
                 )}
               </>
             )}
 
-            <p className="ask-exercise-disclaimer">AI answers can be wrong. Not medical advice.</p>
+            <p className="ask-exercise-disclaimer">{t('ai.disclaimer')}</p>
           </section>
         </div>
       )}

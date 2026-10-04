@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles.css'
 import { initializeDemoMode } from './utils/demoMode'
+import { LanguageProvider } from './i18n'
 import { AuthProvider } from './auth/AuthProvider'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { installChunkErrorHandlers } from './utils/chunkReload'
@@ -30,9 +31,11 @@ installChunkErrorHandlers()
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   </React.StrictMode>
 )

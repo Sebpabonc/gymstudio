@@ -1,26 +1,28 @@
 import React, { useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import { hasGuestWorkoutData } from '../utils/storage'
+import { Translate, useT } from '../i18n'
 
 type LoginMode = 'sign-in' | 'sign-up'
 
-function friendlyError(message: string) {
+function friendlyError(message: string, t: Translate) {
   const normalized = message.toLowerCase()
   if (normalized.includes('provider is not enabled') || normalized.includes('provider not enabled')) {
-    return "Google sign-in isn't set up yet."
+    return t('login.googleNotSetUp')
   }
-  if (normalized.includes('email not confirmed')) return 'Please confirm your email before signing in.'
+  if (normalized.includes('email not confirmed')) return t('login.confirmEmail')
   if (normalized.includes('invalid login credentials') || normalized.includes('wrong password')) {
-    return 'Incorrect email or password.'
+    return t('login.badCredentials')
   }
   if (normalized.includes('too many') || normalized.includes('rate limit')) {
-    return 'Too many attempts. Please wait a moment and try again.'
+    return t('login.tooMany')
   }
-  if (normalized.includes('sign-in unavailable offline')) return 'Sign-in unavailable offline.'
-  return 'Something went wrong. Please try again.'
+  if (normalized.includes('sign-in unavailable offline')) return t('login.offline')
+  return t('login.generic')
 }
 
 export default function LoginScreen({ onClose }: { onClose: () => void }) {
+  const { t } = useT()
   const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle } = useAuth()
   const [mode, setMode] = useState<LoginMode>(() => hasGuestWorkoutData() ? 'sign-in' : 'sign-up')
   const [email, setEmail] = useState('')
@@ -40,15 +42,15 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
       : await signUp(email.trim(), password)
     setBusy(false)
     if (result.error) {
-      setErrorMessage(friendlyError(result.error))
+      setErrorMessage(friendlyError(result.error, t))
     } else if (result.needsConfirmation) {
-      setNotice('Check your email to confirm your account.')
+      setNotice(t('login.checkEmail'))
     }
   }
 
   const sendReset = async () => {
     if (!email.trim()) {
-      setErrorMessage('Enter your email address first.')
+      setErrorMessage(t('login.enterEmail'))
       return
     }
     setBusy(true)
@@ -56,8 +58,8 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
     setNotice('')
     const result = await resetPassword(email.trim())
     setBusy(false)
-    if (result.error) setErrorMessage(friendlyError(result.error))
-    else setNotice('If an account exists for that email, a password reset link is on its way.')
+    if (result.error) setErrorMessage(friendlyError(result.error, t))
+    else setNotice(t('login.resetSent'))
   }
 
   const continueWithGoogle = async () => {
@@ -66,41 +68,40 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
     setNotice('')
     const result = await signInWithGoogle()
     setBusy(false)
-    if (result.error) setErrorMessage(friendlyError(result.error))
+    if (result.error) setErrorMessage(friendlyError(result.error, t))
   }
 
   if (status === 'loading') {
-    return <section className="card account-screen" aria-live="polite"><p>Loading account…</p></section>
+    return <section className="card account-screen" aria-live="polite"><p>{t('account.loading')}</p></section>
   }
 
   if (!available) {
     return (
       <section className="card account-screen">
-        <button type="button" className="account-back" onClick={onClose}>← Back to Today</button>
-        <h2>Account</h2>
-        <p className="account-message">Sign-in unavailable offline.</p>
+        <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
+        <h2>{t('login.account')}</h2>
+        <p className="account-message">{t('login.offline')}</p>
       </section>
     )
   }
 
   return (
     <section className="card account-screen">
-      <button type="button" className="account-back" onClick={onClose}>← Back to Today</button>
-      <h2>{mode === 'sign-in' ? 'Welcome back' : 'Create your account'}</h2>
+      <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
+      <h2>{mode === 'sign-in' ? t('login.welcomeBack') : t('login.createTitle')}</h2>
       <ul className="account-benefits">
-        <li>Back up your workouts.</li>
-        <li>Use GymStudio on any device.</li>
-        <li>Your synced data is private to your account.</li>
+        <li>{t('login.benefit1')}</li>
+        <li>{t('login.benefit2')}</li>
+        <li>{t('login.benefit3')}</li>
       </ul>
       <p className="account-local-data">
-        After sign-in, choose whether to move your local workouts to your account or keep them on this device.
-        They won't be discarded without your choice.
+        {t('login.localData')}
       </p>
       <details className="account-privacy">
-        <summary>Privacy note</summary>
-        <p>Workout history stays on this device while you're signed out. Synced history is only visible to your account.</p>
+        <summary>{t('login.privacyNote')}</summary>
+        <p>{t('login.privacyBody')}</p>
       </details>
-      <div className="account-mode-tabs" role="tablist" aria-label="Account action">
+      <div className="account-mode-tabs" role="tablist" aria-label={t('login.accountAction')}>
         <button
           type="button"
           role="tab"
@@ -108,7 +109,7 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
           className={mode === 'sign-in' ? 'active' : ''}
           onClick={() => { setMode('sign-in'); setErrorMessage(''); setNotice('') }}
         >
-          Sign in
+          {t('login.signIn')}
         </button>
         <button
           type="button"
@@ -117,12 +118,12 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
           className={mode === 'sign-up' ? 'active' : ''}
           onClick={() => { setMode('sign-up'); setErrorMessage(''); setNotice('') }}
         >
-          Create account
+          {t('login.createAccount')}
         </button>
       </div>
 
       <form className="account-form" onSubmit={submit}>
-        <label className="account-label" htmlFor="account-email">Email</label>
+        <label className="account-label" htmlFor="account-email">{t('login.email')}</label>
         <input
           id="account-email"
           type="email"
@@ -131,7 +132,7 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
-        <label className="account-label" htmlFor="account-password">Password</label>
+        <label className="account-label" htmlFor="account-password">{t('login.password')}</label>
         <div className="password-field">
           <input
             id="account-password"
@@ -143,23 +144,23 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
             onChange={(event) => setPassword(event.target.value)}
           />
           <button type="button" onClick={() => setShowPassword((visible) => !visible)}>
-            {showPassword ? 'Hide' : 'Show'}
+            {showPassword ? t('login.hide') : t('login.show')}
           </button>
         </div>
         {mode === 'sign-in' && (
           <button type="button" className="forgot-password" onClick={sendReset} disabled={busy}>
-            Forgot password?
+            {t('login.forgot')}
           </button>
         )}
         <button type="submit" className="primary-button" disabled={busy}>
-          {busy ? 'Please wait…' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
+          {busy ? t('login.wait') : mode === 'sign-in' ? t('login.signIn') : t('login.createAccount')}
         </button>
       </form>
 
-      <div className="account-divider"><span>or</span></div>
+      <div className="account-divider"><span>{t('login.or')}</span></div>
       <button type="button" className="google-button" onClick={continueWithGoogle} disabled={busy}>
         <span className="google-mark" aria-hidden="true">G</span>
-        Continue with Google
+        {t('login.google')}
       </button>
       {errorMessage && <p className="account-error" role="alert">{errorMessage}</p>}
       {notice && <p className="account-message" role="status">{notice}</p>}
