@@ -32,6 +32,7 @@ import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
   filterLoggableSets,
+  getPreviousWorkoutSets,
   parseRepPrescription,
   selectCompletedSets,
   stepWorkoutValue,
@@ -229,14 +230,6 @@ function createTipIllustration(muscle: string, variant: number) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
-const techniqueDetails: Record<NonNullable<PlanExercise['technique']>, string> = {
-  straight: 'Straight sets: same reps and weight every set',
-  pyramid: 'Pyramid: reps down, weight up each set',
-  'reverse-pyramid': 'Reverse pyramid: heaviest set first, weight down each set',
-  'drop-set': 'Drop set: to failure, drop 20–30% and continue',
-  superset: 'Superset: back to back with the paired exercise',
-}
-
 const techniqueLabels: Record<NonNullable<PlanExercise['technique']>, string> = {
   straight: 'Straight sets',
   superset: 'Superset',
@@ -340,6 +333,7 @@ export default function WorkoutPlan({
   const [completedSupersetSets, setCompletedSupersetSets] = useState<Record<string, boolean[]>>({})
   const [progressSectionsVisible, setProgressSectionsVisible] = useState<Record<string, boolean>>({})
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
+  const [squeezeCueExpanded, setSqueezeCueExpanded] = useState<Record<string, boolean>>({})
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState('')
 
@@ -416,11 +410,6 @@ export default function WorkoutPlan({
   const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
   const activeBlockWeek = activeBlock ? blockWeek(activeBlock, today) : null
   const todayDay = activeBlock ? nextUnloggedDay(activeBlock, history, today) : undefined
-  const hasCurrentBlock = trainingBlocks.some((block) => trainingBlockDateStatus(block, today) === 'Current')
-  const nextUpcomingBlock = trainingBlocks
-    .filter((block) => trainingBlockDateStatus(block, today) === 'Upcoming')
-    .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.number - b.number)[0]
-
   const completionScope = (blockId?: string, dayKey?: string) => ({ date: localIsoDate(), blockId, dayKey })
   const activeCompletionScope =
     planMode === 'preset' && activeBlock && activeDay
@@ -1201,13 +1190,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
         </div>
       )}
 
-      {planMode === 'preset' && !hasCurrentBlock && nextUpcomingBlock && (
-        <section className="next-block-banner" role="status">
-          <strong>{`Next block starts ${formatBlockStartDate(nextUpcomingBlock.startDate)}`}</strong>
-          <span>{`Block ${nextUpcomingBlock.number} · ${nextUpcomingBlock.name}`}</span>
-        </section>
-      )}
-
       {planMode === 'preset' && activeBlock && (
         <section className="training-block-card" aria-label="Active training block">
           <button
@@ -1217,23 +1199,23 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             aria-expanded={blockCardExpanded}
             aria-controls="training-block-content"
           >
-            <span className="training-block-title">
-              <span className="training-block-number">Block {activeBlock.number}</span>
+            <span className="training-block-primary">
               <span className="training-block-name">{activeBlock.name}</span>
-            </span>
-            <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
-            <strong className="training-block-status">
-              {pinnedBlockId === activeBlock.id && <span>Pinned block</span>}
-              <span>
+              <strong className="training-block-status">
                 {trainingBlockDateStatus(activeBlock, today) === 'Current'
                   ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
                   : trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
                     ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
                     : 'Completed'}
+              </strong>
+              <span className="toggle-button expand-toggle" aria-hidden="true">
+                {blockCardExpanded ? '−' : '+'}
               </span>
-            </strong>
-            <span className="toggle-button expand-toggle" aria-hidden="true">
-              {blockCardExpanded ? '−' : '+'}
+            </span>
+            <span className="training-block-badges">
+              <span className="training-block-number">Block {activeBlock.number}</span>
+              <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
+              {pinnedBlockId === activeBlock.id && <span className="training-block-number">Pinned block</span>}
             </span>
           </button>
           <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
@@ -1316,33 +1298,36 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               key={day.key}
               type="button"
               className={day.key === (activeDay?.key ?? selectedDay) ? 'day-tab active' : 'day-tab'}
+              aria-label={`Day ${day.position} · ${day.name}${todayDay?.key === day.key ? ' · Today' : ''}`}
+              aria-pressed={day.key === (activeDay?.key ?? selectedDay)}
               onClick={() => {
                 setSelectedDay(day.key)
                 collapseAllExerciseSections()
               }}
             >
-              {todayDay?.key === day.key && <span className="day-tab-today">Today</span>}
-              <span className="day-tab-label">{`Day ${day.position} · ${day.name}`}</span>
+              <span className="day-tab-label">{`D${day.position}`}</span>
               {(() => {
-                const today = localIsoDate()
+                const date = localIsoDate()
                 const done = day.exercises.filter((item) =>
                   history.some(
                     (entry) =>
                       entry.exerciseId === item.exerciseId &&
-                      entry.date === today &&
+                      entry.date === date &&
                       entry.blockId === activeBlock.id &&
                       entry.dayKey === day.key
                   )
                 ).length
                 return (
-                  <span className="day-tab-progress" aria-label={`${done} of ${day.exercises.length} exercises done`}>
-                    {`${done}/${day.exercises.length}`}
-                  </span>
+                  <>
+                    <span className="day-tab-progress">{`${done}/${day.exercises.length}`}</span>
+                    {todayDay?.key === day.key && <span className="day-tab-today">Today</span>}
+                  </>
                 )
               })()}
             </button>
           ))}
         </div>
+        {activeDay && <h2 className="selected-day-name">{`Day ${activeDay.position} · ${activeDay.name}`}</h2>}
         {activeDay?.focus && <p className="day-focus-label">{activeDay.focus}</p>}
         </>
       ) : (
@@ -1458,10 +1443,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       )}
 
       <section className="day-plan-card">
-        <div className="day-plan-header" aria-hidden="true" style={{ display: 'none' }}>
-          <h2>{activeDay?.name}</h2>
-        </div>
-
         <div className="day-exercises">
           {groupSupersets(activeExercises).map((group) => {
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
@@ -1488,6 +1469,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 return match && normalizeExerciseName(match.name) === exerciseKey
               })
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            const previousSets = getPreviousWorkoutSets(exerciseHistory)
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
               id: entry.id,
               date: entry.date,
@@ -1567,161 +1549,216 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         </span>
                       ))}
                     </div>
-                    {exercise.technique && (
-                      <p className="technique-description">{techniqueDetails[exercise.technique]}</p>
-                    )}
-                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
+                    <p className="planned-meta-line">
+                      {`${setCount} ${setCount === 1 ? 'set' : 'sets'} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} reps · ${exercise.rest} rest`}
+                    </p>
 
                     {libraryMatch?.squeezeCue?.trim() && (
-                      <p className="squeeze-cue">
-                        <span className="squeeze-cue-label"><span aria-hidden="true">💪</span> Squeeze</span>
-                        <span>{libraryMatch.squeezeCue}</span>
-                      </p>
+                      <button
+                        type="button"
+                        className={`planned-squeeze-cue${squeezeCueExpanded[exerciseKey] ? ' expanded' : ''}`}
+                        aria-expanded={!!squeezeCueExpanded[exerciseKey]}
+                        onClick={() => setSqueezeCueExpanded((current) => ({
+                          ...current,
+                          [exerciseKey]: !current[exerciseKey],
+                        }))}
+                      >
+                        <strong>Squeeze — </strong>{libraryMatch.squeezeCue}
+                      </button>
                     )}
 
-                    <div className="planned-posture-actions">
-                      <div className="posture-tips-box">
-                        <button
-                          type="button"
-                          className="posture-tips-header"
-                          onClick={() => togglePostureTips(exercise.name)}
-                          aria-expanded={isTipsVisible}
-                          aria-controls={`posture-tips-${exerciseKey}`}
-                        >
-                          <span>{text.posture}</span>
-                          <span className="toggle-button" aria-hidden="true">{isTipsVisible ? '−' : '+'}</span>
-                        </button>
-
-                        <ul id={`posture-tips-${exerciseKey}`} className="posture-tips-list" hidden={!isTipsVisible}>
-                          {postureTips.map((tip, index) => (
-                            <li key={`${exercise.name}-tip-${index}`}>{tip}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      {libraryMatch && (
-                        <AskExercise
-                          exerciseId={libraryMatch.id}
-                          exerciseName={libraryMatch.name}
-                          onSignIn={onSignIn}
-                        />
-                      )}
-                    </div>
-
-                    <div className="plan-metrics">
-                      <div className="metric-pill">
-                        <span>{text.sets}</span>
-                        <strong>{exercise.sets ?? '—'}</strong>
-                      </div>
-                      <div className="metric-pill">
-                        <span>{text.reps}</span>
-                        <strong>{exercise.reps ?? '—'}</strong>
-                      </div>
-                      <div className="metric-pill">
-                        <span>{text.rest}</span>
-                        <strong>{exercise.rest}</strong>
-                        <button
-                          type="button"
-                          className="rest-start-button"
-                          onClick={() => onStartRest(exercise.restSeconds ?? 90)}
-                        >
-                          Start rest
-                        </button>
-                      </div>
-                    </div>
-
                     {!group.isSuperset && (
-                    <div className="planned-progress-box">
-                      <div className="planned-set-header">
-                        <span>{text.setLog}</span>
-                        {getAppliedTarget(exercise, exercise.exerciseId) && (
-                          <span className="weight-target-chip">
-                            +{getAppliedTarget(exercise, exercise.exerciseId)?.increaseKg} kg applied
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          className="same-as-set-one-button"
-                          disabled={!(Number(setWeights[0]) > 0)}
-                          onClick={() => copyPlanSetOneWeight(exercise, setCount)}
-                        >
-                          Same as set 1
-                        </button>
-                      </div>
-
-                      <div className="planned-set-grid">
-                        <div className="planned-set-column-headers" aria-hidden="true">
-                          <span />
-                          <span>kg</span>
-                          <span>Reps</span>
-                          <span />
-                        </div>
-                        {Array.from({ length: setCount }, (_, index) => (
-                          <div
-                            key={`${exercise.name}-set-${index + 1}`}
-                            className={`planned-set-row${completedRows[index] ? ' completed' : ''}`}
+                      <div className="planned-set-section">
+                        <div className="planned-set-header">
+                          {getAppliedTarget(exercise, exercise.exerciseId) && (
+                            <span className="weight-target-chip">
+                              +{getAppliedTarget(exercise, exercise.exerciseId)?.increaseKg} kg applied
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            className="same-as-set-one-button"
+                            disabled={!(Number(setWeights[0]) > 0)}
+                            onClick={() => copyPlanSetOneWeight(exercise, setCount)}
                           >
-                            <span className="planned-set-label">Set {index + 1}</span>
-                            <SteppedNumberInput
-                              value={setWeights[index] ?? 0}
-                              step={2.5}
-                              min={0}
-                              label={`Set ${index + 1} weight in kilograms`}
-                              dataLogWeight
-                              invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
-                              onFocus={(event) => event.currentTarget.select()}
-                              onClick={(event) => event.currentTarget.select()}
-                              onChange={(value) => updatePlanSetValue(exercise, index, 'weight', value, setCount)}
-                            />
-                            <input
-                              className="set-reps-input"
-                              type="number"
-                              inputMode="numeric"
-                              min="1"
-                              value={setReps[index] ?? draft.reps}
-                              aria-label={`Set ${index + 1} reps`}
-                              onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
-                            />
-                            <button
-                              type="button"
-                              className="complete-set-button"
-                              aria-label={`${completedRows[index] ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
-                              aria-pressed={completedRows[index]}
-                              onClick={() => {
-                                // Ticking a set starts the rest before the next one.
-                                if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90)
-                                togglePlanSetDone(exercise, index, setCount)
-                              }}
-                            >
-                              ✓
-                            </button>
-                            {exercise.technique === 'drop-set' && (
-                              <div className="planned-drop-set-row">
-                                <strong>Drop</strong>
+                            Same as set 1
+                          </button>
+                        </div>
+
+                        <div className="planned-set-grid">
+                          <div className="planned-set-column-headers" aria-hidden="true">
+                            <span>Set</span>
+                            <span>Previous</span>
+                            <span>kg</span>
+                            <span>Reps</span>
+                            <span>✓</span>
+                          </div>
+                          {Array.from({ length: setCount }, (_, index) => {
+                            const previousSet = previousSets[index]
+                            return (
+                              <div
+                                key={`${exercise.name}-set-${index + 1}`}
+                                className={`planned-set-row${completedRows[index] ? ' completed' : ''}`}
+                              >
+                                <span className="planned-set-label">{index + 1}</span>
+                                {previousSet ? (
+                                  <button
+                                    type="button"
+                                    className="previous-set-value"
+                                    aria-label={`Copy previous set ${index + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
+                                    onClick={() => {
+                                      updatePlanSetValue(exercise, index, 'weight', String(previousSet.weight), setCount)
+                                      updatePlanSetValue(exercise, index, 'reps', String(previousSet.reps), setCount)
+                                    }}
+                                  >
+                                    {`${previousSet.weight} × ${previousSet.reps}`}
+                                  </button>
+                                ) : (
+                                  <span className="previous-set-value">—</span>
+                                )}
                                 <SteppedNumberInput
-                                  value={dropSetWeights[index] ?? 0}
+                                  value={setWeights[index] ?? 0}
                                   step={2.5}
                                   min={0}
-                                  label={`Set ${index + 1} drop weight in kilograms`}
+                                  label={`Set ${index + 1} weight in kilograms`}
+                                  dataLogWeight
+                                  invalid={!!logError[getPlanDraftKey(exercise.name)] && !(Number(setWeights[index]) > 0)}
                                   onFocus={(event) => event.currentTarget.select()}
                                   onClick={(event) => event.currentTarget.select()}
-                                  onChange={(value) => updatePlanSetValue(exercise, index, 'dropWeight', value, setCount)}
+                                  onChange={(value) => updatePlanSetValue(exercise, index, 'weight', value, setCount)}
                                 />
                                 <input
                                   className="set-reps-input"
                                   type="number"
                                   inputMode="numeric"
                                   min="1"
-                                  value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
-                                  aria-label={`Set ${index + 1} drop reps`}
-                                  onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', event.target.value, setCount)}
+                                  value={setReps[index] ?? draft.reps}
+                                  aria-label={`Set ${index + 1} reps`}
+                                  onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
                                 />
-                                <span aria-hidden="true" />
+                                <button
+                                  type="button"
+                                  className="complete-set-button"
+                                  aria-label={`${completedRows[index] ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
+                                  aria-pressed={completedRows[index]}
+                                  onClick={() => {
+                                    if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90)
+                                    togglePlanSetDone(exercise, index, setCount)
+                                  }}
+                                >
+                                  ✓
+                                </button>
+                                {exercise.technique === 'drop-set' && (
+                                  <div className="planned-drop-set-row">
+                                    <strong>Drop</strong>
+                                    <SteppedNumberInput
+                                      value={dropSetWeights[index] ?? 0}
+                                      step={2.5}
+                                      min={0}
+                                      label={`Set ${index + 1} drop weight in kilograms`}
+                                      onFocus={(event) => event.currentTarget.select()}
+                                      onClick={(event) => event.currentTarget.select()}
+                                      onChange={(value) => updatePlanSetValue(exercise, index, 'dropWeight', value, setCount)}
+                                    />
+                                    <input
+                                      className="set-reps-input"
+                                      type="number"
+                                      inputMode="numeric"
+                                      min="1"
+                                      value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
+                                      aria-label={`Set ${index + 1} drop reps`}
+                                      onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', event.target.value, setCount)}
+                                    />
+                                    <span aria-hidden="true" />
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                            )
+                          })}
+                        </div>
 
+                        {logError[getPlanDraftKey(exercise.name)] && (
+                          <p role="alert" aria-live="assertive" className="account-error log-error">{logError[getPlanDraftKey(exercise.name)]}</p>
+                        )}
+
+                        {(completedSetCount < setCount || logError[getPlanDraftKey(exercise.name)]) && (
+                          <button
+                            type="button"
+                            className="primary-button small-button"
+                            onClick={() => void logPlannedExercise(exercise, completedRows)}
+                          >
+                            Log exercise
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="exercise-detail-row">
+                      <button
+                        type="button"
+                        className="exercise-detail-toggle"
+                        onClick={() => togglePostureTips(exercise.name)}
+                        aria-expanded={isTipsVisible}
+                        aria-controls={`posture-tips-${exerciseKey}`}
+                      >
+                        {text.posture}<span aria-hidden="true">{isTipsVisible ? '−' : '+'}</span>
+                      </button>
+                      <ul id={`posture-tips-${exerciseKey}`} className="posture-tips-list" hidden={!isTipsVisible}>
+                        {postureTips.map((tip, index) => (
+                          <li key={`${exercise.name}-tip-${index}`}>{tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
+                    <div className="exercise-detail-row">
+                      <button
+                        type="button"
+                        className="exercise-detail-toggle"
+                        onClick={() => toggleProgressSection(exercise.name)}
+                        aria-expanded={isProgressSectionVisible}
+                      >
+                        {text.progress}<span aria-hidden="true">{isProgressSectionVisible ? '−' : '+'}</span>
+                      </button>
+                      {isProgressSectionVisible && (progressItems.length > 0 ? (
+                        <div className="planned-history-list">
+                          {progressItems.map((item) => (
+                            <article key={item.id} className="planned-history-item">
+                              <div className="planned-history-topline">
+                                <span>{formatHistoryDate(item.date)}</span>
+                                <strong>{item.maxWeight} kg</strong>
+                              </div>
+                              <div className="planned-history-meta">
+                                <small>{item.totalVolume} kg volume</small>
+                                <small>{item.setsCount} sets</small>
+                              </div>
+                              {item.comments ? (
+                                <p className="planned-history-comment">
+                                  <strong>{text.comments}:</strong> {item.comments}
+                                </p>
+                              ) : null}
+                            </article>
+                          ))}
+                        </div>
+                      ) : <p className="empty-state">{text.noProgressHistory}</p>)}
+                    </div>
+                    {libraryMatch && (
+                      <div className="exercise-detail-row">
+                        <AskExercise
+                          exerciseId={libraryMatch.id}
+                          exerciseName={libraryMatch.name}
+                          onSignIn={onSignIn}
+                        />
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      className="rest-start-button"
+                      onClick={() => onStartRest(exercise.restSeconds ?? 90)}
+                    >
+                      Start rest
+                    </button>
+                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
+                    {!group.isSuperset && (
                       <label className="planned-notes-field">
                         <span>Notes</span>
                         <textarea
@@ -1731,66 +1768,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
                         />
                       </label>
-
-                      {logError[getPlanDraftKey(exercise.name)] && (
-                        <p role="alert" aria-live="assertive" className="account-error log-error">{logError[getPlanDraftKey(exercise.name)]}</p>
-                      )}
-
-                      {(completedSetCount < setCount || logError[getPlanDraftKey(exercise.name)]) && (
-                        <button
-                          type="button"
-                          className="primary-button small-button"
-                          onClick={() => void logPlannedExercise(exercise, completedRows)}
-                        >
-                          Finish exercise
-                        </button>
-                      )}
-
-                    </div>
                     )}
-
-                    <div className="planned-progress-box">
-                      <div className="planned-history-section">
-                        <div className="planned-set-header">
-                          <span>{text.progress}</span>
-                          <button
-                            type="button"
-                            className="toggle-button set-section-toggle"
-                            onClick={() => toggleProgressSection(exercise.name)}
-                            aria-label={isProgressSectionVisible ? `Hide progress for ${exercise.name}` : `Show progress for ${exercise.name}`}
-                          >
-                            {isProgressSectionVisible ? '−' : '+'}
-                          </button>
-                        </div>
-
-                        {isProgressSectionVisible && progressItems.length > 0 ? (
-                          <div className="planned-history-list">
-                            {progressItems.map((item) => (
-                              <article key={item.id} className="planned-history-item">
-                                <div className="planned-history-topline">
-                                  <span>{formatHistoryDate(item.date)}</span>
-                                  <strong>{item.maxWeight} kg</strong>
-                                </div>
-
-                                <div className="planned-history-meta">
-                                  <small>{item.totalVolume} kg volume</small>
-                                  <small>{item.setsCount} sets</small>
-                                </div>
-
-                                {item.comments ? (
-                                  <p className="planned-history-comment">
-                                    <strong>{text.comments}:</strong> {item.comments}
-                                  </p>
-                                ) : null}
-                              </article>
-                            ))}
-                          </div>
-                        ) : isProgressSectionVisible ? (
-                          <p className="empty-state">{text.noProgressHistory}</p>
-                        ) : null}
-                      </div>
-
-                    </div>
                   </>
                 )}
               </article>

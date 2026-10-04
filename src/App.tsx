@@ -32,6 +32,8 @@ import {
   copyWeightToUntouchedSets,
   filterLoggableSets,
   formatWorkoutSet,
+  getPreviousWorkoutSets,
+  isBodyweightEquipment,
   workoutMaxWeight,
   workoutVolume,
 } from './utils/workoutSets'
@@ -104,6 +106,7 @@ export default function App() {
   const [setWeightTouched, setSetWeightTouched] = useState<boolean[]>([false, false])
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
+  const [squeezeCueExpanded, setSqueezeCueExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<AppTab>('today')
   const [restTimer, setRestTimer] = useState<RestTimerState | null>(() => loadRestTimerState())
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
@@ -204,6 +207,7 @@ export default function App() {
     setSetWeightTouched([false, false])
     setDraftNotes('')
     setTipsExpanded(false)
+    setSqueezeCueExpanded(false)
   }, [selectedExercise])
 
   const availableBodyRegions = useMemo(() => getAvailableBodyRegions(exercises), [exercises])
@@ -221,6 +225,7 @@ export default function App() {
   )
 
   const previousWorkout = exerciseHistory[0]
+  const previousSets = selectedExercise ? getPreviousWorkoutSets(history, selectedExercise.id) : []
   const previousVolume = previousWorkout
     ? workoutVolume(previousWorkout.sets)
     : 0
@@ -504,10 +509,14 @@ export default function App() {
                     {selectedExercise.notes && <p className="exercise-notes">{selectedExercise.notes}</p>}
 
                     {selectedExercise.squeezeCue?.trim() && (
-                      <p className="squeeze-cue">
-                        <span className="squeeze-cue-label"><span aria-hidden="true">💪</span> Squeeze</span>
-                        <span>{selectedExercise.squeezeCue}</span>
-                      </p>
+                      <button
+                        type="button"
+                        className={`squeeze-cue-button${squeezeCueExpanded ? ' expanded' : ''}`}
+                        aria-expanded={squeezeCueExpanded}
+                        onClick={() => setSqueezeCueExpanded((current) => !current)}
+                      >
+                        <strong>Squeeze — </strong>{selectedExercise.squeezeCue}
+                      </button>
                     )}
 
                     <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
@@ -584,33 +593,68 @@ export default function App() {
                       <h3>{text.trackTitle}</h3>
                     </div>
 
-                    {draftSets.map((set, index) => (
-                      <div className="set-row" key={set.id}>
-                        <span className="set-label">Set {index + 1}</span>
-                        <label className="set-field">
-                          <span>Reps</span>
-                          <input
-                            type="number"
-                            min={0}
-                            value={set.reps}
-                            onChange={(event) => updateSet(index, 'reps', event.target.value)}
-                          />
-                        </label>
-                        <label className="set-field">
-                          <span>Weight</span>
-                          <input
-                            type="number"
-                            min={0}
-                            step="0.5"
-                            value={set.weight}
-                            onChange={(event) => updateSet(index, 'weight', event.target.value)}
-                          />
-                        </label>
-                        <button type="button" className="remove-set-button" onClick={() => removeSet(set.id)}>
-                          {text.remove}
-                        </button>
+                    <div className="free-set-table">
+                      <div className="free-set-header" aria-hidden="true">
+                        <span>Set</span>
+                        <span>Previous</span>
+                        <span>kg</span>
+                        <span>Reps</span>
+                        <span>✓</span>
+                        <span />
                       </div>
-                    ))}
+                      {draftSets.map((set, index) => {
+                        const previousSet = previousSets[index]
+                        const complete = set.weight > 0 || (isBodyweightEquipment(selectedExercise.equipment) && set.reps > 0)
+                        return (
+                          <div className="set-row" key={set.id}>
+                            <span className="set-label">{index + 1}</span>
+                            {previousSet ? (
+                              <button
+                                type="button"
+                                className="previous-set-value"
+                                aria-label={`Copy previous set ${index + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
+                                onClick={() => {
+                                  updateSet(index, 'weight', String(previousSet.weight))
+                                  updateSet(index, 'reps', String(previousSet.reps))
+                                }}
+                              >
+                                {`${previousSet.weight} × ${previousSet.reps}`}
+                              </button>
+                            ) : (
+                              <span className="previous-set-value">—</span>
+                            )}
+                            <input
+                              className="free-set-input"
+                              type="number"
+                              min={0}
+                              step="0.5"
+                              value={set.weight}
+                              aria-label={`Set ${index + 1} weight in kilograms`}
+                              onChange={(event) => updateSet(index, 'weight', event.target.value)}
+                            />
+                            <input
+                              className="free-set-input"
+                              type="number"
+                              min={0}
+                              value={set.reps}
+                              aria-label={`Set ${index + 1} reps`}
+                              onChange={(event) => updateSet(index, 'reps', event.target.value)}
+                            />
+                            <span className="free-set-complete" aria-label={complete ? 'Set entered' : 'Set not entered'}>
+                              {complete ? '✓' : ''}
+                            </span>
+                            <button
+                              type="button"
+                              className="free-set-remove"
+                              aria-label={`Remove set ${index + 1}`}
+                              onClick={() => removeSet(set.id)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
 
                     <div className="action-row">
                       <button type="button" className="secondary-button" onClick={addSet}>
