@@ -1,9 +1,10 @@
 :root {
-  --bg-dark: #1f1f20;
-  --bg-soft: #2b2b2d;
-  --panel: rgba(255, 255, 255, 0.07);
-  --panel-strong: rgba(255, 255, 255, 0.12);
-  --line: rgba(255, 255, 255, 0.14);
+  /* Darker surfaces (PO 2026-10-05). Previous: bg-dark #1f1f20, bg-soft #2b2b2d. */
+  --bg-dark: #0f0f10;
+  --bg-soft: #171719;
+  --panel: rgba(255, 255, 255, 0.05);
+  --panel-strong: rgba(255, 255, 255, 0.09);
+  --line: rgba(255, 255, 255, 0.11);
   --text: #f3f3f1;
   --muted: #c8c7c4;
   --muted-strong: #efefeb;
@@ -42,7 +43,7 @@ body {
   min-height: 100vh;
   height: 100vh;
   display: block;
-  background: linear-gradient(180deg, #252526, #121212);
+  background: linear-gradient(180deg, #141415, #08080a);
   color: var(--text);
   font-family: Inter, 'Segoe UI', sans-serif;
   font-size: var(--font-body);
@@ -154,7 +155,7 @@ button {
   max-height: none;
   min-height: 0;
   padding-top: env(safe-area-inset-top, 0px);
-  background: linear-gradient(180deg, rgba(37, 37, 38, 0.95), rgba(18, 18, 18, 0.96));
+  background: linear-gradient(180deg, rgba(20, 20, 21, 0.97), rgba(8, 8, 10, 0.98));
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -203,7 +204,7 @@ button {
 }
 
 .brand-bar.collapsed {
-  background: rgba(24, 24, 25, 0.96);
+  background: rgba(12, 12, 13, 0.96);
   border-bottom: 1px solid var(--line);
   pointer-events: auto;
 }
@@ -1370,7 +1371,7 @@ button {
   padding: 0 6px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 30px;
-  background: rgba(24, 24, 25, 0.72);
+  background: rgba(10, 10, 11, 0.78);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
@@ -1380,7 +1381,7 @@ button {
 
 @supports not (backdrop-filter: blur(1px)) {
   .bottom-tab-bar {
-    background: rgba(24, 24, 25, 0.96);
+    background: rgba(12, 12, 13, 0.96);
   }
 }
 
@@ -1422,7 +1423,7 @@ button {
   padding: 4px 6px 4px 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 18px;
-  background: rgba(24, 24, 25, 0.96);
+  background: rgba(12, 12, 13, 0.96);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   transform: translateX(-50%);
 }
