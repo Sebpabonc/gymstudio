@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
+import ExerciseSearchSuggestions from './components/ExerciseSearchSuggestions'
 import RestTimer from './components/RestTimer'
 import AskExercise from './components/AskExercise'
 import { localIsoDate } from './lib/dates'
@@ -26,7 +27,6 @@ import {
   ALL_BODY_REGIONS,
   filterExercises,
   getAvailableBodyRegions,
-  getExerciseSubtitle,
   getExerciseTips,
 } from './utils/exerciseFilters'
 import {
@@ -452,26 +452,14 @@ export default function App() {
                   />
 
                   {(search.trim() || bodyRegion !== ALL_BODY_REGIONS) && (
-                    <div className="search-dropdown" role="listbox" aria-label="Exercise suggestions">
-                      {filteredExercises.length ? (
-                        filteredExercises.map((exercise) => (
-                          <button
-                            key={exercise.id}
-                            type="button"
-                            className={selectedExercise?.id === exercise.id ? 'result-item active' : 'result-item'}
-                            onClick={() => {
-                              setSelectedId(exercise.id)
-                              setSearch('')
-                            }}
-                          >
-                            <span className="result-name">{getExerciseDisplayName(exercise)}</span>
-                            <span className="result-meta">{getExerciseSubtitle(exercise)}</span>
-                          </button>
-                        ))
-                      ) : (
-                        <p className="empty-state">No exercises found.</p>
-                      )}
-                    </div>
+                    <ExerciseSearchSuggestions
+                      exercises={filteredExercises}
+                      selectedExerciseId={selectedExercise?.id}
+                      onSelect={(exerciseId) => {
+                        setSelectedId(exerciseId)
+                        setSearch('')
+                      }}
+                    />
                   )}
                 </div>
               </section>
