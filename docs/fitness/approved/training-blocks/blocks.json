@@ -2,7 +2,7 @@
   {
     "id": "block-2026-02-16-hypertrophy-flat-pyramid",
     "number": 1,
-    "name": "Hypertrophy Flat Pyramid",
+    "name": "Size · Straight Sets + Supersets",
     "method": "flat-pyramid",
     "start_date": "2026-02-16",
     "weeks": 6,
@@ -690,7 +690,7 @@
   {
     "id": "block-2026-03-30-hypertrophy-reverse-pyramid",
     "number": 2,
-    "name": "Hypertrophy Reverse Pyramid",
+    "name": "Size · Heavy-to-Light + Drop Sets",
     "method": "reverse-pyramid",
     "start_date": "2026-03-30",
     "weeks": 6,
@@ -1292,7 +1292,7 @@
   {
     "id": "block-2026-05-11-functional-hypertrophy-flat-pyramid",
     "number": 3,
-    "name": "Functional Hypertrophy Flat Pyramid",
+    "name": "Strength · Heavy Sets of 6-8",
     "method": "strength-hypertrophy",
     "start_date": "2026-05-11",
     "weeks": 6,
@@ -1822,7 +1822,7 @@
   {
     "id": "block-2026-07-06-hypertrophy-pyramid",
     "number": 4,
-    "name": "Hypertrophy Pyramid",
+    "name": "Size · Light-to-Heavy + Supersets",
     "method": "ascending-pyramid",
     "start_date": "2026-07-06",
     "weeks": 6,
@@ -2444,7 +2444,7 @@
   {
     "id": "block-2026-08-17-hypertrophy-reverse-pyramid",
     "number": 5,
-    "name": "Hypertrophy Reverse Pyramid",
+    "name": "Size · Heavy-to-Light + Drop Sets II",
     "method": "reverse-pyramid",
     "start_date": "2026-08-17",
     "weeks": 6,
@@ -3046,24 +3046,24 @@
   {
     "id": "block-2026-10-05-hypertrophy-flat-pyramid-ii",
     "number": 6,
-    "name": "Hypertrophy Flat Pyramid II",
+    "name": "Size · Straight Sets, Stretch Focus",
     "method": "flat-pyramid",
     "start_date": "2026-10-05",
     "weeks": 6,
     "origin": "pt",
-    "summary": "Six weeks of muscle building: same weight on every set, main lifts first, then supersets of non-competing muscles. Effort builds from week 1 to 5, week 6 is lighter. More side-delt and hamstring work, and stretch-focused exercises.",
+    "summary": "Six weeks of muscle building: chest & back, shoulders & arms, and legs, each twice a week. Same weight on every set, main lifts first, then supersets of non-competing muscles. Effort builds from week 1 to 5; week 6 is lighter.",
     "insights": [
       {
         "title": "Goal",
-        "body": "Build muscle with moderate weights taken close to failure, after the intensity of block 5 and the lighter weeks that followed. Volume is set from your own history: more side-delt and hamstring work (your slowest-moving areas), about 18-20 weekly sets for chest and back, and every muscle gets at least one exercise that loads it in a deep stretch."
+        "body": "Build muscle with moderate weights taken close to failure, at maintenance calories. Volume comes from your own history: extra side-delt and hamstring work (your slowest-moving areas), biceps trained early on arm days, about 18 weekly sets for chest and back, and every muscle gets at least one exercise that loads it in a deep stretch."
       },
       {
         "title": "How it works",
-        "body": "Every set of an exercise uses the same weight and reps. The main lifts (30-degree incline dumbbell press, chest-supported T-bar row, Smith machine shoulder press, pendulum squat) come first, done alone with 2.5-3 minutes rest. The rest are supersets of muscles that don't compete, like flat dumbbell press with underhand pulldowns or incline curls with overhead triceps extensions: first exercise, about 10 seconds, second exercise, then the full rest. Abs moved to arms days so leg days stay short."
+        "body": "Each day has one job: chest and back (plus abs), then shoulders and arms, then legs, twice a week. Every set of an exercise uses the same weight and reps. The main lifts (30-degree incline dumbbell press, chest-supported T-bar row, Smith machine shoulder press, pendulum squat) come first, alone, with 2.5-3 minutes rest. The rest are supersets of muscles that don't compete, mostly at one station, like incline curls with dumbbell lateral raises: first exercise, about 10 seconds, second exercise, then the full rest."
       },
       {
         "title": "A days vs B days",
-        "body": "A days are heavier: 8 reps on the main lifts, 10 on the other compound lifts, 12 on isolation exercises and 15 on lateral raises, rear delts and calves. B days repeat the same exercises in the same order with lighter weights for 10, 12, 15 and 20 reps. Track and progress A and B days separately."
+        "body": "A days are heavier: 8 reps on the main lifts, 10 on the other compound lifts, 12 on isolation exercises and abs, and 15 on lateral raises, rear delts and calves. B days repeat the same exercises in the same order with lighter weights for 10, 12, 15 and 20 reps. Track and progress A and B days separately."
       },
       {
         "title": "How to progress",
@@ -3071,18 +3071,18 @@
       },
       {
         "title": "What to expect",
-        "body": "Week 1 should feel easy on purpose while you find your weights and learn the new exercises. Weeks 2-5 get harder each week and should bring more reps or weight on most lifts. Week 6 is lighter: same exercises and weights, but only half the sets (round up) and stop about 3 reps before failure, so you start the heavy block 7 fresh."
+        "body": "Week 1 should feel easy on purpose while you find your weights and learn the new exercises. Weeks 2-5 get harder each week and should bring more reps or weight on most lifts. Shoulder and arm days come the day after chest and back, so the shoulder press may feel slightly weaker than when fresh; that is normal. Week 6 is lighter: same exercises and weights, half the sets (round up), about 3 reps before failure."
       },
       {
         "title": "Key tips",
-        "body": "Set up stations before supersets, for example a flat bench next to the pulldown. Lower slowly into the stretch on every press, fly, curl, RDL and calf raise, without bouncing. Never grind heavy squats, RDLs or presses to failure. If a movement hurts, stop it and see a qualified professional."
+        "body": "Set up before supersets: a flat bench next to the pulldown, dumbbells by the incline bench for curls and laterals, and one cable tower for fly, straight-arm pulldown and crunch. If the second machine of a pair is taken, do both as straight sets with the same rest. Lower slowly into every stretch without bouncing. Never grind squats, RDLs or presses to failure. If a movement hurts, stop it and see a qualified professional."
       }
     ],
     "days": [
       {
         "key": "chest-back-a",
-        "name": "Chest-Back A",
-        "focus": "Chest & back · heavy",
+        "name": "Chest & Back A",
+        "focus": "Chest, back & abs · heavy",
         "exercises": [
           {
             "code": "A1",
@@ -3156,7 +3156,7 @@
           },
           {
             "code": "D2",
-            "exercise_id": "machine-pullover",
+            "exercise_id": "cable-straight-arms-pull-downs",
             "sets": 3,
             "reps": [
               "12",
@@ -3166,28 +3166,28 @@
             "rest_seconds": 90,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": "Let the arms travel high for a full lat stretch."
+            "notes": "Same cable tower as the fly; let your arms rise high to stretch the lats."
           },
           {
             "code": "E1",
-            "exercise_id": "standing-db-lateral-raises",
+            "exercise_id": "cable-crunch",
             "sets": 3,
             "reps": [
-              "15",
-              "15",
-              "15"
+              "12",
+              "12",
+              "12"
             ],
             "rest_seconds": 60,
             "technique": "straight",
             "angle_degrees": null,
-            "notes": "Strict, no swinging; lead with the elbows."
+            "notes": "Curl your spine down; hips stay still."
           }
         ]
       },
       {
         "key": "arms-a",
-        "name": "Arms A",
-        "focus": "Delts, arms & abs · heavy",
+        "name": "Shoulders & Arms A",
+        "focus": "Delts & arms · heavy",
         "exercises": [
           {
             "code": "A1",
@@ -3201,10 +3201,38 @@
             "rest_seconds": 150,
             "technique": "straight",
             "angle_degrees": 75,
-            "notes": ""
+            "notes": "Done first while fresh; lower the bar to chin level under control."
           },
           {
             "code": "B1",
+            "exercise_id": "dumbbell-curl-incline",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
+            "rest_seconds": 10,
+            "technique": "superset",
+            "angle_degrees": 45,
+            "notes": "Let your arms hang straight down at the bottom."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "standing-db-lateral-raises",
+            "sets": 3,
+            "reps": [
+              "15",
+              "15",
+              "15"
+            ],
+            "rest_seconds": 75,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Strict, no swinging; lead with the elbows."
+          },
+          {
+            "code": "C1",
             "exercise_id": "cable-lateral-raise",
             "sets": 4,
             "reps": [
@@ -3219,36 +3247,6 @@
             "notes": "Cable runs behind your body; do both sides, then go on."
           },
           {
-            "code": "B2",
-            "exercise_id": "reverse-pec-deck-fly",
-            "sets": 4,
-            "reps": [
-              "15",
-              "15",
-              "15",
-              "15"
-            ],
-            "rest_seconds": 75,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "C1",
-            "exercise_id": "dumbbell-curl-incline",
-            "sets": 4,
-            "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
-            ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": 45,
-            "notes": "Let your arms hang straight down at the bottom."
-          },
-          {
             "code": "C2",
             "exercise_id": "rope-low-cable-oh-tricep-extensions",
             "sets": 4,
@@ -3261,13 +3259,14 @@
             "rest_seconds": 90,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": "Face away from the stack; let elbows bend fully overhead."
+            "notes": "Same low cable as the laterals; let elbows bend fully overhead."
           },
           {
             "code": "D1",
             "exercise_id": "ez-bb-preacher-curls",
-            "sets": 3,
+            "sets": 4,
             "reps": [
+              "12",
               "12",
               "12",
               "12"
@@ -3279,24 +3278,25 @@
           },
           {
             "code": "D2",
-            "exercise_id": "cable-crunch",
-            "sets": 3,
+            "exercise_id": "reverse-pec-deck-fly",
+            "sets": 4,
             "reps": [
-              "12",
-              "12",
-              "12"
+              "15",
+              "15",
+              "15",
+              "15"
             ],
-            "rest_seconds": 60,
+            "rest_seconds": 75,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": "Curl your spine down; hips stay still."
+            "notes": "Arms long, lead with the back of your hands."
           }
         ]
       },
       {
         "key": "lower-body-a",
-        "name": "Lower Body A",
-        "focus": "Legs · heavy",
+        "name": "Legs A",
+        "focus": "Legs & calves · heavy",
         "exercises": [
           {
             "code": "A1",
@@ -3390,8 +3390,8 @@
       },
       {
         "key": "chest-back-b",
-        "name": "Chest-Back B",
-        "focus": "Chest & back · volume",
+        "name": "Chest & Back B",
+        "focus": "Chest, back & abs · volume",
         "exercises": [
           {
             "code": "A1",
@@ -3465,7 +3465,7 @@
           },
           {
             "code": "D2",
-            "exercise_id": "machine-pullover",
+            "exercise_id": "cable-straight-arms-pull-downs",
             "sets": 3,
             "reps": [
               "15",
@@ -3475,28 +3475,28 @@
             "rest_seconds": 90,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": "Let the arms travel high for a full lat stretch."
+            "notes": "Same cable tower as the fly; let your arms rise high to stretch the lats."
           },
           {
             "code": "E1",
-            "exercise_id": "standing-db-lateral-raises",
+            "exercise_id": "cable-crunch",
             "sets": 3,
             "reps": [
-              "20",
-              "20",
-              "20"
+              "15",
+              "15",
+              "15"
             ],
             "rest_seconds": 60,
             "technique": "straight",
             "angle_degrees": null,
-            "notes": "Strict, no swinging; lead with the elbows."
+            "notes": "Curl your spine down; hips stay still."
           }
         ]
       },
       {
         "key": "arms-b",
-        "name": "Arms B",
-        "focus": "Delts, arms & abs · volume",
+        "name": "Shoulders & Arms B",
+        "focus": "Delts & arms · volume",
         "exercises": [
           {
             "code": "A1",
@@ -3510,10 +3510,38 @@
             "rest_seconds": 150,
             "technique": "straight",
             "angle_degrees": 75,
-            "notes": ""
+            "notes": "Done first while fresh; lower the bar to chin level under control."
           },
           {
             "code": "B1",
+            "exercise_id": "dumbbell-curl-incline",
+            "sets": 3,
+            "reps": [
+              "15",
+              "15",
+              "15"
+            ],
+            "rest_seconds": 10,
+            "technique": "superset",
+            "angle_degrees": 45,
+            "notes": "Let your arms hang straight down at the bottom."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "standing-db-lateral-raises",
+            "sets": 3,
+            "reps": [
+              "20",
+              "20",
+              "20"
+            ],
+            "rest_seconds": 75,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Strict, no swinging; lead with the elbows."
+          },
+          {
+            "code": "C1",
             "exercise_id": "cable-lateral-raise",
             "sets": 4,
             "reps": [
@@ -3528,36 +3556,6 @@
             "notes": "Cable runs behind your body; do both sides, then go on."
           },
           {
-            "code": "B2",
-            "exercise_id": "reverse-pec-deck-fly",
-            "sets": 4,
-            "reps": [
-              "20",
-              "20",
-              "20",
-              "20"
-            ],
-            "rest_seconds": 75,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "C1",
-            "exercise_id": "dumbbell-curl-incline",
-            "sets": 4,
-            "reps": [
-              "15",
-              "15",
-              "15",
-              "15"
-            ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": 45,
-            "notes": "Let your arms hang straight down at the bottom."
-          },
-          {
             "code": "C2",
             "exercise_id": "rope-low-cable-oh-tricep-extensions",
             "sets": 4,
@@ -3570,13 +3568,14 @@
             "rest_seconds": 90,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": "Face away from the stack; let elbows bend fully overhead."
+            "notes": "Same low cable as the laterals; let elbows bend fully overhead."
           },
           {
             "code": "D1",
             "exercise_id": "ez-bb-preacher-curls",
-            "sets": 3,
+            "sets": 4,
             "reps": [
+              "15",
               "15",
               "15",
               "15"
@@ -3588,24 +3587,25 @@
           },
           {
             "code": "D2",
-            "exercise_id": "cable-crunch",
-            "sets": 3,
+            "exercise_id": "reverse-pec-deck-fly",
+            "sets": 4,
             "reps": [
-              "15",
-              "15",
-              "15"
+              "20",
+              "20",
+              "20",
+              "20"
             ],
-            "rest_seconds": 60,
+            "rest_seconds": 75,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": "Curl your spine down; hips stay still."
+            "notes": "Arms long, lead with the back of your hands."
           }
         ]
       },
       {
         "key": "lower-body-b",
-        "name": "Lower Body B",
-        "focus": "Legs · volume",
+        "name": "Legs B",
+        "focus": "Legs & calves · volume",
         "exercises": [
           {
             "code": "A1",
@@ -3702,7 +3702,7 @@
   {
     "id": "block-2026-11-16-strength-hypertrophy-ii",
     "number": 7,
-    "name": "Strength-Hypertrophy II",
+    "name": "Strength · Heavy Sets of 6-8 II",
     "method": "strength-hypertrophy",
     "start_date": "2026-11-16",
     "weeks": 6,
@@ -4316,7 +4316,7 @@
   {
     "id": "block-2026-12-28-hypertrophy-pyramid-ii",
     "number": 8,
-    "name": "Hypertrophy Pyramid II",
+    "name": "Size · Light-to-Heavy + Supersets II",
     "method": "ascending-pyramid",
     "start_date": "2026-12-28",
     "weeks": 6,
@@ -4968,7 +4968,7 @@
   {
     "id": "block-2027-02-08-hypertrophy-reverse-pyramid-iii",
     "number": 9,
-    "name": "Hypertrophy Reverse Pyramid III",
+    "name": "Size · Heavy-to-Light + Drop Sets III",
     "method": "reverse-pyramid",
     "start_date": "2027-02-08",
     "weeks": 6,
