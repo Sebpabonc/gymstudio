@@ -915,6 +915,60 @@ button {
   cursor: not-allowed;
 }
 
+.ai-feature-button {
+  appearance: none;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--nav-active);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ai-feature-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ai-explanation,
+.ai-session-summary {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.ai-inline-consent,
+.ai-inline-answer {
+  width: 100%;
+}
+
+.ai-inline-status,
+.ai-inline-error {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.ai-inline-error {
+  color: var(--danger, #ff8b8b);
+}
+
+.ai-session-summary-button {
+  min-height: 44px;
+}
+
+.ai-summary-bullets {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}
+
 .tips-box.collapsed .tips-header {
   margin-bottom: 0;
 }
