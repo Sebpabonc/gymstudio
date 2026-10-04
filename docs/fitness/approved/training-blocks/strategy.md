@@ -202,3 +202,10 @@ more side/rear delt and hamstring volume, stretch-biased choices (overhead trice
 leg curl, paused standing calves), fewer but better main-lift sets with longer rest, effort ramp from ~3 RIR
 (week 1) to 0–1 RIR (week 5), week 6 lighter (same loads, half the sets), core moved to the arms days.
 The flat skull crusher is gone, so triceps get overhead work in blocks 6 and 7.
+
+### Block 6 v2 and block names (2026-10-05)
+PO feedback: lateral raises did not belong on the Chest & Back days. All delt work now sits on the Shoulders &
+Arms days (same weekly volume); Chest & Back days are chest, back and abs (cable crunch); the machine pullover was
+replaced by the straight-arm cable pulldown. Block names now follow "Goal · how the sets work" (see
+`training-blocks/2026-10-05-block-names.json`); Block 6 days are Chest & Back A/B, Shoulders & Arms A/B, Legs A/B.
+Details: `docs/fitness/approved/2026-10-05-block6-v2-review.md`.

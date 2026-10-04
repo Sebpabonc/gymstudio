@@ -443,7 +443,7 @@ describe('training blocks', () => {
     expect(bundledBlocks).toHaveLength(9)
     expect(bundledBlocks[5]).toMatchObject({
       id: 'block-2026-10-05-hypertrophy-flat-pyramid-ii',
-      name: 'Hypertrophy Flat Pyramid II',
+      name: 'Size · Straight Sets, Stretch Focus',
       startDate: '2026-10-05',
     })
     expect(bundledBlocks[5].insights.map(({ title }) => title)).toEqual([

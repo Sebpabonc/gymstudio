@@ -1,0 +1,11 @@
+[
+  { "number": 1, "old": "Hypertrophy Flat Pyramid", "new": "Size · Straight Sets + Supersets" },
+  { "number": 2, "old": "Hypertrophy Reverse Pyramid", "new": "Size · Heavy-to-Light + Drop Sets" },
+  { "number": 3, "old": "Functional Hypertrophy Flat Pyramid", "new": "Strength · Heavy Sets of 6-8" },
+  { "number": 4, "old": "Hypertrophy Pyramid", "new": "Size · Light-to-Heavy + Supersets" },
+  { "number": 5, "old": "Hypertrophy Reverse Pyramid", "new": "Size · Heavy-to-Light + Drop Sets II" },
+  { "number": 6, "old": "Hypertrophy Flat Pyramid II", "new": "Size · Straight Sets, Stretch Focus" },
+  { "number": 7, "old": "Strength-Hypertrophy II", "new": "Strength · Heavy Sets of 6-8 II" },
+  { "number": 8, "old": "Hypertrophy Pyramid II", "new": "Size · Light-to-Heavy + Supersets II" },
+  { "number": 9, "old": "Hypertrophy Reverse Pyramid III", "new": "Size · Heavy-to-Light + Drop Sets III" }
+]
