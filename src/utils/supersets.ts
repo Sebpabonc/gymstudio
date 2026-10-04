@@ -30,6 +30,11 @@ export function groupSupersets<T extends { code?: string; technique?: string; na
   return groups
 }
 
+export function getLoggedSupersetRounds(setCounts: number[], roundCount: number): boolean[] {
+  const completedRoundCount = setCounts.length > 0 ? Math.min(...setCounts) : 0
+  return Array.from({ length: roundCount }, (_, index) => index < completedRoundCount)
+}
+
 export type SupersetEntryInput = {
   exerciseId: string
   sets: WorkoutSet[]
