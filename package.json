@@ -13,6 +13,8 @@
     "mobile:open:ios": "cap open ios"
   },
   "dependencies": {
+    "@capacitor/app": "^6.0.3",
+    "@capacitor/browser": "^6.0.6",
     "@capacitor/core": "^6.2.2",
     "@capacitor/ios": "^6.2.2",
     "@supabase/supabase-js": "^2.117.2",
