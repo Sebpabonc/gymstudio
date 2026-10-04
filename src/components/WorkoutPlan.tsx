@@ -372,8 +372,8 @@ export default function WorkoutPlan({
     posture: 'POSTURE TIPS',
     noData: 'No logged data yet',
     modePreset: '6-week block',
-    modeCustom: 'Make your own plan',
-    customTitle: 'Make your own plan',
+    modeCustom: 'Make your plan',
+    customTitle: 'Make your plan',
     customHint: 'Create and save exercises manually.',
     customName: 'Exercise name',
     customSets: 'Sets',
@@ -1214,6 +1214,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
   return (
     <div className="card plan-card">
       <div className="section-title-row">
+        {planMode === 'custom' && <h3>{text.customTitle}</h3>}
         <div className="plan-header-actions">
           <button
             type="button"
@@ -1450,7 +1451,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       ) : (
         <section className="custom-plan-builder">
           <div className="custom-plan-header">
-            <strong>{text.customTitle}</strong>
             <p>{text.customHint}</p>
           </div>
 
@@ -1559,6 +1559,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
         </section>
       )}
 
+      {activeExercises.length > 0 && (
       <section className="day-plan-card">
         <div className="day-exercises">
           {groupSupersets(activeExercises).map((group) => {
@@ -2078,6 +2079,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           })}
         </div>
       </section>
+      )}
       {sessionSummary && (
         <div className="session-summary-backdrop" onClick={() => setSessionSummary(null)}>
           <section
