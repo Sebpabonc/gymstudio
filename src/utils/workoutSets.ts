@@ -32,6 +32,22 @@ export function copyWeightToUntouchedSets(
   })
 }
 
+export function copySetOneWeight(weights: number[]) {
+  return weights.length === 0 ? [] : weights.map(() => weights[0])
+}
+
+export function stepWorkoutValue(value: number, direction: -1 | 1, step: number, min = 0) {
+  const precision = Math.max(step.toString().split('.')[1]?.length ?? 0, 0)
+  const nextValue = Math.max(min, (Number(value) || 0) + direction * step)
+  return Number(nextValue.toFixed(precision))
+}
+
+/** Sets ticked as done; when none are ticked, every set counts (the user just pressed Finish). */
+export function selectCompletedSets(sets: WorkoutSet[], completed: boolean[]) {
+  if (!completed.some(Boolean)) return sets
+  return sets.filter((_, index) => completed[index])
+}
+
 export function formatWorkoutSet(set: WorkoutSet) {
   const main = `${set.reps} × ${set.weight} kg`
   return set.drop ? `${main} → ${set.drop.reps} × ${set.drop.weight} kg` : main

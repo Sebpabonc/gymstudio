@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobile Breathing Room</title>
+<meta name="description" content="GymStudio UXer mockups, 2026-10-04: Now vs Proposed phone screens (375 px) for Today, an expanded exercise with set log, Progress and the exercise card.">
+<style>
+  /* App tokens copied from src/styles.css (origin/main, 2026-10-04) */
+  :root {
+    --bg-dark: #1f1f20;
+    --bg-soft: #2b2b2d;
+    --panel: rgba(255, 255, 255, 0.07);
+    --line: rgba(255, 255, 255, 0.14);
+    --text: #f3f3f1;
+    --muted: #c8c7c4;
+    --muted-strong: #efefeb;
+    --brand: #8d5e63;
+    --brand-soft: rgba(141, 94, 99, 0.18);
+    --button-dark: linear-gradient(135deg, #7a5d60 0%, #2f2f31 100%);
+    --nav-active: #c99ca1;
+    --nav-idle: rgba(243, 243, 241, 0.55);
+    --cue: rgba(214, 160, 82, 0.14);
+    --cue-line: rgba(214, 160, 82, 0.45);
+
+    /* Proposed tokens */
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
+    --gutter: 16px;
+    --text-caption: 12px; --text-label: 13px; --text-body: 15px; --text-row-title: 17px;
+    --text-title: 20px; --text-number: 22px; --text-headline: 24px; --text-display: 34px; --text-input: 17px;
+    --radius-section: 16px; --radius-control: 12px;
+    --surface-1: rgba(255, 255, 255, 0.05);
+    --surface-2: rgba(255, 255, 255, 0.08);
+    --divider: rgba(255, 255, 255, 0.08);
+
+    /* Page chrome (doc only) */
+    --page-bg: #151516;
+    --page-text: #f3f3f1;
+    --page-muted: #b9b8b5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--page-bg);
+    color: var(--page-text);
+    font-family: Inter, 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+  }
+  .doc { max-width: 900px; margin: 0 auto; padding: 32px 16px 64px; }
+  .doc h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .doc > p.lede { color: var(--page-muted); margin: 0 0 8px; font-size: 15px; max-width: 680px; }
+  .doc h2 { font-size: 20px; margin: 48px 0 6px; letter-spacing: -0.01em; }
+  .doc h2 + p { color: var(--page-muted); margin: 0 0 16px; font-size: 14px; max-width: 720px; }
+  .pair { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+  .col { display: grid; gap: 8px; justify-items: center; }
+  .tag { font-size: 13px; font-weight: 700; color: var(--page-muted); }
+  .tag.new { color: var(--nav-active); }
+  .notes { font-size: 13px; color: var(--page-muted); max-width: 375px; margin: 0; padding-left: 18px; }
+  .notes li { margin: 2px 0; }
+
+  /* Phone */
+  .phone {
+    position: relative;
+    width: 375px; max-width: calc(100vw - 32px);
+    height: 667px;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(180deg, #252526, #121212);
+    color: var(--text);
+  }
+  .scroll { position: absolute; inset: 0; overflow: hidden; }
+  .bar {
+    position: absolute; inset: 0 0 auto; height: 48px; z-index: 3;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 18px; background: rgba(24,24,25,0.96); border-bottom: 1px solid var(--line);
+  }
+  .bar b { font-size: 12.8px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.03em; }
+  .bar span { font-size: 12.8px; color: var(--muted); margin-left: 8px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #e7bd72; }
+  .dock {
+    position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 4;
+    width: 228px; height: 60px; border-radius: 30px;
+    display: grid; grid-template-columns: repeat(4, 48px); gap: 3px; justify-content: center; align-items: center;
+    background: rgba(24,24,25,0.72); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+  .dock i { display: grid; place-items: center; height: 48px; color: var(--nav-idle); position: relative; }
+  .dock i.on { color: var(--nav-active); }
+  .dock i.on::after { content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--nav-active); }
+  .dock svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .dock i.on svg { stroke-width: 2.1; }
+
+  /* ---------- NOW (approximation of the live CSS) ---------- */
+  .now { font-size: 12.16px; letter-spacing: -0.01em; }
+  .now .content { padding: 62px 12px 100px; display: grid; gap: 12px; }
+  .now .card { background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 22px; padding: 14px 12px; display: grid; gap: 12px; box-shadow: inset 0 1px rgba(255,255,255,0.08); }
+  .now .box { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: rgba(255,255,255,0.03); display: grid; gap: 10px; }
+  .now .box.r18 { border-radius: 18px; }
+  .now .box.r12 { border-radius: 12px; padding: 10px; }
+  .now .box.r10 { border-radius: 10px; padding: 8px 10px; gap: 6px; }
+  .now .banner { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--brand-soft); font-size: 11.5px; display: grid; gap: 4px; }
+  .now .banner b { font-weight: 700; }
+  .now .cap { font-size: 8.6px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .now .sec { font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-strong); }
+  .now .chip { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid var(--line); font-size: 8.6px; font-weight: 700; }
+  .now .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .now .tog { width: 29px; height: 28px; border-radius: 999px; border: 1px solid var(--line); display: grid; place-items: center; font-size: 11px; flex: 0 0 auto; }
+  .now .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .now .code { font-size: 9.9px; letter-spacing: 0.08em; color: var(--muted); }
+  .now .name { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+  .now .name.sm { font-size: 13px; }
+  .now .sub { color: var(--muted); }
+  .now .done { display: inline-flex; gap: 4px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 10.9px; width: max-content; }
+  .now .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .now .tab { border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,0.04); min-height: 64px; padding: 6px 4px; font-size: 9.3px; font-weight: 800; text-align: center; display: grid; place-content: center; gap: 2px; }
+  .now .tab.on { background: var(--button-dark); }
+  .now .tab small { font-size: 8px; font-weight: 600; }
+  .now .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .now .metric { border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; background: rgba(255,255,255,0.04); display: grid; gap: 3px; min-height: 84px; align-content: start; }
+  .now .metric span { font-size: 8.3px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .now .metric strong { font-size: 13px; }
+  .now .restbtn { border: 1px solid var(--line); border-radius: 10px; min-height: 40px; display: grid; place-items: center; font-size: 10.9px; font-weight: 700; background: rgba(255,255,255,0.06); }
+  .now .cue { border: 1px solid var(--cue-line); background: var(--cue); border-radius: 12px; padding: 10px; display: grid; grid-template-columns: auto 1fr; gap: 10px; font-size: 12.5px; }
+  .now .lbl { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .now .inp { border: 1px solid var(--line); border-radius: 10px; min-height: 40px; padding: 9px 10px; font-size: 13.1px; background: rgba(255,255,255,0.04); }
+  .now .pair2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .now .primary { background: var(--button-dark); border-radius: 12px; min-height: 38px; display: grid; place-items: center; font-size: 10.9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .now .superset { border: 1px solid rgba(141,94,99,0.55); background: rgba(141,94,99,0.08); border-radius: 16px; padding: 10px; display: grid; gap: 10px; }
+  .now .ghost { opacity: 0.6; }
+  .now .timer { position: absolute; left: 50%; transform: translateX(-50%); bottom: 94px; z-index: 4; display: flex; gap: 4px; align-items: center; padding: 4px 6px 4px 10px; border-radius: 18px; background: rgba(24,24,25,0.96); border: 1px solid var(--line); min-height: 52px; }
+  .now .timer b { font-size: 14px; padding-right: 6px; }
+  .now .timer span { min-width: 52px; min-height: 44px; display: grid; place-items: center; border-radius: 12px; background: rgba(255,255,255,0.06); font-size: 11px; font-weight: 700; }
+
+  /* ---------- PROPOSED ---------- */
+  .new { font-size: var(--text-body); letter-spacing: -0.005em; }
+  .new .content { padding: 64px var(--gutter) 100px; display: grid; gap: var(--space-5); }
+  .new .caption { font-size: var(--text-caption); color: var(--muted); }
+  .new .label { font-size: var(--text-label); font-weight: 600; color: var(--muted); }
+  .new .meta { font-size: var(--text-label); color: var(--muted); }
+  .new .title { font-size: var(--text-title); font-weight: 700; letter-spacing: -0.015em; line-height: 1.2; }
+  .new .blockhead { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .new .blockhead > div { display: grid; gap: 2px; }
+  .new .chev { color: var(--muted); font-size: 22px; line-height: 1; }
+  .new .days { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .new .day { height: 52px; border-radius: var(--radius-control); background: var(--surface-1); display: grid; place-content: center; justify-items: center; gap: 6px; font-size: var(--text-body); font-weight: 700; position: relative; }
+  .new .day.today { background: var(--brand-soft); }
+  .new .day.sel { box-shadow: inset 0 0 0 2px var(--nav-active); }
+  .new .day .p { width: 24px; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.14); overflow: hidden; }
+  .new .day .p i { display: block; height: 100%; background: var(--nav-active); }
+  .new .dayhead { display: grid; gap: 4px; }
+  .new .progress { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); overflow: hidden; margin-top: 4px; }
+  .new .progress i { display: block; height: 100%; width: 43%; background: var(--nav-active); }
+  .new .section { background: var(--surface-1); border-radius: var(--radius-section); padding: 0 var(--space-4); }
+  .new .xrow { display: grid; grid-template-columns: 28px 1fr auto; gap: var(--space-3); align-items: center; min-height: 64px; padding: var(--space-3) 0; border-top: 1px solid var(--divider); }
+  .new .section > .xrow:first-child, .new .section > .ss:first-child .xrow:first-child { border-top: 0; }
+  .new .badge { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font-size: var(--text-caption); font-weight: 700; color: var(--muted-strong); }
+  .new .badge.ok { background: var(--brand-soft); color: var(--nav-active); font-size: 14px; }
+  .new .xname { font-size: var(--text-row-title); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
+  .new .xrow.done .xname { opacity: 0.7; }
+  .new .ss { border-top: 1px solid var(--divider); padding: var(--space-3) 0 0; position: relative; }
+  .new .ss::before { content: ''; position: absolute; left: -9px; top: 40px; bottom: 14px; width: 3px; border-radius: 2px; background: var(--brand); }
+  .new .ss .xrow { border-top: 0; padding-left: 0; }
+  .new .ss-head { font-size: var(--text-label); color: var(--muted); }
+  .new .ss-head b { color: var(--nav-active); font-weight: 600; }
+  .new .ex-open { padding: var(--space-4) 0; display: grid; gap: var(--space-4); border-top: 1px solid var(--divider); }
+  .new .cue { border-left: 3px solid var(--cue-line); padding: 2px 0 2px var(--space-3); font-size: var(--text-body); color: var(--muted-strong); }
+  .new .cue b { color: #e7bd72; font-weight: 600; }
+  .new .more { color: var(--nav-active); font-weight: 600; }
+  .new .sets { display: grid; }
+  .new .sets .h, .new .sets .r { display: grid; grid-template-columns: 28px 1fr 68px 60px 44px; gap: var(--space-2); align-items: center; }
+  .new .sets .h { font-size: var(--text-caption); color: var(--muted); padding-bottom: var(--space-2); }
+  .new .sets .h span:nth-child(3), .new .sets .h span:nth-child(4) { text-align: center; }
+  .new .sets .r { min-height: 56px; border-top: 1px solid var(--divider); }
+  .new .sets .r.ticked { background: var(--brand-soft); margin: 0 calc(-1 * var(--space-2)); padding: 0 var(--space-2); border-radius: 10px; border-top-color: transparent; }
+  .new .sets .n { font-weight: 700; font-size: var(--text-body); }
+  .new .sets .prev { font-size: var(--text-label); color: var(--muted); }
+  .new .field { height: 48px; border-radius: var(--radius-control); background: var(--surface-2); display: grid; place-items: center; font-size: var(--text-input); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .new .field.ph { color: rgba(255,255,255,0.38); font-weight: 600; }
+  .new .tick { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; color: var(--muted); font-size: 18px; }
+  .new .tick.on { background: var(--nav-active); border-color: var(--nav-active); color: #1f1f20; }
+  .new .setfoot { display: flex; justify-content: space-between; padding-top: var(--space-2); font-size: var(--text-label); }
+  .new .setfoot span { color: var(--nav-active); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+  .new .primary { min-height: 52px; border-radius: var(--radius-control); background: var(--button-dark); display: grid; place-items: center; font-size: 16px; font-weight: 700; }
+  .new .link { display: flex; justify-content: space-between; align-items: center; min-height: 48px; border-top: 1px solid var(--divider); font-size: var(--text-body); }
+  .new .link .chev { font-size: 20px; }
+  .new .links { display: grid; }
+  .new .links .link:first-child { border-top: 0; }
+  .new .timer { position: absolute; left: 50%; transform: translateX(-50%); bottom: 80px; z-index: 4; width: 228px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: space-between; padding: 0 6px 0 16px; background: rgba(24,24,25,0.92); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.1); }
+  .new .timer b { font-size: var(--text-number); font-variant-numeric: tabular-nums; font-weight: 700; }
+  .new .timer span { min-width: 44px; height: 40px; display: grid; place-items: center; font-size: 14px; font-weight: 600; color: var(--nav-active); }
+  .new .headline { background: var(--surface-1); border-radius: var(--radius-section); padding: var(--space-4); display: grid; gap: var(--space-3); }
+  .new .headline .big { font-size: var(--text-headline); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+  .new .wk { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; text-align: center; }
+  .new .wk i { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--line); display: block; margin: 0 auto 4px; }
+  .new .wk i.on { background: var(--brand); border-color: var(--brand); }
+  .new .lrow { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-top: 1px solid var(--divider); gap: var(--space-3); }
+  .new .section > .lrow:first-child { border-top: 0; }
+  .new .lrow .v { color: var(--muted); font-size: var(--text-body); display: flex; align-items: center; gap: var(--space-2); }
+  .new .seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface-2); border-radius: 10px; padding: 2px; height: 36px; }
+  .new .seg span { display: grid; place-items: center; font-size: var(--text-label); font-weight: 600; color: var(--muted); border-radius: 8px; }
+  .new .seg span.on { background: var(--bg-soft); color: var(--text); }
+  .new .pick { min-height: 48px; border-radius: var(--radius-control); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-4); font-size: var(--text-body); }
+  .new .stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  .new .stats strong { display: block; font-size: var(--text-number); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .new .search { min-height: 48px; border-radius: var(--radius-control); background: var(--surface-2); display: flex; align-items: center; padding: 0 var(--space-4); font-size: var(--text-input); color: rgba(255,255,255,0.4); }
+  .new .fchips { display: flex; gap: var(--space-2); overflow: hidden; }
+  .new .fchip { flex: 0 0 auto; height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); display: grid; place-items: center; font-size: var(--text-label); font-weight: 600; color: var(--muted); }
+  .new .fchip.on { background: var(--brand-soft); border-color: rgba(141,94,99,0.6); color: var(--text); }
+  svg.chart { width: 100%; height: 150px; display: block; }
+  @media (max-width: 820px) { .pair { flex-direction: column; align-items: center; } }
+</style>
+</head>
+<body>
+<div class="doc">
+  <h1>Mobile breathing room</h1>
+  <p class="lede">UXer mockups, 4 Oct 2026. Now vs Proposed at 375 × 667, with the app's real colours, font stack and Block 6 demo content. The approved large GYM STUDIO header (shown here in its collapsed 48 px state) and the floating icon dock stay as they are. Proposal: <code>2026-10-04-mobile-breathing-room.md</code>.</p>
+
+  <!-- ===================== 1. TODAY COLLAPSED ===================== -->
+  <h2>1 · Today: block, day selector, exercise list</h2>
+  <p>Now there are three nested frames before an exercise, the block appears twice and the day grid uses 9 px text. The proposal is one block line, D1–D6, then one section of full-width rows with a superset rail.</p>
+  <div class="pair">
+    <div class="col">
+      <span class="tag">Now</span>
+      <div class="phone now">
+        <div class="bar"><div><b>Gym Studio</b><span>Today</span></div><i class="dot"></i></div>
+        <div class="scroll"><div class="content">
+          <div class="card">
+            <div class="banner"><b>Next block starts Mon 5 Oct</b><span>Block 6 · Hypertrophy Flat Pyramid II</span></div>
+            <div class="box">
+              <span class="cap">Block 6</span>
+              <div class="row"><span class="name" style="font-size:17px">Hypertrophy Flat<br>Pyramid II</span><span class="chip">PT</span><span style="font-size:10.5px;font-weight:700;text-align:right">Pinned block<br>Starts Mon 5 Oct</span><span class="tog">+</span></div>
+            </div>
+            <div class="tabs">
+              <div class="tab on"><small>Today</small>Day 1 · Chest-Back A<small>3/7</small></div>
+              <div class="tab">Day 2 · Arms A<small>3/7</small></div>
+              <div class="tab">Day 3 · Lower Body A<small>0/7</small></div>
+              <div class="tab">Day 4 · Chest-Back B<small>0/7</small></div>
+              <div class="tab">Day 5 · Arms B<small>0/7</small></div>
+              <div class="tab">Day 6 · Lower Body B<small>0/7</small></div>
+            </div>
+            <span class="sec">Chest &amp; back · heavy</span>
+            <div class="box r18" style="padding:12px">
+              <div class="box ghost">
+                <span class="code">A1</span>
+                <div class="row"><div><div class="name sm">Dumbbell Bench Press</div><div class="sub">Incline</div></div><span class="tog">+</span></div>
+                <span class="done">✓ Done · 3 sets · top 5 kg</span>
+              </div>
+              <div class="superset">
+                <div class="row" style="justify-content:flex-start"><span class="chip">Superset</span><span class="done">✓ Done</span></div>
+                <span>Do B1, rest ~10 s, then B2; rest after the pair.</span>
+                <div class="box ghost">
+                  <span class="code">B1</span>
+                  <div class="row"><div class="name sm">Dumbbell Bench Press</div><span class="tog">+</span></div>
+                  <span class="done">✓ Done · 1 set · top 24 kg</span>
+                </div>
+                <div class="box ghost">
+                  <span class="code">B2</span>
+                  <div class="row"><div><div class="name sm">Cable Fly</div><div class="sub">High to Low</div></div><span class="tog">+</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <nav class="dock" aria-hidden="true"><i class="on"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></i></nav>
+      </div>
+      <ul class="notes"><li>First exercise row starts at y = 772 px (measured), below the fold</li><li>Day tabs: 9.3 px text, 133 px tall</li><li>4 levels of borders around B1</li></ul>
+    </div>
+
+    <div class="col">
+      <span class="tag new">Proposed</span>
+      <div class="phone new">
+        <div class="bar"><div><b>Gym Studio</b><span>Today</span></div><i class="dot"></i></div>
+        <div class="scroll"><div class="content">
+          <div class="blockhead">
+            <div><span class="caption">Block 6 · Week 1 of 6 · PT</span><span class="title">Hypertrophy Flat Pyramid II</span></div>
+            <span class="chev" aria-hidden="true">›</span>
+          </div>
+          <div style="display:grid;gap:var(--space-4)">
+            <div class="days">
+              <div class="day today sel">D1<span class="p"><i style="width:43%"></i></span></div>
+              <div class="day">D2<span class="p"><i style="width:43%"></i></span></div>
+              <div class="day">D3<span class="p"><i style="width:0"></i></span></div>
+              <div class="day">D4<span class="p"><i style="width:0"></i></span></div>
+              <div class="day">D5<span class="p"><i style="width:0"></i></span></div>
+              <div class="day">D6<span class="p"><i style="width:0"></i></span></div>
+            </div>
+            <div class="dayhead">
+              <span class="title">Day 1 · Chest-Back A</span>
+              <span class="meta">Chest &amp; back · heavy · 3 of 7 done · today</span>
+              <div class="progress"><i></i></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="xrow done"><span class="badge ok">✓</span><div><div class="xname">Dumbbell Bench Press</div><div class="meta">Incline 30° · 3 sets · top 5 kg</div></div><span class="chev">›</span></div>
+            <div class="ss">
+              <div class="ss-head"><b>Superset B</b> · ~10 s between · rest 90 s after</div>
+              <div class="xrow done"><span class="badge ok">✓</span><div><div class="xname">Dumbbell Bench Press</div><div class="meta">Flat · 1 set · top 24 kg</div></div><span class="chev">›</span></div>
+              <div class="xrow done"><span class="badge ok">✓</span><div><div class="xname">Cable Fly</div><div class="meta">High to low · 3 sets · top 5 kg</div></div><span class="chev">›</span></div>
+            </div>
+            <div class="xrow"><span class="badge">C1</span><div><div class="xname">Pec Deck Fly</div><div class="meta">3 × 15 · rest 60 s</div></div><span class="chev">›</span></div>
+            <div class="xrow"><span class="badge">D1</span><div><div class="xname">Plate-Loaded T-Bar Row</div><div class="meta">Chest-supported · 4 × 12 · rest 90 s</div></div><span class="chev">›</span></div>
+          </div>
+        </div></div>
+        <nav class="dock" aria-hidden="true"><i class="on"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></i></nav>
+      </div>
+      <ul class="notes"><li>First exercise at ~y 300; 5 exercises visible</li><li>One container, 16 px gutters, 13–20 px text</li><li>Whole row is the tap target (64 px)</li></ul>
+    </div>
+  </div>
+
+  <!-- ===================== 2. EXPANDED + SET LOG ===================== -->
+  <h2>2 · Today: expanded exercise with set log and rest timer</h2>
+  <p>Now there are tiles, boxes and UPPERCASE labels, the set log needs a second tap, inputs are 13 px (iOS zooms) and the card is 890 px tall. The proposal is one meta line, a one-line cue, a set table that is already open (Previous · kg · reps · ✓), and tips, history and Ask AI as link rows.</p>
+  <div class="pair">
+    <div class="col">
+      <span class="tag">Now</span>
+      <div class="phone now">
+        <div class="bar"><div><b>Gym Studio</b><span>Today</span></div><i class="dot"></i></div>
+        <div class="scroll"><div class="content">
+          <div class="card"><div class="box r18" style="padding:12px">
+            <div class="box">
+              <span class="code">A1</span>
+              <div class="row"><div class="name">Dumbbell Bench Press</div><span class="tog">−</span></div>
+              <div class="chips"><span class="chip">Straight Sets</span><span class="chip">Chest</span><span class="chip">Incline 30°</span></div>
+              <span style="font-size:10.9px" class="sub">Straight sets: same reps and weight every set</span>
+              <div class="cue"><b>💪 Squeeze</b><span>Drive your elbows in and squeeze your upper chest as the dumbbells come up.</span></div>
+              <div class="row"><div class="box r12" style="flex:1"><div class="row"><span class="sec" style="font-size:10.4px">Posture<br>tips</span><span class="tog">+</span></div></div><span class="chip" style="min-height:40px;font-size:10.9px;font-weight:600;color:var(--muted)">Sign in to ask AI</span></div>
+              <div class="metrics">
+                <div class="metric"><span>Sets</span><strong>4</strong></div>
+                <div class="metric"><span>Reps</span><strong>12 · 12 · 12 · 12</strong></div>
+                <div class="metric"><span>Rest</span><strong>90 s</strong><div class="restbtn">Start rest</div></div>
+              </div>
+              <div class="box r12">
+                <div class="row"><span class="sec">Set log</span><span class="tog" style="width:26px;height:25px">−</span></div>
+                <div class="box r10"><b style="font-size:10.9px">Set 1</b><div class="pair2"><span class="lbl">Reps</span><span class="lbl">Weight</span></div><div class="pair2"><span class="inp">12</span><span class="inp">22</span></div></div>
+                <div class="box r10"><b style="font-size:10.9px">Set 2</b><div class="row"><span class="lbl">Ready</span><span>0 kg</span></div></div>
+              </div>
+            </div>
+          </div></div>
+        </div></div>
+        <div class="timer"><b>⏱ 1:12</b><span>+15s</span><span>Skip</span></div>
+        <nav class="dock" aria-hidden="true"><i class="on"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></i></nav>
+      </div>
+      <ul class="notes"><li>Inputs start 74 px from the edge, 13.1 px text → iOS zoom</li><li>Set 3, Set 4 and "Log this exercise" are below the timer and dock</li><li>~15 UPPERCASE labels on one exercise</li></ul>
+    </div>
+
+    <div class="col">
+      <span class="tag new">Proposed</span>
+      <div class="phone new">
+        <div class="bar"><div><b>Gym Studio</b><span>Today</span></div><i class="dot"></i></div>
+        <div class="scroll"><div class="content" style="gap:var(--space-4)">
+          <div class="section">
+            <div class="ex-open" style="border-top:0">
+              <div style="display:grid;gap:4px">
+                <div class="row" style="display:flex;justify-content:space-between;align-items:center"><span class="caption">A1 · Day 1 · Chest-Back A</span><span class="chev" style="transform:rotate(90deg)">›</span></div>
+                <span class="title">Dumbbell Bench Press</span>
+                <span class="meta">Incline 30° · Straight sets · 4 × 12 · rest 90 s</span>
+              </div>
+              <div class="cue"><b>Squeeze</b> — drive your elbows in and squeeze your upper chest… <span class="more">More</span></div>
+              <div class="sets">
+                <div class="h"><span>Set</span><span>Previous</span><span>kg</span><span>Reps</span><span></span></div>
+                <div class="r ticked"><span class="n">1</span><span class="prev">12 × 22</span><span class="field">22</span><span class="field">12</span><span class="tick on">✓</span></div>
+                <div class="r ticked"><span class="n">2</span><span class="prev">12 × 22</span><span class="field">22</span><span class="field">12</span><span class="tick on">✓</span></div>
+                <div class="r"><span class="n">3</span><span class="prev">12 × 22</span><span class="field ph">22</span><span class="field ph">12</span><span class="tick">✓</span></div>
+                <div class="r"><span class="n">4</span><span class="prev">11 × 22</span><span class="field ph">22</span><span class="field ph">12</span><span class="tick">✓</span></div>
+                <div class="setfoot"><span>+ Add set</span><span>Rest 90 s</span></div>
+              </div>
+              <div class="primary">Log exercise</div>
+              <div class="links">
+                <div class="link"><span>Technique tips</span><span class="chev">›</span></div>
+                <div class="link"><span>History &amp; progress</span><span class="chev">›</span></div>
+                <div class="link"><span>Ask AI</span><span class="chev">›</span></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <div class="timer"><b>1:12</b><span>+15 s</span><span>Skip</span></div>
+        <nav class="dock" aria-hidden="true"><i class="on"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></i></nav>
+      </div>
+      <ul class="notes"><li>All 4 sets visible right away; 17 px inputs, 48 px tall (no iOS zoom)</li><li>Ticking a set tints the row and starts the rest timer (#109)</li><li>Timer pill matches the dock width; 22 px digits</li></ul>
+    </div>
+  </div>
+
+  <!-- ===================== 3. PROGRESS ===================== -->
+  <h2>3 · Progress</h2>
+  <p>Now each section is its own 74 px card with an UPPERCASE title and a "+" circle. The proposal keeps the headline card, puts the sections in one grouped list with a summary on the right, and gives the open chart the full width.</p>
+  <div class="pair">
+    <div class="col">
+      <span class="tag">Now</span>
+      <div class="phone now">
+        <div class="bar"><div><b>Gym Studio</b><span>Progress</span></div><i class="dot"></i></div>
+        <div class="scroll"><div class="content">
+          <div class="card"><span class="name" style="font-size:16px">This week: 1 of 6 sessions · 1 PR · in progress</span>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);text-align:center;font-size:8.6px;color:var(--muted)"><span>D1<br><span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--brand)"></span></span><span>D2<br><span style="display:inline-block;width:20px;height:20px;border-radius:50%;border:1px solid var(--line)"></span></span><span>D3<br><span style="display:inline-block;width:20px;height:20px;border-radius:50%;border:1px solid var(--line)"></span></span><span>D4<br><span style="display:inline-block;width:20px;height:20px;border-radius:50%;border:1px solid var(--line)"></span></span><span>D5<br><span style="display:inline-block;width:20px;height:20px;border-radius:50%;border:1px solid var(--line)"></span></span><span>D6<br><span style="display:inline-block;width:20px;height:20px;border-radius:50%;border:1px solid var(--line)"></span></span></div>
+          </div>
+          <div class="card"><div class="row"><span class="sec" style="font-size:10.4px;letter-spacing:.14em">Suggestions</span><span class="tog" style="width:44px;height:44px">+</span></div></div>
+          <div class="card"><div class="row"><span class="sec" style="font-size:10.4px;letter-spacing:.14em">Consistency</span><span class="tog" style="width:44px;height:44px">+</span></div></div>
+          <div class="card">
+            <div class="row"><span class="sec" style="font-size:10.4px;letter-spacing:.14em">Strength trend</span><span class="tog" style="width:44px;height:44px">−</span></div>
+            <span class="cap">Exercise</span>
+            <div class="inp" style="font-size:13px">Barbell Bench Press (Incline)</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="restbtn" style="background:var(--button-dark);min-height:44px">A</div><div class="restbtn" style="min-height:44px">B</div><div class="restbtn" style="min-height:44px">ALL</div></div>
+          </div>
+          <div class="card"><div class="row"><span class="sec" style="font-size:10.4px;letter-spacing:.14em">Personal records</span><span class="tog" style="width:44px;height:44px">+</span></div></div>
+        </div></div>
+        <nav class="dock" aria-hidden="true"><i><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></i><i class="on"><svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></i></nav>
+      </div>
+      <ul class="notes"><li>6 cards × 74 px + gaps = 516 px of headings</li><li>No hint of what's inside a closed section</li></ul>
+    </div>
+
+    <div class="col">
+      <span class="tag new">Proposed</span>
+      <div class="phone new">
+        <div class="bar"><div><b>Gym Studio</b><span>Progress</span></div><i class="dot"></i></div>
+        <div class="scroll"><div class="content" style="gap:var(--space-4)">
+          <div class="headline">
+            <span class="big">1 of 6 sessions this week</span>
+            <span class="meta">1 PR · in progress · Block 6, week 1</span>
+            <div class="wk caption"><span><i class="on"></i>D1</span><span><i></i>D2</span><span><i></i>D3</span><span><i></i>D4</span><span><i></i>D5</span><span><i></i>D6</span></div>
+          </div>
+          <div class="section">
+            <div class="lrow"><span>Suggestions</span><span class="v">3 <span class="chev">›</span></span></div>
+            <div class="lrow"><span>Consistency</span><span class="v">1 of 6 <span class="chev">›</span></span></div>
+            <div class="lrow"><span>Strength trend</span><span class="v">+19% <span class="chev" style="transform:rotate(90deg)">›</span></span></div>
+            <div style="display:grid;gap:var(--space-3);padding-bottom:var(--space-4)">
+              <div class="pick"><span>Barbell Bench Press (Incline)</span><span class="chev">›</span></div>
+              <div class="seg"><span class="on">A days</span><span>B days</span><span>All</span></div>
+              <svg class="chart" viewBox="0 0 320 150" aria-label="Strength trend chart">
+                <rect x="40" y="6" width="60" height="120" fill="rgba(141,94,99,0.14)"/><rect x="130" y="6" width="80" height="120" fill="rgba(141,94,99,0.14)"/><rect x="240" y="6" width="80" height="120" fill="rgba(141,94,99,0.14)"/>
+                <polyline fill="none" stroke="#f3f3f1" stroke-width="2" points="0,70 30,64 40,52 60,118 72,60 96,60 110,40 125,40 240,118 252,62 268,58 296,30 318,14"/>
+                <circle cx="40" cy="52" r="5" fill="#e7bd72"/>
+                <text x="0" y="146" font-size="12" fill="#c8c7c4">20 Apr</text><text x="130" y="146" font-size="12" fill="#c8c7c4">1 Jun</text><text x="262" y="146" font-size="12" fill="#c8c7c4">21 Sep</text>
+              </svg>
+              <span class="meta" style="color:var(--muted-strong)">Est. 1RM +19% this block (66.5 → 79.2 kg)</span>
+            </div>
+            <div class="lrow"><span>Personal records</span><span class="v">1 new <span class="chev">›</span></span></div>
+          </div>
+        </div></div>
+        <nav class="dock" aria-hidden="true"><i><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></i><i class="on"><svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></i></nav>
+      </div>
+      <ul class="notes"><li>Closed sections: 6 × 56 px rows in one container (~336 px)</li><li>Summary value tells you whether to open it</li><li>Weekly sets and Block report card follow below</li></ul>
+    </div>
+  </div>
+
+  <!-- ===================== 4. EXERCISE CARD ===================== -->
+  <h2>4 · Exercises: search and exercise card</h2>
+  <p>Now there are 8.6 px UPPERCASE labels, muscle chips, boxed stats and 27 px filter chips. The proposal uses 13 px filter chips (36 px tall), muscles as a line of text, one stats row with 22 px numbers, and tips and Ask AI as link rows.</p>
+  <div class="pair">
+    <div class="col">
+      <span class="tag">Now</span>
+      <div class="phone now">
+        <div class="bar"><div><b>Gym Studio</b><span>Exercises</span></div><i class="dot"></i></div>
+        <div class="scroll"><div class="content">
+          <div class="card">
+            <span class="cap">Search exercise</span>
+            <div class="chips" style="flex-wrap:nowrap;overflow:hidden"><span class="chip" style="background:var(--brand-soft)">All</span><span class="chip">Chest</span><span class="chip">Back</span><span class="chip">Shoulders</span><span class="chip">Arms</span><span class="chip">Legs</span><span class="chip">Glutes</span></div>
+            <div class="inp" style="min-height:48px;font-size:15.4px;color:rgba(255,255,255,.38)">Bench press, squat, row...</div>
+          </div>
+          <div class="card">
+            <span class="cap">Exercise</span>
+            <span class="name" style="font-size:26px">Barbell Bench Press</span>
+            <span class="cap">Primary muscles</span>
+            <div class="chips"><span class="chip">Chest</span></div>
+            <span class="cap">Secondary muscles</span>
+            <div class="chips"><span class="chip">Triceps</span><span class="chip">Front Delts</span></div>
+            <div class="cue"><b>💪 Squeeze</b><span>Squeeze your chest as if trying to bend the bar into a U.</span></div>
+            <div class="box r12"><div class="row"><span class="cap">Posture tips</span><span class="tog">+</span><span class="chip" style="font-size:10.9px;font-weight:600;color:var(--muted);min-height:40px">Sign in to ask AI</span></div></div>
+            <div class="pair2"><div class="box r12"><span class="cap">Last max</span><b style="font-size:15px">85 kg</b></div><div class="box r12"><span class="cap">Last volume</span><b style="font-size:15px">2720 kg</b></div></div>
+          </div>
+        </div></div>
+        <nav class="dock" aria-hidden="true"><i><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></i><i class="on"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></i></nav>
+      </div>
+      <ul class="notes"><li>Filter chips 27 px tall, 8.6 px text</li><li>Search 15.4 px → iOS zoom on focus</li><li>Free-log inputs further down: 9.9 px, 36 px tall</li></ul>
+    </div>
+
+    <div class="col">
+      <span class="tag new">Proposed</span>
+      <div class="phone new">
+        <div class="bar"><div><b>Gym Studio</b><span>Exercises</span></div><i class="dot"></i></div>
+        <div class="scroll"><div class="content" style="gap:var(--space-4)">
+          <div style="display:grid;gap:var(--space-3)">
+            <div class="search">Search: bench, squat, RDL…</div>
+            <div class="fchips"><span class="fchip on">All</span><span class="fchip">Chest</span><span class="fchip">Back</span><span class="fchip">Shoulders</span><span class="fchip">Arms</span><span class="fchip">Legs</span></div>
+          </div>
+          <div class="section" style="padding:var(--space-4);display:grid;gap:var(--space-4)">
+            <div style="display:grid;gap:4px">
+              <span class="title" style="font-size:var(--text-headline)">Barbell Bench Press</span>
+              <span class="meta">Chest · also Triceps, Front delts</span>
+            </div>
+            <div class="cue"><b>Squeeze</b> — squeeze your chest as if trying to bend the bar into a U. <span class="more">More</span></div>
+            <div class="stats">
+              <div><span class="label">Last max</span><strong>85 kg</strong></div>
+              <div><span class="label">Last volume</span><strong>2,720 kg</strong></div>
+            </div>
+            <div class="meta">Last session 18 Jun · 4 sets · 8 × 85 kg each</div>
+            <div class="links">
+              <div class="link"><span>Technique tips</span><span class="chev">›</span></div>
+              <div class="link"><span>Ask AI about this exercise</span><span class="chev">›</span></div>
+              <div class="link"><span>Log it now</span><span class="chev">›</span></div>
+            </div>
+          </div>
+        </div></div>
+        <nav class="dock" aria-hidden="true"><i><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></i><i class="on"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></i></nav>
+      </div>
+      <ul class="notes"><li>17 px search, 36 px filter chips with a 44 px hit area</li><li>Previous performance in one line; free log reuses the set table</li><li>"Ask AI" shows "Sign in to ask AI" when signed out, as today</li></ul>
+    </div>
+  </div>
+
+  <h2>Proposed tokens</h2>
+  <p>Spacing 4 · 8 · 12 · 16 · 24 · 32 px, 16 px gutter. Type 12 caption · 13 label · 15 body · 17 row title · 20 title · 22 number · 24 headline · 34 wordmark. Inputs 17 px and 48 px tall. Section radius 16 px, control radius 12 px. One level of containers.</p>
+</div>
+</body>
+</html>
