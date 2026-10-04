@@ -1,6 +1,6 @@
 # Mobile breathing room: a roomier, calmer phone UI (2026-10-04)
 
-**Author:** UXer · **Status:** Approved with changes (see PO decisions), waiting for a PO decision ·
+**Author:** UXer · **Status:** Approved with changes (see PO decisions) ·
 **Mockups:** [`2026-10-04-mobile-breathing-room-mockups.html`](./2026-10-04-mobile-breathing-room-mockups.html)
 
 > Proposal only. Nothing here is committed work until Sebas approves it. This proposal keeps the
