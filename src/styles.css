@@ -41,12 +41,8 @@ body {
   margin: 0;
   min-height: 100vh;
   height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.12), transparent 22%),
-    linear-gradient(180deg, #dfe0df 0%, #b8b9b7 100%);
+  display: block;
+  background: linear-gradient(180deg, #252526, #121212);
   color: var(--text);
   font-family: Inter, 'Segoe UI', sans-serif;
   font-size: var(--font-body);
@@ -131,6 +127,7 @@ button {
 
 .phone-frame {
   position: relative;
+  flex: 0 0 100%;
   width: 100%;
   height: 100%;
   max-height: none;
@@ -178,7 +175,7 @@ button {
   gap: 12px;
   height: 48px;
   margin: 0 -12px -60px;
-  padding: 0 18px;
+  padding: 0 max(18px, calc((100% - 720px) / 2));
   background: transparent;
   pointer-events: none;
   transition: background-color 0.18s ease;
@@ -222,7 +219,9 @@ button {
   align-content: end;
   gap: 2px;
   min-height: 110px;
-  margin: 0 -12px;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
   padding: 24px 18px 8px;
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
@@ -320,6 +319,12 @@ button {
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.app-content > :not(.brand-bar):not(.header-sentinel) {
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
 }
 
 .account-screen {
@@ -3126,20 +3131,4 @@ button {
 /* Keep the last exercise scrollable above the rest timer pill as well as the dock. */
 .app-content.with-rest-timer {
   padding-bottom: calc(60px + 64px + max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
-}
-
-@media (min-width: 600px) {
-  .app-shell {
-    padding: 12px;
-  }
-
-  .phone-frame {
-    width: min(calc(100vw - 18px), 390px);
-    height: auto;
-    aspect-ratio: 390 / 844;
-    max-height: calc(100dvh - 12px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 34px;
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
-  }
 }
