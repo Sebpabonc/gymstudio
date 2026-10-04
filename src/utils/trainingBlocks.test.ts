@@ -5,6 +5,7 @@ import {
   blockWeek,
   defaultActiveBlock,
   formatBenchAngle,
+  formatBlockMethod,
   nextUnloggedDay,
   trainingBlockDateStatus,
 } from './trainingBlocks'
@@ -37,6 +38,12 @@ const blocks: TrainingBlock[] = [
 ]
 
 describe('training block dates', () => {
+  it('formats method slugs as sentence-case labels', () => {
+    expect(formatBlockMethod('reverse-pyramid')).toBe('Reverse pyramid')
+    expect(formatBlockMethod('flat-pyramid')).toBe('Flat pyramid')
+    expect(formatBlockMethod('strength_hypertrophy')).toBe('Strength hypertrophy')
+  })
+
   it('selects the next block during a gap when it starts within a week', () => {
     expect(defaultActiveBlock(blocks, '2026-10-03')?.id).toBe('block-6')
   })

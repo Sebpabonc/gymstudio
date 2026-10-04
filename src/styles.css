@@ -86,6 +86,19 @@ textarea {
   font: inherit;
 }
 
+button,
+input,
+select,
+textarea,
+summary {
+  min-height: 44px;
+}
+
+button,
+summary {
+  min-width: 44px;
+}
+
 input,
 select,
 textarea {
@@ -123,6 +136,7 @@ button {
 
 .demo-banner button {
   flex: 0 0 auto;
+  min-height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 999px;
   padding: 4px 10px;
@@ -293,7 +307,6 @@ button {
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .sync-indicator {
@@ -320,6 +333,7 @@ button {
 
 .app-content {
   display: grid;
+  align-content: start;
   gap: 12px;
   padding: 0 12px calc(60px + max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
   flex: 1;
@@ -627,6 +641,7 @@ button {
 
 .region-chip {
   flex: 0 0 auto;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
@@ -752,7 +767,7 @@ button {
   font-weight: 800;
   letter-spacing: -0.04em;
   text-transform: uppercase;
-  min-height: 42px;
+  min-height: 44px;
   width: fit-content;
   max-width: 100%;
   cursor: pointer;
@@ -806,6 +821,7 @@ button {
 .chip {
   display: inline-flex;
   align-items: center;
+  min-height: 36px;
   padding: 6px 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
@@ -885,7 +901,7 @@ button {
   flex: 0 0 auto;
   border: 1px solid var(--line);
   border-radius: 999px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 5px 12px;
   background: var(--brand-soft);
   color: var(--text);
@@ -921,8 +937,8 @@ button {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
   padding: 5px 10px;
+  min-height: 44px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1213,7 +1229,6 @@ button {
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
   box-shadow: 0 10px 22px rgba(33, 33, 35, 0.32);
 }
 
@@ -1252,9 +1267,9 @@ button {
   font-size: 0.56rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  text-transform: uppercase;
   padding: 9px 6px;
   line-height: 1.2;
+  min-height: 44px;
 }
 
 .tab-button.active {
@@ -1441,6 +1456,7 @@ button {
 .plan-badge {
   display: inline-flex;
   align-items: center;
+  min-height: 36px;
   padding: 5px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
@@ -1464,8 +1480,8 @@ button {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted-strong);
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1606,6 +1622,7 @@ button {
   align-items: center;
   gap: 8px;
   width: 100%;
+  min-height: 44px;
   min-width: 0;
   padding: 0;
   border: 0;
@@ -1644,6 +1661,7 @@ button {
 
 .origin-badge {
   flex: 0 0 auto;
+  min-height: 36px;
   padding: 5px 9px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -1686,6 +1704,7 @@ button {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
+  min-height: 44px;
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -2045,10 +2064,25 @@ button {
 }
 
 .planned-exercise-header {
+  appearance: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.planned-exercise-header .expand-toggle {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
 }
 
 .planned-exercise-title-block {
@@ -2254,7 +2288,7 @@ button {
 
 .set-stepper {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
   align-items: center;
   gap: 3px;
   min-width: 0;
@@ -2291,8 +2325,8 @@ button {
 .stepper-button,
 .complete-set-button {
   display: inline-flex;
-  width: 36px;
-  min-width: 36px;
+  width: 44px;
+  min-width: 44px;
   height: 44px;
   align-items: center;
   justify-content: center;
@@ -2403,7 +2437,7 @@ button {
 .planned-set-field-pair input {
   width: 100%;
   min-width: 0;
-  min-height: 40px;
+  min-height: 44px;
   box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -2705,6 +2739,16 @@ button {
   }
 }
 
+button[class] {
+  text-transform: none;
+}
+
+.planned-set-row button.previous-set-value,
+.set-row button.previous-set-value {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 .progress-section {
   --font-section: 0.75rem;
   --font-caption: 0.6875rem;
@@ -2808,6 +2852,7 @@ button {
 }
 
 .weight-target-chip {
+  min-height: 36px;
   font-size: var(--font-caption);
   font-weight: 700;
   color: #9fd6a6;
@@ -3843,13 +3888,13 @@ body {
 }
 
 .planned-set-row .set-stepper {
-  grid-template-columns: 24px minmax(0, 1fr) 24px;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
   gap: 2px;
 }
 
 .planned-set-row .set-stepper .stepper-button {
-  width: 24px;
-  min-width: 24px;
+  width: 44px;
+  min-width: 44px;
   height: 44px;
   border-radius: 8px;
 }
@@ -3877,12 +3922,12 @@ body {
 }
 
 .planned-drop-set-row .set-stepper {
-  grid-template-columns: 28px minmax(0, 1fr) 28px;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
 }
 
 .planned-drop-set-row .stepper-button {
-  width: 28px;
-  min-width: 28px;
+  width: 44px;
+  min-width: 44px;
 }
 
 .planned-progress-box,
@@ -4007,8 +4052,8 @@ body {
 }
 
 .free-set-remove {
-  width: 24px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -4019,13 +4064,59 @@ body {
 @media (max-width: 420px) {
   .planned-set-column-headers,
   .planned-set-row {
-    grid-template-columns: 30px minmax(40px, 1fr) minmax(78px, 1.5fr) minmax(40px, 0.8fr) 44px;
+    grid-template-columns: 30px minmax(44px, 1fr) minmax(136px, 1.5fr) minmax(44px, 0.8fr) 44px;
     gap: 3px;
   }
 
   .free-set-header,
   .set-row {
-    grid-template-columns: 28px minmax(40px, 1fr) minmax(50px, 1fr) minmax(44px, 0.9fr) 20px 20px;
+    grid-template-columns: 28px minmax(44px, 1fr) minmax(50px, 1fr) minmax(44px, 0.9fr) 20px 44px;
     gap: 3px;
   }
+}
+
+/* Block header (Tech Lead review of #80): name on its own line, status below, round 44 px toggle on the right, badges as a small meta row. */
+.training-block-header {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.training-block-primary {
+  grid-template-columns: minmax(0, 1fr) 44px;
+  grid-template-areas:
+    'name toggle'
+    'status toggle';
+  row-gap: 2px;
+}
+
+.training-block-primary .training-block-name {
+  grid-area: name;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}
+
+.training-block-primary .training-block-status {
+  grid-area: status;
+}
+
+.training-block-primary .toggle-button {
+  grid-area: toggle;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.training-block-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.training-block-badges .origin-badge,
+.training-block-badges .training-block-number {
+  min-height: 0;
+  height: auto;
+  padding-block: 2px;
 }

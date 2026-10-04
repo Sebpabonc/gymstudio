@@ -21,6 +21,7 @@ import {
   saveRestTimerState,
 } from './utils/storage'
 import { RestTimerState, startRestTimer } from './utils/restTimer'
+import { summarizeCompletedEntry } from './utils/completedExercises'
 import {
   ALL_BODY_REGIONS,
   filterExercises,
@@ -51,11 +52,10 @@ const uiText = {
   lastMax: 'Last max',
   lastVolume: 'Last volume',
   previousPerformance: 'Previous performance',
-  sets: 'sets',
   trackTitle: 'Track it as you go',
   notes: 'Notes',
   notesPlaceholder: 'How did it feel? Any adjustments?',
-  saveWorkout: 'Save workout',
+  saveWorkout: 'Log workout',
   progress: 'Progress',
   noPrevious: 'No previous workout recorded yet.',
   addSet: '+ Add set',
@@ -275,6 +275,13 @@ export default function App() {
   }
 
   const [saveError, setSaveError] = useState('')
+  const [saveConfirmation, setSaveConfirmation] = useState('')
+
+  useEffect(() => {
+    if (!saveConfirmation) return undefined
+    const timer = window.setTimeout(() => setSaveConfirmation(''), 5000)
+    return () => window.clearTimeout(timer)
+  }, [saveConfirmation])
 
   const saveWorkout = () => {
     if (!selectedExercise) return
@@ -302,6 +309,7 @@ export default function App() {
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
+    setSaveConfirmation(`Logged · ${summarizeCompletedEntry(nextEntry)}`)
     setDraftSets([createSet(8, 0), createSet(8, 0)])
     setSetWeightTouched([false, false])
     setDraftNotes('')
@@ -573,7 +581,9 @@ export default function App() {
                       <>
                         <div className="last-session-line">
                           <span>{formatDate(previousWorkout.date)}</span>
-                          <strong>{previousWorkout.sets.length} {text.sets}</strong>
+                          <strong>
+                            {previousWorkout.sets.length} {previousWorkout.sets.length === 1 ? 'set' : 'sets'}
+                          </strong>
                         </div>
                         <div className="last-sets">
                           {previousWorkout.sets.map((set, index) => (
@@ -744,6 +754,11 @@ export default function App() {
           ))}
         </nav>
         <RestTimer timer={restTimer} hidden={dockHidden} onChange={updateRestTimer} />
+        {saveConfirmation && (
+          <div className="log-toast" role="status" aria-live="polite">
+            <span>{saveConfirmation}</span>
+          </div>
+        )}
       </div>
     </div>
   )

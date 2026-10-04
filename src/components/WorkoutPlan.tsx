@@ -24,6 +24,7 @@ import {
   blockWeek,
   defaultActiveBlock,
   formatBenchAngle,
+  formatBlockMethod,
   nextUnloggedDay,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
@@ -33,6 +34,7 @@ import {
   copyWeightToUntouchedSets,
   filterLoggableSets,
   getPreviousWorkoutSets,
+  getPreviousWorkoutSetRow,
   parseRepPrescription,
   selectCompletedSets,
   stepWorkoutValue,
@@ -371,8 +373,8 @@ export default function WorkoutPlan({
     posture: 'POSTURE TIPS',
     noData: 'No logged data yet',
     modePreset: '6-week block',
-    modeCustom: 'Make your own plan',
-    customTitle: 'Make your own plan',
+    modeCustom: 'Make your plan',
+    customTitle: 'Make your plan',
     customHint: 'Create and save exercises manually.',
     customName: 'Exercise name',
     customSets: 'Sets',
@@ -1213,6 +1215,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
   return (
     <div className="card plan-card">
       <div className="section-title-row">
+        {planMode === 'custom' && <h3>{text.customTitle}</h3>}
         <div className="plan-header-actions">
           <button
             type="button"
@@ -1337,7 +1340,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
             <div className="training-block-meta">
               <span>{blockDateRange(activeBlock)}</span>
-              <span>{activeBlock.method.replace(/-/g, ' ')}</span>
+              <span>{formatBlockMethod(activeBlock.method)}</span>
             </div>
             <p>{activeBlock.summary}</p>
             <button
@@ -1388,7 +1391,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <span>
                       <strong>{`Block ${block.number} · ${block.name}`}</strong>
                       <small className="training-block-option-summary">{block.summary}</small>
-                      <small>{`${blockDateRange(block)} · ${block.method.replace(/-/g, ' ')}`}</small>
+                      <small>{`${blockDateRange(block)} · ${formatBlockMethod(block.method)}`}</small>
                     </span>
                     <small className="training-block-option-status">
                       {`${trainingBlockDateStatus(block, today)}${pinnedBlockId === block.id ? ' · Pinned block' : ''}`}
@@ -1449,7 +1452,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       ) : (
         <section className="custom-plan-builder">
           <div className="custom-plan-header">
-            <strong>{text.customTitle}</strong>
             <p>{text.customHint}</p>
           </div>
 
@@ -1558,9 +1560,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
         </section>
       )}
 
+      {activeExercises.length > 0 && (
       <section className="day-plan-card">
         <div className="day-exercises">
           {groupSupersets(activeExercises).map((group) => {
+            const previousSetsByExercise = new Map<string, ReturnType<typeof getPreviousWorkoutSets>>()
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
             const setCount = getDefaultSetCount(exercise)
@@ -1586,6 +1590,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               })
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             const previousSets = getPreviousWorkoutSets(exerciseHistory)
+            previousSetsByExercise.set(exercise.code ?? exercise.name, previousSets)
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
               id: entry.id,
               date: entry.date,
@@ -1632,13 +1637,19 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 className={cardClasses}
                 data-exercise-card={exerciseKey}
               >
-                <div className="planned-exercise-header">
-                  <div className="planned-exercise-title-block">
+                <button
+                  type="button"
+                  className="planned-exercise-header"
+                  onClick={() => toggleExerciseCollapse(exercise.name)}
+                  aria-expanded={!isCollapsed}
+                  aria-label={isCollapsed ? `Expand ${exercise.name}` : `Collapse ${exercise.name}`}
+                >
+                  <span className="planned-exercise-title-block">
                     {exercise.code && <span className="plan-exercise-code">{exercise.code}</span>}
-                    <div className="planned-exercise-name-wrap">
+                    <span className="planned-exercise-name-wrap">
                       <strong className="planned-exercise-main-name">{displayTitle.main}</strong>
                       {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
-                    </div>
+                    </span>
                       {completedEntry && (
                         <span className="done-badge" role="status">
                           <span aria-hidden="true">✓ </span>
@@ -1651,17 +1662,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           {badge === 'e1rm' ? 'e1RM' : badge === 'weight' ? 'Weight' : 'Rep'} PR
                         </span>
                       ))}
-                  </div>
-                  <button
-                    type="button"
-                    className="toggle-button collapse-trigger"
-                    onClick={() => toggleExerciseCollapse(exercise.name)}
-                    aria-expanded={!isCollapsed}
-                    aria-label={isCollapsed ? `Expand ${exercise.name}` : `Collapse ${exercise.name}`}
-                  >
+                  </span>
+                  <span className="toggle-button expand-toggle" aria-hidden="true">
                     {isCollapsed ? '+' : '−'}
-                  </button>
-                </div>
+                  </span>
+                </button>
 
                 {!isCollapsed && (
                   <>
@@ -1677,6 +1682,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <p className="planned-meta-line">
                       {`${setCount} ${setCount === 1 ? 'set' : 'sets'} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} reps · ${exercise.rest} rest`}
                     </p>
+                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
                     {libraryMatch?.squeezeCue?.trim() && (
                       <button
@@ -1834,7 +1840,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         ))}
                       </ul>
                     </div>
-                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
                     <div className="exercise-detail-row">
                       <button
                         type="button"
@@ -1882,7 +1887,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     >
                       Start rest
                     </button>
-                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
                     {!group.isSuperset && (
                       <label className="planned-notes-field">
                         <span>Notes</span>
@@ -1904,6 +1908,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const groupDone = group.items.every(({ exercise }) => findExerciseCompletion(exercise, history))
             const codes = group.items.map(({ exercise }) => exercise.code ?? exercise.name)
             const supersetExercises = group.items.map(({ exercise }) => exercise)
+            const supersetPreviousSets = supersetExercises.map(
+              (exercise) => previousSetsByExercise.get(exercise.code ?? exercise.name) ?? []
+            )
             const supersetSetCount = Math.max(...supersetExercises.map(getDefaultSetCount))
             const supersetCompletedRows = Array.from(
               { length: supersetSetCount },
@@ -1980,10 +1987,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           </button>
                         </div>
                         <div className="superset-set-exercises">
-                          {supersetExercises.map((exercise) => {
+                          {supersetExercises.map((exercise, exerciseIndex) => {
                             const draft = getDraftForExercise(exercise.name, exercise)
                             const code = exercise.code ?? exercise.name
                             const displayName = getExerciseDisplayName(exercise.name)
+                            const previousSet = getPreviousWorkoutSetRow(supersetPreviousSets, setIndex)[exerciseIndex]
                             const prescribedReps =
                               exercise.repsPerSet?.[setIndex] ?? exercise.reps ?? ''
                             const reps =
@@ -1994,6 +2002,21 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             return (
                               <div className="superset-set-exercise" key={`${group.key}-${code}`}>
                                 <strong className="superset-exercise-label">{code} · {displayName}</strong>
+                                {previousSet ? (
+                                  <button
+                                    type="button"
+                                    className="previous-set-value superset-previous-set-value"
+                                    aria-label={`Copy previous ${code} set ${setIndex + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
+                                    onClick={() => {
+                                      updatePlanSetValue(exercise, setIndex, 'weight', String(previousSet.weight), supersetSetCount)
+                                      updatePlanSetValue(exercise, setIndex, 'reps', String(previousSet.reps), supersetSetCount)
+                                    }}
+                                  >
+                                    Previous: {previousSet.weight} × {previousSet.reps}
+                                  </button>
+                                ) : (
+                                  <span className="previous-set-value superset-previous-set-value">Previous: —</span>
+                                )}
                                 <div className="planned-set-controls">
                                   <SteppedNumberInput
                                     value={weight}
@@ -2057,6 +2080,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           })}
         </div>
       </section>
+      )}
       {sessionSummary && (
         <div className="session-summary-backdrop" onClick={() => setSessionSummary(null)}>
           <section

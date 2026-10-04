@@ -6,6 +6,7 @@ import {
   filterLoggableSets,
   formatWorkoutSet,
   getPreviousWorkoutSets,
+  getPreviousWorkoutSetRow,
   parseRepPrescription,
   selectCompletedSets,
   stepWorkoutValue,
@@ -40,6 +41,19 @@ describe('workout sets', () => {
     expect(getPreviousWorkoutSets(history, 'press')).toEqual(latest.sets)
     expect(getPreviousWorkoutSets(history, 'missing')).toEqual([])
     expect(history).toEqual([older, otherExercise, latest])
+  })
+
+  it('maps each superset set row to the matching previous set for each exercise', () => {
+    const previousSets = [
+      [
+        { id: 'press-1', reps: 8, weight: 40 },
+        { id: 'press-2', reps: 7, weight: 42.5 },
+      ],
+      [{ id: 'curl-1', reps: 12, weight: 25 }],
+    ]
+
+    expect(getPreviousWorkoutSetRow(previousSets, 0)).toEqual([previousSets[0][0], previousSets[1][0]])
+    expect(getPreviousWorkoutSetRow(previousSets, 1)).toEqual([previousSets[0][1], undefined])
   })
 
   it('steps values and clamps decrements at zero', () => {
