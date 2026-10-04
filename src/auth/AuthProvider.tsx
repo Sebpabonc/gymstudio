@@ -4,6 +4,7 @@ import { getSupabaseClient, isGoogleProviderEnabled } from '../lib/supabaseClien
 import GuestDataPrompt from '../components/GuestDataPrompt'
 import { isDemoMode } from '../utils/demoMode'
 import { syncWorkoutHistory } from '../utils/sync'
+import { isNativeApp, listenForNativeAuthCallback, startNativeGoogleOAuth } from './nativeOAuth'
 import {
   hasGuestWorkoutData,
   isGuestDataClaimed,
@@ -117,6 +118,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       unsubscribe = subscribeToAuthChanges(supabase, (session) => {
         if (active) dispatch({ type: 'session', session })
       })
+      if (isNativeApp()) {
+        const removeNativeListener = await listenForNativeAuthCallback(supabase)
+        const removeAuthListener = unsubscribe
+        unsubscribe = () => {
+          removeAuthListener?.()
+          removeNativeListener()
+        }
+      }
       const { data, error } = await supabase.auth.getSession()
       if (active) dispatch({ type: 'session', session: error ? null : data.session })
     })().catch(() => {
@@ -222,6 +231,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = useCallback(async () => {
     const client = await getClient()
     if (!client) return { error: 'Sign-in unavailable offline.' }
+    if (isNativeApp()) {
+      if (!await isGoogleProviderEnabled()) return { error: 'provider is not enabled' }
+      return { error: await startNativeGoogleOAuth(client) }
+    }
     const redirectTo = `${window.location.origin}${window.location.pathname}`
     return startGoogleOAuth(client, redirectTo)
   }, [])
