@@ -473,6 +473,7 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
     normalized.set(key, {
       id: exercise.id || current?.id || key,
       name: exercise.name,
+      nameEs: exercise.nameEs ?? current?.nameEs,
       primaryMuscle: exercise.primaryMuscle || current?.primaryMuscle || 'Other',
       secondaryMuscle: exercise.secondaryMuscle ?? current?.secondaryMuscle,
       bodyRegion: exercise.bodyRegion ?? current?.bodyRegion,
@@ -834,3 +835,4 @@ export function consumeWeightTarget(exerciseId: string, sets: { weight: number }
   if (!target || !isTargetMet(target, sets)) return targets
   return removeWeightTarget(exerciseId)
 }
+export const mergeExercisesForTest = mergeExercises

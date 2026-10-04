@@ -744,3 +744,14 @@ describe('exercise library data', () => {
     }
   })
 })
+
+describe('catalogue merge keeps Spanish names', () => {
+  it('keeps nameEs from the bundled catalogue when an old cache entry has none', async () => {
+    const { mergeExercisesForTest } = await import('./storage')
+    const merged = mergeExercisesForTest(
+      [{ id: 'barbell-bench-press', name: 'Barbell Bench Press', nameEs: 'Press de banca con barra', primaryMuscle: 'Chest', tips: [] }],
+      [{ id: 'barbell-bench-press', name: 'Barbell Bench Press', primaryMuscle: 'Chest' }]
+    )
+    expect(merged[0].nameEs).toBe('Press de banca con barra')
+  })
+})

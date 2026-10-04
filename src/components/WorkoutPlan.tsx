@@ -489,7 +489,15 @@ export default function WorkoutPlan({
   }
   const setLabel = (count: number) => t(count === 1 ? 'workout.set.one' : 'workout.set.other', { count })
   const roundWord = (count: number) => t(count === 1 ? 'workout.round.word.one' : 'workout.round.word.other')
-  const displayExerciseName = (exerciseOrName: Exercise | string) => getExerciseDisplayName(exerciseOrName, language)
+  const displayExerciseName = (exerciseOrName: Exercise | string) => {
+    // Plan rows store the English name; in Spanish show the catalogue's Spanish name when there is one.
+    if (typeof exerciseOrName === 'string' && language === 'es') {
+      const key = normalizeExerciseName(exerciseOrName)
+      const match = exerciseCatalog.find((item) => normalizeExerciseName(item.name) === key)
+      if (match?.nameEs?.trim()) return match.nameEs
+    }
+    return getExerciseDisplayName(exerciseOrName, language)
+  }
   const blockStatusKey = {
     Current: 'workout.block.status.current',
     Upcoming: 'workout.block.status.upcoming',
@@ -1742,11 +1750,12 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               ? draft.dropSetReps
               : Array.from({ length: setCount }, (_, index) => getDefaultDropRepTarget(exercise, index))
             const exerciseKey = normalizeExerciseName(exercise.name)
-            const displayName = displayExerciseName(exercise.name)
-            const displayTitle = splitExerciseTitle(displayName)
             const libraryMatch =
               exerciseCatalog.find((item) => item.id === exercise.exerciseId) ??
               exerciseCatalog.find((item) => normalizeExerciseName(item.name) === exerciseKey)
+            const displayName =
+              language === 'es' && libraryMatch?.nameEs?.trim() ? libraryMatch.nameEs : displayExerciseName(exercise.name)
+            const displayTitle = splitExerciseTitle(displayName)
             const exerciseHistory = history
               .filter((entry) => {
                 if (exercise.exerciseId) return entry.exerciseId === exercise.exerciseId
