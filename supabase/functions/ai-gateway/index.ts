@@ -42,6 +42,24 @@ sets provided. Rules:
 - Do not change the user's training plan; you may suggest what to discuss with their coach.
 - Reply in English, plain text, at most 120 words, short sentences or up to 4 bullet points.`
 
+const SUGGESTION_PROMPT = `You are GymStudio's coach inside a gym-tracking app.
+Explain in plain English WHY the app made the given suggestion for this exercise, using only the
+user's recent sessions and the exercise data provided (e.g. reps hit at the top of the range, a
+stalled e1RM, missed reps). Rules: fitness only; no medical advice (pain or injury: stop and see a
+qualified professional); do not invent numbers that are not in the data; do not change the plan.
+Reply in at most 80 words, plain text, 2-3 short sentences.`
+
+const SESSION_PROMPT = `You are GymStudio's coach inside a gym-tracking app.
+Summarise the user's workout for the given day from the data provided: what went well (compare
+with the previous session of each exercise, mention personal bests if the numbers show them),
+and ONE clear focus for next time. Rules: fitness only; no medical advice (pain or injury: stop
+and see a qualified professional); do not invent numbers; encouraging but factual.
+Reply in at most 120 words, plain text, up to 4 short bullet points starting with "- ".`
+
+const ID_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary'
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' })
@@ -62,19 +80,36 @@ Deno.serve(async (req) => {
   const user = userData?.user
   if (!user) return json(401, { error: 'sign_in_required' })
 
-  let body: { feature?: string; exerciseId?: string; question?: string }
+  let body: {
+    feature?: string
+    exerciseId?: string
+    question?: string
+    suggestion?: string
+    date?: string
+    blockId?: string
+    dayKey?: string
+  }
   try {
     body = await req.json()
   } catch {
     return json(400, { error: 'invalid_json' })
   }
-  if (body.feature !== 'ask_exercise') return json(400, { error: 'unknown_feature' })
-  const question = (body.question ?? '').trim()
+  const feature = body.feature as Feature
+  if (!['ask_exercise', 'explain_suggestion', 'session_summary'].includes(feature)) {
+    return json(400, { error: 'unknown_feature' })
+  }
   const exerciseId = (body.exerciseId ?? '').trim()
-  if (!question || question.length > MAX_QUESTION_CHARS) {
+  const question = (body.question ?? '').trim()
+  const suggestion = (body.suggestion ?? '').trim()
+  const date = (body.date ?? '').trim()
+  if (feature === 'ask_exercise' && (!question || question.length > MAX_QUESTION_CHARS)) {
     return json(400, { error: 'invalid_question', maxChars: MAX_QUESTION_CHARS })
   }
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(exerciseId)) return json(400, { error: 'invalid_exercise' })
+  if (feature === 'explain_suggestion' && (!suggestion || suggestion.length > MAX_QUESTION_CHARS)) {
+    return json(400, { error: 'invalid_suggestion', maxChars: MAX_QUESTION_CHARS })
+  }
+  if (feature !== 'session_summary' && !ID_RE.test(exerciseId)) return json(400, { error: 'invalid_exercise' })
+  if (feature === 'session_summary' && !DATE_RE.test(date)) return json(400, { error: 'invalid_date' })
 
   // Limits: per-user daily count and global monthly spend.
   const now = new Date()
@@ -97,32 +132,65 @@ Deno.serve(async (req) => {
   const monthSpend = (monthRows ?? []).reduce((sum, row) => sum + Number(row.cost_usd), 0)
   if (monthSpend >= MONTHLY_CAP_USD) return json(429, { error: 'monthly_budget_reached' })
 
-  // Grounding: approved catalogue entry + the caller's last sessions of this exercise.
-  const { data: exercise } = await userClient
-    .from('exercises')
-    .select('*')
-    .eq('id', exerciseId)
-    .maybeSingle()
-  if (!exercise) return json(404, { error: 'exercise_not_found' })
-  const { data: history } = await userClient
-    .from('workout_entries')
-    .select('date, sets')
-    .eq('exercise_id', exerciseId)
-    .is('deleted_at', null)
-    .order('date', { ascending: false })
-    .limit(5)
+  // Grounding: approved catalogue data + the caller's own history (read with the caller's JWT, so RLS applies).
+  const describe = (exercise: Record<string, unknown>) => ({
+    id: exercise.id,
+    name: exercise.name_en,
+    primaryMuscles: exercise.primary_muscles ?? [exercise.primary_muscle],
+    secondaryMuscles: exercise.secondary_muscles,
+    equipment: exercise.equipment,
+    movementPattern: exercise.movement_pattern,
+    postureTips: exercise.posture_tips,
+    squeezeCue: exercise.squeeze_cue,
+  })
+  let systemPrompt = SYSTEM_PROMPT
+  let userMessage = question
+  let context: Record<string, unknown>
 
-  const context = {
-    exercise: {
-      name: exercise.name_en,
-      primaryMuscles: exercise.primary_muscles ?? [exercise.primary_muscle],
-      secondaryMuscles: exercise.secondary_muscles,
-      equipment: exercise.equipment,
-      movementPattern: exercise.movement_pattern,
-      postureTips: exercise.posture_tips,
-      squeezeCue: exercise.squeeze_cue,
-    },
-    recentSessions: history ?? [],
+  if (feature === 'session_summary') {
+    let query = userClient
+      .from('workout_entries')
+      .select('exercise_id, date, sets, block_id, day_key')
+      .eq('date', date)
+      .is('deleted_at', null)
+    if (body.blockId) query = query.eq('block_id', body.blockId)
+    if (body.dayKey) query = query.eq('day_key', body.dayKey)
+    const { data: todays } = await query.limit(20)
+    if (!todays?.length) return json(404, { error: 'no_session' })
+    const ids = [...new Set(todays.map((entry) => entry.exercise_id))]
+    const { data: exercises } = await userClient.from('exercises').select('*').in('id', ids)
+    const { data: earlier } = await userClient
+      .from('workout_entries')
+      .select('exercise_id, date, sets')
+      .in('exercise_id', ids)
+      .lt('date', date)
+      .is('deleted_at', null)
+      .order('date', { ascending: false })
+      .limit(60)
+    const previous = ids.map((id) => earlier?.find((entry) => entry.exercise_id === id) ?? null)
+    context = {
+      date,
+      exercises: (exercises ?? []).map(describe),
+      session: todays,
+      previousSessionPerExercise: previous.filter(Boolean),
+    }
+    systemPrompt = SESSION_PROMPT
+    userMessage = 'Summarise this workout.'
+  } else {
+    const { data: exercise } = await userClient.from('exercises').select('*').eq('id', exerciseId).maybeSingle()
+    if (!exercise) return json(404, { error: 'exercise_not_found' })
+    const { data: history } = await userClient
+      .from('workout_entries')
+      .select('date, sets')
+      .eq('exercise_id', exerciseId)
+      .is('deleted_at', null)
+      .order('date', { ascending: false })
+      .limit(feature === 'explain_suggestion' ? 8 : 5)
+    context = { exercise: describe(exercise), recentSessions: history ?? [] }
+    if (feature === 'explain_suggestion') {
+      systemPrompt = SUGGESTION_PROMPT
+      userMessage = `The app suggested: "${suggestion}". Why?`
+    }
   }
 
   const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -132,9 +200,9 @@ Deno.serve(async (req) => {
       model: MODEL,
       max_completion_tokens: MAX_OUTPUT_TOKENS,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: systemPrompt },
         { role: 'system', content: `Data (JSON):\n${JSON.stringify(context)}` },
-        { role: 'user', content: question },
+        { role: 'user', content: userMessage },
       ],
     }),
   })
@@ -151,7 +219,7 @@ Deno.serve(async (req) => {
 
   const { error: logError } = await admin.from('ai_usage').insert({
     user_id: user.id,
-    feature: 'ask_exercise',
+    feature,
     model: MODEL,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
