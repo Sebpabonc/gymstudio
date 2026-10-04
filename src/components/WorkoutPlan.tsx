@@ -1686,7 +1686,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                               className="complete-set-button"
                               aria-label={`${completedRows[index] ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
                               aria-pressed={completedRows[index]}
-                              onClick={() => togglePlanSetDone(exercise, index, setCount)}
+                              onClick={() => {
+                                // Ticking a set starts the rest before the next one.
+                                if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90)
+                                togglePlanSetDone(exercise, index, setCount)
+                              }}
                             >
                               ✓
                             </button>
@@ -1860,6 +1864,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                               const nextCompleted = [...supersetCompletedRows]
                               nextCompleted[setIndex] = !nextCompleted[setIndex]
                               setCompletedSupersetSets((current) => ({ ...current, [group.key]: nextCompleted }))
+                              // Rest is taken after the pair, using the last exercise's prescribed rest.
+                              if (nextCompleted[setIndex]) {
+                                onStartRest(supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90)
+                              }
                               if (nextCompleted.every(Boolean)) {
                                 void logSuperset(supersetExercises, group.key, nextCompleted)
                               }
