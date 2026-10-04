@@ -38,10 +38,12 @@ const blocks: TrainingBlock[] = [
 ]
 
 describe('training block dates', () => {
-  it('formats method slugs as sentence-case labels', () => {
-    expect(formatBlockMethod('reverse-pyramid')).toBe('Reverse pyramid')
-    expect(formatBlockMethod('flat-pyramid')).toBe('Flat pyramid')
-    expect(formatBlockMethod('strength_hypertrophy')).toBe('Strength hypertrophy')
+  it('formats method slugs as title-case labels', () => {
+    expect(formatBlockMethod('reverse-pyramid')).toBe('Reverse Pyramid')
+    expect(formatBlockMethod('flat-pyramid')).toBe('Flat Pyramid')
+    expect(formatBlockMethod('strength_hypertrophy')).toBe('Strength Hypertrophy')
+    expect(formatBlockMethod('  DUP   training ')).toBe('Dup Training')
+    expect(formatBlockMethod('')).toBe('')
   })
 
   it('selects the next block during a gap when it starts within a week', () => {

@@ -360,6 +360,15 @@ export default function WorkoutPlan({
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
   const sessionStartedAt = useRef<SessionStart | null>(null)
 
+  useEffect(() => {
+    if (!blockSelectorOpen) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setBlockSelectorOpen(false)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [blockSelectorOpen])
+
   const text = {
     badge: '6-week block',
     sets: 'Sets',
@@ -1310,103 +1319,135 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       )}
 
       {planMode === 'preset' && activeBlock && (
-        <section className="training-block-card" aria-label="Active training block">
-          <button
-            type="button"
-            className="training-block-header"
-            onClick={toggleBlockCard}
-            aria-expanded={blockCardExpanded}
-            aria-controls="training-block-content"
-          >
-            <span className="training-block-primary">
-              <span className="training-block-name">{activeBlock.name}</span>
-              <strong className="training-block-status">
-                {trainingBlockDateStatus(activeBlock, today) === 'Current'
-                  ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
-                  : trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
-                    ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
-                    : 'Completed'}
-              </strong>
-              <span className="toggle-button expand-toggle" aria-hidden="true">
-                {blockCardExpanded ? '−' : '+'}
-              </span>
-            </span>
-            <span className="training-block-badges">
-              <span className="training-block-number">Block {activeBlock.number}</span>
-              <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
-              {pinnedBlockId === activeBlock.id && <span className="training-block-number">Pinned block</span>}
-            </span>
-          </button>
-          <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
-            <div className="training-block-meta">
-              <span>{blockDateRange(activeBlock)}</span>
-              <span>{formatBlockMethod(activeBlock.method)}</span>
-            </div>
-            <p>{activeBlock.summary}</p>
+        <>
+          <section className="training-block-card" aria-label="Active training block">
             <button
               type="button"
-              className="about-block-toggle"
-              onClick={() => setBlockInsightsOpen((current) => !current)}
-              aria-expanded={blockInsightsOpen}
-              aria-controls="training-block-insights"
+              className="training-block-header"
+              onClick={toggleBlockCard}
+              aria-expanded={blockCardExpanded}
+              aria-controls="training-block-content"
             >
-              About this block
-              <span className="toggle-button expand-toggle" aria-hidden="true">
-                {blockInsightsOpen ? '−' : '+'}
+              <span className="training-block-primary">
+                <span className="training-block-name">{activeBlock.name}</span>
+                <strong className="training-block-status">
+                  {trainingBlockDateStatus(activeBlock, today) === 'Current'
+                    ? `Week ${activeBlockWeek} of ${activeBlock.weeks}`
+                    : trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
+                      ? `Starts ${formatBlockStartDate(activeBlock.startDate)}`
+                      : 'Completed'}
+                </strong>
+                <span className="toggle-button expand-toggle" aria-hidden="true">
+                  {blockCardExpanded ? '−' : '+'}
+                </span>
+              </span>
+              <span className="training-block-badges">
+                <span className="training-block-number">Block {activeBlock.number}</span>
+                <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
+                {pinnedBlockId === activeBlock.id && <span className="training-block-number">Pinned block</span>}
               </span>
             </button>
-            <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
-              {activeBlock.insights.map((insight) => (
-                <section key={insight.title}>
-                  <h5>{insight.title}</h5>
-                  <p>{insight.body}</p>
-                </section>
-              ))}
-            </div>
             <button
               type="button"
               className="secondary-button block-change-button"
-              onClick={() => setBlockSelectorOpen((current) => !current)}
+              onClick={() => setBlockSelectorOpen(true)}
+              aria-haspopup="dialog"
               aria-expanded={blockSelectorOpen}
             >
               {text.changeBlock}
             </button>
-            {blockSelectorOpen && (
-              <div className="training-block-options">
-                {trainingBlocks.map((block) => (
-                  <button
-                    key={block.id}
-                    type="button"
-                    className={block.id === activeBlock.id ? 'training-block-option active' : 'training-block-option'}
-                    onClick={() => {
-                      setActiveBlockId(block.id)
-                      setPinnedBlockId(block.id)
-                      setSelectedBlockId(block.id)
-                      setSelectedDay(nextUnloggedDay(block, history, today)?.key ?? block.days[0]?.key ?? '')
-                      setCollapsedExercises({})
-                      setPlannedDrafts({})
-                      setBlockSelectorOpen(false)
-                    }}
-                  >
-                    <span>
-                      <strong>{`Block ${block.number} · ${block.name}`}</strong>
-                      <small className="training-block-option-summary">{block.summary}</small>
-                      <small>{`${blockDateRange(block)} · ${formatBlockMethod(block.method)}`}</small>
-                    </span>
-                    <small className="training-block-option-status">
-                      {`${trainingBlockDateStatus(block, today)}${pinnedBlockId === block.id ? ' · Pinned block' : ''}`}
-                    </small>
-                  </button>
+            <p className="training-block-origin-legend">
+              <span>Coach</span> = Designed by your coach · <span>PT</span> = Designed by the PT
+            </p>
+            <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
+              <div className="training-block-meta">
+                <span>{blockDateRange(activeBlock)}</span>
+                <span>{formatBlockMethod(activeBlock.method)}</span>
+              </div>
+              <p>{activeBlock.summary}</p>
+              <button
+                type="button"
+                className="about-block-toggle"
+                onClick={() => setBlockInsightsOpen((current) => !current)}
+                aria-expanded={blockInsightsOpen}
+                aria-controls="training-block-insights"
+              >
+                About this block
+                <span className="toggle-button expand-toggle" aria-hidden="true">
+                  {blockInsightsOpen ? '−' : '+'}
+                </span>
+              </button>
+              <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
+                {activeBlock.insights.map((insight) => (
+                  <section key={insight.title}>
+                    <h5>{insight.title}</h5>
+                    <p>{insight.body}</p>
+                  </section>
                 ))}
               </div>
-            )}
-            {pinnedBlockId === activeBlock.id && (
-              <button type="button" className="secondary-button block-change-button" onClick={useDateBasedBlock}>
-                Use date-based block
-              </button>
-            )}
-          </div>
-        </section>
+              {pinnedBlockId === activeBlock.id && (
+                <button type="button" className="secondary-button block-change-button" onClick={useDateBasedBlock}>
+                  Use date-based block
+                </button>
+              )}
+            </div>
+          </section>
+          {blockSelectorOpen && (
+            <div className="block-selector-backdrop" role="presentation" onClick={() => setBlockSelectorOpen(false)}>
+              <section
+                className="block-selector-sheet"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="block-selector-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <header className="block-selector-header">
+                  <h2 id="block-selector-title">Change block</h2>
+                  <button
+                    type="button"
+                    className="session-summary-close"
+                    onClick={() => setBlockSelectorOpen(false)}
+                    aria-label="Close block chooser"
+                  >
+                    ×
+                  </button>
+                </header>
+                <p className="block-selector-legend">
+                  <span>Coach</span> = Designed by your coach · <span>PT</span> = Designed by the PT
+                </p>
+                <div className="block-selector-options">
+                  {trainingBlocks.map((block) => (
+                    <button
+                      key={block.id}
+                      type="button"
+                      className={block.id === activeBlock.id ? 'block-selector-option active' : 'block-selector-option'}
+                      aria-pressed={block.id === activeBlock.id}
+                      onClick={() => {
+                        setActiveBlockId(block.id)
+                        setPinnedBlockId(block.id)
+                        setSelectedBlockId(block.id)
+                        setSelectedDay(nextUnloggedDay(block, history, today)?.key ?? block.days[0]?.key ?? '')
+                        setCollapsedExercises({})
+                        setPlannedDrafts({})
+                        setBlockSelectorOpen(false)
+                      }}
+                    >
+                      <span className="block-selector-option-content">
+                        <span className="block-selector-option-heading">
+                          <strong>{`Block ${block.number} · ${block.name}`}</strong>
+                          <span className="origin-badge">{block.origin === 'pt' ? text.pt : text.coach}</span>
+                        </span>
+                        <small>{`${blockDateRange(block)} · ${formatBlockMethod(block.method)}`}</small>
+                        <small className="block-selector-option-summary">{block.summary}</small>
+                      </span>
+                      <small className="block-selector-option-status">{trainingBlockDateStatus(block, today)}</small>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+        </>
       )}
 
       {planMode === 'preset' ? (
