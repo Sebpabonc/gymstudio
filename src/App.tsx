@@ -20,6 +20,8 @@ import {
   refreshCatalogue,
   saveWorkoutHistory,
   saveRestTimerState,
+  getLayoutMode,
+  setLayoutMode,
 } from './utils/storage'
 import { RestTimerState, startRestTimer } from './utils/restTimer'
 import { summarizeCompletedEntry } from './utils/completedExercises'
@@ -113,6 +115,11 @@ export default function App() {
   const contentRef = useRef<HTMLElement>(null)
   const dockHidden = useTextEntryFocused()
   const [showWelcome, setShowWelcome] = useState(() => !hasDismissedWelcome())
+  const [layoutMode, setLayoutModeState] = useState(getLayoutMode)
+  const chooseLayoutMode = (mode: 'boxes' | 'sheet') => {
+    setLayoutMode(mode)
+    setLayoutModeState(mode)
+  }
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const text = uiText
@@ -314,7 +321,7 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell layout-${layoutMode}`}>
       <div className="phone-frame">
         <main className={`app-content${restTimer ? ' with-rest-timer' : ''}`} ref={contentRef}>
           <div className="header-sentinel" ref={headerSentinelRef} aria-hidden="true" />
@@ -323,17 +330,38 @@ export default function App() {
               <span className="brand-bar-wordmark">Gym Studio</span>
               <span className="brand-bar-screen">{getNavigationTitle(activeTab)}</span>
             </span>
+            <span className="brand-bar-actions">
+            <span className="layout-toggle" role="group" aria-label="Layout">
+              <button
+                type="button"
+                aria-label="Boxes layout"
+                aria-pressed={layoutMode === 'boxes'}
+                onClick={() => chooseLayoutMode('boxes')}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="7" rx="2.2" /><rect x="4" y="13" width="16" height="7" rx="2.2" /></svg>
+              </button>
+              <button
+                type="button"
+                aria-label="Sheet layout"
+                aria-pressed={layoutMode === 'sheet'}
+                onClick={() => chooseLayoutMode('sheet')}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5V12a7 7 0 0 1 7-7h3a7 7 0 0 1 7 7v8.5" /><path d="M8 13.5h8M8 17h8" /></svg>
+              </button>
+            </span>
             <span
               className={`sync-indicator ${status === 'signed-in' ? syncStatus : demoMode ? 'demo' : 'local'}`}
               role="status"
               aria-label={status === 'signed-in' ? `Workout sync: ${syncStatus}` : demoMode ? 'Demo data' : 'Local workout data'}
             />
+            </span>
           </div>
           <header className={`brand-header${headerCollapsed ? ' collapsed' : ''}`}>
             <span className="brand-tagline" aria-hidden="true">Train with intent</span>
             <span className="brand-wordmark" aria-hidden="true">Gym Studio</span>
             <h1>{getNavigationTitle(activeTab)}</h1>
           </header>
+          <div className="screen-surface">
           {activeTab === 'exercises' && (
             <div className="exercise-mode-switch" role="group" aria-label="Exercise tools">
               <button
@@ -711,6 +739,7 @@ export default function App() {
               )}
             </>
           )}
+          </div>
         </main>
         <nav className={`bottom-tab-bar${dockHidden ? ' hidden' : ''}`} aria-label="Primary navigation">
           {navigationTabs.map((tab) => (
