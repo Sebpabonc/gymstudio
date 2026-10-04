@@ -190,19 +190,33 @@ h2.h{font-size:16px;font-weight:700}
 .screen.on{display:block}
 .hint{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
 @media (prefers-reduced-motion:reduce){.bar{transition:none}}
+
+/* ---- Colour preview: darker surfaces (PO request 2026-10-05) ---- */
+.phone.darker{--bg-dark:#0f0f10;--bg-soft:#171719;--sheet-bg:#171719;--panel:rgba(255,255,255,.05);--panel-strong:rgba(255,255,255,.09);--line:rgba(255,255,255,.11);--hairline:rgba(255,255,255,.07);background:#0f0f10}
+.phone.darker .bar{background:rgba(15,15,16,.94)}
+.phone.darker .dock{background:rgba(8,8,9,.78)}
+.phone.darker .rest{background:rgba(10,10,11,.94)}
+.phone.darker.now .sec{background:rgba(255,255,255,.035)}
+.phone.darker.now .dayplan,.phone.darker.now .ex,.phone.darker.now .inner,.phone.darker.now .listrow{background:rgba(255,255,255,.03)}
+.phone.darker.now .ss .ex{background:rgba(8,8,9,.6)}
+body.darker-page{background:#09090a}
 </style>
 </head>
 <body>
 <div class="page">
   <header class="intro">
     <h1>Sheet container prototype</h1>
-    <p>UXer proposal, 5 Oct 2026, for Sebas. <b>Scope: containers only.</b> Colours, fonts, type sizes, the collapsing GYM STUDIO header, the floating dock, chips, buttons, the set table, the superset "Log rounds" panel, Ask AI and the rest timer are all unchanged. The only change is that content sits directly on one rounded sheet (rows and hairline dividers) instead of boxes inside boxes. Use the toggle to compare.</p>
+    <p>UXer proposal, 5 Oct 2026, for Sebas. <b>Scope: containers only.</b> Colours, fonts, type sizes, the collapsing GYM STUDIO header, the floating dock, chips, buttons, the set table, the superset "Log rounds" panel, Ask AI and the rest timer are all unchanged. The only change is that content sits directly on one rounded sheet (rows and hairline dividers) instead of boxes inside boxes. Use the toggle to compare. <b>Colours:</b> “Darker” (default here) previews deeper surfaces — background #0f0f10, cards/sheet #171719 — against today's greys (#1f1f20 / #2b2b2d); text and accent colours are unchanged.</p>
   </header>
 
   <div class="controls">
     <div class="seg" role="group" aria-label="Container style">
-      <button type="button" data-mode="now" aria-pressed="false">Now (boxes)</button>
-      <button type="button" data-mode="sheet" aria-pressed="true">Proposed (sheet)</button>
+      <button type="button" data-mode="now" aria-pressed="true">Now (boxes)</button>
+      <button type="button" data-mode="sheet" aria-pressed="false">Proposed (sheet)</button>
+    </div>
+    <div class="seg" role="group" aria-label="Colours">
+      <button type="button" data-tone="current" aria-pressed="false">Current greys</button>
+      <button type="button" data-tone="darker" aria-pressed="true">Darker</button>
     </div>
     <div class="seg" role="group" aria-label="Jump to screen">
       <button type="button" data-jump="today" aria-pressed="true">Today</button>
@@ -216,7 +230,7 @@ h2.h{font-size:16px;font-weight:700}
 
   <div class="layout">
     <div>
-      <div class="phone sheet-mode" id="phone">
+      <div class="phone now darker" id="phone">
         <div class="sync" title="Synced"></div>
         <div class="bar" id="bar"><span class="w">GYM STUDIO</span><span class="s" id="barName">Today</span></div>
         <div class="scroller" id="scroller">
@@ -504,7 +518,8 @@ h2.h{font-size:16px;font-weight:700}
   document.addEventListener('click',e=>{
     const t=e.target.closest('button'); if(!t) return;
     const d=t.dataset;
-    if(d.mode) setMode(d.mode);
+    if(d.tone){ phone.classList.toggle('darker',d.tone==='darker'); document.body.classList.toggle('darker-page',d.tone==='darker'); $$('[data-tone]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tone===d.tone)); }
+    else if(d.mode) setMode(d.mode);
     else if(d.jump) jump(d.jump);
     else if(d.tab){ $$('[data-jump]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.jump===d.tab)); show(d.tab); }
     else if(d.open){ state.open.has(d.open)?state.open.delete(d.open):state.open.add(d.open); renderToday(); }
@@ -519,7 +534,7 @@ h2.h{font-size:16px;font-weight:700}
   });
   $('#search').addEventListener('input',renderLib);
 
-  renderToday(); renderLib(); setMode('sheet');
+  renderToday(); renderLib(); setMode('now'); phone.classList.add('darker'); document.body.classList.add('darker-page');
 })();
 </script>
 </body>
