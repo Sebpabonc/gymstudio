@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { WorkoutSet } from '../types'
 import {
+  copySetOneWeight,
   copyWeightToUntouchedSets,
   filterLoggableSets,
   formatWorkoutSet,
+  getPreviousWorkoutSets,
   parseRepPrescription,
+  selectCompletedSets,
+  stepWorkoutValue,
   workoutMaxWeight,
   workoutVolume,
 } from './workoutSets'
@@ -20,6 +24,46 @@ describe('workout sets', () => {
   it('does not copy non-positive weights or edits to later sets', () => {
     expect(copyWeightToUntouchedSets([20, 0, 0], [true, false, false], 0, 0)).toEqual([0, 0, 0])
     expect(copyWeightToUntouchedSets([20, 0, 0], [true, false, false], 2, 22)).toEqual([20, 0, 22])
+  })
+
+  it('copies set 1 weight to every set when explicitly requested', () => {
+    expect(copySetOneWeight([24, 20, 22])).toEqual([24, 24, 24])
+    expect(copySetOneWeight([])).toEqual([])
+  })
+
+  it('gets the most recent sets for the requested exercise without mutating history', () => {
+    const older = { id: 'old', exerciseId: 'press', date: '2026-01-01', sets: [{ id: 'old-set', reps: 8, weight: 40 }] }
+    const otherExercise = { id: 'other', exerciseId: 'row', date: '2026-03-01', sets: [{ id: 'row-set', reps: 10, weight: 30 }] }
+    const latest = { id: 'latest', exerciseId: 'press', date: '2026-02-01', sets: [{ id: 'new-set', reps: 6, weight: 45 }] }
+    const history = [older, otherExercise, latest]
+
+    expect(getPreviousWorkoutSets(history, 'press')).toEqual(latest.sets)
+    expect(getPreviousWorkoutSets(history, 'missing')).toEqual([])
+    expect(history).toEqual([older, otherExercise, latest])
+  })
+
+  it('steps values and clamps decrements at zero', () => {
+    expect(stepWorkoutValue(20, 1, 2.5)).toBe(22.5)
+    expect(stepWorkoutValue(1, -1, 2.5)).toBe(0)
+    expect(stepWorkoutValue(8, -1, 1, 1)).toBe(7)
+  })
+
+  it('selects only explicitly completed set rows', () => {
+    const sets: WorkoutSet[] = [
+      { id: 'set-1', reps: 10, weight: 20 },
+      { id: 'set-2', reps: 10, weight: 22 },
+      { id: 'set-3', reps: 10, weight: 24 },
+    ]
+    expect(selectCompletedSets(sets, [true, false])).toEqual([sets[0]])
+    expect(selectCompletedSets(sets, [])).toEqual(sets)
+    expect(selectCompletedSets(sets, [false, false])).toEqual(sets)
+    const dropSet: WorkoutSet = {
+      id: 'drop-set',
+      reps: 12,
+      weight: 30,
+      drop: { reps: 12, weight: 22 },
+    }
+    expect(selectCompletedSets([dropSet, sets[0]], [true, false])).toEqual([dropSet])
   })
 
   it('parses both parts of a drop-set prescription', () => {

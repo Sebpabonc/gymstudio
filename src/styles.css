@@ -81,8 +81,15 @@ body::before {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
 }
 
 button {
@@ -655,7 +662,6 @@ button {
 
 .search-input {
   padding: 12px 14px;
-  font-size: 0.96rem;
 }
 
 .search-input::placeholder,
@@ -1527,7 +1533,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 8px 9px;
-  font-size: 0.76rem;
 }
 
 .calendar-history {
@@ -1885,7 +1890,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 8px 9px;
-  font-size: 0.76rem;
 }
 
 .custom-plan-header {
@@ -1931,7 +1935,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 8px 9px;
-  font-size: 0.76rem;
 }
 
 .custom-plan-full {
@@ -2144,6 +2147,7 @@ button {
 
 .planned-set-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -2173,22 +2177,194 @@ button {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
+  min-width: 0;
+}
+
+.planned-set-column-headers,
+.planned-set-row,
+.planned-drop-set-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) minmax(44px, 48px) 44px;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.planned-set-column-headers {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .planned-set-row {
-  display: grid;
-  gap: 6px;
-  padding: 8px 10px;
+  width: 100%;
+  padding: 2px 4px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.02);
 }
 
+.planned-set-row > *,
+.planned-drop-set-row > * {
+  min-width: 0;
+}
+
+.planned-set-row.completed,
+.superset-set-row.completed {
+  background: rgba(180, 211, 184, 0.08);
+}
+
+.planned-set-row.completed {
+  outline-color: rgba(180, 211, 184, 0.75);
+}
+
+.superset-set-row.completed {
+  border-color: rgba(180, 211, 184, 0.55);
+}
+
+.planned-set-row:not(.completed) .set-stepper input,
+.superset-set-row:not(.completed) .set-stepper input {
+  opacity: 0.62;
+}
+
+.planned-set-row-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+}
+
 .planned-set-label {
+  min-width: 0;
   color: var(--muted-strong);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.planned-set-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.set-stepper {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.set-stepper input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 6px 2px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.set-reps-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 6px 3px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.stepper-button,
+.complete-set-button {
+  display: inline-flex;
+  width: 36px;
+  min-width: 36px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+
+.stepper-button:active,
+.complete-set-button[aria-pressed='true'] {
+  border-color: rgba(180, 211, 184, 0.75);
+  background: rgba(180, 211, 184, 0.2);
+  color: var(--success);
+}
+
+.complete-set-button {
+  width: 44px;
+  min-width: 44px;
+  font-size: 1rem;
+}
+
+.same-as-set-one-button {
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted-strong);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.same-as-set-one-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.planned-drop-set-row {
+  grid-column: 1 / -1;
+  padding-left: 8px;
+}
+
+.planned-drop-set-row > strong {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.superset-set-column-headers,
+.superset-set-column-headers > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.superset-set-column-headers {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.superset-copy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .planned-set-field-pair {
@@ -2234,7 +2410,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 9px 10px;
-  font-size: 0.82rem;
 }
 
 .superset-set-grid {
@@ -2294,7 +2469,6 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 8px 9px;
-  font-size: 0.76rem;
   resize: vertical;
   min-height: 52px;
 }
@@ -2481,8 +2655,34 @@ button {
 }
 
 @media (max-width: 420px) {
+  .day-plan-card,
+  .planned-exercise-card {
+    padding: 8px;
+  }
+
+  .planned-progress-box {
+    padding: 6px;
+  }
+
+  .superset-set-row {
+    padding: 6px;
+  }
+
+  .planned-set-row {
+    padding: 0 4px;
+  }
+
+  .planned-set-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .superset-group {
+    padding: 8px;
+  }
+
   .superset-set-exercises,
-  .superset-notes-grid {
+  .superset-notes-grid,
+  .superset-set-column-headers {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -3103,6 +3303,17 @@ button {
   max-width: 100%;
 }
 
+.personal-record-badge {
+  justify-self: start;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 209, 102, 0.6);
+  border-radius: 999px;
+  background: rgba(255, 209, 102, 0.12);
+  color: #ffe29a;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
 .account-error.log-error {
   font-size: 0.85rem;
   font-weight: 600;
@@ -3117,10 +3328,16 @@ button {
   left: 50%;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
   transform: translateX(-50%);
-  z-index: 50;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: max-content;
   max-width: calc(100vw - 2rem);
-  padding: 0.65rem 1rem;
-  border-radius: 999px;
+  min-height: 52px;
+  padding: 4px 8px 4px 16px;
+  border-radius: 16px;
   background: var(--text);
   color: var(--bg-dark);
   font-size: 0.85rem;
@@ -3128,7 +3345,647 @@ button {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
+.log-toast > span {
+  min-width: 0;
+}
+
+.log-toast button,
+.session-summary-close {
+  flex: 0 0 auto;
+  min-width: 64px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--brand);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.session-summary-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px 12px max(12px, env(safe-area-inset-bottom, 0px));
+  background: rgba(12, 12, 13, 0.68);
+}
+
+.session-summary-sheet {
+  display: grid;
+  gap: 16px;
+  width: min(100%, 480px);
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--bg-soft);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.45);
+}
+
+.session-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.session-summary-header h2,
+.session-summary-records h3,
+.session-summary-records p {
+  margin: 0;
+}
+
+.session-summary-header h2 {
+  font-size: 1.2rem;
+}
+
+.session-summary-close {
+  min-width: 44px;
+  padding: 0;
+  font-size: 1.4rem;
+}
+
+.session-summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.session-summary-metrics > div {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  text-align: center;
+}
+
+.session-summary-metrics strong {
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+}
+
+.session-summary-metrics span,
+.session-summary-records p {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.session-summary-records {
+  display: grid;
+  gap: 8px;
+}
+
+.session-summary-records ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.session-summary-next {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-weight: 700;
+}
+
+.log-toast.in-summary {
+  position: static;
+  transform: none;
+  width: 100%;
+  max-width: none;
+  min-height: 52px;
+}
+
 /* Keep the last exercise scrollable above the rest timer pill as well as the dock. */
 .app-content.with-rest-timer {
   padding-bottom: calc(60px + 64px + max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
+}
+
+body {
+  align-items: stretch;
+  justify-content: stretch;
+  background: var(--bg-dark);
+}
+
+.app-shell {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  min-width: 0;
+  padding: 0;
+}
+
+.phone-frame {
+  width: 100%;
+  height: 100dvh;
+  max-height: none;
+  min-width: 0;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.phone-frame::after {
+  display: none;
+}
+
+.app-content {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  min-width: 0;
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.app-content > :not(.brand-bar):not(.header-sentinel) {
+  width: 100%;
+  max-width: 640px;
+  min-width: 0;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.brand-bar {
+  width: 100vw;
+  margin-right: calc(50% - 50vw);
+  margin-left: calc(50% - 50vw);
+}
+
+.brand-header {
+  max-width: 640px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.plan-card {
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.training-block-card {
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.training-block-header {
+  display: grid;
+  gap: 3px;
+}
+
+.training-block-primary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.training-block-name {
+  overflow: hidden;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.training-block-status {
+  display: block;
+  max-width: 100px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.training-block-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.training-block-number {
+  font-size: 0.58rem;
+}
+
+.origin-badge {
+  padding: 3px 7px;
+  font-size: 0.56rem;
+}
+
+.day-tabs {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.day-tab {
+  min-width: 0;
+  min-height: 52px;
+  padding: 3px 1px;
+  gap: 1px;
+  border-radius: 10px;
+}
+
+.day-tab-label {
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+.day-tab-progress {
+  font-size: 0.58rem;
+}
+
+.day-tab-today {
+  padding: 0;
+  background: transparent;
+  font-size: 0.46rem;
+  line-height: 1;
+}
+
+.day-tab.active {
+  border-color: var(--nav-active);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--nav-active);
+}
+
+.selected-day-name {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.day-focus-label {
+  margin: -5px 0 0;
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.day-plan-card {
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.day-exercises {
+  gap: 8px;
+}
+
+.planned-exercise-card {
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+.planned-exercise-card.collapsed {
+  padding: 10px 12px;
+}
+
+.superset-group {
+  gap: 8px;
+  padding: 6px 0 6px 12px;
+  border: 0;
+  border-left: 3px solid var(--brand);
+  border-radius: 0;
+  background: transparent;
+}
+
+.superset-group-header {
+  gap: 6px;
+}
+
+.superset-group-header .chip {
+  flex: 0 0 auto;
+}
+
+.superset-group-header p {
+  font-size: 0.66rem;
+}
+
+.superset-group .planned-exercise-card .technique-chip {
+  display: none;
+}
+
+.planned-meta-line {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.64rem;
+  line-height: 1.3;
+}
+
+.planned-squeeze-cue,
+.squeeze-cue-button {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 3px 0 3px 10px;
+  border: 0;
+  border-left: 2px solid var(--cue-line);
+  background: transparent;
+  color: var(--muted-strong);
+  font-size: 0.74rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.planned-squeeze-cue:not(.expanded),
+.squeeze-cue-button:not(.expanded) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planned-squeeze-cue strong,
+.squeeze-cue-button strong {
+  color: #e7bd72;
+}
+
+.planned-set-section {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.planned-set-header {
+  min-height: 34px;
+}
+
+.planned-set-header > span {
+  font-size: 0.62rem;
+}
+
+.planned-set-grid {
+  gap: 0;
+}
+
+.planned-set-column-headers,
+.planned-set-row {
+  grid-template-columns: 34px minmax(42px, 1fr) minmax(84px, 1.5fr) minmax(44px, 0.85fr) 44px;
+  gap: 4px;
+}
+
+.planned-set-column-headers {
+  padding-bottom: 4px;
+  font-size: 0.54rem;
+  text-transform: none;
+}
+
+.planned-set-column-headers span:first-child {
+  text-align: left;
+}
+
+.planned-set-row {
+  min-height: 52px;
+  padding: 3px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  background: transparent;
+}
+
+.planned-set-row.completed {
+  background: var(--brand-soft);
+}
+
+.superset-set-grid {
+  gap: 0;
+}
+
+.superset-set-row {
+  padding: 6px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  background: transparent;
+}
+
+.planned-set-label {
+  font-size: 0.66rem;
+  text-align: left;
+}
+
+.previous-set-value {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.56rem;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planned-set-row .set-stepper {
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
+  gap: 2px;
+}
+
+.planned-set-row .set-stepper .stepper-button {
+  width: 24px;
+  min-width: 24px;
+  height: 44px;
+  border-radius: 8px;
+}
+
+.planned-set-row .set-stepper input,
+.planned-set-row .set-reps-input,
+.free-set-input {
+  min-height: 48px;
+  padding: 5px 2px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 16px;
+}
+
+.complete-set-button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+}
+
+.planned-drop-set-row {
+  grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr);
+  padding-left: 0;
+}
+
+.planned-drop-set-row .set-stepper {
+  grid-template-columns: 28px minmax(0, 1fr) 28px;
+}
+
+.planned-drop-set-row .stepper-button {
+  width: 28px;
+  min-width: 28px;
+}
+
+.planned-progress-box,
+.superset-log-box {
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.planned-history-list {
+  gap: 0;
+}
+
+.planned-history-item {
+  padding: 8px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  background: transparent;
+}
+
+.exercise-detail-row {
+  min-width: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.exercise-detail-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted-strong);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.exercise-detail-toggle span {
+  color: var(--nav-active);
+  font-size: 1rem;
+}
+
+.exercise-detail-row .planned-history-list,
+.exercise-detail-row .posture-tips-list {
+  padding-bottom: 8px;
+}
+
+.planned-exercise-notes {
+  margin: 0;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rest-start-button {
+  width: auto;
+  min-height: 44px;
+  justify-self: start;
+  padding: 6px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--nav-active);
+}
+
+.planned-notes-field {
+  margin-top: 4px;
+}
+
+.free-set-table {
+  display: grid;
+  min-width: 0;
+}
+
+.free-set-header,
+.set-row {
+  display: grid;
+  grid-template-columns: 32px minmax(44px, 1fr) minmax(56px, 1fr) minmax(48px, 0.9fr) 24px 24px;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.free-set-header {
+  min-height: 28px;
+  color: var(--muted);
+  font-size: 0.54rem;
+  text-align: center;
+}
+
+.set-row {
+  min-height: 52px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.set-label {
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.66rem;
+}
+
+.free-set-input {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.free-set-complete {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  color: var(--nav-active);
+  font-size: 0.82rem;
+}
+
+.free-set-remove {
+  width: 24px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+@media (max-width: 420px) {
+  .planned-set-column-headers,
+  .planned-set-row {
+    grid-template-columns: 30px minmax(40px, 1fr) minmax(78px, 1.5fr) minmax(40px, 0.8fr) 44px;
+    gap: 3px;
+  }
+
+  .free-set-header,
+  .set-row {
+    grid-template-columns: 28px minmax(40px, 1fr) minmax(50px, 1fr) minmax(44px, 0.9fr) 20px 20px;
+    gap: 3px;
+  }
 }

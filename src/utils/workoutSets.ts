@@ -1,4 +1,4 @@
-import { WorkoutSet } from '../types'
+import { WorkoutEntry, WorkoutSet } from '../types'
 
 export function parseRepPrescription(value: string) {
   return value
@@ -19,6 +19,13 @@ export function workoutMaxWeight(sets: WorkoutSet[]) {
   return Math.max(...sets.map((set) => set.weight), 0)
 }
 
+export function getPreviousWorkoutSets(history: WorkoutEntry[], exerciseId?: string) {
+  return history
+    .filter((entry) => !exerciseId || entry.exerciseId === exerciseId)
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.sets ?? []
+}
+
 export function copyWeightToUntouchedSets(
   weights: number[],
   touched: boolean[],
@@ -30,6 +37,22 @@ export function copyWeightToUntouchedSets(
     if (sourceIndex === 0 && weight > 0 && !touched[index]) return weight
     return currentWeight
   })
+}
+
+export function copySetOneWeight(weights: number[]) {
+  return weights.length === 0 ? [] : weights.map(() => weights[0])
+}
+
+export function stepWorkoutValue(value: number, direction: -1 | 1, step: number, min = 0) {
+  const precision = Math.max(step.toString().split('.')[1]?.length ?? 0, 0)
+  const nextValue = Math.max(min, (Number(value) || 0) + direction * step)
+  return Number(nextValue.toFixed(precision))
+}
+
+/** Sets ticked as done; when none are ticked, every set counts (the user just pressed Finish). */
+export function selectCompletedSets(sets: WorkoutSet[], completed: boolean[]) {
+  if (!completed.some(Boolean)) return sets
+  return sets.filter((_, index) => completed[index])
 }
 
 export function formatWorkoutSet(set: WorkoutSet) {
