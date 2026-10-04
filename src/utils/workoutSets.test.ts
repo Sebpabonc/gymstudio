@@ -5,6 +5,7 @@ import {
   copyWeightToUntouchedSets,
   filterLoggableSets,
   formatWorkoutSet,
+  getPreviousWorkoutSets,
   parseRepPrescription,
   selectCompletedSets,
   stepWorkoutValue,
@@ -28,6 +29,17 @@ describe('workout sets', () => {
   it('copies set 1 weight to every set when explicitly requested', () => {
     expect(copySetOneWeight([24, 20, 22])).toEqual([24, 24, 24])
     expect(copySetOneWeight([])).toEqual([])
+  })
+
+  it('gets the most recent sets for the requested exercise without mutating history', () => {
+    const older = { id: 'old', exerciseId: 'press', date: '2026-01-01', sets: [{ id: 'old-set', reps: 8, weight: 40 }] }
+    const otherExercise = { id: 'other', exerciseId: 'row', date: '2026-03-01', sets: [{ id: 'row-set', reps: 10, weight: 30 }] }
+    const latest = { id: 'latest', exerciseId: 'press', date: '2026-02-01', sets: [{ id: 'new-set', reps: 6, weight: 45 }] }
+    const history = [older, otherExercise, latest]
+
+    expect(getPreviousWorkoutSets(history, 'press')).toEqual(latest.sets)
+    expect(getPreviousWorkoutSets(history, 'missing')).toEqual([])
+    expect(history).toEqual([older, otherExercise, latest])
   })
 
   it('steps values and clamps decrements at zero', () => {

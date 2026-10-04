@@ -1,4 +1,4 @@
-import { WorkoutSet } from '../types'
+import { WorkoutEntry, WorkoutSet } from '../types'
 
 export function parseRepPrescription(value: string) {
   return value
@@ -17,6 +17,13 @@ export function workoutVolume(sets: WorkoutSet[]) {
 
 export function workoutMaxWeight(sets: WorkoutSet[]) {
   return Math.max(...sets.map((set) => set.weight), 0)
+}
+
+export function getPreviousWorkoutSets(history: WorkoutEntry[], exerciseId?: string) {
+  return history
+    .filter((entry) => !exerciseId || entry.exerciseId === exerciseId)
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.sets ?? []
 }
 
 export function copyWeightToUntouchedSets(
