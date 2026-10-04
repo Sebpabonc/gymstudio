@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { mapAiGatewayError, summariseSession } from '../ai/gateway'
 import type { AuthStatus } from '../auth/AuthProvider'
 import AskExercise from './AskExercise'
+import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
+import { openExternal } from '../native/openExternal'
 import AiConsentPrompt from './AiConsentPrompt'
 import { localIsoDate } from '../lib/dates'
 import { isDemoMode } from '../utils/demoMode'
@@ -1767,17 +1769,32 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 className={cardClasses}
                 data-exercise-card={exerciseKey}
               >
-                <button
-                  type="button"
+                <div
                   className="planned-exercise-header"
                   onClick={() => toggleExerciseCollapse(exercise.name)}
-                  aria-expanded={!isCollapsed}
-                  aria-label={isCollapsed ? `Expand ${exercise.name}` : `Collapse ${exercise.name}`}
                 >
                   <span className="planned-exercise-title-block">
                     {exercise.code && <span className="plan-exercise-code">{exercise.code}</span>}
                     <span className="planned-exercise-name-wrap">
-                      <strong className="planned-exercise-main-name">{displayTitle.main}</strong>
+                      <a
+                        className="planned-exercise-main-name exercise-image-link"
+                        href={exerciseImageSearchUrl(exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment))}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`See ${displayName} on Google Images`}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          event.preventDefault()
+                          void openExternal(event.currentTarget.href)
+                        }}
+                      >
+                        {displayTitle.main}
+                        <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                          <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
+                          <circle cx="9" cy="10" r="1.6" />
+                          <path d="M20.5 16l-5-5-8 8" />
+                        </svg>
+                      </a>
                       {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
                     </span>
                       {completedEntry && (
@@ -1793,10 +1810,19 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         </span>
                       ))}
                   </span>
-                  <span className="toggle-button expand-toggle" aria-hidden="true">
+                  <button
+                    type="button"
+                    className="toggle-button expand-toggle"
+                    aria-expanded={!isCollapsed}
+                    aria-label={isCollapsed ? `Expand ${exercise.name}` : `Collapse ${exercise.name}`}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      toggleExerciseCollapse(exercise.name)
+                    }}
+                  >
                     {isCollapsed ? '+' : '−'}
-                  </span>
-                </button>
+                  </button>
+                </div>
 
                 {!isCollapsed && (
                   <>

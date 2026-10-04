@@ -124,6 +124,17 @@ def main():
     tip_counts = Counter(t for _, ex in exercises for t in ex.get('posture_tips', []))
     problems += [f'tip reused {n}x across exercises: {t[:60]!r}' for t, n in tip_counts.items() if n > 2]
 
+    # Google Images search terms (docs/fitness/approved/exercise-image-queries.json): one per exercise.
+    queries_file = Path('docs/fitness/approved/exercise-image-queries.json')
+    queries = json.loads(queries_file.read_text(encoding='utf-8')) if queries_file.exists() else {}
+    for ex_id in sorted(all_ids - set(queries)):
+        problems.append(f'{ex_id}: missing image search query in {queries_file}')
+    for ex_id in sorted(set(queries) - all_ids):
+        problems.append(f'{ex_id}: image search query for an unknown exercise id')
+    for ex_id, query in queries.items():
+        if not re.fullmatch(r'[a-z0-9 -]{3,80}', query or '') or not 3 <= len(query.split()) <= 8:
+            problems.append(f'{ex_id}: image query must be 3-8 lowercase words (letters, digits, hyphens)')
+
     print(f'{len(exercises)} exercises in {folder}')
     print('by region:', dict(Counter(ex.get('body_region') for _, ex in exercises)))
     print('by origin:', dict(Counter(ex.get('origin') for _, ex in exercises)))
