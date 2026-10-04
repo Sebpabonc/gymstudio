@@ -4034,3 +4034,49 @@ body {
     gap: 3px;
   }
 }
+
+/* Block header (Tech Lead review of #80): name on its own line, status below, round 44 px toggle on the right, badges as a small meta row. */
+.training-block-header {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.training-block-primary {
+  grid-template-columns: minmax(0, 1fr) 44px;
+  grid-template-areas:
+    'name toggle'
+    'status toggle';
+  row-gap: 2px;
+}
+
+.training-block-primary .training-block-name {
+  grid-area: name;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}
+
+.training-block-primary .training-block-status {
+  grid-area: status;
+}
+
+.training-block-primary .toggle-button {
+  grid-area: toggle;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.training-block-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.training-block-badges .origin-badge,
+.training-block-badges .training-block-number {
+  min-height: 0;
+  height: auto;
+  padding-block: 2px;
+}
