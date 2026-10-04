@@ -167,6 +167,19 @@ describe('progress calculations', () => {
     expect(aTrend.isTrendAvailable).toBe(true)
   })
 
+  it('shows the latest available block trend when the current block has no sessions for the lift', () => {
+    const firstBlock = makeBlock([], '2026-01-05')
+    const secondBlock = { ...makeBlock([], '2026-02-16'), id: 'block-2', number: 2 }
+    const entries = [
+      makeEntry('press', '2026-01-05', [[40, 8]], { blockId: firstBlock.id, dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-01-12', [[44, 8]], { blockId: firstBlock.id, dayKey: 'chest-back-a' }),
+    ]
+
+    const trend = strengthTrend(entries, [firstBlock, secondBlock], 'press', '2026-02-23', 'A', [dumbbellExercise])
+
+    expect(trend.takeaway).toBe('Dumbbell Press: Not in Block 2 · last trend +10% in Block 1.')
+  })
+
   it('makes the first session a baseline and flags a likely weight typo', () => {
     const block = makeBlock()
     const entries = [
