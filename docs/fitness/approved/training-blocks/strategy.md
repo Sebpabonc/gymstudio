@@ -193,3 +193,12 @@ next one in order rather than skipping it.
 
 Any sharp pain during an exercise is a signal to stop that exercise and see a qualified
 professional; this plan is general training guidance, not medical advice.
+
+## Block 6 revision (2026-10-05)
+Block 6 was rebuilt by the PT for hypertrophy from the owner's 2026 history and the evidence brief
+(`docs/ux/proposals/2026-10-05-hypertrophy-evidence-brief.md`). Full rationale, weekly sets per muscle and
+starting weights: `docs/fitness/approved/2026-10-05-block6-review.md`. Key changes: antagonist supersets,
+more side/rear delt and hamstring volume, stretch-biased choices (overhead triceps, preacher curl, seated
+leg curl, paused standing calves), fewer but better main-lift sets with longer rest, effort ramp from ~3 RIR
+(week 1) to 0–1 RIR (week 5), week 6 lighter (same loads, half the sets), core moved to the arms days.
+The flat skull crusher is gone, so triceps get overhead work in blocks 6 and 7.
