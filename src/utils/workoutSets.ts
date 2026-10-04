@@ -49,7 +49,9 @@ export function stepWorkoutValue(value: number, direction: -1 | 1, step: number,
   return Number(nextValue.toFixed(precision))
 }
 
+/** Sets ticked as done; when none are ticked, every set counts (the user just pressed Finish). */
 export function selectCompletedSets(sets: WorkoutSet[], completed: boolean[]) {
+  if (!completed.some(Boolean)) return sets
   return sets.filter((_, index) => completed[index])
 }
 
