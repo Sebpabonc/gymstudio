@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import blockRows from '../../docs/fitness/approved/training-blocks/blocks.json'
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { generateDemoHistory } from '../demo/generateDemoHistory'
+import { createTranslator } from '../i18n/translate'
 import { TrainingBlock, Exercise } from '../types'
 import {
   adherence,
@@ -71,9 +72,13 @@ const approvedBlocks = (blockRows as unknown as Array<{
 const dumbbellExercise: Exercise = {
   id: 'press',
   name: 'Dumbbell Press',
+  nameEs: 'Press con mancuernas',
   primaryMuscle: 'Chest',
   equipment: 'dumbbell',
 }
+
+const en = { language: 'en' as const, t: createTranslator('en') }
+const es = { language: 'es' as const, t: createTranslator('es') }
 
 function makeBlock(
   exercises: TrainingBlock['days'][number]['exercises'] = [],
@@ -158,8 +163,8 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-02-24', [[60, 8]], { blockId: secondBlock.id, dayKey: 'chest-back-b' }),
       makeEntry('press', '2026-03-02', [[44, 8]], { blockId: secondBlock.id, dayKey: 'chest-back-a' }),
     ]
-    const aTrend = strengthTrend(entries, [firstBlock, secondBlock], 'press', '2026-03-02', 'A', [dumbbellExercise])
-    const allTrend = strengthTrend(entries, [firstBlock, secondBlock], 'press', '2026-03-02', 'all', [dumbbellExercise])
+    const aTrend = strengthTrend(entries, [firstBlock, secondBlock], 'press', '2026-03-02', 'A', [dumbbellExercise], en)
+    const allTrend = strengthTrend(entries, [firstBlock, secondBlock], 'press', '2026-03-02', 'all', [dumbbellExercise], en)
     expect(aTrend.points).toHaveLength(4)
     expect(allTrend.points).toHaveLength(5)
     expect(aTrend.takeaway).toContain('Dumbbell Press: est. 1RM +')
@@ -175,7 +180,7 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-01-12', [[44, 8]], { blockId: firstBlock.id, dayKey: 'chest-back-a' }),
     ]
 
-    const trend = strengthTrend(entries, [firstBlock, secondBlock], 'press', '2026-02-23', 'A', [dumbbellExercise])
+    const trend = strengthTrend(entries, [firstBlock, secondBlock], 'press', '2026-02-23', 'A', [dumbbellExercise], en)
 
     expect(trend.takeaway).toBe('Dumbbell Press: Not in Block 2 · last trend +10% in Block 1.')
   })
@@ -230,7 +235,7 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-01-05', [[20, 8], [20, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('press', '2026-01-06', [[20, 8], [20, 8]], { dayKey: 'chest-back-b' }),
     ]
-    const readySuggestions = progressSuggestions(ready, [block], [dumbbellExercise], '2026-01-06')
+    const readySuggestions = progressSuggestions(ready, [block], [dumbbellExercise], '2026-01-06', new Set(), en)
     expect(readySuggestions).toHaveLength(1)
     expect(readySuggestions[0]).toMatchObject({
       type: 'add-weight',
@@ -250,7 +255,9 @@ describe('progress calculations', () => {
         technique: 'straight',
       }])],
       [{ ...dumbbellExercise, id: 'leg-press', name: 'Leg Press', bodyRegion: 'Legs', equipment: 'machine' }],
-      '2026-01-05'
+      '2026-01-05',
+      new Set(),
+      en
     )
     expect(lowerBodySuggestion[0]).toMatchObject({ type: 'add-weight', increment: 5 })
 
@@ -264,7 +271,9 @@ describe('progress calculations', () => {
       stalledEntries,
       [block],
       [dumbbellExercise, { ...dumbbellExercise, id: 'row' }, { ...dumbbellExercise, id: 'curl' }],
-      '2026-02-02'
+      '2026-02-02',
+      new Set(),
+      en
     )
     expect(fatigue.filter((item) => item.type === 'fatigue')).toHaveLength(1)
     expect(fatigue.some((item) => item.type === 'plateau')).toBe(false)
@@ -284,7 +293,7 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-02-09', [[20, 8]], { blockId: block.id, dayKey: 'chest-back-b' }),
       makeEntry('press', '2026-02-10', [[20, 8]], { blockId: block.id, dayKey: 'chest-back-b' }),
     ]
-    expect(progressSuggestions(entries, [block], [dumbbellExercise], '2026-02-16')).toEqual([])
+    expect(progressSuggestions(entries, [block], [dumbbellExercise], '2026-02-16', new Set(), en)).toEqual([])
   })
 
   it('reports median block change and requires two sessions in each comparison window', () => {
@@ -384,7 +393,7 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-01-05', [[100, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('press', '2026-01-12', [[40, 8]], { dayKey: 'chest-back-a' }),
     ]
-    const trend = strengthTrend(entries, [block], 'press', '2026-01-12')
+    const trend = strengthTrend(entries, [block], 'press', '2026-01-12', 'A', [], en)
     expect(trend.points.map((point) => point.date)).toEqual(['2026-01-12'])
     expect(personalRecords(entries, [block]).every((session) => session.badges.length === 0)).toBe(true)
   })
@@ -398,7 +407,7 @@ describe('progress calculations', () => {
     })
     const { exerciseLibrary } = await loadExerciseLibrary()
     const records = personalRecords(entries, approvedBlocks)
-    const suggestions = progressSuggestions(entries, approvedBlocks, exerciseLibrary, '2026-10-09')
+    const suggestions = progressSuggestions(entries, approvedBlocks, exerciseLibrary, '2026-10-09', new Set(), en)
     const reports = blockReports(entries, approvedBlocks, exerciseLibrary)
     const lastFullWeekSets = weeklySets(entries, approvedBlocks, exerciseLibrary, '2026-09-21')
 
@@ -408,5 +417,32 @@ describe('progress calculations', () => {
       .toHaveLength(4)
     expect(lastFullWeekSets.weekStart).toBe('2026-09-21')
     expect(lastFullWeekSets.groups.some((group) => group.done > 0)).toBe(true)
+  })
+
+  it('renders Spanish suggestion and trend text', () => {
+    const block = makeBlock([{
+      code: 'A1',
+      position: 1,
+      exerciseId: 'press',
+      sets: 2,
+      reps: ['8', '8'],
+      restSeconds: 90,
+      technique: 'straight',
+    }])
+    const ready = [
+      makeEntry('press', '2026-01-05', [[20, 8], [20, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-01-06', [[20, 8], [20, 8]], { dayKey: 'chest-back-b' }),
+    ]
+    expect(progressSuggestions(ready, [block], [dumbbellExercise], '2026-01-06', new Set(), es)[0]).toMatchObject({
+      message: 'Listo para subir 2 kg en Press con mancuernas el próximo día B.',
+      why: 'Completaste todas las series y repeticiones planeadas la última vez.',
+    })
+
+    const trendEntries = [
+      makeEntry('press', '2026-01-05', [[40, 8]], { blockId: block.id, dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-01-12', [[44, 8]], { blockId: block.id, dayKey: 'chest-back-a' }),
+    ]
+    expect(strengthTrend(trendEntries, [block], 'press', '2026-01-12', 'A', [dumbbellExercise], es).takeaway)
+      .toBe('Press con mancuernas: 1RM est. +10% en este bloque (50.7 → 55.7 kg).')
   })
 })

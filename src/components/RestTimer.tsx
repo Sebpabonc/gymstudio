@@ -8,6 +8,7 @@ import {
   RestTimerState,
   toggleRestTimerPause,
 } from '../utils/restTimer'
+import { useT } from '../i18n'
 
 function formatRemainingTime(seconds: number) {
   const minutes = Math.floor(seconds / 60)
@@ -24,6 +25,7 @@ export default function RestTimer({
   hidden: boolean
   onChange: (timer: RestTimerState | null) => void
 }) {
+  const { t } = useT()
   const [now, setNow] = useState(Date.now())
   const lastVibratedEndAt = useRef<number | null>(null)
 
@@ -58,19 +60,19 @@ export default function RestTimer({
   return (
     <div className="rest-timer-pill">
       {isDone ? (
-        <span className="rest-timer-done" role="status">Rest done</span>
+        <span className="rest-timer-done" role="status">{t('rest.done')}</span>
       ) : (
         <button
           type="button"
           className="rest-timer-time"
-          aria-label={isPaused ? 'Resume rest timer' : 'Pause rest timer'}
+          aria-label={isPaused ? t('rest.resume') : t('rest.pause')}
           aria-pressed={isPaused}
           onClick={() => onChange(toggleRestTimerPause(timer))}
         >
           <>
             <span aria-hidden="true">⏱</span>
             {formatRemainingTime(remainingRestSeconds(timer, now))}
-            {isPaused && <span className="rest-timer-paused">Paused</span>}
+            {isPaused && <span className="rest-timer-paused">{t('rest.paused')}</span>}
           </>
         </button>
       )}
@@ -81,14 +83,14 @@ export default function RestTimer({
             className="rest-timer-action"
             onClick={() => onChange(addRestTime(timer))}
           >
-            +15s
+            {t('rest.add15')}
           </button>
           <button
             type="button"
             className="rest-timer-action"
             onClick={() => onChange(skipRestTimer())}
           >
-            Skip
+            {t('rest.skip')}
           </button>
         </>
       )}

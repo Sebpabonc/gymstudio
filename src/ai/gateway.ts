@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../lib/supabaseClient'
+import { Language, translate } from '../i18n/translate'
 
 export type AiGatewayResponse = {
   answer: string
@@ -7,16 +8,19 @@ export type AiGatewayResponse = {
 
 export type AskExerciseResponse = AiGatewayResponse
 
-const errorMessages: Record<string, string> = {
-  daily_limit: "You've used today's 20 questions. Try again tomorrow.",
-  monthly_budget_reached: 'AI is paused for this month.',
-  sign_in_required: 'Sign in to ask AI.',
-  no_session: 'Log a workout first.',
-  offline: "You're offline.",
-}
+const errorKeys = {
+  daily_limit: 'ai.error.dailyLimit',
+  monthly_budget_reached: 'ai.error.monthlyBudget',
+  sign_in_required: 'ai.error.signIn',
+  no_session: 'ai.error.noSession',
+  offline: 'ai.error.offline',
+} as const
 
-export function mapAiGatewayError(code: string): string {
-  return errorMessages[code] ?? 'AI is unavailable right now. Try again.'
+class AiGatewayError extends Error {}
+
+export function mapAiGatewayError(code: string, language: Language = 'en'): string {
+  const key = errorKeys[code as keyof typeof errorKeys] ?? 'ai.error.unavailable'
+  return translate(language, key)
 }
 
 export const mapAskExerciseError = mapAiGatewayError
@@ -38,47 +42,55 @@ async function getErrorCode(error: unknown): Promise<string> {
 async function invokeAiGateway(
   body: Record<string, string>
 ): Promise<AiGatewayResponse> {
+  const language: Language = body.language === 'es' ? 'es' : 'en'
   try {
     const client = await getSupabaseClient()
-    if (!client) throw new Error(mapAiGatewayError('client_unavailable'))
+    if (!client) throw new AiGatewayError(mapAiGatewayError('client_unavailable', language))
 
     const { data, error } = await client.functions.invoke<AiGatewayResponse | { error: string }>(
       'ai-gateway',
       { body }
     )
 
-    if (error) throw new Error(mapAiGatewayError(await getErrorCode(error)))
-    if (data && 'error' in data) throw new Error(mapAiGatewayError(data.error))
+    if (error) throw new AiGatewayError(mapAiGatewayError(await getErrorCode(error), language))
+    if (data && 'error' in data) throw new AiGatewayError(mapAiGatewayError(data.error, language))
     if (!data || typeof data.answer !== 'string' || typeof data.remainingToday !== 'number') {
-      throw new Error(mapAiGatewayError('invalid_response'))
+      throw new AiGatewayError(mapAiGatewayError('invalid_response', language))
     }
 
     return data
   } catch (error) {
-    if (error instanceof Error && Object.values(errorMessages).includes(error.message)) throw error
-    throw new Error(mapAiGatewayError('unknown'))
+    if (error instanceof AiGatewayError) throw error
+    throw new AiGatewayError(mapAiGatewayError('unknown', language))
   }
 }
 
-export function askExercise(exerciseId: string, question: string): Promise<AiGatewayResponse> {
-  return invokeAiGateway({ feature: 'ask_exercise', exerciseId, question })
+export function askExercise(
+  exerciseId: string,
+  question: string,
+  language: Language = 'en'
+): Promise<AiGatewayResponse> {
+  return invokeAiGateway({ feature: 'ask_exercise', exerciseId, question, language })
 }
 
 export function explainSuggestion(
   exerciseId: string,
-  suggestionText: string
+  suggestionText: string,
+  language: Language = 'en'
 ): Promise<AiGatewayResponse> {
-  return invokeAiGateway({ feature: 'explain_suggestion', exerciseId, suggestion: suggestionText })
+  return invokeAiGateway({ feature: 'explain_suggestion', exerciseId, suggestion: suggestionText, language })
 }
 
 export function summariseSession(
   date: string,
   blockId?: string,
-  dayKey?: string
+  dayKey?: string,
+  language: Language = 'en'
 ): Promise<AiGatewayResponse> {
   return invokeAiGateway({
     feature: 'session_summary',
     date,
+    language,
     ...(blockId ? { blockId } : {}),
     ...(dayKey ? { dayKey } : {}),
   })

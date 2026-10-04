@@ -1,3 +1,4 @@
+import { type Language, translate } from '../i18n/translate'
 import { TrainingBlock, WorkoutEntry } from '../types'
 import { PersonalRecordType } from '../progress/types'
 import { personalRecords } from '../progress/personalRecords'
@@ -75,7 +76,8 @@ export function createSessionSummary(
   entries: WorkoutEntry[],
   durationMs: number,
   history: WorkoutEntry[],
-  blocks: TrainingBlock[]
+  blocks: TrainingBlock[],
+  language: Language = 'en'
 ): SessionSummary {
   const durationMinutes = Math.max(1, Math.round(durationMs / 60_000))
   const badgesByExercise = new Map<string, Set<PersonalRecordType>>()
@@ -89,7 +91,9 @@ export function createSessionSummary(
   }
 
   return {
-    duration: `${durationMinutes} min${durationMinutes === 1 ? '' : 's'}`,
+    duration: translate(language, durationMinutes === 1 ? 'workout.duration.one' : 'workout.duration.other', {
+      count: durationMinutes,
+    }),
     sets: entries.reduce((total, entry) => total + entry.sets.length, 0),
     volume: Math.round(entries.reduce((total, entry) => total + workoutVolume(entry.sets), 0) * 10) / 10,
     prs: Array.from(badgesByExercise, ([exerciseId, badges]) => ({ exerciseId, badges: [...badges] })),

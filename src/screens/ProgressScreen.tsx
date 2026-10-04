@@ -2,6 +2,7 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { explainSuggestion, mapAiGatewayError } from '../ai/gateway'
 import type { AuthStatus } from '../auth/AuthProvider'
 import AiConsentPrompt from '../components/AiConsentPrompt'
+import { formatNumber, formatShortDate, useT } from '../i18n'
 import { localIsoDate } from '../lib/dates'
 import { isDemoMode } from '../utils/demoMode'
 import {
@@ -24,11 +25,12 @@ import {
   formatChange,
   formatBlockMethod,
   formatPercent,
+  formatWeekLabel,
   limitSuggestions,
+  muscleGroupLabel,
   muscleRows,
   muscleScale,
   muscleStatus,
-  formatWeekLabel,
   recentRecords,
   reportingBlock,
   reportingWeek,
@@ -78,6 +80,7 @@ function AiSuggestionExplanation({
   status: AuthStatus
   onSignIn: () => void
 }) {
+  const { t, language } = useT()
   const [consent, setConsent] = useState<AskExerciseAiConsent | null>(null)
   const [showConsent, setShowConsent] = useState(false)
   const [answer, setAnswer] = useState('')
@@ -88,17 +91,17 @@ function AiSuggestionExplanation({
   const requestExplanation = async () => {
     if (pending || answer) return
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      setError(mapAiGatewayError('offline'))
+      setError(mapAiGatewayError('offline', language))
       return
     }
     setPending(true)
     setError('')
     try {
-      const response = await explainSuggestion(exerciseId, suggestionText.slice(0, 300))
+      const response = await explainSuggestion(exerciseId, suggestionText.slice(0, 300), language)
       setAnswer(response.answer)
       setRemainingToday(response.remainingToday)
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'AI is unavailable right now. Try again.')
+      setError(requestError instanceof Error ? requestError.message : mapAiGatewayError('unknown', language))
     } finally {
       setPending(false)
     }
@@ -140,42 +143,45 @@ function AiSuggestionExplanation({
         disabled={demoMode || status === 'loading' || pending || !!answer}
         onClick={demoMode || status === 'signed-out' ? onSignIn : explain}
       >
-        {demoMode || status === 'signed-out' ? 'Sign in to use AI' : 'Ask AI why'}
+        {demoMode || status === 'signed-out' ? t('progress.ai.signInToUse') : t('progress.ai.askWhy')}
       </button>
       {showConsent && (
         <div className="ask-exercise-consent ai-inline-consent">
           {consent === null ? (
             <AiConsentPrompt onChoice={chooseConsent} />
           ) : (
-            <p className="ask-exercise-consent-message">AI is off for this account because you chose not to turn it on.</p>
+            <p className="ask-exercise-consent-message">{t('progress.ai.disabled')}</p>
           )}
         </div>
       )}
-      {pending && <p className="ai-inline-status" role="status">Thinking…</p>}
+      {pending && <p className="ai-inline-status" role="status">{t('progress.ai.thinking')}</p>}
       {error && (
         <div className="ai-inline-error" role="alert">
           <p>{error}</p>
-          {error === 'Sign in to ask AI.' && (
-            <button type="button" className="secondary-button" onClick={onSignIn}>Sign in</button>
+          {error === mapAiGatewayError('sign_in_required', language) && (
+            <button type="button" className="secondary-button" onClick={onSignIn}>{t('progress.ai.signIn')}</button>
           )}
         </div>
       )}
       {answer && (
         <div className="ask-exercise-answer ai-inline-answer" aria-live="polite">
           <p>{answer}</p>
-          {remainingToday !== null && <small>{remainingToday} questions left today</small>}
-          <small>AI answers can be wrong. Not medical advice.</small>
+          {remainingToday !== null && (
+            <small>
+              {t(remainingToday === 1 ? 'progress.ai.remaining.one' : 'progress.ai.remaining.other', {
+                count: formatNumber(language, remainingToday),
+              })}
+            </small>
+          )}
+          <small>{t('progress.ai.disclaimer')}</small>
         </div>
       )}
     </div>
   )
 }
 
-function formatDate(value: string) {
-  return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
-
 function SectionCard({ id, title, children, defaultOpen = false }: { id: string; title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const { t } = useT()
   const [open, setOpen] = useState(defaultOpen)
   return (
     <section className="card progress-section">
@@ -186,7 +192,7 @@ function SectionCard({ id, title, children, defaultOpen = false }: { id: string;
           className="toggle-button expand-toggle"
           aria-expanded={open}
           aria-controls={`progress-${id}`}
-          aria-label={`${open ? 'Collapse' : 'Expand'} ${title}`}
+          aria-label={t(open ? 'progress.section.collapse' : 'progress.section.expand', { title })}
           onClick={() => setOpen((current) => !current)}
         >
           {open ? '−' : '+'}
@@ -198,6 +204,7 @@ function SectionCard({ id, title, children, defaultOpen = false }: { id: string;
 }
 
 function StrengthChart({ model, title, summary }: { model: ReturnType<typeof buildChartModel>; title: string; summary: string }) {
+  const { t } = useT()
   const { left, right, top, bottom, width, height } = CHART_SIZE
   const uid = useId()
   const titleId = `${uid}-title`
@@ -221,7 +228,7 @@ function StrengthChart({ model, title, summary }: { model: ReturnType<typeof bui
       {model.yTicks.map((tick) => (
         <g key={tick.value}>
           <line x1={left} x2={width - right} y1={tick.y} y2={tick.y} className="chart-grid" />
-          <text x={left - 4} y={tick.y + 3} textAnchor="end" className="chart-label">{tick.value} kg</text>
+          <text x={left - 4} y={tick.y + 3} textAnchor="end" className="chart-label">{`${tick.value} ${t('progress.unit.kg')}`}</text>
         </g>
       ))}
       {model.xTicks.map((tick, index) => (
@@ -250,6 +257,7 @@ function StrengthChart({ model, title, summary }: { model: ReturnType<typeof bui
 }
 
 export default function ProgressScreen({ entries, exercises, initialExerciseId, onOpenExercise, onSignIn, authStatus }: Props) {
+  const { t, language } = useT()
   const demoMode = isDemoMode()
   const [blocks, setBlocks] = useState<TrainingBlock[] | null>(null)
   const [dayType, setDayType] = useState<DayTypeFilter>('A')
@@ -274,7 +282,8 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
 
   const data = useMemo(() => {
     if (!blocks) return null
-    const suggestions = limitSuggestions(progressSuggestions(entries, blocks, exercises, today, new Set(Object.keys(targets))))
+    const i18n = { t, language }
+    const suggestions = limitSuggestions(progressSuggestions(entries, blocks, exercises, today, new Set(Object.keys(targets)), i18n))
     const week = reportingWeek(entries, today)
     const currentWeek = startOfWeek(today)
     const currentWeekAdherence = adherence(entries, blocks, currentWeek)
@@ -283,29 +292,30 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
     const prCount = weeklyPRCount(records, currentWeek)
     const reports = visibleBlockReports(blockReports(entries, blocks, exercises), entries, blocks)
     const weekly = weeklySets(entries, blocks, exercises, week)
-    const options = exercisesWithHistory(entries, exercises)
+    const options = exercisesWithHistory(entries, exercises, language)
     const consistencyBlock = reportingBlock(blocks, entries, today)
     return { week, currentWeek, currentWeekAdherence, prCount, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options }
-  }, [blocks, entries, exercises, today, targets])
+  }, [blocks, entries, exercises, language, t, today, targets])
 
   if (!blocks || !data) {
-    return <section className="card" aria-live="polite"><p className="empty-state">Loading progress…</p></section>
+    return <section className="card" aria-live="polite"><p className="empty-state">{t('progress.loading')}</p></section>
   }
 
   const { week, currentWeek, currentWeekAdherence, prCount, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options } = data
   const nameFor = (id: string) => {
     const exercise = exercises.find((item) => item.id === id)
-    return exercise ? getExerciseDisplayName(exercise) : id
+    return exercise ? getExerciseDisplayName(exercise, language) : id
   }
   const selectedId = options.some((exercise) => exercise.id === pickedId)
     ? pickedId
-    : defaultExerciseId(entries, exercises, blocks, today)
+    : defaultExerciseId(entries, exercises, blocks, today, language)
   const filteredOptions = filterExerciseOptions(options, exerciseSearch)
-  const trend = selectedId ? strengthTrend(entries, blocks, selectedId, today, dayType, exercises) : null
+  const i18n = { t, language } as const
+  const trend = selectedId ? strengthTrend(entries, blocks, selectedId, today, dayType, exercises, i18n) : null
   const recordDates = new Set(
     records.filter((record) => record.exerciseId === selectedId && record.badges.length > 0).map((record) => record.date)
   )
-  const chart = trend ? buildChartModel(trend.points, blocks, recordDates) : null
+  const chart = trend ? buildChartModel(trend.points, blocks, recordDates, i18n) : null
   const blockAdherence = blockAdherenceFor(adherenceReport, consistencyBlock?.id)
   const dots = sessionDots(adherenceReport)
   const headlineDots = sessionDots(currentWeekAdherence)
@@ -330,35 +340,46 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
 
   return (
     <>
-      <section className="card progress-headline" aria-label="Weekly progress">
-        <h2 className="progress-headline-text">{weeklySummary(currentWeekAdherence.week.sessionsDone, currentWeekAdherence.week.sessionsPlanned, prCount, today)}</h2>
+      <section className="card progress-headline" aria-label={t('progress.headline.label')}>
+        <h2 className="progress-headline-text">{weeklySummary(currentWeekAdherence.week.sessionsDone, currentWeekAdherence.week.sessionsPlanned, prCount, today, i18n)}</h2>
         <div
           className="progress-session-days"
           role="img"
-          aria-label={`${currentWeekAdherence.week.sessionsDone} of ${currentWeekAdherence.week.sessionsPlanned} sessions done, ${formatWeekLabel(currentWeek, today).toLowerCase()}`}
+          aria-label={t('progress.headline.aria', {
+            done: formatNumber(language, currentWeekAdherence.week.sessionsDone),
+            planned: formatNumber(language, currentWeekAdherence.week.sessionsPlanned),
+            week: formatWeekLabel(currentWeek, today, i18n).toLowerCase(),
+          })}
         >
           {headlineDots.map((done, index) => (
             <span key={index} className="progress-session-day">
-              <span>D{index + 1}</span>
+              <span>{t('progress.sessions.label', { number: index + 1 })}</span>
               <span className={done ? 'session-dot done' : 'session-dot'} />
             </span>
           ))}
         </div>
       </section>
 
-      <SectionCard id="suggestions" title="Suggestions">
+      <SectionCard id="suggestions" title={t('progress.section.suggestions')}>
         {suggestions.length || appliedTargets.length ? (
           <ul className="progress-suggestions">
             {appliedTargets.map(([exerciseId, target]) => (
               <li key={`applied-${exerciseId}`} className="suggestion-actions">
                 <div className="suggestion-button static">
-                  <span className="suggestion-tag add-weight">Add weight</span>
+                  <span className="suggestion-tag add-weight">{t('progress.suggestions.tag.addWeight')}</span>
                   <span>
-                    {nameFor(exerciseId)}: Applied ✓ · next {target.dayType ? `${target.dayType} day` : 'session'} (+{target.increaseKg} kg)
+                    {t('progress.suggestions.applied', {
+                      exercise: nameFor(exerciseId),
+                      session: target.dayType
+                        ? t('progress.suggestions.nextDay', { dayType: target.dayType })
+                        : t('progress.suggestions.nextSession'),
+                      kg: formatNumber(language, target.increaseKg),
+                      unit: t('progress.unit.kg'),
+                    })}
                   </span>
                 </div>
                 <button type="button" className="suggestion-action-button" onClick={() => setTargets(removeWeightTarget(exerciseId))}>
-                  Undo
+                  {t('progress.suggestions.undo')}
                 </button>
               </li>
             ))}
@@ -369,10 +390,10 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                   {exerciseId ? (
                     <div className="suggestion-copy">
                       <span className={`suggestion-tag ${suggestion.type}`}>
-                        {suggestion.type === 'add-weight' ? 'Add weight' : 'Plateau'}
+                        {suggestion.type === 'add-weight' ? t('progress.suggestions.tag.addWeight') : t('progress.suggestions.tag.plateau')}
                       </span>
                       <span>{suggestion.message}</span>
-                      <p className="suggestion-why"><strong>Why?</strong> {suggestion.why}</p>
+                      <p className="suggestion-why"><strong>{t('progress.suggestions.why')}</strong> {suggestion.why}</p>
                       <AiSuggestionExplanation
                         exerciseId={exerciseId}
                         suggestionText={suggestion.message}
@@ -381,19 +402,19 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                         onSignIn={onSignIn}
                       />
                       <button type="button" className="suggestion-exercise-link" onClick={() => openSuggestion(suggestion)}>
-                        Open {nameFor(exerciseId)}
+                        {t('progress.suggestions.openExercise', { exercise: nameFor(exerciseId) })}
                       </button>
                     </div>
                   ) : (
                     <div className="suggestion-copy">
-                      <span className="suggestion-tag fatigue">Fatigue</span>
+                      <span className="suggestion-tag fatigue">{t('progress.suggestions.tag.fatigue')}</span>
                       <span>{suggestion.message}</span>
-                      <p className="suggestion-why"><strong>Why?</strong> {suggestion.why}</p>
+                      <p className="suggestion-why"><strong>{t('progress.suggestions.why')}</strong> {suggestion.why}</p>
                     </div>
                   )}
                   {suggestion.type === 'add-weight' && (
                     <button type="button" className="suggestion-action-button" onClick={() => applySuggestion(suggestion)}>
-                      Apply
+                      {t('progress.suggestions.apply')}
                     </button>
                   )}
                 </li>
@@ -401,38 +422,53 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
             })}
           </ul>
         ) : (
-          <p className="empty-state">{hasHistory ? 'No actions right now — keep following the plan.' : 'Log a few sessions to see suggestions.'}</p>
+          <p className="empty-state">{hasHistory ? t('progress.suggestions.empty.active') : t('progress.suggestions.empty.none')}</p>
         )}
       </SectionCard>
 
-      <SectionCard id="consistency" title="Consistency">
-        {hasHistory && <p className="chart-legend">{formatWeekLabel(week, today)}{consistencyBlock ? ` · Block ${consistencyBlock.number}` : ''}</p>}
-        <div className="session-dots" role="img" aria-label={`${adherenceReport.week.sessionsDone} of ${adherenceReport.week.sessionsPlanned} sessions done, ${formatWeekLabel(week, today).toLowerCase()}`}>
+      <SectionCard id="consistency" title={t('progress.section.consistency')}>
+        {hasHistory && (
+          <p className="chart-legend">
+            {t('progress.consistency.legend', {
+              week: formatWeekLabel(week, today, i18n),
+              block: consistencyBlock ? ` · ${t('progress.block.label', { number: consistencyBlock.number })}` : '',
+            })}
+          </p>
+        )}
+        <div
+          className="session-dots"
+          role="img"
+          aria-label={t('progress.headline.aria', {
+            done: formatNumber(language, adherenceReport.week.sessionsDone),
+            planned: formatNumber(language, adherenceReport.week.sessionsPlanned),
+            week: formatWeekLabel(week, today, i18n).toLowerCase(),
+          })}
+        >
           {dots.map((done, index) => (
             <span key={index} className={done ? 'session-dot done' : 'session-dot'} />
           ))}
         </div>
         <div className="summary-grid">
           <div className="metric-card">
-            <span>Block adherence</span>
+            <span>{t('progress.consistency.metric.blockAdherence')}</span>
             <strong>
               {blockAdherence
-                ? formatPercent(blockAdherence.sessionsDone / blockAdherence.sessionsPlanned)
+                ? formatPercent(blockAdherence.sessionsDone / blockAdherence.sessionsPlanned, language)
                 : '—'}
             </strong>
           </div>
           <div className="metric-card">
-            <span>Reps hit</span>
-            <strong>{formatPercent(blockAdherence?.hitRate ?? adherenceReport.week.hitRate)}</strong>
+            <span>{t('progress.consistency.metric.repsHit')}</span>
+            <strong>{formatPercent(blockAdherence?.hitRate ?? adherenceReport.week.hitRate, language)}</strong>
           </div>
         </div>
-        {!hasHistory && <p className="empty-state">Log a few sessions to see your consistency.</p>}
+        {!hasHistory && <p className="empty-state">{t('progress.consistency.empty')}</p>}
       </SectionCard>
 
-      <SectionCard id="strength" title="Strength trend" defaultOpen>
+      <SectionCard id="strength" title={t('progress.section.strengthTrend')} defaultOpen>
         {options.length ? (
           <>
-            <span className="field-label">Exercise</span>
+            <span className="field-label">{t('progress.strength.exercise')}</span>
             <button
               ref={exercisePickerButtonRef}
               type="button"
@@ -448,16 +484,16 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
             </button>
             {exercisePickerOpen && (
               <div id="progress-exercise-picker" className="exercise-picker-panel">
-                <label className="field-label" htmlFor="progress-exercise-search">Search exercises</label>
+                <label className="field-label" htmlFor="progress-exercise-search">{t('progress.strength.search.label')}</label>
                 <input
                   id="progress-exercise-search"
                   className="search-input"
                   type="search"
-                  placeholder="Search by exercise name"
+                  placeholder={t('progress.strength.search.placeholder')}
                   value={exerciseSearch}
                   onChange={(event) => setExerciseSearch(event.target.value)}
                 />
-                <div className="search-dropdown" aria-label="Exercises sorted by most recent session">
+                <div className="search-dropdown" aria-label={t('progress.strength.search.results')}>
                   {filteredOptions.length ? filteredOptions.map((exercise) => (
                     <button
                       key={exercise.id}
@@ -471,13 +507,13 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                         exercisePickerButtonRef.current?.focus()
                       }}
                     >
-                      <span className="result-name">{getExerciseDisplayName(exercise)}</span>
+                      <span className="result-name">{getExerciseDisplayName(exercise, language)}</span>
                     </button>
-                  )) : <p className="empty-state">No exercises found.</p>}
+                  )) : <p className="empty-state">{t('progress.strength.search.empty')}</p>}
                 </div>
               </div>
             )}
-            <div className="plan-mode-tabs day-toggle" role="group" aria-label="Day type">
+            <div className="plan-mode-tabs day-toggle" role="group" aria-label={t('progress.strength.dayType')}>
               {(['A', 'B', 'all'] as const).map((value) => (
                 <button
                   key={value}
@@ -486,7 +522,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                   aria-pressed={dayType === value}
                   onClick={() => setDayType(value)}
                 >
-                  {value === 'all' ? 'All' : value}
+                  {value === 'all' ? t('progress.strength.dayType.all') : value}
                 </button>
               ))}
             </div>
@@ -494,44 +530,47 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
               <>
                 <StrengthChart
                   model={chart}
-                  title={`Estimated 1RM per session — ${nameFor(selectedId)} (${dayType === 'all' ? 'all days' : `${dayType} days`})`}
-                  summary={chartSummary(trend.points, trend.takeaway)}
+                  title={t('progress.strength.chart.title', {
+                    exercise: nameFor(selectedId),
+                    scope: dayType === 'all' ? t('progress.strength.scope.all') : t('progress.strength.scope.dayType', { dayType }),
+                  })}
+                  summary={chartSummary(trend.points, trend.takeaway, i18n)}
                 />
                 <p className="trend-takeaway">{trend.takeaway}</p>
-                <p className="chart-legend"><span className="chart-point record legend-dot" /> Personal record · shaded bands are training blocks</p>
+                <p className="chart-legend"><span className="chart-point record legend-dot" /> {t('progress.strength.chart.legend')}</p>
               </>
             ) : (
               <p className="empty-state">
-                {dayType === 'all' ? 'Log a few sessions to see your trend.' : `No ${dayType}-day sessions yet. Try another toggle or log a few sessions to see your trend.`}
+                {dayType === 'all' ? t('progress.strength.empty.all') : t('progress.strength.empty.dayType', { dayType })}
               </p>
             )}
           </>
         ) : (
-          <p className="empty-state">Log a few sessions to see your trend.</p>
+          <p className="empty-state">{t('progress.strength.empty.none')}</p>
         )}
         {selectedId && (
           <button type="button" className="secondary-button" onClick={() => onOpenExercise(selectedId)}>
-            Open exercise
+            {t('progress.strength.openExercise')}
           </button>
         )}
       </SectionCard>
 
-      <SectionCard id="records" title="Personal records">
+      <SectionCard id="records" title={t('progress.section.personalRecords')}>
         {recent.length ? (
           <ul className="record-list">
             {recent.map((record) => (
               <li key={`${record.exerciseId}-${record.date}`}>
                 <div>
                   <strong>{nameFor(record.exerciseId)}</strong>
-                  <small>{formatDate(record.date)}</small>
+                  <small>{formatShortDate(language, record.date)}</small>
                 </div>
                 <div className="chip-row">
                   {record.badges.map((badge) => (
                     <span key={badge} className="record-badge">
-                      <span className="chip">{RECORD_LABELS[badge]}</span>
+                      <span className="chip">{t(RECORD_LABELS[badge])}</span>
                       <details className="record-help">
-                        <summary aria-label={`Explain ${RECORD_LABELS[badge]}`} title={RECORD_TOOLTIPS[badge]}>ⓘ</summary>
-                        <span className="record-help-text" role="tooltip">{RECORD_TOOLTIPS[badge]}</span>
+                        <summary aria-label={t('progress.records.explain', { label: t(RECORD_LABELS[badge]) })} title={t(RECORD_TOOLTIPS[badge])}>ⓘ</summary>
+                        <span className="record-help-text" role="tooltip">{t(RECORD_TOOLTIPS[badge])}</span>
                       </details>
                     </span>
                   ))}
@@ -540,25 +579,37 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
             ))}
           </ul>
         ) : (
-          <p className="empty-state">Personal records appear once you have logged a few sessions of a lift.</p>
+          <p className="empty-state">{t('progress.records.empty')}</p>
         )}
       </SectionCard>
 
-      <SectionCard id="weekly-sets" title="Weekly sets by muscle">
+      <SectionCard id="weekly-sets" title={t('progress.section.weeklySets')}>
         {rows.length ? (
           <>
-            <p className="chart-legend">{formatWeekLabel(week, today)}</p>
+            <p className="chart-legend">{formatWeekLabel(week, today, i18n)}</p>
             <ul className="muscle-bars">
               {rows.map((row) => (
                 <li key={row.muscleGroup}>
                   <div className="muscle-bar-head">
-                    <span>{row.muscleGroup}</span>
-                    <small>{Number(row.done.toFixed(1))} done / {Number(row.planned.toFixed(1))} planned · {muscleStatus(row)}</small>
+                    <span>{muscleGroupLabel(row.muscleGroup, i18n)}</span>
+                    <small>
+                      {t('progress.weeklySets.donePlanned', {
+                        done: formatNumber(language, Number(row.done.toFixed(1))),
+                        planned: formatNumber(language, Number(row.planned.toFixed(1))),
+                        status: muscleStatus(row, i18n),
+                      })}
+                    </small>
                   </div>
                   <div
                     className="muscle-bar-track"
                     role="img"
-                    aria-label={`${row.muscleGroup}: ${row.done} sets done, ${row.planned} planned, recommended ${SETS_RANGE.min} to ${SETS_RANGE.max}`}
+                    aria-label={t('progress.weeklySets.aria', {
+                      group: muscleGroupLabel(row.muscleGroup, i18n),
+                      done: formatNumber(language, row.done),
+                      planned: formatNumber(language, row.planned),
+                      min: formatNumber(language, SETS_RANGE.min),
+                      max: formatNumber(language, SETS_RANGE.max),
+                    })}
                   >
                     <div className="muscle-range" style={{ left: `${(SETS_RANGE.min / scale) * 100}%`, width: `${((SETS_RANGE.max - SETS_RANGE.min) / scale) * 100}%` }} />
                     <div className="muscle-planned" style={{ left: `${Math.min(row.planned / scale, 1) * 100}%` }} />
@@ -567,39 +618,45 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                 </li>
               ))}
             </ul>
-            <p className="chart-legend">Shaded band = {SETS_RANGE.min}–{SETS_RANGE.max} sets per week. Marker = planned.</p>
+            <p className="chart-legend">{t('progress.weeklySets.legend', {
+              min: formatNumber(language, SETS_RANGE.min),
+              max: formatNumber(language, SETS_RANGE.max),
+            })}</p>
           </>
         ) : (
-          <p className="empty-state">Log a few sessions to see your weekly sets.</p>
+          <p className="empty-state">{t('progress.weeklySets.empty')}</p>
         )}
       </SectionCard>
 
-      <SectionCard id="block-report" title="Block report card">
+      <SectionCard id="block-report" title={t('progress.section.blockReport')}>
         {reports.length ? (
           <ul className="block-reports">
             {reports.map((report) => (
               <li key={report.blockId} className="block-report">
                 <div className="section-title-row">
-                  <strong>Block {report.blockNumber} · {formatBlockMethod(report.method)}</strong>
-                  <span className="block-headline">{formatChange(report.medianChangePercent)}</span>
+                  <strong>{t('progress.blockReport.itemTitle', {
+                    block: t('progress.block.label', { number: report.blockNumber }),
+                    method: formatBlockMethod(report.method, i18n),
+                  })}</strong>
+                  <span className="block-headline">{formatChange(report.medianChangePercent, language)}</span>
                 </div>
                 {topLifts(report).length ? (
                   <ul className="block-lifts">
                     {topLifts(report).map((lift) => (
                       <li key={`${lift.exerciseId}-${lift.dayType}`}>
-                        <span>{nameFor(lift.exerciseId)} ({lift.dayType})</span>
-                        <strong>{formatChange(lift.changePercent)}</strong>
+                        <span>{t('progress.blockReport.liftLabel', { exercise: nameFor(lift.exerciseId), dayType: lift.dayType })}</span>
+                        <strong>{formatChange(lift.changePercent, language)}</strong>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="empty-state">Not enough sessions yet to compare start and end of this block.</p>
+                  <p className="empty-state">{t('progress.blockReport.emptyComparison')}</p>
                 )}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="empty-state">Log a few sessions to see your block report.</p>
+          <p className="empty-state">{t('progress.blockReport.empty')}</p>
         )}
       </SectionCard>
     </>

@@ -1,6 +1,9 @@
+import { formatNumber } from '../i18n/format'
 import { Exercise, TrainingBlock } from '../types'
+import { getExerciseDisplayName } from '../utils/storage'
 import { ProgressEntry, ProgressSuggestion } from './types'
 import {
+  defaultProgressI18n,
   blockWeek,
   dateValue,
   exerciseFor,
@@ -10,6 +13,7 @@ import {
   groupExerciseSessions,
   isDeloadWeek,
   plannedExerciseForEntry,
+  ProgressI18n,
   prescribedReps,
   sessionE1RM,
   workingSets,
@@ -66,7 +70,8 @@ export function progressSuggestions(
   blocks: TrainingBlock[],
   exercises: Exercise[],
   today: string,
-  appliedExerciseIds: ReadonlySet<string> = new Set()
+  appliedExerciseIds: ReadonlySet<string> = new Set(),
+  { language, t }: ProgressI18n = defaultProgressI18n
 ): ProgressSuggestion[] {
   const block = findBlockForDate(blocks, today)
   if (!block) return []
@@ -97,7 +102,7 @@ export function progressSuggestions(
     const latest = daySessions[daySessions.length - 1]
     if (!latest) continue
     const exercise = exerciseFor(exercises, latest.exerciseId)
-    const name = exercise?.name ?? latest.exerciseId
+    const name = exercise ? getExerciseDisplayName(exercise, language) : latest.exerciseId
 
     if (appliedExerciseIds.has(exerciseId)) continue
 
@@ -108,8 +113,13 @@ export function progressSuggestions(
         exerciseId: latest.exerciseId,
         dayType,
         increment,
-        message: `Ready to add ${increment} kg on ${name} next ${dayType} day.`,
-        why: 'You completed every planned set and rep target last time.',
+        message: t('progress.suggestions.addWeight.message', {
+          increment: formatNumber(language, increment),
+          exercise: name,
+          dayType,
+          unit: t('progress.unit.kg'),
+        }),
+        why: t('progress.suggestions.addWeight.why'),
       })
       continue
     }
@@ -132,8 +142,8 @@ export function progressSuggestions(
       type: 'plateau',
       exerciseId,
       dayType,
-      message: `${name} has held steady for 3 ${dayType}-day sessions. Aim for one more rep at the same weight before adding load.`,
-      why: `Your last three ${dayType}-day sessions did not beat the earlier best.`,
+      message: t('progress.suggestions.plateau.message', { exercise: name, dayType }),
+      why: t('progress.suggestions.plateau.why', { dayType }),
     }
     plateauSuggestions.push(suggestion)
     plateauByWeek.set(latestWeek, (plateauByWeek.get(latestWeek) ?? 0) + 1)
@@ -148,8 +158,8 @@ export function progressSuggestions(
       {
         type: 'fatigue',
         week: fatigueWeek,
-        message: 'Many lifts have stalled at once. Sleep, food and stress usually matter more than the program; prioritize recovery.',
-        why: 'Three or more lifts stalled in the same week.',
+        message: t('progress.suggestions.fatigue.message'),
+        why: t('progress.suggestions.fatigue.why'),
       },
     ]
   }

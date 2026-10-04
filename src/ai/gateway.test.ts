@@ -28,6 +28,7 @@ describe('AI gateway wrappers', () => {
         feature: 'explain_suggestion',
         exerciseId: 'barbell-bench-press',
         suggestion: 'Ready to add 2.5 kg.',
+        language: 'en',
       },
     })
   })
@@ -48,6 +49,7 @@ describe('AI gateway wrappers', () => {
         date: '2026-10-04',
         blockId: 'block-1',
         dayKey: 'chest-back-a',
+        language: 'en',
       },
     })
   })
@@ -65,5 +67,18 @@ describe('AI gateway wrappers', () => {
     const { explainSuggestion } = await import('./gateway')
 
     await expect(explainSuggestion('barbell-bench-press', 'Why?')).rejects.toThrow(message)
+  })
+
+  it('sends the selected language and localises errors', async () => {
+    invoke.mockResolvedValue({
+      data: null,
+      error: { context: new Response(JSON.stringify({ error: 'sign_in_required' }), { status: 401 }) },
+    })
+    const { askExercise } = await import('./gateway')
+
+    await expect(askExercise('barbell-bench-press', '¿Cómo?', 'es')).rejects.toThrow('Inicia sesión para preguntar a la IA.')
+    expect(invoke).toHaveBeenCalledWith('ai-gateway', {
+      body: { feature: 'ask_exercise', exerciseId: 'barbell-bench-press', question: '¿Cómo?', language: 'es' },
+    })
   })
 })

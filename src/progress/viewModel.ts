@@ -1,16 +1,22 @@
+import { type TranslationKey } from '../i18n/en'
+import { formatNumber, formatShortDate } from '../i18n/format'
+import type { Language } from '../i18n/translate'
 import { Exercise, TrainingBlock } from '../types'
+import { filterExercises } from '../utils/exerciseFilters'
+import { getExerciseDisplayName } from '../utils/storage'
 import {
   AdherenceReport,
   BlockReport,
+  MuscleGroup,
   PersonalRecordSession,
   ProgressEntry,
   ProgressSuggestion,
   StrengthTrendPoint,
   WeeklyMuscleSets,
 } from './types'
-import { dateValue, findBlockForDate, startOfWeek } from './utils'
+import { dateValue, defaultProgressI18n, findBlockForDate, ProgressI18n, startOfWeek } from './utils'
 
-export { formatBlockMethod } from '../utils/trainingBlocks'
+import { formatBlockMethod as plainFormatBlockMethod } from '../utils/trainingBlocks'
 
 export const MAX_SUGGESTIONS = 5
 export const MAX_RECORDS = 5
@@ -32,8 +38,8 @@ export function sessionDots(adherenceReport: AdherenceReport) {
   return Array.from({ length: sessionsPlanned }, (_, index) => index < sessionsDone)
 }
 
-export function formatPercent(rate: number | null) {
-  return rate === null ? '—' : `${Math.round(rate * 100)}%`
+export function formatPercent(rate: number | null, language: Language = 'en') {
+  return rate === null ? '—' : `${formatNumber(language, Math.round(rate * 100))}%`
 }
 
 export function blockAdherenceFor(adherenceReport: AdherenceReport, blockId: string | undefined) {
@@ -47,11 +53,15 @@ export function recentRecords(records: PersonalRecordSession[], max = MAX_RECORD
     .slice(0, max)
 }
 
-export const RECORD_LABELS = { weight: 'Weight PR', reps: 'Rep PR', e1rm: 'e1RM PR' } as const
+export const RECORD_LABELS = {
+  weight: 'progress.records.badge.weight',
+  reps: 'progress.records.badge.reps',
+  e1rm: 'progress.records.badge.e1rm',
+} as const
 export const RECORD_TOOLTIPS = {
-  weight: 'Highest weight lifted while meeting the minimum rep target.',
-  reps: 'Most reps completed at a weight equal to or heavier than before.',
-  e1rm: 'Estimated one-rep max: your estimated maximum weight for one repetition.',
+  weight: 'progress.records.tooltip.weight',
+  reps: 'progress.records.tooltip.reps',
+  e1rm: 'progress.records.tooltip.e1rm',
 } as const
 
 export function visibleBlockReports(reports: BlockReport[], entries: ProgressEntry[], blocks: TrainingBlock[]) {
@@ -68,10 +78,10 @@ export function topLifts(report: BlockReport, max = MAX_BLOCK_LIFTS) {
   return [...report.lifts].sort((a, b) => b.changePercent - a.changePercent).slice(0, max)
 }
 
-export function formatChange(value: number | null) {
+export function formatChange(value: number | null, language: Language = 'en') {
   if (value === null) return '—'
   const rounded = Math.round(value)
-  return `${rounded > 0 ? '+' : ''}${rounded}%`
+  return `${rounded > 0 ? '+' : rounded < 0 ? '−' : ''}${formatNumber(language, Math.abs(rounded))}%`
 }
 
 export function muscleRows(weekly: WeeklyMuscleSets) {
@@ -82,16 +92,16 @@ export function muscleScale(rows: ReturnType<typeof muscleRows>) {
   return Math.max(SETS_RANGE.max + 5, ...rows.flatMap((row) => [row.done, row.planned]))
 }
 
-export function muscleStatus(row: { done: number; planned: number; band: string }) {
+export function muscleStatus(row: { done: number; planned: number; band: string }, { t }: ProgressI18n = defaultProgressI18n) {
   if (row.band === 'high') {
-    return row.planned >= row.done ? 'Above range (planned)' : 'Above range'
+    return row.planned >= row.done ? t('progress.muscleStatus.highPlanned') : t('progress.muscleStatus.high')
   }
-  if (row.band === 'in-range') return 'In range'
-  if (row.band === 'light') return 'Light'
-  return 'Low'
+  if (row.band === 'in-range') return t('progress.muscleStatus.inRange')
+  if (row.band === 'light') return t('progress.muscleStatus.light')
+  return t('progress.muscleStatus.low')
 }
 
-export function exercisesWithHistory(entries: ProgressEntry[], exercises: Exercise[]) {
+export function exercisesWithHistory(entries: ProgressEntry[], exercises: Exercise[], language: Language = 'en') {
   const latestDates = new Map<string, string>()
   for (const entry of entries) {
     const date = entry.date.slice(0, 10)
@@ -99,13 +109,14 @@ export function exercisesWithHistory(entries: ProgressEntry[], exercises: Exerci
   }
   return exercises
     .filter((exercise) => latestDates.has(exercise.id))
-    .sort((a, b) => (latestDates.get(b.id) ?? '').localeCompare(latestDates.get(a.id) ?? '') || a.name.localeCompare(b.name))
+    .sort((a, b) =>
+      (latestDates.get(b.id) ?? '').localeCompare(latestDates.get(a.id) ?? '')
+      || getExerciseDisplayName(a, language).localeCompare(getExerciseDisplayName(b, language))
+    )
 }
 
 export function filterExerciseOptions(exercises: Exercise[], query: string) {
-  const normalized = query.trim().toLowerCase()
-  if (!normalized) return exercises
-  return exercises.filter((exercise) => `${exercise.name} ${exercise.id}`.toLowerCase().includes(normalized))
+  return filterExercises(exercises, query)
 }
 
 export function weeklyPRCount(records: PersonalRecordSession[], weekStart: string) {
@@ -117,11 +128,24 @@ export function weeklyPRCount(records: PersonalRecordSession[], weekStart: strin
   }).length
 }
 
-export function weeklySummary(sessionsDone: number, sessionsPlanned: number, prCount: number, today: string) {
+export function weeklySummary(
+  sessionsDone: number,
+  sessionsPlanned: number,
+  prCount: number,
+  today: string,
+  { language, t }: ProgressI18n = defaultProgressI18n
+) {
   const weekday = new Date(dateValue(today)).getUTCDay()
   const sessionsExpected = Math.min(weekday === 0 ? 6 : weekday, sessionsPlanned)
-  const status = sessionsDone >= sessionsExpected ? 'on track' : 'in progress'
-  return `This week: ${sessionsDone} of ${sessionsPlanned} sessions · ${prCount} PR${prCount === 1 ? '' : 's'} · ${status}`
+  const status = sessionsDone >= sessionsExpected
+    ? t('progress.weeklySummary.status.onTrack')
+    : t('progress.weeklySummary.status.inProgress')
+  return t(prCount === 1 ? 'progress.weeklySummary.one' : 'progress.weeklySummary.other', {
+    done: formatNumber(language, sessionsDone),
+    planned: formatNumber(language, sessionsPlanned),
+    prCount: formatNumber(language, prCount),
+    status,
+  })
 }
 
 export function mainLiftForToday(blocks: TrainingBlock[], today: string) {
@@ -138,9 +162,10 @@ export function defaultExerciseId(
   entries: ProgressEntry[],
   exercises: Exercise[],
   blocks: TrainingBlock[],
-  today: string
+  today: string,
+  language: Language = 'en'
 ) {
-  const options = exercisesWithHistory(entries, exercises)
+  const options = exercisesWithHistory(entries, exercises, language)
   const main = mainLiftForToday(blocks, today)
   if (main && options.some((exercise) => exercise.id === main)) return main
   return options[0]?.id ?? ''
@@ -163,7 +188,8 @@ export const CHART_SIZE = { width: 320, height: 190, left: 34, right: 10, top: 1
 export function buildChartModel(
   points: StrengthTrendPoint[],
   blocks: TrainingBlock[],
-  recordDates: Set<string> = new Set()
+  recordDates: Set<string> = new Set(),
+  { language, t }: ProgressI18n = defaultProgressI18n
 ): ChartModel {
   const { width, height, left, right, top, bottom } = CHART_SIZE
   if (!points.length) return { width, height, points: [], path: '', bands: [], yTicks: [], xTicks: [] }
@@ -196,7 +222,12 @@ export function buildChartModel(
       if (end <= minTime || start > maxTime) return null
       const x1 = xFor(Math.max(start, minTime))
       const x2 = xFor(Math.min(end, maxTime))
-      return { blockId: block.id, label: `B${block.number}`, x: Number(x1.toFixed(1)), width: Number((x2 - x1).toFixed(1)) }
+      return {
+        blockId: block.id,
+        label: t('progress.block.short', { number: block.number }),
+        x: Number(x1.toFixed(1)),
+        width: Number((x2 - x1).toFixed(1)),
+      }
     })
     .filter((band): band is ChartBand => band !== null && band.width > 0)
 
@@ -211,7 +242,7 @@ export function buildChartModel(
   ]).values()]
   const xTicks = xTickPoints.map((point) => ({
     date: point.date,
-    label: new Date(`${point.date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }),
+    label: formatShortDate(language, point.date),
     x: point.x,
   }))
   const path = chartPoints.map((point, index) => {
@@ -230,12 +261,24 @@ export function buildChartModel(
   }
 }
 
-export function chartSummary(points: StrengthTrendPoint[], takeaway: string) {
+export function chartSummary(
+  points: StrengthTrendPoint[],
+  takeaway: string,
+  { language, t }: ProgressI18n = defaultProgressI18n
+) {
   if (!points.length) return takeaway
   const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date))
   const first = sorted[0]
   const last = sorted[sorted.length - 1]
-  return `${takeaway} ${sorted.length} sessions from ${first.date} (${first.e1rm.toFixed(1)} kg) to ${last.date} (${last.e1rm.toFixed(1)} kg).`
+  return t('progress.chart.summary', {
+    takeaway,
+    count: formatNumber(language, sorted.length),
+    startDate: formatShortDate(language, first.date),
+    startValue: formatNumber(language, first.e1rm, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+    endDate: formatShortDate(language, last.date),
+    endValue: formatNumber(language, last.e1rm, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+    unit: t('progress.unit.kg'),
+  })
 }
 
 export function reportingWeek(entries: Pick<ProgressEntry, 'date'>[], today: string) {
@@ -264,8 +307,38 @@ export function reportingBlock(blocks: TrainingBlock[], entries: ProgressEntry[]
     .sort((a, b) => b.startDate.localeCompare(a.startDate))[0] ?? null
 }
 
-export function formatWeekLabel(weekStart: string, today: string) {
-  if (weekStart === startOfWeek(today)) return 'This week'
-  const label = new Date(`${weekStart}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
-  return `Week of ${label}`
+export function formatWeekLabel(weekStart: string, today: string, { language, t }: ProgressI18n = defaultProgressI18n) {
+  if (weekStart === startOfWeek(today)) return t('progress.week.this')
+  return t('progress.week.of', { date: formatShortDate(language, weekStart) })
+}
+
+const BLOCK_METHOD_LABELS = {
+  'flat-pyramid': 'progress.blockMethod.flatPyramid',
+  'reverse-pyramid': 'progress.blockMethod.reversePyramid',
+  'strength-hypertrophy': 'progress.blockMethod.strengthHypertrophy',
+  'ascending-pyramid': 'progress.blockMethod.ascendingPyramid',
+} as const satisfies Partial<Record<string, TranslationKey>>
+
+const MUSCLE_GROUP_LABELS = {
+  Chest: 'progress.muscle.chest',
+  Back: 'progress.muscle.back',
+  'Shoulders (side and rear)': 'progress.muscle.shoulders',
+  'Front delts': 'progress.muscle.frontDelts',
+  Biceps: 'progress.muscle.biceps',
+  Triceps: 'progress.muscle.triceps',
+  Quads: 'progress.muscle.quads',
+  Hamstrings: 'progress.muscle.hamstrings',
+  Glutes: 'progress.muscle.glutes',
+  Calves: 'progress.muscle.calves',
+  Core: 'progress.muscle.core',
+  Other: 'progress.muscle.other',
+} as const satisfies Record<MuscleGroup, TranslationKey>
+
+export function formatBlockMethod(method: string, { t }: ProgressI18n = defaultProgressI18n) {
+  const key = BLOCK_METHOD_LABELS[method as keyof typeof BLOCK_METHOD_LABELS]
+  return key ? t(key) : plainFormatBlockMethod(method)
+}
+
+export function muscleGroupLabel(group: MuscleGroup, { t }: ProgressI18n = defaultProgressI18n) {
+  return t(MUSCLE_GROUP_LABELS[group])
 }

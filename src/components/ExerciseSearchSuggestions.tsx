@@ -2,6 +2,7 @@ import React from 'react'
 import { Exercise } from '../types'
 import { getExerciseSubtitle } from '../utils/exerciseFilters'
 import { getExerciseDisplayName } from '../utils/storage'
+import { useT } from '../i18n'
 
 export default function ExerciseSearchSuggestions({
   exercises,
@@ -12,6 +13,7 @@ export default function ExerciseSearchSuggestions({
   selectedExerciseId?: string
   onSelect: (exerciseId: string) => void
 }) {
+  const { t, language } = useT()
   return (
     <div className="search-dropdown">
       {exercises.length ? (
@@ -22,12 +24,12 @@ export default function ExerciseSearchSuggestions({
             className={selectedExerciseId === exercise.id ? 'result-item active' : 'result-item'}
             onClick={() => onSelect(exercise.id)}
           >
-            <span className="result-name">{getExerciseDisplayName(exercise)}</span>
+            <span className="result-name">{getExerciseDisplayName(exercise, language)}</span>
             <span className="result-meta">{getExerciseSubtitle(exercise)}</span>
           </button>
         ))
       ) : (
-        <p className="empty-state">No exercises found.</p>
+        <p className="empty-state">{t('exercises.noResults')}</p>
       )}
     </div>
   )

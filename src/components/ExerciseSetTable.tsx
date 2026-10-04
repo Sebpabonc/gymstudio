@@ -1,6 +1,7 @@
 import React from 'react'
 import { WorkoutSet } from '../types'
 import { stepWorkoutValue } from '../utils/workoutSets'
+import { useT } from '../i18n'
 
 type ExerciseSetTableProps = {
   sets: WorkoutSet[]
@@ -19,19 +20,20 @@ export default function ExerciseSetTable({
   onToggleComplete,
   onRemoveSet,
 }: ExerciseSetTableProps) {
+  const { t } = useT()
   return (
     <div className="free-set-table">
       <div className="free-set-header" aria-hidden="true">
-        <span>Set</span>
-        <span>Previous</span>
-        <span>kg</span>
-        <span>Reps</span>
+        <span>{t('setTable.set')}</span>
+        <span>{t('setTable.previous')}</span>
+        <span>{t('setTable.kg')}</span>
+        <span>{t('setTable.reps')}</span>
         <span>✓</span>
         <span />
       </div>
       {sets.map((set, index) => {
         const previousSet = previousSets[index]
-        const weightLabel = `Set ${index + 1} weight in kilograms`
+        const weightLabel = t('setTable.weightAria', { n: index + 1 })
         const complete = completedSets[index] ?? false
         return (
           <div className={`set-row${complete ? ' completed' : ''}`} key={set.id}>
@@ -40,7 +42,7 @@ export default function ExerciseSetTable({
               <button
                 type="button"
                 className="previous-set-value"
-                aria-label={`Copy previous set ${index + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
+                aria-label={t('setTable.copyPrevious', { n: index + 1, weight: previousSet.weight, reps: previousSet.reps })}
                 onClick={() => {
                   onUpdateSet(index, 'weight', String(previousSet.weight))
                   onUpdateSet(index, 'reps', String(previousSet.reps))
@@ -55,7 +57,7 @@ export default function ExerciseSetTable({
               <button
                 type="button"
                 className="stepper-button"
-                aria-label={`Decrease ${weightLabel}`}
+                aria-label={t('setTable.decrease', { label: weightLabel })}
                 onClick={() => onUpdateSet(index, 'weight', String(stepWorkoutValue(set.weight, -1, 2.5)))}
               >
                 −
@@ -73,7 +75,7 @@ export default function ExerciseSetTable({
               <button
                 type="button"
                 className="stepper-button"
-                aria-label={`Increase ${weightLabel}`}
+                aria-label={t('setTable.increase', { label: weightLabel })}
                 onClick={() => onUpdateSet(index, 'weight', String(stepWorkoutValue(set.weight, 1, 2.5)))}
               >
                 +
@@ -85,13 +87,13 @@ export default function ExerciseSetTable({
               inputMode="numeric"
               min={0}
               value={set.reps}
-              aria-label={`Set ${index + 1} reps`}
+              aria-label={t('setTable.repsAria', { n: index + 1 })}
               onChange={(event) => onUpdateSet(index, 'reps', event.target.value)}
             />
             <button
               type="button"
               className="complete-set-button"
-              aria-label={`${complete ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
+              aria-label={t(complete ? 'setTable.unmarkComplete' : 'setTable.markComplete', { n: index + 1 })}
               aria-pressed={complete}
               onClick={() => onToggleComplete(index)}
             >
@@ -100,7 +102,7 @@ export default function ExerciseSetTable({
             <button
               type="button"
               className="free-set-remove"
-              aria-label={`Remove set ${index + 1}`}
+              aria-label={t('setTable.remove', { n: index + 1 })}
               onClick={() => onRemoveSet(set.id)}
             >
               ×

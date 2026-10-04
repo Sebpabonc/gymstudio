@@ -1,7 +1,18 @@
+import { createTranslator, type Language, type Translate } from '../i18n/translate'
 import { Exercise, PlannedExercise, TrainingBlock } from '../types'
 import { DayType, ProgressEntry, ProgressSet } from './types'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+
+export type ProgressI18n = {
+  language: Language
+  t: Translate
+}
+
+export const defaultProgressI18n: ProgressI18n = {
+  language: 'en',
+  t: createTranslator('en'),
+}
 
 export type ExerciseSession = {
   exerciseId: string

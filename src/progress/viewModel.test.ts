@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { createTranslator } from '../i18n/translate'
 import { Exercise, TrainingBlock } from '../types'
 import {
   buildChartModel,
@@ -43,10 +44,13 @@ const block = (number: number, startDate: string, exerciseId = 'bench'): Trainin
 })
 
 const exercises: Exercise[] = [
-  { id: 'bench', name: 'Bench', primaryMuscle: 'Chest' },
-  { id: 'row', name: 'Row', primaryMuscle: 'Lats' },
-  { id: 'curl', name: 'Curl', primaryMuscle: 'Biceps' },
+  { id: 'bench', name: 'Bench', nameEs: 'Press banca', primaryMuscle: 'Chest' },
+  { id: 'row', name: 'Row', nameEs: 'Remo', primaryMuscle: 'Lats' },
+  { id: 'curl', name: 'Curl', nameEs: 'Curl de bíceps', primaryMuscle: 'Biceps' },
 ]
+
+const en = { language: 'en' as const, t: createTranslator('en') }
+const es = { language: 'es' as const, t: createTranslator('es') }
 
 const entry = (exerciseId: string, date: string): ProgressEntry => ({
   id: `${exerciseId}-${date}`,
@@ -95,19 +99,19 @@ describe('progress view model', () => {
   })
 
   it('marks high sets as planned when the plan prescribes them', () => {
-    expect(muscleStatus({ band: 'high', done: 24, planned: 24 })).toBe('Above range (planned)')
-    expect(muscleStatus({ band: 'high', done: 26, planned: 20 })).toBe('Above range')
-    expect(muscleStatus({ band: 'in-range', done: 12, planned: 12 })).toBe('In range')
+    expect(muscleStatus({ band: 'high', done: 24, planned: 24 }, en)).toBe('Above range (planned)')
+    expect(muscleStatus({ band: 'high', done: 26, planned: 20 }, en)).toBe('Above range')
+    expect(muscleStatus({ band: 'in-range', done: 12, planned: 12 }, en)).toBe('In range')
   })
 
   it('uses plain block method labels and explains personal record types', () => {
-    expect(formatBlockMethod('reverse-pyramid')).toBe('Reverse Pyramid')
-    expect(RECORD_TOOLTIPS.e1rm).toContain('Estimated one-rep max')
-    expect(RECORD_TOOLTIPS.weight).toContain('Highest weight')
-    expect(RECORD_TOOLTIPS.reps).toContain('Most reps')
+    expect(formatBlockMethod('reverse-pyramid', en)).toBe('Reverse Pyramid')
+    expect(en.t(RECORD_TOOLTIPS.e1rm)).toContain('Estimated one-rep max')
+    expect(en.t(RECORD_TOOLTIPS.weight)).toContain('Highest weight')
+    expect(en.t(RECORD_TOOLTIPS.reps)).toContain('Most reps')
   })
 
-  it('orders chart exercises by most recent session and filters them by search', () => {
+  it('orders chart exercises by most recent session and filters them by Spanish search', () => {
     const entries = [
       entry('bench', '2026-01-06'),
       entry('curl', '2026-01-07'),
@@ -116,7 +120,8 @@ describe('progress view model', () => {
     ]
     const options = exercisesWithHistory(entries, exercises)
     expect(options.map((item) => item.id)).toEqual(['row', 'curl', 'bench'])
-    expect(filterExerciseOptions(options, 'UR')).toEqual([exercises[2]])
+    expect(filterExerciseOptions(options, 'bíceps')).toEqual([exercises[2]])
+    expect(filterExerciseOptions(options, 'remo')).toEqual([exercises[1]])
     expect(filterExerciseOptions(options, '')).toEqual(options)
   })
 
@@ -127,9 +132,10 @@ describe('progress view model', () => {
       { exerciseId: 'curl', date: '2026-03-09', badges: ['weight' as const], likelyTypoSetIds: [] },
     ]
     expect(weeklyPRCount(records, '2026-03-02')).toBe(2)
-    expect(weeklySummary(1, 6, 1, '2026-03-02')).toBe('This week: 1 of 6 sessions · 1 PR · on track')
-    expect(weeklySummary(0, 6, 0, '2026-03-02')).toBe('This week: 0 of 6 sessions · 0 PRs · in progress')
-    expect(weeklySummary(0, 6, 0, '2026-03-08')).toBe('This week: 0 of 6 sessions · 0 PRs · in progress')
+    expect(weeklySummary(1, 6, 1, '2026-03-02', en)).toBe('This week: 1 of 6 sessions · 1 PR · on track')
+    expect(weeklySummary(0, 6, 0, '2026-03-02', en)).toBe('This week: 0 of 6 sessions · 0 PRs · in progress')
+    expect(weeklySummary(0, 6, 0, '2026-03-08', en)).toBe('This week: 0 of 6 sessions · 0 PRs · in progress')
+    expect(weeklySummary(1, 6, 1, '2026-03-02', es)).toBe('Esta semana: 1 de 6 sesiones · 1 PR · en ritmo')
   })
 
   it('picks the main lift of the current day, falling back to most logged', () => {
@@ -155,7 +161,8 @@ describe('progress view model', () => {
     expect(model.path.startsWith('M')).toBe(true)
     expect(model.xTicks.map((tick) => tick.date)).toEqual(['2026-01-05', '2026-01-19'])
     expect(buildChartModel([], blocks).points).toEqual([])
-    expect(chartSummary(points, 'Up.')).toContain('2 sessions')
+    expect(buildChartModel(points, blocks, new Set(['2026-01-19']), es).xTicks[0].label).toBe('5 ene')
+    expect(chartSummary(points, 'Up.', en)).toContain('2 sessions')
   })
 
   it('starts a new chart line at each block boundary', () => {
@@ -179,7 +186,8 @@ describe('progress view model', () => {
     expect(reportingBlock(blocks, entries, '2026-03-04')?.id).toBe('b1')
     expect(reportingBlock(blocks, [...entries, entry('bench', '2026-02-17')], '2026-02-20')?.id).toBe('b2')
     expect(reportingBlock(blocks, [], '2026-03-04')).toBeNull()
-    expect(formatWeekLabel('2026-01-19', '2026-03-04')).toBe('Week of 19 Jan')
-    expect(formatWeekLabel('2026-03-02', '2026-03-04')).toBe('This week')
+    expect(formatWeekLabel('2026-01-19', '2026-03-04', en)).toBe('Week of Jan 19')
+    expect(formatWeekLabel('2026-03-02', '2026-03-04', en)).toBe('This week')
+    expect(formatWeekLabel('2026-01-19', '2026-03-04', es)).toBe('Semana de 19 ene')
   })
 })

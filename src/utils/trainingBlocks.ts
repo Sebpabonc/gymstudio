@@ -1,3 +1,5 @@
+import type { TranslationKey } from '../i18n/en'
+import { localeFor, type Language, translate } from '../i18n/translate'
 import { TrainingBlock, WorkoutEntry } from '../types'
 import { localIsoDate } from '../lib/dates'
 
@@ -22,7 +24,32 @@ function sortedBlocks(blocks: TrainingBlock[]) {
 
 export type TrainingBlockDateStatus = 'Current' | 'Upcoming' | 'Completed'
 
-export function formatBlockMethod(method: string) {
+const methodWordKeys: Record<string, TranslationKey> = {
+  ascending: 'workout.method.ascending',
+  dup: 'workout.method.dup',
+  flat: 'workout.method.flat',
+  hypertrophy: 'workout.method.hypertrophy',
+  pyramid: 'workout.method.pyramid',
+  reverse: 'workout.method.reverse',
+  strength: 'workout.method.strength',
+  training: 'workout.method.training',
+}
+
+const methodPhraseKeys: Record<string, TranslationKey> = {
+  'ascending-pyramid': 'workout.methodPhrase.ascendingPyramid',
+  'flat-pyramid': 'workout.methodPhrase.flatPyramid',
+  'reverse-pyramid': 'workout.methodPhrase.reversePyramid',
+  'strength-hypertrophy': 'workout.methodPhrase.strengthHypertrophy',
+}
+
+function titleCase(word: string) {
+  return `${word[0].toUpperCase()}${word.slice(1)}`
+}
+
+export function formatBlockMethod(method: string, language: Language = 'en') {
+  const normalizedMethod = method.trim().replace(/[_\s]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase()
+  const phraseKey = methodPhraseKeys[normalizedMethod]
+  if (phraseKey) return translate(language, phraseKey)
   const words = method
     .replace(/[-_]+/g, ' ')
     .trim()
@@ -30,7 +57,10 @@ export function formatBlockMethod(method: string) {
     .split(/\s+/)
   if (!words[0]) return ''
   return words
-    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
+    .map((word) => {
+      const key = methodWordKeys[word]
+      return key ? translate(language, key) : titleCase(word)
+    })
     .join(' ')
 }
 
@@ -92,27 +122,30 @@ export function nextUnloggedDay(
   )
 }
 
-export function formatBenchAngle(angleDegrees?: number | null) {
+export function formatBenchAngle(angleDegrees?: number | null, language: Language = 'en') {
   if (angleDegrees == null) return null
-  if (angleDegrees === 0) return 'Flat bench'
-  if (angleDegrees === 90) return 'Upright seat'
+  if (angleDegrees === 0) return translate(language, 'workout.bench.flat')
+  if (angleDegrees === 90) return translate(language, 'workout.bench.upright')
   return angleDegrees > 0
-    ? `Incline ${angleDegrees}°`
-    : `Decline ${Math.abs(angleDegrees)}°`
+    ? translate(language, 'workout.bench.incline', { degrees: angleDegrees })
+    : translate(language, 'workout.bench.decline', { degrees: Math.abs(angleDegrees) })
 }
 
-function formatDate(value: number) {
-  return new Intl.DateTimeFormat('en-GB', {
+function formatRangeDate(language: Language, value: number) {
+  const parts = new Intl.DateTimeFormat(localeFor(language), {
     day: 'numeric',
     month: 'short',
     timeZone: 'UTC',
-  }).format(value)
+  }).formatToParts(value)
+  const day = parts.find((part) => part.type === 'day')?.value ?? ''
+  const month = (parts.find((part) => part.type === 'month')?.value ?? '').replace(/\.$/, '')
+  return `${day} ${month}`
 }
 
-export function blockDateRange(block: TrainingBlock) {
+export function blockDateRange(block: TrainingBlock, language: Language = 'en') {
   const start = dateValue(block.startDate)
   const end = blockEnd(block) - DAY_MS
   const startYear = new Date(start).getUTCFullYear()
   const endYear = new Date(end).getUTCFullYear()
-  return `${formatDate(start)}${startYear === endYear ? '' : ` ${startYear}`} – ${formatDate(end)} ${endYear}`
+  return `${formatRangeDate(language, start)}${startYear === endYear ? '' : ` ${startYear}`} – ${formatRangeDate(language, end)} ${endYear}`
 }

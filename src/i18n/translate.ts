@@ -1,6 +1,8 @@
-import { en, TranslationKey, Dictionary } from './en'
+import { en, Dictionary } from './en'
+import type { TranslationKey } from './en'
 import { es } from './es'
 
+export type { TranslationKey }
 export type Language = 'en' | 'es'
 export type TranslationParams = Record<string, string | number>
 export type Translate = (key: TranslationKey, params?: TranslationParams) => string
