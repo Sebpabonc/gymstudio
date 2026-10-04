@@ -340,7 +340,7 @@ export default function WorkoutPlan({
   lockMode?: boolean
   authStatus?: AuthStatus
   onSignIn: () => void
-  onStartRest: (durationSeconds: number) => void
+  onStartRest: (durationSeconds: number, label?: string) => void
 }) {
   const demoMode = isDemoMode()
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
@@ -1073,7 +1073,7 @@ export default function WorkoutPlan({
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    onStartRest(exercise.restSeconds ?? 90)
+    onStartRest(exercise.restSeconds ?? 90, getExerciseDisplayName(exercise.name))
     showLogToast([entryToSave], storedHistory, nextHistory, activeCompletionScope)
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
     setWeightTargets(consumeWeightTarget(entryToSave.exerciseId, entryToSave.sets))
@@ -1178,7 +1178,7 @@ export default function WorkoutPlan({
     saveWorkoutHistory(nextHistory)
     for (const entry of entriesToSave) setWeightTargets(consumeWeightTarget(entry.exerciseId, entry.sets))
     if (entriesToSave.length === exercises.length) {
-      onStartRest(exercises[exercises.length - 1]?.restSeconds ?? 90)
+      onStartRest(exercises[exercises.length - 1]?.restSeconds ?? 90, exercises.map((item) => getExerciseDisplayName(item.name)).join(' + '))
     }
 
     const exerciseKeys = exercises.map((exercise) => normalizeExerciseName(exercise.name))
@@ -1892,7 +1892,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   aria-label={`${completedRows[index] ? 'Unmark' : 'Mark'} set ${index + 1} complete`}
                                   aria-pressed={completedRows[index]}
                                   onClick={() => {
-                                    if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90)
+                                    if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90, getExerciseDisplayName(exercise.name))
                                     togglePlanSetDone(exercise, index, setCount)
                                   }}
                                 >
@@ -2002,7 +2002,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <button
                       type="button"
                       className="rest-start-button"
-                      onClick={() => onStartRest(exercise.restSeconds ?? 90)}
+                      onClick={() => onStartRest(exercise.restSeconds ?? 90, getExerciseDisplayName(exercise.name))}
                     >
                       Start rest
                     </button>
@@ -2097,7 +2097,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                 setCompletedSupersetSets((current) => ({ ...current, [group.key]: nextCompleted }))
                                 // Rest is taken after the pair, using the last exercise's prescribed rest.
                                 if (nextCompleted[setIndex]) {
-                                  onStartRest(supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90)
+                                  onStartRest(
+                                    supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90,
+                                    supersetExercises.map((item) => getExerciseDisplayName(item.name)).join(' + ')
+                                  )
                                 }
                                 if (nextCompleted.every(Boolean)) {
                                   void logSuperset(supersetExercises, group.key, nextCompleted)

@@ -2,6 +2,7 @@ import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useStat
 import WorkoutPlan from './components/WorkoutPlan'
 import ExerciseSearchSuggestions from './components/ExerciseSearchSuggestions'
 import RestTimer from './components/RestTimer'
+import { syncRestTimerActivity } from './native/restTimerActivity'
 import AskExercise from './components/AskExercise'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
@@ -124,14 +125,19 @@ export default function App() {
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const text = uiText
 
+  const restLabel = useRef('Rest')
   const updateRestTimer = useCallback((timer: RestTimerState | null) => {
     saveRestTimerState(timer)
     setRestTimer(timer)
+    void syncRestTimerActivity(timer, restLabel.current, false)
   }, [])
-  const startRest = useCallback(
-    (durationSeconds: number) => updateRestTimer(startRestTimer(durationSeconds)),
-    [updateRestTimer]
-  )
+  const startRest = useCallback((durationSeconds: number, label?: string) => {
+    restLabel.current = label || 'Rest'
+    const timer = startRestTimer(durationSeconds)
+    saveRestTimerState(timer)
+    setRestTimer(timer)
+    void syncRestTimerActivity(timer, restLabel.current, true)
+  }, [])
 
   useEffect(() => {
     const sentinel = headerSentinelRef.current
