@@ -33,6 +33,7 @@ import {
   copyWeightToUntouchedSets,
   filterLoggableSets,
   getPreviousWorkoutSets,
+  getPreviousWorkoutSetRow,
   parseRepPrescription,
   selectCompletedSets,
   stepWorkoutValue,
@@ -1561,6 +1562,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       <section className="day-plan-card">
         <div className="day-exercises">
           {groupSupersets(activeExercises).map((group) => {
+            const previousSetsByExercise = new Map<string, ReturnType<typeof getPreviousWorkoutSets>>()
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
             const setCount = getDefaultSetCount(exercise)
@@ -1586,6 +1588,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               })
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             const previousSets = getPreviousWorkoutSets(exerciseHistory)
+            previousSetsByExercise.set(exercise.code ?? exercise.name, previousSets)
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
               id: entry.id,
               date: entry.date,
@@ -1677,6 +1680,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <p className="planned-meta-line">
                       {`${setCount} ${setCount === 1 ? 'set' : 'sets'} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} reps · ${exercise.rest} rest`}
                     </p>
+                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
                     {libraryMatch?.squeezeCue?.trim() && (
                       <button
@@ -1834,7 +1838,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         ))}
                       </ul>
                     </div>
-                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
                     <div className="exercise-detail-row">
                       <button
                         type="button"
@@ -1882,7 +1885,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     >
                       Start rest
                     </button>
-                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
                     {!group.isSuperset && (
                       <label className="planned-notes-field">
                         <span>Notes</span>
@@ -1904,6 +1906,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const groupDone = group.items.every(({ exercise }) => findExerciseCompletion(exercise, history))
             const codes = group.items.map(({ exercise }) => exercise.code ?? exercise.name)
             const supersetExercises = group.items.map(({ exercise }) => exercise)
+            const supersetPreviousSets = supersetExercises.map(
+              (exercise) => previousSetsByExercise.get(exercise.code ?? exercise.name) ?? []
+            )
             const supersetSetCount = Math.max(...supersetExercises.map(getDefaultSetCount))
             const supersetCompletedRows = Array.from(
               { length: supersetSetCount },
@@ -1980,10 +1985,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           </button>
                         </div>
                         <div className="superset-set-exercises">
-                          {supersetExercises.map((exercise) => {
+                          {supersetExercises.map((exercise, exerciseIndex) => {
                             const draft = getDraftForExercise(exercise.name, exercise)
                             const code = exercise.code ?? exercise.name
                             const displayName = getExerciseDisplayName(exercise.name)
+                            const previousSet = getPreviousWorkoutSetRow(supersetPreviousSets, setIndex)[exerciseIndex]
                             const prescribedReps =
                               exercise.repsPerSet?.[setIndex] ?? exercise.reps ?? ''
                             const reps =
@@ -1994,6 +2000,21 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             return (
                               <div className="superset-set-exercise" key={`${group.key}-${code}`}>
                                 <strong className="superset-exercise-label">{code} · {displayName}</strong>
+                                {previousSet ? (
+                                  <button
+                                    type="button"
+                                    className="previous-set-value superset-previous-set-value"
+                                    aria-label={`Copy previous ${code} set ${setIndex + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
+                                    onClick={() => {
+                                      updatePlanSetValue(exercise, setIndex, 'weight', String(previousSet.weight), supersetSetCount)
+                                      updatePlanSetValue(exercise, setIndex, 'reps', String(previousSet.reps), supersetSetCount)
+                                    }}
+                                  >
+                                    Previous: {previousSet.weight} × {previousSet.reps}
+                                  </button>
+                                ) : (
+                                  <span className="previous-set-value superset-previous-set-value">Previous: —</span>
+                                )}
                                 <div className="planned-set-controls">
                                   <SteppedNumberInput
                                     value={weight}

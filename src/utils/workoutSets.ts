@@ -26,6 +26,10 @@ export function getPreviousWorkoutSets(history: WorkoutEntry[], exerciseId?: str
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.sets ?? []
 }
 
+export function getPreviousWorkoutSetRow(previousSetsByExercise: WorkoutSet[][], setIndex: number) {
+  return previousSetsByExercise.map((sets) => sets[setIndex])
+}
+
 export function copyWeightToUntouchedSets(
   weights: number[],
   touched: boolean[],
