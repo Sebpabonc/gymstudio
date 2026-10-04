@@ -54,6 +54,24 @@ export function strengthTrend(
     const percent = ((latest.e1rm - first.e1rm) / first.e1rm) * 100
     const sign = percent > 0 ? '+' : ''
     takeaway = `${name}: est. 1RM ${sign}${Math.round(percent)}% this block (${first.e1rm.toFixed(1)} → ${latest.e1rm.toFixed(1)} kg).`
+  } else if (!comparablePoints.length && block) {
+    const previousTrend = [...blocks]
+      .sort((a, b) => b.startDate.localeCompare(a.startDate))
+      .map((candidate) => ({
+        block: candidate,
+        points: points.filter((point) => point.blockId === candidate.id && point.dayType !== null),
+      }))
+      .find(({ block: candidate, points: candidatePoints }) =>
+        candidate.startDate < block.startDate && candidatePoints.length >= 2
+      )
+
+    if (previousTrend) {
+      const previousFirst = previousTrend.points[0]
+      const previousLatest = previousTrend.points[previousTrend.points.length - 1]
+      const percent = ((previousLatest.e1rm - previousFirst.e1rm) / previousFirst.e1rm) * 100
+      const sign = percent > 0 ? '+' : ''
+      takeaway = `${name}: Not in Block ${block.number} · last trend ${sign}${Math.round(percent)}% in Block ${previousTrend.block.number}.`
+    }
   }
 
   return {
