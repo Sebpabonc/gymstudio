@@ -3,6 +3,8 @@ import WorkoutPlan from './components/WorkoutPlan'
 import ExerciseSearchSuggestions from './components/ExerciseSearchSuggestions'
 import RestTimer from './components/RestTimer'
 import { syncRestTimerActivity } from './native/restTimerActivity'
+import { openExternal } from './native/openExternal'
+import { exerciseImageQuery, exerciseImageSearchUrl } from './utils/exerciseImages'
 import AskExercise from './components/AskExercise'
 import ExerciseSetTable from './components/ExerciseSetTable'
 import { localIsoDate } from './lib/dates'
@@ -508,7 +510,26 @@ export default function App() {
                     <div className="exercise-header">
                       <div>
                         <p className="field-label">{text.exercise}</p>
-                        <h2>{getExerciseDisplayName(selectedExercise)}</h2>
+                        <h2>
+                          <a
+                            className="exercise-image-link"
+                            href={exerciseImageSearchUrl(exerciseImageQuery(selectedExercise.id, getExerciseDisplayName(selectedExercise), selectedExercise.equipment))}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`See ${getExerciseDisplayName(selectedExercise)} on Google Images`}
+                            onClick={(event) => {
+                              event.preventDefault()
+                              void openExternal(event.currentTarget.href)
+                            }}
+                          >
+                            {getExerciseDisplayName(selectedExercise)}
+                            <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                              <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
+                              <circle cx="9" cy="10" r="1.6" />
+                              <path d="M20.5 16l-5-5-8 8" />
+                            </svg>
+                          </a>
+                        </h2>
                       </div>
                     </div>
 
