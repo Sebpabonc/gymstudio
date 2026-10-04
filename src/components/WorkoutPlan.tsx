@@ -48,7 +48,7 @@ import {
   workoutMaxWeight,
   workoutVolume,
 } from '../utils/workoutSets'
-import { createSupersetEntries, groupSupersets } from '../utils/supersets'
+import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from '../utils/supersets'
 import {
   captureUndoSnapshots,
   createSessionSummary,
@@ -1189,7 +1189,10 @@ export default function WorkoutPlan({
           : [key, draft]
       )
     ))
-    setCompletedSupersetSets((current) => ({ ...current, [groupKey]: [] }))
+    setCompletedSupersetSets((current) => {
+      const { [groupKey]: _completedRows, ...remaining } = current
+      return remaining
+    })
     setLoggedAtByExercise((current) => ({
       ...current,
       ...Object.fromEntries(entriesToSave.map((entry) => [entry.id, Date.now()])),
@@ -2031,10 +2034,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               (exercise) => previousSetsByExercise.get(exercise.code ?? exercise.name) ?? []
             )
             const supersetSetCount = Math.max(...supersetExercises.map(getDefaultSetCount))
-            const supersetCompletedRows = Array.from(
-              { length: supersetSetCount },
-              (_, index) => completedSupersetSets[group.key]?.[index] ?? false
+            const loggedSupersetRows = getLoggedSupersetRounds(
+              supersetExercises.map((exercise) => findExerciseCompletion(exercise, history)?.sets.length ?? 0),
+              supersetSetCount
             )
+            const supersetCompletedRows = completedSupersetSets[group.key] ?? loggedSupersetRows
             const supersetCompletedCount = supersetCompletedRows.filter(Boolean).length
             const supersetError = supersetExercises
               .map((exercise) => logError[getPlanDraftKey(exercise.name)])

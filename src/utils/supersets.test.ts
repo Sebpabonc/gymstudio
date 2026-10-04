@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { groupSupersets, createSupersetEntries } from './supersets'
+import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from './supersets'
 
 describe('groupSupersets', () => {
   it('pairs adjacent exercises with the same code letter and superset technique', () => {
@@ -15,6 +15,18 @@ describe('groupSupersets', () => {
       [false, ['Curl']],
       [false, ['Row']],
     ])
+  })
+})
+
+describe('getLoggedSupersetRounds', () => {
+  it('restores only rounds logged for every exercise, capped at the prescribed count', () => {
+    expect(getLoggedSupersetRounds([2, 2], 3)).toEqual([true, true, false])
+    expect(getLoggedSupersetRounds([3, 2], 3)).toEqual([true, true, false])
+    expect(getLoggedSupersetRounds([5, 5], 3)).toEqual([true, true, true])
+  })
+
+  it('returns no completed rounds when an exercise has no logged sets', () => {
+    expect(getLoggedSupersetRounds([2, 0], 3)).toEqual([false, false, false])
   })
 })
 
