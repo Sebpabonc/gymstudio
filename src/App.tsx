@@ -380,12 +380,14 @@ export default function App() {
                 <ProgressScreen
                   entries={history}
                   exercises={exercises}
+                  authStatus={status}
                   initialExerciseId={progressExerciseId || undefined}
                   onOpenExercise={(exerciseId) => {
                     setSelectedId(exerciseId)
                     setExerciseMode('lookup')
                     setActiveTab('exercises')
                   }}
+                  onSignIn={() => setActiveTab('you')}
                 />
               </Suspense>
             )
@@ -419,11 +421,11 @@ export default function App() {
                     </div>
                   </section>
                 )}
-                <WorkoutPlan mode="preset" lockMode onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
+                <WorkoutPlan mode="preset" lockMode authStatus={status} onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
               </>
             )
           ) : exerciseMode === 'custom' ? (
-            <WorkoutPlan mode="custom" lockMode onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
+            <WorkoutPlan mode="custom" lockMode authStatus={status} onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
           ) : (
             <>
               <section className="card search-panel">

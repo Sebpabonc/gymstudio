@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { mapAiGatewayError, summariseSession } from '../ai/gateway'
+import type { AuthStatus } from '../auth/AuthProvider'
 import AskExercise from './AskExercise'
+import AiConsentPrompt from './AiConsentPrompt'
 import { localIsoDate } from '../lib/dates'
+import { isDemoMode } from '../utils/demoMode'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
 import {
   fetchTrainingBlocks,
@@ -17,7 +21,10 @@ import {
   storageKey,
   setActiveBlockId,
   upsertExerciseRecord,
+  getAskExerciseAiConsent,
+  setAskExerciseAiConsent,
 } from '../utils/storage'
+import type { AskExerciseAiConsent } from '../utils/storage'
 import { applyTargetToWeights, targetAppliesToDay } from '../utils/weightTargets'
 import {
   blockDateRange,
@@ -91,6 +98,9 @@ type LogToast = {
 
 type DaySessionSummary = SessionSummary & {
   nextSession?: string
+  date: string
+  blockId?: string
+  dayKey?: string
 }
 
 function SteppedNumberInput({
@@ -322,14 +332,17 @@ function sanitizeLoggedComment(rawNote: string | undefined, fragments: Array<str
 export default function WorkoutPlan({
   mode,
   lockMode = false,
+  authStatus = 'signed-out',
   onSignIn,
   onStartRest,
 }: {
   mode?: PlanMode
   lockMode?: boolean
+  authStatus?: AuthStatus
   onSignIn: () => void
   onStartRest: (durationSeconds: number) => void
 }) {
+  const demoMode = isDemoMode()
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
   const [customPlan, setCustomPlan] = useState<PlanExercise[]>(() => loadCustomPlan())
@@ -358,7 +371,70 @@ export default function WorkoutPlan({
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
+  const [aiSummary, setAiSummary] = useState('')
+  const [aiRemainingToday, setAiRemainingToday] = useState<number | null>(null)
+  const [aiSummaryError, setAiSummaryError] = useState('')
+  const [aiSummaryPending, setAiSummaryPending] = useState(false)
+  const [aiConsent, setAiConsent] = useState<AskExerciseAiConsent | null>(null)
+  const [showAiConsent, setShowAiConsent] = useState(false)
   const sessionStartedAt = useRef<SessionStart | null>(null)
+  const aiSummaryRequestId = useRef(0)
+
+  const requestAiSummary = async () => {
+    if (!sessionSummary || aiSummaryPending || aiSummary) return
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setAiSummaryError(mapAiGatewayError('offline'))
+      return
+    }
+    const requestId = aiSummaryRequestId.current
+    setAiSummaryPending(true)
+    setAiSummaryError('')
+    try {
+      const response = await summariseSession(sessionSummary.date, sessionSummary.blockId, sessionSummary.dayKey)
+      if (requestId !== aiSummaryRequestId.current) return
+      setAiSummary(response.answer)
+      setAiRemainingToday(response.remainingToday)
+    } catch (requestError) {
+      if (requestId !== aiSummaryRequestId.current) return
+      setAiSummaryError(requestError instanceof Error ? requestError.message : 'AI is unavailable right now. Try again.')
+    } finally {
+      if (requestId === aiSummaryRequestId.current) setAiSummaryPending(false)
+    }
+  }
+
+  const dismissSessionSummary = () => {
+    aiSummaryRequestId.current += 1
+    setSessionSummary(null)
+    setAiSummaryPending(false)
+  }
+
+  const chooseAiConsent = (choice: AskExerciseAiConsent) => {
+    setAskExerciseAiConsent(choice)
+    setAiConsent(choice)
+    if (choice === 'enabled') {
+      setShowAiConsent(false)
+      void requestAiSummary()
+    } else {
+      setShowAiConsent(false)
+    }
+  }
+
+  const openAiSummary = () => {
+    if (demoMode) return
+    if (status !== 'signed-in') {
+      onSignIn()
+      return
+    }
+    if (aiSummary || aiSummaryPending || !sessionSummary) return
+    setAiSummaryError('')
+    const savedConsent = getAskExerciseAiConsent()
+    setAiConsent(savedConsent)
+    if (savedConsent !== 'enabled') {
+      setShowAiConsent(true)
+      return
+    }
+    void requestAiSummary()
+  }
 
   useEffect(() => {
     if (!blockSelectorOpen) return
@@ -904,6 +980,7 @@ export default function WorkoutPlan({
     )
     const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
     const scopeKey = getSessionScopeKey(activeCompletionScope, planMode)
+    aiSummaryRequestId.current += 1
     setSessionSummary({
       ...createSessionSummary(
         entries,
@@ -912,7 +989,16 @@ export default function WorkoutPlan({
         trainingBlocks
       ),
       nextSession: nextDay ? `Day ${nextDay.position} · ${nextDay.name}` : undefined,
+      date: activeCompletionScope.date,
+      blockId: activeCompletionScope.blockId,
+      dayKey: activeCompletionScope.dayKey,
     })
+    setAiSummary('')
+    setAiRemainingToday(null)
+    setAiSummaryError('')
+    setAiSummaryPending(false)
+    setAiConsent(null)
+    setShowAiConsent(false)
   }
 
   const undoLastLog = () => {
@@ -921,7 +1007,7 @@ export default function WorkoutPlan({
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
     setToast(null)
-    setSessionSummary(null)
+    dismissSessionSummary()
   }
 
   const logPlannedExercise = async (exercise: PlanExercise, completedRows?: boolean[]) => {
@@ -2123,7 +2209,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       </section>
       )}
       {sessionSummary && (
-        <div className="session-summary-backdrop" onClick={() => setSessionSummary(null)}>
+        <div className="session-summary-backdrop" onClick={dismissSessionSummary}>
           <section
             className="session-summary-sheet"
             role="dialog"
@@ -2136,7 +2222,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               <button
                 type="button"
                 className="session-summary-close"
-                onClick={() => setSessionSummary(null)}
+                onClick={dismissSessionSummary}
                 aria-label="Close session summary"
               >
                 ×
@@ -2164,6 +2250,47 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               )}
             </section>
             {sessionSummary.nextSession && <p className="session-summary-next">{`Next session: ${sessionSummary.nextSession}`}</p>}
+            {!aiSummary && (
+              <div className="ai-session-summary">
+                <button
+                  type="button"
+                  className="primary-button ai-session-summary-button"
+                  disabled={demoMode || authStatus === 'loading' || aiSummaryPending}
+                  onClick={demoMode || authStatus === 'signed-out' ? onSignIn : openAiSummary}
+                >
+                  {demoMode || authStatus === 'signed-out' ? 'Sign in to use AI' : aiSummaryPending ? 'Thinking…' : 'AI coach summary'}
+                </button>
+                {showAiConsent && (
+                  <div className="ask-exercise-consent ai-inline-consent">
+                    {aiConsent === null ? (
+                      <AiConsentPrompt onChoice={chooseAiConsent} />
+                    ) : (
+                      <p className="ask-exercise-consent-message">AI is off for this account because you chose not to turn it on.</p>
+                    )}
+                  </div>
+                )}
+                {aiSummaryError && (
+                  <div className="ai-inline-error" role="alert">
+                    <p>{aiSummaryError}</p>
+                    {aiSummaryError === 'Sign in to ask AI.' && (
+                      <button type="button" className="secondary-button" onClick={onSignIn}>Sign in</button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            {aiSummary && (
+              <section className="ai-session-summary" aria-label="AI coach summary" aria-live="polite">
+                <h3>AI coach summary</h3>
+                <ul className="ai-summary-bullets">
+                  {aiSummary.split(/\n+/).map((line) => line.trim()).filter(Boolean).map((line, index) => (
+                    <li key={index}>{line.replace(/^(?:[-*•]|\d+[.)])\s*/, '')}</li>
+                  ))}
+                </ul>
+                {aiRemainingToday !== null && <small>{aiRemainingToday} questions left today</small>}
+                <small>AI answers can be wrong. Not medical advice.</small>
+              </section>
+            )}
             {toast && (
               <div className="log-toast in-summary" role="status" aria-live="polite">
                 <span>{toast.message}</span>

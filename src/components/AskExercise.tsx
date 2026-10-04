@@ -1,8 +1,9 @@
 import React, { FormEvent, useState } from 'react'
-import { askExercise } from '../ai/askExercise'
+import { askExercise } from '../ai/gateway'
 import { useAuth } from '../auth/AuthProvider'
 import { isDemoMode } from '../utils/demoMode'
 import type { AskExerciseAiConsent } from '../utils/storage'
+import AiConsentPrompt from './AiConsentPrompt'
 import {
   getAskExerciseAiConsent,
   setAskExerciseAiConsent,
@@ -117,17 +118,7 @@ export default function AskExercise({ exerciseId, exerciseName, onSignIn }: AskE
 
             {consent === null ? (
               <div className="ask-exercise-consent">
-                <p>
-                  Your question, this exercise and your last 5 sessions of it are sent to OpenAI to answer. Nothing else.
-                </p>
-                <div className="ask-exercise-actions">
-                  <button type="button" className="primary-button" onClick={() => chooseConsent('enabled')}>
-                    Turn on AI
-                  </button>
-                  <button type="button" className="secondary-button" onClick={() => chooseConsent('declined')}>
-                    Not now
-                  </button>
-                </div>
+                <AiConsentPrompt onChoice={chooseConsent} />
               </div>
             ) : consent === 'declined' ? (
               <p className="ask-exercise-consent-message">AI is off for this account because you chose not to turn it on.</p>

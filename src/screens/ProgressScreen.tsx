@@ -1,5 +1,9 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { explainSuggestion, mapAiGatewayError } from '../ai/gateway'
+import type { AuthStatus } from '../auth/AuthProvider'
+import AiConsentPrompt from '../components/AiConsentPrompt'
 import { localIsoDate } from '../lib/dates'
+import { isDemoMode } from '../utils/demoMode'
 import {
   adherence,
   blockReports,
@@ -44,9 +48,12 @@ import {
   applyWeightTarget,
   fetchTrainingBlocks,
   getExerciseDisplayName,
+  getAskExerciseAiConsent,
   loadWeightTargets,
   removeWeightTarget,
+  setAskExerciseAiConsent,
 } from '../utils/storage'
+import type { AskExerciseAiConsent } from '../utils/storage'
 import { baseWeightFromHistory } from '../utils/weightTargets'
 
 type Props = {
@@ -54,6 +61,114 @@ type Props = {
   exercises: Exercise[]
   initialExerciseId?: string
   onOpenExercise: (exerciseId: string) => void
+  onSignIn: () => void
+  authStatus: AuthStatus
+}
+
+function AiSuggestionExplanation({
+  exerciseId,
+  suggestionText,
+  demoMode,
+  status,
+  onSignIn,
+}: {
+  exerciseId: string
+  suggestionText: string
+  demoMode: boolean
+  status: AuthStatus
+  onSignIn: () => void
+}) {
+  const [consent, setConsent] = useState<AskExerciseAiConsent | null>(null)
+  const [showConsent, setShowConsent] = useState(false)
+  const [answer, setAnswer] = useState('')
+  const [remainingToday, setRemainingToday] = useState<number | null>(null)
+  const [error, setError] = useState('')
+  const [pending, setPending] = useState(false)
+
+  const requestExplanation = async () => {
+    if (pending || answer) return
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setError(mapAiGatewayError('offline'))
+      return
+    }
+    setPending(true)
+    setError('')
+    try {
+      const response = await explainSuggestion(exerciseId, suggestionText)
+      setAnswer(response.answer)
+      setRemainingToday(response.remainingToday)
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'AI is unavailable right now. Try again.')
+    } finally {
+      setPending(false)
+    }
+  }
+
+  const chooseConsent = (choice: AskExerciseAiConsent) => {
+    setAskExerciseAiConsent(choice)
+    setConsent(choice)
+    if (choice === 'enabled') {
+      setShowConsent(false)
+      void requestExplanation()
+    } else {
+      setShowConsent(false)
+    }
+  }
+
+  const explain = () => {
+    if (demoMode) return
+    if (status !== 'signed-in') {
+      onSignIn()
+      return
+    }
+    if (answer || pending) return
+    setError('')
+    const savedConsent = getAskExerciseAiConsent()
+    setConsent(savedConsent)
+    if (savedConsent !== 'enabled') {
+      setShowConsent(true)
+      return
+    }
+    void requestExplanation()
+  }
+
+  return (
+    <div className="ai-explanation">
+      <button
+        type="button"
+        className="ai-feature-button"
+        disabled={demoMode || status === 'loading' || pending || !!answer}
+        onClick={demoMode || status === 'signed-out' ? onSignIn : explain}
+      >
+        {demoMode || status === 'signed-out' ? 'Sign in to use AI' : 'Why?'}
+      </button>
+      {showConsent && (
+        <div className="ask-exercise-consent ai-inline-consent">
+          {consent === null ? (
+            <AiConsentPrompt onChoice={chooseConsent} />
+          ) : (
+            <p className="ask-exercise-consent-message">AI is off for this account because you chose not to turn it on.</p>
+          )}
+        </div>
+      )}
+      {pending && <p className="ai-inline-status" role="status">Thinking…</p>}
+      {error && (
+        <div className="ai-inline-error" role="alert">
+          <p>{error}</p>
+          {error === 'Sign in to ask AI.' && (
+            <button type="button" className="secondary-button" onClick={onSignIn}>Sign in</button>
+          )}
+        </div>
+      )}
+      {answer && (
+        <div className="ask-exercise-answer ai-inline-answer" aria-live="polite">
+          <p>{answer}</p>
+          {remainingToday !== null && <small>{remainingToday} questions left today</small>}
+          <small>AI answers can be wrong. Not medical advice.</small>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function formatDate(value: string) {
@@ -134,7 +249,8 @@ function StrengthChart({ model, title, summary }: { model: ReturnType<typeof bui
   )
 }
 
-export default function ProgressScreen({ entries, exercises, initialExerciseId, onOpenExercise }: Props) {
+export default function ProgressScreen({ entries, exercises, initialExerciseId, onOpenExercise, onSignIn, authStatus }: Props) {
+  const demoMode = isDemoMode()
   const [blocks, setBlocks] = useState<TrainingBlock[] | null>(null)
   const [dayType, setDayType] = useState<DayTypeFilter>('A')
   const [pickedId, setPickedId] = useState(initialExerciseId ?? '')
@@ -257,6 +373,13 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                       </span>
                       <span>{suggestion.message}</span>
                       <p className="suggestion-why"><strong>Why?</strong> {suggestion.why}</p>
+                      <AiSuggestionExplanation
+                        exerciseId={exerciseId}
+                        suggestionText={suggestion.message}
+                        demoMode={demoMode}
+                        status={authStatus}
+                        onSignIn={onSignIn}
+                      />
                       <button type="button" className="suggestion-exercise-link" onClick={() => openSuggestion(suggestion)}>
                         Open {nameFor(exerciseId)}
                       </button>
