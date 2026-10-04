@@ -352,9 +352,9 @@ export default function WorkoutPlan({
   const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
   const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({})
   const [completedSupersetSets, setCompletedSupersetSets] = useState<Record<string, boolean[]>>({})
+  const [supersetLogOpen, setSupersetLogOpen] = useState<Record<string, boolean>>({})
   const [progressSectionsVisible, setProgressSectionsVisible] = useState<Record<string, boolean>>({})
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
-  const [squeezeCueExpanded, setSqueezeCueExpanded] = useState<Record<string, boolean>>({})
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
@@ -1726,17 +1726,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
                     {libraryMatch?.squeezeCue?.trim() && (
-                      <button
-                        type="button"
-                        className={`planned-squeeze-cue${squeezeCueExpanded[exerciseKey] ? ' expanded' : ''}`}
-                        aria-expanded={!!squeezeCueExpanded[exerciseKey]}
-                        onClick={() => setSqueezeCueExpanded((current) => ({
-                          ...current,
-                          [exerciseKey]: !current[exerciseKey],
-                        }))}
-                      >
+                      <p className="planned-squeeze-cue expanded">
                         <strong>Squeeze — </strong>{libraryMatch.squeezeCue}
-                      </button>
+                      </p>
                     )}
 
                     {!group.isSuperset && (
@@ -1969,151 +1961,147 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                   <p>Do {codes[0]}, rest ~10 s, then {codes.slice(1).join(', ')}; rest after the pair.</p>
                 </div>
                 {cards}
-                <div className="planned-progress-box superset-log-box">
-                  <div className="planned-set-header">
-                    <span>Superset sets</span>
-                  </div>
-                  <div className="superset-copy-actions">
-                    {supersetExercises.map((exercise) => (
+                <div className={`superset-log-box${supersetLogOpen[group.key] ? ' open' : ''}`}>
+                  <button
+                    type="button"
+                    className="superset-log-toggle"
+                    aria-expanded={!!supersetLogOpen[group.key]}
+                    aria-controls={`superset-log-${group.key}`}
+                    onClick={() => setSupersetLogOpen((current) => ({ ...current, [group.key]: !current[group.key] }))}
+                  >
+                    <span className="superset-log-title">Log rounds</span>
+                    <span className="superset-log-progress">{supersetCompletedCount}/{supersetSetCount} rounds</span>
+                    <span className="toggle-button expand-toggle" aria-hidden="true">
+                      {supersetLogOpen[group.key] ? '−' : '+'}
+                    </span>
+                  </button>
+                  {supersetLogOpen[group.key] && (
+                    <div id={`superset-log-${group.key}`} className="superset-log-body">
                       <button
-                        key={`${group.key}-${exercise.code}-copy`}
                         type="button"
                         className="same-as-set-one-button"
-                        disabled={!((getDraftForExercise(exercise.name, exercise).setWeights[0] ?? 0) > 0)}
-                        aria-label={`Copy ${exercise.code ?? exercise.name} set 1 weight to all sets`}
-                        onClick={() => copyPlanSetOneWeight(exercise, supersetSetCount)}
+                        disabled={!supersetExercises.some(
+                          (exercise) => (getDraftForExercise(exercise.name, exercise).setWeights[0] ?? 0) > 0
+                        )}
+                        onClick={() => supersetExercises.forEach((exercise) => copyPlanSetOneWeight(exercise, supersetSetCount))}
                       >
-                        Same as set 1 · {exercise.code ?? exercise.name}
+                        Copy round 1 weights to all
                       </button>
-                    ))}
-                  </div>
-                  <div
-                    className="superset-set-column-headers"
-                    aria-hidden="true"
-                  >
-                    {supersetExercises.map((exercise) => (
-                      <div key={`${group.key}-${exercise.code}-column-headings`}>
+                      <div className="superset-round-columns" aria-hidden="true">
+                        <span />
+                        <span>Previous</span>
                         <span>kg</span>
                         <span>Reps</span>
                       </div>
-                    ))}
-                  </div>
-                  <div className="superset-set-grid">
-                    {Array.from({ length: supersetSetCount }, (_, setIndex) => (
-                      <div
-                        className={`superset-set-row${supersetCompletedRows[setIndex] ? ' completed' : ''}`}
-                        key={`${group.key}-set-${setIndex + 1}`}
-                      >
-                        <div className="planned-set-row-heading">
-                          <span className="planned-set-label">Set {setIndex + 1}</span>
-                          <button
-                            type="button"
-                            className="complete-set-button"
-                            aria-label={`${supersetCompletedRows[setIndex] ? 'Unmark' : 'Mark'} superset set ${setIndex + 1} complete`}
-                            aria-pressed={supersetCompletedRows[setIndex]}
-                            onClick={() => {
-                              const nextCompleted = [...supersetCompletedRows]
-                              nextCompleted[setIndex] = !nextCompleted[setIndex]
-                              setCompletedSupersetSets((current) => ({ ...current, [group.key]: nextCompleted }))
-                              // Rest is taken after the pair, using the last exercise's prescribed rest.
-                              if (nextCompleted[setIndex]) {
-                                onStartRest(supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90)
-                              }
-                              if (nextCompleted.every(Boolean)) {
-                                void logSuperset(supersetExercises, group.key, nextCompleted)
-                              }
-                            }}
-                          >
-                            ✓
-                          </button>
-                        </div>
-                        <div className="superset-set-exercises">
+                      {Array.from({ length: supersetSetCount }, (_, setIndex) => (
+                        <div
+                          className={`superset-round${supersetCompletedRows[setIndex] ? ' completed' : ''}`}
+                          key={`${group.key}-set-${setIndex + 1}`}
+                        >
+                          <div className="superset-round-header">
+                            <span className="superset-round-label">Round {setIndex + 1}</span>
+                            <button
+                              type="button"
+                              className="complete-set-button"
+                              aria-label={`${supersetCompletedRows[setIndex] ? 'Unmark' : 'Mark'} superset set ${setIndex + 1} complete`}
+                              aria-pressed={supersetCompletedRows[setIndex]}
+                              onClick={() => {
+                                const nextCompleted = [...supersetCompletedRows]
+                                nextCompleted[setIndex] = !nextCompleted[setIndex]
+                                setCompletedSupersetSets((current) => ({ ...current, [group.key]: nextCompleted }))
+                                // Rest is taken after the pair, using the last exercise's prescribed rest.
+                                if (nextCompleted[setIndex]) {
+                                  onStartRest(supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90)
+                                }
+                                if (nextCompleted.every(Boolean)) {
+                                  void logSuperset(supersetExercises, group.key, nextCompleted)
+                                }
+                              }}
+                            >
+                              ✓
+                            </button>
+                          </div>
                           {supersetExercises.map((exercise, exerciseIndex) => {
                             const draft = getDraftForExercise(exercise.name, exercise)
                             const code = exercise.code ?? exercise.name
-                            const displayName = getExerciseDisplayName(exercise.name)
                             const previousSet = getPreviousWorkoutSetRow(supersetPreviousSets, setIndex)[exerciseIndex]
-                            const prescribedReps =
-                              exercise.repsPerSet?.[setIndex] ?? exercise.reps ?? ''
+                            const prescribedReps = exercise.repsPerSet?.[setIndex] ?? exercise.reps ?? ''
                             const reps =
                               draft.setReps[setIndex] ??
                               parseRepPrescription(prescribedReps)[0] ??
                               getDefaultRepTarget(exercise)
                             const weight = draft.setWeights[setIndex] ?? draft.weight ?? 0
                             return (
-                              <div className="superset-set-exercise" key={`${group.key}-${code}`}>
-                                <strong className="superset-exercise-label">{code} · {displayName}</strong>
+                              <div className="superset-round-row" key={`${group.key}-${code}`}>
+                                <span className="superset-round-code" title={getExerciseDisplayName(exercise.name)}>{code}</span>
                                 {previousSet ? (
                                   <button
                                     type="button"
-                                    className="previous-set-value superset-previous-set-value"
+                                    className="previous-set-value"
                                     aria-label={`Copy previous ${code} set ${setIndex + 1}: ${previousSet.weight} kilograms for ${previousSet.reps} reps`}
                                     onClick={() => {
                                       updatePlanSetValue(exercise, setIndex, 'weight', String(previousSet.weight), supersetSetCount)
                                       updatePlanSetValue(exercise, setIndex, 'reps', String(previousSet.reps), supersetSetCount)
                                     }}
                                   >
-                                    Previous: {previousSet.weight} × {previousSet.reps}
+                                    {previousSet.weight}×{previousSet.reps}
                                   </button>
                                 ) : (
-                                  <span className="previous-set-value superset-previous-set-value">Previous: —</span>
+                                  <span className="previous-set-value">—</span>
                                 )}
-                                <div className="planned-set-controls">
-                                  <SteppedNumberInput
-                                    value={weight}
-                                    step={2.5}
-                                    min={0}
-                                    label={`Set ${setIndex + 1}, ${code} weight in kilograms`}
-                                    onFocus={(event) => event.currentTarget.select()}
-                                    onClick={(event) => event.currentTarget.select()}
-                                    onChange={(value) =>
-                                      updatePlanSetValue(exercise, setIndex, 'weight', value, supersetSetCount)
-                                    }
-                                  />
-                                  <input
-                                    className="set-reps-input"
-                                    type="number"
-                                    inputMode="numeric"
-                                    min="1"
-                                    value={reps}
-                                    aria-label={`Set ${setIndex + 1}, ${code} reps`}
-                                    onChange={(event) =>
-                                      updatePlanSetValue(exercise, setIndex, 'reps', event.target.value, supersetSetCount)
-                                    }
-                                  />
-                                </div>
+                                <SteppedNumberInput
+                                  value={weight}
+                                  step={2.5}
+                                  min={0}
+                                  label={`Set ${setIndex + 1}, ${code} weight in kilograms`}
+                                  onFocus={(event) => event.currentTarget.select()}
+                                  onClick={(event) => event.currentTarget.select()}
+                                  onChange={(value) => updatePlanSetValue(exercise, setIndex, 'weight', value, supersetSetCount)}
+                                />
+                                <input
+                                  className="set-reps-input"
+                                  type="number"
+                                  inputMode="numeric"
+                                  min="1"
+                                  value={reps}
+                                  aria-label={`Set ${setIndex + 1}, ${code} reps`}
+                                  onChange={(event) =>
+                                    updatePlanSetValue(exercise, setIndex, 'reps', event.target.value, supersetSetCount)
+                                  }
+                                />
                               </div>
                             )
                           })}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="superset-notes-grid">
-                    {supersetExercises.map((exercise) => {
-                      const draft = getDraftForExercise(exercise.name, exercise)
-                      return (
-                        <label className="planned-notes-field" key={`${group.key}-${exercise.code}-notes`}>
-                          <span>{exercise.code ?? exercise.name} notes</span>
-                          <textarea
-                            rows={2}
-                            value={draft.notes}
-                            placeholder={`Add notes for ${getExerciseDisplayName(exercise.name)}`}
-                            onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
-                          />
-                        </label>
-                      )
-                    })}
-                  </div>
-                  {supersetError && <p role="alert" aria-live="assertive" className="account-error log-error">{supersetError}</p>}
-                  {(supersetCompletedCount < supersetSetCount || supersetError) && (
-                    <button
-                      type="button"
-                      className="primary-button small-button"
-                      onClick={() => void logSuperset(supersetExercises, group.key, supersetCompletedRows)}
-                    >
-                      Finish superset
-                    </button>
+                      ))}
+                      <details className="superset-notes">
+                        <summary>Notes</summary>
+                        {supersetExercises.map((exercise) => {
+                          const draft = getDraftForExercise(exercise.name, exercise)
+                          return (
+                            <label className="planned-notes-field" key={`${group.key}-${exercise.code}-notes`}>
+                              <span>{exercise.code ?? exercise.name} · {getExerciseDisplayName(exercise.name)}</span>
+                              <textarea
+                                rows={2}
+                                value={draft.notes}
+                                placeholder="Add a note"
+                                onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)}
+                              />
+                            </label>
+                          )
+                        })}
+                      </details>
+                      {supersetError && <p role="alert" aria-live="assertive" className="account-error log-error">{supersetError}</p>}
+                      {(supersetCompletedCount < supersetSetCount || supersetError) && (
+                        <button
+                          type="button"
+                          className="primary-button small-button"
+                          onClick={() => void logSuperset(supersetExercises, group.key, supersetCompletedRows)}
+                        >
+                          Finish superset
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
