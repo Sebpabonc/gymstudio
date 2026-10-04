@@ -3051,31 +3051,31 @@
     "start_date": "2026-10-05",
     "weeks": 6,
     "origin": "pt",
-    "summary": "A 6-week volume block: flat sets with the same reps and weight on every set, plus supersets. Chest is pressed at 30 degrees and flat, with high-to-low cable flies, to grow every part of the chest.",
+    "summary": "Six weeks of muscle building: same weight on every set, main lifts first, then supersets of non-competing muscles. Effort builds from week 1 to 5, week 6 is lighter. More side-delt and hamstring work, and stretch-focused exercises.",
     "insights": [
       {
         "title": "Goal",
-        "body": "Build muscle through plenty of quality, moderately heavy work after the intensity of block 5. It gives your joints a break from very heavy sets while still growing muscle, and it sets up the heavy strength block that comes next."
+        "body": "Build muscle with moderate weights taken close to failure, after the intensity of block 5 and the lighter weeks that followed. Volume is set from your own history: more side-delt and hamstring work (your slowest-moving areas), about 18-20 weekly sets for chest and back, and every muscle gets at least one exercise that loads it in a deep stretch."
       },
       {
         "title": "How it works",
-        "body": "Every set of an exercise uses the same reps and weight, for example 4 x 12 on the 30-degree incline dumbbell press, the Smith machine shoulder press and the plate-loaded pendulum squat. After the main lift, two exercises are done as a superset: the first, about 10 seconds of rest, then the second, then 60-90 seconds of rest. On chest day that is a flat dumbbell press with high-to-low cable flies. New choices include the chest-supported T-bar row, Bulgarian split squats, reverse pec deck and cable crunches."
+        "body": "Every set of an exercise uses the same weight and reps. The main lifts (30-degree incline dumbbell press, chest-supported T-bar row, Smith machine shoulder press, pendulum squat) come first, done alone with 2.5-3 minutes rest. The rest are supersets of muscles that don't compete, like flat dumbbell press with underhand pulldowns or incline curls with overhead triceps extensions: first exercise, about 10 seconds, second exercise, then the full rest. Abs moved to arms days so leg days stay short."
       },
       {
         "title": "A days vs B days",
-        "body": "A days use 10-12 reps per set (15 on finishers) with heavier weights; B days repeat the same exercises in the same order at 12-15 reps (20 on finishers) with lighter weights. A days give heavier, controlled work, while B days add volume and pump with less stress on the joints."
+        "body": "A days are heavier: 8 reps on the main lifts, 10 on the other compound lifts, 12 on isolation exercises and 15 on lateral raises, rear delts and calves. B days repeat the same exercises in the same order with lighter weights for 10, 12, 15 and 20 reps. Track and progress A and B days separately."
       },
       {
         "title": "How to progress",
-        "body": "Keep the weight the same for every set. When you complete all reps of all sets with good form and about one rep left in the tank, add the smallest step next time (about 1-2.5 kg upper body, 2.5-5 kg lower body). If you fall short, keep the weight and aim for one more rep next week. Track A and B days separately."
+        "body": "The reps shown are your target. When every set reaches it with clean form at that week's effort, add the smallest step next time (about 1-2.5 kg upper body, 2.5-5 kg legs); if the last sets fall 1-2 reps short, keep the weight and beat it next week. Effort rises through the block: week 1 stop about 3 reps before failure, week 2 about 2, weeks 3-4 about 1-2, week 5 about 1, and only the last set of machine, cable or isolation work may go to failure."
       },
       {
         "title": "What to expect",
-        "body": "Expect a strong pump and steady, manageable fatigue rather than very heavy sets. Supersets make sessions feel dense, and new exercises like Bulgarian split squats may cause extra soreness in the first week or two. Strength should rise gradually from week to week."
+        "body": "Week 1 should feel easy on purpose while you find your weights and learn the new exercises. Weeks 2-5 get harder each week and should bring more reps or weight on most lifts. Week 6 is lighter: same exercises and weights, but only half the sets (round up) and stop about 3 reps before failure, so you start the heavy block 7 fresh."
       },
       {
         "title": "Key tips",
-        "body": "Pick a starting weight you can hold for all four sets; it is fine if week 1 feels a little easy. Keep the 10-second gap inside supersets short: on chest day, set up a flat bench next to the cable station before you start. Learn the new exercises with moderate weights first before pushing them hard."
+        "body": "Set up stations before supersets, for example a flat bench next to the pulldown. Lower slowly into the stretch on every press, fly, curl, RDL and calf raise, without bouncing. Never grind heavy squats, RDLs or presses to failure. If a movement hurts, stop it and see a qualified professional."
       }
     ],
     "days": [
@@ -3087,20 +3087,33 @@
           {
             "code": "A1",
             "exercise_id": "incline-dumbbell-press",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
+              "8",
+              "8",
+              "8"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 150,
             "technique": "straight",
             "angle_degrees": 30,
-            "notes": ""
+            "notes": "Lower until you feel a deep chest stretch."
           },
           {
             "code": "B1",
+            "exercise_id": "plate-loaded-t-bar-row-chest-supported",
+            "sets": 3,
+            "reps": [
+              "8",
+              "8",
+              "8"
+            ],
+            "rest_seconds": 150,
+            "technique": "straight",
+            "angle_degrees": null,
+            "notes": "Let the weight pull your shoulder blades forward at the bottom."
+          },
+          {
+            "code": "C1",
             "exercise_id": "dumbbell-bench-press",
             "sets": 3,
             "reps": [
@@ -3114,50 +3127,7 @@
             "notes": ""
           },
           {
-            "code": "B2",
-            "exercise_id": "high-cable-fly",
-            "sets": 3,
-            "reps": [
-              "12",
-              "12",
-              "12"
-            ],
-            "rest_seconds": 90,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "C1",
-            "exercise_id": "pec-deck-fly",
-            "sets": 3,
-            "reps": [
-              "15",
-              "15",
-              "15"
-            ],
-            "rest_seconds": 60,
-            "technique": "straight",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "D1",
-            "exercise_id": "plate-loaded-t-bar-row-chest-supported",
-            "sets": 4,
-            "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
-            ],
-            "rest_seconds": 90,
-            "technique": "straight",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "E1",
+            "code": "C2",
             "exercise_id": "cable-lat-pulldown-underhand-grip",
             "sets": 3,
             "reps": [
@@ -3165,13 +3135,27 @@
               "10",
               "10"
             ],
+            "rest_seconds": 120,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Full stretch at the top; pull elbows down to your ribs."
+          },
+          {
+            "code": "D1",
+            "exercise_id": "high-cable-fly",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
             "rest_seconds": 10,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Step forward so your arms open slightly behind your body."
           },
           {
-            "code": "E2",
+            "code": "D2",
             "exercise_id": "machine-pullover",
             "sets": 3,
             "reps": [
@@ -3182,26 +3166,39 @@
             "rest_seconds": 90,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Let the arms travel high for a full lat stretch."
+          },
+          {
+            "code": "E1",
+            "exercise_id": "standing-db-lateral-raises",
+            "sets": 3,
+            "reps": [
+              "15",
+              "15",
+              "15"
+            ],
+            "rest_seconds": 60,
+            "technique": "straight",
+            "angle_degrees": null,
+            "notes": "Strict, no swinging; lead with the elbows."
           }
         ]
       },
       {
         "key": "arms-a",
         "name": "Arms A",
-        "focus": "Shoulders & arms · heavy",
+        "focus": "Delts, arms & abs · heavy",
         "exercises": [
           {
             "code": "A1",
             "exercise_id": "smith-machine-shoulder-press",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
+              "8",
+              "8",
+              "8"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 150,
             "technique": "straight",
             "angle_degrees": 75,
             "notes": ""
@@ -3209,48 +3206,35 @@
           {
             "code": "B1",
             "exercise_id": "cable-lateral-raise",
-            "sets": 3,
+            "sets": 4,
             "reps": [
-              "12",
-              "12",
-              "12"
-            ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": "Do both sides, then rest."
-          },
-          {
-            "code": "B2",
-            "exercise_id": "reverse-pec-deck-fly",
-            "sets": 3,
-            "reps": [
+              "15",
               "15",
               "15",
               "15"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 10,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Cable runs behind your body; do both sides, then go on."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "reverse-pec-deck-fly",
+            "sets": 4,
+            "reps": [
+              "15",
+              "15",
+              "15",
+              "15"
+            ],
+            "rest_seconds": 75,
             "technique": "superset",
             "angle_degrees": null,
             "notes": ""
           },
           {
             "code": "C1",
-            "exercise_id": "ez-bar-curl",
-            "sets": 4,
-            "reps": [
-              "10",
-              "10",
-              "10",
-              "10"
-            ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "C2",
             "exercise_id": "dumbbell-curl-incline",
             "sets": 4,
             "reps": [
@@ -3259,29 +3243,14 @@
               "12",
               "12"
             ],
-            "rest_seconds": 90,
-            "technique": "superset",
-            "angle_degrees": 45,
-            "notes": ""
-          },
-          {
-            "code": "D1",
-            "exercise_id": "ez-bar-skull-crusher",
-            "sets": 4,
-            "reps": [
-              "10",
-              "10",
-              "10",
-              "10"
-            ],
             "rest_seconds": 10,
             "technique": "superset",
-            "angle_degrees": 0,
-            "notes": ""
+            "angle_degrees": 45,
+            "notes": "Let your arms hang straight down at the bottom."
           },
           {
-            "code": "D2",
-            "exercise_id": "cable-triceps-pushdown-straight-bar",
+            "code": "C2",
+            "exercise_id": "rope-low-cable-oh-tricep-extensions",
             "sets": 4,
             "reps": [
               "12",
@@ -3292,32 +3261,73 @@
             "rest_seconds": 90,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Face away from the stack; let elbows bend fully overhead."
+          },
+          {
+            "code": "D1",
+            "exercise_id": "ez-bb-preacher-curls",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
+            "rest_seconds": 10,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Control the bottom; never bounce out of the stretch."
+          },
+          {
+            "code": "D2",
+            "exercise_id": "cable-crunch",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
+            "rest_seconds": 60,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Curl your spine down; hips stay still."
           }
         ]
       },
       {
         "key": "lower-body-a",
         "name": "Lower Body A",
-        "focus": "Legs & core · heavy",
+        "focus": "Legs · heavy",
         "exercises": [
           {
             "code": "A1",
             "exercise_id": "plate-loaded-pendulum-squat",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
+              "8",
+              "8",
+              "8"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 180,
             "technique": "straight",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Go as deep as you can control; never grind to failure."
           },
           {
             "code": "B1",
+            "exercise_id": "romanian-deadlift",
+            "sets": 3,
+            "reps": [
+              "10",
+              "10",
+              "10"
+            ],
+            "rest_seconds": 150,
+            "technique": "straight",
+            "angle_degrees": null,
+            "notes": "Hips back to a strong hamstring stretch; keep the spine neutral."
+          },
+          {
+            "code": "C1",
             "exercise_id": "dumbbell-bulgarian-split-squat",
             "sets": 3,
             "reps": [
@@ -3325,73 +3335,47 @@
               "10",
               "10"
             ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": "Reps are per leg."
-          },
-          {
-            "code": "B2",
-            "exercise_id": "machine-leg-extension-single-leg",
-            "sets": 3,
-            "reps": [
-              "12",
-              "12",
-              "12"
-            ],
             "rest_seconds": 90,
-            "technique": "superset",
+            "technique": "straight",
             "angle_degrees": null,
-            "notes": "Per leg; toes pulled up, pointing straight ahead."
-          },
-          {
-            "code": "C1",
-            "exercise_id": "dumbbell-romanian-deadlift",
-            "sets": 3,
-            "reps": [
-              "10",
-              "10",
-              "10"
-            ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "C2",
-            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
-            "sets": 3,
-            "reps": [
-              "12",
-              "12",
-              "12"
-            ],
-            "rest_seconds": 90,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": "Toes pulled up (dorsiflexed), pointing straight ahead."
+            "notes": "Reps are per leg; a slight forward lean adds glute work."
           },
           {
             "code": "D1",
-            "exercise_id": "machine-seated-calf-raise",
+            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
             "sets": 4,
             "reps": [
-              "15",
-              "15",
-              "15",
-              "15"
+              "12",
+              "12",
+              "12",
+              "12"
             ],
-            "rest_seconds": 60,
-            "technique": "straight",
+            "rest_seconds": 10,
+            "technique": "superset",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Toes pulled up; lean your torso forward for a bigger stretch."
+          },
+          {
+            "code": "D2",
+            "exercise_id": "leg-extensions-toes-dorsiflexed-neutral",
+            "sets": 4,
+            "reps": [
+              "12",
+              "12",
+              "12",
+              "12"
+            ],
+            "rest_seconds": 90,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Toes pulled up, pointing ahead; slow through the deep bend."
           },
           {
             "code": "E1",
-            "exercise_id": "cable-crunch",
-            "sets": 4,
+            "exercise_id": "standing-calf-raises-toes-neutral",
+            "sets": 5,
             "reps": [
+              "15",
               "15",
               "15",
               "15",
@@ -3400,7 +3384,7 @@
             "rest_seconds": 60,
             "technique": "straight",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Pause 2 s in the deep stretch at the bottom of every rep."
           }
         ]
       },
@@ -3412,20 +3396,33 @@
           {
             "code": "A1",
             "exercise_id": "incline-dumbbell-press",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "15",
-              "15",
-              "15",
-              "15"
+              "10",
+              "10",
+              "10"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 150,
             "technique": "straight",
             "angle_degrees": 30,
-            "notes": ""
+            "notes": "Lower until you feel a deep chest stretch."
           },
           {
             "code": "B1",
+            "exercise_id": "plate-loaded-t-bar-row-chest-supported",
+            "sets": 3,
+            "reps": [
+              "10",
+              "10",
+              "10"
+            ],
+            "rest_seconds": 150,
+            "technique": "straight",
+            "angle_degrees": null,
+            "notes": "Let the weight pull your shoulder blades forward at the bottom."
+          },
+          {
+            "code": "C1",
             "exercise_id": "dumbbell-bench-press",
             "sets": 3,
             "reps": [
@@ -3439,50 +3436,7 @@
             "notes": ""
           },
           {
-            "code": "B2",
-            "exercise_id": "high-cable-fly",
-            "sets": 3,
-            "reps": [
-              "15",
-              "15",
-              "15"
-            ],
-            "rest_seconds": 90,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "C1",
-            "exercise_id": "pec-deck-fly",
-            "sets": 3,
-            "reps": [
-              "20",
-              "20",
-              "20"
-            ],
-            "rest_seconds": 60,
-            "technique": "straight",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "D1",
-            "exercise_id": "plate-loaded-t-bar-row-chest-supported",
-            "sets": 4,
-            "reps": [
-              "15",
-              "15",
-              "15",
-              "15"
-            ],
-            "rest_seconds": 90,
-            "technique": "straight",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "E1",
+            "code": "C2",
             "exercise_id": "cable-lat-pulldown-underhand-grip",
             "sets": 3,
             "reps": [
@@ -3490,13 +3444,27 @@
               "12",
               "12"
             ],
+            "rest_seconds": 120,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Full stretch at the top; pull elbows down to your ribs."
+          },
+          {
+            "code": "D1",
+            "exercise_id": "high-cable-fly",
+            "sets": 3,
+            "reps": [
+              "15",
+              "15",
+              "15"
+            ],
             "rest_seconds": 10,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Step forward so your arms open slightly behind your body."
           },
           {
-            "code": "E2",
+            "code": "D2",
             "exercise_id": "machine-pullover",
             "sets": 3,
             "reps": [
@@ -3507,26 +3475,39 @@
             "rest_seconds": 90,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Let the arms travel high for a full lat stretch."
+          },
+          {
+            "code": "E1",
+            "exercise_id": "standing-db-lateral-raises",
+            "sets": 3,
+            "reps": [
+              "20",
+              "20",
+              "20"
+            ],
+            "rest_seconds": 60,
+            "technique": "straight",
+            "angle_degrees": null,
+            "notes": "Strict, no swinging; lead with the elbows."
           }
         ]
       },
       {
         "key": "arms-b",
         "name": "Arms B",
-        "focus": "Shoulders & arms · volume",
+        "focus": "Delts, arms & abs · volume",
         "exercises": [
           {
             "code": "A1",
             "exercise_id": "smith-machine-shoulder-press",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "15",
-              "15",
-              "15",
-              "15"
+              "10",
+              "10",
+              "10"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 150,
             "technique": "straight",
             "angle_degrees": 75,
             "notes": ""
@@ -3534,48 +3515,35 @@
           {
             "code": "B1",
             "exercise_id": "cable-lateral-raise",
-            "sets": 3,
+            "sets": 4,
             "reps": [
-              "15",
-              "15",
-              "15"
-            ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": "Do both sides, then rest."
-          },
-          {
-            "code": "B2",
-            "exercise_id": "reverse-pec-deck-fly",
-            "sets": 3,
-            "reps": [
+              "20",
               "20",
               "20",
               "20"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 10,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Cable runs behind your body; do both sides, then go on."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "reverse-pec-deck-fly",
+            "sets": 4,
+            "reps": [
+              "20",
+              "20",
+              "20",
+              "20"
+            ],
+            "rest_seconds": 75,
             "technique": "superset",
             "angle_degrees": null,
             "notes": ""
           },
           {
             "code": "C1",
-            "exercise_id": "ez-bar-curl",
-            "sets": 4,
-            "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
-            ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "C2",
             "exercise_id": "dumbbell-curl-incline",
             "sets": 4,
             "reps": [
@@ -3584,29 +3552,14 @@
               "15",
               "15"
             ],
-            "rest_seconds": 90,
-            "technique": "superset",
-            "angle_degrees": 45,
-            "notes": ""
-          },
-          {
-            "code": "D1",
-            "exercise_id": "ez-bar-skull-crusher",
-            "sets": 4,
-            "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
-            ],
             "rest_seconds": 10,
             "technique": "superset",
-            "angle_degrees": 0,
-            "notes": ""
+            "angle_degrees": 45,
+            "notes": "Let your arms hang straight down at the bottom."
           },
           {
-            "code": "D2",
-            "exercise_id": "cable-triceps-pushdown-straight-bar",
+            "code": "C2",
+            "exercise_id": "rope-low-cable-oh-tricep-extensions",
             "sets": 4,
             "reps": [
               "15",
@@ -3617,32 +3570,73 @@
             "rest_seconds": 90,
             "technique": "superset",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Face away from the stack; let elbows bend fully overhead."
+          },
+          {
+            "code": "D1",
+            "exercise_id": "ez-bb-preacher-curls",
+            "sets": 3,
+            "reps": [
+              "15",
+              "15",
+              "15"
+            ],
+            "rest_seconds": 10,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Control the bottom; never bounce out of the stretch."
+          },
+          {
+            "code": "D2",
+            "exercise_id": "cable-crunch",
+            "sets": 3,
+            "reps": [
+              "15",
+              "15",
+              "15"
+            ],
+            "rest_seconds": 60,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Curl your spine down; hips stay still."
           }
         ]
       },
       {
         "key": "lower-body-b",
         "name": "Lower Body B",
-        "focus": "Legs & core · volume",
+        "focus": "Legs · volume",
         "exercises": [
           {
             "code": "A1",
             "exercise_id": "plate-loaded-pendulum-squat",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "15",
-              "15",
-              "15",
-              "15"
+              "10",
+              "10",
+              "10"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 180,
             "technique": "straight",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Go as deep as you can control; never grind to failure."
           },
           {
             "code": "B1",
+            "exercise_id": "romanian-deadlift",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
+            "rest_seconds": 150,
+            "technique": "straight",
+            "angle_degrees": null,
+            "notes": "Hips back to a strong hamstring stretch; keep the spine neutral."
+          },
+          {
+            "code": "C1",
             "exercise_id": "dumbbell-bulgarian-split-squat",
             "sets": 3,
             "reps": [
@@ -3650,73 +3644,47 @@
               "12",
               "12"
             ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": "Reps are per leg."
-          },
-          {
-            "code": "B2",
-            "exercise_id": "machine-leg-extension-single-leg",
-            "sets": 3,
-            "reps": [
-              "15",
-              "15",
-              "15"
-            ],
             "rest_seconds": 90,
-            "technique": "superset",
+            "technique": "straight",
             "angle_degrees": null,
-            "notes": "Per leg; toes pulled up, pointing straight ahead."
-          },
-          {
-            "code": "C1",
-            "exercise_id": "dumbbell-romanian-deadlift",
-            "sets": 3,
-            "reps": [
-              "12",
-              "12",
-              "12"
-            ],
-            "rest_seconds": 10,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": ""
-          },
-          {
-            "code": "C2",
-            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
-            "sets": 3,
-            "reps": [
-              "15",
-              "15",
-              "15"
-            ],
-            "rest_seconds": 90,
-            "technique": "superset",
-            "angle_degrees": null,
-            "notes": "Toes pulled up (dorsiflexed), pointing straight ahead."
+            "notes": "Reps are per leg; a slight forward lean adds glute work."
           },
           {
             "code": "D1",
-            "exercise_id": "machine-seated-calf-raise",
+            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
             "sets": 4,
             "reps": [
-              "20",
-              "20",
-              "20",
-              "20"
+              "15",
+              "15",
+              "15",
+              "15"
             ],
-            "rest_seconds": 60,
-            "technique": "straight",
+            "rest_seconds": 10,
+            "technique": "superset",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Toes pulled up; lean your torso forward for a bigger stretch."
+          },
+          {
+            "code": "D2",
+            "exercise_id": "leg-extensions-toes-dorsiflexed-neutral",
+            "sets": 4,
+            "reps": [
+              "15",
+              "15",
+              "15",
+              "15"
+            ],
+            "rest_seconds": 90,
+            "technique": "superset",
+            "angle_degrees": null,
+            "notes": "Toes pulled up, pointing ahead; slow through the deep bend."
           },
           {
             "code": "E1",
-            "exercise_id": "cable-crunch",
-            "sets": 4,
+            "exercise_id": "standing-calf-raises-toes-neutral",
+            "sets": 5,
             "reps": [
+              "20",
               "20",
               "20",
               "20",
@@ -3725,7 +3693,7 @@
             "rest_seconds": 60,
             "technique": "straight",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Pause 2 s in the deep stretch at the bottom of every rep."
           }
         ]
       }
