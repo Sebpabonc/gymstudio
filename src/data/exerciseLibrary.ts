@@ -20,6 +20,7 @@ export async function loadExerciseLibrary() {
     squeezeCue: exercise.squeeze_cue,
     primaryMuscle: exercise.primary_muscles[0],
     secondaryMuscle: exercise.secondary_muscles[0],
+    mechanic: exercise.mechanic as Exercise['mechanic'],
   }))
   const aliases = Object.fromEntries(
     catalogue.flatMap((exercise) => exercise.aliases.map((alias) => [alias, exercise.id]))
