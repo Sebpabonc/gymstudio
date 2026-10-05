@@ -976,10 +976,10 @@ export default function WorkoutPlan({
 
   const requestExerciseNote = (entry: WorkoutEntry, exercise: PlanExercise, target: NextTarget | null) => {
     if (!target) return
+    if (exerciseFeedbackRequests.current.has(entry.id)) return
     const baseState = { target, pending: false }
     setExerciseFeedbackByEntryId((current) => ({ ...current, [entry.id]: baseState }))
     if (demoMode || authStatus !== 'signed-in' || aiConsent !== 'enabled') return
-    if (exerciseFeedbackRequests.current.has(entry.id)) return
 
     exerciseFeedbackRequests.current.add(entry.id)
     setExerciseFeedbackByEntryId((current) => ({
