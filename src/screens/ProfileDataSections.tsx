@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import { formatNumber, formatShortDate, Language, TranslationKey, useT } from '../i18n'
 import { localIsoDate } from '../lib/dates'
@@ -98,6 +98,9 @@ export default function ProfileDataSections() {
   const { user } = useAuth()
   const disabled = !user
   const today = localIsoDate()
+  const translatorRef = useRef(t)
+  translatorRef.current = t
+  const metricRequestId = useRef(0)
   const [selectedDate, setSelectedDate] = useState(today)
   const [metricInput, setMetricInput] = useState(asMetricInput(null))
   const [metrics, setMetrics] = useState<BodyMetric[]>([])
@@ -130,34 +133,39 @@ export default function ProfileDataSections() {
         setEditingGoal(!saved)
       })
       .catch((cause) => {
-        if (active) setError(getFriendlyError(cause, t))
+        if (active) setError(getFriendlyError(cause, translatorRef.current))
       })
       .finally(() => {
         if (active) setLoading(false)
       })
     return () => { active = false }
-  }, [disabled, today, t])
+  }, [disabled, today])
 
   useEffect(() => {
     if (disabled) {
+      metricRequestId.current += 1
       setMetricInput(asMetricInput(null))
       setMetricLoading(false)
       return
     }
     let active = true
+    const requestId = ++metricRequestId.current
     setMetricLoading(true)
     void fetchBodyMetric(selectedDate)
       .then((metric) => {
-        if (active) setMetricInput(asMetricInput(metric))
+        if (active && metricRequestId.current === requestId) setMetricInput(asMetricInput(metric))
       })
       .catch((cause) => {
-        if (active) setError(getFriendlyError(cause, t))
+        if (active && metricRequestId.current === requestId) setError(getFriendlyError(cause, translatorRef.current))
       })
       .finally(() => {
-        if (active) setMetricLoading(false)
+        if (active && metricRequestId.current === requestId) setMetricLoading(false)
       })
-    return () => { active = false }
-  }, [disabled, selectedDate, t])
+    return () => {
+      active = false
+      if (metricRequestId.current === requestId) metricRequestId.current += 1
+    }
+  }, [disabled, selectedDate])
 
   const visibleMetrics = useMemo(() => {
     const cutoff = new Date(`${today}T00:00:00`)
@@ -169,6 +177,7 @@ export default function ProfileDataSections() {
 
   const submitMetric = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (disabled || busy || metricLoading) return
     setBusy(true)
     setError('')
     setNotice('')
@@ -218,8 +227,10 @@ export default function ProfileDataSections() {
               <input
                 type="date"
                 required
+                max={today}
                 value={selectedDate}
                 onChange={(event) => {
+                  metricRequestId.current += 1
                   setMetricInput(asMetricInput(null))
                   setMetricLoading(true)
                   setError('')
