@@ -84,7 +84,7 @@ table needs `user_id`. Row Level Security enforces user isolation.
   checked in CI by `scripts/validate-catalogue.py`) and is turned into a migration with
   `python3 scripts/catalogue-v2-seed.py` — never hand-edit seed SQL.
 - Training blocks (`training_blocks`, `training_block_days`, `training_block_exercises`) are
-  global read-only reference data from `docs/fitness/approved/training-blocks/blocks.json`
+  Sebas's private program (`owner_id`; only the owner can read them, migration 028) built from `docs/fitness/approved/training-blocks/blocks.json`
   (spec: `docs/fitness/training-blocks-spec.md`, validated in CI by `scripts/validate-blocks.py`,
   seeded with `python3 scripts/training-blocks-seed.py`).
 - Personal plans: `public.user_plans` (one active per user, RLS own rows). Built in `src/plans/`:
