@@ -49,6 +49,7 @@ import {
   formatBenchAngle,
   formatBlockMethod,
   nextUnloggedDay,
+  todayTrainingDay,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
 import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, formatLoggedTime, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
@@ -425,7 +426,6 @@ export default function WorkoutPlan({
   const [exerciseFeedbackByEntryId, setExerciseFeedbackByEntryId] = useState<Record<string, ExerciseFeedbackState>>({})
   const [aiPlans, setAiPlans] = useState<Record<string, NextSessionPlan>>({})
   const [aiPlanLoading, setAiPlanLoading] = useState<Record<string, boolean>>({})
-  const [usePtRuleByExercise, setUsePtRuleByExercise] = useState<Record<string, boolean>>({})
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const aiSummaryRequestId = useRef(0)
   const exerciseFeedbackRequests = useRef(new Set<string>())
@@ -585,17 +585,13 @@ export default function WorkoutPlan({
   )
   const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
   const activeBlockWeek = activeBlock ? blockWeek(activeBlock, today) : null
-  const todayDay = activeBlock ? nextUnloggedDay(activeBlock, history, today) : undefined
+  const todayDay = activeBlock ? todayTrainingDay(activeBlock, history, today) : undefined
   const activeAiPlanKey = activeBlock && activeDay ? getAiPlanKey(activeBlock.id, activeDay.key) : ''
-  const activeCoachPlan = activeAiPlanKey && todayDay?.key === activeDay?.key
+  const activeCoachPlan = activeAiPlanKey
     ? aiPlans[activeAiPlanKey] ?? (activeBlock && activeDay ? loadAiSessionPlan(activeBlock.id, activeDay.key) ?? undefined : undefined)
     : undefined
   const getAiPlanExercise = (exercise: PlanExercise) =>
     exercise.code ? activeCoachPlan?.exercises.find((item) => item.code === exercise.code) : undefined
-  const getUsePtRuleKey = (exercise: PlanExercise) =>
-    activeBlock && activeDay && exercise.code
-      ? getAiPlanKey(activeBlock.id, activeDay.key) + `:${exercise.code}`
-      : ''
   const personalRecordBadgesByEntryId = useMemo(
     () => new Map(
       history
@@ -649,7 +645,7 @@ export default function WorkoutPlan({
       if (savedBlockId && !pinnedBlock) setActiveBlockId(null)
       setPinnedBlockId(pinnedBlock?.id ?? '')
       setSelectedBlockId(nextBlock?.id ?? '')
-      setSelectedDay(nextBlock ? nextUnloggedDay(nextBlock, entries)?.key ?? '' : '')
+      setSelectedDay(nextBlock ? todayTrainingDay(nextBlock, entries)?.key ?? '' : '')
     })
 
     return () => {
@@ -1018,21 +1014,6 @@ export default function WorkoutPlan({
     })
   }
 
-  useEffect(() => {
-    if (planMode !== 'preset' || !activeBlock || !activeDay) return
-    const planKey = getAiPlanKey(activeBlock.id, activeDay.key)
-    const saved = loadAiSessionPlan(activeBlock.id, activeDay.key)
-    if (saved) setAiPlans((current) => ({ ...current, [planKey]: saved }))
-    if (
-      todayDay?.key === activeDay.key &&
-      authStatus === 'signed-in' &&
-      aiConsent === 'enabled' &&
-      !saved
-    ) {
-      void requestAiPlan(activeBlock, activeDay, history)
-    }
-  }, [planMode, activeBlock, activeDay, todayDay?.key, authStatus, aiConsent, history, language])
-
   const getAppliedTarget = (exercise?: PlanExercise, exerciseId?: string) => {
     if (!exercise || !exerciseId) return undefined
     const target = weightTargets[exerciseId]
@@ -1060,8 +1041,7 @@ export default function WorkoutPlan({
     })
     const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
     const aiExercise = exercise ? getAiPlanExercise(exercise) : undefined
-    const usePtRule = exercise ? !!usePtRuleByExercise[getUsePtRuleKey(exercise)] : false
-    const baseSetWeights = aiExercise && !usePtRule
+    const baseSetWeights = aiExercise
       ? Array.from({ length: fallbackSetCount }, () => aiExercise.weight)
       : nextTarget
         ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
@@ -1073,7 +1053,7 @@ export default function WorkoutPlan({
       return Number(source?.drop?.weight) || Number(((baseSetWeights[index] ?? 0) * 0.75).toFixed(2))
     })
     const baseSetReps = Array.from({ length: fallbackSetCount }, (_, index) => {
-      if (aiExercise && !usePtRule) return aiExercise.reps[index] ?? aiExercise.reps[aiExercise.reps.length - 1] ?? fallbackReps
+      if (aiExercise) return aiExercise.reps[index] ?? aiExercise.reps[aiExercise.reps.length - 1] ?? fallbackReps
       const prescribed = exercise?.repsPerSet?.[index] ?? exercise?.reps ?? ''
       return parseRepPrescription(prescribed)[0] || Number(fallbackReps) || 8
     })
@@ -1177,7 +1157,7 @@ export default function WorkoutPlan({
     setActiveBlockId(null)
     setPinnedBlockId('')
     setSelectedBlockId(block?.id ?? '')
-    setSelectedDay(block ? nextUnloggedDay(block, history, today)?.key ?? '' : '')
+    setSelectedDay(block ? todayTrainingDay(block, history, today)?.key ?? '' : '')
     setCollapsedExercises({})
     setPlannedDrafts({})
     setBlockSelectorOpen(false)
@@ -1857,16 +1837,16 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 {pinnedBlockId === activeBlock.id && <span className="training-block-number">{t('workout.block.pinned')}</span>}
               </span>
             </button>
-            <button
-              type="button"
-              className="secondary-button block-change-button"
-              onClick={() => setBlockSelectorOpen(true)}
-              aria-haspopup="dialog"
-              aria-expanded={blockSelectorOpen}
-            >
-              {text.changeBlock}
-            </button>
             <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
+              <button
+                type="button"
+                className="secondary-button block-change-button"
+                onClick={() => setBlockSelectorOpen(true)}
+                aria-haspopup="dialog"
+                aria-expanded={blockSelectorOpen}
+              >
+                {text.changeBlock}
+              </button>
               <div className="training-block-meta">
                 <span>{blockDateRange(activeBlock, language)}</span>
                 <span>{formatBlockMethod(activeBlock.method, language)}</span>
@@ -1932,7 +1912,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         setActiveBlockId(block.id)
                         setPinnedBlockId(block.id)
                         setSelectedBlockId(block.id)
-                        setSelectedDay(nextUnloggedDay(block, history, today)?.key ?? block.days[0]?.key ?? '')
+                        setSelectedDay(todayTrainingDay(block, history, today)?.key ?? block.days[0]?.key ?? '')
                         setCollapsedExercises({})
                         setPlannedDrafts({})
                         setBlockSelectorOpen(false)
@@ -2196,7 +2176,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const postureTips = getPostureTips(exercise, libraryMatch)
             const completedEntry = findExerciseCompletion(exercise, history)
             const aiPlanExercise = getAiPlanExercise(exercise)
-            const usePtRule = !!usePtRuleByExercise[getUsePtRuleKey(exercise)]
             const recordBadges =
               completedEntry?.date === today
                 ? personalRecordBadgesByEntryId.get(completedEntry.id) ?? []
@@ -2314,22 +2293,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     {aiPlanExercise && (
                       <div className="ai-plan-exercise">
                         {aiPlanExercise.note && <p>{aiPlanExercise.note}</p>}
-                        <label>
-                          <input
-                            type="checkbox"
-                            checked={usePtRule}
-                            onChange={(event) => {
-                              const key = getUsePtRuleKey(exercise)
-                              const draftKey = getPlanDraftKey(exercise.name)
-                              setUsePtRuleByExercise((current) => ({ ...current, [key]: event.target.checked }))
-                              setPlannedDrafts((current) => {
-                                const { [draftKey]: _draft, ...remaining } = current
-                                return remaining
-                              })
-                            }}
-                          />
-                          {t('workout.ai.usePtRule')}
-                        </label>
                       </div>
                     )}
                     {previousTarget && (

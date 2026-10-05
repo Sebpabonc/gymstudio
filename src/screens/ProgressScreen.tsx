@@ -66,6 +66,8 @@ type Props = {
   initialExerciseId?: string
   onOpenExercise: (exerciseId: string) => void
   onSignIn: () => void
+  onDeleteEntry: (entryId: string) => Promise<void>
+  onRestoreEntry: (entry: WorkoutEntry) => Promise<void>
   authStatus: AuthStatus
 }
 
@@ -258,7 +260,16 @@ function StrengthChart({ model, title, summary }: { model: ReturnType<typeof bui
   )
 }
 
-export default function ProgressScreen({ entries, exercises, initialExerciseId, onOpenExercise, onSignIn, authStatus }: Props) {
+export default function ProgressScreen({
+  entries,
+  exercises,
+  initialExerciseId,
+  onOpenExercise,
+  onSignIn,
+  onDeleteEntry,
+  onRestoreEntry,
+  authStatus,
+}: Props) {
   const { t, language } = useT()
   const demoMode = isDemoMode()
   const [rawBlocks, setBlocks] = useState<TrainingBlock[] | null>(null)
@@ -270,7 +281,14 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   const [exercisePickerOpen, setExercisePickerOpen] = useState(false)
   const exercisePickerButtonRef = useRef<HTMLButtonElement>(null)
   const [targets, setTargets] = useState(() => loadWeightTargets())
+  const [confirmDeleteId, setConfirmDeleteId] = useState('')
+  const [undoEntry, setUndoEntry] = useState<WorkoutEntry | null>(null)
+  const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const today = localIsoDate()
+
+  useEffect(() => () => {
+    if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -354,6 +372,47 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
     const exercise = exercises.find((item) => item.id === id)
     return exercise ? getExerciseDisplayName(exercise, language) : id
   }
+  const deleteEntry = async (entry: WorkoutEntry) => {
+    await onDeleteEntry(entry.id)
+    setConfirmDeleteId('')
+    setUndoEntry(entry)
+    if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current)
+    undoTimeoutRef.current = setTimeout(() => setUndoEntry(null), 5_000)
+  }
+  const undoDelete = async () => {
+    if (!undoEntry) return
+    if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current)
+    await onRestoreEntry(undoEntry)
+    setUndoEntry(null)
+  }
+  const renderDeleteAction = (entry: WorkoutEntry) => (
+    <div className="progress-log-delete">
+      <button
+        type="button"
+        className="icon-button log-delete-button"
+        aria-label={t('progress.delete.logFor', {
+          exercise: nameFor(entry.exerciseId),
+          date: formatShortDate(language, entry.date),
+        })}
+        onClick={() => setConfirmDeleteId(entry.id)}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3" />
+        </svg>
+      </button>
+      {confirmDeleteId === entry.id && (
+        <div className="progress-delete-confirm" role="group" aria-label={t('progress.delete.confirm')}>
+          <span>{t('progress.delete.confirm')}</span>
+          <button type="button" className="text-button" onClick={() => void deleteEntry(entry)}>
+            {t('progress.delete.action')}
+          </button>
+          <button type="button" className="text-button" onClick={() => setConfirmDeleteId('')}>
+            {t('progress.delete.cancel')}
+          </button>
+        </div>
+      )}
+    </div>
+  )
   const selectedId = options.some((exercise) => exercise.id === pickedId)
     ? pickedId
     : defaultExerciseId(entries, exercises, blocks, today, language)
@@ -388,6 +447,14 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
 
   return (
     <>
+      {undoEntry && (
+        <aside className="progress-delete-toast" role="status" aria-live="polite">
+          <span>{t('progress.delete.deleted')}</span>
+          <button type="button" className="text-button" onClick={() => void undoDelete()}>
+            {t('progress.delete.undo')}
+          </button>
+        </aside>
+      )}
       <section className="card progress-headline" aria-label={t('progress.headline.label')}>
         <h2 className="progress-headline-text">
           {gapWeek && activeBlock
@@ -607,6 +674,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                       <th scope="col">{t('progress.setHistory.date')}</th>
                       <th scope="col">{t('progress.setHistory.sets')}</th>
                       <th scope="col">{t('progress.setHistory.volume')}</th>
+                      <th scope="col"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -632,6 +700,11 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                           </ul>
                         </td>
                         <td>{`${formatNumber(language, point.volume, { maximumFractionDigits: 1 })} ${t('progress.unit.kg')}`}</td>
+                        <td>
+                          {entries
+                            .filter((entry) => entry.exerciseId === selectedId && entry.date.slice(0, 10) === point.date)
+                            .map((entry) => <React.Fragment key={entry.id}>{renderDeleteAction(entry)}</React.Fragment>)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -672,6 +745,11 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                       </details>
                     </span>
                   ))}
+                </div>
+                <div className="record-delete-actions">
+                  {entries
+                    .filter((entry) => entry.exerciseId === record.exerciseId && entry.date.slice(0, 10) === record.date)
+                    .map((entry) => <React.Fragment key={entry.id}>{renderDeleteAction(entry)}</React.Fragment>)}
                 </div>
               </li>
             ))}

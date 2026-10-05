@@ -741,7 +741,7 @@ export async function upsertExerciseRecord(exercise: Partial<Exercise> & { name:
   return nextExercise
 }
 
-export async function loadWorkoutHistory(): Promise<WorkoutEntry[]> {
+async function loadWorkoutHistoryEntries(): Promise<WorkoutEntry[]> {
   const raw = localStorage.getItem(storageKey(HISTORY_KEY))
   if (!raw) return []
 
@@ -772,6 +772,16 @@ export async function loadWorkoutHistory(): Promise<WorkoutEntry[]> {
   }
 }
 
+export async function loadWorkoutHistory(): Promise<WorkoutEntry[]> {
+  const history = await loadWorkoutHistoryEntries()
+  const deletedIds = new Set(
+    Object.entries(loadSyncMetadata().entries)
+      .filter(([, sync]) => sync.deletedAt)
+      .map(([id]) => id)
+  )
+  return history.filter((entry) => !deletedIds.has(entry.id))
+}
+
 export function saveWorkoutHistory(history: WorkoutEntry[]) {
   const raw = localStorage.getItem(storageKey(HISTORY_KEY))
   let previous: WorkoutEntry[] = []
@@ -782,26 +792,31 @@ export function saveWorkoutHistory(history: WorkoutEntry[]) {
     previous = []
   }
 
-  const previousById = new Map(previous.map((entry) => [entry.id, JSON.stringify(entry)]))
   const metadata = loadSyncMetadata()
+  const historyIds = new Set(history.map((entry) => entry.id))
+  const allHistory = [
+    ...history,
+    ...previous.filter((entry) => metadata.entries[entry.id]?.deletedAt && !historyIds.has(entry.id)),
+  ]
+  const previousById = new Map(previous.map((entry) => [entry.id, JSON.stringify(entry)]))
   const nextEntries: SyncMetadata['entries'] = {}
   const now = new Date().toISOString()
 
-  for (const entry of history) {
+  for (const entry of allHistory) {
     const sync = metadata.entries[entry.id]
     const unchanged = previousById.get(entry.id) === JSON.stringify(entry)
     nextEntries[entry.id] = unchanged && sync
       ? sync
-      : { updatedAt: now, dirty: true }
+      : { updatedAt: now, dirty: true, ...(sync?.deletedAt ? { deletedAt: sync.deletedAt } : {}) }
   }
 
-  localStorage.setItem(storageKey(HISTORY_KEY), JSON.stringify(history))
+  localStorage.setItem(storageKey(HISTORY_KEY), JSON.stringify(allHistory))
   saveSyncMetadata({ ...metadata, entries: nextEntries })
   signalWorkoutHistorySaved()
 }
 
 export async function loadWorkoutHistoryForSync(): Promise<SyncWorkoutEntry[]> {
-  const history = await loadWorkoutHistory()
+  const history = await loadWorkoutHistoryEntries()
   const metadata = loadSyncMetadata()
   let changed = false
   const entries = history.map((entry) => {
@@ -815,6 +830,40 @@ export async function loadWorkoutHistoryForSync(): Promise<SyncWorkoutEntry[]> {
   })
   if (changed) saveSyncMetadata(metadata)
   return entries
+}
+
+export async function deleteWorkoutEntry(entryId: string): Promise<WorkoutEntry[]> {
+  const history = await loadWorkoutHistoryEntries()
+  if (!history.some((entry) => entry.id === entryId)) return loadWorkoutHistory()
+
+  const metadata = loadSyncMetadata()
+  const now = new Date().toISOString()
+  metadata.entries[entryId] = { updatedAt: now, dirty: true, deletedAt: now }
+  saveSyncMetadata(metadata)
+  signalWorkoutHistorySaved()
+  return history.filter((entry) => entry.id !== entryId && !metadata.entries[entry.id]?.deletedAt)
+}
+
+export function restoreWorkoutEntry(entry: WorkoutEntry) {
+  const raw = localStorage.getItem(storageKey(HISTORY_KEY))
+  let history: WorkoutEntry[] = []
+  try {
+    const parsed = JSON.parse(raw ?? '[]')
+    if (Array.isArray(parsed)) history = parsed
+  } catch {
+    history = []
+  }
+
+  const nextHistory = [
+    entry,
+    ...history.filter((item) => item.id !== entry.id),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const metadata = loadSyncMetadata()
+  metadata.entries[entry.id] = { updatedAt: new Date().toISOString(), dirty: true }
+  localStorage.setItem(storageKey(HISTORY_KEY), JSON.stringify(nextHistory))
+  saveSyncMetadata(metadata)
+  signalWorkoutHistorySaved()
+  return nextHistory.filter((item) => !metadata.entries[item.id]?.deletedAt)
 }
 
 export function saveMergedWorkoutHistory(history: SyncWorkoutEntry[]) {

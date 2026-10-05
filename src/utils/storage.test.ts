@@ -4,6 +4,7 @@ import { Exercise, WorkoutEntry } from '../types'
 import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
 import {
   addWorkoutEntry,
+  deleteWorkoutEntry,
   fetchTrainingBlocks,
   dismissWelcome,
   getExerciseDisplayName,
@@ -13,13 +14,16 @@ import {
   loadExercises,
   loadRestTimerState,
   loadWorkoutHistory,
+  loadWorkoutHistoryForSync,
   mapTrainingBlockRows,
   normalizeExerciseName,
+  restoreWorkoutEntry,
   storageKey,
   setActiveBlockId,
   setAskExerciseAiConsent,
   setSessionStorageValue,
   saveRestTimerState,
+  saveWorkoutHistory,
   getActiveBlockId,
   upsertExerciseRecord,
   setStorageNamespace,
@@ -758,6 +762,28 @@ describe('workout history', () => {
     await addWorkoutEntry(plannedEntry)
 
     expect(await loadWorkoutHistory()).toEqual([plannedEntry])
+  })
+
+  it('soft-deletes a log for sync, hides it from history, and can restore it', async () => {
+    const loggedEntry = { ...entry('delete-me', '2026-09-15'), exerciseId: 'barbell-bench-press' }
+    await addWorkoutEntry(loggedEntry)
+
+    expect(await deleteWorkoutEntry(loggedEntry.id)).toEqual([])
+    expect(await loadWorkoutHistory()).toEqual([])
+    expect(await loadWorkoutHistoryForSync()).toEqual([
+      expect.objectContaining({ id: loggedEntry.id, dirty: true, deletedAt: expect.any(String) }),
+    ])
+
+    saveWorkoutHistory([])
+    expect(await loadWorkoutHistoryForSync()).toEqual([
+      expect.objectContaining({ id: loggedEntry.id, dirty: true, deletedAt: expect.any(String) }),
+    ])
+
+    expect(restoreWorkoutEntry(loggedEntry)).toEqual([loggedEntry])
+    expect(await loadWorkoutHistory()).toEqual([loggedEntry])
+    const [restoredForSync] = await loadWorkoutHistoryForSync()
+    expect(restoredForSync).toMatchObject({ id: loggedEntry.id, dirty: true })
+    expect(restoredForSync).not.toHaveProperty('deletedAt')
   })
 })
 

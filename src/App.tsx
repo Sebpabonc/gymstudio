@@ -24,7 +24,9 @@ import {
   loadExercises,
   loadRestTimerState,
   loadWorkoutHistory,
+  deleteWorkoutEntry,
   refreshCatalogue,
+  restoreWorkoutEntry,
   saveWorkoutHistory,
   saveRestTimerState,
   getLayoutMode,
@@ -418,6 +420,8 @@ export default function App() {
                   exercises={exercises}
                   authStatus={status}
                   initialExerciseId={progressExerciseId || undefined}
+                  onDeleteEntry={async (entryId) => setHistory(await deleteWorkoutEntry(entryId))}
+                  onRestoreEntry={async (entry) => setHistory(restoreWorkoutEntry(entry))}
                   onOpenExercise={(exerciseId) => {
                     setSelectedId(exerciseId)
                     setExerciseMode('lookup')
