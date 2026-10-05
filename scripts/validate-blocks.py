@@ -46,20 +46,27 @@ def main():
         problems.append('strategy.md missing')
 
     blocks = json.loads((folder / 'blocks.json').read_text())
+    # PT plan templates for other users (docs/fitness/approved/templates): same rules, except numbering,
+    # dates and the 3-6 day split with their own day keys.
+    template_dir = Path('docs/fitness/approved/templates')
+    templates = [json.loads(f.read_text()) for f in sorted(template_dir.glob('tpl-*.json'))] if template_dir.exists() else []
     seen_ids = set()
     previous_start = None
-    for index, block in enumerate(blocks, 1):
+    index = 0
+    for block, is_template in [(b, False) for b in blocks] + [(t, True) for t in templates]:
+        index += 1
         where = block.get('id', f'block #{index}')
         if block.get('id') in seen_ids:
             problems.append(f'{where}: duplicate id')
         seen_ids.add(block.get('id'))
-        if block.get('number') != index:
+        if not is_template and block.get('number') != index:
             problems.append(f'{where}: number should be {index}')
         try:
             start = datetime.date.fromisoformat(block['start_date'])
-            if previous_start and start <= previous_start:
-                problems.append(f'{where}: start_date not after previous block')
-            previous_start = start
+            if not is_template:
+                if previous_start and start <= previous_start:
+                    problems.append(f'{where}: start_date not after previous block')
+                previous_start = start
         except (KeyError, ValueError):
             problems.append(f'{where}: bad start_date')
         if block.get('origin') not in ('coach', 'pt'):
@@ -85,7 +92,11 @@ def main():
             if SPANISH.search(body):
                 problems.append(f"{where}: insight {item.get('title')!r} not in English")
         days = block.get('days', [])
-        if [d.get('key') for d in days] != DAY_KEYS:
+        keys = [d.get('key') for d in days]
+        if is_template:
+            if not 3 <= len(keys) <= 6 or len(set(keys)) != len(keys) or not all(re.fullmatch(r'[a-z]+(-[a-z]+)*', k or '') for k in keys):
+                problems.append(f'{where}: templates need 3-6 days with unique kebab-case keys')
+        elif keys != DAY_KEYS:
             problems.append(f'{where}: days must be {DAY_KEYS}')
         for day in days:
             if len(day.get('focus') or '') > 28:
@@ -160,7 +171,7 @@ def main():
                 if code not in keys.get(day_key, set()):
                     problems.append(f'es/blocks.json: {block_id} unknown exercise {note_key}')
 
-    print(f'{len(blocks)} blocks, {len(additions)} catalogue additions')
+    print(f'{len(blocks)} blocks, {len(templates)} templates, {len(additions)} catalogue additions')
     if problems:
         print(f'\n{len(problems)} problem(s):')
         for problem in problems:

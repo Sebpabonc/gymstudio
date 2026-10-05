@@ -1,0 +1,85 @@
+{
+  "id": "tpl-5d-upper-lower-ppl-gym",
+  "number": 0,
+  "name": "Upper / Lower + Push / Pull / Legs · 5 Days",
+  "method": "flat-pyramid",
+  "start_date": "2026-01-05",
+  "weeks": 6,
+  "origin": "pt",
+  "summary": "Six weeks, five sessions: heavy upper and lower days, then lighter push, pull and legs days. Every muscle is trained twice a week with the same weight on every set. Effort builds from week 1 to 5; week 6 is lighter.",
+  "insights": [
+    { "title": "Goal", "body": "Build muscle and strength on five days a week. The first two days focus on heavier compound lifts; the last three add more volume with lighter, stretch-focused exercises, so every muscle gets two different kinds of work each week." },
+    { "title": "How it works", "body": "Upper and Lower are the heavy days: main lifts first, alone, with 2.5-3 minutes rest. Push (chest, shoulders, triceps), Pull (back, rear delts, biceps) and Legs use machines, cables and dumbbells for 10-20 reps. Paired exercises (same letter) are supersets: first exercise, about 10 seconds, second exercise, then the full rest." },
+    { "title": "A days vs B days", "body": "Instead of A/B copies, this template uses different exercises on the heavy days (Upper, Lower: 8-10 reps) and the volume days (Push, Pull, Legs: 10-20 reps). This gives more variety and trains each muscle across a wide rep range every week. Track each day separately." },
+    { "title": "How to progress", "body": "The reps shown are your target. When every set reaches it with clean form, add the smallest step next time (about 1-2.5 kg upper body, 2.5-5 kg legs). If you fall 1-2 reps short, keep the weight and beat it next week. Week 1 stop about 3 reps before failure, week 2 about 2, weeks 3-4 about 1-2, week 5 about 1." },
+    { "title": "What to expect", "body": "Week 1 should feel easy while you find your weights. Weeks 2-5 should bring more reps or weight on most lifts. A good week is Upper, Lower, rest, Push, Pull, Legs, rest. Week 6 is lighter: same exercises and weights, half the sets (round up), about 3 reps before failure." },
+    { "title": "Key tips", "body": "Warm up with 1-2 lighter sets of each main lift. If a machine is taken, swap to a similar exercise from the library and keep the reps. Only the last set of machine, cable or isolation work may go to failure. If a movement hurts, stop it and see a qualified professional." }
+  ],
+  "days": [
+    {
+      "key": "upper",
+      "name": "Upper",
+      "focus": "Upper body · heavy",
+      "exercises": [
+        { "code": "A1", "exercise_id": "barbell-bench-press", "sets": 3, "reps": ["8", "8", "8"], "rest_seconds": 150, "technique": "straight", "angle_degrees": 0, "notes": "" },
+        { "code": "B1", "exercise_id": "plate-loaded-t-bar-row-chest-supported", "sets": 3, "reps": ["8", "8", "8"], "rest_seconds": 150, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "C1", "exercise_id": "dumbbell-shoulder-press", "sets": 3, "reps": ["10", "10", "10"], "rest_seconds": 10, "technique": "superset", "angle_degrees": 75, "notes": "" },
+        { "code": "C2", "exercise_id": "neutral-grip-lat-pulldown", "sets": 3, "reps": ["10", "10", "10"], "rest_seconds": 120, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "D1", "exercise_id": "ez-bar-curl", "sets": 2, "reps": ["10", "10"], "rest_seconds": 10, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "D2", "exercise_id": "ez-bar-skull-crusher", "sets": 2, "reps": ["10", "10"], "rest_seconds": 90, "technique": "superset", "angle_degrees": 0, "notes": "" }
+      ]
+    },
+    {
+      "key": "lower",
+      "name": "Lower",
+      "focus": "Legs & abs · heavy",
+      "exercises": [
+        { "code": "A1", "exercise_id": "back-squat", "sets": 3, "reps": ["8", "8", "8"], "rest_seconds": 180, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "B1", "exercise_id": "romanian-deadlift", "sets": 3, "reps": ["8", "8", "8"], "rest_seconds": 150, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "C1", "exercise_id": "dumbbell-bulgarian-split-squat", "sets": 2, "reps": ["10", "10"], "rest_seconds": 90, "technique": "straight", "angle_degrees": null, "notes": "Reps are per leg." },
+        { "code": "D1", "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral", "sets": 3, "reps": ["10", "10", "10"], "rest_seconds": 90, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "E1", "exercise_id": "standing-calf-raises-toes-neutral", "sets": 3, "reps": ["12", "12", "12"], "rest_seconds": 10, "technique": "superset", "angle_degrees": null, "notes": "Pause one second in the bottom stretch." },
+        { "code": "E2", "exercise_id": "hanging-knee-raise", "sets": 3, "reps": ["12", "12", "12"], "rest_seconds": 60, "technique": "superset", "angle_degrees": null, "notes": "" }
+      ]
+    },
+    {
+      "key": "push",
+      "name": "Push",
+      "focus": "Chest, shoulders, triceps",
+      "exercises": [
+        { "code": "A1", "exercise_id": "incline-dumbbell-press", "sets": 3, "reps": ["10", "10", "10"], "rest_seconds": 120, "technique": "straight", "angle_degrees": 30, "notes": "Lower until you feel a deep chest stretch." },
+        { "code": "B1", "exercise_id": "high-cable-fly", "sets": 3, "reps": ["12", "12", "12"], "rest_seconds": 10, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "B2", "exercise_id": "cable-lateral-raise", "sets": 3, "reps": ["15", "15", "15"], "rest_seconds": 90, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "C1", "exercise_id": "lateral-raises-machine", "sets": 2, "reps": ["20", "20"], "rest_seconds": 60, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "D1", "exercise_id": "rope-low-cable-oh-tricep-extensions", "sets": 3, "reps": ["12", "12", "12"], "rest_seconds": 60, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "E1", "exercise_id": "cable-triceps-pushdown-straight-bar", "sets": 2, "reps": ["15", "15"], "rest_seconds": 60, "technique": "straight", "angle_degrees": null, "notes": "" }
+      ]
+    },
+    {
+      "key": "pull",
+      "name": "Pull",
+      "focus": "Back, rear delts, biceps",
+      "exercises": [
+        { "code": "A1", "exercise_id": "lat-pulldown", "sets": 3, "reps": ["10", "10", "10"], "rest_seconds": 120, "technique": "straight", "angle_degrees": null, "notes": "Full stretch at the top of every rep." },
+        { "code": "B1", "exercise_id": "seated-cable-row", "sets": 3, "reps": ["12", "12", "12"], "rest_seconds": 120, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "C1", "exercise_id": "cable-straight-arms-pull-downs", "sets": 3, "reps": ["15", "15", "15"], "rest_seconds": 10, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "C2", "exercise_id": "reverse-pec-deck-fly", "sets": 3, "reps": ["15", "15", "15"], "rest_seconds": 60, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "D1", "exercise_id": "dumbbell-curl-incline", "sets": 3, "reps": ["12", "12", "12"], "rest_seconds": 60, "technique": "straight", "angle_degrees": 45, "notes": "" },
+        { "code": "E1", "exercise_id": "hammer-curls", "sets": 2, "reps": ["15", "15"], "rest_seconds": 60, "technique": "straight", "angle_degrees": null, "notes": "" }
+      ]
+    },
+    {
+      "key": "legs",
+      "name": "Legs",
+      "focus": "Legs & abs · volume",
+      "exercises": [
+        { "code": "A1", "exercise_id": "hack-squat-machine", "sets": 3, "reps": ["12", "12", "12"], "rest_seconds": 120, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "B1", "exercise_id": "barbell-hip-thrust", "sets": 3, "reps": ["12", "12", "12"], "rest_seconds": 120, "technique": "straight", "angle_degrees": null, "notes": "" },
+        { "code": "C1", "exercise_id": "leg-extensions-toes-dorsiflexed-neutral", "sets": 3, "reps": ["15", "15", "15"], "rest_seconds": 10, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "C2", "exercise_id": "prone-leg-curl-toes-dorsiflexed-neutral", "sets": 3, "reps": ["15", "15", "15"], "rest_seconds": 90, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "D1", "exercise_id": "machine-seated-calf-raise", "sets": 3, "reps": ["20", "20", "20"], "rest_seconds": 10, "technique": "superset", "angle_degrees": null, "notes": "" },
+        { "code": "D2", "exercise_id": "cable-crunch", "sets": 3, "reps": ["15", "15", "15"], "rest_seconds": 60, "technique": "superset", "angle_degrees": null, "notes": "" }
+      ]
+    }
+  ]
+}
