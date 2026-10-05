@@ -4,6 +4,7 @@ import { getSupabaseClient } from '../lib/supabaseClient'
 import { isDemoMode } from './demoMode'
 import { isTargetMet, WeightTarget, WeightTargets } from './weightTargets'
 import { RestTimerState } from './restTimer'
+import type { NextSessionPlan } from '../ai/coachLoop'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
@@ -17,6 +18,7 @@ const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
+const AI_SESSION_PLAN_KEY = 'gym-studio.ai-session-plan'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
 let helpAiAppOpensThisLoad: number | null = null
 
@@ -207,6 +209,54 @@ export function setAskExerciseAiConsent(choice: AskExerciseAiConsent) {
     localStorage.setItem(storageKey(ASK_EXERCISE_AI_CONSENT_KEY), choice)
   } catch {
     // Consent cannot be remembered when browser storage is unavailable.
+  }
+}
+
+function aiSessionPlanStorageKey(blockId: string, dayKey: string) {
+  return `${AI_SESSION_PLAN_KEY}.${encodeURIComponent(blockId)}.${encodeURIComponent(dayKey)}`
+}
+
+export function loadAiSessionPlan(blockId: string, dayKey: string): NextSessionPlan | null {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(storageKey(aiSessionPlanStorageKey(blockId, dayKey))) ?? 'null')
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      !('summary' in parsed) ||
+      typeof parsed.summary !== 'string' ||
+      !('exercises' in parsed) ||
+      !Array.isArray(parsed.exercises)
+    ) return null
+
+    const exercises = parsed.exercises.filter((exercise): exercise is NextSessionPlan['exercises'][number] =>
+      typeof exercise === 'object' &&
+      exercise !== null &&
+      'code' in exercise &&
+      typeof exercise.code === 'string' &&
+      'weight' in exercise &&
+      typeof exercise.weight === 'number' &&
+      Number.isFinite(exercise.weight) &&
+      'reps' in exercise &&
+      Array.isArray(exercise.reps) &&
+      exercise.reps.every((reps: unknown) => typeof reps === 'number' && Number.isFinite(reps)) &&
+      'note' in exercise &&
+      typeof exercise.note === 'string'
+    )
+    if (exercises.length !== parsed.exercises.length) return null
+    return { summary: parsed.summary, exercises }
+  } catch {
+    return null
+  }
+}
+
+export function saveAiSessionPlan(blockId: string, dayKey: string, plan: NextSessionPlan) {
+  try {
+    localStorage.setItem(
+      storageKey(aiSessionPlanStorageKey(blockId, dayKey)),
+      JSON.stringify(plan)
+    )
+  } catch {
+    // The workout remains usable when browser storage is unavailable.
   }
 }
 

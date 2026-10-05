@@ -54,6 +54,68 @@ describe('AI gateway wrappers', () => {
     })
   })
 
+  it('invokes exercise_feedback with logged sets, target and rule recommendation', async () => {
+    invoke.mockResolvedValue({
+      data: { answer: 'Keep the same weight.', remainingToday: 39 },
+      error: null,
+    })
+    const { requestExerciseFeedback } = await import('./gateway')
+
+    await expect(requestExerciseFeedback({
+      feature: 'exercise_feedback',
+      exerciseId: 'barbell-bench-press',
+      language: 'en',
+      logged: [{ weight: 60, reps: 9 }],
+      target: { sets: 2, reps: [8, 8], weight: 60 },
+      recommendation: {
+        action: 'hold',
+        weight: 60,
+        reps: [8, 8],
+        setCount: 2,
+        shortSets: [],
+        increaseKg: 0,
+        firstSetAboveTarget: false,
+      },
+    })).resolves.toMatchObject({ answer: 'Keep the same weight.' })
+    expect(invoke).toHaveBeenCalledWith('ai-gateway', {
+      body: {
+        feature: 'exercise_feedback',
+        exerciseId: 'barbell-bench-press',
+        language: 'en',
+        logged: [{ weight: 60, reps: 9 }],
+        target: { sets: 2, reps: [8, 8], weight: 60 },
+        recommendation: expect.objectContaining({ action: 'hold' }),
+      },
+    })
+  })
+
+  it('invokes next_session_plan with the plan and language', async () => {
+    invoke.mockResolvedValue({
+      data: { answer: '{"summary":"Ready.","exercises":[]}', remainingToday: 38 },
+      error: null,
+    })
+    const { requestNextSessionPlan } = await import('./gateway')
+    const plan = {
+      blockId: 'block-1',
+      dayKey: 'chest-a',
+      week: 3,
+      exercises: [{
+        code: 'A1',
+        exerciseId: 'barbell-bench-press',
+        name: 'Barbell Bench Press',
+        sets: 2,
+        reps: [8, 8],
+        ruleTarget: { weight: 60, reps: [8, 8] },
+        last: [{ weight: 60, reps: 8 }],
+      }],
+    }
+
+    await expect(requestNextSessionPlan(plan, 'es')).resolves.toMatchObject({ remainingToday: 38 })
+    expect(invoke).toHaveBeenCalledWith('ai-gateway', {
+      body: { feature: 'next_session_plan', plan, language: 'es' },
+    })
+  })
+
   it('invokes general_chat with the question and selected language', async () => {
     invoke.mockResolvedValue({
       data: { answer: 'Try adding a rep next session.', remainingToday: 19 },
