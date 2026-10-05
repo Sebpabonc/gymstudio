@@ -2150,6 +2150,18 @@ button {
   color: var(--muted-strong);
 }
 
+.ai-plan-today {
+  margin: 12px 0;
+}
+
+.ai-plan-today p,
+.next-block-banner p {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
 .day-tab {
   appearance: none;
   border: 1px solid var(--line);
@@ -2399,6 +2411,30 @@ button {
   font-size: 0.68rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
+}
+
+.ai-plan-exercise {
+  display: grid;
+  gap: 5px;
+}
+
+.ai-plan-exercise p {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.ai-plan-exercise label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+
+.ai-plan-exercise input {
+  accent-color: var(--brand);
 }
 
 .planned-exercise-card.collapsed {
@@ -4277,6 +4313,10 @@ button[class] {
   color: var(--muted);
   font-size: 0.72rem;
   line-height: 1.4;
+}
+
+.next-target-card .ai-exercise-note {
+  color: var(--muted-strong);
 }
 
 .previous-target-card {

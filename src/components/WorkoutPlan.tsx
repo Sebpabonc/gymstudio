@@ -1,5 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { mapAiGatewayError, summariseSession } from '../ai/gateway'
+import { mapAiGatewayError, requestExerciseFeedback, requestNextSessionPlan, summariseSession } from '../ai/gateway'
+import {
+  buildExerciseFeedbackPayload,
+  buildNextSessionPlanPayload,
+  limitAiNoteToTwoSentences,
+  validateNextSessionPlan,
+  type CoachPlanExercise,
+  type NextSessionPlan,
+} from '../ai/coachLoop'
 import type { AuthStatus } from '../auth/AuthProvider'
 import AskExercise from './AskExercise'
 import SqueezeCue from './SqueezeCue'
@@ -27,6 +35,8 @@ import {
   setActiveBlockId,
   upsertExerciseRecord,
   getAskExerciseAiConsent,
+  loadAiSessionPlan,
+  saveAiSessionPlan,
   setAskExerciseAiConsent,
 } from '../utils/storage'
 import type { AskExerciseAiConsent } from '../utils/storage'
@@ -109,6 +119,17 @@ type DaySessionSummary = SessionSummary & {
   date: string
   blockId?: string
   dayKey?: string
+  nextPlanBlockId?: string
+  nextPlanDayKey?: string
+  nextPlanSummary?: string
+  nextPlanPending?: boolean
+}
+
+type ExerciseFeedbackState = {
+  target: NextTarget
+  pending: boolean
+  note?: string
+  unavailable?: boolean
 }
 
 function SteppedNumberInput({
@@ -173,6 +194,8 @@ function SteppedNumberInput({
 
 const CUSTOM_PLAN_KEY = 'gym-studio.custom-plan'
 const BLOCK_CARD_EXPANDED_KEY = 'gym-studio.block-card-expanded'
+const getAiPlanKey = (blockId: string, dayKey: string) =>
+  JSON.stringify([storageKey('gym-studio.ai-session-plan'), blockId, dayKey])
 
 const defaultCustomExercise: PlanExercise = {
   name: '',
@@ -397,10 +420,16 @@ export default function WorkoutPlan({
   const [aiRemainingToday, setAiRemainingToday] = useState<number | null>(null)
   const [aiSummaryError, setAiSummaryError] = useState('')
   const [aiSummaryPending, setAiSummaryPending] = useState(false)
-  const [aiConsent, setAiConsent] = useState<AskExerciseAiConsent | null>(null)
+  const [aiConsent, setAiConsent] = useState<AskExerciseAiConsent | null>(() => getAskExerciseAiConsent())
   const [showAiConsent, setShowAiConsent] = useState(false)
+  const [exerciseFeedbackByEntryId, setExerciseFeedbackByEntryId] = useState<Record<string, ExerciseFeedbackState>>({})
+  const [aiPlans, setAiPlans] = useState<Record<string, NextSessionPlan>>({})
+  const [aiPlanLoading, setAiPlanLoading] = useState<Record<string, boolean>>({})
+  const [usePtRuleByExercise, setUsePtRuleByExercise] = useState<Record<string, boolean>>({})
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const aiSummaryRequestId = useRef(0)
+  const exerciseFeedbackRequests = useRef(new Set<string>())
+  const aiPlanRequests = useRef(new Set<string>())
 
   const requestAiSummary = async () => {
     if (!sessionSummary || aiSummaryPending || aiSummary) return
@@ -557,6 +586,16 @@ export default function WorkoutPlan({
   const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
   const activeBlockWeek = activeBlock ? blockWeek(activeBlock, today) : null
   const todayDay = activeBlock ? nextUnloggedDay(activeBlock, history, today) : undefined
+  const activeAiPlanKey = activeBlock && activeDay ? getAiPlanKey(activeBlock.id, activeDay.key) : ''
+  const activeCoachPlan = activeAiPlanKey && todayDay?.key === activeDay?.key
+    ? aiPlans[activeAiPlanKey] ?? (activeBlock && activeDay ? loadAiSessionPlan(activeBlock.id, activeDay.key) ?? undefined : undefined)
+    : undefined
+  const getAiPlanExercise = (exercise: PlanExercise) =>
+    exercise.code ? activeCoachPlan?.exercises.find((item) => item.code === exercise.code) : undefined
+  const getUsePtRuleKey = (exercise: PlanExercise) =>
+    activeBlock && activeDay && exercise.code
+      ? getAiPlanKey(activeBlock.id, activeDay.key) + `:${exercise.code}`
+      : ''
   const personalRecordBadgesByEntryId = useMemo(
     () => new Map(
       history
@@ -817,13 +856,16 @@ export default function WorkoutPlan({
       : /lower|leg|glute/i.test(exerciseInfo?.bodyRegion ?? exercise.focus)
         ? 'lower'
         : 'upper'
-    const targetReps = Array.from({ length: getRawDefaultSetCount(exercise) }, (_, index) => {
+    const targetReps = getExerciseTargetReps(exercise)
+    return recommendNextTarget(sets, targetReps, progressionType, deload)
+  }
+
+  const getExerciseTargetReps = (exercise: PlanExercise) =>
+    Array.from({ length: getRawDefaultSetCount(exercise) }, (_, index) => {
       const prescription = exercise.repsPerSet?.[index] ?? exercise.reps ?? ''
       const values = prescription.match(/\d+/g)?.map(Number) ?? []
       return Math.max(...values, 0)
-    })
-    return recommendNextTarget(sets, targetReps, progressionType, deload)
-  }
+    }).filter((reps) => reps > 0)
 
   const getNextTargetWhy = (target: NextTarget) => {
     if (target.action === 'deload') return t('workout.nextTarget.why.deload')
@@ -846,6 +888,150 @@ export default function WorkoutPlan({
       reps: target.reps[0] ?? 0,
       sets: target.setCount,
     })
+
+  const buildCoachPlanExercises = (
+    block: TrainingBlock,
+    day: TrainingBlock['days'][number],
+    entries: WorkoutEntry[]
+  ): CoachPlanExercise[] => {
+    const week = blockWeek(block, today) ?? 1
+    return day.exercises.map((planned) => {
+      const exercise: PlanExercise = {
+        name: getBlockExerciseName(planned, exerciseCatalog),
+        sets: String(planned.sets),
+        reps: planned.reps.join(' · '),
+        repsPerSet: planned.reps,
+        rest: `${planned.restSeconds} s`,
+        restSeconds: planned.restSeconds,
+        focus: day.focus ?? '',
+        goal: '',
+        tip: '',
+        exerciseId: planned.exerciseId,
+        code: planned.code,
+        technique: planned.technique,
+      }
+      const lastEntry = findPrefillEntry(entries, planned.exerciseId, day.key)
+      const target = lastEntry ? getNextTarget(exercise, lastEntry.sets, week === 6) : null
+      const setCount = target?.setCount ?? (week === 6 ? Math.ceil(planned.sets / 2) : planned.sets)
+      const reps = target?.reps ?? getExerciseTargetReps(exercise).slice(0, setCount)
+      return {
+        code: planned.code,
+        exerciseId: planned.exerciseId,
+        name: exercise.name,
+        sets: setCount,
+        reps,
+        ruleTarget: {
+          weight: target?.weight ?? lastEntry?.sets[0]?.weight ?? 0,
+          reps,
+        },
+        last: (lastEntry?.sets ?? []).map(({ weight, reps: loggedReps }) => ({
+          weight,
+          reps: loggedReps,
+        })),
+      }
+    })
+  }
+
+  const requestAiPlan = async (
+    block: TrainingBlock,
+    day: TrainingBlock['days'][number],
+    entries: WorkoutEntry[]
+  ) => {
+    if (demoMode || authStatus !== 'signed-in' || aiConsent !== 'enabled') return
+    const planKey = getAiPlanKey(block.id, day.key)
+    const setSummary = (summary: string | undefined, pending: boolean) => {
+      setSessionSummary((current) =>
+        current?.nextPlanBlockId === block.id && current.nextPlanDayKey === day.key
+          ? { ...current, nextPlanSummary: summary, nextPlanPending: pending }
+          : current
+      )
+    }
+    const saved = loadAiSessionPlan(block.id, day.key)
+    if (saved) {
+      setAiPlans((current) => ({ ...current, [planKey]: saved }))
+      setSummary(saved.summary, false)
+      return
+    }
+    if (aiPlanRequests.current.has(planKey)) return
+
+    aiPlanRequests.current.add(planKey)
+    setAiPlanLoading((current) => ({ ...current, [planKey]: true }))
+    setSummary(undefined, true)
+    try {
+      const ruleExercises = buildCoachPlanExercises(block, day, entries)
+      const payload = buildNextSessionPlanPayload(block.id, day.key, blockWeek(block, today) ?? 1, ruleExercises)
+      const response = await requestNextSessionPlan(payload, language)
+      const plan = validateNextSessionPlan(response.answer, ruleExercises)
+      if (!plan) throw new Error('invalid_plan')
+      saveAiSessionPlan(block.id, day.key, plan)
+      setAiPlans((current) => ({ ...current, [planKey]: plan }))
+      setSummary(plan.summary, false)
+    } catch {
+      setSummary(undefined, false)
+    } finally {
+      aiPlanRequests.current.delete(planKey)
+      setAiPlanLoading((current) => ({ ...current, [planKey]: false }))
+    }
+  }
+
+  const requestExerciseNote = (entry: WorkoutEntry, exercise: PlanExercise, target: NextTarget | null) => {
+    if (!target) return
+    if (exerciseFeedbackRequests.current.has(entry.id)) return
+    const baseState = { target, pending: false }
+    setExerciseFeedbackByEntryId((current) => ({ ...current, [entry.id]: baseState }))
+    if (demoMode || authStatus !== 'signed-in' || aiConsent !== 'enabled') return
+
+    exerciseFeedbackRequests.current.add(entry.id)
+    setExerciseFeedbackByEntryId((current) => ({
+      ...current,
+      [entry.id]: { target, pending: true },
+    }))
+    const targetReps = getExerciseTargetReps(exercise)
+    const payload = buildExerciseFeedbackPayload(
+      entry.exerciseId,
+      language,
+      entry.sets,
+      {
+        sets: getDefaultSetCount(exercise),
+        reps: targetReps.slice(0, getDefaultSetCount(exercise)),
+        weight: entry.sets[0]?.weight,
+      },
+      target
+    )
+    void requestExerciseFeedback(payload).then((response) => {
+      setAiRemainingToday(response.remainingToday)
+      const note = limitAiNoteToTwoSentences(response.answer)
+      if (!note) throw new Error('empty_note')
+      setExerciseFeedbackByEntryId((current) => ({
+        ...current,
+        [entry.id]: {
+          target,
+          pending: false,
+          note,
+        },
+      }))
+    }).catch(() => {
+      setExerciseFeedbackByEntryId((current) => ({
+        ...current,
+        [entry.id]: { target, pending: false, unavailable: true },
+      }))
+    })
+  }
+
+  useEffect(() => {
+    if (planMode !== 'preset' || !activeBlock || !activeDay) return
+    const planKey = getAiPlanKey(activeBlock.id, activeDay.key)
+    const saved = loadAiSessionPlan(activeBlock.id, activeDay.key)
+    if (saved) setAiPlans((current) => ({ ...current, [planKey]: saved }))
+    if (
+      todayDay?.key === activeDay.key &&
+      authStatus === 'signed-in' &&
+      aiConsent === 'enabled' &&
+      !saved
+    ) {
+      void requestAiPlan(activeBlock, activeDay, history)
+    }
+  }, [planMode, activeBlock, activeDay, todayDay?.key, authStatus, aiConsent, history, language])
 
   const getAppliedTarget = (exercise?: PlanExercise, exerciseId?: string) => {
     if (!exercise || !exerciseId) return undefined
@@ -873,16 +1059,21 @@ export default function WorkoutPlan({
       return Number(source?.weight ?? bestWeight) || 0
     })
     const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
-    const baseSetWeights = nextTarget
-      ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
-      : appliedTarget
-        ? applyTargetToWeights(lastWeights, appliedTarget)
-        : lastWeights
+    const aiExercise = exercise ? getAiPlanExercise(exercise) : undefined
+    const usePtRule = exercise ? !!usePtRuleByExercise[getUsePtRuleKey(exercise)] : false
+    const baseSetWeights = aiExercise && !usePtRule
+      ? Array.from({ length: fallbackSetCount }, () => aiExercise.weight)
+      : nextTarget
+        ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
+        : appliedTarget
+          ? applyTargetToWeights(lastWeights, appliedTarget)
+          : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       return Number(source?.drop?.weight) || Number(((baseSetWeights[index] ?? 0) * 0.75).toFixed(2))
     })
     const baseSetReps = Array.from({ length: fallbackSetCount }, (_, index) => {
+      if (aiExercise && !usePtRule) return aiExercise.reps[index] ?? aiExercise.reps[aiExercise.reps.length - 1] ?? fallbackReps
       const prescribed = exercise?.repsPerSet?.[index] ?? exercise?.reps ?? ''
       return parseRepPrescription(prescribed)[0] || Number(fallbackReps) || 8
     })
@@ -1096,13 +1287,16 @@ export default function WorkoutPlan({
       date: activeCompletionScope.date,
       blockId: activeCompletionScope.blockId,
       dayKey: activeCompletionScope.dayKey,
+      nextPlanBlockId: nextDay ? activeBlock.id : undefined,
+      nextPlanDayKey: nextDay?.key,
+      nextPlanPending: !!nextDay && !demoMode && authStatus === 'signed-in' && aiConsent === 'enabled',
     })
     setAiSummary('')
     setAiRemainingToday(null)
     setAiSummaryError('')
     setAiSummaryPending(false)
-    setAiConsent(null)
     setShowAiConsent(false)
+    if (nextDay) void requestAiPlan(activeBlock, nextDay, nextHistory)
   }
 
   const undoLastLog = () => {
@@ -1179,6 +1373,7 @@ export default function WorkoutPlan({
     saveWorkoutHistory(nextHistory)
     onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
     showLogToast([entryToSave], storedHistory, activeCompletionScope, [exercise])
+    requestExerciseNote(entryToSave, exercise, getNextTarget(exercise, entryToSave.sets))
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
     setWeightTargets(consumeWeightTarget(entryToSave.exerciseId, entryToSave.sets))
     setExerciseCatalog(await loadExercises())
@@ -1272,6 +1467,10 @@ export default function WorkoutPlan({
     const scope = { ...activeCompletionScope, date }
     startSession(loggedAt, scope)
     showLogToast(entriesToSave, storedHistory, scope, exercises)
+    for (const entry of entriesToSave) {
+      const exercise = exercises.find((item) => item.exerciseId === entry.exerciseId)
+      if (exercise) requestExerciseNote(entry, exercise, getNextTarget(exercise, entry.sets))
+    }
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
 
     setLogError((current) => ({
@@ -1812,6 +2011,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             <p className="day-focus-label">{activeDay.focus}</p>
           </>
         )}
+        {activeCoachPlan ? (
+          <aside className="next-block-banner ai-plan-today" aria-live="polite">
+            <strong>{t('workout.ai.planToday')}</strong>
+            <p>{activeCoachPlan.summary}</p>
+          </aside>
+        ) : activeAiPlanKey && aiPlanLoading[activeAiPlanKey] ? (
+          <aside className="next-block-banner ai-plan-today" role="status" aria-live="polite">
+            <strong>{t('workout.ai.planToday')}</strong>
+            <small className="ai-inline-status">{t('workout.ai.coachThinking')}</small>
+          </aside>
+        ) : null}
         </>
       ) : (
         <section className="custom-plan-builder">
@@ -1985,6 +2195,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
             const postureTips = getPostureTips(exercise, libraryMatch)
             const completedEntry = findExerciseCompletion(exercise, history)
+            const aiPlanExercise = getAiPlanExercise(exercise)
+            const usePtRule = !!usePtRuleByExercise[getUsePtRuleKey(exercise)]
             const recordBadges =
               completedEntry?.date === today
                 ? personalRecordBadgesByEntryId.get(completedEntry.id) ?? []
@@ -1992,6 +2204,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const toastRecommendation = toast?.recommendations.find(
               (recommendation) => recommendation.exerciseKey === exerciseKey
             )
+            const exerciseFeedback = completedEntry
+              ? exerciseFeedbackByEntryId[completedEntry.id]
+              : undefined
+            const insightTarget = exerciseFeedback?.target ?? toastRecommendation?.target
             const completedRows = Array.from(
               { length: setCount },
               (_, index) => draft.setDone[index] ?? false
@@ -2067,10 +2283,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                   </button>
                 </div>
 
-                {toastRecommendation && (
+                {insightTarget && (toastRecommendation || exerciseFeedback) && (
                   <aside className="next-target-card" role="status" aria-live="polite">
-                    <strong>{getNextTargetLabel(toastRecommendation.target)}</strong>
-                    <p>{toastRecommendation.why}</p>
+                    <strong>{getNextTargetLabel(insightTarget)}</strong>
+                    <p>{getNextTargetWhy(insightTarget)}</p>
+                    {exerciseFeedback?.pending && (
+                      <small className="ai-inline-status">{t('workout.ai.coachThinking')}</small>
+                    )}
+                    {exerciseFeedback?.note && <p className="ai-exercise-note">{exerciseFeedback.note}</p>}
+                    {exerciseFeedback?.unavailable && (
+                      <small className="ai-inline-status">{t('workout.ai.noteUnavailable')}</small>
+                    )}
                   </aside>
                 )}
 
@@ -2088,6 +2311,27 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <p className="planned-meta-line">
                       {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
                     </p>
+                    {aiPlanExercise && (
+                      <div className="ai-plan-exercise">
+                        {aiPlanExercise.note && <p>{aiPlanExercise.note}</p>}
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={usePtRule}
+                            onChange={(event) => {
+                              const key = getUsePtRuleKey(exercise)
+                              const draftKey = getPlanDraftKey(exercise.name)
+                              setUsePtRuleByExercise((current) => ({ ...current, [key]: event.target.checked }))
+                              setPlannedDrafts((current) => {
+                                const { [draftKey]: _draft, ...remaining } = current
+                                return remaining
+                              })
+                            }}
+                          />
+                          {t('workout.ai.usePtRule')}
+                        </label>
+                      </div>
+                    )}
                     {previousTarget && (
                       <aside className="next-target-card previous-target-card">
                         <strong>{getNextTargetLabel(previousTarget)}</strong>
@@ -2571,6 +2815,15 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               </section>
             )}
             {sessionSummary.nextSession && <p className="session-summary-next">{t('workout.session.next', { session: sessionSummary.nextSession })}</p>}
+            {sessionSummary.nextPlanPending && (
+              <p className="ai-inline-status" role="status">{t('workout.ai.coachThinking')}</p>
+            )}
+            {sessionSummary.nextPlanSummary && (
+              <aside className="next-block-banner">
+                <strong>{t('workout.ai.planReady')}</strong>
+                <p>{sessionSummary.nextPlanSummary}</p>
+              </aside>
+            )}
             {!aiSummary && (
               <div className="ai-session-summary">
                 <button

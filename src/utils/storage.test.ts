@@ -29,6 +29,8 @@ import {
   getLanguage,
   recordHelpAiAppOpen,
   setLanguage,
+  loadAiSessionPlan,
+  saveAiSessionPlan,
 } from './storage'
 
 const supabaseMock = vi.hoisted(() => {
@@ -111,6 +113,27 @@ describe('language preference', () => {
     } finally {
       sessionStorage.removeItem('gym-studio.demo-mode')
     }
+  })
+})
+
+describe('AI session plan storage', () => {
+  it('stores plans in the active account namespace by block and day', () => {
+    const plan = { summary: 'Steady progress.', exercises: [{ code: 'A1', weight: 60, reps: [8], note: 'Stay controlled.' }] }
+    try {
+      setStorageNamespace('user-1')
+      saveAiSessionPlan('block/1', 'chest/a', plan)
+      expect(loadAiSessionPlan('block/1', 'chest/a')).toEqual(plan)
+
+      setStorageNamespace('user-2')
+      expect(loadAiSessionPlan('block/1', 'chest/a')).toBeNull()
+    } finally {
+      setStorageNamespace(null)
+    }
+  })
+
+  it('ignores malformed stored plans', () => {
+    localStorage.setItem('gym-studio.ai-session-plan.block.day', '{bad json')
+    expect(loadAiSessionPlan('block', 'day')).toBeNull()
   })
 })
 

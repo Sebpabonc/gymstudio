@@ -40,7 +40,7 @@ async function getErrorCode(error: unknown): Promise<string> {
 }
 
 async function invokeAiGateway(
-  body: Record<string, string>
+  body: Record<string, unknown>
 ): Promise<AiGatewayResponse> {
   const language: Language = body.language === 'es' ? 'es' : 'en'
   try {
@@ -98,4 +98,17 @@ export function summariseSession(
     ...(blockId ? { blockId } : {}),
     ...(dayKey ? { dayKey } : {}),
   })
+}
+
+export function requestExerciseFeedback(
+  payload: ReturnType<typeof import('./coachLoop').buildExerciseFeedbackPayload>
+): Promise<AiGatewayResponse> {
+  return invokeAiGateway(payload)
+}
+
+export function requestNextSessionPlan(
+  plan: ReturnType<typeof import('./coachLoop').buildNextSessionPlanPayload>,
+  language: Language = 'en'
+): Promise<AiGatewayResponse> {
+  return invokeAiGateway({ feature: 'next_session_plan', plan, language })
 }
