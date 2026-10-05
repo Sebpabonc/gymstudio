@@ -17,6 +17,8 @@ const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
+const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
+let helpAiAppOpensThisLoad: number | null = null
 
 export type SyncWorkoutEntry = WorkoutEntry & {
   updatedAt: string
@@ -205,6 +207,20 @@ export function setAskExerciseAiConsent(choice: AskExerciseAiConsent) {
     localStorage.setItem(storageKey(ASK_EXERCISE_AI_CONSENT_KEY), choice)
   } catch {
     // Consent cannot be remembered when browser storage is unavailable.
+  }
+}
+
+export function recordHelpAiAppOpen() {
+  if (helpAiAppOpensThisLoad !== null) return helpAiAppOpensThisLoad
+
+  try {
+    const storedCount = Number(localStorage.getItem(HELP_AI_APP_OPENS_KEY) ?? 0)
+    helpAiAppOpensThisLoad = Number.isSafeInteger(storedCount) && storedCount >= 0 ? storedCount + 1 : 1
+    localStorage.setItem(HELP_AI_APP_OPENS_KEY, String(helpAiAppOpensThisLoad))
+    return helpAiAppOpensThisLoad
+  } catch {
+    helpAiAppOpensThisLoad = 0
+    return helpAiAppOpensThisLoad
   }
 }
 

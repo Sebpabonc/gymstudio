@@ -73,6 +73,10 @@ export function askExercise(
   return invokeAiGateway({ feature: 'ask_exercise', exerciseId, question, language })
 }
 
+export function askGeneral(question: string, language: Language = 'en'): Promise<AiGatewayResponse> {
+  return invokeAiGateway({ feature: 'general_chat', question, language })
+}
+
 export function explainSuggestion(
   exerciseId: string,
   suggestionText: string,

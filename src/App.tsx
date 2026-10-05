@@ -8,6 +8,7 @@ import { localizeCatalogue, useSpanishContentReady } from './i18n/content'
 import { exerciseImageQuery, exerciseImageSearchUrl } from './utils/exerciseImages'
 import AskExercise from './components/AskExercise'
 import ExerciseSetTable from './components/ExerciseSetTable'
+import HelpAndAi from './components/HelpAndAi'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
@@ -26,6 +27,7 @@ import {
   saveWorkoutHistory,
   saveRestTimerState,
   getLayoutMode,
+  recordHelpAiAppOpen,
   setLayoutMode,
 } from './utils/storage'
 import { formatShortDate, localizeMuscle, TranslationKey, useT } from './i18n'
@@ -87,6 +89,7 @@ export default function App() {
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<AppTab>('today')
+  const [showHelpPulse] = useState(() => recordHelpAiAppOpen() <= 3)
   const [restTimer, setRestTimer] = useState<RestTimerState | null>(() => loadRestTimerState())
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
   const headerSentinelRef = useRef<HTMLDivElement>(null)
@@ -738,6 +741,12 @@ export default function App() {
           ))}
         </nav>
         <RestTimer timer={restTimer} hidden={dockHidden} onChange={updateRestTimer} />
+        <HelpAndAi
+          activeTab={activeTab}
+          hidden={dockHidden}
+          showPulse={showHelpPulse}
+          onSignIn={() => setActiveTab('you')}
+        />
         {saveConfirmation && (
           <div className="log-toast" role="status" aria-live="polite">
             <span>{saveConfirmation}</span>
