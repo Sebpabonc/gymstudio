@@ -70,6 +70,13 @@ describe('workout sets', () => {
     expect(scaleWeightForOtherDay(0)).toBe(0)
   })
 
+  it('uses the reps done on the other day when they are known', () => {
+    expect(scaleWeightForOtherDay(26, 12, 10)).toBe(25)
+    expect(scaleWeightForOtherDay(26, 8, 10)).toBe(22.5)
+    expect(scaleWeightForOtherDay(20, 4, 12)).toBe(15)
+    expect(scaleWeightForOtherDay(20, 20, 8)).toBe(20)
+  })
+
   it('selects only explicitly completed set rows', () => {
     const sets: WorkoutSet[] = [
       { id: 'set-1', reps: 10, weight: 20 },
