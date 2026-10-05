@@ -21,6 +21,7 @@ import { isDemoMode } from '../utils/demoMode'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
 import {
   fetchTrainingBlocks,
+  getCachedTrainingBlocks,
   getActiveBlockId,
   getExerciseDisplayName,
   getSessionStorageValue,
@@ -638,11 +639,14 @@ export default function WorkoutPlan({
 
   useEffect(() => {
     let cancelled = false
-    void Promise.all([loadExercises(), loadWorkoutHistory(), fetchTrainingBlocks()]).then(([exercises, entries, blocks]) => {
+    // Fast first load: render from the blocks saved on this device right away, then refresh from
+    // the server in the background (the selection is only set on the first render).
+    const apply = (exercises: Exercise[], entries: WorkoutEntry[], blocks: TrainingBlock[], selectDay: boolean) => {
       if (cancelled) return
       setExerciseCatalog(exercises)
       setHistory(entries)
       setTrainingBlocks(blocks)
+      if (!selectDay) return
       const savedBlockId = getActiveBlockId()
       const pinnedBlock = blocks.find((block) => block.id === savedBlockId)
       const nextBlock = pinnedBlock ?? defaultActiveBlock(blocks, getTodayIsoDate())
@@ -650,6 +654,11 @@ export default function WorkoutPlan({
       setPinnedBlockId(pinnedBlock?.id ?? '')
       setSelectedBlockId(nextBlock?.id ?? '')
       setSelectedDay(nextBlock ? nextUnloggedDay(nextBlock, entries)?.key ?? '' : '')
+    }
+    void Promise.all([loadExercises(), loadWorkoutHistory()]).then(([exercises, entries]) => {
+      const cached = getCachedTrainingBlocks()
+      if (cached?.length) apply(exercises, entries, cached, true)
+      void fetchTrainingBlocks().then((blocks) => apply(exercises, entries, blocks, !cached?.length))
     })
 
     return () => {
