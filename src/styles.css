@@ -4924,3 +4924,9 @@ a.planned-exercise-main-name {
     width: 38px;
   }
 }
+
+/* The scroll container's grid rows must grow with their content. Without this, opening an exercise
+   left the Sheet surface at its old height and the rest drew over the page background (PO 2026-10-05). */
+.app-content {
+  grid-auto-rows: max-content;
+}
