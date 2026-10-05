@@ -6,6 +6,7 @@ import {
   addWorkoutEntry,
   deleteWorkoutEntry,
   fetchTrainingBlocks,
+  cacheActiveUserPlan,
   dismissWelcome,
   getExerciseDisplayName,
   getAskExerciseAiConsent,
@@ -25,6 +26,7 @@ import {
   saveRestTimerState,
   saveWorkoutHistory,
   getActiveBlockId,
+  getCachedActiveUserPlan,
   upsertExerciseRecord,
   setStorageNamespace,
   hasGuestWorkoutData,
@@ -138,6 +140,38 @@ describe('AI session plan storage', () => {
   it('ignores malformed stored plans', () => {
     localStorage.setItem('gym-studio.ai-session-plan.block.day', '{bad json')
     expect(loadAiSessionPlan('block', 'day')).toBeNull()
+  })
+})
+
+describe('active user plan cache', () => {
+  it('keeps personal plans isolated in each account namespace', () => {
+    const plan = {
+      templateId: 'template-a',
+      startDate: '2026-10-12',
+      source: 'rules' as const,
+      block: {
+        id: 'personal-a',
+        number: 1,
+        name: 'Personal plan',
+        method: 'straight sets',
+        startDate: '2026-10-12',
+        weeks: 6,
+        origin: 'pt' as const,
+        summary: '',
+        insights: [],
+        days: [],
+      },
+    }
+    try {
+      setStorageNamespace('user-a')
+      cacheActiveUserPlan(plan)
+      expect(getCachedActiveUserPlan()).toEqual(plan)
+
+      setStorageNamespace('user-b')
+      expect(getCachedActiveUserPlan()).toBeNull()
+    } finally {
+      setStorageNamespace(null)
+    }
   })
 })
 

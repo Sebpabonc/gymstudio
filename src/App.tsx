@@ -79,7 +79,7 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 
 export default function App() {
   const demoMode = isDemoMode()
-  const { status, syncStatus } = useAuth()
+  const { status, syncStatus, user } = useAuth()
   const [rawExercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
@@ -427,6 +427,7 @@ export default function App() {
                   entries={history}
                   exercises={exercises}
                   authStatus={status}
+                  authUserId={user?.id ?? null}
                   initialExerciseId={progressExerciseId || undefined}
                   onDeleteEntry={async (entryId) => setHistory(await deleteWorkoutEntry(entryId))}
                   onRestoreEntry={async (entry) => setHistory(restoreWorkoutEntry(entry))}
@@ -469,11 +470,11 @@ export default function App() {
                     </div>
                   </section>
                 )}
-                <WorkoutPlan mode="preset" lockMode authStatus={status} onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
+                <WorkoutPlan mode="preset" lockMode authStatus={status} authUserId={user?.id ?? null} onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
               </>
             )
           ) : exerciseMode === 'custom' ? (
-            <WorkoutPlan mode="custom" lockMode authStatus={status} onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
+            <WorkoutPlan mode="custom" lockMode authStatus={status} authUserId={user?.id ?? null} onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
           ) : (
             <>
               <section className="card search-panel">

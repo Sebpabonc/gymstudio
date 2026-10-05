@@ -2,17 +2,25 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import { formatNumber, formatShortDate, Language, TranslationKey, useT } from '../i18n'
 import { localIsoDate } from '../lib/dates'
+import { buildMyPlan } from '../plans/buildMyPlan'
+import type { BuiltPlan } from '../plans/buildMyPlan'
+import MyPlanSection from './MyPlanSection'
+import type { SavedUserPlan } from '../utils/profileData'
 import {
   BodyMetric,
+  fetchActiveUserPlan,
   fetchBodyMetric,
   fetchBodyMetrics,
   fetchTrainingGoal,
+  publishUserPlan,
   saveBodyMetric,
   saveTrainingGoal,
   TrainingGoal,
   TrainingGoalInput,
   trainingGoalOptions,
 } from '../utils/profileData'
+import { cacheActiveUserPlan, getCachedActiveUserPlan, loadExercises } from '../utils/storage'
+import type { Exercise } from '../types'
 
 const emptyGoal: TrainingGoalInput = {
   goal: 'muscle',
@@ -113,6 +121,13 @@ export default function ProfileDataSections() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [activePlan, setActivePlan] = useState<SavedUserPlan | null>(null)
+  const [planPreview, setPlanPreview] = useState<BuiltPlan | null>(null)
+  const [planExercises, setPlanExercises] = useState<Exercise[]>([])
+  const [planLoading, setPlanLoading] = useState(false)
+  const [buildingPlan, setBuildingPlan] = useState(false)
+  const [publishingPlan, setPublishingPlan] = useState(false)
+  const [confirmingRegeneration, setConfirmingRegeneration] = useState(false)
 
   useEffect(() => {
     if (disabled) {
@@ -140,6 +155,32 @@ export default function ProfileDataSections() {
       })
     return () => { active = false }
   }, [disabled, today])
+
+  useEffect(() => {
+    if (disabled) {
+      setActivePlan(null)
+      setPlanPreview(null)
+      setPlanLoading(false)
+      return
+    }
+    let active = true
+    const cached = getCachedActiveUserPlan()
+    setActivePlan(cached)
+    setPlanLoading(true)
+    void Promise.all([fetchActiveUserPlan(), loadExercises()])
+      .then(([plan, catalogue]) => {
+        if (!active) return
+        setActivePlan(plan)
+        setPlanExercises(catalogue)
+      })
+      .catch((cause) => {
+        if (active) setError(getFriendlyError(cause, translatorRef.current))
+      })
+      .finally(() => {
+        if (active) setPlanLoading(false)
+      })
+    return () => { active = false }
+  }, [disabled, user?.id])
 
   useEffect(() => {
     if (disabled) {
@@ -210,6 +251,58 @@ export default function ProfileDataSections() {
       setError(getFriendlyError(cause, t))
     } finally {
       setBusy(false)
+    }
+  }
+
+  const generatePlan = async () => {
+    if (disabled || !savedGoal || buildingPlan) return
+    setBuildingPlan(true)
+    setError('')
+    setNotice('')
+    try {
+      const catalogue = await loadExercises()
+      const plan = await buildMyPlan(savedGoal, catalogue, language)
+      setPlanExercises(catalogue)
+      setPlanPreview(plan)
+    } catch (cause) {
+      setError(getFriendlyError(cause, t))
+    } finally {
+      setBuildingPlan(false)
+    }
+  }
+
+  const requestRegeneration = () => {
+    if (activePlan) setConfirmingRegeneration(true)
+    else void generatePlan()
+  }
+
+  const confirmRegeneration = () => {
+    setConfirmingRegeneration(false)
+    void generatePlan()
+  }
+
+  const publishPlan = async () => {
+    if (!planPreview || publishingPlan) return
+    const plan: SavedUserPlan = {
+      templateId: planPreview.templateId,
+      startDate: planPreview.startDate,
+      block: planPreview.block,
+      source: planPreview.source,
+    }
+    setPublishingPlan(true)
+    setError('')
+    setNotice('')
+    try {
+      await publishUserPlan(plan)
+      cacheActiveUserPlan(plan)
+      setActivePlan(plan)
+      setPlanPreview(null)
+      setConfirmingRegeneration(false)
+      setNotice(t('profile.plan.published'))
+    } catch (cause) {
+      setError(getFriendlyError(cause, t))
+    } finally {
+      setPublishingPlan(false)
     }
   }
 
@@ -319,6 +412,21 @@ export default function ProfileDataSections() {
           </form>
         )}
       </section>
+      <MyPlanSection
+        goal={savedGoal}
+        activePlan={activePlan}
+        preview={planPreview}
+        exercises={planExercises}
+        loading={planLoading || buildingPlan}
+        building={buildingPlan}
+        publishing={publishingPlan}
+        confirmingRegeneration={confirmingRegeneration}
+        onGenerate={() => void generatePlan()}
+        onPublish={() => void publishPlan()}
+        onRegenerate={requestRegeneration}
+        onConfirmRegeneration={confirmRegeneration}
+        onCancelRegeneration={() => setConfirmingRegeneration(false)}
+      />
       {(error || notice) && (
         <div className="profile-data-feedback">
           {error && <p className="account-error" role="alert">{error}</p>}

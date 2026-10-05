@@ -46,10 +46,13 @@ import {
   weeklySummary,
 } from '../progress/viewModel'
 import { entriesWithinBlock, startOfWeek } from '../progress/utils'
+import { selectPlanBlocks } from '../plans/selectPlanBlocks'
 import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import {
   applyWeightTarget,
+  fetchActiveUserPlan,
   fetchTrainingBlocks,
+  getCachedActiveUserPlan,
   getCachedTrainingBlocks,
   getExerciseDisplayName,
   getAskExerciseAiConsent,
@@ -70,6 +73,7 @@ type Props = {
   onDeleteEntry: (entryId: string) => Promise<void>
   onRestoreEntry: (entry: WorkoutEntry) => Promise<void>
   authStatus: AuthStatus
+  authUserId?: string | null
 }
 
 function AiSuggestionExplanation({
@@ -270,6 +274,7 @@ export default function ProgressScreen({
   onDeleteEntry,
   onRestoreEntry,
   authStatus,
+  authUserId,
 }: Props) {
   const { t, language } = useT()
   const demoMode = isDemoMode()
@@ -293,17 +298,23 @@ export default function ProgressScreen({
 
   useEffect(() => {
     let cancelled = false
-    const cachedBlocks = getCachedTrainingBlocks()
-    if (cachedBlocks?.length) setBlocks(cachedBlocks)
-    void fetchTrainingBlocks().then((loaded) => {
-      if (!cancelled) setBlocks(loaded)
+    const signedIn = authStatus === 'signed-in' && !demoMode
+    const cachedPlan = signedIn ? getCachedActiveUserPlan() : null
+    const globalCache = getCachedTrainingBlocks() ?? []
+    const cachedBlocks = selectPlanBlocks(globalCache, cachedPlan, signedIn, demoMode)
+    if (cachedBlocks.length) setBlocks(cachedBlocks)
+    void Promise.all([
+      fetchTrainingBlocks(),
+      signedIn ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
+    ]).then(([globalBlocks, activePlan]) => {
+      if (!cancelled) setBlocks(selectPlanBlocks(globalBlocks, activePlan, signedIn, demoMode))
     }).catch(() => {
-      if (!cancelled) setBlocks([])
+      if (!cancelled) setBlocks(cachedBlocks)
     })
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [authStatus, authUserId, demoMode])
 
   const data = useMemo(() => {
     if (!blocks) return null
