@@ -30,7 +30,6 @@ import {
   loadWeightTargets,
   consumeWeightTarget,
   loadWorkoutHistory,
-  deleteWorkoutEntry,
   normalizeExerciseName,
   saveWorkoutHistory,
   setSessionStorageValue,
@@ -1332,41 +1331,6 @@ export default function WorkoutPlan({
     dismissSessionSummary()
   }
 
-  const [confirmDeleteKey, setConfirmDeleteKey] = useState('')
-
-  const deleteTodaysLog = async (entries: WorkoutEntry[]) => {
-    let nextHistory: WorkoutEntry[] = history
-    for (const entry of entries) nextHistory = await deleteWorkoutEntry(entry.id)
-    setHistory(nextHistory)
-    setConfirmDeleteKey('')
-  }
-
-  const renderDeleteTodaysLog = (key: string, entries: WorkoutEntry[], label: string) => (
-    <span className="progress-log-delete">
-      <button
-        type="button"
-        className="icon-button log-delete-button"
-        aria-label={t('workout.delete.todayLog', { name: label })}
-        onClick={() => setConfirmDeleteKey(key)}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3" />
-        </svg>
-      </button>
-      {confirmDeleteKey === key && (
-        <span className="progress-delete-confirm" role="group" aria-label={t('progress.delete.confirm')}>
-          <span>{t('progress.delete.confirm')}</span>
-          <button type="button" className="text-button" onClick={() => void deleteTodaysLog(entries)}>
-            {t('progress.delete.action')}
-          </button>
-          <button type="button" className="text-button" onClick={() => setConfirmDeleteKey('')}>
-            {t('progress.delete.cancel')}
-          </button>
-        </span>
-      )}
-    </span>
-  )
-
   const logPlannedExercise = async (exercise: PlanExercise, completedRows?: boolean[]) => {
     const exerciseKey = getPlanDraftKey(exercise.name)
     const sectionKey = normalizeExerciseName(exercise.name)
@@ -2344,9 +2308,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           <span className="done-summary"> · {summarizeCompletedEntry(completedEntry, language)}</span>
                         </span>
                       )}
-                      {completedEntry && completedEntry.date === today && (
-                        renderDeleteTodaysLog(`exercise-${completedEntry.id}`, [completedEntry], displayName)
-                      )}
                       {recordBadges.map((badge) => (
                         <span key={`${completedEntry?.id}-${badge}`} className="personal-record-badge">
                           {badge === 'e1rm' ? t('workout.pr.e1rm') : badge === 'weight' ? t('workout.pr.weight') : t('workout.pr.reps')}
@@ -2635,9 +2596,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             )
             const supersetCompletedRows = completedSupersetSets[group.key] ?? loggedSupersetRows
             const supersetCompletedCount = supersetCompletedRows.filter(Boolean).length
-            const supersetLoggedToday = supersetExercises
-              .map((exercise) => findExerciseCompletion(exercise, history))
-              .filter((entry): entry is WorkoutEntry => !!entry && entry.date === today)
             const supersetError = supersetExercises
               .map((exercise) => logError[getPlanDraftKey(exercise.name)])
               .find(Boolean)
@@ -2646,11 +2604,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 <div className="superset-group-header">
                   <span className="chip technique-chip">{t('workout.technique.superset')}</span>
                   {groupDone && <span className="done-badge" role="status"><span aria-hidden="true">✓ </span>{t('workout.status.done')}</span>}
-                  {groupDone && supersetLoggedToday.length > 0 && renderDeleteTodaysLog(
-                    `superset-${group.key}`,
-                    supersetLoggedToday,
-                    supersetExercises.map((item) => displayExerciseName(item.name)).join(' + ')
-                  )}
                   <p>{t('workout.superset.instructions', { first: codes[0], others: codes.slice(1).join(', ') })}</p>
                 </div>
                 {cards}
