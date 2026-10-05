@@ -947,7 +947,7 @@ export default function WorkoutPlan({
       const setCount = target?.setCount ?? (week === 6 ? Math.ceil(planned.sets / 2) : planned.sets)
       const reps = target?.reps ?? getExerciseTargetReps(exercise).slice(0, setCount)
       const otherDayWeight = prefill?.basis === 'other-day'
-        ? scaleWeightForOtherDay(lastEntry?.sets[0]?.weight ?? 0)
+        ? scaleWeightForOtherDay(lastEntry?.sets[0]?.weight ?? 0, lastEntry?.sets[0]?.reps, reps[0])
         : undefined
       return {
         code: planned.code,
@@ -1080,7 +1080,9 @@ export default function WorkoutPlan({
     const lastWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       const weight = Number(source?.weight ?? bestWeight) || 0
-      return otherDayPrefill ? scaleWeightForOtherDay(weight) : weight
+      return otherDayPrefill
+        ? scaleWeightForOtherDay(weight, source?.reps, exercise ? getExerciseTargetReps(exercise)[index] : undefined)
+        : weight
     })
     const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
     const aiExercise = exercise ? getAiPlanExercise(exercise) : undefined

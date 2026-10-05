@@ -19,8 +19,17 @@ export function workoutMaxWeight(sets: WorkoutSet[]) {
   return Math.max(...sets.map((set) => set.weight), 0)
 }
 
-export function scaleWeightForOtherDay(weight: number) {
-  return Math.max(0, Math.floor((weight * 0.9 + Number.EPSILON) / 2.5) * 2.5)
+/**
+ * Starting weight for the first session of the other A/B day. Without rep data: the other day's weight − 10%.
+ * With the reps done there and this day's target reps: estimate strength (Epley e1RM) and pick the load for the
+ * target reps with ~2 reps in reserve, kept between −20% and the other day's weight. So 26 kg × 12 on day A
+ * gives 25 kg for 10 reps on day B, instead of 22.5 kg.
+ */
+export function scaleWeightForOtherDay(weight: number, doneReps?: number, targetReps?: number) {
+  const roundDown = (value: number) => Math.max(0, Math.floor((value + Number.EPSILON) / 2.5) * 2.5)
+  if (!doneReps || !targetReps || doneReps <= 0 || targetReps <= 0) return roundDown(weight * 0.9)
+  const estimate = (weight * (1 + doneReps / 30)) / (1 + (targetReps + 2) / 30)
+  return roundDown(Math.min(weight, Math.max(weight * 0.8, estimate)))
 }
 
 export function getPreviousWorkoutSets(history: WorkoutEntry[], exerciseId?: string) {
