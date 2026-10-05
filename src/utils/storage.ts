@@ -479,6 +479,11 @@ function saveTrainingBlockCache(blocks: TrainingBlock[]) {
   }
 }
 
+/** Blocks saved on this device from the last successful fetch (null if none) — for instant first render. */
+export function getCachedTrainingBlocks(): TrainingBlock[] | null {
+  return loadTrainingBlockCache()
+}
+
 export async function fetchTrainingBlocks(): Promise<TrainingBlock[]> {
   const cachedBlocks = loadTrainingBlockCache()
 
