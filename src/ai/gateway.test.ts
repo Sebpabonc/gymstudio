@@ -133,7 +133,7 @@ describe('AI gateway wrappers', () => {
   })
 
   it.each([
-    ['daily_limit', "You've used today's 20 questions. Try again tomorrow."],
+    ['daily_limit', "You've used today's 40 questions. Try again tomorrow."],
     ['monthly_budget_reached', 'AI is paused for this month.'],
     ['sign_in_required', 'Sign in to ask AI.'],
     ['no_session', 'Log a workout first.'],

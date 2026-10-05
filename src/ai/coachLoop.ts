@@ -70,6 +70,7 @@ export function validateNextSessionPlan(answer: string, ruleExercises: CoachPlan
     parsed === null ||
     !('summary' in parsed) ||
     typeof parsed.summary !== 'string' ||
+    !parsed.summary.trim() ||
     !('exercises' in parsed) ||
     !Array.isArray(parsed.exercises)
   ) {
