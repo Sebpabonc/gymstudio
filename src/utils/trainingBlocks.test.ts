@@ -8,6 +8,7 @@ import {
   formatBenchAngle,
   formatBlockMethod,
   nextUnloggedDay,
+  todayTrainingDay,
   trainingBlockDateStatus,
 } from './trainingBlocks'
 
@@ -144,6 +145,31 @@ describe('next unlogged training day', () => {
 
     expect(nextUnloggedDay(block, [], '2026-10-04')?.key).toBe('day-1')
     expect(nextUnloggedDay(block, weekHistory, '2026-10-08')?.key).toBe('day-1')
+  })
+
+  it('keeps a day logged today as Today, including when only part of it is logged', () => {
+    const history = [entry('press', 'day-1', '2026-10-05')]
+
+    expect(todayTrainingDay(block, history, '2026-10-05')?.key).toBe('day-1')
+    expect(todayTrainingDay(block, history, '2026-10-05')?.key).toBe('day-1')
+  })
+
+  it('returns to the next incomplete day on a later date after the session is complete', () => {
+    const history = [
+      entry('press', 'day-1', '2026-10-05'),
+      entry('row', 'day-1', '2026-10-05'),
+    ]
+
+    expect(todayTrainingDay(block, history, '2026-10-06')?.key).toBe('day-2')
+  })
+
+  it('otherwise selects the next incomplete day in the current week', () => {
+    const history = [
+      entry('press', 'day-1', '2026-10-05'),
+      entry('row', 'day-1', '2026-10-05'),
+    ]
+
+    expect(todayTrainingDay(block, history, '2026-10-07')?.key).toBe('day-2')
   })
 
   it('marks only sessions with every planned exercise logged for the same block, day, and date', () => {

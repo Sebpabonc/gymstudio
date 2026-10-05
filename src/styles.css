@@ -887,38 +887,6 @@ button {
   margin-bottom: 8px;
 }
 
-.exercise-ai-controls,
-.planned-posture-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.planned-posture-actions > .posture-tips-box {
-  flex: 1;
-  min-width: 0;
-}
-
-.ask-ai-button {
-  appearance: none;
-  flex: 0 0 auto;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  min-height: 44px;
-  padding: 5px 12px;
-  background: var(--brand-soft);
-  color: var(--text);
-  font-size: 0.68rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.ask-ai-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
 .ai-feature-button {
   appearance: none;
   min-height: 44px;
@@ -949,6 +917,20 @@ button {
 .ai-inline-consent,
 .ai-inline-answer {
   width: 100%;
+}
+
+.ai-inline-consent {
+  display: grid;
+  gap: 10px;
+}
+
+.ai-inline-consent p {
+  margin: 0;
+}
+
+.ai-consent-actions {
+  display: grid;
+  gap: 8px;
 }
 
 .ai-inline-status,
@@ -2425,18 +2407,6 @@ button {
   line-height: 1.4;
 }
 
-.ai-plan-exercise label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 0.64rem;
-}
-
-.ai-plan-exercise input {
-  accent-color: var(--brand);
-}
-
 .planned-exercise-card.collapsed {
   padding: 10px 12px;
 }
@@ -3429,10 +3399,97 @@ button[class] {
   width: 4.5rem;
 }
 
-.set-history th:last-child,
-.set-history td:last-child {
+.set-history th:nth-child(3),
+.set-history td:nth-child(3) {
   width: 5rem;
   text-align: right;
+}
+
+.set-history th:last-child,
+.set-history td:last-child {
+  width: 2.75rem;
+  text-align: right;
+}
+
+.progress-log-delete {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.log-delete-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  min-height: 32px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--muted-strong);
+}
+
+.log-delete-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.progress-delete-confirm {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 4px);
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  font-size: var(--font-caption);
+}
+
+.text-button {
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+.progress-delete-toast {
+  position: sticky;
+  z-index: 3;
+  top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  font-size: var(--font-caption);
+}
+
+.record-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 .set-history-sets {
@@ -3672,30 +3729,6 @@ button[class] {
 
 .guest-data-actions .secondary-button {
   width: 100%;
-}
-
-.ask-exercise-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1100;
-  display: grid;
-  align-items: end;
-  justify-items: center;
-  background: rgba(0, 0, 0, 0.62);
-}
-
-.ask-exercise-sheet {
-  width: min(100%, 560px);
-  max-height: min(90vh, 800px);
-  overflow-y: auto;
-  display: grid;
-  gap: 16px;
-  padding: 20px 16px max(20px, env(safe-area-inset-bottom));
-  border: 1px solid var(--line);
-  border-bottom: 0;
-  border-radius: 20px 20px 0 0;
-  background: var(--bg-soft);
-  box-shadow: var(--shadow);
 }
 
 .help-ai-overlay {
@@ -3969,91 +4002,22 @@ button[class] {
   font-weight: 800;
 }
 
-.ask-exercise-sheet-header,
-.ask-exercise-form-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ask-exercise-sheet-header h2 {
-  margin: 4px 0 0;
-  font-size: 1.1rem;
-  overflow-wrap: anywhere;
-}
-
-.ask-exercise-sheet-header .field-label,
-.ask-exercise-form .field-label {
+.ai-inline-answer p {
   margin: 0;
 }
 
-.ask-exercise-consent,
-.ask-exercise-form {
-  display: grid;
-  gap: 10px;
-}
-
-.ask-exercise-consent p,
-.ask-exercise-consent-message,
-.ask-exercise-answer p,
-.ask-exercise-error p {
-  margin: 0;
-}
-
-.ask-exercise-actions {
-  display: grid;
-  gap: 8px;
-}
-
-.ask-exercise-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.ask-exercise-suggestion {
-  cursor: pointer;
-  text-align: left;
-}
-
-.ask-exercise-form textarea {
-  width: 100%;
-  resize: vertical;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-}
-
-.ask-exercise-form-footer span,
-.ask-exercise-answer small,
-.ask-exercise-disclaimer {
+.ai-inline-answer small {
   color: var(--muted);
   font-size: 0.72rem;
 }
 
-.ask-exercise-form-footer .primary-button {
-  width: auto;
-}
-
-.ask-exercise-answer,
-.ask-exercise-error {
+.ai-inline-answer {
   display: grid;
   gap: 8px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
-}
-
-.ask-exercise-error {
-  color: var(--muted-strong);
-}
-
-.ask-exercise-disclaimer {
-  margin: 0;
 }
 
 .planned-exercise-card.completed {
@@ -4936,28 +4900,28 @@ body {
   }
 }
 
-/* Block header (Tech Lead review of #80): name on its own line, status below, round 44 px toggle on the right, badges as a small meta row. */
+/* Block header: keep the status beside the name, with the expand control on the right. */
 .training-block-header {
   grid-template-columns: minmax(0, 1fr);
 }
 
 .training-block-primary {
-  grid-template-columns: minmax(0, 1fr) 44px;
-  grid-template-areas:
-    'name toggle'
-    'status toggle';
+  grid-template-columns: minmax(0, 1fr) auto 44px;
+  grid-template-areas: 'name status toggle';
   row-gap: 2px;
 }
 
 .training-block-primary .training-block-name {
   grid-area: name;
-  overflow: visible;
+  overflow-wrap: anywhere;
   white-space: normal;
   text-overflow: clip;
 }
 
 .training-block-primary .training-block-status {
   grid-area: status;
+  max-width: none;
+  white-space: nowrap;
 }
 
 .training-block-primary .toggle-button {
@@ -5485,7 +5449,6 @@ body:has([aria-modal='true']) .help-ai-button {
 .rest-timer-pill,
 .block-selector-sheet,
 .session-summary-sheet,
-.ask-exercise-sheet,
 .help-ai-sheet,
 .log-toast {
   background: var(--glass-fill);
@@ -5500,15 +5463,13 @@ body:has([aria-modal='true']) .help-ai-button {
   border-width: 0 0 1px;
 }
 
-.block-selector-sheet,
-.ask-exercise-sheet {
+.block-selector-sheet {
   border-bottom: 0;
 }
 
 .layout-toggle,
 .block-selector-sheet,
-.session-summary-sheet,
-.ask-exercise-sheet {
+.session-summary-sheet {
   position: relative;
 }
 
@@ -5519,7 +5480,6 @@ body:has([aria-modal='true']) .help-ai-button {
 .rest-timer-pill::before,
 .block-selector-sheet::before,
 .session-summary-sheet::before,
-.ask-exercise-sheet::before,
 .help-ai-sheet::before,
 .log-toast::before {
   content: '';
@@ -5554,7 +5514,6 @@ body:has([aria-modal='true']) .help-ai-button {
   .rest-timer-pill,
   .block-selector-sheet,
   .session-summary-sheet,
-  .ask-exercise-sheet,
   .help-ai-sheet,
   .log-toast {
     background: rgba(14, 14, 15, 0.96);
@@ -5569,7 +5528,6 @@ body:has([aria-modal='true']) .help-ai-button {
   .rest-timer-pill,
   .block-selector-sheet,
   .session-summary-sheet,
-  .ask-exercise-sheet,
   .help-ai-sheet,
   .log-toast {
     background: rgba(14, 14, 15, 0.96);
@@ -5584,7 +5542,6 @@ body:has([aria-modal='true']) .help-ai-button {
   .rest-timer-pill::before,
   .block-selector-sheet::before,
   .session-summary-sheet::before,
-  .ask-exercise-sheet::before,
   .help-ai-sheet::before,
   .log-toast::before {
     display: none;

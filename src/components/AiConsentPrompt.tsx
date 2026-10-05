@@ -13,7 +13,7 @@ export default function AiConsentPrompt({
   return (
     <>
       <p>{t(bodyKey)}</p>
-      <div className="ask-exercise-actions">
+      <div className="ai-consent-actions">
         <button type="button" className="primary-button" onClick={() => onChoice('enabled')}>
           {t('ai.consent.on')}
         </button>

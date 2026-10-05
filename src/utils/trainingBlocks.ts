@@ -147,6 +147,19 @@ export function nextUnloggedDay(
   )
 }
 
+export function todayTrainingDay(
+  block: TrainingBlock,
+  history: WorkoutEntry[],
+  today: string | Date = new Date()
+) {
+  const date = toIsoDate(today)
+  const days = [...block.days].sort((a, b) => a.position - b.position)
+  const loggedToday = days.find((day) =>
+    history.some((entry) => entry.blockId === block.id && entry.dayKey === day.key && entry.date === date)
+  )
+  return loggedToday ?? nextUnloggedDay(block, history, today)
+}
+
 export function formatBenchAngle(angleDegrees?: number | null, language: Language = 'en') {
   if (angleDegrees == null) return null
   if (angleDegrees === 0) return translate(language, 'workout.bench.flat')
