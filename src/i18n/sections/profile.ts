@@ -1,6 +1,7 @@
 export const profile = {
   en: {
     'profile.data.signIn': 'Sign in to save your measurements',
+    'profile.goal.signIn': 'Sign in to save your goal',
     'profile.data.loading': 'Loading your profile data…',
     'profile.data.saving': 'Saving…',
     'profile.data.saved': 'Saved.',
@@ -54,6 +55,7 @@ export const profile = {
     'profile.goal.equipment.home': 'Home',
     'profile.plan.title': 'My plan',
     'profile.plan.noGoal': 'Complete your training goals questionnaire first to generate a personal plan.',
+    'profile.plan.signIn': 'Sign in to create your personal plan',
     'profile.plan.generate': 'Generate my plan',
     'profile.plan.building': 'Building your plan…',
     'profile.plan.preview': 'Plan preview',
@@ -72,6 +74,7 @@ export const profile = {
   },
   es: {
     'profile.data.signIn': 'Inicia sesión para guardar tus medidas',
+    'profile.goal.signIn': 'Inicia sesión para guardar tu objetivo',
     'profile.data.loading': 'Cargando los datos de tu perfil…',
     'profile.data.saving': 'Guardando…',
     'profile.data.saved': 'Guardado.',
@@ -125,6 +128,7 @@ export const profile = {
     'profile.goal.equipment.home': 'En casa',
     'profile.plan.title': 'Mi plan',
     'profile.plan.noGoal': 'Completa primero el cuestionario de objetivos para generar un plan personal.',
+    'profile.plan.signIn': 'Inicia sesión para crear tu plan personal',
     'profile.plan.generate': 'Generar mi plan',
     'profile.plan.building': 'Creando tu plan…',
     'profile.plan.preview': 'Vista previa del plan',

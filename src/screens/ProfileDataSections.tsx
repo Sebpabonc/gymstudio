@@ -384,7 +384,7 @@ export default function ProfileDataSections() {
       <section className="card profile-data-card" aria-labelledby="profile-goal-title">
         <h2 id="profile-goal-title">{t('profile.goal.title')}</h2>
         <p className="profile-data-hint">{t('profile.goal.copy')}</p>
-        {disabled && <p className="profile-data-hint">{t('profile.data.signIn')}</p>}
+        {disabled && <p className="profile-data-hint">{t('profile.goal.signIn')}</p>}
         {loading ? (
           <p className="profile-data-hint">{t('profile.data.loading')}</p>
         ) : savedGoal && !editingGoal ? (
@@ -413,6 +413,7 @@ export default function ProfileDataSections() {
         )}
       </section>
       <MyPlanSection
+        signedOut={disabled}
         goal={savedGoal}
         activePlan={activePlan}
         preview={planPreview}

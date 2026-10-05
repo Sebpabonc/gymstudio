@@ -51,6 +51,7 @@ const preview: BuiltPlan = {
 }
 
 const props = {
+  signedOut: false,
   goal,
   activePlan: null,
   preview: null,
@@ -70,6 +71,13 @@ describe('MyPlanSection', () => {
   it('asks the user to complete goals before generating a plan', () => {
     const html = renderToString(<MyPlanSection {...props} goal={null} />)
     expect(html).toContain('Complete your training goals questionnaire first')
+    expect(html).not.toContain('Generate my plan')
+  })
+
+  it('prompts signed-out users to sign in and hides plan generation', () => {
+    const html = renderToString(<MyPlanSection {...props} signedOut />)
+    expect(html).toContain('Sign in to create your personal plan')
+    expect(html).not.toContain('Complete your training goals questionnaire first')
     expect(html).not.toContain('Generate my plan')
   })
 

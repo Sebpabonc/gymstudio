@@ -40,6 +40,7 @@ const methodPhraseKeys: Record<string, TranslationKey> = {
   'flat-pyramid': 'workout.methodPhrase.flatPyramid',
   'reverse-pyramid': 'workout.methodPhrase.reversePyramid',
   'strength-hypertrophy': 'workout.methodPhrase.strengthHypertrophy',
+  'straight-sets': 'workout.technique.straight',
 }
 
 function titleCase(word: string) {
