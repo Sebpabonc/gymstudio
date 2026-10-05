@@ -300,6 +300,7 @@ describe('remote catalogue', () => {
       primary_muscles: ['Hamstrings', 'Glutes'],
       secondary_muscles: ['Glutes', 'Lower Back'],
       equipment: 'barbell',
+      mechanic: 'compound',
       posture_tips: [
         'Tip one',
         'Tip two',
@@ -319,6 +320,7 @@ describe('remote catalogue', () => {
       primary_muscles: ['Lats'],
       secondary_muscles: ['Upper Back', 'Biceps'],
       equipment: 'cable',
+      mechanic: 'compound',
       posture_tips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
       squeeze_cue: null,
       aliases: [],
@@ -333,7 +335,7 @@ describe('remote catalogue', () => {
 
     expect(supabaseMock.from).toHaveBeenCalledWith('exercises')
     expect(supabaseMock.select).toHaveBeenCalledWith(
-      'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, squeeze_cue, aliases'
+      'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, mechanic, posture_tips, squeeze_cue, aliases'
     )
     expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
     expect(supabaseMock.order).toHaveBeenCalledWith('name_en')
@@ -346,6 +348,7 @@ describe('remote catalogue', () => {
       primaryMuscles: ['Hamstrings', 'Glutes'],
       secondaryMuscles: ['Glutes', 'Lower Back'],
       equipment: 'barbell',
+      mechanic: 'compound',
       postureTips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
       squeezeCue: 'Squeeze the target muscle at lockout.',
     })
@@ -381,6 +384,7 @@ describe('remote catalogue', () => {
     expect(deadlift?.primaryMuscles).toEqual(['Hamstrings', 'Glutes'])
     expect(deadlift?.secondaryMuscles).toEqual(['Glutes', 'Lower Back'])
     expect(deadlift?.equipment).toBe('barbell')
+    expect(deadlift?.mechanic).toBe('compound')
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.squeezeCue).toBe('Squeeze the target muscle at lockout.')

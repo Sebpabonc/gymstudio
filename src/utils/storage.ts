@@ -317,6 +317,7 @@ type CatalogueRow = {
   primary_muscles: string[] | null
   secondary_muscles: string[]
   equipment: string | null
+  mechanic: 'compound' | 'isolation' | null
   posture_tips: string[] | null
   squeeze_cue: string | null
   aliases: string[]
@@ -333,6 +334,7 @@ type CatalogueExercise = Pick<
   | 'primaryMuscles'
   | 'secondaryMuscles'
   | 'equipment'
+  | 'mechanic'
   | 'postureTips'
   | 'squeezeCue'
 >
@@ -497,6 +499,7 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
       primaryMuscles: exercise.primaryMuscles ?? current?.primaryMuscles,
       secondaryMuscles: exercise.secondaryMuscles ?? current?.secondaryMuscles,
       equipment: exercise.equipment ?? current?.equipment,
+      mechanic: exercise.mechanic ?? current?.mechanic,
       postureTips: exercise.postureTips ?? current?.postureTips,
       squeezeCue: exercise.squeezeCue ?? current?.squeezeCue,
       notes: exercise.notes ?? current?.notes,
@@ -526,6 +529,7 @@ function loadCatalogueCache(): CatalogueCache | null {
         primaryMuscles: exercise.primaryMuscles,
         secondaryMuscles: exercise.secondaryMuscles,
         equipment: exercise.equipment,
+        mechanic: exercise.mechanic,
         postureTips: exercise.postureTips,
         squeezeCue: exercise.squeezeCue,
       })),
@@ -544,7 +548,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
     const { data, error } = await supabaseClient
       .from('exercises')
       .select(
-        'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, posture_tips, squeeze_cue, aliases'
+        'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, mechanic, posture_tips, squeeze_cue, aliases'
       )
       .eq('is_active', true)
       .order('name_en')
@@ -565,6 +569,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
         primaryMuscles: row.primary_muscles ?? undefined,
         secondaryMuscles: row.secondary_muscles ?? undefined,
         equipment: row.equipment ?? undefined,
+        mechanic: row.mechanic ?? undefined,
         postureTips: row.posture_tips ?? undefined,
         squeezeCue: row.squeeze_cue ?? undefined,
       }
@@ -600,6 +605,7 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
           primaryMuscles: exercise.primaryMuscles,
           secondaryMuscles: exercise.secondaryMuscles,
           equipment: exercise.equipment,
+          mechanic: exercise.mechanic,
           postureTips: exercise.postureTips,
           squeezeCue: exercise.squeezeCue,
         })),

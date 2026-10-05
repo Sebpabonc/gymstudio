@@ -94,6 +94,31 @@ export function blockWeek(block: TrainingBlock, today: string | Date = new Date(
   return Math.floor((todayValue - startValue) / (7 * DAY_MS)) + 1
 }
 
+export function completedTrainingSessions(block: TrainingBlock, history: WorkoutEntry[]) {
+  const loggedExercisesBySession = new Map<string, Set<string>>()
+  for (const entry of history) {
+    if (entry.blockId !== block.id || !entry.dayKey) continue
+    const key = `${entry.dayKey}:${entry.date}`
+    const exercises = loggedExercisesBySession.get(key) ?? new Set<string>()
+    exercises.add(entry.exerciseId)
+    loggedExercisesBySession.set(key, exercises)
+  }
+
+  return block.days.flatMap((day) => {
+    if (day.exercises.length === 0) return []
+    const dates = [...loggedExercisesBySession.entries()]
+      .filter(
+        ([key, exercises]) =>
+          key.startsWith(`${day.key}:`) &&
+          day.exercises.every((exercise) => exercises.has(exercise.exerciseId))
+      )
+      .map(([key]) => key.slice(day.key.length + 1))
+      .sort()
+
+    return dates.map((date) => ({ dayKey: day.key, date }))
+  })
+}
+
 export function nextUnloggedDay(
   block: TrainingBlock,
   history: WorkoutEntry[],

@@ -111,7 +111,7 @@ function makeBlock(
 function makeEntry(
   exerciseId: string,
   date: string,
-  weightsAndReps: Array<[number, number]>,
+  weightsAndReps: Array<[number, number, ProgressEntry['sets'][number]['drop']?]>,
   extras: Partial<Pick<ProgressEntry, 'blockId' | 'dayKey'>> = {}
 ): ProgressEntry {
   return {
@@ -119,10 +119,11 @@ function makeEntry(
     exerciseId,
     date,
     ...extras,
-    sets: weightsAndReps.map(([weight, reps], index) => ({
+    sets: weightsAndReps.map(([weight, reps, drop], index) => ({
       id: `${exerciseId}-${date}-${index}`,
       weight,
       reps,
+      ...(drop ? { drop } : {}),
     })),
   }
 }
@@ -171,9 +172,36 @@ describe('progress calculations', () => {
     const allTrend = strengthTrend(entries, [firstBlock, secondBlock], 'press', '2026-03-02', 'all', [dumbbellExercise], en)
     expect(aTrend.points).toHaveLength(4)
     expect(allTrend.points).toHaveLength(5)
+    expect(aTrend.points[2].e1rm).toBeCloseTo(53.2)
+    expect(aTrend.points[2]).toMatchObject({
+      sets: [{ weight: 42, reps: 8 }],
+      bestSetIndex: 0,
+      volume: 336,
+    })
     expect(aTrend.takeaway).toContain('Dumbbell Press: est. 1RM +')
     expect(aTrend.takeaway).not.toContain('-')
     expect(aTrend.isTrendAvailable).toBe(true)
+  })
+
+  it('includes all per-set and drop-set volume while highlighting the e1RM-best set', () => {
+    const block = makeBlock()
+    const entries = [
+      makeEntry('press', '2026-01-05', [[40, 8], [50, 6], [20, 16]], { dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-01-12', [[30, 10, { weight: 20, reps: 5 }]], { dayKey: 'chest-back-a' }),
+    ]
+
+    const trend = strengthTrend(entries, [block], 'press', '2026-01-12', 'all', [dumbbellExercise], en)
+
+    expect(trend.points[0]).toMatchObject({
+      e1rm: 60,
+      bestSetIndex: 1,
+      volume: 940,
+    })
+    expect(trend.points[0].sets).toHaveLength(3)
+    expect(trend.points[1]).toMatchObject({
+      volume: 400,
+      sets: [{ weight: 30, reps: 10, drop: { weight: 20, reps: 5 } }],
+    })
   })
 
   it('shows the latest available block trend when the current block has no sessions for the lift', () => {

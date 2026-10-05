@@ -1,6 +1,7 @@
 import { formatNumber } from '../i18n/format'
 import { Exercise, TrainingBlock } from '../types'
 import { getExerciseDisplayName } from '../utils/storage'
+import { workoutSetVolume } from '../utils/workoutSets'
 import {
   DayType,
   DayTypeFilter,
@@ -11,6 +12,7 @@ import {
 import {
   currentOrLatestBlock,
   defaultProgressI18n,
+  bestSetIndex,
   findEntryBlock,
   getDayType,
   groupExerciseSessions,
@@ -33,13 +35,17 @@ export function strengthTrend(
     .flatMap((session) => {
       const block = findEntryBlock(blocks, session)
       if (isDeloadWeek(block, session.date)) return []
+      const best = bestSetIndex(session.sets)
       const estimate = sessionE1RM(session.sets)
-      if (estimate === null) return []
+      if (estimate === null || best === null) return []
       const inferredDayType = getDayType(session, blocks)
       if (dayType !== 'all' && inferredDayType !== dayType) return []
       return [{
         date: session.date,
         e1rm: estimate,
+        sets: session.sets,
+        bestSetIndex: best,
+        volume: session.sets.reduce((total, set) => total + workoutSetVolume(set), 0),
         dayType: inferredDayType,
         blockId: block?.id ?? null,
       }]

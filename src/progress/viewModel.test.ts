@@ -151,8 +151,8 @@ describe('progress view model', () => {
   it('builds chart geometry with bands and record markers', () => {
     const blocks = [block(1, '2026-01-05')]
     const points = [
-      { date: '2026-01-05', e1rm: 60, dayType: 'A' as const, blockId: 'b1' },
-      { date: '2026-01-19', e1rm: 66, dayType: 'A' as const, blockId: 'b1' },
+      { date: '2026-01-05', e1rm: 60, sets: [], bestSetIndex: -1, volume: 0, dayType: 'A' as const, blockId: 'b1' },
+      { date: '2026-01-19', e1rm: 66, sets: [], bestSetIndex: -1, volume: 0, dayType: 'A' as const, blockId: 'b1' },
     ]
     const model = buildChartModel(points, blocks, new Set(['2026-01-19']))
     expect(model.points).toHaveLength(2)
@@ -169,9 +169,9 @@ describe('progress view model', () => {
   it('starts a new chart line at each block boundary', () => {
     const blocks = [block(1, '2026-01-05'), block(2, '2026-02-16')]
     const points = [
-      { date: '2026-01-05', e1rm: 60, dayType: 'A' as const, blockId: 'b1' },
-      { date: '2026-02-16', e1rm: 66, dayType: 'A' as const, blockId: 'b2' },
-      { date: '2026-02-23', e1rm: 68, dayType: 'A' as const, blockId: 'b2' },
+      { date: '2026-01-05', e1rm: 60, sets: [], bestSetIndex: -1, volume: 0, dayType: 'A' as const, blockId: 'b1' },
+      { date: '2026-02-16', e1rm: 66, sets: [], bestSetIndex: -1, volume: 0, dayType: 'A' as const, blockId: 'b2' },
+      { date: '2026-02-23', e1rm: 68, sets: [], bestSetIndex: -1, volume: 0, dayType: 'A' as const, blockId: 'b2' },
     ]
     const model = buildChartModel(points, blocks)
     expect(model.path.match(/M/g)).toHaveLength(2)
