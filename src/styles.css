@@ -3311,6 +3311,75 @@ button[class] {
   color: var(--muted);
 }
 
+.set-history {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: var(--font-caption);
+}
+
+.set-history caption {
+  padding: 12px 0 6px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.set-history th,
+.set-history td {
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.set-history th:first-child,
+.set-history td:first-child {
+  width: 4.5rem;
+}
+
+.set-history th:last-child,
+.set-history td:last-child {
+  width: 5rem;
+  text-align: right;
+}
+
+.set-history-sets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.set-history-sets li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 2px 5px;
+}
+
+.set-history-sets li.best {
+  border-color: var(--brand);
+  color: var(--text);
+}
+
+.set-history-drop {
+  color: var(--muted);
+}
+
+.set-history-best {
+  color: var(--text);
+  background: var(--brand);
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 1px 3px;
+}
+
 .legend-dot {
   display: inline-block;
   width: 8px;

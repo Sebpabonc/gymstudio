@@ -97,12 +97,28 @@ export function workingSets(sets: ProgressSet[]) {
   return sets.filter((set) => set.weight >= maxWeight * 0.5)
 }
 
-export function sessionE1RM(sets: ProgressSet[]) {
-  return workingSets(sets).reduce<number | null>((best, set) => {
-    if (set.weight <= 0 || set.reps < 1 || set.reps > 12) return best
+export function bestSetIndex(sets: ProgressSet[]) {
+  const eligibleSets = workingSets(sets)
+  let bestIndex: number | null = null
+  let bestEstimate = 0
+
+  sets.forEach((set, index) => {
+    if (!eligibleSets.includes(set) || set.weight <= 0 || set.reps < 1 || set.reps > 12) return
     const estimate = set.weight * (1 + set.reps / 30)
-    return best === null ? estimate : Math.max(best, estimate)
-  }, null)
+    if (bestIndex === null || estimate > bestEstimate) {
+      bestIndex = index
+      bestEstimate = estimate
+    }
+  })
+
+  return bestIndex
+}
+
+export function sessionE1RM(sets: ProgressSet[]) {
+  const index = bestSetIndex(sets)
+  if (index === null) return null
+  const set = sets[index]
+  return set.weight * (1 + set.reps / 30)
 }
 
 export function isDeloadWeek(block: TrainingBlock | null, date: string) {
