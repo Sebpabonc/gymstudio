@@ -52,6 +52,7 @@ import {
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
+const ProfileDataSections = lazy(() => import('./screens/ProfileDataSections'))
 const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
 
 function createSet(reps = 8, weight = 0): WorkoutSet {
@@ -395,16 +396,24 @@ export default function App() {
           )}
           {activeTab === 'you' ? (
             demoMode ? (
-              <section className="card account-screen">
-                <h2>{t('demo.title')}</h2>
-                <p className="account-message">{t('demo.message')}</p>
-                <button type="button" className="secondary-button" onClick={exitDemoMode}>{t('demo.exit')}</button>
-              </section>
+              <Suspense fallback={<section className="card account-screen">{t('account.loading')}</section>}>
+                <>
+                  <ProfileDataSections />
+                  <section className="card account-screen">
+                    <h2>{t('demo.title')}</h2>
+                    <p className="account-message">{t('demo.message')}</p>
+                    <button type="button" className="secondary-button" onClick={exitDemoMode}>{t('demo.exit')}</button>
+                  </section>
+                </>
+              </Suspense>
             ) : (
               <Suspense fallback={<section className="card account-screen">{t('account.loading')}</section>}>
                 {status === 'signed-in'
                   ? <ProfileScreen onClose={() => setActiveTab('today')} />
-                  : <LoginScreen onClose={() => setActiveTab('today')} />}
+                  : <>
+                    <ProfileDataSections />
+                    <LoginScreen onClose={() => setActiveTab('today')} />
+                  </>}
               </Suspense>
             )
           ) : activeTab === 'progress' ? (

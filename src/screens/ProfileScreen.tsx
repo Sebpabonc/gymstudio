@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { useT } from '../i18n'
+import ProfileDataSections from './ProfileDataSections'
 
 export default function ProfileScreen({ onClose }: { onClose: () => void }) {
   const { t, locale } = useT()
@@ -47,18 +48,21 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <section className="card account-screen profile-screen">
-      <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
-      <h2>{t('profile.title')}</h2>
-      {name && <p className="profile-name">{name}</p>}
-      <p className="profile-email">{user?.email}</p>
-      <p className="account-message" role="status" aria-live="polite">
-        {syncMessage}
-      </p>
-      <button type="button" className="secondary-button profile-signout" onClick={leaveAccount} disabled={busy}>
-        {busy ? t('profile.signingOut') : t('profile.signOut')}
-      </button>
-      {error && <p className="account-error" role="alert">{error}</p>}
-    </section>
+    <>
+      <section className="card account-screen profile-screen">
+        <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
+        <h2>{t('profile.title')}</h2>
+        {name && <p className="profile-name">{name}</p>}
+        <p className="profile-email">{user?.email}</p>
+        <p className="account-message" role="status" aria-live="polite">
+          {syncMessage}
+        </p>
+        <button type="button" className="secondary-button profile-signout" onClick={leaveAccount} disabled={busy}>
+          {busy ? t('profile.signingOut') : t('profile.signOut')}
+        </button>
+        {error && <p className="account-error" role="alert">{error}</p>}
+      </section>
+      <ProfileDataSections />
+    </>
   )
 }
