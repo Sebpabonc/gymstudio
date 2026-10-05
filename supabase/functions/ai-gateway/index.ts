@@ -56,9 +56,17 @@ and ONE clear focus for next time. Rules: fitness only; no medical advice (pain 
 and see a qualified professional); do not invent numbers; encouraging but factual.
 Reply in at most 120 words, plain text, up to 4 short bullet points starting with "- ".`
 
+const GENERAL_PROMPT = `You are GymStudio's training coach inside a gym-tracking app.
+Answer the user's training question using the data provided: their current training block (days and
+exercises with sets, reps and rest) and their recent logged sessions. Rules: fitness and training only
+(politely decline anything else); no medical advice (pain or injury: stop and see a qualified
+professional); never invent numbers not in the data; you may suggest what to try next session but the
+plan itself is designed by the PT. Reply in at most 150 words, plain text, short sentences or up to
+5 bullet points starting with "- ".`
+
 const ID_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
-type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary'
+type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary' | 'general_chat'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -96,20 +104,20 @@ Deno.serve(async (req) => {
     return json(400, { error: 'invalid_json' })
   }
   const feature = body.feature as Feature
-  if (!['ask_exercise', 'explain_suggestion', 'session_summary'].includes(feature)) {
+  if (!['ask_exercise', 'explain_suggestion', 'session_summary', 'general_chat'].includes(feature)) {
     return json(400, { error: 'unknown_feature' })
   }
   const exerciseId = (body.exerciseId ?? '').trim()
   const question = (body.question ?? '').trim()
   const suggestion = (body.suggestion ?? '').trim()
   const date = (body.date ?? '').trim()
-  if (feature === 'ask_exercise' && (!question || question.length > MAX_QUESTION_CHARS)) {
+  if ((feature === 'ask_exercise' || feature === 'general_chat') && (!question || question.length > MAX_QUESTION_CHARS)) {
     return json(400, { error: 'invalid_question', maxChars: MAX_QUESTION_CHARS })
   }
   if (feature === 'explain_suggestion' && (!suggestion || suggestion.length > MAX_QUESTION_CHARS)) {
     return json(400, { error: 'invalid_suggestion', maxChars: MAX_QUESTION_CHARS })
   }
-  if (feature !== 'session_summary' && !ID_RE.test(exerciseId)) return json(400, { error: 'invalid_exercise' })
+  if ((feature === 'ask_exercise' || feature === 'explain_suggestion') && !ID_RE.test(exerciseId)) return json(400, { error: 'invalid_exercise' })
   if (feature === 'session_summary' && !DATE_RE.test(date)) return json(400, { error: 'invalid_date' })
   const language = body.language === 'es' ? 'es' : 'en'
 
@@ -149,7 +157,30 @@ Deno.serve(async (req) => {
   let userMessage = question
   let context: Record<string, unknown>
 
-  if (feature === 'session_summary') {
+  if (feature === 'general_chat') {
+    const todayIso = new Date().toISOString().slice(0, 10)
+    const { data: blocks } = await userClient
+      .from('training_blocks')
+      .select('id, number, name, start_date, weeks')
+      .lte('start_date', todayIso)
+      .order('start_date', { ascending: false })
+      .limit(1)
+    const block = blocks?.[0]
+    const { data: planRows } = block
+      ? await userClient
+          .from('training_block_exercises')
+          .select('day_key, code, exercise_id, sets, reps, rest_seconds, technique')
+          .eq('block_id', block.id)
+      : { data: [] }
+    const { data: recent } = await userClient
+      .from('workout_entries')
+      .select('exercise_id, date, sets')
+      .is('deleted_at', null)
+      .order('date', { ascending: false })
+      .limit(30)
+    context = { today: todayIso, block, plan: planRows ?? [], recentSessions: recent ?? [] }
+    systemPrompt = GENERAL_PROMPT
+  } else if (feature === 'session_summary') {
     let query = userClient
       .from('workout_entries')
       .select('exercise_id, date, sets, block_id, day_key')
