@@ -201,7 +201,7 @@ button {
   gap: 12px;
   height: 48px;
   margin: 0 -12px -60px;
-  padding: 0 max(18px, calc((100% - 720px) / 2));
+  padding: 0 max(16px, calc((100% - 640px) / 2));
   background: transparent;
   pointer-events: none;
   transition: background-color 0.18s ease;
@@ -248,7 +248,7 @@ button {
   width: 100%;
   max-width: 720px;
   margin-inline: auto;
-  padding: 24px 18px 8px;
+  padding: 24px 0 8px;
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
@@ -663,10 +663,9 @@ button {
 }
 
 .field-label {
-  font-size: var(--font-caption);
+  font-size: 0.62rem;
   font-weight: var(--font-section-weight);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--muted);
 }
 
@@ -1158,8 +1157,7 @@ button {
 .section-title-row h3 {
   font-size: var(--font-section);
   font-weight: var(--font-section-weight);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   color: var(--muted-strong);
 }
 
@@ -2536,8 +2534,6 @@ button {
   color: var(--muted-strong);
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .set-section-toggle {
@@ -2836,9 +2832,7 @@ button {
 
 .planned-notes-field span {
   color: var(--muted);
-  font-size: 0.54rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.62rem;
 }
 
 .planned-notes-field textarea {
@@ -2994,8 +2988,7 @@ button {
   color: var(--muted-strong);
   font-size: var(--font-section);
   font-weight: var(--font-section-weight);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 .posture-tips-toggle {
@@ -4526,31 +4519,95 @@ body {
   line-height: 1.3;
 }
 
-.planned-squeeze-cue,
-.squeeze-cue-button {
-  display: block;
+.squeeze-cue-box {
+  display: grid;
+  gap: 8px;
   width: 100%;
   min-width: 0;
-  padding: 3px 0 3px 10px;
-  border: 0;
-  border-left: 2px solid var(--cue-line);
-  background: transparent;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(214, 170, 92, 0.35);
+  border-radius: 12px;
+  background: rgba(214, 170, 92, 0.1);
   color: var(--muted-strong);
   font-size: 0.74rem;
   line-height: 1.4;
-  text-align: left;
 }
 
-.planned-squeeze-cue,
-.squeeze-cue-button {
+.squeeze-cue-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.squeeze-cue-text {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   white-space: normal;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
-.planned-squeeze-cue strong,
-.squeeze-cue-button strong {
+.squeeze-cue-text strong {
   color: #e7bd72;
+}
+
+.squeeze-cue-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.squeeze-cue-toggle {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.squeeze-cue-tips {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  list-style: none;
+}
+
+.squeeze-cue-tips[hidden] {
+  display: none;
+}
+
+.squeeze-cue-tips li {
+  color: var(--muted-strong);
+  font-size: 0.77rem;
+  line-height: 1.45;
+}
+
+.exercise-card .squeeze-cue-box {
+  margin-top: 14px;
+}
+
+.planned-set-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
 .planned-set-section {
@@ -4940,14 +4997,6 @@ body {
 }
 
 /* Layer 3: inner panels inside an open card. */
-.planned-exercise-card .planned-squeeze-cue {
-  padding: 10px 12px;
-  border: 1px solid rgba(214, 170, 92, 0.35);
-  border-radius: 12px;
-  background: rgba(214, 170, 92, 0.1);
-  text-align: left;
-}
-
 .planned-exercise-card .planned-set-section,
 .planned-exercise-card .exercise-detail-row {
   padding: 10px;
@@ -5292,6 +5341,14 @@ body:has([aria-modal='true']) .help-ai-button {
   align-content: start;
 }
 
+.layout-sheet .brand-header {
+  padding-left: 16px;
+}
+
+.layout-sheet .brand-bar {
+  padding-inline: max(32px, calc((100% - 640px) / 2 + 16px));
+}
+
 .layout-sheet .screen-surface > *:not(:first-child) {
   border-top: 1px solid var(--hairline);
 }
@@ -5376,7 +5433,7 @@ body:has([aria-modal='true']) .help-ai-button {
   margin: 4px 16px 0 20px;
 }
 
-.layout-sheet .planned-exercise-card .planned-squeeze-cue {
+.layout-sheet .planned-exercise-card .squeeze-cue-box {
   border-color: transparent;
 }
 
