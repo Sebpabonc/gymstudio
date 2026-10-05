@@ -1064,7 +1064,7 @@ export default function WorkoutPlan({
       ? Array.from({ length: fallbackSetCount }, () => aiExercise.weight)
       : nextTarget
         ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
-        : appliedTarget
+        : appliedTarget && !otherDayPrefill
           ? applyTargetToWeights(lastWeights, appliedTarget)
           : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
@@ -2171,7 +2171,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const previousDayType = previousSelection?.basis === 'other-day'
               ? getDayKeyType(previousEntry?.dayKey)
               : undefined
-            const previousTarget = previousEntry ? getNextTarget(exercise, previousEntry.sets) : null
+            const previousTarget = previousEntry && previousSelection?.basis !== 'other-day'
+              ? getNextTarget(exercise, previousEntry.sets)
+              : null
             previousSetsByExercise.set(exercise.code ?? exercise.name, previousSets)
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
               id: entry.id,
