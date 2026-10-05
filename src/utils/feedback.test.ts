@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-const { insert } = vi.hoisted(() => ({ insert: vi.fn() }))
+const { from, insert } = vi.hoisted(() => ({
+  from: vi.fn(),
+  insert: vi.fn(),
+}))
 
 vi.mock('../lib/supabaseClient', () => ({
-  getSupabaseClient: vi.fn(async () => ({ from: () => ({ insert }) })),
+  getSupabaseClient: vi.fn(async () => ({ from })),
 }))
 
 afterEach(() => {
@@ -13,6 +16,7 @@ afterEach(() => {
 
 describe('submitFeedback', () => {
   it('inserts feedback with app metadata using the signed-in client', async () => {
+    from.mockReturnValue({ insert })
     insert.mockResolvedValue({ error: null })
     const { submitFeedback } = await import('./feedback')
 
@@ -24,6 +28,7 @@ describe('submitFeedback', () => {
       language: 'en',
     })
 
+    expect(from).toHaveBeenCalledWith('feedback')
     expect(insert).toHaveBeenCalledWith({
       type: 'content',
       message: 'The exercise description needs an update.',
@@ -34,6 +39,7 @@ describe('submitFeedback', () => {
   })
 
   it('maps insert failures to a friendly error code', async () => {
+    from.mockReturnValue({ insert })
     insert.mockResolvedValue({ error: { message: 'database details' } })
     const { submitFeedback } = await import('./feedback')
 

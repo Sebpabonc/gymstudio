@@ -74,6 +74,10 @@ export default function HelpAndAi({ activeTab, hidden, showPulse, onSignIn }: He
     if (!trimmedQuestion || pending) return
 
     setError('')
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setError(mapAiGatewayError('offline', language))
+      return
+    }
     setMessages((current) => [...current, { role: 'user', text: trimmedQuestion }])
     setQuestion('')
     setPending(true)
