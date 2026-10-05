@@ -49,7 +49,7 @@ export function recommendNextTarget(
   ).length
   const increaseKg = progressionType === 'lower' ? 5 : progressionType === 'isolation' ? 1 : 2.5
 
-  if (firstSetAboveTarget || allSetsHitTarget) {
+  if (allSetsHitTarget || (firstSetAboveTarget && shortByAtLeastThree === 0)) {
     return {
       action: 'increase',
       weight: Number((weight + increaseKg).toFixed(2)),

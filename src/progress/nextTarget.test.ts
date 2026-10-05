@@ -12,14 +12,34 @@ describe('recommendNextTarget', () => {
     ).toMatchObject({ action: 'increase', weight: 12.5, reps: [10, 10, 10] })
   })
 
-  it('uses the first set to recommend an increase even when later sets drop', () => {
+  it('uses a strong first set to recommend an increase when later sets only drop a little', () => {
+    expect(
+      recommendNextTarget(
+        [{ weight: 10, reps: 13 }, { weight: 10, reps: 9 }, { weight: 10, reps: 9 }],
+        [10, 10, 10],
+        'lower'
+      )
+    ).toMatchObject({ action: 'increase', weight: 15 })
+  })
+
+  it('does not increase when later sets fall 3+ reps short, even after a strong first set', () => {
     expect(
       recommendNextTarget(
         [{ weight: 10, reps: 13 }, { weight: 10, reps: 6 }, { weight: 10, reps: 5 }],
         [10, 10, 10],
         'lower'
       )
-    ).toMatchObject({ action: 'increase', weight: 15 })
+    ).toMatchObject({ action: 'reduce' })
+  })
+
+  it('holds the weight for 12/10/8 on a 3x10 plan (PO example)', () => {
+    expect(
+      recommendNextTarget(
+        [{ weight: 10, reps: 12 }, { weight: 10, reps: 10 }, { weight: 10, reps: 8 }],
+        [10, 10, 10],
+        'upper'
+      )
+    ).toMatchObject({ action: 'hold', weight: 10, shortSets: [3] })
   })
 
   it('holds weight when total reps are within two and identifies missed sets', () => {
