@@ -1,0 +1,158 @@
+<title>Exercise Name Size</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: three phones side by side (Current / Larger / Largest) showing the same Planned day; only the exercise name size changes. */
+:root {
+  color-scheme: dark;
+  --bg: #0f0f10;        /* app background (darker surfaces) */
+  --card: #171719;      /* app cards */
+  --page: #09090a;      /* page around the phones */
+  --line: rgba(255, 255, 255, 0.11);
+  --text: #f3f3f1;
+  --muted: #c8c7c4;
+  --mauve: #c99ca1;     /* --nav-active */
+  --cue: #e7bd72;
+  --font: Inter, "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--text); font-family: var(--font); }
+.page { max-width: 1260px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; }
+h1 { margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; text-wrap: balance; }
+.lead { margin: 6px 0 0; max-width: 68ch; color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 22px; }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); }
+.seg button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: 700 0.82rem var(--font); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.07); color: var(--mauve); }
+.seg button:focus-visible { outline: 2px solid var(--mauve); outline-offset: 2px; }
+
+.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; align-items: start; }
+.variant { display: grid; gap: 10px; min-width: 0; }
+.variant-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.variant-head strong { font-size: 1rem; }
+.variant-head span { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.variant.recommended .variant-head strong::after { content: "Recommended"; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(201, 156, 161, 0.16); color: var(--mauve); font-size: 0.7rem; font-weight: 700; vertical-align: 2px; }
+
+/* phone */
+.phone { width: 100%; max-width: 390px; border: 8px solid #000; border-radius: 40px; background: var(--bg); overflow: hidden; }
+.screen { padding: 16px 12px 22px; font-size: 12.16px; display: grid; gap: 10px; }
+.day-title { margin: 4px 2px 0; font-size: 1.18em; font-weight: 700; }
+.day-focus { margin: -6px 2px 2px; color: var(--muted); font-size: 0.84em; }
+.plan { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255, 255, 255, 0.03); }
+.card { display: grid; gap: 8px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; background: var(--card); }
+.card.open { border-color: rgba(201, 156, 161, 0.45); }
+.head { display: flex; align-items: center; gap: 10px; }
+.titles { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.code { font-size: 9.92px; font-weight: 800; letter-spacing: 0.08em; color: var(--muted); }
+.name { font-size: var(--name-size); font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; overflow-wrap: anywhere; }
+.card.open .name { font-size: var(--name-size-open); }
+.name svg { width: 0.8em; height: 0.8em; margin-left: 5px; vertical-align: -0.05em; opacity: 0.9; fill: none; stroke: var(--mauve); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.detail { font-size: 12.16px; color: var(--muted); }
+.toggle { flex: 0 0 40px; width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--text); font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255, 255, 255, 0.06); font-size: 10.6px; font-weight: 700; }
+.meta { color: var(--muted); font-size: 11.5px; }
+.cue { padding: 9px 11px; border: 1px solid rgba(231, 189, 114, 0.35); border-radius: 12px; background: rgba(231, 189, 114, 0.08); font-size: 11.5px; line-height: 1.45; }
+.cue b { color: var(--cue); }
+.ss { display: grid; gap: 8px; padding: 9px; border: 1px solid rgba(201, 156, 161, 0.28); border-radius: 16px; background: rgba(141, 94, 99, 0.1); }
+.ss-head { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 10.6px; }
+.ss-head .chip { font-size: 9.5px; }
+.note { color: var(--muted); font-size: 0.82rem; margin: 0; }
+</style>
+
+<div class="page">
+  <h1>Exercise name size</h1>
+  <p class="lead">Prototype for Sebas: the Planned day (Day 1 · Chest &amp; Back A, Block 6) at three sizes for the exercise name only. Everything else (codes, details, chips, cue, colours) stays exactly as in the app today. Measured in the live app at 390 px: a closed exercise name is 12.8 px bold and it grows to 17 px when you open it — that jump is what you see today.</p>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Icon next to the name">
+      <button type="button" id="icon-arrow" data-icon="arrow" aria-pressed="true">↗ Arrow</button>
+      <button type="button" id="icon-camera" data-icon="camera" aria-pressed="false">Camera</button>
+      <button type="button" id="icon-eye" data-icon="eye" aria-pressed="false">Eye</button>
+      <button type="button" id="icon-none" data-icon="none" aria-pressed="false">No icon</button>
+    </div>
+    <div class="seg" role="group" aria-label="Open card">
+      <button type="button" id="open-none" data-open="none" aria-pressed="true">All closed</button>
+      <button type="button" id="open-a1" data-open="a1" aria-pressed="false">A1 open</button>
+    </div>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-es" data-lang="es" aria-pressed="true">ES</button>
+      <button type="button" id="lang-en" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+
+  <div class="phones" id="phones"></div>
+  <p class="note" style="margin-top:18px">Tapping the name opens Google Images. The icon only hints at that; pick the one you like (Arrow is the usual "opens outside" sign). Larger sizes wrap long names to two lines rather than cutting them off.</p>
+</div>
+
+<script>
+(function () {
+  const variants = [
+    { id: 'current', label: 'Current', size: 12.8, open: 17, note: 'closed 12.8 px · open 17 px' },
+    { id: 'larger', label: 'Larger', size: 16, open: 17, note: 'closed 16 px · open 17 px', recommended: true },
+    { id: 'same', label: 'Same size', size: 17, open: 17, note: 'closed 17 px · open 17 px' },
+  ]
+  const text = {
+    es: {
+      day: 'Día 1 · Pecho y Espalda A', focus: 'Pecho, espalda y abs · pesado', superset: 'Superserie',
+      ssHint: (a, b) => `Haz ${a}, descansa ~10 s, luego ${b}; descansa al final del par.`,
+      meta: '3 series · 8·8·8 reps · 150 s descanso', squeeze: 'Aprieta —',
+      cue: 'Al empujar, aprieta el pecho superior para llevar los bíceps arriba y hacia el mentón, como si cerraras un libro sobre tu cara.',
+      chips: ['Series rectas', 'Inclinado 30°', 'Pecho superior'],
+      ex: {
+        A1: ['Press de banca con mancuernas', 'inclinado'], B1: ['Remo en T en máquina de discos', 'con apoyo de pecho'],
+        C1: ['Press de banca con mancuernas', ''], C2: ['Jalón al pecho en polea', 'agarre supino'],
+        D1: ['Aperturas en polea', 'de arriba hacia abajo'], D2: ['Jalón con brazos rectos en polea', ''], E1: ['Crunch en polea', ''],
+      },
+    },
+    en: {
+      day: 'Day 1 · Chest & Back A', focus: 'Chest, back & abs · heavy', superset: 'Superset',
+      ssHint: (a, b) => `Do ${a}, rest ~10 s, then ${b}; rest after the pair.`,
+      meta: '3 sets · 8·8·8 reps · 150 s rest', squeeze: 'Squeeze —',
+      cue: 'As you press, squeeze your upper chest to bring your biceps up and in toward your chin, as if closing a book over your face.',
+      chips: ['Straight Sets', 'Incline 30°', 'Upper Chest'],
+      ex: {
+        A1: ['Dumbbell Bench Press', 'Incline'], B1: ['Plate-Loaded T-Bar Row', 'Chest-Supported'],
+        C1: ['Dumbbell Bench Press', ''], C2: ['Cable Lat Pulldown', 'Underhand Grip'],
+        D1: ['Cable Fly', 'High to Low'], D2: ['Cable Straight-Arm Pulldown', ''], E1: ['Cable Crunch', ''],
+      },
+    },
+  }
+  const icons = {
+    arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16L16 8"/><path d="M9.5 8H16v6.5"/></svg>',
+    camera: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.2"/></svg>',
+    eye: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>',
+    none: '',
+  }
+  let state = { lang: 'es', icon: 'arrow', open: 'none' }
+
+  function card(t, code, open) {
+    const [name, detail] = t.ex[code]
+    let html = `<div class="card${open ? ' open' : ''}"><div class="head"><div class="titles"><span class="code">${code}</span><span class="name">${name}${icons[state.icon]}</span>${detail ? `<span class="detail">${detail}</span>` : ''}</div><span class="toggle" aria-hidden="true">${open ? '−' : '+'}</span></div>`
+    if (open) html += `<div class="chips">${t.chips.map((c) => `<span class="chip">${c}</span>`).join('')}</div><div class="meta">${t.meta}</div><div class="cue"><b>${t.squeeze}</b> ${t.cue}</div>`
+    return html + '</div>'
+  }
+  function superset(t, a, b) {
+    return `<div class="ss"><div class="ss-head"><span class="chip">${t.superset}</span>${t.ssHint(a, b)}</div>${card(t, a)}${card(t, b)}</div>`
+  }
+  function render() {
+    const lang = state.lang
+    const t = text[lang]
+    document.getElementById('phones').innerHTML = variants.map((v) => `
+      <section class="variant${v.recommended ? ' recommended' : ''}" style="--name-size:${v.size}px;--name-size-open:${v.open}px" aria-label="${v.label}">
+        <div class="variant-head"><strong>${v.label}</strong><span>${v.note}</span></div>
+        <div class="phone"><div class="screen">
+          <p class="day-title">${t.day}</p><p class="day-focus">${t.focus}</p>
+          <div class="plan">${card(t, 'A1', state.open === 'a1')}${card(t, 'B1')}${superset(t, 'C1', 'C2')}${superset(t, 'D1', 'D2')}${card(t, 'E1')}</div>
+        </div></div>
+      </section>`).join('')
+    for (const key of ['lang', 'icon', 'open']) {
+      document.querySelectorAll(`[data-${key}]`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[key] === state[key])))
+    }
+  }
+  for (const key of ['lang', 'icon', 'open']) {
+    document.querySelectorAll(`[data-${key}]`).forEach((b) => b.addEventListener('click', () => { state = { ...state, [key]: b.dataset[key] }; render() }))
+  }
+  render()
+})()
+</script>

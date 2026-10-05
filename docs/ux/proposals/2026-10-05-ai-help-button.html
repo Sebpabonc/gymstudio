@@ -1,0 +1,253 @@
+<title>AI Help Button</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one phone running a clickable prototype (Today + dock + new round AI button) beside short design notes. */
+:root {
+  color-scheme: dark;
+  --page: #09090a;
+  --bg: #0f0f10;
+  --card: #171719;
+  --line: rgba(255, 255, 255, 0.11);
+  --text: #f3f3f1;
+  --muted: #c8c7c4;
+  --mauve: #c99ca1;
+  --brand: #8d5e63;
+  --glass: rgba(22, 22, 24, 0.55);
+  --glass-line: rgba(255, 255, 255, 0.14);
+  --ok: #7cbd91;
+  --font: Inter, "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--text); font-family: var(--font); }
+.page { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; }
+h1 { margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+.lead { margin: 6px 0 18px; max-width: 70ch; color: var(--muted); line-height: 1.5; font-size: 0.95rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); }
+.seg button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: 700 0.82rem var(--font); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.07); color: var(--mauve); }
+button:focus-visible, textarea:focus-visible { outline: 2px solid var(--mauve); outline-offset: 2px; }
+.layout { display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); gap: 36px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } .phone { margin-inline: auto; } }
+
+/* phone */
+.phone { position: relative; width: 100%; max-width: 390px; height: 820px; border: 8px solid #000; border-radius: 42px; background: var(--bg); overflow: hidden; }
+.screen { position: absolute; inset: 0; overflow-y: auto; padding: 18px 12px 120px; font-size: 12.16px; scrollbar-width: none; }
+.bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.word { font-size: 30px; font-weight: 800; letter-spacing: -0.05em; }
+.sub { font-size: 15px; font-weight: 700; margin-top: -2px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); }
+.day { margin: 14px 2px 2px; font-size: 15px; font-weight: 700; }
+.focus { margin: 0 2px 10px; color: var(--muted); }
+.plan { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255, 255, 255, 0.03); }
+.ex { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; background: var(--card); }
+.ex div { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.code { font-size: 9.9px; font-weight: 800; letter-spacing: 0.08em; color: var(--muted); }
+.name { font-size: 17px; font-weight: 700; }
+.det { color: var(--muted); }
+.plus { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+
+/* dock + AI button */
+.glass { background: var(--glass); -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%); border: 1px solid var(--glass-line); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 12px 30px rgba(0, 0, 0, 0.45); }
+.dock { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); width: 228px; height: 60px; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; padding: 0 6px; z-index: 5; }
+.dock span { width: 46px; height: 46px; display: grid; place-items: center; color: rgba(243, 243, 241, 0.55); position: relative; }
+.dock span.on { color: var(--mauve); }
+.dock span.on::after { content: ""; position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--mauve); }
+.dock svg, .ai-fab svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.ai-fab { position: absolute; right: 14px; bottom: 22px; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; color: var(--mauve); cursor: pointer; z-index: 6; transition: transform 0.15s ease; }
+.ai-fab:hover { transform: translateY(-1px); }
+.ai-fab .pulse { position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid rgba(201, 156, 161, 0.45); animation: pulse 2.4s ease-out infinite; pointer-events: none; }
+@keyframes pulse { 0% { opacity: 0.8; transform: scale(0.92); } 100% { opacity: 0; transform: scale(1.25); } }
+@media (prefers-reduced-motion: reduce) { .ai-fab .pulse { animation: none; opacity: 0; } .ai-fab, .sheet { transition: none !important; } }
+
+/* sheet */
+.scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 8; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 86%; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; border-radius: 26px 26px 0 0; z-index: 9; padding: 10px 14px 16px; background: rgba(23, 23, 25, 0.9); }
+.grab { width: 38px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 10px; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.tabs { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); }
+.tabs button { min-height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: 700 12px var(--font); cursor: pointer; }
+.tabs button[aria-selected="true"] { background: rgba(255, 255, 255, 0.08); color: var(--mauve); }
+.close { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--text); font-size: 18px; cursor: pointer; }
+.body { overflow-y: auto; display: grid; gap: 10px; align-content: start; padding-bottom: 6px; min-height: 0; }
+.hint { color: var(--muted); font-size: 11.5px; line-height: 1.45; margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-height: 34px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255, 255, 255, 0.05); color: var(--text); font: 600 11.5px var(--font); cursor: pointer; text-align: left; }
+.chip[aria-pressed="true"] { border-color: var(--mauve); color: var(--mauve); background: rgba(201, 156, 161, 0.1); }
+.msg { max-width: 88%; padding: 10px 12px; border-radius: 16px; font-size: 12.5px; line-height: 1.45; }
+.msg.me { justify-self: end; background: rgba(141, 94, 99, 0.35); border-bottom-right-radius: 6px; }
+.msg.ai { justify-self: start; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line); border-bottom-left-radius: 6px; }
+.msg.ai b { color: var(--mauve); }
+.composer { display: flex; gap: 8px; align-items: flex-end; padding-top: 10px; border-top: 1px solid var(--line); }
+.composer textarea { flex: 1; min-width: 0; min-height: 44px; max-height: 110px; resize: none; padding: 11px 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.05); color: var(--text); font: 500 16px var(--font); }
+.send { min-width: 76px; height: 44px; border: 0; border-radius: 14px; background: linear-gradient(135deg, #7a5d60, #2f2f31); color: #f5f5f5; font: 800 12px var(--font); letter-spacing: 0.04em; cursor: pointer; }
+.send:disabled { opacity: 0.45; cursor: default; }
+.foot { color: var(--muted); font-size: 10.5px; text-align: center; margin: 8px 0 0; }
+.thanks { display: grid; gap: 6px; justify-items: center; text-align: center; padding: 22px 10px; }
+.thanks .ok { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: rgba(124, 189, 145, 0.16); color: var(--ok); font-size: 22px; font-weight: 800; }
+
+/* notes */
+.notes { border: 1px solid var(--line); border-radius: 20px; background: var(--card); padding: 22px; display: grid; gap: 14px; font-size: 0.92rem; line-height: 1.5; min-width: 0; }
+.notes h2 { margin: 0; font-size: 1rem; }
+.notes ul { margin: 0; padding-left: 18px; color: var(--muted); display: grid; gap: 6px; }
+.notes b { color: var(--text); }
+</style>
+
+<div class="page">
+  <h1>AI help button</h1>
+  <p class="lead">Prototype for Sebas. A round AI button sits on its own to the right of the menu bar on every screen. Tap it to open one window with two options: ask the AI anything about training, or send a comment about the app. Tap the round button at the bottom right of the phone. The two tabs, the suggested questions and Send all work (answers are examples).</p>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-es" data-lang="es" aria-pressed="true">ES</button>
+      <button type="button" id="lang-en" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="phone" id="phone">
+      <div class="screen">
+        <div class="bar"><span></span><span class="dot" title="Synced"></span></div>
+        <div class="word">GYM STUDIO</div>
+        <div class="sub" id="t-today"></div>
+        <p class="day" id="t-day"></p>
+        <p class="focus" id="t-focus"></p>
+        <div class="plan" id="plan"></div>
+      </div>
+
+      <nav class="dock glass" aria-label="Menu">
+        <span class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span>
+        <span><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span>
+        <span><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></span>
+        <span><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span>
+      </nav>
+      <button type="button" class="ai-fab glass" id="ai-fab" aria-haspopup="dialog">
+        <span class="pulse" aria-hidden="true"></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.7 4.6L18.3 9.3 13.7 11 12 15.6 10.3 11 5.7 9.3 10.3 7.6z"/><path d="M18.5 14.5l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/></svg>
+      </button>
+
+      <div class="scrim" id="scrim" hidden></div>
+      <section class="sheet glass" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+        <div class="grab" aria-hidden="true"></div>
+        <div class="sheet-head">
+          <div class="tabs" role="tablist" id="tabs">
+            <button type="button" role="tab" id="tab-ai" data-tab="ai" aria-selected="true"></button>
+            <button type="button" role="tab" id="tab-feedback" data-tab="feedback" aria-selected="false"></button>
+          </div>
+          <span id="sheet-title" hidden></span>
+          <button type="button" class="close" id="close" aria-label="Close">×</button>
+        </div>
+        <div class="body" id="body"></div>
+        <div id="footer"></div>
+      </section>
+    </div>
+
+    <aside class="notes" aria-label="Design notes">
+      <h2>How it works</h2>
+      <ul>
+        <li><b>Where:</b> a 60 px round glass button, alone at the bottom right next to the menu bar, on every tab. It hides while you type, like the menu bar.</li>
+        <li><b>Ask AI:</b> one chat for any training question (not tied to a single exercise). The AI knows your current block, today's day and your recent sessions. Same limits as Ask AI today (20 questions a day, USD 15 a month), no medical advice, answers in your language.</li>
+        <li><b>Send a comment:</b> pick a type (Problem, Idea, Exercise or content, Other), write it and send. It saves with the app version, screen and language so the team can act on it. You get a "Thanks" right away.</li>
+        <li><b>Where comments go:</b> a new table in the app's database. The Tech Lead turns them into tasks for the team (bugs to QAer/Copilot, content to the PT).</li>
+        <li><b>Exercise "Ask AI" buttons stay</b> inside each exercise for questions about that exercise.</li>
+      </ul>
+      <h2>Decisions for you</h2>
+      <ul>
+        <li>Pulse ring around the button: keep it, or plain button?</li>
+        <li>Do comments need your account, or can guests send them too?</li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+  const copy = {
+    es: {
+      today: 'Hoy', day: 'Día 1 · Pecho y Espalda A', focus: 'Pecho, espalda y abdomen · pesado',
+      ex: [['A1', 'Press de banca con mancuernas', 'inclinado'], ['B1', 'Remo en T en máquina de discos', 'con apoyo de pecho'], ['C1', 'Press de banca con mancuernas', ''], ['C2', 'Jalón al pecho en polea', 'agarre supino'], ['D1', 'Aperturas en polea', 'de arriba hacia abajo']],
+      fab: 'Ayuda e IA', tabAi: 'Preguntar a la IA', tabFeedback: 'Enviar comentario', close: 'Cerrar',
+      aiHint: 'Pregunta lo que quieras sobre tu entrenamiento. Uso tu bloque actual, el día de hoy y tus últimas sesiones.',
+      suggestions: ['¿Qué debería priorizar hoy?', '¿Cómo progreso si me estanco?', '¿Puedo cambiar un ejercicio si la máquina está ocupada?'],
+      placeholderAi: 'Escribe tu pregunta…', send: 'Enviar', left: '19 preguntas restantes hoy',
+      foot: 'Las respuestas de la IA pueden tener errores. No es consejo médico.',
+      sample: (q) => `<b>Sobre "${q}":</b> Hoy es Pecho y Espalda A, semana 1 del Bloque 6. Empieza con el press inclinado a unas 3 repeticiones de reserva (26 kg por mano según tu historial) y descansa 2,5 minutos. Si una máquina está ocupada, haz las superseries como series normales.`,
+      fbHint: 'Cuéntanos qué mejorarías o qué no funciona. Lo leemos todo.',
+      types: ['Problema', 'Idea', 'Ejercicio o contenido', 'Otro'], placeholderFb: 'Escribe tu comentario…',
+      fbMeta: 'Se envía con: versión de la app, pantalla actual (Hoy) e idioma.',
+      thanks: '¡Gracias! Recibimos tu comentario.', thanksSub: 'Lo revisamos y te avisamos si hace falta más información.', another: 'Enviar otro',
+    },
+    en: {
+      today: 'Today', day: 'Day 1 · Chest & Back A', focus: 'Chest, back & abs · heavy',
+      ex: [['A1', 'Dumbbell Bench Press', 'Incline'], ['B1', 'Plate-Loaded T-Bar Row', 'Chest-Supported'], ['C1', 'Dumbbell Bench Press', ''], ['C2', 'Cable Lat Pulldown', 'Underhand Grip'], ['D1', 'Cable Fly', 'High to Low']],
+      fab: 'Help and AI', tabAi: 'Ask AI', tabFeedback: 'Send feedback', close: 'Close',
+      aiHint: 'Ask anything about your training. I use your current block, today’s day and your recent sessions.',
+      suggestions: ['What should I focus on today?', 'How do I progress if I stall?', 'Can I swap an exercise if the machine is busy?'],
+      placeholderAi: 'Type your question…', send: 'Send', left: '19 questions left today',
+      foot: 'AI answers can be wrong. Not medical advice.',
+      sample: (q) => `<b>About "${q}":</b> Today is Chest & Back A, week 1 of Block 6. Start the incline press about 3 reps short of failure (26 kg per hand from your history) and rest 2.5 minutes. If a machine is busy, do the supersets as straight sets.`,
+      fbHint: 'Tell us what you would improve or what isn’t working. We read everything.',
+      types: ['Problem', 'Idea', 'Exercise or content', 'Other'], placeholderFb: 'Write your comment…',
+      fbMeta: 'Sent with: app version, current screen (Today) and language.',
+      thanks: 'Thanks! We got your comment.', thanksSub: 'We’ll review it and reach out if we need more detail.', another: 'Send another',
+    },
+  }
+  let state = { lang: 'es', open: false, tab: 'ai', chat: [], fbType: 0, fbSent: false }
+  const $ = (id) => document.getElementById(id)
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+
+  function renderScreen() {
+    const t = copy[state.lang]
+    $('t-today').textContent = t.today; $('t-day').textContent = t.day; $('t-focus').textContent = t.focus
+    $('plan').innerHTML = t.ex.map(([c, n, d]) => `<div class="ex"><div><span class="code">${c}</span><span class="name">${n}</span>${d ? `<span class="det">${d}</span>` : ''}</div><span class="plus">+</span></div>`).join('')
+    $('ai-fab').setAttribute('aria-label', t.fab)
+    $('tab-ai').textContent = t.tabAi; $('tab-feedback').textContent = t.tabFeedback
+    $('close').setAttribute('aria-label', t.close); $('sheet-title').textContent = t.fab
+    document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)))
+  }
+
+  function renderSheet() {
+    const t = copy[state.lang]
+    $('sheet').hidden = !state.open; $('scrim').hidden = !state.open
+    document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === state.tab)))
+    if (!state.open) return
+    if (state.tab === 'ai') {
+      const chat = state.chat.map((m) => `<div class="msg ${m.from}">${m.from === 'ai' ? m.html : esc(m.text)}</div>`).join('')
+      $('body').innerHTML = `<p class="hint">${t.aiHint}</p>${state.chat.length ? '' : `<div class="chips">${t.suggestions.map((q, i) => `<button type="button" class="chip" data-suggest="${i}">${q}</button>`).join('')}</div>`}${chat}`
+      $('footer').innerHTML = `<form class="composer" id="ai-form"><textarea id="ai-input" rows="1" maxlength="300" placeholder="${t.placeholderAi}" aria-label="${t.placeholderAi}"></textarea><button class="send" type="submit">${t.send}</button></form><p class="foot">${t.left} · ${t.foot}</p>`
+      $('ai-form').addEventListener('submit', (e) => { e.preventDefault(); ask($('ai-input').value) })
+    } else if (state.fbSent) {
+      $('body').innerHTML = `<div class="thanks"><span class="ok">✓</span><strong>${t.thanks}</strong><p class="hint">${t.thanksSub}</p><button type="button" class="chip" id="fb-again">${t.another}</button></div>`
+      $('footer').innerHTML = ''
+      $('fb-again').addEventListener('click', () => { state.fbSent = false; renderSheet() })
+    } else {
+      $('body').innerHTML = `<p class="hint">${t.fbHint}</p><div class="chips" role="group">${t.types.map((x, i) => `<button type="button" class="chip" data-fbtype="${i}" aria-pressed="${i === state.fbType}">${x}</button>`).join('')}</div><p class="hint">${t.fbMeta}</p>`
+      $('footer').innerHTML = `<form class="composer" id="fb-form"><textarea id="fb-input" rows="3" maxlength="1000" placeholder="${t.placeholderFb}" aria-label="${t.placeholderFb}"></textarea><button class="send" type="submit">${t.send}</button></form>`
+      $('fb-form').addEventListener('submit', (e) => { e.preventDefault(); if ($('fb-input').value.trim()) { state.fbSent = true; renderSheet() } })
+    }
+    $('body').scrollTop = $('body').scrollHeight
+  }
+
+  function ask(question) {
+    const q = question.trim(); if (!q) return
+    const t = copy[state.lang]
+    state.chat.push({ from: 'me', text: q }, { from: 'ai', html: t.sample(esc(q)) })
+    renderSheet()
+  }
+
+  $('ai-fab').addEventListener('click', () => { state.open = true; renderSheet(); setTimeout(() => $('ai-input')?.focus({ preventScroll: true }), 50) })
+  $('close').addEventListener('click', () => { state.open = false; renderSheet(); $('ai-fab').focus() })
+  $('scrim').addEventListener('click', () => { state.open = false; renderSheet() })
+  $('tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b) { state.tab = b.dataset.tab; renderSheet() } })
+  $('body').addEventListener('click', (e) => {
+    const s = e.target.closest('[data-suggest]'); if (s) ask(copy[state.lang].suggestions[+s.dataset.suggest])
+    const f = e.target.closest('[data-fbtype]'); if (f) { state.fbType = +f.dataset.fbtype; renderSheet() }
+  })
+  document.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => { state.lang = b.dataset.lang; state.chat = []; renderScreen(); renderSheet() }))
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.open) { state.open = false; renderSheet() } })
+
+  renderScreen()
+  renderSheet()
+})()
+</script>
