@@ -24,7 +24,7 @@ export function recommendNextTarget(
 
   const weight = loggedSets[0].weight
   const shortSets = plannedReps.flatMap((target, index) =>
-    (loggedSets[index]?.reps ?? 0) < target ? [index + 1] : []
+    loggedSets[index] && loggedSets[index].reps < target ? [index + 1] : []
   )
 
   if (deload) {
@@ -44,8 +44,10 @@ export function recommendNextTarget(
   const allSetsHitTarget = plannedReps.every(
     (target, index) => loggedSets[index] !== undefined && loggedSets[index].reps >= target
   )
+  const allSetsLogged = plannedReps.every((_, index) => loggedSets[index] !== undefined)
   const shortByAtLeastThree = plannedReps.filter(
-    (target, index) => target - (loggedSets[index]?.reps ?? 0) >= 3
+    (target, index) =>
+      loggedSets[index] !== undefined && target - loggedSets[index].reps >= 3
   ).length
   const increaseKg = progressionType === 'lower' ? 5 : progressionType === 'isolation' ? 1 : 2.5
 
@@ -61,7 +63,7 @@ export function recommendNextTarget(
     }
   }
 
-  if (shortByAtLeastThree >= 2) {
+  if (allSetsLogged && shortByAtLeastThree >= 2) {
     const roundedWeight = Math.round((weight * 0.925) / 2.5) * 2.5
     return {
       action: 'reduce',
