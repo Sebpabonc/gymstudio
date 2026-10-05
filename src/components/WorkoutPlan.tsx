@@ -20,6 +20,8 @@ import { isDemoMode } from '../utils/demoMode'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
 import {
   fetchTrainingBlocks,
+  fetchActiveUserPlan,
+  getCachedActiveUserPlan,
   getCachedTrainingBlocks,
   getActiveBlockId,
   getExerciseDisplayName,
@@ -69,6 +71,7 @@ import {
 } from '../utils/workoutSets'
 import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from '../utils/supersets'
 import { recommendNextTarget, type NextTarget, type ProgressionType } from '../progress/nextTarget'
+import { selectPlanBlocks } from '../plans/selectPlanBlocks'
 import {
   captureUndoSnapshots,
   createSessionSummary,
@@ -375,12 +378,14 @@ export default function WorkoutPlan({
   mode,
   lockMode = false,
   authStatus = 'signed-out',
+  authUserId = null,
   onSignIn,
   onStartRest,
 }: {
   mode?: PlanMode
   lockMode?: boolean
   authStatus?: AuthStatus
+  authUserId?: string | null
   onSignIn: () => void
   onStartRest: (durationSeconds: number, label?: string) => void
 }) {
@@ -636,16 +641,25 @@ export default function WorkoutPlan({
 
   useEffect(() => {
     let cancelled = false
-    // Fast first load: render from the blocks saved on this device right away, then refresh from
-    // the server in the background (the selection is only set on the first render).
-    const apply = (exercises: Exercise[], entries: WorkoutEntry[], blocks: TrainingBlock[], selectDay: boolean) => {
+    const signedIn = authStatus === 'signed-in' && !demoMode
+    const cachedPlan = signedIn ? getCachedActiveUserPlan() : null
+    const globalCache = getCachedTrainingBlocks() ?? []
+    const cachedBlocks = selectPlanBlocks(globalCache, cachedPlan, signedIn, demoMode)
+    const apply = (
+      exercises: Exercise[],
+      entries: WorkoutEntry[],
+      blocks: TrainingBlock[],
+      selectDay: boolean,
+      personalPlan: boolean,
+    ) => {
       if (cancelled) return
       setExerciseCatalog(exercises)
       setHistory(entries)
       setTrainingBlocks(blocks)
-      if (!selectDay) return
-      const savedBlockId = getActiveBlockId()
-      const pinnedBlock = blocks.find((block) => block.id === savedBlockId)
+      const selectedBlockExists = blocks.some((block) => block.id === selectedBlockId)
+      if (!selectDay && !personalPlan && selectedBlockExists) return
+      const savedBlockId = personalPlan ? null : getActiveBlockId()
+      const pinnedBlock = savedBlockId ? blocks.find((block) => block.id === savedBlockId) : undefined
       const nextBlock = pinnedBlock ?? defaultActiveBlock(blocks, getTodayIsoDate())
       if (savedBlockId && !pinnedBlock) setActiveBlockId(null)
       setPinnedBlockId(pinnedBlock?.id ?? '')
@@ -653,15 +667,20 @@ export default function WorkoutPlan({
       setSelectedDay(nextBlock ? todayTrainingDay(nextBlock, entries)?.key ?? '' : '')
     }
     void Promise.all([loadExercises(), loadWorkoutHistory()]).then(([exercises, entries]) => {
-      const cached = getCachedTrainingBlocks()
-      if (cached?.length) apply(exercises, entries, cached, true)
-      void fetchTrainingBlocks().then((blocks) => apply(exercises, entries, blocks, !cached?.length))
+      if (cachedBlocks.length) apply(exercises, entries, cachedBlocks, true, !!cachedPlan)
+      void Promise.all([
+        fetchTrainingBlocks(),
+        signedIn ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
+      ]).then(([globalBlocks, activePlan]) => {
+        const blocks = selectPlanBlocks(globalBlocks, activePlan, signedIn, demoMode)
+        apply(exercises, entries, blocks, !cachedBlocks.length, !!(signedIn && activePlan))
+      })
     })
 
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [authStatus, authUserId, demoMode])
 
   useEffect(() => {
     if (planMode !== 'preset') return

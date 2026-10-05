@@ -824,6 +824,99 @@ button {
   margin: 0 auto;
 }
 
+.personal-plan-details,
+.personal-plan-days,
+.personal-plan-active,
+.personal-plan-preview,
+.personal-plan-confirmation {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.personal-plan-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.personal-plan-heading h3,
+.personal-plan-active h3,
+.personal-plan-preview h3,
+.personal-plan-day h4 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.personal-plan-badge {
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--text);
+  padding: 5px 9px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.personal-plan-details > p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.personal-plan-insights,
+.personal-plan-day ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.personal-plan-insights li,
+.personal-plan-day {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.personal-plan-insights p {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.personal-plan-day {
+  display: grid;
+  gap: 8px;
+}
+
+.personal-plan-day > p {
+  margin: 0;
+}
+
+.personal-plan-day li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 10px;
+  min-width: 0;
+}
+
+.personal-plan-day li span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.personal-plan-day li strong {
+  white-space: nowrap;
+}
+
+.personal-plan-actions {
+  display: grid;
+  gap: 8px;
+}
+
 .card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--line);
