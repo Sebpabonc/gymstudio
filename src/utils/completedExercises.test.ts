@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { WorkoutEntry } from '../types'
-import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, summarizeCompletedEntry, upsertScopedEntry } from './completedExercises'
+import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, findPrefillSelection, summarizeCompletedEntry, upsertScopedEntry } from './completedExercises'
 
 const entry = (overrides: Partial<WorkoutEntry> = {}): WorkoutEntry => ({
   id: 'e1',
@@ -58,20 +58,45 @@ describe('completed exercises', () => {
 })
 
 describe('findPrefillEntry', () => {
-  const make = (id: string, date: string, dayKey: string, weight: number): WorkoutEntry => ({
+  const make = (id: string, date: string, dayKey: string, weight: number, reps = 8): WorkoutEntry => ({
     id,
     exerciseId: 'press',
     date,
     dayKey,
-    sets: [{ id: `${id}-1`, reps: 8, weight }],
+    sets: [{ id: `${id}-1`, reps, weight }],
   })
 
-  it('prefers the latest session of the same day, else the latest overall', () => {
-    const list = [make('a', '2026-09-01', 'A', 20), make('b', '2026-09-10', 'B', 24), make('c', '2026-09-20', 'A', 26)]
-    expect(findPrefillEntry(list, 'press', 'A')?.id).toBe('c')
-    expect(findPrefillEntry(list, 'press', 'B')?.id).toBe('b')
+  it('prefers the latest matching day before falling back to its paired day', () => {
+    const list = [
+      make('a', '2026-09-01', 'chest-back-a', 20),
+      make('b', '2026-09-10', 'chest-back-b', 24),
+      make('c', '2026-09-20', 'chest-back-a', 26),
+    ]
+    expect(findPrefillEntry(list, 'press', 'chest-back-a')?.id).toBe('c')
+    expect(findPrefillEntry(list, 'press', 'chest-back-b')?.id).toBe('b')
+    expect(findPrefillEntry(list, 'press', 'chest-back-c')?.id).toBe('c')
     expect(findPrefillEntry(list, 'press', 'C')?.id).toBe('c')
-    expect(findPrefillEntry(list, 'other', 'A')).toBeUndefined()
+    expect(findPrefillEntry(list, 'other', 'chest-back-a')).toBeUndefined()
+  })
+
+  it('uses A as the basis for the first B session while retaining same-day history afterward', () => {
+    const aSession = make('a', '2026-09-01', 'chest-back-a', 10, 10)
+    const bSession = make('b', '2026-09-10', 'chest-back-b', 12.5, 15)
+
+    expect(findPrefillSelection([aSession], 'press', 'chest-back-b')).toEqual({
+      entry: aSession,
+      basis: 'other-day',
+    })
+    expect(findPrefillSelection([bSession, aSession], 'press', 'chest-back-b')).toEqual({
+      entry: bSession,
+      basis: 'same-day',
+    })
+    expect(findPrefillSelection([aSession], 'press', 'chest-back-a')).toEqual({
+      entry: aSession,
+      basis: 'same-day',
+    })
+    const uppercaseA = make('upper-a', '2026-09-01', 'A', 10, 10)
+    expect(findPrefillEntry([uppercaseA], 'press', 'B')?.id).toBe('upper-a')
   })
 })
 

@@ -19,6 +19,10 @@ export function workoutMaxWeight(sets: WorkoutSet[]) {
   return Math.max(...sets.map((set) => set.weight), 0)
 }
 
+export function scaleWeightForOtherDay(weight: number) {
+  return Math.max(0, Math.floor((weight * 0.9 + Number.EPSILON) / 2.5) * 2.5)
+}
+
 export function getPreviousWorkoutSets(history: WorkoutEntry[], exerciseId?: string) {
   return history
     .filter((entry) => !exerciseId || entry.exerciseId === exerciseId)

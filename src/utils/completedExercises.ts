@@ -39,11 +39,47 @@ export function findNextPendingIndex(done: boolean[], currentIndex: number): num
   return -1
 }
 
-export function findPrefillEntry(entries: WorkoutEntry[], exerciseId: string, dayKey?: string): WorkoutEntry | undefined {
+export type PrefillSelection = {
+  entry: WorkoutEntry
+  basis: 'same-day' | 'other-day' | 'latest'
+}
+
+export function getDayKeyType(dayKey?: string): 'A' | 'B' | undefined {
+  const match = dayKey?.match(/(?:^|-)([ab])$/i)
+  return match ? match[1].toUpperCase() as 'A' | 'B' : undefined
+}
+
+function getPairedDayKey(dayKey: string) {
+  const type = getDayKeyType(dayKey)
+  if (!type) return undefined
+  const suffix = dayKey.slice(-1)
+  const replacement = type === 'A' ? 'B' : 'A'
+  return dayKey.replace(/[ab]$/i, suffix === suffix.toUpperCase() ? replacement : replacement.toLowerCase())
+}
+
+export function findPrefillSelection(
+  entries: WorkoutEntry[],
+  exerciseId: string,
+  dayKey?: string
+): PrefillSelection | undefined {
   const latestFirst = entries
     .filter((entry) => entry.exerciseId === exerciseId && entry.sets.length > 0)
     .sort((a, b) => b.date.localeCompare(a.date))
-  return (dayKey ? latestFirst.find((entry) => entry.dayKey === dayKey) : undefined) ?? latestFirst[0]
+  if (dayKey) {
+    const sameDay = latestFirst.find((entry) => entry.dayKey === dayKey)
+    if (sameDay) return { entry: sameDay, basis: 'same-day' }
+    const pairedDayKey = getPairedDayKey(dayKey)
+    if (pairedDayKey) {
+      const otherDay = latestFirst.find((entry) => entry.dayKey === pairedDayKey)
+      return otherDay ? { entry: otherDay, basis: 'other-day' } : undefined
+    }
+  }
+  const latest = latestFirst[0]
+  return latest ? { entry: latest, basis: 'latest' } : undefined
+}
+
+export function findPrefillEntry(entries: WorkoutEntry[], exerciseId: string, dayKey?: string): WorkoutEntry | undefined {
+  return findPrefillSelection(entries, exerciseId, dayKey)?.entry
 }
 
 export function upsertScopedEntry(

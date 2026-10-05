@@ -2792,6 +2792,13 @@ button {
   text-transform: uppercase;
 }
 
+.previous-day-label {
+  display: block;
+  font-size: 0.85em;
+  font-weight: 500;
+  text-transform: none;
+}
+
 .planned-set-row {
   width: 100%;
   padding: 2px 4px;

@@ -54,6 +54,19 @@ describe('AI coach loop payloads', () => {
       exercises: [planExercise],
     })
   })
+
+  it('preserves the other-day basis in the AI plan payload', () => {
+    const exercise: CoachPlanExercise = {
+      ...planExercise,
+      sets: 3,
+      reps: [15, 15, 15],
+      ruleTarget: { weight: 7.5, reps: [15, 15, 15] },
+      last: [{ weight: 10, reps: 10 }],
+      basis: 'other-day',
+    }
+    expect(buildNextSessionPlanPayload('block-1', 'chest-back-b', 1, [exercise]).exercises[0])
+      .toEqual(exercise)
+  })
 })
 
 describe('next-session plan validation', () => {
