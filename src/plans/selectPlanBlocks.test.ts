@@ -8,6 +8,11 @@ const personalBlock = { id: 'personal' } as TrainingBlock
 const personalPlan = { block: personalBlock } as SavedUserPlan
 
 describe('selectPlanBlocks', () => {
+  it('returns no blocks when the server list is empty and there is no personal plan', () => {
+    expect(selectPlanBlocks([], null, true, false)).toEqual([])
+    expect(selectPlanBlocks([], null, false, false)).toEqual([])
+  })
+
   it('uses the personal block for a signed-in user with a plan', () => {
     expect(selectPlanBlocks([globalBlock], personalPlan, true, false)).toEqual([personalBlock])
   })
