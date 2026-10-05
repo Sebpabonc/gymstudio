@@ -119,3 +119,13 @@ describe('exercise filters', () => {
     expect(getExerciseTips(bundled)).toEqual(['Bundled'])
   })
 })
+
+describe('search ranking', () => {
+  it('puts primary-muscle matches before secondary-muscle matches', () => {
+    const exercises = [
+      { id: 'plank', name: 'Plank', primaryMuscle: 'Abs', primaryMuscles: ['Abs'], secondaryMuscles: ['Glutes'], bodyRegion: 'Core' },
+      { id: 'hip-thrust', name: 'Hip Thrust', primaryMuscle: 'Glutes', primaryMuscles: ['Glutes'], secondaryMuscles: ['Hamstrings'], bodyRegion: 'Glutes' },
+    ]
+    expect(filterExercises(exercises as never, 'glutes').map((exercise) => exercise.id)).toEqual(['hip-thrust', 'plank'])
+  })
+})

@@ -44,27 +44,41 @@ export function getAvailableBodyRegions(exercises: Exercise[]) {
 
 export function filterExercises(exercises: Exercise[], query: string, bodyRegion = ALL_BODY_REGIONS) {
   const searchTerms = getExerciseSearchTerms(query)
+  const matchesAll = (values: Array<string | undefined>) => {
+    const text = normalizeExerciseSearchText(values.filter(Boolean).join(' '))
+    return searchTerms.every((term) => text.includes(term))
+  }
 
-  return exercises.filter((exercise) => {
-    if (bodyRegion !== ALL_BODY_REGIONS && exercise.bodyRegion !== bodyRegion) return false
-    if (!searchTerms.length) return true
+  // Rank: name match first, then primary muscle / body region, then secondary-muscle-only matches.
+  const ranked: Array<{ exercise: Exercise; tier: number }> = []
+  for (const exercise of exercises) {
+    if (bodyRegion !== ALL_BODY_REGIONS && exercise.bodyRegion !== bodyRegion) continue
+    if (!searchTerms.length) {
+      ranked.push({ exercise, tier: 0 })
+      continue
+    }
 
-    const muscles = [
-      ...(exercise.primaryMuscles ?? [exercise.primaryMuscle]),
-      ...(exercise.secondaryMuscles ?? (exercise.secondaryMuscle ? [exercise.secondaryMuscle] : [])),
-    ]
-    const searchableValues = [
-      exercise.name,
-      exercise.nameEs,
-      ...muscles,
-      ...muscles.flatMap(getMuscleSearchTermsEs),
+    const primary = exercise.primaryMuscles ?? [exercise.primaryMuscle]
+    const secondary = exercise.secondaryMuscles ?? (exercise.secondaryMuscle ? [exercise.secondaryMuscle] : [])
+    const nameValues = [exercise.name, exercise.nameEs, exercise.equipment]
+    const primaryValues = [
+      ...nameValues,
+      ...primary,
+      ...primary.flatMap(getMuscleSearchTermsEs),
+      exercise.bodyRegion,
       localizeBodyRegion(exercise.bodyRegion, 'es'),
-      exercise.equipment,
     ]
+    const allValues = [...primaryValues, ...secondary, ...secondary.flatMap(getMuscleSearchTermsEs)]
 
-    const normalizedValues = normalizeExerciseSearchText(searchableValues.filter(Boolean).join(' '))
-    return searchTerms.every((term) => normalizedValues.includes(term))
-  })
+    if (matchesAll(nameValues)) ranked.push({ exercise, tier: 0 })
+    else if (matchesAll(primaryValues)) ranked.push({ exercise, tier: 1 })
+    else if (matchesAll(allValues)) ranked.push({ exercise, tier: 2 })
+  }
+
+  return ranked
+    .map((item, index) => ({ ...item, index }))
+    .sort((a, b) => a.tier - b.tier || a.index - b.index)
+    .map((item) => item.exercise)
 }
 
 export function getExerciseSubtitle(exercise: Exercise, language: Language = 'en') {
