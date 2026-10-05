@@ -52,7 +52,7 @@ import {
   todayTrainingDay,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
-import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, formatLoggedTime, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
+import { findCompletedEntry, findNextPendingIndex, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
@@ -61,6 +61,7 @@ import {
   getPreviousWorkoutSetRow,
   parseRepPrescription,
   selectCompletedSets,
+  scaleWeightForOtherDay,
   stepWorkoutValue,
   workoutMaxWeight,
   workoutVolume,
@@ -914,10 +915,16 @@ export default function WorkoutPlan({
         code: planned.code,
         technique: planned.technique,
       }
-      const lastEntry = findPrefillEntry(entries, planned.exerciseId, day.key)
-      const target = lastEntry ? getNextTarget(exercise, lastEntry.sets, week === 6) : null
+      const prefill = findPrefillSelection(entries, planned.exerciseId, day.key)
+      const lastEntry = prefill?.entry
+      const target = lastEntry && prefill?.basis !== 'other-day'
+        ? getNextTarget(exercise, lastEntry.sets, week === 6)
+        : null
       const setCount = target?.setCount ?? (week === 6 ? Math.ceil(planned.sets / 2) : planned.sets)
       const reps = target?.reps ?? getExerciseTargetReps(exercise).slice(0, setCount)
+      const otherDayWeight = prefill?.basis === 'other-day'
+        ? scaleWeightForOtherDay(lastEntry?.sets[0]?.weight ?? 0)
+        : undefined
       return {
         code: planned.code,
         exerciseId: planned.exerciseId,
@@ -925,9 +932,10 @@ export default function WorkoutPlan({
         sets: setCount,
         reps,
         ruleTarget: {
-          weight: target?.weight ?? lastEntry?.sets[0]?.weight ?? 0,
+          weight: target?.weight ?? otherDayWeight ?? lastEntry?.sets[0]?.weight ?? 0,
           reps,
         },
+        ...(prefill?.basis === 'other-day' ? { basis: 'other-day' as const } : {}),
         last: (lastEntry?.sets ?? []).map(({ weight, reps: loggedReps }) => ({
           weight,
           reps: loggedReps,
@@ -1038,14 +1046,17 @@ export default function WorkoutPlan({
     const prefillExerciseId =
       exercise?.exerciseId ??
       exerciseCatalog.find((item) => normalizeExerciseName(item.name) === normalizeExerciseName(exerciseName))?.id
-    const prefill =
+    const prefillSelection =
       exercise && prefillExerciseId
-        ? findPrefillEntry(history, prefillExerciseId, planMode === 'preset' ? activeDay?.key : undefined)
+        ? findPrefillSelection(history, prefillExerciseId, planMode === 'preset' ? activeDay?.key : undefined)
         : undefined
-    const nextTarget = exercise && prefill ? getNextTarget(exercise, prefill.sets) : null
+    const prefill = prefillSelection?.entry
+    const otherDayPrefill = prefillSelection?.basis === 'other-day'
+    const nextTarget = exercise && prefill && !otherDayPrefill ? getNextTarget(exercise, prefill.sets) : null
     const lastWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
-      return Number(source?.weight ?? bestWeight) || 0
+      const weight = Number(source?.weight ?? bestWeight) || 0
+      return otherDayPrefill ? scaleWeightForOtherDay(weight) : weight
     })
     const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
     const aiExercise = exercise ? getAiPlanExercise(exercise) : undefined
@@ -1053,7 +1064,7 @@ export default function WorkoutPlan({
       ? Array.from({ length: fallbackSetCount }, () => aiExercise.weight)
       : nextTarget
         ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
-        : appliedTarget
+        : appliedTarget && !otherDayPrefill
           ? applyTargetToWeights(lastWeights, appliedTarget)
           : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
@@ -2152,11 +2163,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 return match && normalizeExerciseName(match.name) === exerciseKey
               })
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            const previousSets = getPreviousWorkoutSets(exerciseHistory)
-            const previousEntry = exercise.exerciseId
-              ? findPrefillEntry(history, exercise.exerciseId, planMode === 'preset' ? activeDay?.key : undefined)
-              : exerciseHistory[0]
-            const previousTarget = previousEntry ? getNextTarget(exercise, previousEntry.sets) : null
+            const previousSelection = exercise.exerciseId
+              ? findPrefillSelection(history, exercise.exerciseId, planMode === 'preset' ? activeDay?.key : undefined)
+              : undefined
+            const previousEntry = previousSelection?.entry ?? (exercise.exerciseId ? undefined : exerciseHistory[0])
+            const previousSets = previousEntry?.sets ?? []
+            const previousDayType = previousSelection?.basis === 'other-day'
+              ? getDayKeyType(previousEntry?.dayKey)
+              : undefined
+            const previousTarget = previousEntry && previousSelection?.basis !== 'other-day'
+              ? getNextTarget(exercise, previousEntry.sets)
+              : null
             previousSetsByExercise.set(exercise.code ?? exercise.name, previousSets)
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
               id: entry.id,
@@ -2352,7 +2369,12 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         <div className="planned-set-grid">
                           <div className="planned-set-column-headers" aria-hidden="true">
                             <span>{t('workout.label.set')}</span>
-                            <span>{t('workout.label.previous')}</span>
+                            <span>
+                              {t('workout.label.previous')}
+                              {previousDayType && (
+                                <small className="previous-day-label">{t('workout.previous.day', { day: previousDayType })}</small>
+                              )}
+                            </span>
                             <span>kg</span>
                             <span>{text.repsShort}</span>
                             <span>✓</span>
