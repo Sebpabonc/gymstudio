@@ -26,6 +26,9 @@ export type ProgressInputs = {
 export type StrengthTrendPoint = {
   date: string
   e1rm: number
+  sets: ProgressSet[]
+  bestSetIndex: number
+  volume: number
   dayType: DayType | null
   blockId: string | null
 }

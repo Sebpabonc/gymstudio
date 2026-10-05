@@ -600,6 +600,42 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                 />
                 <p className="trend-takeaway">{trend.takeaway}</p>
                 <p className="chart-legend"><span className="chart-point record legend-dot" /> {t('progress.strength.chart.legend')}</p>
+                <table className="set-history">
+                  <caption>{t('progress.setHistory.caption', { exercise: nameFor(selectedId) })}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t('progress.setHistory.date')}</th>
+                      <th scope="col">{t('progress.setHistory.sets')}</th>
+                      <th scope="col">{t('progress.setHistory.volume')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...trend.points].reverse().map((point) => (
+                      <tr key={point.date}>
+                        <td>{formatShortDate(language, point.date)}</td>
+                        <td>
+                          <ul className="set-history-sets">
+                            {point.sets.map((set, index) => (
+                              <li key={`${set.id}-${index}`} className={index === point.bestSetIndex ? 'best' : undefined}>
+                                <span>{`${formatNumber(language, set.weight)} ${t('progress.unit.kg')} × ${formatNumber(language, set.reps)}`}</span>
+                                {set.drop && (
+                                  <span className="set-history-drop">
+                                    <span aria-hidden="true">→ </span>
+                                    {`${formatNumber(language, set.drop.weight)} ${t('progress.unit.kg')} × ${formatNumber(language, set.drop.reps)}`}
+                                  </span>
+                                )}
+                                {index === point.bestSetIndex && (
+                                  <span className="set-history-best">{t('progress.setHistory.best')}</span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </td>
+                        <td>{`${formatNumber(language, point.volume, { maximumFractionDigits: 1 })} ${t('progress.unit.kg')}`}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </>
             ) : (
               <p className="empty-state">
