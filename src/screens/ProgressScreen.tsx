@@ -11,6 +11,7 @@ import {
   blockReports,
   personalRecords,
   progressSuggestions,
+  suggestionSourceBlock,
   strengthTrend,
   weeklySets,
 } from '../progress'
@@ -33,7 +34,6 @@ import {
   muscleScale,
   muscleStatus,
   recentRecords,
-  reportingBlock,
   reportingWeek,
   RECORD_LABELS,
   RECORD_TOOLTIPS,
@@ -45,7 +45,7 @@ import {
   weeklyPRCount,
   weeklySummary,
 } from '../progress/viewModel'
-import { startOfWeek } from '../progress/utils'
+import { entriesWithinBlock, startOfWeek } from '../progress/utils'
 import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import {
   applyWeightTarget,
@@ -58,6 +58,7 @@ import {
 } from '../utils/storage'
 import type { AskExerciseAiConsent } from '../utils/storage'
 import { baseWeightFromHistory } from '../utils/weightTargets'
+import { defaultActiveBlock, trainingBlockDateStatus } from '../utils/trainingBlocks'
 
 type Props = {
   entries: WorkoutEntry[]
@@ -286,25 +287,69 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   const data = useMemo(() => {
     if (!blocks) return null
     const i18n = { t, language }
-    const suggestions = limitSuggestions(progressSuggestions(entries, blocks, exercises, today, new Set(Object.keys(targets)), i18n))
-    const week = reportingWeek(entries, today)
+    const activeBlock = defaultActiveBlock(blocks, today)
+    const gapWeek = activeBlock !== null && trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
+    const suggestionBlock = suggestionSourceBlock(blocks, activeBlock, today)
+    const progressEntries = gapWeek && activeBlock
+      ? entriesWithinBlock(entries, activeBlock)
+      : entries
+    const suggestions = limitSuggestions(progressSuggestions(
+      entries,
+      blocks,
+      exercises,
+      today,
+      new Set(Object.keys(targets)),
+      i18n,
+      activeBlock
+    ))
+    const week = gapWeek ? startOfWeek(today) : reportingWeek(entries, today)
     const currentWeek = startOfWeek(today)
-    const currentWeekAdherence = adherence(entries, blocks, currentWeek)
-    const adherenceReport = adherence(entries, blocks, week)
+    const currentWeekAdherence = adherence(progressEntries, blocks, currentWeek)
+    const adherenceReport = adherence(progressEntries, blocks, week)
     const records = personalRecords(entries, blocks)
     const prCount = weeklyPRCount(records, currentWeek)
     const reports = visibleBlockReports(blockReports(entries, blocks, exercises), entries, blocks)
-    const weekly = weeklySets(entries, blocks, exercises, week)
+    const weekly = weeklySets(entries, blocks, exercises, week, gapWeek ? activeBlock : undefined)
     const options = exercisesWithHistory(entries, exercises, language)
-    const consistencyBlock = reportingBlock(blocks, entries, today)
-    return { week, currentWeek, currentWeekAdherence, prCount, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options }
+    const consistencyBlock = activeBlock
+    return {
+      week,
+      currentWeek,
+      currentWeekAdherence,
+      prCount,
+      consistencyBlock,
+      gapWeek,
+      activeBlock,
+      suggestionBlock,
+      suggestions,
+      adherenceReport,
+      records,
+      reports,
+      weekly,
+      options,
+    }
   }, [blocks, entries, exercises, language, t, today, targets])
 
   if (!blocks || !data) {
     return <section className="card" aria-live="polite"><p className="empty-state">{t('progress.loading')}</p></section>
   }
 
-  const { week, currentWeek, currentWeekAdherence, prCount, consistencyBlock, suggestions, adherenceReport, records, reports, weekly, options } = data
+  const {
+    week,
+    currentWeek,
+    currentWeekAdherence,
+    prCount,
+    consistencyBlock,
+    gapWeek,
+    activeBlock,
+    suggestionBlock,
+    suggestions,
+    adherenceReport,
+    records,
+    reports,
+    weekly,
+    options,
+  } = data
   const nameFor = (id: string) => {
     const exercise = exercises.find((item) => item.id === id)
     return exercise ? getExerciseDisplayName(exercise, language) : id
@@ -344,7 +389,14 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
   return (
     <>
       <section className="card progress-headline" aria-label={t('progress.headline.label')}>
-        <h2 className="progress-headline-text">{weeklySummary(currentWeekAdherence.week.sessionsDone, currentWeekAdherence.week.sessionsPlanned, prCount, today, i18n)}</h2>
+        <h2 className="progress-headline-text">
+          {gapWeek && activeBlock
+            ? t('progress.headline.blockStarts', {
+              number: activeBlock.number,
+              date: formatShortDate(language, activeBlock.startDate),
+            })
+            : weeklySummary(currentWeekAdherence.week.sessionsDone, currentWeekAdherence.week.sessionsPlanned, prCount, today, i18n)}
+        </h2>
         <div
           className="progress-session-days"
           role="img"
@@ -364,6 +416,13 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
       </section>
 
       <SectionCard id="suggestions" title={t('progress.section.suggestions')}>
+        {gapWeek && suggestionBlock && (
+          <p className="chart-legend">
+            {t('progress.suggestions.sourceBlock', {
+              block: t('progress.block.label', { number: suggestionBlock.number }),
+            })}
+          </p>
+        )}
         {suggestions.length || appliedTargets.length ? (
           <ul className="progress-suggestions">
             {appliedTargets.map(([exerciseId, target]) => (
@@ -430,7 +489,7 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
       </SectionCard>
 
       <SectionCard id="consistency" title={t('progress.section.consistency')}>
-        {hasHistory && (
+        {(hasHistory || gapWeek) && (
           <p className="chart-legend">
             {t('progress.consistency.legend', {
               week: formatWeekLabel(week, today, i18n),

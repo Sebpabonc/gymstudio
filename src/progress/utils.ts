@@ -1,6 +1,7 @@
 import { createTranslator, type Language, type Translate } from '../i18n/translate'
 import { Exercise, PlannedExercise, TrainingBlock } from '../types'
 import { DayType, ProgressEntry, ProgressSet } from './types'
+import { defaultActiveBlock } from '../utils/trainingBlocks'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -49,6 +50,15 @@ export function blockWeek(block: TrainingBlock, date: string) {
   const start = dateValue(block.startDate)
   if (value < start || value >= start + block.weeks * 7 * DAY_MS) return null
   return Math.floor((value - start) / (7 * DAY_MS)) + 1
+}
+
+export function entriesWithinBlock(entries: ProgressEntry[], block: TrainingBlock) {
+  const start = dateValue(block.startDate)
+  const end = start + block.weeks * 7 * DAY_MS
+  return entries.filter((entry) => {
+    const date = dateValue(entry.date)
+    return date >= start && date < end
+  })
 }
 
 export function getDayType(entry: Pick<ProgressEntry, 'date' | 'dayKey'>, blocks: TrainingBlock[]): DayType | null {
@@ -128,11 +138,7 @@ export function prescribedReps(plan: PlannedExercise, index: number) {
 }
 
 export function currentOrLatestBlock(blocks: TrainingBlock[], today: string) {
-  const active = findBlockForDate(blocks, today)
-  if (active) return active
-  return [...blocks]
-    .filter((block) => block.startDate <= today)
-    .sort((a, b) => b.startDate.localeCompare(a.startDate))[0] ?? null
+  return defaultActiveBlock(blocks, today)
 }
 
 export function startOfWeek(date: string) {

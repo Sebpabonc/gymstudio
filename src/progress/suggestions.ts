@@ -1,6 +1,7 @@
 import { formatNumber } from '../i18n/format'
 import { Exercise, TrainingBlock } from '../types'
 import { getExerciseDisplayName } from '../utils/storage'
+import { defaultActiveBlock, trainingBlockDateStatus } from '../utils/trainingBlocks'
 import { ProgressEntry, ProgressSuggestion } from './types'
 import {
   defaultProgressI18n,
@@ -71,9 +72,10 @@ export function progressSuggestions(
   exercises: Exercise[],
   today: string,
   appliedExerciseIds: ReadonlySet<string> = new Set(),
-  { language, t }: ProgressI18n = defaultProgressI18n
+  { language, t }: ProgressI18n = defaultProgressI18n,
+  activeBlock: TrainingBlock | null = defaultActiveBlock(blocks, today)
 ): ProgressSuggestion[] {
-  const block = findBlockForDate(blocks, today)
+  const block = suggestionSourceBlock(blocks, activeBlock, today)
   if (!block) return []
   const sessions = groupExerciseSessions(entries)
   const recentAfter = dateValue(today) - SIX_WEEKS_MS
@@ -164,4 +166,18 @@ export function progressSuggestions(
     ]
   }
   return [...suggestions, ...plateauSuggestions]
+}
+
+export function suggestionSourceBlock(
+  blocks: TrainingBlock[],
+  activeBlock: TrainingBlock | null,
+  today: string
+) {
+  if (!activeBlock) return null
+  const status = trainingBlockDateStatus(activeBlock, today)
+  if (status === 'Current') return activeBlock
+  if (status !== 'Upcoming') return null
+  return [...blocks]
+    .filter((block) => block.startDate < activeBlock.startDate)
+    .sort((a, b) => b.startDate.localeCompare(a.startDate))[0] ?? null
 }
