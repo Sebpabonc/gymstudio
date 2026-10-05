@@ -3,6 +3,7 @@ import { TrainingBlock, WorkoutEntry } from '../types'
 import {
   blockDateRange,
   blockWeek,
+  completedTrainingSessions,
   defaultActiveBlock,
   formatBenchAngle,
   formatBlockMethod,
@@ -143,6 +144,17 @@ describe('next unlogged training day', () => {
 
     expect(nextUnloggedDay(block, [], '2026-10-04')?.key).toBe('day-1')
     expect(nextUnloggedDay(block, weekHistory, '2026-10-08')?.key).toBe('day-1')
+  })
+
+  it('marks only sessions with every planned exercise logged for the same block, day, and date', () => {
+    const history = [
+      entry('press', 'day-1', '2026-10-05'),
+      entry('row', 'day-1', '2026-10-05'),
+      entry('press', 'day-1', '2026-10-06'),
+      entry('curl', 'day-2', '2026-10-05', 'other-block'),
+    ]
+
+    expect(completedTrainingSessions(block, history)).toEqual([{ dayKey: 'day-1', date: '2026-10-05' }])
   })
 })
 

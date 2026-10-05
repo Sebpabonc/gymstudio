@@ -33,6 +33,7 @@ import { applyTargetToWeights, targetAppliesToDay } from '../utils/weightTargets
 import {
   blockDateRange,
   blockWeek,
+  completedTrainingSessions,
   defaultActiveBlock,
   formatBenchAngle,
   formatBlockMethod,
@@ -53,6 +54,7 @@ import {
   workoutVolume,
 } from '../utils/workoutSets'
 import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from '../utils/supersets'
+import { recommendNextTarget, type NextTarget, type ProgressionType } from '../progress/nextTarget'
 import {
   captureUndoSnapshots,
   createSessionSummary,
@@ -96,12 +98,13 @@ type PlanDraft = {
 type PlanMode = 'preset' | 'custom'
 
 type LogToast = {
-  message: string
+  recommendations: Array<{ exerciseKey: string; target: NextTarget; why: string }>
   undoSnapshots: UndoSnapshot[]
 }
 
 type DaySessionSummary = SessionSummary & {
   nextSession?: string
+  nextTargets: Array<{ exerciseId: string; exerciseKey: string; target: NextTarget; why: string }>
   date: string
   blockId?: string
   dayKey?: string
@@ -303,6 +306,13 @@ function formatHistoryDate(language: ReturnType<typeof useT>['language'], value:
   return formatShortDate(language, value)
 }
 
+function formatBlockWeekRange(block: TrainingBlock, week: number, language: ReturnType<typeof useT>['language']) {
+  const start = new Date(`${block.startDate}T00:00:00Z`)
+  start.setUTCDate(start.getUTCDate() + (week - 1) * 7)
+  const end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000)
+  return `${formatShortDate(language, start.toISOString().slice(0, 10))} – ${formatShortDate(language, end.toISOString().slice(0, 10))}`
+}
+
 function getTodayIsoDate() {
   return localIsoDate()
 }
@@ -372,6 +382,7 @@ export default function WorkoutPlan({
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
+  const [selectedCalendarBlockId, setSelectedCalendarBlockId] = useState('')
   const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
   const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({})
   const [completedSupersetSets, setCompletedSupersetSets] = useState<Record<string, boolean[]>>({})
@@ -515,6 +526,11 @@ export default function WorkoutPlan({
       trainingBlocks.find((block) => block.id === selectedBlockId) ??
       defaultActiveBlock(trainingBlocks, today),
     [selectedBlockId, today, trainingBlocks]
+  )
+  const selectedCalendarBlock = trainingBlocks.find((block) => block.id === selectedCalendarBlockId)
+  const calendarBlockSessions = useMemo(
+    () => selectedCalendarBlock ? completedTrainingSessions(selectedCalendarBlock, history) : [],
+    [history, selectedCalendarBlock]
   )
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
   const activeBlockExercises = useMemo(
@@ -676,7 +692,7 @@ export default function WorkoutPlan({
   }, [exerciseCatalog, history])
 
   const getPlanDraftKey = (exerciseName: string) =>
-    `${planMode === 'preset' ? `${activeBlock?.id ?? ''}:${activeDay?.key ?? ''}` : 'custom'}:${normalizeExerciseName(exerciseName)}`
+    `${planMode === 'preset' ? `${activeBlock?.id ?? ''}:${activeDay?.key ?? ''}:${today}` : 'custom'}:${normalizeExerciseName(exerciseName)}`
 
   const updatePlanDraft = (exercise: PlanExercise, field: 'reps' | 'weight' | 'notes', value: string) => {
     const key = getPlanDraftKey(exercise.name)
@@ -776,11 +792,59 @@ export default function WorkoutPlan({
     return reps[1] ?? reps[0] ?? 8
   }
 
-  const getDefaultSetCount = (exercise: PlanExercise) => {
+  const getRawDefaultSetCount = (exercise: PlanExercise) => {
     const raw = exercise.sets ?? '1'
     const match = raw.match(/(\d+)/)
     return match ? Number(match[1]) : 1
   }
+
+  const getDefaultSetCount = (exercise: PlanExercise) => {
+    const setCount = getRawDefaultSetCount(exercise)
+    return planMode === 'preset' && activeBlockWeek === 6 ? Math.ceil(setCount / 2) : setCount
+  }
+
+  const getNextTarget = (
+    exercise: PlanExercise,
+    sets: Pick<WorkoutSet, 'weight' | 'reps'>[],
+    deload = planMode === 'preset' && activeBlockWeek === 6
+  ) => {
+    const exerciseInfo =
+      exerciseCatalog.find((item) => item.id === exercise.exerciseId) ??
+      exerciseCatalog.find((item) => normalizeExerciseName(item.name) === normalizeExerciseName(exercise.name))
+    const progressionType: ProgressionType = exerciseInfo?.mechanic === 'isolation'
+      ? 'isolation'
+      : /lower|leg|glute/i.test(exerciseInfo?.bodyRegion ?? exercise.focus)
+        ? 'lower'
+        : 'upper'
+    const targetReps = Array.from({ length: getRawDefaultSetCount(exercise) }, (_, index) => {
+      const prescription = exercise.repsPerSet?.[index] ?? exercise.reps ?? ''
+      const values = prescription.match(/\d+/g)?.map(Number) ?? []
+      return Math.max(...values, 0)
+    })
+    return recommendNextTarget(sets, targetReps, progressionType, deload)
+  }
+
+  const getNextTargetWhy = (target: NextTarget) => {
+    if (target.action === 'deload') return t('workout.nextTarget.why.deload')
+    if (target.action === 'reduce') return t('workout.nextTarget.why.reduce')
+    if (target.action === 'increase' && target.firstSetAboveTarget) {
+      return t('workout.nextTarget.why.firstSet')
+    }
+    if (target.action === 'increase') {
+      return t('workout.nextTarget.why.increase', { increase: formatNumber(language, target.increaseKg) })
+    }
+    return t('workout.nextTarget.why.hold', {
+      sets: target.shortSets.map((set) => t('workout.nextTarget.set', { set })).join(', '),
+      reps: target.reps[0] ?? 0,
+    })
+  }
+
+  const getNextTargetLabel = (target: NextTarget) =>
+    t('workout.nextTarget.label', {
+      weight: formatNumber(language, target.weight),
+      reps: target.reps[0] ?? 0,
+      sets: target.setCount,
+    })
 
   const getAppliedTarget = (exercise?: PlanExercise, exerciseId?: string) => {
     if (!exercise || !exerciseId) return undefined
@@ -802,12 +866,17 @@ export default function WorkoutPlan({
       exercise && prefillExerciseId
         ? findPrefillEntry(history, prefillExerciseId, planMode === 'preset' ? activeDay?.key : undefined)
         : undefined
+    const nextTarget = exercise && prefill ? getNextTarget(exercise, prefill.sets) : null
     const lastWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       return Number(source?.weight ?? bestWeight) || 0
     })
     const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
-    const baseSetWeights = appliedTarget ? applyTargetToWeights(lastWeights, appliedTarget) : lastWeights
+    const baseSetWeights = nextTarget
+      ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
+      : appliedTarget
+        ? applyTargetToWeights(lastWeights, appliedTarget)
+        : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       return Number(source?.drop?.weight) || Number(((baseSetWeights[index] ?? 0) * 0.75).toFixed(2))
@@ -950,28 +1019,23 @@ export default function WorkoutPlan({
   const showLogToast = (
     entries: WorkoutEntry[],
     previousHistory: WorkoutEntry[],
-    nextHistory: WorkoutEntry[],
-    scope: typeof activeCompletionScope
+    scope: typeof activeCompletionScope,
+    exercises: PlanExercise[]
   ) => {
-    const exerciseNames = entries.map(
-      (entry) => {
-        const exercise = exerciseCatalog.find((item) => item.id === entry.exerciseId)
-        return exercise ? displayExerciseName(exercise) : entry.exerciseId
-      }
-    )
-    const setCount = entries.reduce((total, entry) => total + entry.sets.length, 0)
-    const recordMessages = entries.flatMap((entry) =>
-      getPersonalRecordBadges(entry, nextHistory, trainingBlocks).map((badge) => {
-        if (badge === 'weight') return t('workout.toast.pr.weight', { weight: workoutMaxWeight(entry.sets) })
-        if (badge === 'reps') return t('workout.toast.pr.reps')
-        return t('workout.toast.pr.e1rm')
-      })
-    )
-
     setToast({
-      message: `${t('workout.toast.logged', { exercises: exerciseNames.join(' + ') })} · ${setLabel(setCount)}${
-        recordMessages.length ? ` · ${recordMessages.join(' · ')} 🎉` : ''
-      }`,
+      recommendations: entries.flatMap((entry) => {
+        const exercise = exercises.find((item) =>
+          item.exerciseId === entry.exerciseId ||
+          normalizeExerciseName(item.name) === normalizeExerciseName(
+            exerciseCatalog.find((catalogueItem) => catalogueItem.id === entry.exerciseId)?.name ??
+              entry.exerciseId.replace(/-custom$/, '')
+          )
+        )
+        const target = exercise ? getNextTarget(exercise, entry.sets) : null
+        return target && exercise
+          ? [{ exerciseKey: normalizeExerciseName(exercise.name), target, why: getNextTargetWhy(target) }]
+          : []
+      }),
       undoSnapshots: captureUndoSnapshots(previousHistory, entries, scope),
     })
   }
@@ -1003,6 +1067,18 @@ export default function WorkoutPlan({
         entry.blockId === activeCompletionScope.blockId &&
         entry.dayKey === activeCompletionScope.dayKey
     )
+    const nextTargets = entries.flatMap((entry) => {
+      const exercise = activeExercises.find((item) => item.exerciseId === entry.exerciseId)
+      const target = exercise ? getNextTarget(exercise, entry.sets) : null
+      return target && exercise
+        ? [{
+          exerciseId: entry.exerciseId,
+          exerciseKey: normalizeExerciseName(exercise.name),
+          target,
+          why: getNextTargetWhy(target),
+        }]
+        : []
+    })
     const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
     const scopeKey = getSessionScopeKey(activeCompletionScope, planMode)
     aiSummaryRequestId.current += 1
@@ -1015,6 +1091,7 @@ export default function WorkoutPlan({
         language
       ),
       nextSession: nextDay ? t('workout.day.title', { position: nextDay.position, name: nextDay.name }) : undefined,
+      nextTargets,
       date: activeCompletionScope.date,
       blockId: activeCompletionScope.blockId,
       dayKey: activeCompletionScope.dayKey,
@@ -1100,7 +1177,7 @@ export default function WorkoutPlan({
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
     onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
-    showLogToast([entryToSave], storedHistory, nextHistory, activeCompletionScope)
+    showLogToast([entryToSave], storedHistory, activeCompletionScope, [exercise])
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
     setWeightTargets(consumeWeightTarget(entryToSave.exerciseId, entryToSave.sets))
     setExerciseCatalog(await loadExercises())
@@ -1193,7 +1270,7 @@ export default function WorkoutPlan({
     const loggedAt = Date.now()
     const scope = { ...activeCompletionScope, date }
     startSession(loggedAt, scope)
-    showLogToast(entriesToSave, storedHistory, nextHistory, scope)
+    showLogToast(entriesToSave, storedHistory, scope, exercises)
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
 
     setLogError((current) => ({
@@ -1381,6 +1458,120 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 {text.close}
               </button>
             </div>
+
+            <section className="calendar-program" aria-labelledby="calendar-program-title">
+              <strong id="calendar-program-title">{t('workout.calendar.program')}</strong>
+              {trainingBlocks.length > 0 ? (
+                <div className="calendar-block-list" role="list">
+                  {[...trainingBlocks]
+                    .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.number - b.number)
+                    .map((block) => {
+                      const expanded = selectedCalendarBlockId === block.id
+                      const currentWeek = blockWeek(block, today)
+                      const weeks = Array.from({ length: block.weeks }, (_, index) => index + 1)
+                      return (
+                        <article className="calendar-block" key={block.id} role="listitem">
+                          <button
+                            type="button"
+                            className="calendar-block-toggle"
+                            aria-expanded={expanded}
+                            aria-controls={`calendar-block-details-${block.id}`}
+                            onClick={() => setSelectedCalendarBlockId(expanded ? '' : block.id)}
+                          >
+                            <span className="calendar-block-title-row">
+                              <strong>{t('workout.block.optionTitle', { number: block.number, name: block.name })}</strong>
+                              <span className="calendar-block-status">
+                                {t(blockStatusKey[trainingBlockDateStatus(block, today)])}
+                              </span>
+                            </span>
+                            <span className="calendar-block-meta">
+                              {blockDateRange(block, language)} · {formatBlockMethod(block.method, language)}
+                            </span>
+                          </button>
+                          <div
+                            className="calendar-week-list"
+                            role="list"
+                            aria-label={t('workout.calendar.weeks', { count: block.weeks })}
+                            style={{ gridTemplateColumns: `repeat(${block.weeks}, minmax(0, 1fr))` }}
+                          >
+                            {weeks.map((week) => {
+                              const isCurrentWeek = week === currentWeek
+                              const weekRange = formatBlockWeekRange(block, week, language)
+                              return (
+                                <span
+                                  key={week}
+                                  className={isCurrentWeek ? 'calendar-week current' : 'calendar-week'}
+                                  role="listitem"
+                                  aria-current={isCurrentWeek ? 'date' : undefined}
+                                  aria-label={t('workout.calendar.weekRange', { week, range: weekRange })}
+                                >
+                                  {t('workout.calendar.weekShort', { week })}
+                                </span>
+                              )
+                            })}
+                          </div>
+                          {expanded && (
+                            <div
+                              className="calendar-block-details"
+                              id={`calendar-block-details-${block.id}`}
+                              role="group"
+                              aria-label={block.name}
+                            >
+                              {[...block.days]
+                                .sort((a, b) => a.position - b.position)
+                                .map((day) => {
+                                  const completedDates = calendarBlockSessions
+                                    .filter((session) => session.dayKey === day.key)
+                                    .map((session) => session.date)
+                                  return (
+                                    <article className="calendar-day" key={day.key}>
+                                      <div className="calendar-day-heading">
+                                        <strong>{day.name}</strong>
+                                        {completedDates.map((date) => (
+                                          <span className="calendar-session-completed" key={date}>
+                                            <span aria-hidden="true">✓</span>
+                                            {t('workout.calendar.completedSession', { date: formatHistoryDate(language, date) })}
+                                          </span>
+                                        ))}
+                                      </div>
+                                      {day.focus && <small className="calendar-day-focus">{day.focus}</small>}
+                                      {day.exercises.length > 0 ? (
+                                        <ul className="calendar-exercise-list">
+                                          {[...day.exercises]
+                                            .sort((a, b) => a.position - b.position)
+                                            .map((exercise) => (
+                                              <li key={`${exercise.position}-${exercise.exerciseId}`}>
+                                                <span>
+                                                  {displayExerciseName(
+                                                    exerciseCatalog.find((item) => item.id === exercise.exerciseId) ??
+                                                      exercise.exerciseId
+                                                  )}
+                                                </span>
+                                                <small>
+                                                  {t('workout.calendar.exercisePrescription', {
+                                                    sets: exercise.sets,
+                                                    reps: exercise.reps.join(' · '),
+                                                  })}
+                                                </small>
+                                              </li>
+                                            ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="calendar-no-exercises">{t('workout.calendar.noExercises')}</p>
+                                      )}
+                                    </article>
+                                  )
+                                })}
+                            </div>
+                          )}
+                        </article>
+                      )
+                    })}
+                </div>
+              ) : (
+                <p className="calendar-blocks-empty">{t('workout.calendar.blocksEmpty')}</p>
+              )}
+            </section>
 
             <label className="calendar-field">
               <span>{text.calendarSelect}</span>
@@ -1769,6 +1960,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               })
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             const previousSets = getPreviousWorkoutSets(exerciseHistory)
+            const previousEntry = exercise.exerciseId
+              ? findPrefillEntry(history, exercise.exerciseId, planMode === 'preset' ? activeDay?.key : undefined)
+              : exerciseHistory[0]
+            const previousTarget = previousEntry ? getNextTarget(exercise, previousEntry.sets) : null
             previousSetsByExercise.set(exercise.code ?? exercise.name, previousSets)
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
               id: entry.id,
@@ -1799,6 +1994,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               completedEntry?.date === today
                 ? personalRecordBadgesByEntryId.get(completedEntry.id) ?? []
                 : []
+            const toastRecommendation = toast?.recommendations.find(
+              (recommendation) => recommendation.exerciseKey === exerciseKey
+            )
             const completedRows = Array.from(
               { length: setCount },
               (_, index) => draft.setDone[index] ?? false
@@ -1874,6 +2072,13 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                   </button>
                 </div>
 
+                {toastRecommendation && (
+                  <aside className="next-target-card" role="status" aria-live="polite">
+                    <strong>{getNextTargetLabel(toastRecommendation.target)}</strong>
+                    <p>{toastRecommendation.why}</p>
+                  </aside>
+                )}
+
                 {!isCollapsed && (
                   <>
                     <div className="chip-row chip-row-tight">
@@ -1888,6 +2093,12 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <p className="planned-meta-line">
                       {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
                     </p>
+                    {previousTarget && (
+                      <aside className="next-target-card previous-target-card">
+                        <strong>{getNextTargetLabel(previousTarget)}</strong>
+                        <p>{getNextTargetWhy(previousTarget)}</p>
+                      </aside>
+                    )}
                     {/* TODO(i18n): PT will provide approved translations */}
                     {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
@@ -2350,6 +2561,23 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 <p>{t('workout.session.noRecords')}</p>
               )}
             </section>
+            {sessionSummary.nextTargets.length > 0 && (
+              <section className="session-summary-targets" aria-label={t('workout.session.targets')}>
+                <h3>{t('workout.session.targets')}</h3>
+                <ul>
+                  {sessionSummary.nextTargets.map(({ exerciseId, exerciseKey, target, why }) => {
+                    const exercise = exerciseCatalog.find((item) => item.id === exerciseId)
+                    return (
+                      <li key={exerciseKey}>
+                        <strong>{exercise ? displayExerciseName(exercise) : exerciseId}</strong>
+                        <strong>{getNextTargetLabel(target)}</strong>
+                        <p>{why}</p>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
+            )}
             {sessionSummary.nextSession && <p className="session-summary-next">{t('workout.session.next', { session: sessionSummary.nextSession })}</p>}
             {!aiSummary && (
               <div className="ai-session-summary">
@@ -2404,7 +2632,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             )}
             {toast && (
               <div className="log-toast in-summary" role="status" aria-live="polite">
-                <span>{toast.message}</span>
                 <button type="button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
               </div>
             )}
@@ -2413,7 +2640,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       )}
       {toast && !sessionSummary && (
         <div className="log-toast" role="status" aria-live="polite">
-          <span>{toast.message}</span>
           <button type="button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
         </div>
       )}
