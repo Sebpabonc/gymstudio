@@ -1,0 +1,191 @@
+import { getSupabaseClient } from '../lib/supabaseClient'
+
+export type BodyMetric = {
+  date: string
+  weight_kg: number | null
+  steps: number | null
+  calories: number | null
+}
+
+export type BodyMetricInput = {
+  weightKg: string | number | null
+  steps: string | number | null
+  calories: string | number | null
+}
+
+export const trainingGoalOptions = {
+  goal: ['muscle', 'fat_loss', 'strength', 'general'],
+  daysPerWeek: [3, 4, 5, 6],
+  experience: ['beginner', 'intermediate', 'advanced'],
+  activityLevel: ['low', 'moderate', 'high'],
+  sessionMinutes: [45, 60, 75, 90],
+  equipment: ['full_gym', 'basic_gym', 'home'],
+} as const
+
+export type TrainingGoalInput = {
+  goal: (typeof trainingGoalOptions.goal)[number]
+  daysPerWeek: (typeof trainingGoalOptions.daysPerWeek)[number]
+  experience: (typeof trainingGoalOptions.experience)[number]
+  activityLevel: (typeof trainingGoalOptions.activityLevel)[number]
+  sessionMinutes: (typeof trainingGoalOptions.sessionMinutes)[number]
+  equipment: (typeof trainingGoalOptions.equipment)[number]
+  notes: string
+}
+
+export type TrainingGoal = TrainingGoalInput
+export type TrainingGoalPayload = {
+  goal: TrainingGoalInput['goal']
+  days_per_week: TrainingGoalInput['daysPerWeek']
+  experience: TrainingGoalInput['experience']
+  activity_level: TrainingGoalInput['activityLevel']
+  session_minutes: TrainingGoalInput['sessionMinutes']
+  equipment: TrainingGoalInput['equipment']
+  notes: string | null
+}
+
+export function buildBodyMetricPayload(date: string, input: BodyMetricInput): BodyMetric {
+  const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T00:00:00Z`) : null
+  if (!parsedDate || Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) {
+    throw new Error('invalid-date')
+  }
+
+  const weight = parseOptionalNumber(input.weightKg)
+  const steps = parseOptionalNumber(input.steps)
+  const calories = parseOptionalNumber(input.calories)
+  if (weight === null && steps === null && calories === null) throw new Error('empty-metric')
+  if (weight !== null && (weight < 25 || weight > 350 || Math.abs(weight * 10 - Math.round(weight * 10)) > 1e-8)) {
+    throw new Error('invalid-weight')
+  }
+  if (steps !== null && (!Number.isInteger(steps) || steps < 0 || steps > 100_000)) {
+    throw new Error('invalid-steps')
+  }
+  if (calories !== null && (!Number.isInteger(calories) || calories < 0 || calories > 10_000)) {
+    throw new Error('invalid-calories')
+  }
+
+  return { date, weight_kg: weight, steps, calories }
+}
+
+function parseOptionalNumber(value: string | number | null): number | null {
+  if (value === null || (typeof value === 'string' && value.trim() === '')) return null
+  const parsed = typeof value === 'number' ? value : Number(value)
+  if (!Number.isFinite(parsed)) throw new Error('invalid-number')
+  return parsed
+}
+
+export function buildTrainingGoalPayload(input: TrainingGoalInput): TrainingGoalPayload {
+  const valid = (key: keyof typeof trainingGoalOptions, value: unknown) =>
+    (trainingGoalOptions[key] as readonly unknown[]).includes(value)
+  if (
+    !valid('goal', input.goal)
+    || !valid('daysPerWeek', input.daysPerWeek)
+    || !valid('experience', input.experience)
+    || !valid('activityLevel', input.activityLevel)
+    || !valid('sessionMinutes', input.sessionMinutes)
+    || !valid('equipment', input.equipment)
+  ) {
+    throw new Error('invalid-goal')
+  }
+
+  const notes = input.notes.trim()
+  if (notes.length > 500) throw new Error('notes-too-long')
+  return {
+    goal: input.goal,
+    days_per_week: input.daysPerWeek,
+    experience: input.experience,
+    activity_level: input.activityLevel,
+    session_minutes: input.sessionMinutes,
+    equipment: input.equipment,
+    notes: notes || null,
+  }
+}
+
+function throwIfUnavailable() {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) throw new Error('offline')
+}
+
+async function getClient() {
+  throwIfUnavailable()
+  const client = await getSupabaseClient()
+  if (!client) throw new Error('offline')
+  return client
+}
+
+function throwIfError(error: { message: string } | null) {
+  if (error) throw new Error(error.message)
+}
+
+export async function fetchBodyMetrics(since: string, through: string): Promise<BodyMetric[]> {
+  const client = await getClient()
+  const { data, error } = await client
+    .from('body_metrics')
+    .select('date, weight_kg, steps, calories')
+    .gte('date', since)
+    .lte('date', through)
+    .order('date', { ascending: false })
+  throwIfError(error)
+  return (data ?? []) as BodyMetric[]
+}
+
+export async function fetchBodyMetric(date: string): Promise<BodyMetric | null> {
+  const client = await getClient()
+  const { data, error } = await client
+    .from('body_metrics')
+    .select('date, weight_kg, steps, calories')
+    .eq('date', date)
+    .maybeSingle()
+  throwIfError(error)
+  return data as BodyMetric | null
+}
+
+export async function saveBodyMetric(date: string, input: BodyMetricInput): Promise<BodyMetric> {
+  const payload = buildBodyMetricPayload(date, input)
+  const client = await getClient()
+  const { data, error } = await client
+    .from('body_metrics')
+    .upsert(payload, { onConflict: 'user_id,date', defaultToNull: false })
+    .select('date, weight_kg, steps, calories')
+    .single()
+  throwIfError(error)
+  return data as BodyMetric
+}
+
+export async function fetchTrainingGoal(): Promise<TrainingGoal | null> {
+  const client = await getClient()
+  const { data, error } = await client
+    .from('training_goals')
+    .select('goal, days_per_week, experience, activity_level, session_minutes, equipment, notes')
+    .maybeSingle()
+  throwIfError(error)
+  if (!data) return null
+  return {
+    goal: data.goal,
+    daysPerWeek: data.days_per_week,
+    experience: data.experience,
+    activityLevel: data.activity_level,
+    sessionMinutes: data.session_minutes,
+    equipment: data.equipment,
+    notes: data.notes ?? '',
+  } as TrainingGoal
+}
+
+export async function saveTrainingGoal(input: TrainingGoalInput): Promise<TrainingGoal> {
+  const payload = buildTrainingGoalPayload(input)
+  const client = await getClient()
+  const { data, error } = await client
+    .from('training_goals')
+    .upsert(payload, { onConflict: 'user_id', defaultToNull: false })
+    .select('goal, days_per_week, experience, activity_level, session_minutes, equipment, notes')
+    .single()
+  throwIfError(error)
+  if (!data) throw new Error('profile-goal-missing')
+  return {
+    goal: data.goal,
+    daysPerWeek: data.days_per_week,
+    experience: data.experience,
+    activityLevel: data.activity_level,
+    sessionMinutes: data.session_minutes,
+    equipment: data.equipment,
+    notes: data.notes ?? '',
+  } as TrainingGoal
+}
