@@ -8,6 +8,7 @@ import {
   getPreviousWorkoutSets,
   getPreviousWorkoutSetRow,
   parseRepPrescription,
+  scaleWeightForOtherDay,
   selectCompletedSets,
   stepWorkoutValue,
   workoutMaxWeight,
@@ -60,6 +61,13 @@ describe('workout sets', () => {
     expect(stepWorkoutValue(20, 1, 2.5)).toBe(22.5)
     expect(stepWorkoutValue(1, -1, 2.5)).toBe(0)
     expect(stepWorkoutValue(8, -1, 1, 1)).toBe(7)
+  })
+
+  it('scales a paired-day weight down by ten percent to a 2.5 kg increment', () => {
+    expect(scaleWeightForOtherDay(10)).toBe(7.5)
+    expect(scaleWeightForOtherDay(20)).toBe(17.5)
+    expect(scaleWeightForOtherDay(2.5)).toBe(0)
+    expect(scaleWeightForOtherDay(0)).toBe(0)
   })
 
   it('selects only explicitly completed set rows', () => {
