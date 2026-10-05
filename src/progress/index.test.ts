@@ -12,10 +12,14 @@ import {
   epleyOneRepMax,
   personalRecords,
   progressSuggestions,
+  suggestionSourceBlock,
   strengthTrend,
   weeklySets,
 } from './index'
 import { ProgressEntry } from './types'
+import { entriesWithinBlock, startOfWeek } from './utils'
+import { defaultActiveBlock, nextUnloggedDay } from '../utils/trainingBlocks'
+import { formatShortDate } from '../i18n/format'
 
 const approvedBlocks = (blockRows as unknown as Array<{
   id: string
@@ -385,6 +389,66 @@ describe('progress calculations', () => {
       hitRate: 0.5,
     })
     expect(result.blocks[0].sessionsPlanned).toBe(36)
+  })
+
+  it('keeps all progress views aligned on the upcoming block during a gap week', () => {
+    const plan = [{
+      code: 'A1',
+      position: 1,
+      exerciseId: 'press',
+      sets: 2,
+      reps: ['8', '8'],
+      restSeconds: 90,
+      technique: 'straight' as const,
+    }]
+    const previousBlock = { ...makeBlock(plan, '2026-08-17'), id: 'block-5', number: 5 }
+    const upcomingBlock = { ...makeBlock(plan, '2026-10-05'), id: 'block-6', number: 6 }
+    const today = '2026-10-04'
+    const week = startOfWeek(today)
+    const gapEntry = makeEntry('press', today, [[20, 8], [20, 8]], {
+      blockId: upcomingBlock.id,
+      dayKey: 'chest-back-a',
+    })
+    const previousEntry = makeEntry('press', '2026-09-27', [[20, 8], [20, 8]], {
+      blockId: previousBlock.id,
+      dayKey: 'chest-back-a',
+    })
+    const blocks = [previousBlock, upcomingBlock]
+    const activeBlock = defaultActiveBlock(blocks, today)
+
+    expect(activeBlock?.id).toBe(upcomingBlock.id)
+    expect(nextUnloggedDay(upcomingBlock, [gapEntry], today)?.key).toBe('chest-back-a')
+
+    const currentBlockEntries = activeBlock ? entriesWithinBlock([gapEntry], activeBlock) : []
+    const consistency = adherence(currentBlockEntries, blocks, week)
+    expect(consistency.week.sessionsDone).toBe(0)
+    expect(consistency.blocks.find((block) => block.blockId === activeBlock?.id)?.sessionsDone).toBe(0)
+
+    const weekly = weeklySets([gapEntry], blocks, [dumbbellExercise], week, activeBlock)
+    expect(weekly.groups.find((group) => group.muscleGroup === 'Chest')).toMatchObject({
+      done: 0,
+      planned: 12,
+    })
+
+    expect(suggestionSourceBlock(blocks, activeBlock, today)?.id).toBe(previousBlock.id)
+    expect(progressSuggestions(
+      [previousEntry, gapEntry],
+      blocks,
+      [dumbbellExercise],
+      today,
+      new Set(),
+      en,
+      activeBlock
+    )).toHaveLength(1)
+
+    expect(en.t('progress.headline.blockStarts', {
+      number: upcomingBlock.number,
+      date: formatShortDate('en', upcomingBlock.startDate),
+    })).toBe('Block 6 starts Oct 5')
+    expect(es.t('progress.headline.blockStarts', {
+      number: upcomingBlock.number,
+      date: formatShortDate('es', upcomingBlock.startDate),
+    })).toBe('El bloque 6 empieza el 5 oct')
   })
 
   it('excludes the lighter first week of block 8 from strength trends and PR history', () => {

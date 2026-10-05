@@ -75,7 +75,8 @@ export function weeklySets(
   entries: ProgressEntry[],
   blocks: TrainingBlock[],
   exercises: Exercise[],
-  week: string
+  week: string,
+  activeBlock?: TrainingBlock | null
 ): WeeklyMuscleSets {
   const weekStart = startOfWeek(week)
   const weekEnd = dateValue(weekStart) + 7 * 24 * 60 * 60 * 1000
@@ -84,11 +85,15 @@ export function weeklySets(
   for (const session of groupExerciseSessions(entries)) {
     const value = dateValue(session.date)
     if (value < dateValue(weekStart) || value >= weekEnd) continue
+    if (activeBlock && (
+      value < dateValue(activeBlock.startDate)
+      || value >= dateValue(activeBlock.startDate) + activeBlock.weeks * 7 * 24 * 60 * 60 * 1000
+    )) continue
     const count = workingSets(session.sets).length
     addExerciseSets(done, session.exerciseId, count, exercises)
   }
 
-  const block = plannedBlockForWeek(blocks, weekStart)
+  const block = activeBlock === undefined ? plannedBlockForWeek(blocks, weekStart) : activeBlock
   if (block) {
     for (const day of block.days) {
       for (const exercise of day.exercises) {

@@ -16,7 +16,7 @@ import {
 } from './types'
 import { dateValue, defaultProgressI18n, findBlockForDate, ProgressI18n, startOfWeek } from './utils'
 
-import { formatBlockMethod as plainFormatBlockMethod } from '../utils/trainingBlocks'
+import { defaultActiveBlock, formatBlockMethod as plainFormatBlockMethod } from '../utils/trainingBlocks'
 
 export const MAX_SUGGESTIONS = 5
 export const MAX_RECORDS = 5
@@ -149,8 +149,7 @@ export function weeklySummary(
 }
 
 export function mainLiftForToday(blocks: TrainingBlock[], today: string) {
-  const block = findBlockForDate(blocks, today)
-    ?? [...blocks].filter((item) => item.startDate <= today).sort((a, b) => b.startDate.localeCompare(a.startDate))[0]
+  const block = defaultActiveBlock(blocks, today)
   if (!block) return null
   const weekday = new Date(dateValue(today)).getUTCDay()
   const days = [...block.days].sort((a, b) => a.position - b.position)
