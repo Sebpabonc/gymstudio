@@ -33,6 +33,7 @@ import { applyTargetToWeights, targetAppliesToDay } from '../utils/weightTargets
 import {
   blockDateRange,
   blockWeek,
+  completedTrainingSessions,
   defaultActiveBlock,
   formatBenchAngle,
   formatBlockMethod,
@@ -305,6 +306,13 @@ function formatHistoryDate(language: ReturnType<typeof useT>['language'], value:
   return formatShortDate(language, value)
 }
 
+function formatBlockWeekRange(block: TrainingBlock, week: number, language: ReturnType<typeof useT>['language']) {
+  const start = new Date(`${block.startDate}T00:00:00Z`)
+  start.setUTCDate(start.getUTCDate() + (week - 1) * 7)
+  const end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000)
+  return `${formatShortDate(language, start.toISOString().slice(0, 10))} – ${formatShortDate(language, end.toISOString().slice(0, 10))}`
+}
+
 function getTodayIsoDate() {
   return localIsoDate()
 }
@@ -374,6 +382,7 @@ export default function WorkoutPlan({
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
+  const [selectedCalendarBlockId, setSelectedCalendarBlockId] = useState('')
   const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
   const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({})
   const [completedSupersetSets, setCompletedSupersetSets] = useState<Record<string, boolean[]>>({})
@@ -517,6 +526,11 @@ export default function WorkoutPlan({
       trainingBlocks.find((block) => block.id === selectedBlockId) ??
       defaultActiveBlock(trainingBlocks, today),
     [selectedBlockId, today, trainingBlocks]
+  )
+  const selectedCalendarBlock = trainingBlocks.find((block) => block.id === selectedCalendarBlockId)
+  const calendarBlockSessions = useMemo(
+    () => selectedCalendarBlock ? completedTrainingSessions(selectedCalendarBlock, history) : [],
+    [history, selectedCalendarBlock]
   )
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
   const activeBlockExercises = useMemo(
@@ -1444,6 +1458,120 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 {text.close}
               </button>
             </div>
+
+            <section className="calendar-program" aria-labelledby="calendar-program-title">
+              <strong id="calendar-program-title">{t('workout.calendar.program')}</strong>
+              {trainingBlocks.length > 0 ? (
+                <div className="calendar-block-list" role="list">
+                  {[...trainingBlocks]
+                    .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.number - b.number)
+                    .map((block) => {
+                      const expanded = selectedCalendarBlockId === block.id
+                      const currentWeek = blockWeek(block, today)
+                      const weeks = Array.from({ length: block.weeks }, (_, index) => index + 1)
+                      return (
+                        <article className="calendar-block" key={block.id} role="listitem">
+                          <button
+                            type="button"
+                            className="calendar-block-toggle"
+                            aria-expanded={expanded}
+                            aria-controls={`calendar-block-details-${block.id}`}
+                            onClick={() => setSelectedCalendarBlockId(expanded ? '' : block.id)}
+                          >
+                            <span className="calendar-block-title-row">
+                              <strong>{t('workout.block.optionTitle', { number: block.number, name: block.name })}</strong>
+                              <span className="calendar-block-status">
+                                {t(blockStatusKey[trainingBlockDateStatus(block, today)])}
+                              </span>
+                            </span>
+                            <span className="calendar-block-meta">
+                              {blockDateRange(block, language)} · {formatBlockMethod(block.method, language)}
+                            </span>
+                          </button>
+                          <div
+                            className="calendar-week-list"
+                            role="list"
+                            aria-label={t('workout.calendar.weeks', { count: block.weeks })}
+                            style={{ gridTemplateColumns: `repeat(${block.weeks}, minmax(0, 1fr))` }}
+                          >
+                            {weeks.map((week) => {
+                              const isCurrentWeek = week === currentWeek
+                              const weekRange = formatBlockWeekRange(block, week, language)
+                              return (
+                                <span
+                                  key={week}
+                                  className={isCurrentWeek ? 'calendar-week current' : 'calendar-week'}
+                                  role="listitem"
+                                  aria-current={isCurrentWeek ? 'date' : undefined}
+                                  aria-label={t('workout.calendar.weekRange', { week, range: weekRange })}
+                                >
+                                  {t('workout.calendar.weekShort', { week })}
+                                </span>
+                              )
+                            })}
+                          </div>
+                          {expanded && (
+                            <div
+                              className="calendar-block-details"
+                              id={`calendar-block-details-${block.id}`}
+                              role="group"
+                              aria-label={block.name}
+                            >
+                              {[...block.days]
+                                .sort((a, b) => a.position - b.position)
+                                .map((day) => {
+                                  const completedDates = calendarBlockSessions
+                                    .filter((session) => session.dayKey === day.key)
+                                    .map((session) => session.date)
+                                  return (
+                                    <article className="calendar-day" key={day.key}>
+                                      <div className="calendar-day-heading">
+                                        <strong>{day.name}</strong>
+                                        {completedDates.map((date) => (
+                                          <span className="calendar-session-completed" key={date}>
+                                            <span aria-hidden="true">✓</span>
+                                            {t('workout.calendar.completedSession', { date: formatHistoryDate(language, date) })}
+                                          </span>
+                                        ))}
+                                      </div>
+                                      {day.focus && <small className="calendar-day-focus">{day.focus}</small>}
+                                      {day.exercises.length > 0 ? (
+                                        <ul className="calendar-exercise-list">
+                                          {[...day.exercises]
+                                            .sort((a, b) => a.position - b.position)
+                                            .map((exercise) => (
+                                              <li key={`${exercise.position}-${exercise.exerciseId}`}>
+                                                <span>
+                                                  {displayExerciseName(
+                                                    exerciseCatalog.find((item) => item.id === exercise.exerciseId) ??
+                                                      exercise.exerciseId
+                                                  )}
+                                                </span>
+                                                <small>
+                                                  {t('workout.calendar.exercisePrescription', {
+                                                    sets: exercise.sets,
+                                                    reps: exercise.reps.join(' · '),
+                                                  })}
+                                                </small>
+                                              </li>
+                                            ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="calendar-no-exercises">{t('workout.calendar.noExercises')}</p>
+                                      )}
+                                    </article>
+                                  )
+                                })}
+                            </div>
+                          )}
+                        </article>
+                      )
+                    })}
+                </div>
+              ) : (
+                <p className="calendar-blocks-empty">{t('workout.calendar.blocksEmpty')}</p>
+              )}
+            </section>
 
             <label className="calendar-field">
               <span>{text.calendarSelect}</span>
