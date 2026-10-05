@@ -5,11 +5,14 @@ import { isDemoMode } from './demoMode'
 import { isTargetMet, WeightTarget, WeightTargets } from './weightTargets'
 import { RestTimerState } from './restTimer'
 import type { NextSessionPlan } from '../ai/coachLoop'
+import { fetchActiveUserPlan as fetchRemoteActiveUserPlan } from './profileData'
+import type { SavedUserPlan } from './profileData'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
 const CATALOGUE_KEY = 'gym-studio.catalogue'
 const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
+const ACTIVE_USER_PLAN_KEY = 'gym-studio.active-user-plan'
 const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
 const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
 const WEIGHT_TARGETS_KEY = 'gym-studio.weight-targets'
@@ -482,6 +485,51 @@ function saveTrainingBlockCache(blocks: TrainingBlock[]) {
 /** Blocks saved on this device from the last successful fetch (null if none) — for instant first render. */
 export function getCachedTrainingBlocks(): TrainingBlock[] | null {
   return loadTrainingBlockCache()
+}
+
+export function getCachedActiveUserPlan(): SavedUserPlan | null {
+  if (isDemoMode()) return null
+  try {
+    const parsed = JSON.parse(localStorage.getItem(storageKey(ACTIVE_USER_PLAN_KEY)) ?? 'null')
+    if (
+      !parsed
+      || typeof parsed !== 'object'
+      || typeof parsed.templateId !== 'string'
+      || typeof parsed.startDate !== 'string'
+      || (parsed.source !== 'ai' && parsed.source !== 'rules')
+      || !parsed.block
+      || typeof parsed.block !== 'object'
+      || !Array.isArray(parsed.block.days)
+    ) return null
+    return parsed as SavedUserPlan
+  } catch {
+    return null
+  }
+}
+
+export function cacheActiveUserPlan(plan: SavedUserPlan | null) {
+  if (isDemoMode()) return
+  try {
+    const key = storageKey(ACTIVE_USER_PLAN_KEY)
+    if (plan) localStorage.setItem(key, JSON.stringify(plan))
+    else localStorage.removeItem(key)
+  } catch {
+    return
+  }
+}
+
+/** Uses the account-scoped cache immediately when the signed-in user's plan is offline. */
+export async function fetchActiveUserPlan(): Promise<SavedUserPlan | null> {
+  if (isDemoMode()) return null
+  const cached = getCachedActiveUserPlan()
+  try {
+    const plan = await fetchRemoteActiveUserPlan()
+    cacheActiveUserPlan(plan)
+    return plan
+  } catch (error) {
+    if (cached) return cached
+    throw error
+  }
 }
 
 export async function fetchTrainingBlocks(): Promise<TrainingBlock[]> {
