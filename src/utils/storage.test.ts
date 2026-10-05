@@ -6,6 +6,7 @@ import {
   addWorkoutEntry,
   deleteWorkoutEntry,
   fetchTrainingBlocks,
+  getCachedTrainingBlocks,
   cacheActiveUserPlan,
   dismissWelcome,
   getExerciseDisplayName,
@@ -553,6 +554,16 @@ describe('training blocks', () => {
     expect(supabaseMock.order).toHaveBeenCalledWith('number')
     expect(blocks.map((block) => block.number)).toEqual([1, 2])
     expect(JSON.parse(localStorage.getItem('gym-studio.training-blocks')!)).toEqual(blocks)
+  })
+
+  it('returns an empty list and clears the cache when the server has no blocks', async () => {
+    supabaseMock.response.data = trainingBlockRows
+    await fetchTrainingBlocks()
+    expect(getCachedTrainingBlocks()).toHaveLength(2)
+
+    supabaseMock.response.data = []
+    expect(await fetchTrainingBlocks()).toEqual([])
+    expect(getCachedTrainingBlocks()).toBeNull()
   })
 
   it('uses cached blocks offline and the bundled blocks when no cache exists', async () => {

@@ -14,9 +14,9 @@ import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
 import { useAuth } from './auth/AuthProvider'
 import { useTextEntryFocused } from './utils/textEntryFocus'
+import { loadDemoBlocks } from './plans/demoBlock'
 import { exitDemoMode, isDemoMode } from './utils/demoMode'
 import {
-  fetchTrainingBlocks,
   dismissWelcome,
   getExerciseDisplayName,
   hasDismissedWelcome,
@@ -124,6 +124,27 @@ export default function App() {
     void syncRestTimerActivity(timer, restLabel.current, true)
   }, [t])
 
+  const [scrollToPlan, setScrollToPlan] = useState(false)
+  const openPlanSection = useCallback(() => {
+    setScrollToPlan(true)
+    setActiveTab('you')
+  }, [])
+
+  useEffect(() => {
+    if (!scrollToPlan || activeTab !== 'you') return
+    let attempts = 0
+    const timer = window.setInterval(() => {
+      attempts += 1
+      const target = document.getElementById('profile-plan-title')
+      if (target || attempts >= 30) {
+        window.clearInterval(timer)
+        target?.scrollIntoView({ block: 'start' })
+        setScrollToPlan(false)
+      }
+    }, 100)
+    return () => window.clearInterval(timer)
+  }, [scrollToPlan, activeTab])
+
   useEffect(() => {
     const sentinel = headerSentinelRef.current
     if (!sentinel || typeof IntersectionObserver === 'undefined') return
@@ -145,7 +166,7 @@ export default function App() {
         return savedHistory
       }
 
-      const blocks = await fetchTrainingBlocks()
+      const blocks = await loadDemoBlocks()
       const { generateDemoHistory } = await import('./demo/generateDemoHistory')
       const generatedHistory = generateDemoHistory({ blocks, endDate: localIsoDate(), months: 6, seed: 26 })
       saveWorkoutHistory(generatedHistory)
@@ -470,7 +491,7 @@ export default function App() {
                     </div>
                   </section>
                 )}
-                <WorkoutPlan mode="preset" lockMode authStatus={status} authUserId={user?.id ?? null} onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
+                <WorkoutPlan mode="preset" lockMode authStatus={status} authUserId={user?.id ?? null} onSignIn={() => setActiveTab('you')} onCreatePlan={openPlanSection} onStartRest={startRest} />
               </>
             )
           ) : exerciseMode === 'custom' ? (

@@ -72,6 +72,7 @@ import {
 import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from '../utils/supersets'
 import { recommendNextTarget, type NextTarget, type ProgressionType } from '../progress/nextTarget'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
+import { loadDemoBlocks } from '../plans/demoBlock'
 import {
   captureUndoSnapshots,
   createSessionSummary,
@@ -380,6 +381,7 @@ export default function WorkoutPlan({
   authStatus = 'signed-out',
   authUserId = null,
   onSignIn,
+  onCreatePlan,
   onStartRest,
 }: {
   mode?: PlanMode
@@ -387,6 +389,7 @@ export default function WorkoutPlan({
   authStatus?: AuthStatus
   authUserId?: string | null
   onSignIn: () => void
+  onCreatePlan?: () => void
   onStartRest: (durationSeconds: number, label?: string) => void
 }) {
   const { t, language, locale } = useT()
@@ -400,6 +403,7 @@ export default function WorkoutPlan({
   const [weightTargets, setWeightTargets] = useState(() => loadWeightTargets())
   const [rawExerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
   const [rawTrainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
+  const [blocksLoaded, setBlocksLoaded] = useState(false)
   // Spanish fitness content (PT-approved) overlays the English source; ids, keys and codes are unchanged.
   const spanishReady = useSpanishContentReady(language)
   const exerciseCatalog = useMemo(() => localizeCatalogue(rawExerciseCatalog, language), [rawExerciseCatalog, language, spanishReady])
@@ -643,7 +647,7 @@ export default function WorkoutPlan({
     let cancelled = false
     const signedIn = authStatus === 'signed-in' && !demoMode
     const cachedPlan = signedIn ? getCachedActiveUserPlan() : null
-    const globalCache = getCachedTrainingBlocks() ?? []
+    const globalCache = demoMode ? [] : getCachedTrainingBlocks() ?? []
     const cachedBlocks = selectPlanBlocks(globalCache, cachedPlan, signedIn, demoMode)
     const apply = (
       exercises: Exercise[],
@@ -656,6 +660,7 @@ export default function WorkoutPlan({
       setExerciseCatalog(exercises)
       setHistory(entries)
       setTrainingBlocks(blocks)
+      setBlocksLoaded(true)
       const selectedBlockExists = blocks.some((block) => block.id === selectedBlockId)
       if (!selectDay && !personalPlan && selectedBlockExists) return
       const savedBlockId = personalPlan ? null : getActiveBlockId()
@@ -669,7 +674,7 @@ export default function WorkoutPlan({
     void Promise.all([loadExercises(), loadWorkoutHistory()]).then(([exercises, entries]) => {
       if (cachedBlocks.length) apply(exercises, entries, cachedBlocks, true, !!cachedPlan)
       void Promise.all([
-        fetchTrainingBlocks(),
+        demoMode ? loadDemoBlocks() : fetchTrainingBlocks(),
         signedIn ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
       ]).then(([globalBlocks, activePlan]) => {
         const blocks = selectPlanBlocks(globalBlocks, activePlan, signedIn, demoMode)
@@ -1668,6 +1673,26 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       return next
     })
 
+  }
+
+  if (planMode === 'preset' && blocksLoaded && trainingBlocks.length === 0) {
+    const signedInUser = authStatus === 'signed-in' && !demoMode
+    return (
+      <section className="card welcome-card no-plan-card" aria-labelledby="no-plan-title">
+        <h2 id="no-plan-title">{signedInUser ? t('noPlan.title') : t('noPlan.guestTitle')}</h2>
+        {signedInUser && <p>{t('noPlan.message')}</p>}
+        <div className="welcome-actions">
+          {signedInUser ? (
+            <button type="button" className="primary-button" onClick={onCreatePlan ?? onSignIn}>{t('noPlan.create')}</button>
+          ) : (
+            <>
+              <button type="button" className="primary-button" onClick={onSignIn}>{t('noPlan.signIn')}</button>
+              <a className="secondary-button" href="?demo=1">{t('noPlan.demo')}</a>
+            </>
+          )}
+        </div>
+      </section>
+    )
   }
 
   return (

@@ -47,6 +47,7 @@ import {
 } from '../progress/viewModel'
 import { entriesWithinBlock, startOfWeek } from '../progress/utils'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
+import { loadDemoBlocks } from '../plans/demoBlock'
 import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import {
   applyWeightTarget,
@@ -300,11 +301,11 @@ export default function ProgressScreen({
     let cancelled = false
     const signedIn = authStatus === 'signed-in' && !demoMode
     const cachedPlan = signedIn ? getCachedActiveUserPlan() : null
-    const globalCache = getCachedTrainingBlocks() ?? []
+    const globalCache = demoMode ? [] : getCachedTrainingBlocks() ?? []
     const cachedBlocks = selectPlanBlocks(globalCache, cachedPlan, signedIn, demoMode)
     if (cachedBlocks.length) setBlocks(cachedBlocks)
     void Promise.all([
-      fetchTrainingBlocks(),
+      demoMode ? loadDemoBlocks() : fetchTrainingBlocks(),
       signedIn ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
     ]).then(([globalBlocks, activePlan]) => {
       if (!cancelled) setBlocks(selectPlanBlocks(globalBlocks, activePlan, signedIn, demoMode))

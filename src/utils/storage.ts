@@ -482,6 +482,14 @@ function saveTrainingBlockCache(blocks: TrainingBlock[]) {
   }
 }
 
+function clearTrainingBlockCache() {
+  try {
+    localStorage.removeItem(storageKey(TRAINING_BLOCKS_KEY))
+  } catch {
+    return
+  }
+}
+
 /** Blocks saved on this device from the last successful fetch (null if none) — for instant first render. */
 export function getCachedTrainingBlocks(): TrainingBlock[] | null {
   return loadTrainingBlockCache()
@@ -552,6 +560,9 @@ export async function fetchTrainingBlocks(): Promise<TrainingBlock[]> {
           saveTrainingBlockCache(blocks)
           return blocks
         }
+        // The server answered with no visible blocks: never fall back to another user's cached or bundled blocks.
+        clearTrainingBlockCache()
+        return []
       }
     }
   } catch {
