@@ -50,6 +50,7 @@ import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import {
   applyWeightTarget,
   fetchTrainingBlocks,
+  getCachedTrainingBlocks,
   getExerciseDisplayName,
   getAskExerciseAiConsent,
   loadWeightTargets,
@@ -292,6 +293,8 @@ export default function ProgressScreen({
 
   useEffect(() => {
     let cancelled = false
+    const cachedBlocks = getCachedTrainingBlocks()
+    if (cachedBlocks?.length) setBlocks(cachedBlocks)
     void fetchTrainingBlocks().then((loaded) => {
       if (!cancelled) setBlocks(loaded)
     }).catch(() => {
