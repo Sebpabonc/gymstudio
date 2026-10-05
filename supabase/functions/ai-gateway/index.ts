@@ -247,7 +247,15 @@ Deno.serve(async (req) => {
       .is('deleted_at', null)
       .order('date', { ascending: false })
       .limit(30)
-    context = { today: todayIso, block, plan: planRows ?? [], recentSessions: recent ?? [] }
+    // Users with a personal plan (user_plans) are coached on that plan instead of the owner-only blocks.
+    const { data: userPlan } = await userClient
+      .from('user_plans')
+      .select('start_date, block')
+      .eq('active', true)
+      .maybeSingle()
+    context = userPlan
+      ? { today: todayIso, personalPlan: userPlan.block, planStart: userPlan.start_date, recentSessions: recent ?? [] }
+      : { today: todayIso, block, plan: planRows ?? [], recentSessions: recent ?? [] }
     systemPrompt = GENERAL_PROMPT
   } else if (feature === 'session_summary') {
     let query = userClient
