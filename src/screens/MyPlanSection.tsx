@@ -8,6 +8,7 @@ import type { SavedUserPlan, TrainingGoal } from '../utils/profileData'
 type PlanPreview = Pick<BuiltPlan, 'startDate' | 'block' | 'source' | 'cappedForBeginner'>
 
 type Props = {
+  signedOut: boolean
   goal: TrainingGoal | null
   activePlan: SavedUserPlan | null
   preview: PlanPreview | null
@@ -24,6 +25,7 @@ type Props = {
 }
 
 export default function MyPlanSection({
+  signedOut,
   goal,
   activePlan,
   preview,
@@ -95,7 +97,11 @@ export default function MyPlanSection({
   return (
     <section className="card profile-data-card personal-plan-card" aria-labelledby="profile-plan-title">
       <h2 id="profile-plan-title">{t('profile.plan.title')}</h2>
-      {!goal && <p className="profile-data-hint">{t('profile.plan.noGoal')}</p>}
+      {signedOut ? (
+        <p className="profile-data-hint">{t('profile.plan.signIn')}</p>
+      ) : !goal && (
+        <p className="profile-data-hint">{t('profile.plan.noGoal')}</p>
+      )}
       {activePlan && (
         <div className="personal-plan-active">
           <h3>{t('profile.plan.active')}</h3>
@@ -122,7 +128,7 @@ export default function MyPlanSection({
           {renderPlan(preview, true)}
         </div>
       )}
-      {!preview && !activePlan && goal && (
+      {!signedOut && !preview && !activePlan && goal && (
         <button type="button" className="primary-button" onClick={onGenerate} disabled={loading}>
           {building ? t('profile.plan.building') : t('profile.plan.generate')}
         </button>

@@ -39,6 +39,13 @@ describe('dictionaries', () => {
     expect(en['exercises.postureTips']).toBe('Posture tips')
     expect(es['exercises.postureTips']).toBe('Consejos de postura')
   })
+
+  it('uses separate sign-in hints for saving goals and creating personal plans', () => {
+    expect(en['profile.goal.signIn']).toBe('Sign in to save your goal')
+    expect(es['profile.goal.signIn']).toBe('Inicia sesión para guardar tu objetivo')
+    expect(en['profile.plan.signIn']).toBe('Sign in to create your personal plan')
+    expect(es['profile.plan.signIn']).toBe('Inicia sesión para crear tu plan personal')
+  })
 })
 
 describe('translate', () => {

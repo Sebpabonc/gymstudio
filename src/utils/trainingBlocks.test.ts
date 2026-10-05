@@ -45,6 +45,8 @@ describe('training block dates', () => {
     expect(formatBlockMethod('flat-pyramid')).toBe('Flat Pyramid')
     expect(formatBlockMethod('strength_hypertrophy')).toBe('Strength Hypertrophy')
     expect(formatBlockMethod('  DUP   training ')).toBe('DUP Training')
+    expect(formatBlockMethod('straight sets')).toBe('Straight sets')
+    expect(formatBlockMethod('straight sets', 'es')).toBe('Series rectas')
     expect(formatBlockMethod('')).toBe('')
     expect(formatBlockMethod('reverse-pyramid', 'es')).toBe('Pirámide inversa')
   })
