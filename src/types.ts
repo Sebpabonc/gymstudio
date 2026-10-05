@@ -9,6 +9,7 @@ export type Exercise = {
   name: string
   nameEs?: string
   primaryMuscle: string
+  mechanic?: 'compound' | 'isolation'
   secondaryMuscle?: string
   bodyRegion?: string
   primaryMuscles?: string[]
