@@ -189,3 +189,38 @@ export async function saveTrainingGoal(input: TrainingGoalInput): Promise<Traini
     notes: data.notes ?? '',
   } as TrainingGoal
 }
+
+export type SavedUserPlan = {
+  templateId: string
+  startDate: string
+  block: import('../types').TrainingBlock
+  source: 'ai' | 'rules'
+}
+
+/** The signed-in user's active personal plan, or null (then the app keeps the global blocks). */
+export async function fetchActiveUserPlan(): Promise<SavedUserPlan | null> {
+  const client = await getClient()
+  const { data, error } = await client
+    .from('user_plans')
+    .select('template_id, start_date, block, source')
+    .eq('active', true)
+    .maybeSingle()
+  throwIfError(error)
+  return data
+    ? { templateId: data.template_id, startDate: data.start_date, block: data.block, source: data.source }
+    : null
+}
+
+/** Publishes a new personal plan: the previous active plan is kept as history (active = false). */
+export async function publishUserPlan(plan: SavedUserPlan): Promise<void> {
+  const client = await getClient()
+  const { error: archiveError } = await client.from('user_plans').update({ active: false }).eq('active', true)
+  throwIfError(archiveError)
+  const { error } = await client.from('user_plans').insert({
+    template_id: plan.templateId,
+    start_date: plan.startDate,
+    block: plan.block,
+    source: plan.source,
+  })
+  throwIfError(error)
+}
