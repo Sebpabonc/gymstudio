@@ -2425,18 +2425,6 @@ button {
   line-height: 1.4;
 }
 
-.ai-plan-exercise label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 0.64rem;
-}
-
-.ai-plan-exercise input {
-  accent-color: var(--brand);
-}
-
 .planned-exercise-card.collapsed {
   padding: 10px 12px;
 }

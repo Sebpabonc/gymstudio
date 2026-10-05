@@ -674,7 +674,7 @@ export default function ProgressScreen({
                       <th scope="col">{t('progress.setHistory.date')}</th>
                       <th scope="col">{t('progress.setHistory.sets')}</th>
                       <th scope="col">{t('progress.setHistory.volume')}</th>
-                      <th scope="col"></th>
+                      <th scope="col"><span className="visually-hidden">{t('progress.delete.actions')}</span></th>
                     </tr>
                   </thead>
                   <tbody>
