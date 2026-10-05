@@ -62,6 +62,24 @@ describe('recommendNextTarget', () => {
     ).toMatchObject({ action: 'reduce', weight: 7.5 })
   })
 
+  it('holds the weight when only one of three sets is logged', () => {
+    expect(recommendNextTarget([{ weight: 20, reps: 8 }], [8, 8, 8], 'upper')).toMatchObject({
+      action: 'hold',
+      weight: 20,
+      shortSets: [],
+    })
+  })
+
+  it('does not reduce the weight when only two of three sets are logged', () => {
+    expect(
+      recommendNextTarget(
+        [{ weight: 20, reps: 5 }, { weight: 20, reps: 5 }],
+        [8, 8, 8],
+        'upper'
+      )
+    ).toMatchObject({ action: 'hold', weight: 20, shortSets: [1, 2] })
+  })
+
   it('uses the same weight and half the sets during a deload', () => {
     expect(
       recommendNextTarget(
