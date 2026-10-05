@@ -657,6 +657,7 @@ button {
 
 .profile-data-field input,
 .profile-data-field textarea {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
   min-height: 44px;
@@ -670,6 +671,22 @@ button {
 .profile-data-field textarea {
   min-height: 80px;
   resize: vertical;
+}
+
+/* iOS Safari draws date inputs with their own width and centred, oversized text: match the other fields. */
+.profile-data-field input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  max-width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  text-align: left;
+}
+
+.profile-data-field input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
 }
 
 .profile-data-fields:disabled {
