@@ -25,7 +25,7 @@ export default function ExerciseSearchSuggestions({
             onClick={() => onSelect(exercise.id)}
           >
             <span className="result-name">{getExerciseDisplayName(exercise, language)}</span>
-            <span className="result-meta">{getExerciseSubtitle(exercise)}</span>
+            <span className="result-meta">{getExerciseSubtitle(exercise, language)}</span>
           </button>
         ))
       ) : (

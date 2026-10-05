@@ -17,6 +17,10 @@ function friendlyError(message: string, t: Translate) {
   if (normalized.includes('too many') || normalized.includes('rate limit')) {
     return t('login.tooMany')
   }
+  if (normalized.includes('user already registered') || normalized.includes('already been registered')) {
+    return t('login.alreadyRegistered')
+  }
+  if (normalized.includes('password should be') || normalized.includes('weak password')) return t('login.weakPassword')
   if (normalized.includes('sign-in unavailable offline')) return t('login.offline')
   return t('login.generic')
 }

@@ -3,3 +3,4 @@ export { createTranslator, detectLanguage, translate, localeFor, isLanguage } fr
 export type { Language, Translate, TranslationParams } from './translate'
 export type { TranslationKey } from './en'
 export { formatShortDate, formatWeekdayDate, formatLongDate, formatNumber } from './format'
+export { localizeMuscle } from './muscles'

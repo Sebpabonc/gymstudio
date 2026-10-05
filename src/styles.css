@@ -4360,7 +4360,7 @@ body {
 /* Set rows must fit inside the set panel at 375 px: flexible stepper column. */
 .planned-set-section .planned-set-row,
 .planned-set-section .planned-set-column-headers {
-  grid-template-columns: 20px minmax(34px, 44px) minmax(0, 1fr) 46px 44px;
+  grid-template-columns: 30px minmax(34px, 44px) minmax(0, 1fr) 46px 44px;
   gap: 4px;
 }
 
@@ -4394,7 +4394,7 @@ body {
 
   .planned-set-section .planned-set-row,
   .planned-set-section .planned-set-column-headers {
-    grid-template-columns: 14px minmax(30px, 40px) minmax(0, 1fr) 42px 40px;
+    grid-template-columns: 30px minmax(30px, 40px) minmax(0, 1fr) 42px 40px;
     gap: 3px;
   }
 

@@ -1,4 +1,7 @@
 import { Exercise, ExerciseTip } from '../types'
+import { getMuscleSearchTermsEs, localizeMuscle } from '../i18n/muscles'
+import { dictionaries } from '../i18n/translate'
+import type { Language, TranslationKey } from '../i18n/translate'
 
 export const ALL_BODY_REGIONS = 'All'
 
@@ -29,6 +32,11 @@ function getExerciseSearchTerms(query: string) {
     .flatMap((word) => exerciseSearchAbbreviations[word] ?? [word])
 }
 
+function localizeBodyRegion(region: string | undefined, language: Language) {
+  if (!region || language !== 'es') return region
+  return dictionaries.es[`region.${region}` as TranslationKey] ?? region
+}
+
 export function getAvailableBodyRegions(exercises: Exercise[]) {
   const presentRegions = new Set(exercises.map((exercise) => exercise.bodyRegion).filter(Boolean))
   return [ALL_BODY_REGIONS, ...bodyRegionOrder.filter((region) => presentRegions.has(region))]
@@ -41,11 +49,16 @@ export function filterExercises(exercises: Exercise[], query: string, bodyRegion
     if (bodyRegion !== ALL_BODY_REGIONS && exercise.bodyRegion !== bodyRegion) return false
     if (!searchTerms.length) return true
 
+    const muscles = [
+      ...(exercise.primaryMuscles ?? [exercise.primaryMuscle]),
+      ...(exercise.secondaryMuscles ?? (exercise.secondaryMuscle ? [exercise.secondaryMuscle] : [])),
+    ]
     const searchableValues = [
       exercise.name,
       exercise.nameEs,
-      ...(exercise.primaryMuscles ?? [exercise.primaryMuscle]),
-      ...(exercise.secondaryMuscles ?? (exercise.secondaryMuscle ? [exercise.secondaryMuscle] : [])),
+      ...muscles,
+      ...muscles.flatMap(getMuscleSearchTermsEs),
+      localizeBodyRegion(exercise.bodyRegion, 'es'),
       exercise.equipment,
     ]
 
@@ -54,12 +67,17 @@ export function filterExercises(exercises: Exercise[], query: string, bodyRegion
   })
 }
 
-export function getExerciseSubtitle(exercise: Exercise) {
+export function getExerciseSubtitle(exercise: Exercise, language: Language = 'en') {
   const primaryMuscles = exercise.primaryMuscles ?? [exercise.primaryMuscle]
   const additionalMuscles = primaryMuscles.filter(
     (muscle) => muscle.trim().toLowerCase() !== exercise.bodyRegion?.trim().toLowerCase()
   )
-  return [exercise.bodyRegion, ...additionalMuscles].filter(Boolean).join(' · ')
+  return [
+    localizeBodyRegion(exercise.bodyRegion, language),
+    ...additionalMuscles.map((muscle) => localizeMuscle(muscle, language)),
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 export function getExerciseTips(exercise: Exercise): Array<string | ExerciseTip> {
