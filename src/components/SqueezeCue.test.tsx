@@ -23,5 +23,6 @@ describe('SqueezeCue', () => {
     expect(html).toContain('aria-expanded="false"')
     expect(html).toContain('id="posture-tips" class="squeeze-cue-tips" hidden=""')
     expect(html).toContain('<li>Tip one</li><li>Tip two</li>')
+    expect(html).not.toContain('ask-ai-button')
   })
 })

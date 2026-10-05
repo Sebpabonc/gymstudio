@@ -6,7 +6,6 @@ import { syncRestTimerActivity } from './native/restTimerActivity'
 import { openExternal } from './native/openExternal'
 import { localizeCatalogue, useSpanishContentReady } from './i18n/content'
 import { exerciseImageQuery, exerciseImageSearchUrl } from './utils/exerciseImages'
-import AskExercise from './components/AskExercise'
 import ExerciseSetTable from './components/ExerciseSetTable'
 import SqueezeCue from './components/SqueezeCue'
 import HelpAndAi from './components/HelpAndAi'
@@ -572,13 +571,7 @@ export default function App() {
                       tipsId={`track-posture-tips-${selectedExercise.id}`}
                       expanded={tipsExpanded}
                       onToggle={() => setTipsExpanded((current) => !current)}
-                    >
-                      <AskExercise
-                        exerciseId={selectedExercise.id}
-                        exerciseName={getExerciseDisplayName(selectedExercise, language)}
-                        onSignIn={() => setActiveTab('you')}
-                      />
-                    </SqueezeCue>
+                    />
 
                     <div className="summary-grid">
                       <div className="metric-card">

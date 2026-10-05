@@ -150,11 +150,11 @@ function AiSuggestionExplanation({
         {demoMode || status === 'signed-out' ? t('progress.ai.signInToUse') : t('progress.ai.askWhy')}
       </button>
       {showConsent && (
-        <div className="ask-exercise-consent ai-inline-consent">
+        <div className="ai-inline-consent">
           {consent === null ? (
             <AiConsentPrompt onChoice={chooseConsent} />
           ) : (
-            <p className="ask-exercise-consent-message">{t('progress.ai.disabled')}</p>
+            <p>{t('progress.ai.disabled')}</p>
           )}
         </div>
       )}
@@ -168,7 +168,7 @@ function AiSuggestionExplanation({
         </div>
       )}
       {answer && (
-        <div className="ask-exercise-answer ai-inline-answer" aria-live="polite">
+        <div className="ai-inline-answer" aria-live="polite">
           <p>{answer}</p>
           {remainingToday !== null && (
             <small>

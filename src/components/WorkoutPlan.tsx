@@ -9,7 +9,6 @@ import {
   type NextSessionPlan,
 } from '../ai/coachLoop'
 import type { AuthStatus } from '../auth/AuthProvider'
-import AskExercise from './AskExercise'
 import SqueezeCue from './SqueezeCue'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
@@ -2491,15 +2490,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         </div>
                       ) : <p className="empty-state">{text.noProgressHistory}</p>)}
                     </div>
-                    {libraryMatch && (
-                      <div className="exercise-detail-row">
-                        <AskExercise
-                          exerciseId={libraryMatch.id}
-                          exerciseName={displayExerciseName(libraryMatch)}
-                          onSignIn={onSignIn}
-                        />
-                      </div>
-                    )}
                     {!group.isSuperset && (
                       <label className="planned-notes-field">
                         <span>{t('workout.label.notes')}</span>
@@ -2802,11 +2792,11 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       : t('workout.ai.summary')}
                 </button>
                 {showAiConsent && (
-                  <div className="ask-exercise-consent ai-inline-consent">
+                  <div className="ai-inline-consent">
                     {aiConsent === null ? (
                       <AiConsentPrompt onChoice={chooseAiConsent} />
                     ) : (
-                      <p className="ask-exercise-consent-message">{t('workout.ai.off')}</p>
+                      <p>{t('workout.ai.off')}</p>
                     )}
                   </div>
                 )}

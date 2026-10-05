@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React from 'react'
 
 type SqueezeCueProps = {
   cue?: string
@@ -8,7 +8,6 @@ type SqueezeCueProps = {
   tipsId: string
   expanded: boolean
   onToggle: () => void
-  children?: ReactNode
 }
 
 export default function SqueezeCue({
@@ -19,12 +18,11 @@ export default function SqueezeCue({
   tipsId,
   expanded,
   onToggle,
-  children,
 }: SqueezeCueProps) {
   const visibleCue = cue?.trim()
   const hasTips = tips.length > 0
 
-  if (!visibleCue && !hasTips && !children) return null
+  if (!visibleCue && !hasTips) return null
 
   return (
     <section className="squeeze-cue-box">
@@ -40,7 +38,6 @@ export default function SqueezeCue({
           ) : null}
         </p>
         <div className="squeeze-cue-actions">
-          {children}
           {hasTips && (
             <button
               type="button"
