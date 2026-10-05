@@ -5,6 +5,8 @@ catalogue-additions.json), validated with scripts/validate-blocks.py.
 Output: SQL upserts on stdout (catalogue additions first, then blocks).
 """
 import json
+
+OWNER_ID = '44b10d1d-b2db-445f-aa93-9c9793c75a3b'
 from pathlib import Path
 
 SOURCE = Path('docs/fitness/approved/training-blocks')
@@ -38,11 +40,12 @@ def main():
                   array(e['posture_tips']), array(e['aliases']),
               ]) + ') on conflict (id) do nothing;')
 
+    # blocks.json is Sebas's private program (migration 028): every seeded block belongs to his account.
     for b in blocks:
         insights = text(json.dumps(b.get('insights', []), ensure_ascii=False)) + '::jsonb'
-        print(f"\ninsert into public.training_blocks (id, number, name, method, start_date, weeks, origin, summary, insights) values ("
+        print(f"\ninsert into public.training_blocks (id, number, name, method, start_date, weeks, origin, summary, insights, owner_id) values ("
               f"{text(b['id'])}, {b['number']}, {text(b['name'])}, {text(b['method'])}, {text(b['start_date'])}, "
-              f"{b['weeks']}, {text(b['origin'])}, {text(b['summary'])}, {insights}) on conflict (id) do update set "
+              f"{b['weeks']}, {text(b['origin'])}, {text(b['summary'])}, {insights}, {text(OWNER_ID)}) on conflict (id) do update set "
               "number = excluded.number, name = excluded.name, method = excluded.method, start_date = excluded.start_date, "
               "weeks = excluded.weeks, origin = excluded.origin, summary = excluded.summary, insights = excluded.insights, "
               "updated_at = now();")
