@@ -49,6 +49,8 @@ describe('translate', () => {
   it('translates and interpolates params', () => {
     expect(translate('en', 'exercises.logged', { summary: '3 sets' })).toBe('Logged · 3 sets')
     expect(translate('es', 'exercises.logged', { summary: '3 series' })).toBe('Registrado · 3 series')
+    expect(translate('en', 'workout.previous.day', { day: 'A' })).toBe('Day A')
+    expect(translate('es', 'workout.previous.day', { day: 'A' })).toBe('Día A')
   })
 
   it('falls back to English when a Spanish entry is missing, then to the key', () => {

@@ -8,6 +8,7 @@ export type CoachPlanExercise = {
   reps: number[]
   ruleTarget: { weight: number; reps: number[] }
   last: Array<{ weight: number; reps: number }>
+  basis?: 'other-day'
 }
 
 export type NextSessionPlan = {
