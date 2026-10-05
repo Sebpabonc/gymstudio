@@ -599,6 +599,8 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                       {t('progress.weeklySets.donePlanned', {
                         done: formatNumber(language, Number(row.done.toFixed(1))),
                         planned: formatNumber(language, Number(row.planned.toFixed(1))),
+                        doneWord: t(row.done === 1 ? 'progress.weeklySets.doneWord.one' : 'progress.weeklySets.doneWord.other'),
+                        plannedWord: t(row.planned === 1 ? 'progress.weeklySets.plannedWord.one' : 'progress.weeklySets.plannedWord.other'),
                         status: muscleStatus(row, i18n),
                       })}
                     </small>
@@ -610,6 +612,8 @@ export default function ProgressScreen({ entries, exercises, initialExerciseId, 
                       group: muscleGroupLabel(row.muscleGroup, i18n),
                       done: formatNumber(language, row.done),
                       planned: formatNumber(language, row.planned),
+                      setsDoneWord: t(row.done === 1 ? 'progress.weeklySets.setsDoneWord.one' : 'progress.weeklySets.setsDoneWord.other'),
+                      plannedWord: t(row.planned === 1 ? 'progress.weeklySets.plannedWord.one' : 'progress.weeklySets.plannedWord.other'),
                       min: formatNumber(language, SETS_RANGE.min),
                       max: formatNumber(language, SETS_RANGE.max),
                     })}

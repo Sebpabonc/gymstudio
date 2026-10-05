@@ -100,6 +100,17 @@ describe('language preference', () => {
     expect(storageKey('gym-studio.language')).toBe('gym-studio.language')
     expect(getLanguage()).toBe('es')
   })
+
+  it('is shared with demo mode', () => {
+    setLanguage('es')
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+    try {
+      expect(storageKey('gym-studio.language')).toBe('gym-studio.language')
+      expect(getLanguage()).toBe('es')
+    } finally {
+      sessionStorage.removeItem('gym-studio.demo-mode')
+    }
+  })
 })
 
 describe('bundled catalogue Spanish names', () => {

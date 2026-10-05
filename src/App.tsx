@@ -28,7 +28,7 @@ import {
   getLayoutMode,
   setLayoutMode,
 } from './utils/storage'
-import { formatShortDate, TranslationKey, useT } from './i18n'
+import { formatShortDate, localizeMuscle, TranslationKey, useT } from './i18n'
 import { RestTimerState, startRestTimer } from './utils/restTimer'
 import { summarizeCompletedEntry } from './utils/completedExercises'
 import {
@@ -301,7 +301,7 @@ export default function App() {
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    setSaveConfirmation(t('exercises.logged', { summary: summarizeCompletedEntry(nextEntry) }))
+    setSaveConfirmation(t('exercises.logged', { summary: summarizeCompletedEntry(nextEntry, language) }))
     setDraftSets([createSet(8, 0), createSet(8, 0)])
     setCompletedSets([false, false])
     setSetWeightTouched([false, false])
@@ -533,7 +533,7 @@ export default function App() {
                           <span className="field-label">{t('exercises.primaryMuscles')}</span>
                           <div className="chip-row muscle-chip-row">
                             {(selectedExercise.primaryMuscles ?? [selectedExercise.primaryMuscle]).map((muscle) => (
-                              <span key={muscle} className="chip">{muscle}</span>
+                              <span key={muscle} className="chip">{localizeMuscle(muscle, language)}</span>
                             ))}
                           </div>
                         </div>
@@ -543,15 +543,15 @@ export default function App() {
                             {(selectedExercise.secondaryMuscles ??
                               (selectedExercise.secondaryMuscle ? [selectedExercise.secondaryMuscle] : [])
                             ).map((muscle) => (
-                              <span key={muscle} className="chip subtle">{muscle}</span>
+                              <span key={muscle} className="chip subtle">{localizeMuscle(muscle, language)}</span>
                             ))}
                           </div>
                         </div>
                       </div>
                     ) : (
                       <div className="chip-row">
-                        <span className="chip">{selectedExercise.primaryMuscle}</span>
-                        {selectedExercise.secondaryMuscle && <span className="chip subtle">{selectedExercise.secondaryMuscle}</span>}
+                        <span className="chip">{localizeMuscle(selectedExercise.primaryMuscle, language)}</span>
+                        {selectedExercise.secondaryMuscle && <span className="chip subtle">{localizeMuscle(selectedExercise.secondaryMuscle, language)}</span>}
                       </div>
                     )}
 

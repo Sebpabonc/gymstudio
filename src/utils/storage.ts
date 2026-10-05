@@ -64,6 +64,7 @@ export function setStorageNamespace(userId: string | null) {
 }
 
 export function storageKey(key: string) {
+  if (key === LANGUAGE_KEY) return key
   if (isDemoMode()) return key.replace(/^gym-studio\./, 'gym-studio.demo.')
   if (storageNamespace && !SHARED_KEYS.has(key)) {
     return key.replace(/^gym-studio\./, `gym-studio.user.${storageNamespace}.`)

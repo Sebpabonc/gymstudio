@@ -299,10 +299,10 @@
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho, espalda y abs · pesado" },
+      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho, espalda y abdomen · pesado" },
       "arms-a": { "name": "Hombros y Brazos A", "focus": "Deltoides y brazos · pesado" },
       "lower-body-a": { "name": "Piernas A", "focus": "Piernas y pantorrillas · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho, espalda y abs · volumen" },
+      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho, espalda y abdomen · volumen" },
       "arms-b": { "name": "Hombros y Brazos B", "focus": "Deltoides y brazos · volumen" },
       "lower-body-b": { "name": "Piernas B", "focus": "Piernas y pantorrillas · volumen" }
     },

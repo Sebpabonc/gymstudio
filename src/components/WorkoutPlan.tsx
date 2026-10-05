@@ -3,7 +3,7 @@ import { mapAiGatewayError, summariseSession } from '../ai/gateway'
 import type { AuthStatus } from '../auth/AuthProvider'
 import AskExercise from './AskExercise'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
-import { formatNumber, formatShortDate, formatWeekdayDate, useT } from '../i18n'
+import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
 import { openExternal } from '../native/openExternal'
 import AiConsentPrompt from './AiConsentPrompt'
@@ -1882,7 +1882,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       {benchAngleLabel && <span className="chip subtle">{benchAngleLabel}</span>}
                       {muscleChips.map((muscle, index) => (
                         <span key={`${exerciseKey}-muscle-${index}`} className={index === 0 ? 'chip' : 'chip subtle'}>
-                          {muscle}
+                          {localizeMuscle(muscle, language)}
                         </span>
                       ))}
                     </div>

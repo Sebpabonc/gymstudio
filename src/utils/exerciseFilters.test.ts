@@ -38,6 +38,25 @@ describe('exercise filters', () => {
     expect(filterExercises(exercises, 'row', 'Chest')).toEqual([])
   })
 
+  it('finds exercises by Spanish muscle and region words', () => {
+    const core: Exercise = { id: 'crunch', name: 'Cable Crunch', primaryMuscle: 'Abs', bodyRegion: 'Core' }
+    const calf: Exercise = { id: 'calf', name: 'Calf Raise', primaryMuscle: 'Calves', bodyRegion: 'Legs' }
+    const all = [...exercises, core, calf]
+
+    expect(filterExercises(all, 'espalda')).toEqual([exercises[0]])
+    expect(filterExercises(all, 'dorsales')).toEqual([exercises[0]])
+    expect(filterExercises(all, 'bíceps')).toEqual([exercises[0]])
+    expect(filterExercises(all, 'abdomen')).toEqual([core])
+    expect(filterExercises(all, 'pantorrillas')).toEqual([calf])
+    expect(filterExercises(all, 'gemelos')).toEqual([calf])
+    expect(filterExercises(all, 'pecho')).toEqual([exercises[1]])
+  })
+
+  it('shows the subtitle region and muscles in Spanish', () => {
+    expect(getExerciseSubtitle(exercises[0], 'es')).toBe('Espalda · Dorsales · Espalda alta')
+    expect(getExerciseSubtitle(exercises[0])).toBe('Back · Lats · Upper Back')
+  })
+
   it('normalizes spacing and hyphens and matches query words in any order', () => {
     const pulldown = { ...exercises[0], name: 'Lat Pulldown', equipment: 'cable' }
     const dumbbellPress = { ...exercises[1], name: 'Dumbbell Bench Press', equipment: 'dumbbell' }
@@ -98,5 +117,15 @@ describe('exercise filters', () => {
     expect(getExerciseTips({ ...bundled, postureTips: ['Catalogue'] })).toEqual(['Catalogue'])
     expect(getExerciseTips({ ...bundled, postureTips: [] })).toEqual([])
     expect(getExerciseTips(bundled)).toEqual(['Bundled'])
+  })
+})
+
+describe('search ranking', () => {
+  it('puts primary-muscle matches before secondary-muscle matches', () => {
+    const exercises = [
+      { id: 'plank', name: 'Plank', primaryMuscle: 'Abs', primaryMuscles: ['Abs'], secondaryMuscles: ['Glutes'], bodyRegion: 'Core' },
+      { id: 'hip-thrust', name: 'Hip Thrust', primaryMuscle: 'Glutes', primaryMuscles: ['Glutes'], secondaryMuscles: ['Hamstrings'], bodyRegion: 'Glutes' },
+    ]
+    expect(filterExercises(exercises as never, 'glutes').map((exercise) => exercise.id)).toEqual(['hip-thrust', 'plank'])
   })
 })

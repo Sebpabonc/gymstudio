@@ -135,7 +135,8 @@ describe('progress view model', () => {
     expect(weeklySummary(1, 6, 1, '2026-03-02', en)).toBe('This week: 1 of 6 sessions · 1 PR · on track')
     expect(weeklySummary(0, 6, 0, '2026-03-02', en)).toBe('This week: 0 of 6 sessions · 0 PRs · in progress')
     expect(weeklySummary(0, 6, 0, '2026-03-08', en)).toBe('This week: 0 of 6 sessions · 0 PRs · in progress')
-    expect(weeklySummary(1, 6, 1, '2026-03-02', es)).toBe('Esta semana: 1 de 6 sesiones · 1 PR · en ritmo')
+    expect(weeklySummary(1, 6, 1, '2026-03-02', es)).toBe('Esta semana: 1 de 6 sesiones · 1 récord · al día')
+    expect(weeklySummary(0, 6, 0, '2026-03-08', es)).toBe('Esta semana: 0 de 6 sesiones · 0 récords · en progreso')
   })
 
   it('picks the main lift of the current day, falling back to most logged', () => {
