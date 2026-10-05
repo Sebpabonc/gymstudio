@@ -2231,8 +2231,9 @@ button {
   font-size: calc(var(--font-body) * 1.4);
 }
 
+/* PO 2026-10-05: the exercise name keeps the same size closed and open (no jump). */
 .planned-exercise-card.collapsed .planned-exercise-main-name {
-  font-size: calc(var(--font-body) * 1.05);
+  font-size: calc(var(--font-body) * 1.4);
 }
 
 .planned-exercise-detail-name {

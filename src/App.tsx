@@ -518,9 +518,8 @@ export default function App() {
                           >
                             {getExerciseDisplayName(selectedExercise, language)}
                             <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
-                              <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
-                              <circle cx="9" cy="10" r="1.6" />
-                              <path d="M20.5 16l-5-5-8 8" />
+                              <path d="M8 16L16 8" />
+                              <path d="M9.5 8H16v6.5" />
                             </svg>
                           </a>
                         </h2>
