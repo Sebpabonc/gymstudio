@@ -32,6 +32,13 @@ describe('dictionaries', () => {
     expect(es['exercises.logWorkout']).toBe('Registrar ejercicio')
     expect(es['rest.label']).toBe('Descanso')
   })
+
+  it('uses sentence case for posture section labels', () => {
+    expect(en['workout.posture.title']).toBe('Posture tips')
+    expect(es['workout.posture.title']).toBe('Consejos de postura')
+    expect(en['exercises.postureTips']).toBe('Posture tips')
+    expect(es['exercises.postureTips']).toBe('Consejos de postura')
+  })
 })
 
 describe('translate', () => {

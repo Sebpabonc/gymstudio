@@ -8,6 +8,7 @@ import { localizeCatalogue, useSpanishContentReady } from './i18n/content'
 import { exerciseImageQuery, exerciseImageSearchUrl } from './utils/exerciseImages'
 import AskExercise from './components/AskExercise'
 import ExerciseSetTable from './components/ExerciseSetTable'
+import SqueezeCue from './components/SqueezeCue'
 import HelpAndAi from './components/HelpAndAi'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
@@ -559,44 +560,21 @@ export default function App() {
 
                     {selectedExercise.notes && <p className="exercise-notes">{selectedExercise.notes}</p>}
 
-                    {selectedExercise.squeezeCue?.trim() && (
-                      <p className="squeeze-cue-button expanded">
-                        <strong>{t('exercises.squeeze')}</strong>{selectedExercise.squeezeCue}
-                      </p>
-                    )}
-
-                    <div className={`tips-box ${tipsExpanded ? 'expanded' : 'collapsed'}`}>
-                      <div className="tips-header">
-                        <p className="field-label">{t('exercises.postureTips')}</p>
-                        <div className="exercise-ai-controls">
-                          {selectedExerciseTips.length > 0 && (
-                            <button
-                              type="button"
-                              className="toggle-button expand-toggle"
-                              onClick={() => setTipsExpanded((current) => !current)}
-                              aria-expanded={tipsExpanded}
-                              aria-controls={`track-posture-tips-${selectedExercise.id}`}
-                            >
-                              {tipsExpanded ? '−' : '+'}
-                            </button>
-                          )}
-                          <AskExercise
-                            exerciseId={selectedExercise.id}
-                            exerciseName={getExerciseDisplayName(selectedExercise, language)}
-                            onSignIn={() => setActiveTab('you')}
-                          />
-                        </div>
-                      </div>
-                      {selectedExerciseTips.length > 0 && (
-                        <ul id={`track-posture-tips-${selectedExercise.id}`} className="tips-list" hidden={!tipsExpanded}>
-                          {selectedExerciseTips.map((tip, index) => (
-                            <li key={`${selectedExercise.id}-tip-${index}`} className="tip-item">
-                              {typeof tip === 'string' ? tip : tip.text}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
+                    <SqueezeCue
+                      cue={selectedExercise.squeezeCue}
+                      cueLabel={t('workout.squeezeCue')}
+                      tips={selectedExerciseTips.map((tip) => (typeof tip === 'string' ? tip : tip.text))}
+                      tipsLabel={t('exercises.postureTips')}
+                      tipsId={`track-posture-tips-${selectedExercise.id}`}
+                      expanded={tipsExpanded}
+                      onToggle={() => setTipsExpanded((current) => !current)}
+                    >
+                      <AskExercise
+                        exerciseId={selectedExercise.id}
+                        exerciseName={getExerciseDisplayName(selectedExercise, language)}
+                        onSignIn={() => setActiveTab('you')}
+                      />
+                    </SqueezeCue>
 
                     <div className="summary-grid">
                       <div className="metric-card">

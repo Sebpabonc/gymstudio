@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { mapAiGatewayError, summariseSession } from '../ai/gateway'
 import type { AuthStatus } from '../auth/AuthProvider'
 import AskExercise from './AskExercise'
+import SqueezeCue from './SqueezeCue'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
@@ -1666,9 +1667,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             >
               {text.changeBlock}
             </button>
-            <p className="training-block-origin-legend">
-              <span>{text.coach}</span> = {t('workout.block.origin.coach')} · <span>{text.pt}</span> = {t('workout.block.origin.pt')}
-            </p>
             <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
               <div className="training-block-meta">
                 <span>{blockDateRange(activeBlock, language)}</span>
@@ -1724,9 +1722,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     ×
                   </button>
                 </header>
-                <p className="block-selector-legend">
-                  <span>{text.coach}</span> = {t('workout.block.origin.coach')} · <span>{text.pt}</span> = {t('workout.block.origin.pt')}
-                </p>
                 <div className="block-selector-options">
                   {trainingBlocks.map((block) => (
                     <button
@@ -2102,13 +2097,15 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     {/* TODO(i18n): PT will provide approved translations */}
                     {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
 
-                    {libraryMatch?.squeezeCue?.trim() && (
-                      <p className="planned-squeeze-cue expanded">
-                        <strong>{t('workout.squeezeCue')} — </strong>
-                        {/* TODO(i18n): PT will provide approved translations */}
-                        {libraryMatch.squeezeCue}
-                      </p>
-                    )}
+                    <SqueezeCue
+                      cue={libraryMatch?.squeezeCue}
+                      cueLabel={t('workout.squeezeCue')}
+                      tips={postureTips}
+                      tipsLabel={text.posture}
+                      tipsId={`posture-tips-${exerciseKey}`}
+                      expanded={isTipsVisible}
+                      onToggle={() => togglePostureTips(exercise.name)}
+                    />
 
                     {!group.isSuperset && (
                       <div className="planned-set-section">
@@ -2118,14 +2115,23 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                               {t('workout.target.applied', { value: getAppliedTarget(exercise, exercise.exerciseId)?.increaseKg ?? 0 })}
                             </span>
                           )}
-                          <button
-                            type="button"
-                            className="same-as-set-one-button"
-                            disabled={!(Number(setWeights[0]) > 0)}
-                            onClick={() => copyPlanSetOneWeight(exercise, setCount)}
-                          >
-                            {t('workout.set.sameAsFirst')}
-                          </button>
+                          <div className="planned-set-actions">
+                            <button
+                              type="button"
+                              className="same-as-set-one-button"
+                              disabled={!(Number(setWeights[0]) > 0)}
+                              onClick={() => copyPlanSetOneWeight(exercise, setCount)}
+                            >
+                              {t('workout.set.sameAsFirst')}
+                            </button>
+                            <button
+                              type="button"
+                              className="rest-start-button"
+                              onClick={() => onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))}
+                            >
+                              {t('workout.action.startRest')}
+                            </button>
+                          </div>
                         </div>
 
                         <div className="planned-set-grid">
@@ -2251,25 +2257,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       <button
                         type="button"
                         className="exercise-detail-toggle"
-                        onClick={() => togglePostureTips(exercise.name)}
-                        aria-expanded={isTipsVisible}
-                        aria-controls={`posture-tips-${exerciseKey}`}
-                      >
-                        {text.posture}<span aria-hidden="true">{isTipsVisible ? '−' : '+'}</span>
-                      </button>
-                      <ul id={`posture-tips-${exerciseKey}`} className="posture-tips-list" hidden={!isTipsVisible}>
-                        {postureTips.map((tip, index) => (
-                          <li key={`${exercise.name}-tip-${index}`}>
-                            {/* TODO(i18n): PT will provide approved translations */}
-                            {tip}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="exercise-detail-row">
-                      <button
-                        type="button"
-                        className="exercise-detail-toggle"
                         onClick={() => toggleProgressSection(exercise.name)}
                         aria-expanded={isProgressSectionVisible}
                       >
@@ -2306,13 +2293,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         />
                       </div>
                     )}
-                    <button
-                      type="button"
-                      className="rest-start-button"
-                      onClick={() => onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))}
-                    >
-                      {t('workout.action.startRest')}
-                    </button>
                     {!group.isSuperset && (
                       <label className="planned-notes-field">
                         <span>{t('workout.label.notes')}</span>
@@ -2356,6 +2336,18 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 </div>
                 {cards}
                 <div className={`superset-log-box${supersetLogOpen[group.key] ? ' open' : ''}`}>
+                  <button
+                    type="button"
+                    className="rest-start-button"
+                    onClick={() =>
+                      onStartRest(
+                        supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90,
+                        supersetExercises.map((item) => displayExerciseName(item.name)).join(' + ')
+                      )
+                    }
+                  >
+                    {t('workout.action.startRest')}
+                  </button>
                   <button
                     type="button"
                     className="superset-log-toggle"
