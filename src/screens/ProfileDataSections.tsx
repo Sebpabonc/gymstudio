@@ -106,6 +106,7 @@ export default function ProfileDataSections() {
   const [savedGoal, setSavedGoal] = useState<TrainingGoal | null>(null)
   const [editingGoal, setEditingGoal] = useState(true)
   const [loading, setLoading] = useState(!disabled)
+  const [metricLoading, setMetricLoading] = useState(!disabled)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -140,15 +141,20 @@ export default function ProfileDataSections() {
   useEffect(() => {
     if (disabled) {
       setMetricInput(asMetricInput(null))
+      setMetricLoading(false)
       return
     }
     let active = true
+    setMetricLoading(true)
     void fetchBodyMetric(selectedDate)
       .then((metric) => {
         if (active) setMetricInput(asMetricInput(metric))
       })
       .catch((cause) => {
         if (active) setError(getFriendlyError(cause, t))
+      })
+      .finally(() => {
+        if (active) setMetricLoading(false)
       })
     return () => { active = false }
   }, [disabled, selectedDate, t])
@@ -206,10 +212,20 @@ export default function ProfileDataSections() {
         <h2 id="profile-measurements-title">{t('profile.measurements.title')}</h2>
         {disabled && <p className="profile-data-hint">{t('profile.data.signIn')}</p>}
         <form onSubmit={submitMetric}>
-          <fieldset className="profile-data-fields" disabled={disabled || busy}>
+          <fieldset className="profile-data-fields" disabled={disabled || busy || metricLoading}>
             <label className="profile-data-field">
               <span>{t('profile.measurements.date')}</span>
-              <input type="date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} />
+              <input
+                type="date"
+                required
+                value={selectedDate}
+                onChange={(event) => {
+                  setMetricInput(asMetricInput(null))
+                  setMetricLoading(true)
+                  setError('')
+                  setSelectedDate(event.target.value)
+                }}
+              />
             </label>
             <label className="profile-data-field">
               <span>{t('profile.measurements.weight')}</span>
@@ -224,7 +240,7 @@ export default function ProfileDataSections() {
               <input type="number" inputMode="numeric" min="0" max="10000" step="1" value={metricInput.calories} onChange={(event) => setMetricInput({ ...metricInput, calories: event.target.value })} />
             </label>
           </fieldset>
-          <button type="submit" className="primary-button profile-data-save" disabled={disabled || busy}>
+          <button type="submit" className="primary-button profile-data-save" disabled={disabled || busy || metricLoading}>
             {busy ? t('profile.data.saving') : t('profile.measurements.save')}
           </button>
         </form>
