@@ -1,0 +1,501 @@
+{
+  "id": "tpl-5d-upper-lower-ppl-db",
+  "number": 0,
+  "name": "Upper / Lower + Push / Pull / Legs · Dumbbells · 5 Days",
+  "method": "flat-pyramid",
+  "start_date": "2026-01-05",
+  "weeks": 6,
+  "origin": "pt",
+  "summary": "Six weeks, five sessions needing only dumbbells, an adjustable bench and your bodyweight: heavier upper and lower days, then push, pull and legs days with higher reps. Same weight on every set. Week 6 is lighter.",
+  "insights": [
+    {
+      "title": "Goal",
+      "body": "Build muscle and strength on five days a week with dumbbells and bodyweight. The first two days use heavier compound lifts; the last three add volume with stretch-focused exercises, so every muscle gets two kinds of work each week."
+    },
+    {
+      "title": "How it works",
+      "body": "Upper and Lower are the heavier days (8-12 reps). Push (chest, shoulders, triceps), Pull (back, rear delts, biceps) and Legs use 10-20 reps. Every set of an exercise uses the same weight and reps. Paired exercises (same letter) are supersets: first exercise, about 10 seconds, second exercise, then the full rest."
+    },
+    {
+      "title": "A days vs B days",
+      "body": "Instead of A/B copies, this template uses different exercises on the heavy days (Upper, Lower) and the volume days (Push, Pull, Legs). That gives variety and trains each muscle across a wide rep range every week, which matters when the heaviest dumbbells are limited. Track each day separately."
+    },
+    {
+      "title": "How to progress",
+      "body": "When every set reaches the target reps, add the smallest dumbbell step. If your heaviest dumbbells get too easy, add 2-5 reps per set or slow the lowering to 3 seconds. Week 1 stop about 3 reps before failure, week 2 about 2, weeks 3-4 about 1-2, week 5 about 1."
+    },
+    {
+      "title": "What to expect",
+      "body": "Week 1 should feel easy while you find your weights. Weeks 2-5 should bring more reps or weight. A good week is Upper, Lower, rest, Push, Pull, Legs, rest. Week 6 is lighter: same exercises and weights, half the sets (round up), about 3 reps before failure."
+    },
+    {
+      "title": "Key tips",
+      "body": "Five days is a lot: sleep well and keep at least one full rest day. Set the bench angle before each superset. For push-ups, raise your hands on the bench if you can't reach the reps. If a movement hurts, stop it and see a qualified professional."
+    }
+  ],
+  "days": [
+    {
+      "key": "upper",
+      "name": "Upper",
+      "focus": "Upper body · heavy",
+      "exercises": [
+        {
+          "code": "A1",
+          "exercise_id": "dumbbell-bench-press",
+          "sets": 3,
+          "reps": [
+            "8",
+            "8",
+            "8"
+          ],
+          "rest_seconds": 120,
+          "technique": "straight",
+          "angle_degrees": 0,
+          "notes": ""
+        },
+        {
+          "code": "B1",
+          "exercise_id": "dumbbell-row-single-arm",
+          "sets": 3,
+          "reps": [
+            "8",
+            "8",
+            "8"
+          ],
+          "rest_seconds": 120,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": "Reps are per arm."
+        },
+        {
+          "code": "C1",
+          "exercise_id": "dumbbell-shoulder-press",
+          "sets": 3,
+          "reps": [
+            "10",
+            "10",
+            "10"
+          ],
+          "rest_seconds": 120,
+          "technique": "straight",
+          "angle_degrees": 75,
+          "notes": ""
+        },
+        {
+          "code": "D1",
+          "exercise_id": "dumbbell-chest-supported-row",
+          "sets": 3,
+          "reps": [
+            "10",
+            "10",
+            "10"
+          ],
+          "rest_seconds": 90,
+          "technique": "straight",
+          "angle_degrees": 30,
+          "notes": ""
+        },
+        {
+          "code": "E1",
+          "exercise_id": "standing-dumbbell-curl",
+          "sets": 2,
+          "reps": [
+            "10",
+            "10"
+          ],
+          "rest_seconds": 10,
+          "technique": "superset",
+          "angle_degrees": null,
+          "notes": ""
+        },
+        {
+          "code": "E2",
+          "exercise_id": "dumbbell-skull-crusher",
+          "sets": 2,
+          "reps": [
+            "10",
+            "10"
+          ],
+          "rest_seconds": 90,
+          "technique": "superset",
+          "angle_degrees": 0,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "key": "lower",
+      "name": "Lower",
+      "focus": "Legs & core · heavy",
+      "exercises": [
+        {
+          "code": "A1",
+          "exercise_id": "dumbbell-bulgarian-split-squat",
+          "sets": 3,
+          "reps": [
+            "8",
+            "8",
+            "8"
+          ],
+          "rest_seconds": 120,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": "Reps are per leg."
+        },
+        {
+          "code": "B1",
+          "exercise_id": "dumbbell-romanian-deadlift",
+          "sets": 3,
+          "reps": [
+            "8",
+            "8",
+            "8"
+          ],
+          "rest_seconds": 120,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": ""
+        },
+        {
+          "code": "C1",
+          "exercise_id": "dumbbell-goblet-squat",
+          "sets": 2,
+          "reps": [
+            "12",
+            "12"
+          ],
+          "rest_seconds": 90,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": ""
+        },
+        {
+          "code": "D1",
+          "exercise_id": "hip-thrust-single-leg",
+          "sets": 3,
+          "reps": [
+            "10",
+            "10",
+            "10"
+          ],
+          "rest_seconds": 60,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": "Reps are per leg."
+        },
+        {
+          "code": "E1",
+          "exercise_id": "dumbbell-standing-calf-raise-single-leg",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 10,
+          "technique": "superset",
+          "angle_degrees": null,
+          "notes": "Reps are per leg."
+        },
+        {
+          "code": "E2",
+          "exercise_id": "lying-leg-raise",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 45,
+          "technique": "superset",
+          "angle_degrees": null,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "key": "push",
+      "name": "Push",
+      "focus": "Chest, shoulders, triceps",
+      "exercises": [
+        {
+          "code": "A1",
+          "exercise_id": "incline-dumbbell-press",
+          "sets": 3,
+          "reps": [
+            "10",
+            "10",
+            "10"
+          ],
+          "rest_seconds": 120,
+          "technique": "straight",
+          "angle_degrees": 30,
+          "notes": "Lower until you feel a deep chest stretch."
+        },
+        {
+          "code": "B1",
+          "exercise_id": "dumbbell-fly",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 10,
+          "technique": "superset",
+          "angle_degrees": 0,
+          "notes": ""
+        },
+        {
+          "code": "B2",
+          "exercise_id": "standing-db-lateral-raises",
+          "sets": 3,
+          "reps": [
+            "15",
+            "15",
+            "15"
+          ],
+          "rest_seconds": 90,
+          "technique": "superset",
+          "angle_degrees": null,
+          "notes": ""
+        },
+        {
+          "code": "C1",
+          "exercise_id": "push-up",
+          "sets": 2,
+          "reps": [
+            "12",
+            "12"
+          ],
+          "rest_seconds": 60,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": ""
+        },
+        {
+          "code": "D1",
+          "exercise_id": "dumbbell-overhead-triceps-extension",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 60,
+          "technique": "straight",
+          "angle_degrees": 90,
+          "notes": ""
+        },
+        {
+          "code": "E1",
+          "exercise_id": "dumbbell-triceps-kickback",
+          "sets": 2,
+          "reps": [
+            "15",
+            "15"
+          ],
+          "rest_seconds": 60,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "key": "pull",
+      "name": "Pull",
+      "focus": "Back, rear delts, biceps",
+      "exercises": [
+        {
+          "code": "A1",
+          "exercise_id": "dumbbell-chest-supported-row",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 120,
+          "technique": "straight",
+          "angle_degrees": 30,
+          "notes": ""
+        },
+        {
+          "code": "B1",
+          "exercise_id": "db-pull-overs",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 90,
+          "technique": "straight",
+          "angle_degrees": 0,
+          "notes": ""
+        },
+        {
+          "code": "C1",
+          "exercise_id": "dumbbell-bent-over-row",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 90,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": ""
+        },
+        {
+          "code": "D1",
+          "exercise_id": "dumbbell-rear-delt-fly-chest-supported",
+          "sets": 3,
+          "reps": [
+            "15",
+            "15",
+            "15"
+          ],
+          "rest_seconds": 10,
+          "technique": "superset",
+          "angle_degrees": 30,
+          "notes": ""
+        },
+        {
+          "code": "D2",
+          "exercise_id": "dumbbell-shrug",
+          "sets": 3,
+          "reps": [
+            "15",
+            "15",
+            "15"
+          ],
+          "rest_seconds": 60,
+          "technique": "superset",
+          "angle_degrees": null,
+          "notes": ""
+        },
+        {
+          "code": "E1",
+          "exercise_id": "dumbbell-curl-incline",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 60,
+          "technique": "straight",
+          "angle_degrees": 45,
+          "notes": ""
+        },
+        {
+          "code": "F1",
+          "exercise_id": "hammer-curls",
+          "sets": 2,
+          "reps": [
+            "15",
+            "15"
+          ],
+          "rest_seconds": 60,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "key": "legs",
+      "name": "Legs",
+      "focus": "Legs & core · volume",
+      "exercises": [
+        {
+          "code": "A1",
+          "exercise_id": "dumbbell-step-up",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 90,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": "Reps are per leg."
+        },
+        {
+          "code": "B1",
+          "exercise_id": "dumbbell-romanian-deadlift-single-leg",
+          "sets": 3,
+          "reps": [
+            "12",
+            "12",
+            "12"
+          ],
+          "rest_seconds": 60,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": "Reps are per leg."
+        },
+        {
+          "code": "C1",
+          "exercise_id": "dumbbell-sumo-squat",
+          "sets": 3,
+          "reps": [
+            "15",
+            "15",
+            "15"
+          ],
+          "rest_seconds": 90,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": ""
+        },
+        {
+          "code": "D1",
+          "exercise_id": "glute-bridge-single-leg",
+          "sets": 3,
+          "reps": [
+            "15",
+            "15",
+            "15"
+          ],
+          "rest_seconds": 60,
+          "technique": "straight",
+          "angle_degrees": null,
+          "notes": "Reps are per leg."
+        },
+        {
+          "code": "E1",
+          "exercise_id": "dumbbell-standing-calf-raise-single-leg",
+          "sets": 3,
+          "reps": [
+            "20",
+            "20",
+            "20"
+          ],
+          "rest_seconds": 10,
+          "technique": "superset",
+          "angle_degrees": null,
+          "notes": "Reps are per leg."
+        },
+        {
+          "code": "E2",
+          "exercise_id": "dead-bug",
+          "sets": 3,
+          "reps": [
+            "10",
+            "10",
+            "10"
+          ],
+          "rest_seconds": 45,
+          "technique": "superset",
+          "angle_degrees": null,
+          "notes": ""
+        }
+      ]
+    }
+  ]
+}
