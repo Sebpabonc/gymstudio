@@ -14,7 +14,8 @@ const PRICES: Record<string, [number, number]> = {
 const FALLBACK_PRICE: [number, number] = [2.5, 10]
 // App-side cap stays below the USD 20 hard limit set in the OpenAI dashboard.
 const MONTHLY_CAP_USD = Number(Deno.env.get('AI_MONTHLY_CAP_USD') ?? '15')
-const DAILY_LIMIT_PER_USER = Number(Deno.env.get('AI_DAILY_LIMIT') ?? '20')
+// Automatic coach calls (per-exercise feedback + next-session plan) also count, so allow more per day.
+const DAILY_LIMIT_PER_USER = Number(Deno.env.get('AI_DAILY_LIMIT') ?? '40')
 const MAX_QUESTION_CHARS = 300
 const MAX_OUTPUT_TOKENS = 400
 
@@ -64,9 +65,21 @@ professional); never invent numbers not in the data; you may suggest what to try
 plan itself is designed by the PT. Reply in at most 150 words, plain text, short sentences or up to
 5 bullet points starting with "- ".`
 
+const FEEDBACK_PROMPT = `You are GymStudio's coach. The user just logged one exercise. Using the plan target,
+the sets just logged, the app's rule-based recommendation and the previous sessions of this exercise, write
+ONE short coaching note (max 2 sentences, max 40 words): what went well or what to fix, and the concrete
+target for next time. Agree with the rule-based recommendation unless the history clearly shows a better
+option; never change the exercise; no medical advice.`
+
+const PLAN_PROMPT = `You are GymStudio's coach preparing the user's next session of a given day of their PT plan.
+For EACH planned exercise propose the weight and reps per set for next time, starting from the app's
+rule-based target and adjusting only within +/-10% using the user's history (trend, missed reps, rest of
+the week). Never add, remove or swap exercises; the PT owns the plan. Reply ONLY with JSON:
+{"summary": "<1-2 sentences>", "exercises": [{"code": "A1", "weight": 25, "reps": [8, 8, 8], "note": "<max 15 words>"}]}`
+
 const ID_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
-type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary' | 'general_chat'
+type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary' | 'general_chat' | 'exercise_feedback' | 'next_session_plan'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -97,6 +110,10 @@ Deno.serve(async (req) => {
     blockId?: string
     dayKey?: string
     language?: string
+    logged?: unknown
+    target?: unknown
+    recommendation?: unknown
+    plan?: unknown
   }
   try {
     body = await req.json()
@@ -104,7 +121,7 @@ Deno.serve(async (req) => {
     return json(400, { error: 'invalid_json' })
   }
   const feature = body.feature as Feature
-  if (!['ask_exercise', 'explain_suggestion', 'session_summary', 'general_chat'].includes(feature)) {
+  if (!['ask_exercise', 'explain_suggestion', 'session_summary', 'general_chat', 'exercise_feedback', 'next_session_plan'].includes(feature)) {
     return json(400, { error: 'unknown_feature' })
   }
   const exerciseId = (body.exerciseId ?? '').trim()
@@ -117,7 +134,7 @@ Deno.serve(async (req) => {
   if (feature === 'explain_suggestion' && (!suggestion || suggestion.length > MAX_QUESTION_CHARS)) {
     return json(400, { error: 'invalid_suggestion', maxChars: MAX_QUESTION_CHARS })
   }
-  if ((feature === 'ask_exercise' || feature === 'explain_suggestion') && !ID_RE.test(exerciseId)) return json(400, { error: 'invalid_exercise' })
+  if ((feature === 'ask_exercise' || feature === 'explain_suggestion' || feature === 'exercise_feedback') && !ID_RE.test(exerciseId)) return json(400, { error: 'invalid_exercise' })
   if (feature === 'session_summary' && !DATE_RE.test(date)) return json(400, { error: 'invalid_date' })
   const language = body.language === 'es' ? 'es' : 'en'
 
@@ -157,7 +174,19 @@ Deno.serve(async (req) => {
   let userMessage = question
   let context: Record<string, unknown>
 
-  if (feature === 'general_chat') {
+  if (feature === 'next_session_plan') {
+    const plan = body.plan
+    if (!plan || JSON.stringify(plan).length > 6000) return json(400, { error: 'invalid_plan' })
+    const { data: recent } = await userClient
+      .from('workout_entries')
+      .select('exercise_id, date, sets, day_key')
+      .is('deleted_at', null)
+      .order('date', { ascending: false })
+      .limit(40)
+    context = { plan, recentSessions: recent ?? [] }
+    systemPrompt = PLAN_PROMPT
+    userMessage = 'Prepare my next session.'
+  } else if (feature === 'general_chat') {
     const todayIso = new Date().toISOString().slice(0, 10)
     const { data: blocks } = await userClient
       .from('training_blocks')
@@ -220,6 +249,13 @@ Deno.serve(async (req) => {
       .order('date', { ascending: false })
       .limit(feature === 'explain_suggestion' ? 8 : 5)
     context = { exercise: describe(exercise), recentSessions: history ?? [] }
+    if (feature === 'exercise_feedback') {
+      const extra = { logged: body.logged, target: body.target, recommendation: body.recommendation }
+      if (JSON.stringify(extra).length > 3000) return json(400, { error: 'invalid_feedback' })
+      context = { ...context, ...extra }
+      systemPrompt = FEEDBACK_PROMPT
+      userMessage = 'Give me my coaching note.'
+    }
     if (feature === 'explain_suggestion') {
       systemPrompt = SUGGESTION_PROMPT
       userMessage = `The app suggested: "${suggestion}". Why?`
@@ -231,7 +267,8 @@ Deno.serve(async (req) => {
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: MODEL,
-      max_completion_tokens: MAX_OUTPUT_TOKENS,
+      max_completion_tokens: feature === 'next_session_plan' ? 900 : MAX_OUTPUT_TOKENS,
+      ...(feature === 'next_session_plan' ? { response_format: { type: 'json_object' } } : {}),
       messages: [
         { role: 'system', content: systemPrompt },
         ...(language === 'es'
