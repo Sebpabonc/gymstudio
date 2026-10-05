@@ -112,3 +112,8 @@ export function requestNextSessionPlan(
 ): Promise<AiGatewayResponse> {
   return invokeAiGateway({ feature: 'next_session_plan', plan, language })
 }
+
+/** AI personalisation of a rule-based 6-week plan (JSON answer, applied with applyAiAdjustments). */
+export function requestBlockPlan(plan: import('../types').TrainingBlock, language: Language = 'en'): Promise<AiGatewayResponse> {
+  return invokeAiGateway({ feature: 'block_plan', plan, language })
+}

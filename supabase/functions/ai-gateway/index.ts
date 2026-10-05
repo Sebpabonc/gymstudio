@@ -77,9 +77,20 @@ rule-based target and adjusting only within +/-10% using the user's history (tre
 the week). Never add, remove or swap exercises; the PT owns the plan. Reply ONLY with JSON:
 {"summary": "<1-2 sentences>", "exercises": [{"code": "A1", "weight": 25, "reps": [8, 8, 8], "note": "<max 15 words>"}]}`
 
+const BLOCK_PROMPT = `You are GymStudio's PT personalising a 6-week training block for one user. You get the user's
+goals and measurements, the rule-based plan (already built from a PT template with the approved rules) and a
+list of allowed alternative exercises. Personalise it: you may swap an exercise ONLY for an alternative with
+the same primary muscle, change sets by at most 1 (range 2-4), change rest (30-300 s) and add short notes.
+Keep the split, days and codes. No medical advice; fat loss mainly comes from a calorie deficit and steps.
+Then write a summary (max 60 words) explaining why the plan fits them, and 3-6 insights (title max 40 chars,
+body max 50 words). Reply ONLY with JSON:
+{"summary": "...", "insights": [{"title": "...", "body": "..."}],
+ "exercises": [{"dayKey": "upper-a", "code": "A1", "exerciseId": "...", "sets": 3, "restSeconds": 120, "note": "<max 12 words>"}]}
+List only the exercises you change.`
+
 const ID_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
-type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary' | 'general_chat' | 'exercise_feedback' | 'next_session_plan'
+type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary' | 'general_chat' | 'exercise_feedback' | 'next_session_plan' | 'block_plan'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -121,7 +132,7 @@ Deno.serve(async (req) => {
     return json(400, { error: 'invalid_json' })
   }
   const feature = body.feature as Feature
-  if (!['ask_exercise', 'explain_suggestion', 'session_summary', 'general_chat', 'exercise_feedback', 'next_session_plan'].includes(feature)) {
+  if (!['ask_exercise', 'explain_suggestion', 'session_summary', 'general_chat', 'exercise_feedback', 'next_session_plan', 'block_plan'].includes(feature)) {
     return json(400, { error: 'unknown_feature' })
   }
   const exerciseId = (body.exerciseId ?? '').trim()
@@ -174,7 +185,36 @@ Deno.serve(async (req) => {
   let userMessage = question
   let context: Record<string, unknown>
 
-  if (feature === 'next_session_plan') {
+  if (feature === 'block_plan') {
+    const plan = body.plan as { days?: Array<{ exercises?: Array<{ exerciseId?: string }> }> } | undefined
+    if (!plan || !Array.isArray(plan.days) || JSON.stringify(plan).length > 15000) return json(400, { error: 'invalid_plan' })
+    const { data: goals } = await userClient.from('training_goals').select('*').maybeSingle()
+    if (!goals) return json(400, { error: 'goals_required' })
+    const { data: metrics } = await userClient
+      .from('body_metrics')
+      .select('date, weight_kg, steps, calories')
+      .order('date', { ascending: false })
+      .limit(14)
+    const ids = [...new Set(plan.days.flatMap((day) => (day.exercises ?? []).map((exercise) => String(exercise.exerciseId))))]
+    const { data: used } = await userClient.from('exercises').select('id, primary_muscles, equipment').in('id', ids.slice(0, 60))
+    const muscles = [...new Set((used ?? []).map((exercise) => exercise.primary_muscles?.[0]).filter(Boolean))]
+    const kit = [...new Set((used ?? []).map((exercise) => exercise.equipment).filter(Boolean))]
+    const { data: alternatives } = await userClient
+      .from('exercises')
+      .select('id, name_en, primary_muscles, equipment')
+      .in('equipment', kit)
+      .limit(400)
+    context = {
+      goals,
+      recentMetrics: metrics ?? [],
+      plan,
+      alternatives: (alternatives ?? [])
+        .filter((exercise) => muscles.includes(exercise.primary_muscles?.[0]))
+        .map((exercise) => ({ id: exercise.id, name: exercise.name_en, primaryMuscle: exercise.primary_muscles?.[0] })),
+    }
+    systemPrompt = BLOCK_PROMPT
+    userMessage = 'Personalise my plan.'
+  } else if (feature === 'next_session_plan') {
     const plan = body.plan
     if (!plan || JSON.stringify(plan).length > 6000) return json(400, { error: 'invalid_plan' })
     const { data: recent } = await userClient
@@ -267,8 +307,8 @@ Deno.serve(async (req) => {
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: MODEL,
-      max_completion_tokens: feature === 'next_session_plan' ? 900 : MAX_OUTPUT_TOKENS,
-      ...(feature === 'next_session_plan' ? { response_format: { type: 'json_object' } } : {}),
+      max_completion_tokens: feature === 'block_plan' ? 2000 : feature === 'next_session_plan' ? 900 : MAX_OUTPUT_TOKENS,
+      ...(feature === 'next_session_plan' || feature === 'block_plan' ? { response_format: { type: 'json_object' } } : {}),
       messages: [
         { role: 'system', content: systemPrompt },
         ...(language === 'es'

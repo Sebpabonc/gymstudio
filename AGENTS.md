@@ -87,6 +87,9 @@ table needs `user_id`. Row Level Security enforces user isolation.
   global read-only reference data from `docs/fitness/approved/training-blocks/blocks.json`
   (spec: `docs/fitness/training-blocks-spec.md`, validated in CI by `scripts/validate-blocks.py`,
   seeded with `python3 scripts/training-blocks-seed.py`).
+- Personal plans: `public.user_plans` (one active per user, RLS own rows). Built in `src/plans/`:
+  PT template (`docs/fitness/approved/templates/`) → `personalizeTemplate` (approved rules) → AI `block_plan`
+  → `applyAiAdjustments` (keeps only rule-safe changes). A user with an active plan follows it; others keep the global blocks.
 - User data: `public.workout_entries` (synced workout history) and `public.profiles`, RLS by
   `auth.uid()`. Auth + sync design: `docs/architecture/auth-and-sync.md`. The old
   `workout_sessions` / `workout_sets` tables are unused.
