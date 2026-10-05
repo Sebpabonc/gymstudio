@@ -1,12 +1,18 @@
 import React from 'react'
 import type { AskExerciseAiConsent } from '../utils/storage'
-import { useT } from '../i18n'
+import { TranslationKey, useT } from '../i18n'
 
-export default function AiConsentPrompt({ onChoice }: { onChoice: (choice: AskExerciseAiConsent) => void }) {
+export default function AiConsentPrompt({
+  onChoice,
+  bodyKey = 'ai.consent.body',
+}: {
+  onChoice: (choice: AskExerciseAiConsent) => void
+  bodyKey?: TranslationKey
+}) {
   const { t } = useT()
   return (
     <>
-      <p>{t('ai.consent.body')}</p>
+      <p>{t(bodyKey)}</p>
       <div className="ask-exercise-actions">
         <button type="button" className="primary-button" onClick={() => onChoice('enabled')}>
           {t('ai.consent.on')}

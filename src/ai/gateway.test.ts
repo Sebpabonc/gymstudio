@@ -54,6 +54,22 @@ describe('AI gateway wrappers', () => {
     })
   })
 
+  it('invokes general_chat with the question and selected language', async () => {
+    invoke.mockResolvedValue({
+      data: { answer: 'Try adding a rep next session.', remainingToday: 19 },
+      error: null,
+    })
+    const { askGeneral } = await import('./gateway')
+
+    await expect(askGeneral('How do I progress?', 'es')).resolves.toEqual({
+      answer: 'Try adding a rep next session.',
+      remainingToday: 19,
+    })
+    expect(invoke).toHaveBeenCalledWith('ai-gateway', {
+      body: { feature: 'general_chat', question: 'How do I progress?', language: 'es' },
+    })
+  })
+
   it.each([
     ['daily_limit', "You've used today's 20 questions. Try again tomorrow."],
     ['monthly_budget_reached', 'AI is paused for this month.'],

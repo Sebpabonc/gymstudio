@@ -27,6 +27,7 @@ import {
   isGuestDataClaimed,
   moveGuestDataToAccount,
   getLanguage,
+  recordHelpAiAppOpen,
   setLanguage,
 } from './storage'
 
@@ -110,6 +111,16 @@ describe('language preference', () => {
     } finally {
       sessionStorage.removeItem('gym-studio.demo-mode')
     }
+  })
+})
+
+describe('help button open count', () => {
+  it('counts app opens in the device-level key once per page load', () => {
+    localStorage.setItem('gym-studio.help-ai-app-opens', '2')
+
+    expect(recordHelpAiAppOpen()).toBe(3)
+    expect(localStorage.getItem('gym-studio.help-ai-app-opens')).toBe('3')
+    expect(recordHelpAiAppOpen()).toBe(3)
   })
 })
 
