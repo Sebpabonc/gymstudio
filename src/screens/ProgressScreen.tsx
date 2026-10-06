@@ -473,7 +473,7 @@ export default function ProgressScreen({
       <section className="card progress-headline" aria-label={t('progress.headline.label')}>
         <h2 className="progress-headline-text">
           {gapWeek && activeBlock
-            ? t('progress.headline.blockStarts', {
+            ? t(activeBlock.number === 0 ? 'progress.headline.planStarts' : 'progress.headline.blockStarts', {
               number: activeBlock.number,
               date: formatShortDate(language, activeBlock.startDate),
             })
