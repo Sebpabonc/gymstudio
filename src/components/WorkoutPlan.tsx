@@ -1916,11 +1916,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             {activeBlockWeek !== null && (
               <span className="chip subtle training-week-chip">
                 {t(
-                  activeBlockWeek === 1
-                    ? 'workout.block.weekType.intro'
-                    : activeBlockWeek === 6
-                      ? 'workout.block.weekType.deload'
-                      : 'workout.block.weekType.full'
+                  activeBlockWeek === 6
+                    ? 'workout.block.weekType.deload'
+                    : 'workout.block.weekType.full'
                 )}
               </span>
             )}

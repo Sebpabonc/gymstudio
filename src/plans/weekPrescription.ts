@@ -12,12 +12,17 @@ function hasHeavyTopSet(exercise: PlannedExercise, week: number) {
     (week === 6 || Number(firstRep) <= 5)
 }
 
+/**
+ * PO 2026-10-06: weeks 1-5 follow the plan at full intensity and only week 6 is a deload.
+ * The week-1 intro (no intensity techniques) applies only to beginners' personal plans.
+ */
 export function prescriptionForWeek(
   exercise: PlannedExercise,
-  week: number
+  week: number,
+  options: { beginnerIntro?: boolean } = {}
 ): PlannedExercise & { weekNote?: string } {
   const prescription = { ...exercise, reps: [...exercise.reps] }
-  if (week !== 1 && week !== 6) return prescription
+  if (week !== 6 && !(week === 1 && options.beginnerIntro)) return prescription
 
   const isDeload = week === 6
   const weekNote = isDeload ? DELOAD_NOTE : INTRO_NOTE
