@@ -44,7 +44,7 @@ import {
   todayTrainingDay,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
-import { findCompletedEntry, findNextPendingIndex, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
+import { findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
@@ -799,7 +799,7 @@ export default function WorkoutPlan({
       const match = exerciseCatalog.find((item) => item.id === entry.exerciseId)
       return match && normalizeExerciseName(match.name) === exerciseKey
     })
-    return findCompletedEntry(matching, activeCompletionScope)
+    return findWeekCompletion(matching, activeCompletionScope)
   }
 
   useEffect(() => {
@@ -2278,12 +2278,13 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             >
               <span className="day-tab-label">{t('workout.day.short', { position: day.position })}</span>
               {(() => {
-                const date = localIsoDate()
+                const week = weekBounds(localIsoDate())
                 const done = day.exercises.filter((item) =>
                   history.some(
                     (entry) =>
                       entry.exerciseId === item.exerciseId &&
-                      entry.date === date &&
+                      entry.date >= week.start &&
+                      entry.date <= week.end &&
                       entry.blockId === activeBlock.id &&
                       entry.dayKey === day.key
                   )

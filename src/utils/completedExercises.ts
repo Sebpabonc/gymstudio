@@ -17,6 +17,29 @@ export function findCompletedEntry(entries: WorkoutEntry[], scope: CompletionSco
   )
 }
 
+/** Monday–Sunday week containing `date` (ISO yyyy-mm-dd). */
+export function weekBounds(date: string) {
+  const value = Date.parse(`${date}T00:00:00Z`)
+  const weekday = new Date(value).getUTCDay()
+  const start = new Date(value - (weekday === 0 ? 6 : weekday - 1) * 86_400_000)
+  const end = new Date(start.getTime() + 6 * 86_400_000)
+  return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) }
+}
+
+/**
+ * PO 2026-10-07: the plan shows the active week. An exercise counts as done for its day if it was logged for that
+ * block/day any time this Monday–Sunday week (latest wins); next Monday every day starts empty again.
+ */
+export function findWeekCompletion(entries: WorkoutEntry[], scope: CompletionScope): WorkoutEntry | undefined {
+  const { start, end } = weekBounds(scope.date)
+  return entries
+    .filter((entry) =>
+      entry.date >= start && entry.date <= end &&
+      (entry.blockId ?? undefined) === (scope.blockId ?? undefined) &&
+      (entry.dayKey ?? undefined) === (scope.dayKey ?? undefined))
+    .sort((a, b) => b.date.localeCompare(a.date))[0]
+}
+
 export function summarizeCompletedEntry(entry: WorkoutEntry, language: Language = 'en') {
   const count = entry.sets.length
   const top = workoutMaxWeight(entry.sets)
