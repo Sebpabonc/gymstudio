@@ -16,6 +16,10 @@ const reasonTranslations: Record<ReasonCode, TranslationKey> = {
   deload_week: 'workout.trainer.reason.deload_week',
   long_break: 'workout.trainer.reason.long_break',
   outlier_capped: 'workout.trainer.reason.outlier_capped',
+  incomplete_session: 'workout.trainer.reason.incomplete_session',
+  light_load_add_reps: 'workout.trainer.reason.light_load_add_reps',
+  bodyweight_add_reps: 'workout.trainer.reason.bodyweight_add_reps',
+  double_angle: 'workout.trainer.reason.double_angle',
 }
 
 export function trainerRangeLabel(range: RepRange, language: Language) {

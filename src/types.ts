@@ -28,6 +28,8 @@ export type WorkoutSet = {
   reps: number
   weight: number
   drop?: { reps: number; weight: number }
+  /** PT spec R3/R10: `mini` (rest-pause / myo-reps mini-set) and `partial` sets never count for progression. */
+  tag?: 'main' | 'mini' | 'partial'
   /** Reps in reserve reported for this set (optional, AI Trainer phase 6). */
   rir?: number
   /** When the set was ticked (epoch ms), for set-by-set coaching. */

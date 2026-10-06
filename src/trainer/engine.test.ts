@@ -17,16 +17,17 @@ describe('recommend — same target as last time', () => {
   const base = { today: '2026-10-08', sets: 3, equipment: 'dumbbell' }
 
   it('target 10, actual 10 on every set → one step up', () => {
-    const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(10, 10, 10, 10), target: range(10) }]
-    expect(recommend({ ...base, history, target: range(10) })).toMatchObject({ action: 'increase_weight', weight: 12, reason: 'reached_top_of_range' })
+    // Barbell load: light dumbbells follow the PT light-load rule R8 (spec.test.ts T22–T25).
+    const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(40, 10, 10, 10), target: range(10) }]
+    expect(recommend({ ...base, equipment: 'barbell', history, target: range(10) })).toMatchObject({ action: 'increase_weight', weight: 42.5, reason: 'reached_top_of_range' })
   })
 
   it('target 10, actual 14 on every set → increase by capacity, capped to real weights', () => {
-    const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(10, 14, 14, 14), target: range(10) }]
-    const result = recommend({ ...base, history, target: range(10) })
+    const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(40, 14, 14, 14), target: range(10) }]
+    const result = recommend({ ...base, equipment: 'barbell', history, target: range(10) })
     expect(result.action).toBe('increase_weight')
     expect(result.reason).toBe('exceeded_target')
-    expect(result.weight).toBe(12)
+    expect(result.weight).toBe(42.5)
     expect(result.evidence.lastReps).toEqual([14, 14, 14])
   })
 
@@ -43,8 +44,8 @@ describe('recommend — same target as last time', () => {
   })
 
   it('first set fine, later sets drop 3+ reps → maintain', () => {
-    const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(8, 12, 9, 8), target: range(12) }]
-    expect(recommend({ ...base, history, target: range(12) })).toMatchObject({ action: 'maintain', reason: 'drop_off_across_sets' })
+    const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(30, 12, 9, 8), target: range(12) }]
+    expect(recommend({ ...base, equipment: 'barbell', history, target: range(12) })).toMatchObject({ action: 'maintain', reason: 'drop_off_across_sets' })
   })
 
   it('inside the range without reaching the top → add reps, same weight', () => {

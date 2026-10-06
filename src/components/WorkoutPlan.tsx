@@ -77,7 +77,7 @@ import { saveTrainerRecommendation } from '../utils/profileData'
 import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { recommend } from '../trainer/engine'
-import { buildEvidence } from '../trainer/evidence'
+import { buildEvidence, isDoubleAngleFollower } from '../trainer/evidence'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
@@ -1290,10 +1290,22 @@ export default function WorkoutPlan({
       : original
   }
 
-  const getTrainerRecommendation = (exercise: PlanExercise) => {
+  // PT spec R5: a double-angle follower ("Same dumbbells as …") uses the previous exercise's recommended load today.
+  const followLoadFor = (exercise: PlanExercise): number | undefined => {
+    if (!isDoubleAngleFollower(exercise.notes) || !activeDay) return undefined
+    const index = activeBlockExercises.findIndex((item) => item.code === exercise.code)
+    const leader = index > 0 ? activeBlockExercises[index - 1] : undefined
+    const leaderTrainer = leader ? getTrainerRecommendation(leader) : null
+    return leaderTrainer?.recommendation.weight ?? undefined
+  }
+
+  const getTrainerRecommendation = (exercise: PlanExercise): ReturnType<typeof buildTrainerRecommendation> => buildTrainerRecommendation(exercise)
+
+  const buildTrainerRecommendation = (exercise: PlanExercise) => {
     if (planMode !== 'preset' || !activeBlock || !activeDay || !exercise.exerciseId) return null
     const original = getOriginalDraftForExercise(exercise.name, exercise)
-    const reps = (exercise.repsPerSet ?? [exercise.reps ?? '8']).flatMap(parseRepPrescription)
+    // First number of each set ("12+12" drop-set → 12): the main-set reps the PT spec progresses on.
+    const reps = (exercise.repsPerSet ?? [exercise.reps ?? '8']).map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0)
     const target = reps.length
       ? { min: Math.min(...reps), max: Math.max(...reps) }
       : { min: 8, max: 8 }
@@ -1311,6 +1323,8 @@ export default function WorkoutPlan({
       deload: activeBlockWeek === 6,
       technique: exercise.technique,
       setReps: reps,
+      tempo: /\btempo\b/i.test(exercise.notes ?? ''),
+      followLoad: followLoadFor(exercise),
     })
     return {
       recommendation,
