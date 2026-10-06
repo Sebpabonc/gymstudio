@@ -8,10 +8,13 @@ export function buildEvidence(
   history: WorkoutEntry[],
   exerciseId: string,
   blocks: TrainingBlock[],
-  today: string
+  today: string,
+  /** Only today's entry for this day slot is the one being edited; other days done today are evidence. */
+  todayDayKey?: string
 ): SessionEvidence[] {
   return history
-    .filter((entry) => entry.exerciseId === exerciseId && entry.date.slice(0, 10) !== today && entry.sets.length > 0)
+    .filter((entry) => entry.exerciseId === exerciseId && entry.sets.length > 0)
+    .filter((entry) => entry.date.slice(0, 10) !== today || (todayDayKey !== undefined && entry.dayKey !== todayDayKey))
     .map((entry) => {
       let target = entry.target?.reps
       const block = findEntryBlock(blocks, entry)

@@ -81,3 +81,11 @@ describe('buildEvidence', () => {
     expect(buildEvidence([logged], 'press', blocks, '2026-10-08')[0]?.sets[0]?.rir).toBe(0)
   })
 })
+
+describe('same-day evidence across day slots', () => {
+  it('keeps another day done today (D2 today feeds D5 today) but drops the slot being edited', () => {
+    const doneToday = { ...entry('d2', '2026-10-08', 'day-a') }
+    expect(buildEvidence([doneToday], 'press', blocks, '2026-10-08', 'day-b')).toHaveLength(1)
+    expect(buildEvidence([doneToday], 'press', blocks, '2026-10-08', 'day-a')).toHaveLength(0)
+  })
+})
