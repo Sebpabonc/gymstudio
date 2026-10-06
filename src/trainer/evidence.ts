@@ -11,7 +11,7 @@ export function buildEvidence(
   today: string
 ): SessionEvidence[] {
   return history
-    .filter((entry) => entry.exerciseId === exerciseId && entry.date.slice(0, 10) !== today)
+    .filter((entry) => entry.exerciseId === exerciseId && entry.date.slice(0, 10) !== today && entry.sets.length > 0)
     .map((entry) => {
       let target = entry.target?.reps
       if (!target) {

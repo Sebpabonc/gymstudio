@@ -267,13 +267,12 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-01-05', [[20, 8], [20, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('press', '2026-01-06', [[20, 8], [20, 8]], { dayKey: 'chest-back-b' }),
     ]
-    const readySuggestions = progressSuggestions(ready, [block], [dumbbellExercise], '2026-01-06', new Set(), en)
+    const readySuggestions = progressSuggestions(ready, [block], [dumbbellExercise], '2026-01-06', en)
     expect(readySuggestions).toHaveLength(1)
     expect(readySuggestions[0]).toMatchObject({
       type: 'add-weight',
-      increment: 2,
-      message: 'Ready to add 2 kg on Dumbbell Press next B day.',
-      why: 'You completed every planned set and rep target last time.',
+      message: 'Dumbbell Press: next B day, aim for 22 kg × 8 reps.',
+      why: 'Last time you reached the top of the 8-rep target at 20 kg, so I moved the load up.',
     })
     const lowerBodySuggestion = progressSuggestions(
       [makeEntry('leg-press', '2026-01-05', [[80, 8]], { dayKey: 'lower-body-a' })],
@@ -287,11 +286,13 @@ describe('progress calculations', () => {
         technique: 'straight',
       }])],
       [{ ...dumbbellExercise, id: 'leg-press', name: 'Leg Press', bodyRegion: 'Legs', equipment: 'machine' }],
-      '2026-01-05',
-      new Set(),
+      '2026-01-06',
       en
     )
-    expect(lowerBodySuggestion[0]).toMatchObject({ type: 'add-weight', increment: 5 })
+    expect(lowerBodySuggestion[0]).toMatchObject({
+      type: 'add-weight',
+      message: 'Leg Press: next A day, aim for 82.5 kg × 8 reps.',
+    })
 
     const stalledEntries: ProgressEntry[] = []
     for (const exerciseId of ['press', 'row', 'curl']) {
@@ -304,7 +305,6 @@ describe('progress calculations', () => {
       [block],
       [dumbbellExercise, { ...dumbbellExercise, id: 'row' }, { ...dumbbellExercise, id: 'curl' }],
       '2026-02-02',
-      new Set(),
       en
     )
     expect(fatigue.filter((item) => item.type === 'fatigue')).toHaveLength(1)
@@ -325,7 +325,7 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-02-09', [[20, 8]], { blockId: block.id, dayKey: 'chest-back-b' }),
       makeEntry('press', '2026-02-10', [[20, 8]], { blockId: block.id, dayKey: 'chest-back-b' }),
     ]
-    expect(progressSuggestions(entries, [block], [dumbbellExercise], '2026-02-16', new Set(), en)).toEqual([])
+    expect(progressSuggestions(entries, [block], [dumbbellExercise], '2026-02-16', en)).toEqual([])
   })
 
   it('reports median block change and requires two sessions in each comparison window', () => {
@@ -464,7 +464,6 @@ describe('progress calculations', () => {
       blocks,
       [dumbbellExercise],
       today,
-      new Set(),
       en,
       activeBlock
     )).toHaveLength(1)
@@ -499,7 +498,7 @@ describe('progress calculations', () => {
     })
     const { exerciseLibrary } = await loadExerciseLibrary()
     const records = personalRecords(entries, approvedBlocks)
-    const suggestions = progressSuggestions(entries, approvedBlocks, exerciseLibrary, '2026-10-09', new Set(), en)
+    const suggestions = progressSuggestions(entries, approvedBlocks, exerciseLibrary, '2026-10-09', en)
     const reports = blockReports(entries, approvedBlocks, exerciseLibrary)
     const lastFullWeekSets = weeklySets(entries, approvedBlocks, exerciseLibrary, '2026-09-21')
 
@@ -525,9 +524,9 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-01-05', [[20, 8], [20, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('press', '2026-01-06', [[20, 8], [20, 8]], { dayKey: 'chest-back-b' }),
     ]
-    expect(progressSuggestions(ready, [block], [dumbbellExercise], '2026-01-06', new Set(), es)[0]).toMatchObject({
-      message: 'Listo para subir 2 kg en Press con mancuernas el próximo día B.',
-      why: 'Completaste todas las series y repeticiones planeadas la última vez.',
+    expect(progressSuggestions(ready, [block], [dumbbellExercise], '2026-01-06', es)[0]).toMatchObject({
+      message: 'Press con mancuernas: el próximo día B, apunta a 22 kg × 8 reps.',
+      why: 'La última vez alcanzaste el máximo del objetivo de 8 repeticiones con 20 kg, así que subí el peso.',
     })
 
     const trendEntries = [

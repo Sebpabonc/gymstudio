@@ -2,6 +2,11 @@ import { formatNumber } from '../i18n/format'
 import { Exercise, TrainingBlock } from '../types'
 import { getExerciseDisplayName } from '../utils/storage'
 import { defaultActiveBlock, trainingBlockDateStatus } from '../utils/trainingBlocks'
+import { parseRepPrescription } from '../utils/workoutSets'
+import { prescriptionForWeek } from '../plans/weekPrescription'
+import { buildEvidence } from '../trainer/evidence'
+import { recommend, workingWeight } from '../trainer/engine'
+import { trainerReason } from '../trainer/presentation'
 import { ProgressEntry, ProgressSuggestion } from './types'
 import {
   defaultProgressI18n,
@@ -15,22 +20,11 @@ import {
   isDeloadWeek,
   plannedExerciseForEntry,
   ProgressI18n,
-  prescribedReps,
   sessionE1RM,
   workingSets,
 } from './utils'
 
 const SIX_WEEKS_MS = 42 * 24 * 60 * 60 * 1000
-
-function getIncrement(exercise: Exercise | undefined) {
-  const equipment = exercise?.equipment?.toLowerCase() ?? ''
-  const lowerBody = /lower|leg|glute/i.test(exercise?.bodyRegion ?? '')
-  if (lowerBody && (/barbell|smith|machine/.test(equipment))) return 5
-  if (equipment === 'dumbbell') return 2
-  if (equipment === 'barbell' || equipment === 'smith-machine' || equipment === 'plate-loaded') return 2.5
-  if (equipment === 'cable' || equipment === 'machine') return 2.5
-  return 2.5
-}
 
 function sessionScore(sets: ProgressEntry['sets']) {
   const e1rm = sessionE1RM(sets)
@@ -43,35 +37,11 @@ function sessionScore(sets: ProgressEntry['sets']) {
   return Math.max(...working.filter((set) => set.weight === mostUsedWeight).map((set) => set.reps))
 }
 
-function hitTarget(
-  session: ReturnType<typeof groupExerciseSessions>[number],
-  block: TrainingBlock,
-  previous: ReturnType<typeof groupExerciseSessions>
-) {
-  const plan = plannedExerciseForEntry(block, session)
-  const logged = workingSets(session.sets)
-  const previousSession = [...previous].reverse().find(
-    (item) => item.exerciseId === session.exerciseId
-      && getDayType(item, [block]) === getDayType(session, [block])
-  )
-  if (plan) {
-    if (logged.length < plan.sets) return false
-    return Array.from({ length: plan.sets }, (_, index) => {
-      const target = prescribedReps(plan, index)
-      return target !== null && logged[index]?.reps >= target
-    }).every(Boolean)
-  }
-  if (!previousSession) return false
-  const previousSets = workingSets(previousSession.sets)
-  return logged.length >= previousSets.length && previousSets.every((set, index) => logged[index]?.reps >= set.reps)
-}
-
 export function progressSuggestions(
   entries: ProgressEntry[],
   blocks: TrainingBlock[],
   exercises: Exercise[],
   today: string,
-  appliedExerciseIds: ReadonlySet<string> = new Set(),
   { language, t }: ProgressI18n = defaultProgressI18n,
   activeBlock: TrainingBlock | null = defaultActiveBlock(blocks, today)
 ): ProgressSuggestion[] {
@@ -106,22 +76,42 @@ export function progressSuggestions(
     const exercise = exerciseFor(exercises, latest.exerciseId)
     const name = exercise ? getExerciseDisplayName(exercise, language) : latest.exerciseId
 
-    if (appliedExerciseIds.has(exerciseId)) continue
-
-    if (hitTarget(latest, block, daySessions.slice(0, -1))) {
-      const increment = getIncrement(exercise)
+    const planned = plannedExerciseForEntry(block, latest)
+    const recommendationWeek = blockWeek(block, today) ?? blockWeek(block, latest.date) ?? 1
+    const currentPlan = planned ? prescriptionForWeek(planned, recommendationWeek) : null
+    const reps = currentPlan?.reps.flatMap(parseRepPrescription) ?? []
+    const target = reps.length
+      ? { min: Math.min(...reps), max: Math.max(...reps) }
+      : { min: 8, max: 8 }
+    const evidence = buildEvidence(entries, exerciseId, blocks, today)
+    const recommendation = recommend({
+      history: evidence,
+      today,
+      target,
+      sets: planned?.sets ?? latest.sets.length,
+      equipment: exercise?.equipment,
+      plannedWeight: workingWeight(latest.sets) || undefined,
+      deload: blockWeek(block, today) === 6,
+    })
+    const previousWeight = recommendation.evidence.lastWeight ?? workingWeight(latest.sets)
+    if (
+      recommendation.action === 'increase_weight' &&
+      recommendation.weight !== null &&
+      recommendation.weight > previousWeight
+    ) {
       suggestions.push({
         type: 'add-weight',
         exerciseId: latest.exerciseId,
         dayType,
-        increment,
         message: t('progress.suggestions.addWeight.message', {
-          increment: formatNumber(language, increment),
+          weight: formatNumber(language, recommendation.weight),
+          reps: recommendation.reps.min === recommendation.reps.max
+            ? formatNumber(language, recommendation.reps.min)
+            : `${formatNumber(language, recommendation.reps.min)}–${formatNumber(language, recommendation.reps.max)}`,
           exercise: name,
           dayType,
-          unit: t('progress.unit.kg'),
         }),
-        why: t('progress.suggestions.addWeight.why'),
+        why: trainerReason(t, language, recommendation, target),
       })
       continue
     }
