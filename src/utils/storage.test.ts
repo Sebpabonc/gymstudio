@@ -397,7 +397,7 @@ describe('remote catalogue', () => {
 
     expect(supabaseMock.from).toHaveBeenCalledWith('exercises')
     expect(supabaseMock.select).toHaveBeenCalledWith(
-      'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, mechanic, posture_tips, squeeze_cue, aliases'
+      'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, mechanic, movement_pattern, posture_tips, squeeze_cue, aliases'
     )
     expect(supabaseMock.eq).toHaveBeenCalledWith('is_active', true)
     expect(supabaseMock.order).toHaveBeenCalledWith('name_en')

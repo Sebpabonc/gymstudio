@@ -224,3 +224,25 @@ export async function publishUserPlan(plan: SavedUserPlan): Promise<void> {
   })
   throwIfError(error)
 }
+
+/** Permanent swaps ("always use X instead of Y") of the signed-in user. */
+export async function fetchExerciseSwaps(): Promise<Array<{ fromExerciseId: string; toExerciseId: string }>> {
+  const client = await getClient()
+  const { data, error } = await client.from('exercise_swaps').select('from_exercise_id, to_exercise_id')
+  throwIfError(error)
+  return (data ?? []).map((row) => ({ fromExerciseId: row.from_exercise_id, toExerciseId: row.to_exercise_id }))
+}
+
+export async function saveExerciseSwap(fromExerciseId: string, toExerciseId: string): Promise<void> {
+  const client = await getClient()
+  const { error } = await client
+    .from('exercise_swaps')
+    .upsert({ from_exercise_id: fromExerciseId, to_exercise_id: toExerciseId }, { onConflict: 'user_id,from_exercise_id' })
+  throwIfError(error)
+}
+
+export async function removeExerciseSwap(fromExerciseId: string): Promise<void> {
+  const client = await getClient()
+  const { error } = await client.from('exercise_swaps').delete().eq('from_exercise_id', fromExerciseId)
+  throwIfError(error)
+}

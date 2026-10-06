@@ -15,6 +15,7 @@ export type Exercise = {
   primaryMuscles?: string[]
   secondaryMuscles?: string[]
   equipment?: string
+  movementPattern?: string
   postureTips?: string[]
   squeezeCue?: string
   notes?: string
@@ -51,6 +52,8 @@ export type PlannedExercise = {
   technique: TrainingTechnique
   angleDegrees?: number
   notes?: string
+  /** Set when the user swapped this exercise in; the plan's original exercise id. */
+  swappedFrom?: string
 }
 
 export type TrainingDay = {

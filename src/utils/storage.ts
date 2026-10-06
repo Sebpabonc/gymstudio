@@ -1,3 +1,4 @@
+import type { ExerciseSwap } from '../plans/exerciseSwaps'
 import { Exercise, PlannedExercise, TrainingBlock, TrainingDay, WorkoutEntry } from '../types'
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
@@ -22,6 +23,7 @@ const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
 const AI_SESSION_PLAN_KEY = 'gym-studio.ai-session-plan'
+const EXERCISE_SWAPS_KEY = 'gym-studio.exercise-swaps'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
 let helpAiAppOpensThisLoad: number | null = null
 
@@ -252,6 +254,32 @@ export function loadAiSessionPlan(blockId: string, dayKey: string): NextSessionP
   }
 }
 
+/** Exercise swaps on this device: today-only swaps plus a cache of the account's permanent swaps. */
+export function loadLocalExerciseSwaps(): ExerciseSwap[] {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(storageKey(EXERCISE_SWAPS_KEY)) ?? '[]')
+    return Array.isArray(parsed)
+      ? parsed.filter((swap): swap is ExerciseSwap =>
+          typeof swap?.fromExerciseId === 'string' &&
+          typeof swap?.toExerciseId === 'string' &&
+          (swap.scope === 'always' || (swap.scope === 'today' && typeof swap.date === 'string')))
+      : []
+  } catch {
+    return []
+  }
+}
+
+export function saveLocalExerciseSwaps(swaps: ExerciseSwap[], today: string) {
+  // Old today-only swaps are dropped; only today's and permanent ones are kept.
+  const kept = swaps.filter((swap) => swap.scope === 'always' || swap.date === today)
+  try {
+    localStorage.setItem(storageKey(EXERCISE_SWAPS_KEY), JSON.stringify(kept))
+  } catch {
+    // The swap still applies for this session.
+  }
+  return kept
+}
+
 export function saveAiSessionPlan(blockId: string, dayKey: string, plan: NextSessionPlan) {
   try {
     localStorage.setItem(
@@ -371,6 +399,7 @@ type CatalogueRow = {
   secondary_muscles: string[]
   equipment: string | null
   mechanic: 'compound' | 'isolation' | null
+  movement_pattern?: string | null
   posture_tips: string[] | null
   squeeze_cue: string | null
   aliases: string[]
@@ -662,7 +691,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
     const { data, error } = await supabaseClient
       .from('exercises')
       .select(
-        'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, mechanic, posture_tips, squeeze_cue, aliases'
+        'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, mechanic, movement_pattern, posture_tips, squeeze_cue, aliases'
       )
       .eq('is_active', true)
       .order('name_en')
@@ -684,6 +713,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
         secondaryMuscles: row.secondary_muscles ?? undefined,
         equipment: row.equipment ?? undefined,
         mechanic: row.mechanic ?? undefined,
+        movementPattern: row.movement_pattern ?? undefined,
         postureTips: row.posture_tips ?? undefined,
         squeezeCue: row.squeeze_cue ?? undefined,
       }
