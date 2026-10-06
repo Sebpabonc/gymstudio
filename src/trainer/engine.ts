@@ -407,7 +407,12 @@ function recommendStraight(
   const last = progressing[0]
   const lastTarget = last.target ?? target
   const lastReps = lastSets.map((set) => set.reps)
+  const finalSet = lastSets[lastSets.length - 1]
   const complete = lastSets.length >= sets
+
+  if (finalSet?.rir === 0 && finalSet.reps < target.min) {
+    return make('maintain', lastWeight, 'slightly_below_target')
+  }
 
   // R7: bodyweight with no added load — progress reps; +2.5 kg after two sessions at target max + 2.
   if (isBodyweight(input.equipment) && lastWeight === 0) {
@@ -451,7 +456,11 @@ function recommendStraight(
     return make(action, weight, 'converted_rep_range')
   }
 
-  const exceeded = lastReps.every((reps) => reps >= lastTarget.max + 3)
+  const exceeded =
+    lastReps.every((reps) => reps >= lastTarget.max + 3) ||
+    (finalSet?.rir !== undefined &&
+      finalSet.rir >= 3 &&
+      lastReps.every((reps) => reps >= lastTarget.min))
   const atTop = lastReps.every((reps) => reps >= lastTarget.max)
   const belowBy3 = lastReps.filter((reps) => lastTarget.min - reps >= 3).length
   const dropOff = lastReps.length > 1 && lastReps[0] >= lastTarget.min && lastReps.slice(1).some((reps) => lastTarget.min - reps >= 3)
