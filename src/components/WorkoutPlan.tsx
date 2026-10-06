@@ -2646,7 +2646,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       weight: formatNumber(language, trainerNext.next.weight ?? trainerNext.actual.weight),
                       reps: trainerRangeLabel(trainerNext.next.reps),
                     })}</strong>
-                    <p>{trainerReason(t, language, trainerNext.next, trainerNext.target.reps)}</p>
+                    <p>{trainerReason(t, language, trainerNext.next, trainerNext.next.reps)}</p>
                   </aside>
                 )}
                 {insightTarget && (toastRecommendation || completedEntry) && (
@@ -3286,7 +3286,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                   {sessionSummary.performance.map((row) => {
                     const { exerciseId, trend, actual, target, next, nextDate } = row
                     const exercise = exerciseCatalog.find((item) => item.id === exerciseId)
-                    const template = trainerReason(t, language, next, target.reps)
+                    const template = trainerReason(t, language, next, next.reps)
                     const why = trainerWhy(
                       exerciseId,
                       next,
