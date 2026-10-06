@@ -1,17 +1,34 @@
-// AI Trainer progression engine (PO-approved plan, 2026-10-07).
-// Pure functions: every set is evidence of current capacity (Epley e1RM); capacity is turned into a load for
-// each session's rep range and rounded to weights that exist. The LLM never chooses numbers — it only explains
-// the structured recommendation this module returns.
+// AI Trainer progression engine. Implements the PT-approved spec
+// docs/fitness/approved/2026-10-07-progression-engine-spec.md (rules R1–R11, test cases T1–T29).
+// The PT owns these rules; change them only through an approved PT spec with test cases.
+// Pure functions: the LLM never chooses numbers — it only explains the structured recommendation returned here.
 
-export type LoggedSet = { weight: number; reps: number }
+export type SetTag = 'main' | 'mini' | 'partial'
+
+export type LoggedSet = {
+  weight: number
+  reps: number
+  tag?: SetTag
+  rir?: number
+  drop?: { weight: number; reps: number }
+}
 
 export type RepRange = { min: number; max: number }
 
-/** One past session of the exercise (any day of the week/program) and what the plan asked that day, if known. */
+/** One past session of the exercise (any day of the program) and what the plan asked that day, if known. */
 export type SessionEvidence = {
   date: string
   sets: LoggedSet[]
   target?: RepRange
+  /** Planned technique and per-set reps of that session (pyramids). */
+  technique?: string
+  setReps?: number[]
+  /** Week-6 deload session (R4) — excluded from capacity and "missed twice". */
+  deload?: boolean
+  /** Second exercise of a double-angle pair (R5) — excluded from this exercise's history. */
+  follower?: boolean
+  /** Session of a slot that prescribes tempo (R10). */
+  tempo?: boolean
 }
 
 export type TrainerAction =
@@ -37,17 +54,26 @@ export type ReasonCode =
   | 'deload_week'
   | 'long_break'
   | 'outlier_capped'
+  | 'incomplete_session'
+  | 'light_load_add_reps'
+  | 'bodyweight_add_reps'
+  | 'double_angle'
 
 export type Confidence = 'low' | 'medium' | 'high'
 
 export type Recommendation = {
   action: TrainerAction
-  /** Recommended load in kg (null when there is no history and no planned weight). */
+  /** Recommended load in kg (the heaviest set for pyramids; null when unknown). */
   weight: number | null
   reps: RepRange
   sets: number
   reason: ReasonCode
   confidence: Confidence
+  /** Per-set loads/reps when the sets differ (pyramids, deloaded pyramids). */
+  setWeights?: number[]
+  setReps?: number[]
+  /** Drop-set: recommended drop load (R3). */
+  dropWeight?: number
   evidence: {
     lastDate?: string
     lastWeight?: number
@@ -67,28 +93,36 @@ export type RecommendInput = {
   equipment?: string
   plannedWeight?: number
   deload?: boolean
+  technique?: string
+  /** Planned reps per set (pyramids). */
+  setReps?: number[]
+  /** Today's slot prescribes tempo (R10). */
+  tempo?: boolean
+  /** Double-angle follower (R5): use the leading exercise's recommended load today. */
+  followLoad?: number
 }
 
 const MAX_REPS_FOR_ESTIMATE = 15
 const RESERVE_REPS = 2
 const CAPACITY_WINDOW_DAYS = 42
-const LONG_BREAK_DAYS = 21
 const OUTLIER_JUMP = 0.12
 const MAX_INCREASE_PCT = 0.1
 
-/** Load increment per equipment (PO 2026-10-07: dumbbells move in 2 kg steps). */
+/** Load increment (spec "Definitions"): dumbbell 2 kg, machine/cable stacks 5 kg, everything else 2.5 kg. */
 export function equipmentStep(equipment?: string) {
   switch (equipment) {
     case 'dumbbell':
     case 'kettlebell':
       return 2
-    case 'bodyweight':
-    case 'band':
-      return 0
+    case 'machine':
+    case 'cable':
+      return 5
     default:
       return 2.5
   }
 }
+
+const isBodyweight = (equipment?: string) => equipment === 'bodyweight' || equipment === 'band'
 
 export function roundToStep(weight: number, step: number, direction: 'down' | 'up' | 'nearest' = 'down') {
   if (step <= 0) return Math.max(0, weight)
@@ -97,18 +131,18 @@ export function roundToStep(weight: number, step: number, direction: 'down' | 'u
   return Math.max(0, Number((rounded * step).toFixed(2)))
 }
 
-export function estimateOneRepMax(set: LoggedSet) {
+export function estimateOneRepMax(set: Pick<LoggedSet, 'weight' | 'reps'>) {
   if (!(set.weight > 0) || !(set.reps > 0)) return null
   return set.weight * (1 + Math.min(set.reps, MAX_REPS_FOR_ESTIMATE) / 30)
 }
 
-/** Load that leaves ~2 reps in reserve at `reps` for a given e1RM. */
-export function loadForReps(oneRepMax: number, reps: number) {
-  return oneRepMax / (1 + (reps + RESERVE_REPS) / 30)
+/** Load for `reps` with `reserve` reps in reserve (Epley). */
+export function loadForReps(oneRepMax: number, reps: number, reserve = RESERVE_REPS) {
+  return oneRepMax / (1 + (reps + reserve) / 30)
 }
 
 /** The load used on most sets (ties keep the heaviest). */
-export function workingWeight(sets: LoggedSet[]) {
+export function workingWeight(sets: Pick<LoggedSet, 'weight'>[]) {
   const counts = new Map<number, number>()
   for (const set of sets) if (set.weight > 0) counts.set(set.weight, (counts.get(set.weight) ?? 0) + 1)
   let best = 0
@@ -120,6 +154,11 @@ export function workingWeight(sets: LoggedSet[]) {
     }
   }
   return best
+}
+
+/** Progression sets: `main` sets only, up to the planned set count, in logged order (R3, R10). */
+export function progressionSets(sets: LoggedSet[], planned: number) {
+  return sets.filter((set) => !set.tag || set.tag === 'main').slice(0, Math.max(1, planned))
 }
 
 function sessionOneRepMax(sets: LoggedSet[]) {
@@ -143,12 +182,13 @@ export type Capacity = {
   latestIsOutlier: boolean
 }
 
-/** Current capacity from the last 3 sessions in 6 weeks (latest weighs most). */
-export function estimateCapacity(history: SessionEvidence[], today: string): Capacity | null {
-  const recent = history
+/** Current capacity from the last 3 usable sessions in 6 weeks (latest weighs most). */
+export function estimateCapacity(history: SessionEvidence[], today: string, planned = 99): Capacity | null {
+  const sorted = history
     .filter((session) => daysBetween(session.date, today) >= 0 && daysBetween(session.date, today) <= CAPACITY_WINDOW_DAYS)
     .sort((a, b) => b.date.localeCompare(a.date))
-    .map((session) => sessionOneRepMax(session.sets))
+  const recent = sorted
+    .map((session) => sessionOneRepMax(progressionSets(session.sets, planned)))
     .filter((value): value is number => value !== null)
     .slice(0, 3)
   if (!recent.length) return null
@@ -161,10 +201,11 @@ export function estimateCapacity(history: SessionEvidence[], today: string): Cap
   const spread = (Math.max(...recent) - Math.min(...recent)) / Math.max(...recent)
 
   let confidence: Confidence = 'low'
+  const latestSets = progressionSets(sorted[0]?.sets ?? [], planned)
   if (recent.length >= 3 && spread <= 0.05) confidence = 'high'
   else if (recent.length >= 2 && spread <= 0.08) confidence = 'medium'
-  else if (recent.length === 1 && history[0]?.sets.length >= 3 && new Set(history[0].sets.map((set) => set.reps)).size === 1) {
-    // One session, but every set landed the same: consistent evidence inside the session.
+  else if (recent.length === 1 && latestSets.length >= 3 && new Set(latestSets.map((set) => set.reps)).size === 1) {
+    // R11: a single session is read from the LATEST session — every set landed the same.
     confidence = 'medium'
   }
   if (latestIsOutlier) confidence = 'low'
@@ -175,101 +216,265 @@ function sameRange(a?: RepRange, b?: RepRange) {
   return !!a && !!b && a.min === b.min && a.max === b.max
 }
 
-export function recommend(input: RecommendInput): Recommendation {
-  const { today, target, sets, plannedWeight, deload } = input
-  const step = equipmentStep(input.equipment)
-  const history = [...input.history].filter((session) => session.sets.length > 0).sort((a, b) => b.date.localeCompare(a.date))
-  const last = history[0]
+const isPyramid = (technique?: string, setReps?: number[]) =>
+  (technique === 'pyramid' || technique === 'reverse-pyramid') && !!setReps && setReps.length > 1 && new Set(setReps).size > 1
 
-  if (!last) {
-    return {
-      action: 'collect_data',
-      weight: plannedWeight ?? null,
-      reps: target,
-      sets,
-      reason: 'no_history',
-      confidence: 'low',
-      evidence: { sessionsUsed: 0 },
-    }
+/** Per-set guardrail (spec "Definitions"): max(1 step, min(+10 %, 2 steps)) above that set's last load, rounded down. */
+function setCap(lastLoad: number, step: number) {
+  return roundToStep(lastLoad + Math.max(step, Math.min(lastLoad * MAX_INCREASE_PCT, 2 * step)), step, 'down')
+}
+
+/** Fewer reps never means less weight. */
+function monotonic(weights: number[], reps: number[]) {
+  const order = reps.map((count, index) => ({ count, index })).sort((a, b) => b.count - a.count)
+  for (let i = 1; i < order.length; i += 1) {
+    const prev = weights[order[i - 1].index]
+    if (weights[order[i].index] < prev) weights[order[i].index] = prev
   }
+  return weights
+}
 
-  const lastWeight = workingWeight(last.sets)
-  const lastReps = last.sets.map((set) => set.reps)
-  const lastTarget = last.target ?? target
-  const daysSinceLast = daysBetween(last.date, today)
-  const capacity = estimateCapacity(history, today)
+type Make = (action: TrainerAction, weight: number | null, reason: ReasonCode, extra?: Partial<Recommendation>) => Recommendation
+
+export function recommend(input: RecommendInput): Recommendation {
+  const { today, target, sets, plannedWeight } = input
+  const step = equipmentStep(input.equipment)
+  const pyramid = isPyramid(input.technique, input.setReps)
+
+  // R5 / R10 / R4: which past sessions count.
+  const usable = [...input.history]
+    .filter((session) => session.sets.length > 0 && !session.follower && !!session.tempo === !!input.tempo)
+    .sort((a, b) => b.date.localeCompare(a.date))
+  const progressing = usable.filter((session) => !session.deload)
+  const last = progressing[0]
+
+  const capacity = estimateCapacity(progressing, today, sets)
+  const confidence: Confidence = capacity?.confidence ?? 'low'
+  const lastSets = last ? progressionSets(last.sets, sets) : []
+  const lastWeight = workingWeight(lastSets)
+  const lastReps = lastSets.map((set) => set.reps)
+  const daysSinceLast = last ? daysBetween(last.date, today) : undefined
   const evidence: Recommendation['evidence'] = {
-    lastDate: last.date,
-    lastWeight,
-    lastReps,
-    lastTarget: last.target,
+    lastDate: last?.date,
+    lastWeight: last ? lastWeight : undefined,
+    lastReps: last ? lastReps : undefined,
+    lastTarget: last?.target,
     estimatedOneRepMax: capacity ? Number(capacity.oneRepMax.toFixed(1)) : undefined,
-    sessionsUsed: capacity?.sessions.length ?? 1,
+    sessionsUsed: capacity?.sessions.length ?? (last ? 1 : 0),
     daysSinceLast,
   }
-  const confidence: Confidence = capacity?.confidence ?? 'low'
-  const result = (action: TrainerAction, weight: number, reason: ReasonCode, reps = target, setCount = sets): Recommendation => ({
-    action,
-    weight,
-    reps,
-    sets: setCount,
-    reason,
-    confidence,
-    evidence,
+  const make: Make = (action, weight, reason, extra = {}) => ({
+    action, weight, reps: target, sets, reason, confidence, evidence, ...extra,
   })
 
-  if (deload) return result('deload', lastWeight, 'deload_week', target, Math.ceil(sets / 2))
-  if (daysSinceLast > LONG_BREAK_DAYS) {
-    return result('regress', roundToStep(lastWeight * 0.9, step, 'down'), 'long_break')
+  // R5: double-angle follower uses the leading exercise's load today, max reps at ~1 RIR.
+  if (input.followLoad !== undefined) return make('maintain', input.followLoad, 'double_angle')
+
+  // R4: deload — same loads as the last non-deload session, half the sets, bottom of the range.
+  if (input.deload) {
+    const half = Math.ceil(sets / 2)
+    if (!last) return make('deload', plannedWeight ?? null, 'deload_week', { sets: half, reps: { min: target.min, max: target.min } })
+    if (pyramid && input.setReps) {
+      const planned = input.setReps
+      const loads = progressionSets(last.sets, planned.length).map((set) => set.weight)
+      const topIndex = planned.indexOf(Math.min(...planned))
+      const indexes = planned.map((_, index) => index)
+      // Ascending: the first (lighter) sets; reverse: skip the top set and use the back-off sets.
+      const chosen = (input.technique === 'reverse-pyramid' ? indexes.filter((index) => index !== topIndex) : indexes).slice(0, half)
+      const setWeights = chosen.map((index) => loads[index] ?? lastWeight)
+      const setReps = chosen.map((index) => planned[index])
+      return make('deload', Math.max(...setWeights), 'deload_week', {
+        sets: half, setWeights, setReps, reps: { min: Math.min(...setReps), max: Math.max(...setReps) },
+      })
+    }
+    return make('deload', lastWeight, 'deload_week', { sets: half, reps: { min: target.min, max: target.min } })
   }
 
-  // Guardrail: at most +10 % or 2 steps, but always allow one step; an outlier session allows one step only.
+  if (!last) return make('collect_data', plannedWeight ?? null, 'no_history')
+
+  // R11: long break — 22-56 days −10 %, more than 56 days −20 %, rounded down; per set for pyramids.
+  if (daysSinceLast !== undefined && daysSinceLast > 21) {
+    const factor = daysSinceLast > 56 ? 0.8 : 0.9
+    if (pyramid && input.setReps) {
+      const loads = progressionSets(last.sets, input.setReps.length)
+      const setWeights = input.setReps.map((_, index) => roundToStep((loads[index]?.weight ?? lastWeight) * factor, step, 'down'))
+      return make('regress', Math.max(...setWeights), 'long_break', { setWeights, setReps: [...input.setReps] })
+    }
+    return make('regress', roundToStep(lastWeight * factor, step, 'down'), 'long_break')
+  }
+
+  if (pyramid && input.setReps) return recommendPyramid(input, progressing, capacity, confidence, step, make)
+
+  const result = recommendStraight(input, progressing, lastSets, lastWeight, capacity, confidence, step, make)
+  // R3: drop-set — the drop is 75 % of the recommended main load, rounded down.
+  if (input.technique === 'drop-set' && result.weight !== null && result.weight > 0) {
+    return { ...result, dropWeight: roundToStep(result.weight * 0.75, step, 'down') }
+  }
+  return result
+}
+
+function recommendPyramid(
+  input: RecommendInput,
+  progressing: SessionEvidence[],
+  capacity: Capacity | null,
+  confidence: Confidence,
+  step: number,
+  make: Make
+): Recommendation {
+  const planned = input.setReps!
+  const topReps = Math.min(...planned)
+  const topIndex = planned.indexOf(topReps)
+  const sameTechnique = progressing.filter((session) => session.technique === input.technique)
+  const lastPyramid = sameTechnique[0]
+  const heaviestOf = (sets: LoggedSet[]) => sets[topIndex] ?? sets.reduce((a, b) => (b.weight > a.weight ? b : a))
+
+  let top: number
+  let action: TrainerAction
+  let reason: ReasonCode
+  let lastLoads: number[] | null = null
+  if (lastPyramid) {
+    // R1.1 / R2.1: the top (heaviest) set progresses on its own history.
+    const lastSets = progressionSets(lastPyramid.sets, planned.length)
+    lastLoads = lastSets.map((set) => set.weight)
+    const topSet = heaviestOf(lastSets)
+    const short = topReps - topSet.reps
+    const previous = sameTechnique[1] ? heaviestOf(progressionSets(sameTechnique[1].sets, planned.length)) : null
+    if (short <= 0 && topSet.rir !== 0) {
+      top = topSet.weight + step
+      action = 'increase_weight'
+      reason = 'reached_top_of_range'
+    } else if (short <= 1) {
+      top = topSet.weight
+      action = 'maintain'
+      reason = 'slightly_below_target'
+    } else if (previous && topReps - previous.reps >= 2) {
+      top = roundToStep(topSet.weight * 0.95, step, 'down')
+      action = 'decrease_weight'
+      reason = 'below_target_twice'
+    } else {
+      top = topSet.weight
+      action = 'maintain'
+      reason = 'below_target_once'
+    }
+    // R6: incomplete pyramid → at most the same load.
+    if (lastSets.length < planned.length && top > topSet.weight) {
+      top = topSet.weight
+      action = 'maintain'
+      reason = 'incomplete_session'
+    }
+  } else if (capacity) {
+    // R1.3: first time with this pyramid — top set from capacity at ~1 RIR, round up only with medium/high confidence.
+    top = roundToStep(loadForReps(capacity.oneRepMax, topReps, 1), step, confidence === 'low' ? 'down' : 'up')
+    action = 'increase_weight'
+    reason = 'converted_rep_range'
+  } else {
+    return make('collect_data', input.plannedWeight ?? null, 'no_history')
+  }
+
+  // R1.2 / R2.2: the other sets.
+  const others = planned.filter((_, index) => index !== topIndex)
+  const backOffFormat = input.technique === 'reverse-pyramid' && new Set(others).size === 1
+  const setWeights = planned.map((reps, index) => {
+    if (index === topIndex) return top
+    if (backOffFormat) return roundToStep(top * 0.9, step, 'down')
+    let load = roundToStep((top * (1 + (topReps + 1) / 30)) / (1 + (reps + 2) / 30), step, 'nearest')
+    const lastLoad = lastLoads?.[index]
+    if (lastLoad !== undefined && lastLoad > 0) load = Math.min(load, setCap(lastLoad, step))
+    return load
+  })
+  if (!backOffFormat) monotonic(setWeights, planned)
+  const lastTopLoad = lastLoads?.[topIndex]
+  const finalAction: TrainerAction =
+    lastTopLoad === undefined ? action : top > lastTopLoad ? 'increase_weight' : top < lastTopLoad ? 'decrease_weight' : action
+  return make(finalAction, top, reason, {
+    setWeights,
+    setReps: [...planned],
+    reps: { min: topReps, max: Math.max(...planned) },
+  })
+}
+
+function recommendStraight(
+  input: RecommendInput,
+  progressing: SessionEvidence[],
+  lastSets: LoggedSet[],
+  lastWeight: number,
+  capacity: Capacity | null,
+  confidence: Confidence,
+  step: number,
+  make: Make
+): Recommendation {
+  const { target, sets } = input
+  const last = progressing[0]
+  const lastTarget = last.target ?? target
+  const lastReps = lastSets.map((set) => set.reps)
+  const complete = lastSets.length >= sets
+
+  // R7: bodyweight with no added load — progress reps; +2.5 kg after two sessions at target max + 2.
+  if (isBodyweight(input.equipment) && lastWeight === 0) {
+    const atPlus2 = (session?: SessionEvidence) => {
+      if (!session) return false
+      const logged = progressionSets(session.sets, sets)
+      return logged.length >= sets && logged.every((set) => set.reps >= (session.target ?? target).max + 2)
+    }
+    if (atPlus2(progressing[0]) && atPlus2(progressing[1])) return make('increase_weight', 2.5, 'bodyweight_add_reps')
+    if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', 0, 'slightly_below_target')
+    return make('increase_reps', 0, 'bodyweight_add_reps')
+  }
+
+  // Guardrail: at most +10 % or 2 steps, always one step allowed; an outlier allows one step only.
   const maxWeight = capacity?.latestIsOutlier
     ? lastWeight + step
     : Math.max(lastWeight + step, Math.min(lastWeight * (1 + MAX_INCREASE_PCT), lastWeight + 2 * step))
+  const capped = (weight: number) => Math.min(weight, roundToStep(maxWeight, step, 'down'))
   const strong = confidence !== 'low'
-  const capped = (weight: number) => {
-    const next = Math.min(weight, roundToStep(maxWeight, step, 'down'))
-    return next
-  }
 
-  const allLogged = last.sets.length >= Math.min(sets, lastReps.length)
-  const exceeded = allLogged && lastReps.every((reps) => reps >= lastTarget.max + 3)
-  const atTop = allLogged && lastReps.every((reps) => reps >= lastTarget.max)
-  const belowBy3 = lastReps.filter((reps) => lastTarget.min - reps >= 3).length
-  const dropOff = lastReps.length > 1 && lastReps[0] >= lastTarget.min && lastReps.slice(1).some((reps) => lastTarget.min - reps >= 3)
+  // R8: light loads — when one step is more than 10 % of the load, add reps to max + 2 before adding the step.
+  // (Added load on bodyweight work follows normal straight-set rules — R7, T9/T21.)
+  if (!isBodyweight(input.equipment) && lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT && sameRange(lastTarget, target)) {
+    if (complete && lastReps.every((reps) => reps >= target.max + 2)) {
+      return make('increase_weight', lastWeight + step, 'reached_top_of_range', { reps: { min: target.min, max: target.min } })
+    }
+    if (lastReps.some((reps) => reps < target.min)) return make('maintain', lastWeight, 'slightly_below_target')
+    return make('increase_reps', lastWeight, 'light_load_add_reps')
+  }
 
   // Different rep range today (e.g. Monday 8-10 → Thursday 12-15): convert through capacity, never copy the load.
   if (!sameRange(lastTarget, target) && capacity) {
-    const raw = loadForReps(capacity.oneRepMax, target.min)
-    let weight = roundToStep(raw, step, strong ? 'nearest' : 'down')
-    // If the last session already beat today's target at a load ≥ this one, today's original is too easy.
-    if (lastWeight >= weight && lastReps.every((reps) => reps >= target.max + 2)) {
-      return result('increase_weight', capped(lastWeight + step), 'original_too_easy', { min: Math.max(1, target.max - 2), max: target.max })
+    let weight = roundToStep(loadForReps(capacity.oneRepMax, target.min), step, strong ? 'nearest' : 'down')
+    if (complete && lastWeight >= weight && lastReps.every((reps) => reps >= target.max + 2)) {
+      return make('increase_weight', capped(lastWeight + step), 'original_too_easy', {
+        reps: { min: Math.max(1, target.max - 2), max: target.max },
+      })
     }
     weight = Math.min(weight, roundToStep(maxWeight, step, 'down'))
     const action: TrainerAction = weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
-    return result(action, weight, 'converted_rep_range')
+    return make(action, weight, 'converted_rep_range')
   }
 
+  const exceeded = lastReps.every((reps) => reps >= lastTarget.max + 3)
+  const atTop = lastReps.every((reps) => reps >= lastTarget.max)
+  const belowBy3 = lastReps.filter((reps) => lastTarget.min - reps >= 3).length
+  const dropOff = lastReps.length > 1 && lastReps[0] >= lastTarget.min && lastReps.slice(1).some((reps) => lastTarget.min - reps >= 3)
+
+  if (!complete) {
+    // R6: incomplete session → at most the same load.
+    if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, 'slightly_below_target')
+    return make('maintain', lastWeight, 'incomplete_session')
+  }
   if (exceeded && capacity) {
-    const raw = loadForReps(capacity.oneRepMax, target.min)
-    const byCapacity = roundToStep(raw, step, strong ? 'up' : 'down')
-    const weight = capped(Math.max(byCapacity, lastWeight + step))
-    return result('increase_weight', weight, capacity.latestIsOutlier ? 'outlier_capped' : 'exceeded_target')
+    const byCapacity = roundToStep(loadForReps(capacity.oneRepMax, target.min), step, strong ? 'up' : 'down')
+    return make('increase_weight', capped(Math.max(byCapacity, lastWeight + step)), capacity.latestIsOutlier ? 'outlier_capped' : 'exceeded_target')
   }
-  if (atTop) return result('increase_weight', capped(lastWeight + step), 'reached_top_of_range')
-  if (dropOff) return result('maintain', lastWeight, 'drop_off_across_sets')
+  if (atTop) return make('increase_weight', capped(lastWeight + step), 'reached_top_of_range')
+  if (dropOff) return make('maintain', lastWeight, 'drop_off_across_sets')
   if (belowBy3 >= 2) {
-    const previous = history[1]
+    const previous = progressing[1]
     const previousTarget = previous?.target ?? lastTarget
-    const previousBelow = previous && previous.sets.filter((set) => previousTarget.min - set.reps >= 3).length >= 2
-    if (previousBelow) {
-      return result('decrease_weight', roundToStep(lastWeight * 0.925, step, 'down'), 'below_target_twice')
-    }
-    return result('maintain', lastWeight, 'below_target_once')
+    const previousBelow = previous && progressionSets(previous.sets, sets).filter((set) => previousTarget.min - set.reps >= 3).length >= 2
+    if (previousBelow) return make('decrease_weight', roundToStep(lastWeight * 0.925, step, 'down'), 'below_target_twice')
+    return make('maintain', lastWeight, 'below_target_once')
   }
-  if (lastReps.some((reps) => reps < lastTarget.min)) return result('maintain', lastWeight, 'slightly_below_target')
-  if (history.length === 1 && confidence === 'low') return result('collect_data', lastWeight, 'no_history')
-  return result('increase_reps', lastWeight, 'within_range')
+  if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, 'slightly_below_target')
+  if (progressing.length === 1 && confidence === 'low') return make('collect_data', lastWeight, 'no_history')
+  return make('increase_reps', lastWeight, 'within_range')
 }

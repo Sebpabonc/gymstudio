@@ -291,7 +291,7 @@ describe('progress calculations', () => {
     )
     expect(lowerBodySuggestion[0]).toMatchObject({
       type: 'add-weight',
-      message: 'Leg Press: next A day, aim for 82.5 kg × 8 reps.',
+      message: 'Leg Press: next A day, aim for 85 kg × 8 reps.',
     })
 
     const stalledEntries: ProgressEntry[] = []
@@ -466,7 +466,7 @@ describe('progress calculations', () => {
       today,
       en,
       activeBlock
-    )).toHaveLength(1)
+    )).toHaveLength(0) // 2026-09-27 is week 6 (deload) of block 5: PT spec R4 excludes it from progression.
 
     expect(en.t('progress.headline.blockStarts', {
       number: upcomingBlock.number,

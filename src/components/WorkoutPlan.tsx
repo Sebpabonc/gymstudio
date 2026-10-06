@@ -69,7 +69,7 @@ import { saveTrainerRecommendation } from '../utils/profileData'
 import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { recommend } from '../trainer/engine'
-import { buildEvidence } from '../trainer/evidence'
+import { buildEvidence, isDoubleAngleFollower } from '../trainer/evidence'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
@@ -1171,10 +1171,22 @@ export default function WorkoutPlan({
       : original
   }
 
-  const getTrainerRecommendation = (exercise: PlanExercise) => {
+  // PT spec R5: a double-angle follower ("Same dumbbells as …") uses the previous exercise's recommended load today.
+  const followLoadFor = (exercise: PlanExercise): number | undefined => {
+    if (!isDoubleAngleFollower(exercise.notes) || !activeDay) return undefined
+    const index = activeBlockExercises.findIndex((item) => item.code === exercise.code)
+    const leader = index > 0 ? activeBlockExercises[index - 1] : undefined
+    const leaderTrainer = leader ? getTrainerRecommendation(leader) : null
+    return leaderTrainer?.recommendation.weight ?? undefined
+  }
+
+  const getTrainerRecommendation = (exercise: PlanExercise): ReturnType<typeof buildTrainerRecommendation> => buildTrainerRecommendation(exercise)
+
+  const buildTrainerRecommendation = (exercise: PlanExercise) => {
     if (planMode !== 'preset' || !activeBlock || !activeDay || !exercise.exerciseId) return null
     const original = getOriginalDraftForExercise(exercise.name, exercise)
-    const reps = (exercise.repsPerSet ?? [exercise.reps ?? '8']).flatMap(parseRepPrescription)
+    // First number of each set ("12+12" drop-set → 12): the main-set reps the PT spec progresses on.
+    const reps = (exercise.repsPerSet ?? [exercise.reps ?? '8']).map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0)
     const target = reps.length
       ? { min: Math.min(...reps), max: Math.max(...reps) }
       : { min: 8, max: 8 }
@@ -1190,6 +1202,10 @@ export default function WorkoutPlan({
       equipment,
       plannedWeight: original.weight > 0 ? original.weight : undefined,
       deload: activeBlockWeek === 6,
+      technique: exercise.technique,
+      setReps: reps,
+      tempo: /\btempo\b/i.test(exercise.notes ?? ''),
+      followLoad: followLoadFor(exercise),
     })
     return {
       recommendation,
@@ -2544,8 +2560,12 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           reps: trainerRangeLabel(trainer.target),
                         })}
                         recommended={t('workout.trainer.recommended', {
-                          weight: formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
-                          reps: trainerRangeLabel(trainer.recommendation.reps),
+                          weight: trainer.recommendation.setWeights && new Set(trainer.recommendation.setWeights).size > 1
+                            ? trainer.recommendation.setWeights.map((weight) => formatNumber(language, weight)).join(' / ')
+                            : formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
+                          reps: trainer.recommendation.setReps
+                            ? trainer.recommendation.setReps.map((reps) => formatNumber(language, reps)).join(' · ')
+                            : trainerRangeLabel(trainer.recommendation.reps),
                         })}
                         why={t('workout.trainer.why', {
                           reason: trainerWhy(
@@ -2558,6 +2578,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         confidence={t(`workout.trainer.confidence.${trainer.recommendation.confidence}` as TranslationKey)}
                         collectData={trainer.recommendation.action === 'collect_data'}
                         sameAsOriginal={
+                          !(trainer.recommendation.setWeights && new Set(trainer.recommendation.setWeights).size > 1) &&
                           trainer.recommendation.weight === trainer.original.weight &&
                           trainer.recommendation.reps.min === trainer.target.min &&
                           trainer.recommendation.reps.max === trainer.target.max &&
