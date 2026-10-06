@@ -310,6 +310,53 @@ export default function ProfileDataSections() {
 
   return (
     <>
+      <section className="card profile-data-card" aria-labelledby="profile-goal-title">
+        <h2 id="profile-goal-title">{t('profile.goal.title')}</h2>
+        <p className="profile-data-hint">{t('profile.goal.copy')}</p>
+        {disabled && <p className="profile-data-hint">{t('profile.goal.signIn')}</p>}
+        {loading ? (
+          <p className="profile-data-hint">{t('profile.data.loading')}</p>
+        ) : savedGoal && !editingGoal ? (
+          <div className="profile-goal-summary">
+            <p>{summary}</p>
+            <button type="button" className="secondary-button" onClick={() => setEditingGoal(true)} disabled={disabled}>
+              {t('profile.goal.edit')}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submitGoal}>
+            <ChoiceGroup label={t('profile.goal.field.goal')} translationPrefix="profile.goal.choice" value={goal.goal} options={trainingGoalOptions.goal} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, goal: value })} />
+            <ChoiceGroup label={t('profile.goal.field.days')} translationPrefix="profile.goal.days" value={goal.daysPerWeek} options={trainingGoalOptions.daysPerWeek} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, daysPerWeek: value })} />
+            <ChoiceGroup label={t('profile.goal.field.experience')} translationPrefix="profile.goal.experience" value={goal.experience} options={trainingGoalOptions.experience} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, experience: value })} />
+            <ChoiceGroup label={t('profile.goal.field.activity')} translationPrefix="profile.goal.activity" value={goal.activityLevel} options={trainingGoalOptions.activityLevel} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, activityLevel: value })} />
+            <ChoiceGroup label={t('profile.goal.field.minutes')} translationPrefix="profile.goal.minutes" value={goal.sessionMinutes} options={trainingGoalOptions.sessionMinutes} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, sessionMinutes: value })} />
+            <ChoiceGroup label={t('profile.goal.field.equipment')} translationPrefix="profile.goal.equipment" value={goal.equipment} options={trainingGoalOptions.equipment} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, equipment: value })} />
+            <label className="profile-data-field profile-goal-notes">
+              <span>{t('profile.goal.notes')}</span>
+              <textarea maxLength={500} value={goal.notes} onChange={(event) => setGoal({ ...goal, notes: event.target.value })} />
+            </label>
+            <button type="submit" className="primary-button profile-data-save" disabled={disabled || busy}>
+              {busy ? t('profile.data.saving') : t('profile.goal.save')}
+            </button>
+          </form>
+        )}
+      </section>
+      <MyPlanSection
+        signedOut={disabled}
+        goal={savedGoal}
+        activePlan={activePlan}
+        preview={planPreview}
+        exercises={planExercises}
+        loading={planLoading || buildingPlan}
+        building={buildingPlan}
+        publishing={publishingPlan}
+        confirmingRegeneration={confirmingRegeneration}
+        onGenerate={() => void generatePlan()}
+        onPublish={() => void publishPlan()}
+        onRegenerate={requestRegeneration}
+        onConfirmRegeneration={confirmRegeneration}
+        onCancelRegeneration={() => setConfirmingRegeneration(false)}
+      />
       <section className="card profile-data-card" aria-labelledby="profile-measurements-title">
         <h2 id="profile-measurements-title">{t('profile.measurements.title')}</h2>
         {disabled && <p className="profile-data-hint">{t('profile.data.signIn')}</p>}
@@ -380,54 +427,6 @@ export default function ProfileDataSections() {
           </div>
         )}
       </section>
-
-      <section className="card profile-data-card" aria-labelledby="profile-goal-title">
-        <h2 id="profile-goal-title">{t('profile.goal.title')}</h2>
-        <p className="profile-data-hint">{t('profile.goal.copy')}</p>
-        {disabled && <p className="profile-data-hint">{t('profile.goal.signIn')}</p>}
-        {loading ? (
-          <p className="profile-data-hint">{t('profile.data.loading')}</p>
-        ) : savedGoal && !editingGoal ? (
-          <div className="profile-goal-summary">
-            <p>{summary}</p>
-            <button type="button" className="secondary-button" onClick={() => setEditingGoal(true)} disabled={disabled}>
-              {t('profile.goal.edit')}
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={submitGoal}>
-            <ChoiceGroup label={t('profile.goal.field.goal')} translationPrefix="profile.goal.choice" value={goal.goal} options={trainingGoalOptions.goal} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, goal: value })} />
-            <ChoiceGroup label={t('profile.goal.field.days')} translationPrefix="profile.goal.days" value={goal.daysPerWeek} options={trainingGoalOptions.daysPerWeek} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, daysPerWeek: value })} />
-            <ChoiceGroup label={t('profile.goal.field.experience')} translationPrefix="profile.goal.experience" value={goal.experience} options={trainingGoalOptions.experience} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, experience: value })} />
-            <ChoiceGroup label={t('profile.goal.field.activity')} translationPrefix="profile.goal.activity" value={goal.activityLevel} options={trainingGoalOptions.activityLevel} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, activityLevel: value })} />
-            <ChoiceGroup label={t('profile.goal.field.minutes')} translationPrefix="profile.goal.minutes" value={goal.sessionMinutes} options={trainingGoalOptions.sessionMinutes} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, sessionMinutes: value })} />
-            <ChoiceGroup label={t('profile.goal.field.equipment')} translationPrefix="profile.goal.equipment" value={goal.equipment} options={trainingGoalOptions.equipment} disabled={disabled || busy} onChange={(value) => setGoal({ ...goal, equipment: value })} />
-            <label className="profile-data-field profile-goal-notes">
-              <span>{t('profile.goal.notes')}</span>
-              <textarea maxLength={500} value={goal.notes} onChange={(event) => setGoal({ ...goal, notes: event.target.value })} />
-            </label>
-            <button type="submit" className="primary-button profile-data-save" disabled={disabled || busy}>
-              {busy ? t('profile.data.saving') : t('profile.goal.save')}
-            </button>
-          </form>
-        )}
-      </section>
-      <MyPlanSection
-        signedOut={disabled}
-        goal={savedGoal}
-        activePlan={activePlan}
-        preview={planPreview}
-        exercises={planExercises}
-        loading={planLoading || buildingPlan}
-        building={buildingPlan}
-        publishing={publishingPlan}
-        confirmingRegeneration={confirmingRegeneration}
-        onGenerate={() => void generatePlan()}
-        onPublish={() => void publishPlan()}
-        onRegenerate={requestRegeneration}
-        onConfirmRegeneration={confirmRegeneration}
-        onCancelRegeneration={() => setConfirmingRegeneration(false)}
-      />
       {(error || notice) && (
         <div className="profile-data-feedback">
           {error && <p className="account-error" role="alert">{error}</p>}
