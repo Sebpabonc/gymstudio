@@ -48,6 +48,9 @@ import {
 import { entriesWithinBlock, startOfWeek } from '../progress/utils'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
 import { loadDemoBlocks } from '../plans/demoBlock'
+import { activeSwaps, applySwaps } from '../plans/exerciseSwaps'
+import type { ExerciseSwap } from '../plans/exerciseSwaps'
+import { fetchExerciseSwaps } from '../utils/profileData'
 import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import {
   applyWeightTarget,
@@ -58,7 +61,9 @@ import {
   getExerciseDisplayName,
   getAskExerciseAiConsent,
   loadWeightTargets,
+  loadLocalExerciseSwaps,
   removeWeightTarget,
+  saveLocalExerciseSwaps,
   setAskExerciseAiConsent,
 } from '../utils/storage'
 import type { AskExerciseAiConsent } from '../utils/storage'
@@ -280,8 +285,15 @@ export default function ProgressScreen({
   const { t, language } = useT()
   const demoMode = isDemoMode()
   const [rawBlocks, setBlocks] = useState<TrainingBlock[] | null>(null)
+  const [exerciseSwaps, setExerciseSwaps] = useState<ExerciseSwap[]>(() => loadLocalExerciseSwaps())
+  const today = localIsoDate()
   const spanishReady = useSpanishContentReady(language)
-  const blocks = useMemo(() => (rawBlocks ? localizeBlocks(rawBlocks, language) : null), [rawBlocks, language, spanishReady])
+  const blocks = useMemo(() => rawBlocks
+    ? localizeBlocks(
+        applySwaps(rawBlocks, activeSwaps(exerciseSwaps, today), new Set(exercises.map((exercise) => exercise.id))),
+        language
+      )
+    : null, [rawBlocks, exerciseSwaps, today, exercises, language, spanishReady])
   const [dayType, setDayType] = useState<DayTypeFilter>('A')
   const [pickedId, setPickedId] = useState(initialExerciseId ?? '')
   const [exerciseSearch, setExerciseSearch] = useState('')
@@ -291,7 +303,6 @@ export default function ProgressScreen({
   const [confirmDeleteId, setConfirmDeleteId] = useState('')
   const [undoEntry, setUndoEntry] = useState<WorkoutEntry | null>(null)
   const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const today = localIsoDate()
 
   useEffect(() => () => {
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current)
@@ -300,6 +311,8 @@ export default function ProgressScreen({
   useEffect(() => {
     let cancelled = false
     const signedIn = authStatus === 'signed-in' && !demoMode
+    const localSwaps = loadLocalExerciseSwaps()
+    setExerciseSwaps(localSwaps)
     const cachedPlan = signedIn ? getCachedActiveUserPlan() : null
     const globalCache = demoMode ? [] : getCachedTrainingBlocks() ?? []
     const cachedBlocks = selectPlanBlocks(globalCache, cachedPlan, signedIn, demoMode)
@@ -307,8 +320,17 @@ export default function ProgressScreen({
     void Promise.all([
       demoMode ? loadDemoBlocks() : fetchTrainingBlocks(),
       signedIn ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
-    ]).then(([globalBlocks, activePlan]) => {
-      if (!cancelled) setBlocks(selectPlanBlocks(globalBlocks, activePlan, signedIn, demoMode))
+      signedIn ? fetchExerciseSwaps().catch(() => null) : Promise.resolve(null),
+    ]).then(([globalBlocks, activePlan, remoteSwaps]) => {
+      if (cancelled) return
+      if (remoteSwaps) {
+        const swaps: ExerciseSwap[] = [
+          ...localSwaps.filter((swap) => swap.scope === 'today'),
+          ...remoteSwaps.map((swap) => ({ ...swap, scope: 'always' as const })),
+        ]
+        setExerciseSwaps(saveLocalExerciseSwaps(swaps, today))
+      }
+      setBlocks(selectPlanBlocks(globalBlocks, activePlan, signedIn, demoMode))
     }).catch(() => {
       if (!cancelled) setBlocks(cachedBlocks)
     })

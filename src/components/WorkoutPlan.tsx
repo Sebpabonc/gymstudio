@@ -12,12 +12,14 @@ import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue from './SqueezeCue'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
+import type { TranslationKey } from '../i18n'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
 import { openExternal } from '../native/openExternal'
 import AiConsentPrompt from './AiConsentPrompt'
 import { localIsoDate } from '../lib/dates'
 import { isDemoMode } from '../utils/demoMode'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
+import type { Language, Translate } from '../i18n'
 import {
   fetchTrainingBlocks,
   fetchActiveUserPlan,
@@ -27,10 +29,12 @@ import {
   getExerciseDisplayName,
   getSessionStorageValue,
   loadExercises,
+  loadLocalExerciseSwaps,
   loadWeightTargets,
   consumeWeightTarget,
   loadWorkoutHistory,
   normalizeExerciseName,
+  saveLocalExerciseSwaps,
   saveWorkoutHistory,
   setSessionStorageValue,
   storageKey,
@@ -72,6 +76,9 @@ import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from '
 import { recommendNextTarget, type NextTarget, type ProgressionType } from '../progress/nextTarget'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
 import { loadDemoBlocks } from '../plans/demoBlock'
+import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
+import type { ExerciseSwap } from '../plans/exerciseSwaps'
+import { fetchExerciseSwaps, removeExerciseSwap, saveExerciseSwap } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import {
   captureUndoSnapshots,
@@ -99,7 +106,22 @@ type PlanExercise = {
   technique?: BlockExercise['technique']
   angleDegrees?: number
   notes?: string
+  swappedFrom?: string
   weekNote?: string
+}
+
+const swapEquipmentKeys: Record<string, TranslationKey> = {
+  band: 'workout.swap.equipment.band',
+  barbell: 'workout.swap.equipment.barbell',
+  bodyweight: 'workout.swap.equipment.bodyweight',
+  cable: 'workout.swap.equipment.cable',
+  dumbbell: 'workout.swap.equipment.dumbbell',
+  'ez-bar': 'workout.swap.equipment.ezBar',
+  'hex-bar': 'workout.swap.equipment.hexBar',
+  kettlebell: 'workout.swap.equipment.kettlebell',
+  machine: 'workout.swap.equipment.machine',
+  'plate-loaded': 'workout.swap.equipment.plateLoaded',
+  'smith-machine': 'workout.swap.equipment.smithMachine',
 }
 
 type PlanDraft = {
@@ -362,6 +384,113 @@ function splitExerciseTitle(name: string) {
   return { main: name, details: '' }
 }
 
+export function ExerciseSwapButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: React.MouseEventHandler<HTMLButtonElement>
+}) {
+  return (
+    <button
+      type="button"
+      className="exercise-swap-button"
+      aria-label={label}
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick(event)
+      }}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 7V3m0 4h-4M4 17v4m0-4h4M5.6 9a7 7 0 0 1 11.9-2L20 7M4 17l2.5.1A7 7 0 0 0 18.4 15" />
+      </svg>
+    </button>
+  )
+}
+
+export function ExerciseSwapSheet({
+  alternatives,
+  language,
+  t,
+  onCancel,
+  onSelect,
+}: {
+  alternatives: Exercise[]
+  language: Language
+  t: Translate
+  onCancel: () => void
+  onSelect: (exerciseId: string, scope: ExerciseSwap['scope']) => void
+}) {
+  return (
+    <section
+      className="exercise-swap-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="exercise-swap-title"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <header className="exercise-swap-header">
+        <h2 id="exercise-swap-title">{t('workout.swap.suggestions')}</h2>
+        <button type="button" className="secondary-button" onClick={onCancel}>
+          {t('workout.swap.cancel')}
+        </button>
+      </header>
+      <div className="exercise-swap-suggestions">
+        {alternatives.map((alternative) => (
+          <article className="exercise-swap-suggestion" key={alternative.id}>
+            <a
+              className="exercise-swap-name exercise-image-link"
+              href={exerciseImageSearchUrl(exerciseImageQuery(alternative.id, getExerciseDisplayName(alternative, language), alternative.equipment))}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t('workout.exercise.imageSearch', { name: getExerciseDisplayName(alternative, language) })}
+              onClick={(event) => {
+                event.stopPropagation()
+                event.preventDefault()
+                void openExternal(event.currentTarget.href)
+              }}
+            >
+              {getExerciseDisplayName(alternative, language)}
+              <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 16L16 8" />
+                <path d="M9.5 8H16v6.5" />
+              </svg>
+            </a>
+            <div className="chip-row chip-row-tight">
+              <span className="chip">{t('workout.swap.muscle')}: {localizeMuscle(alternative.primaryMuscle, language)}</span>
+              {alternative.equipment && (
+                <span className="chip subtle">
+                  {t('workout.swap.equipment')}: {
+                    swapEquipmentKeys[alternative.equipment]
+                      ? t(swapEquipmentKeys[alternative.equipment])
+                      : alternative.equipment
+                  }
+                </span>
+              )}
+            </div>
+            <div className="exercise-swap-actions">
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => onSelect(alternative.id, 'today')}
+              >
+                {t('workout.swap.justToday')}
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => onSelect(alternative.id, 'always')}
+              >
+                {t('workout.swap.always')}
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function sanitizeLoggedComment(rawNote: string | undefined, fragments: Array<string | undefined>) {
   let text = rawNote?.trim() ?? ''
   if (!text) return ''
@@ -404,11 +533,16 @@ export default function WorkoutPlan({
   const [weightTargets, setWeightTargets] = useState(() => loadWeightTargets())
   const [rawExerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
   const [rawTrainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
+  const [exerciseSwaps, setExerciseSwaps] = useState<ExerciseSwap[]>(() => loadLocalExerciseSwaps())
   const [blocksLoaded, setBlocksLoaded] = useState(false)
+  const today = getTodayIsoDate()
   // Spanish fitness content (PT-approved) overlays the English source; ids, keys and codes are unchanged.
   const spanishReady = useSpanishContentReady(language)
   const exerciseCatalog = useMemo(() => localizeCatalogue(rawExerciseCatalog, language), [rawExerciseCatalog, language, spanishReady])
-  const trainingBlocks = useMemo(() => localizeBlocks(rawTrainingBlocks, language), [rawTrainingBlocks, language, spanishReady])
+  const trainingBlocks = useMemo(() => localizeBlocks(
+    applySwaps(rawTrainingBlocks, activeSwaps(exerciseSwaps, today), new Set(rawExerciseCatalog.map((exercise) => exercise.id))),
+    language
+  ), [rawTrainingBlocks, exerciseSwaps, today, rawExerciseCatalog, language, spanishReady])
   const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
   const [pinnedBlockId, setPinnedBlockId] = useState(() => getActiveBlockId() ?? '')
   const [blockCardExpanded, setBlockCardExpanded] = useState(
@@ -416,6 +550,7 @@ export default function WorkoutPlan({
   )
   const [blockSelectorOpen, setBlockSelectorOpen] = useState(false)
   const [blockInsightsOpen, setBlockInsightsOpen] = useState(false)
+  const [swapTarget, setSwapTarget] = useState<{ exercise: Exercise; fromExerciseId: string } | null>(null)
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
@@ -442,6 +577,7 @@ export default function WorkoutPlan({
   const aiSummaryRequestId = useRef(0)
   const exerciseFeedbackRequests = useRef(new Set<string>())
   const aiPlanRequests = useRef(new Set<string>())
+  const swapChangesDuringLoad = useRef(new Set<string>())
 
   const requestAiSummary = async () => {
     if (!sessionSummary || aiSummaryPending || aiSummary) return
@@ -508,6 +644,15 @@ export default function WorkoutPlan({
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [blockSelectorOpen])
 
+  useEffect(() => {
+    if (!swapTarget) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSwapTarget(null)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [swapTarget])
+
   const text = {
     sets: t('workout.label.sets'),
     reps: t('workout.label.reps'),
@@ -560,7 +705,6 @@ export default function WorkoutPlan({
     Completed: 'workout.block.status.completed',
   } as const
 
-  const today = getTodayIsoDate()
   const activeBlock = useMemo(
     () =>
       trainingBlocks.find((block) => block.id === selectedBlockId) ??
@@ -594,11 +738,19 @@ export default function WorkoutPlan({
           angleDegrees: prescription.angleDegrees,
           notes: prescription.notes,
           weekNote: prescription.weekNote,
+          swappedFrom: prescription.swappedFrom,
         }
       }) ?? [],
     [activeBlockWeek, activeDay, exerciseCatalog]
   )
   const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
+  const swapSuggestions = swapTarget
+    ? suggestAlternatives(
+        swapTarget.exercise,
+        exerciseCatalog,
+        activeExercises.flatMap((exercise) => exercise.exerciseId ? [exercise.exerciseId] : [])
+      )
+    : []
   const todayDay = activeBlock ? todayTrainingDay(activeBlock, history, today) : undefined
   const activeAiPlanKey = activeBlock && activeDay ? getAiPlanKey(activeBlock.id, activeDay.key) : ''
   const activeCoachPlan = activeAiPlanKey
@@ -620,6 +772,40 @@ export default function WorkoutPlan({
     planMode === 'preset' && activeBlock && activeDay
       ? completionScope(activeBlock.id, activeDay.key)
       : completionScope()
+  const chooseExerciseSwap = (toExerciseId: string, scope: ExerciseSwap['scope']) => {
+    if (!swapTarget) return
+    const fromExerciseId = swapTarget.fromExerciseId
+    swapChangesDuringLoad.current.add(fromExerciseId)
+    const remaining = exerciseSwaps.filter((swap) =>
+      swap.fromExerciseId !== fromExerciseId || (scope === 'today' && swap.scope === 'always')
+    )
+    const nextSwap: ExerciseSwap = scope === 'today'
+      ? { fromExerciseId, toExerciseId, scope, date: today }
+      : { fromExerciseId, toExerciseId, scope }
+    setExerciseSwaps(saveLocalExerciseSwaps([...remaining, nextSwap], today))
+    setSwapTarget(null)
+    if (scope === 'always' && authStatus === 'signed-in' && !demoMode) {
+      void saveExerciseSwap(fromExerciseId, toExerciseId).catch(() => undefined)
+    }
+  }
+  const undoExerciseSwap = (fromExerciseId: string) => {
+    swapChangesDuringLoad.current.add(fromExerciseId)
+    const hasTodaySwap = exerciseSwaps.some(
+      (swap) => swap.fromExerciseId === fromExerciseId && swap.scope === 'today' && swap.date === today
+    )
+    const removePermanentSwap = !hasTodaySwap && exerciseSwaps.some(
+      (swap) => swap.fromExerciseId === fromExerciseId && swap.scope === 'always'
+    )
+    setExerciseSwaps(saveLocalExerciseSwaps(
+      exerciseSwaps.filter((swap) =>
+        swap.fromExerciseId !== fromExerciseId || (hasTodaySwap && swap.scope === 'always')
+      ),
+      today
+    ))
+    if (removePermanentSwap && authStatus === 'signed-in' && !demoMode) {
+      void removeExerciseSwap(fromExerciseId).catch(() => undefined)
+    }
+  }
   const findExerciseCompletion = (exercise: PlanExercise, entries: WorkoutEntry[]) => {
     const exerciseKey = normalizeExerciseName(exercise.name)
     const matching = entries.filter((entry) => {
@@ -649,6 +835,8 @@ export default function WorkoutPlan({
   useEffect(() => {
     let cancelled = false
     const signedIn = authStatus === 'signed-in' && !demoMode
+    const localSwaps = loadLocalExerciseSwaps()
+    setExerciseSwaps(localSwaps)
     const cachedPlan = signedIn ? getCachedActiveUserPlan() : null
     const globalCache = demoMode ? [] : getCachedTrainingBlocks() ?? []
     const cachedBlocks = selectPlanBlocks(globalCache, cachedPlan, signedIn, demoMode)
@@ -679,7 +867,23 @@ export default function WorkoutPlan({
       void Promise.all([
         demoMode ? loadDemoBlocks() : fetchTrainingBlocks(),
         signedIn ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
-      ]).then(([globalBlocks, activePlan]) => {
+        signedIn ? fetchExerciseSwaps().catch(() => null) : Promise.resolve(null),
+      ]).then(([globalBlocks, activePlan, remoteSwaps]) => {
+        if (cancelled) return
+        if (remoteSwaps) {
+          const currentLocalSwaps = loadLocalExerciseSwaps()
+          const changedSources = swapChangesDuringLoad.current
+          const swaps: ExerciseSwap[] = [
+            ...currentLocalSwaps.filter((swap) =>
+              swap.scope === 'today' || changedSources.has(swap.fromExerciseId)
+            ),
+            ...remoteSwaps
+              .filter((swap) => !changedSources.has(swap.fromExerciseId))
+              .map((swap) => ({ ...swap, scope: 'always' as const })),
+          ]
+          changedSources.clear()
+          setExerciseSwaps(saveLocalExerciseSwaps(swaps, today))
+        }
         const blocks = selectPlanBlocks(globalBlocks, activePlan, signedIn, demoMode)
         apply(exercises, entries, blocks, !cachedBlocks.length, !!(signedIn && activePlan))
       })
@@ -1067,7 +1271,6 @@ export default function WorkoutPlan({
   const getDraftForExercise = (exerciseName: string, exercise?: PlanExercise) => {
     const key = getPlanDraftKey(exerciseName)
     const best = bestProgressByName.get(normalizeExerciseName(exerciseName))
-    const bestWeight = best ? workoutMaxWeight(best.sets) : 0
     const bestReps = best && best.sets.length ? Math.max(...best.sets.map((set) => set.reps), 0) : 8
     const fallbackReps = exercise ? getDefaultRepTarget(exercise) : bestReps
     const fallbackSetCount = exercise ? getDefaultSetCount(exercise) : 1
@@ -1079,6 +1282,9 @@ export default function WorkoutPlan({
         ? findPrefillSelection(history, prefillExerciseId, planMode === 'preset' ? activeDay?.key : undefined)
         : undefined
     const prefill = prefillSelection?.entry
+    const noSwapHistory = !!exercise?.swappedFrom &&
+      !history.some((entry) => entry.exerciseId === prefillExerciseId)
+    const bestWeight = noSwapHistory ? 0 : best ? workoutMaxWeight(best.sets) : 0
     const otherDayPrefill = prefillSelection?.basis === 'other-day'
     const nextTarget = exercise && prefill && !otherDayPrefill ? getNextTarget(exercise, prefill.sets) : null
     const lastWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
@@ -1088,10 +1294,10 @@ export default function WorkoutPlan({
         ? scaleWeightForOtherDay(weight, source?.reps, exercise ? getExerciseTargetReps(exercise)[index] : undefined)
         : weight
     })
-    const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
+    const appliedTarget = noSwapHistory ? undefined : getAppliedTarget(exercise, prefillExerciseId)
     // Ignore an AI weight that no longer matches the history it was built from (e.g. a trial log was deleted).
     const ruleWeight = nextTarget?.weight ?? lastWeights[0] ?? 0
-    const plannedAi = exercise ? getAiPlanExercise(exercise) : undefined
+    const plannedAi = exercise && !exercise.swappedFrom ? getAiPlanExercise(exercise) : undefined
     const aiExercise = plannedAi && (ruleWeight <= 0 || Math.abs(plannedAi.weight - ruleWeight) <= ruleWeight * 0.1)
       ? plannedAi
       : undefined
@@ -2222,6 +2428,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const displayName =
               language === 'es' && libraryMatch?.nameEs?.trim() ? libraryMatch.nameEs : displayExerciseName(exercise.name)
             const displayTitle = splitExerciseTitle(displayName)
+            const originalExercise = exercise.swappedFrom
+              ? exerciseCatalog.find((item) => item.id === exercise.swappedFrom)
+              : undefined
             const exerciseHistory = history
               .filter((entry) => {
                 if (exercise.exerciseId) return entry.exerciseId === exercise.exerciseId
@@ -2301,27 +2510,56 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 >
                   <span className="planned-exercise-title-block">
                     {exercise.code && <span className="plan-exercise-code">{exercise.code}</span>}
-                    <span className="planned-exercise-name-wrap">
-                      <a
-                        className="planned-exercise-main-name exercise-image-link"
-                        href={exerciseImageSearchUrl(exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment))}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={t('workout.exercise.imageSearch', { name: displayName })}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          event.preventDefault()
-                          void openExternal(event.currentTarget.href)
-                        }}
-                      >
-                        {displayTitle.main}
-                        <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M8 16L16 8" />
-                              <path d="M9.5 8H16v6.5" />
-                            </svg>
-                      </a>
-                      {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
+                    <span className="planned-exercise-name-row">
+                      <span className="planned-exercise-name-wrap">
+                        <a
+                          className="planned-exercise-main-name exercise-image-link"
+                          href={exerciseImageSearchUrl(exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment))}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={t('workout.exercise.imageSearch', { name: displayName })}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            event.preventDefault()
+                            void openExternal(event.currentTarget.href)
+                          }}
+                        >
+                          {displayTitle.main}
+                          <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8 16L16 8" />
+                            <path d="M9.5 8H16v6.5" />
+                          </svg>
+                        </a>
+                        {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
+                      </span>
+                      {planMode === 'preset' && libraryMatch && completedEntry?.date !== today && (
+                        <ExerciseSwapButton
+                          label={t('workout.swap.change')}
+                          onClick={() => {
+                            setSwapTarget({
+                              exercise: libraryMatch,
+                              fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
+                            })
+                          }}
+                        />
+                      )}
                     </span>
+                    {exercise.swappedFrom && (
+                      <small className="exercise-swap-origin">
+                        {t('workout.swap.insteadOf', {
+                          name: displayExerciseName(originalExercise ?? exercise.swappedFrom),
+                        })}
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            undoExerciseSwap(exercise.swappedFrom!)
+                          }}
+                        >
+                          {t('workout.action.undo')}
+                        </button>
+                      </small>
+                    )}
                       {completedEntry && (
                         <span className="done-badge" role="status">
                           <span aria-hidden="true">✓ </span>
@@ -2811,6 +3049,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           })}
         </div>
       </section>
+      )}
+      {swapTarget && (
+        <div className="exercise-swap-backdrop" role="presentation" onClick={() => setSwapTarget(null)}>
+          <ExerciseSwapSheet
+            alternatives={swapSuggestions}
+            language={language}
+            t={t}
+            onCancel={() => setSwapTarget(null)}
+            onSelect={chooseExerciseSwap}
+          />
+        </div>
       )}
       {sessionSummary && (
         <div className="session-summary-backdrop" onClick={dismissSessionSummary}>

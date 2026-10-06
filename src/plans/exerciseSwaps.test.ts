@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { activeSwaps, applySwaps, suggestAlternatives } from './exerciseSwaps'
+import type { ExerciseSwap } from './exerciseSwaps'
 import type { TrainingBlock } from '../types'
 
 const dir = 'docs/fitness/approved/catalogue-v2'
@@ -50,6 +51,19 @@ describe('applySwaps', () => {
     ]
     expect(activeSwaps(swaps, '2026-10-06').get('a')).toBe('c')
     expect(activeSwaps(swaps, '2026-10-07').get('a')).toBe('b')
+  })
+
+  it('applies today swaps only for their date, permanent swaps on later dates, and leaves unmatched exercises unchanged', () => {
+    const originalId = block.days[0].exercises[0].exerciseId
+    const todayOnly = [{ fromExerciseId: originalId, toExerciseId: 'today-alt', scope: 'today' as const, date: '2026-10-06' }]
+    const permanent = [{ fromExerciseId: originalId, toExerciseId: 'always-alt', scope: 'always' as const }]
+    const exerciseId = (swaps: ExerciseSwap[]) =>
+      applySwaps([block], activeSwaps(swaps, '2026-10-06'))[0].days[0].exercises[0].exerciseId
+
+    expect(exerciseId([])).toBe(originalId)
+    expect(exerciseId(todayOnly)).toBe('today-alt')
+    expect(applySwaps([block], activeSwaps(todayOnly, '2026-10-07'))[0].days[0].exercises[0].exerciseId).toBe(originalId)
+    expect(exerciseId(permanent)).toBe('always-alt')
   })
 
   it('replaces the exercise, keeps sets/reps/rest and drops the old bench angle', () => {
