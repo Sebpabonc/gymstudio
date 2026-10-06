@@ -117,3 +117,8 @@ export function requestNextSessionPlan(
 export function requestBlockPlan(plan: import('../types').TrainingBlock, language: Language = 'en'): Promise<AiGatewayResponse> {
   return invokeAiGateway({ feature: 'block_plan', plan, language })
 }
+
+/** Phase 4: PT-style sentence for a recommendation the engine already made (numbers are validated client-side). */
+export function explainTrainerRecommendation(exerciseId: string, recommendation: unknown, language: Language = 'en'): Promise<AiGatewayResponse> {
+  return invokeAiGateway({ feature: 'trainer_explain', exerciseId, recommendation, language })
+}

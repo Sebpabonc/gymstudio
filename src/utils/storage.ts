@@ -20,6 +20,7 @@ const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
 const EXERCISE_SWAPS_KEY = 'gym-studio.exercise-swaps'
+const TRAINER_EXPLANATIONS_KEY = 'gym-studio.trainer-explanations'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
 let helpAiAppOpensThisLoad: number | null = null
 
@@ -210,6 +211,27 @@ export function setAskExerciseAiConsent(choice: AskExerciseAiConsent) {
     localStorage.setItem(storageKey(ASK_EXERCISE_AI_CONSENT_KEY), choice)
   } catch {
     // Consent cannot be remembered when browser storage is unavailable.
+  }
+}
+
+/** Cached AI Trainer sentences, keyed by recommendation (kept small: last 100). */
+export function loadTrainerExplanation(key: string): string | null {
+  try {
+    const cache = JSON.parse(localStorage.getItem(storageKey(TRAINER_EXPLANATIONS_KEY)) ?? '{}') as Record<string, string>
+    return typeof cache[key] === 'string' ? cache[key] : null
+  } catch {
+    return null
+  }
+}
+
+export function saveTrainerExplanation(key: string, text: string) {
+  try {
+    const cache = JSON.parse(localStorage.getItem(storageKey(TRAINER_EXPLANATIONS_KEY)) ?? '{}') as Record<string, string>
+    cache[key] = text
+    const entries = Object.entries(cache).slice(-100)
+    localStorage.setItem(storageKey(TRAINER_EXPLANATIONS_KEY), JSON.stringify(Object.fromEntries(entries)))
+  } catch {
+    // The template sentence is shown instead.
   }
 }
 

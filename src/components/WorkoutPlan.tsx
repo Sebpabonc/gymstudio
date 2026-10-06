@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { mapAiGatewayError, requestExerciseFeedback, summariseSession } from '../ai/gateway'
+import { explainTrainerRecommendation, mapAiGatewayError, requestExerciseFeedback, summariseSession } from '../ai/gateway'
+import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
 import {
   buildExerciseFeedbackPayload,
   limitAiNoteToTwoSentences,
@@ -26,6 +27,8 @@ import {
   getSessionStorageValue,
   loadExercises,
   loadLocalExerciseSwaps,
+  loadTrainerExplanation,
+  saveTrainerExplanation,
   loadWorkoutHistory,
   normalizeExerciseName,
   saveLocalExerciseSwaps,
@@ -595,6 +598,33 @@ export default function WorkoutPlan({
   const aiSummaryRequestId = useRef(0)
   const exerciseFeedbackRequests = useRef(new Set<string>())
   const trainerRecommendationIds = useRef(new Map<string, string>())
+  // Phase 4: PT sentence from the AI for the engine's decision; the template sentence shows until (or unless) it arrives.
+  const [trainerExplanations, setTrainerExplanations] = useState<Record<string, string>>({})
+  const requestedExplanations = useRef(new Set<string>())
+  const trainerWhy = (
+    exerciseId: string | undefined,
+    recommendation: Parameters<typeof explanationPayload>[0],
+    original: Parameters<typeof explanationPayload>[1],
+    template: string
+  ) => {
+    if (!exerciseId || demoMode || authStatus !== 'signed-in') return template
+    const key = explanationKey(exerciseId, today, recommendation, language)
+    const known = trainerExplanations[key] ?? loadTrainerExplanation(key)
+    if (known) return known
+    if (!requestedExplanations.current.has(key)) {
+      requestedExplanations.current.add(key)
+      const payload = explanationPayload(recommendation, original)
+      void explainTrainerRecommendation(exerciseId, payload, language)
+        .then((response) => {
+          const text = validateExplanation(response.answer, payload)
+          if (!text) return
+          saveTrainerExplanation(key, text)
+          setTrainerExplanations((current) => ({ ...current, [key]: text }))
+        })
+        .catch(() => undefined)
+    }
+    return template
+  }
   const swapChangesDuringLoad = useRef(new Set<string>())
 
   const requestAiSummary = async () => {
@@ -2667,7 +2697,12 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           reps: trainerRangeLabel(trainer.recommendation.reps),
                         })}
                         why={t('workout.trainer.why', {
-                          reason: trainerReason(t, language, trainer.recommendation, trainer.target),
+                          reason: trainerWhy(
+                            exercise.exerciseId,
+                            trainer.recommendation,
+                            { weight: trainer.original.weight, target: trainer.target },
+                            trainerReason(t, language, trainer.recommendation, trainer.target)
+                          ),
                         })}
                         confidence={t(`workout.trainer.confidence.${trainer.recommendation.confidence}` as TranslationKey)}
                         collectData={trainer.recommendation.action === 'collect_data'}

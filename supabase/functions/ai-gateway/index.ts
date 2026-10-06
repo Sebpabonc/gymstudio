@@ -88,9 +88,15 @@ body max 50 words). Reply ONLY with JSON:
  "exercises": [{"dayKey": "upper-a", "code": "A1", "exerciseId": "...", "sets": 3, "restSeconds": 120, "note": "<max 12 words>"}]}
 List only the exercises you change.`
 
+const TRAINER_PROMPT = `You are the user's personal trainer inside GymStudio. The app's progression engine already decided
+today's load for one exercise; you only explain it. Write ONE or TWO short sentences (max 35 words) that say what the
+user did last time versus the target and what to do today, like a real PT standing next to them. Use ONLY numbers that
+appear in the data; never invent or change a weight, rep count or date; never suggest a different load. No praise
+filler ("great job", "keep pushing"), no medical advice. Plain text.`
+
 const ID_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
-type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary' | 'general_chat' | 'exercise_feedback' | 'next_session_plan' | 'block_plan'
+type Feature = 'ask_exercise' | 'explain_suggestion' | 'session_summary' | 'general_chat' | 'exercise_feedback' | 'next_session_plan' | 'block_plan' | 'trainer_explain'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -132,7 +138,7 @@ Deno.serve(async (req) => {
     return json(400, { error: 'invalid_json' })
   }
   const feature = body.feature as Feature
-  if (!['ask_exercise', 'explain_suggestion', 'session_summary', 'general_chat', 'exercise_feedback', 'next_session_plan', 'block_plan'].includes(feature)) {
+  if (!['ask_exercise', 'explain_suggestion', 'session_summary', 'general_chat', 'exercise_feedback', 'next_session_plan', 'block_plan', 'trainer_explain'].includes(feature)) {
     return json(400, { error: 'unknown_feature' })
   }
   const exerciseId = (body.exerciseId ?? '').trim()
@@ -185,7 +191,16 @@ Deno.serve(async (req) => {
   let userMessage = question
   let context: Record<string, unknown>
 
-  if (feature === 'block_plan') {
+  if (feature === 'trainer_explain') {
+    const recommendation = body.recommendation
+    if (!recommendation || JSON.stringify(recommendation).length > 3000 || !ID_RE.test(exerciseId)) {
+      return json(400, { error: 'invalid_recommendation' })
+    }
+    const { data: exercise } = await userClient.from('exercises').select('name_en, name_es').eq('id', exerciseId).maybeSingle()
+    context = { exercise: language === 'es' ? exercise?.name_es ?? exercise?.name_en : exercise?.name_en, recommendation }
+    systemPrompt = TRAINER_PROMPT
+    userMessage = 'Explain today\'s recommendation.'
+  } else if (feature === 'block_plan') {
     const plan = body.plan as { days?: Array<{ exercises?: Array<{ exerciseId?: string }> }> } | undefined
     if (!plan || !Array.isArray(plan.days) || JSON.stringify(plan).length > 15000) return json(400, { error: 'invalid_plan' })
     const { data: goals } = await userClient.from('training_goals').select('*').maybeSingle()
