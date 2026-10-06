@@ -79,6 +79,7 @@ import { loadDemoBlocks } from '../plans/demoBlock'
 import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
 import type { ExerciseSwap } from '../plans/exerciseSwaps'
 import { fetchExerciseSwaps, removeExerciseSwap, saveExerciseSwap } from '../utils/profileData'
+import { prescriptionForWeek } from '../plans/weekPrescription'
 import {
   captureUndoSnapshots,
   createSessionSummary,
@@ -106,6 +107,7 @@ type PlanExercise = {
   angleDegrees?: number
   notes?: string
   swappedFrom?: string
+  weekNote?: string
 }
 
 const swapEquipmentKeys: Record<string, TranslationKey> = {
@@ -709,6 +711,7 @@ export default function WorkoutPlan({
       defaultActiveBlock(trainingBlocks, today),
     [selectedBlockId, today, trainingBlocks]
   )
+  const activeBlockWeek = activeBlock ? blockWeek(activeBlock, today) : null
   const selectedCalendarBlock = trainingBlocks.find((block) => block.id === selectedCalendarBlockId)
   const calendarBlockSessions = useMemo(
     () => selectedCalendarBlock ? completedTrainingSessions(selectedCalendarBlock, history) : [],
@@ -717,24 +720,28 @@ export default function WorkoutPlan({
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
   const activeBlockExercises = useMemo(
     () =>
-      activeDay?.exercises.map((exercise) => ({
-        name: getBlockExerciseName(exercise, exerciseCatalog),
-        sets: String(exercise.sets),
-        reps: exercise.reps.join(' · '),
-        repsPerSet: exercise.reps,
-        rest: `${exercise.restSeconds} s`,
-        restSeconds: exercise.restSeconds,
-        focus: activeDay.focus ?? '',
-        goal: '',
-        tip: '',
-        exerciseId: exercise.exerciseId,
-        code: exercise.code,
-        technique: exercise.technique,
-        angleDegrees: exercise.angleDegrees,
-        notes: exercise.notes,
-        swappedFrom: exercise.swappedFrom,
-      })) ?? [],
-    [activeDay, exerciseCatalog]
+      activeDay?.exercises.map((exercise) => {
+        const prescription = prescriptionForWeek(exercise, activeBlockWeek ?? 1)
+        return {
+          name: getBlockExerciseName(prescription, exerciseCatalog),
+          sets: String(prescription.sets),
+          reps: prescription.reps.join(' · '),
+          repsPerSet: prescription.reps,
+          rest: `${prescription.restSeconds} s`,
+          restSeconds: prescription.restSeconds,
+          focus: activeDay.focus ?? '',
+          goal: '',
+          tip: '',
+          exerciseId: prescription.exerciseId,
+          code: prescription.code,
+          technique: prescription.technique,
+          angleDegrees: prescription.angleDegrees,
+          notes: prescription.notes,
+          weekNote: prescription.weekNote,
+          swappedFrom: prescription.swappedFrom,
+        }
+      }) ?? [],
+    [activeBlockWeek, activeDay, exerciseCatalog]
   )
   const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
   const swapSuggestions = swapTarget
@@ -744,7 +751,6 @@ export default function WorkoutPlan({
         activeExercises.flatMap((exercise) => exercise.exerciseId ? [exercise.exerciseId] : [])
       )
     : []
-  const activeBlockWeek = activeBlock ? blockWeek(activeBlock, today) : null
   const todayDay = activeBlock ? todayTrainingDay(activeBlock, history, today) : undefined
   const activeAiPlanKey = activeBlock && activeDay ? getAiPlanKey(activeBlock.id, activeDay.key) : ''
   const activeCoachPlan = activeAiPlanKey
@@ -1070,8 +1076,7 @@ export default function WorkoutPlan({
   }
 
   const getDefaultSetCount = (exercise: PlanExercise) => {
-    const setCount = getRawDefaultSetCount(exercise)
-    return planMode === 'preset' && activeBlockWeek === 6 ? Math.ceil(setCount / 2) : setCount
+    return getRawDefaultSetCount(exercise)
   }
 
   const getNextTarget = (
@@ -1127,33 +1132,34 @@ export default function WorkoutPlan({
   ): CoachPlanExercise[] => {
     const week = blockWeek(block, today) ?? 1
     return day.exercises.map((planned) => {
+      const prescription = prescriptionForWeek(planned, week)
       const exercise: PlanExercise = {
-        name: getBlockExerciseName(planned, exerciseCatalog),
-        sets: String(planned.sets),
-        reps: planned.reps.join(' · '),
-        repsPerSet: planned.reps,
-        rest: `${planned.restSeconds} s`,
-        restSeconds: planned.restSeconds,
+        name: getBlockExerciseName(prescription, exerciseCatalog),
+        sets: String(prescription.sets),
+        reps: prescription.reps.join(' · '),
+        repsPerSet: prescription.reps,
+        rest: `${prescription.restSeconds} s`,
+        restSeconds: prescription.restSeconds,
         focus: day.focus ?? '',
         goal: '',
         tip: '',
-        exerciseId: planned.exerciseId,
-        code: planned.code,
-        technique: planned.technique,
+        exerciseId: prescription.exerciseId,
+        code: prescription.code,
+        technique: prescription.technique,
       }
-      const prefill = findPrefillSelection(entries, planned.exerciseId, day.key)
+      const prefill = findPrefillSelection(entries, prescription.exerciseId, day.key)
       const lastEntry = prefill?.entry
       const target = lastEntry && prefill?.basis !== 'other-day'
         ? getNextTarget(exercise, lastEntry.sets, week === 6)
         : null
-      const setCount = target?.setCount ?? (week === 6 ? Math.ceil(planned.sets / 2) : planned.sets)
+      const setCount = target?.setCount ?? prescription.sets
       const reps = target?.reps ?? getExerciseTargetReps(exercise).slice(0, setCount)
       const otherDayWeight = prefill?.basis === 'other-day'
         ? scaleWeightForOtherDay(lastEntry?.sets[0]?.weight ?? 0, lastEntry?.sets[0]?.reps, reps[0])
         : undefined
       return {
-        code: planned.code,
-        exerciseId: planned.exerciseId,
+        code: prescription.code,
+        exerciseId: prescription.exerciseId,
         name: exercise.name,
         sets: setCount,
         reps,
@@ -2113,6 +2119,15 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 {pinnedBlockId === activeBlock.id && <span className="training-block-number">{t('workout.block.pinned')}</span>}
               </span>
             </button>
+            {activeBlockWeek !== null && (
+              <span className="chip subtle training-week-chip">
+                {t(
+                  activeBlockWeek === 6
+                    ? 'workout.block.weekType.deload'
+                    : 'workout.block.weekType.full'
+                )}
+              </span>
+            )}
             <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
               <button
                 type="button"
@@ -2616,7 +2631,14 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       </aside>
                     )}
                     {/* TODO(i18n): PT will provide approved translations */}
-                    {exercise.notes?.trim() && <p className="planned-exercise-notes">{exercise.notes}</p>}
+                    {exercise.weekNote && (
+                      <p className="planned-exercise-notes">
+                        {t(activeBlockWeek === 6 ? 'workout.weekNote.deload' : 'workout.weekNote.intro')}
+                      </p>
+                    )}
+                    {exercise.notes?.trim() && exercise.notes !== exercise.weekNote && (
+                      <p className="planned-exercise-notes">{exercise.notes}</p>
+                    )}
 
                     <SqueezeCue
                       cue={libraryMatch?.squeezeCue}

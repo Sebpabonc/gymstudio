@@ -29,12 +29,30 @@
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho y espalda · pesado" },
-      "arms-a": { "name": "Brazos A", "focus": "Hombros y brazos · pesado" },
-      "lower-body-a": { "name": "Tren inferior A", "focus": "Piernas y core · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho y espalda · volumen" },
-      "arms-b": { "name": "Brazos B", "focus": "Hombros y brazos · volumen" },
-      "lower-body-b": { "name": "Tren inferior B", "focus": "Piernas y core · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho y espalda · pesado"
+      },
+      "arms-a": {
+        "name": "Brazos A",
+        "focus": "Hombros y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Tren inferior A",
+        "focus": "Piernas y core · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho y espalda · volumen"
+      },
+      "arms-b": {
+        "name": "Brazos B",
+        "focus": "Hombros y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Tren inferior B",
+        "focus": "Piernas y core · volumen"
+      }
     },
     "notes": {
       "arms-a/C1": "Jala con los bíceps y los dorsales.",
@@ -83,12 +101,30 @@
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho y espalda · pesado" },
-      "arms-a": { "name": "Brazos A", "focus": "Hombros y brazos · pesado" },
-      "lower-body-a": { "name": "Tren inferior A", "focus": "Piernas y core · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho y espalda · volumen" },
-      "arms-b": { "name": "Brazos B", "focus": "Hombros y brazos · volumen" },
-      "lower-body-b": { "name": "Tren inferior B", "focus": "Piernas y core · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho y espalda · pesado"
+      },
+      "arms-a": {
+        "name": "Brazos A",
+        "focus": "Hombros y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Tren inferior A",
+        "focus": "Piernas y core · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho y espalda · volumen"
+      },
+      "arms-b": {
+        "name": "Brazos B",
+        "focus": "Hombros y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Tren inferior B",
+        "focus": "Piernas y core · volumen"
+      }
     },
     "notes": {
       "arms-a/D1": "Apoya la espalda en el banco, con los brazos colgando.",
@@ -137,12 +173,30 @@
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho y espalda · pesado" },
-      "arms-a": { "name": "Brazos A", "focus": "Hombros y brazos · pesado" },
-      "lower-body-a": { "name": "Tren inferior A", "focus": "Piernas y core · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho y espalda · volumen" },
-      "arms-b": { "name": "Brazos B", "focus": "Hombros y brazos · volumen" },
-      "lower-body-b": { "name": "Tren inferior B", "focus": "Piernas y core · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho y espalda · pesado"
+      },
+      "arms-a": {
+        "name": "Brazos A",
+        "focus": "Hombros y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Tren inferior A",
+        "focus": "Piernas y core · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho y espalda · volumen"
+      },
+      "arms-b": {
+        "name": "Brazos B",
+        "focus": "Hombros y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Tren inferior B",
+        "focus": "Piernas y core · volumen"
+      }
     },
     "notes": {
       "chest-back-a/D1": "Agrega peso con un cinturón de lastre o una mancuerna entre los pies.",
@@ -191,12 +245,30 @@
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho y espalda · pesado" },
-      "arms-a": { "name": "Brazos A", "focus": "Hombros y brazos · pesado" },
-      "lower-body-a": { "name": "Tren inferior A", "focus": "Piernas y core · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho y espalda · volumen" },
-      "arms-b": { "name": "Brazos B", "focus": "Hombros y brazos · volumen" },
-      "lower-body-b": { "name": "Tren inferior B", "focus": "Piernas y core · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho y espalda · pesado"
+      },
+      "arms-a": {
+        "name": "Brazos A",
+        "focus": "Hombros y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Tren inferior A",
+        "focus": "Piernas y core · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho y espalda · volumen"
+      },
+      "arms-b": {
+        "name": "Brazos B",
+        "focus": "Hombros y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Tren inferior B",
+        "focus": "Piernas y core · volumen"
+      }
     },
     "notes": {
       "chest-back-a/C1": "Agarre de una mano; lleva el codo hacia la cadera.",
@@ -247,12 +319,30 @@
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho y espalda · pesado" },
-      "arms-a": { "name": "Brazos A", "focus": "Hombros y brazos · pesado" },
-      "lower-body-a": { "name": "Tren inferior A", "focus": "Piernas y core · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho y espalda · volumen" },
-      "arms-b": { "name": "Brazos B", "focus": "Hombros y brazos · volumen" },
-      "lower-body-b": { "name": "Tren inferior B", "focus": "Piernas y core · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho y espalda · pesado"
+      },
+      "arms-a": {
+        "name": "Brazos A",
+        "focus": "Hombros y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Tren inferior A",
+        "focus": "Piernas y core · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho y espalda · volumen"
+      },
+      "arms-b": {
+        "name": "Brazos B",
+        "focus": "Hombros y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Tren inferior B",
+        "focus": "Piernas y core · volumen"
+      }
     },
     "notes": {
       "arms-a/D1": "Polea abajo; mantén los codos pegados a los costados.",
@@ -271,234 +361,346 @@
   },
   "block-2026-10-05-hypertrophy-flat-pyramid-ii": {
     "name": "Masa · Series rectas, enfoque en estiramiento",
-    "summary": "Seis semanas de construcción muscular: pecho y espalda, hombros y brazos, y piernas, cada uno dos veces por semana. El mismo peso en todas las series, primero los ejercicios principales y luego superseries de músculos que no compiten entre sí. El esfuerzo sube de la semana 1 a la 5; la semana 6 es más ligera.",
+    "summary": "Seis semanas para ganar músculo, cada músculo dos veces por semana. Series rectas en los ejercicios principales, máximo dos superseries por día, más una pirámide inversa, una pirámide, un drop set y extras en la última serie como parciales o myo-reps. La semana 6 es más ligera.",
     "insights": [
       {
         "title": "Objetivo",
-        "body": "Construir músculo con pesos moderados llevados cerca del fallo, con calorías de mantenimiento. El volumen sale de tu propio historial: trabajo extra de deltoide lateral e isquiotibiales (tus zonas que avanzan más lento), bíceps entrenado al inicio de los días de brazos, unas 18 series semanales para pecho y espalda, y cada músculo tiene al menos un ejercicio que lo carga en un estiramiento profundo."
+        "body": "Ganar músculo con pesos moderados llevados cerca del fallo. El volumen sigue tu historial: trabajo extra de deltoides lateral e isquiotibiales, bíceps temprano en los días de brazos, unas 18 series semanales de pecho y espalda, y cada músculo tiene al menos un ejercicio cargado en estiramiento profundo. Los ejercicios son los mismos que al empezar el bloque, así que tus registros siguen igual."
       },
       {
         "title": "Cómo funciona",
-        "body": "Cada día tiene una sola tarea: pecho y espalda (más abdomen), luego hombros y brazos, luego piernas, dos veces por semana. Todas las series de un ejercicio usan el mismo peso y las mismas repeticiones. Los ejercicios principales (press inclinado con mancuernas a 30 grados, remo en barra T con apoyo de pecho, press de hombros en máquina Smith, sentadilla péndulo) van primero, solos, con 2.5-3 minutos de descanso. El resto son superseries de músculos que no compiten entre sí, casi siempre en una misma estación, como curl inclinado con elevaciones laterales con mancuernas: primer ejercicio, unos 10 segundos, segundo ejercicio y luego el descanso completo."
+        "body": "Los ejercicios principales van primero, solos, con 2.5-3 minutos de descanso. Algunos usan pirámide inversa (la serie más pesada primero, luego más ligero y más reps) o pirámide (ligero primero, más pesado a medida que bajan las reps). Cada día tiene máximo dos superseries de músculos que no compiten: primer ejercicio, unos 10 segundos, segundo ejercicio y luego el descanso completo. El press plano con mancuernas después del press a 30 grados trabaja el pecho en dos ángulos. Extras como drop set, parciales, rest-pause o myo-reps están en las notas y solo aplican a la última serie."
       },
       {
         "title": "Días A vs. días B",
-        "body": "Los días A son más pesados: 8 repeticiones en los ejercicios principales, 10 en los demás compuestos, 12 en los de aislamiento y abdomen, y 15 en elevaciones laterales, deltoides posteriores y pantorrillas. Los días B repiten los mismos ejercicios en el mismo orden con menos peso para 10, 12, 15 y 20 repeticiones. Registra y progresa los días A y B por separado."
+        "body": "Los días A son más pesados: 8-12 reps en los principales y 10-15 en el resto. Los días B repiten los mismos ejercicios en el mismo orden con menos peso para 10-20 reps. El día B de pecho y espalda abre con pirámide y el día A de piernas con pirámide inversa, así cada semana mezcla ambos estilos. Registra y progresa los días A y B por separado."
       },
       {
         "title": "Cómo progresar",
-        "body": "Las repeticiones indicadas son tu objetivo. Cuando todas las series lo alcancen con técnica limpia al esfuerzo de esa semana, sube el incremento más pequeño la próxima vez (unos 1-2.5 kg en tren superior, 2.5-5 kg en piernas); si en las últimas series te faltan 1-2 repeticiones, mantén el peso y supéralo la próxima semana. El esfuerzo sube a lo largo del bloque: en la semana 1 para unas 3 repeticiones antes del fallo, en la semana 2 unas 2, en las semanas 3-4 unas 1-2, en la semana 5 alrededor de 1, y solo la última serie de los ejercicios en máquina, en polea o de aislamiento puede llegar al fallo."
+        "body": "Cuando todas las series lleguen a sus reps objetivo con buena técnica, sube el incremento más pequeño la próxima vez; si te faltan 1-2 reps, mantén el peso. En las pirámides, progresa el peso de cada serie por separado. El esfuerzo sube: semana 1 a unas 3 reps del fallo y sin extras, semana 2 a unas 2, semanas 3-4 a 1-2, semana 5 a 1. La semana 6 siempre es de descarga: la mitad de las series, sin extras."
       },
       {
         "title": "Qué esperar",
-        "body": "La semana 1 debe sentirse fácil a propósito mientras encuentras tus pesos y aprendes los ejercicios nuevos. Las semanas 2-5 se ponen más duras cada semana y deberían traer más repeticiones o más peso en la mayoría de los ejercicios. Los días de hombros y brazos van el día después de pecho y espalda, así que el press de hombros puede sentirse un poco más débil que estando fresco; es normal. La semana 6 es más ligera: mismos ejercicios y pesos, la mitad de las series (redondeando hacia arriba), a unas 3 repeticiones del fallo."
+        "body": "La semana 1 debe sentirse fácil mientras aprendes los cambios. Desde la semana 2 los extras de la última serie dan un ardor fuerte en poleas y máquinas, pero las sesiones no deberían alargarse porque hay menos superseries que preparar. Para la semana 5 espera más reps o más peso en casi todos los ejercicios."
       },
       {
         "title": "Consejos clave",
-        "body": "Prepara todo antes de las superseries: un banco plano junto al jalón, mancuernas junto al banco inclinado para los curls y las laterales, y una torre de poleas para la apertura, el jalón con brazos rectos y el crunch. Si la segunda máquina del par está ocupada, haz ambos ejercicios como series rectas con el mismo descanso. Baja despacio a cada estiramiento sin rebotar. Nunca pelees repeticiones hasta el fallo en sentadillas, pesos muertos rumanos o presses. Si un movimiento te duele, detenlo y consulta a un profesional calificado."
+        "body": "Haz extras como parciales, rest-pause, myo-reps o drop sets solo en la última serie y solo en máquinas, poleas o ejercicios de aislamiento. Nunca pelees sentadillas, peso muerto rumano o presses hasta el fallo. Si la segunda máquina de una superserie está ocupada, haz ambos como series rectas. Si un movimiento te duele, detente y consulta a un profesional calificado."
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho, espalda y abdomen · pesado" },
-      "arms-a": { "name": "Hombros y Brazos A", "focus": "Deltoides y brazos · pesado" },
-      "lower-body-a": { "name": "Piernas A", "focus": "Piernas y pantorrillas · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho, espalda y abdomen · volumen" },
-      "arms-b": { "name": "Hombros y Brazos B", "focus": "Deltoides y brazos · volumen" },
-      "lower-body-b": { "name": "Piernas B", "focus": "Piernas y pantorrillas · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho, espalda y abdomen · pesado"
+      },
+      "arms-a": {
+        "name": "Hombros y Brazos A",
+        "focus": "Deltoides y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Piernas A",
+        "focus": "Piernas y pantorrillas · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho, espalda y abdomen · volumen"
+      },
+      "arms-b": {
+        "name": "Hombros y Brazos B",
+        "focus": "Deltoides y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Piernas B",
+        "focus": "Piernas y pantorrillas · volumen"
+      }
     },
     "notes": {
       "chest-back-a/A1": "Baja hasta sentir un estiramiento profundo en el pecho.",
-      "chest-back-a/B1": "Abajo, deja que el peso lleve tus escápulas hacia adelante.",
+      "chest-back-a/B1": "La serie más pesada primero, luego un 10% más ligero cada serie.",
+      "chest-back-a/C1": "Plano después del press a 30 grados: dos ángulos de pecho.",
       "chest-back-a/C2": "Estiramiento completo arriba; lleva los codos hacia las costillas.",
       "chest-back-a/D1": "Da un paso al frente para que los brazos abran un poco por detrás del cuerpo.",
       "chest-back-a/D2": "Misma torre que la apertura; deja subir los brazos alto para estirar los dorsales.",
-      "chest-back-a/E1": "Enrolla la columna hacia abajo; la cadera no se mueve.",
+      "chest-back-a/E1": "Enrolla la columna; baja el peso un 25% y sigue sin descanso.",
       "arms-a/A1": "Va primero, estando fresco; baja la barra a la altura del mentón con control.",
       "arms-a/B1": "Abajo, deja que los brazos cuelguen rectos hacia el piso.",
       "arms-a/B2": "Estricto, sin balanceo; guía el movimiento con los codos.",
       "arms-a/C1": "El cable pasa por detrás del cuerpo; haz ambos lados y luego sigue.",
       "arms-a/C2": "Misma polea baja que las laterales; flexiona del todo los codos sobre la cabeza.",
-      "arms-a/D1": "Controla abajo; nunca rebotes al salir del estiramiento.",
-      "arms-a/D2": "Brazos largos; guía con el dorso de las manos.",
-      "lower-body-a/A1": "Baja tan profundo como puedas controlar; nunca pelees reps hasta el fallo.",
+      "arms-a/D1": "Última serie: suma 4-6 medias reps abajo. Nunca rebotes.",
+      "arms-a/E1": "Brazos largos; baja el peso un 25% y sigue sin descanso.",
+      "lower-body-a/A1": "La serie más pesada primero, luego más ligero; nunca pelees el fallo.",
       "lower-body-a/B1": "Cadera atrás hasta estirar fuerte los isquiotibiales; columna neutra.",
       "lower-body-a/C1": "Reps por pierna; inclinarte un poco al frente suma trabajo de glúteo.",
       "lower-body-a/D1": "Puntas hacia arriba; inclina el torso al frente para estirar más.",
-      "lower-body-a/D2": "Puntas hacia arriba y al frente; ve lento en la flexión profunda.",
+      "lower-body-a/D2": "Puntas arriba. Última serie: suma 5 medias reps en la flexión profunda.",
       "lower-body-a/E1": "Pausa de 2 s en el estiramiento profundo de abajo, en cada rep.",
-      "chest-back-b/A1": "Baja hasta sentir un estiramiento profundo en el pecho.",
+      "chest-back-b/A1": "Sube el peso cada serie mientras bajan las reps; estira profundo.",
       "chest-back-b/B1": "Abajo, deja que el peso lleve tus escápulas hacia adelante.",
+      "chest-back-b/C1": "Plano después del press a 30 grados: dos ángulos de pecho.",
       "chest-back-b/C2": "Estiramiento completo arriba; lleva los codos hacia las costillas.",
-      "chest-back-b/D1": "Da un paso al frente para que los brazos abran un poco por detrás del cuerpo.",
+      "chest-back-b/D1": "Última serie: suma 4-6 medias reps con los brazos bien abiertos.",
       "chest-back-b/D2": "Misma torre que la apertura; deja subir los brazos alto para estirar los dorsales.",
       "chest-back-b/E1": "Enrolla la columna hacia abajo; la cadera no se mueve.",
-      "arms-b/A1": "Va primero, estando fresco; baja la barra a la altura del mentón con control.",
+      "arms-b/A1": "Baja la barra en 3 segundos en cada rep.",
       "arms-b/B1": "Abajo, deja que los brazos cuelguen rectos hacia el piso.",
       "arms-b/B2": "Estricto, sin balanceo; guía el movimiento con los codos.",
       "arms-b/C1": "El cable pasa por detrás del cuerpo; haz ambos lados y luego sigue.",
       "arms-b/C2": "Misma polea baja que las laterales; flexiona del todo los codos sobre la cabeza.",
-      "arms-b/D1": "Controla abajo; nunca rebotes al salir del estiramiento.",
-      "arms-b/D2": "Brazos largos; guía con el dorso de las manos.",
-      "lower-body-b/A1": "Baja tan profundo como puedas controlar; nunca pelees reps hasta el fallo.",
+      "arms-b/D1": "Última serie: rest-pause, descansa 15 s y haz 2 mini-series.",
+      "arms-b/E1": "Última serie: myo-reps, 3 mini-series de 5, 5 respiraciones de pausa.",
+      "lower-body-b/A1": "Sube el peso cada serie mientras bajan las reps; nunca pelees el fallo.",
       "lower-body-b/B1": "Cadera atrás hasta estirar fuerte los isquiotibiales; columna neutra.",
       "lower-body-b/C1": "Reps por pierna; inclinarte un poco al frente suma trabajo de glúteo.",
-      "lower-body-b/D1": "Puntas hacia arriba; inclina el torso al frente para estirar más.",
+      "lower-body-b/D1": "Puntas arriba, torso al frente. Última serie: rest-pause 15 s, +2 mini-series.",
       "lower-body-b/D2": "Puntas hacia arriba y al frente; ve lento en la flexión profunda.",
-      "lower-body-b/E1": "Pausa de 2 s en el estiramiento profundo de abajo, en cada rep."
+      "lower-body-b/E1": "Pausa de 2 s abajo. Última serie: myo-reps, 3 mini-series de 5."
     }
   },
   "block-2026-11-16-strength-hypertrophy-ii": {
     "name": "Fuerza · Series pesadas de 6-8 II",
-    "summary": "Un bloque de fuerza de 6 semanas: ejercicios compuestos pesados en series rectas de 6 y 8 repeticiones con descansos de 2 minutos. El pecho se trabaja en plano y a 30 grados, para subir los pesos que usarás en los bloques 8 y 9.",
+    "summary": "Un bloque de fuerza de 6 semanas: una serie top pesada de 4-5 reps en el ejercicio principal de cada día A, series rectas de 6-8 en el resto, pecho a 30 y luego 0 grados, máximo una superserie por día y uno o dos extras en la última serie como rest-pause o parciales.",
     "insights": [
       {
         "title": "Objetivo",
-        "body": "Ganar fuerza en los ejercicios compuestos grandes para que los dos siguientes bloques de masa muscular se puedan hacer con más peso. Sigue a la fase de volumen del bloque 6 y replica el bloque 3 del entrenador, que funcionó bien antes de un bloque de pirámide."
+        "body": "Ganar fuerza en los ejercicios grandes para hacer los bloques 8 y 9 con más peso. Una dosis pequeña de trabajo pesado a 4-5 reps construye fuerza que luego conviertes en músculo, mientras la mayoría de las series se quedan en 6-12 reps, donde el crecimiento es eficiente."
       },
       {
         "title": "Cómo funciona",
-        "body": "Los ejercicios principales usan series rectas con pesos pesados y unos 2 minutos de descanso, por ejemplo 4 x 6 en la sentadilla trasera, el press de banca plano en máquina Smith y el press militar sentado con barra (respaldo vertical). Los secundarios, como el press inclinado con mancuernas a 30 grados y las dominadas con agarre ancho, usan 8 repeticiones; los fondos, el remo con apoyo de pecho a 30 grados y el trabajo de aislamiento usan 10. Cada día tiene 6 ejercicios y no hay superseries ni drop sets."
+        "body": "Cada día A abre con pirámide inversa: una serie top pesada (4 reps en el press de banca en Smith y el press militar sentado con barra, 5 en la sentadilla trasera), luego series más ligeras de 6, 8 y 10, con 2.5-3 minutos de descanso. El resto son series rectas. El pecho se trabaja en dos ángulos: press inclinado con mancuernas a 30 grados y luego press plano con mancuernas. Los días de brazos y piernas combinan dos ejercicios que no compiten en una superserie. Uno o dos extras por día en la última serie (rest-pause, parciales, myo-reps, drop set o tempo lento) están en las notas."
       },
       {
         "title": "Días A vs. días B",
-        "body": "Los días A usan 6 repeticiones en los ejercicios principales con las cargas más pesadas; los días B repiten los mismos ejercicios a 8 repeticiones (secundarios a 10, aislamiento a 12) con un poco menos de peso. Los días A buscan la máxima fuerza, mientras que los días B suman volumen para apoyar el crecimiento muscular."
+        "body": "Los días A llevan la serie top pesada y 6-8 reps en los principales. Los días B usan los mismos ejercicios con series rectas de 8-10 y un poco menos de peso, más una pirámide en el press JM y un drop set en el curl femoral. Los días A construyen fuerza máxima; los días B suman volumen para crecer."
       },
       {
         "title": "Cómo progresar",
-        "body": "Mantén el mismo peso en todas las series. Cuando completes limpiamente todas las series con más o menos una repetición en reserva, sube el incremento más pequeño la próxima vez; con pocas repeticiones funcionan mejor los saltos pequeños y constantes. En dominadas y fondos, agrega lastre solo cuando todas las repeticiones con tu peso corporal sean fáciles. Si te faltan repeticiones, repite el peso hasta dominarlo."
+        "body": "Series top: termina con 1-2 reps en reserva y sube el incremento más pequeño cuando cumplas el objetivo limpio; las series ligeras siguen. Series rectas: mismo peso en todas, sube cuando completes todas. Semana 1: sin serie top (hazla como serie ligera) y sin extras. Semanas 2-5: plan completo. La semana 6 siempre es de descarga: la mitad de las series, sin series top ni extras."
       },
       {
         "title": "Qué esperar",
-        "body": "Las sesiones son más lentas y con menos bombeo, con descansos más largos, pero cada serie se siente pesada y exigente. Después de las sentadillas y los remos, espera más cansancio general del cuerpo que ardor local. Para las semanas 5-6 tus ejercicios principales deberían estar claramente más pesados que al inicio."
+        "body": "Sesiones más lentas, con descansos largos y series pesadas y enfocadas en vez de bombeo. Espera más cansancio general después de sentadillas y remos. Para la semana 5 tus series top deberían ser claramente más pesadas que en la semana 2."
       },
       {
         "title": "Consejos clave",
-        "body": "Tómate los 2 minutos completos de descanso en los ejercicios principales. Calienta con algunas series de aproximación más ligeras antes de tu primera serie efectiva, sobre todo en la sentadilla trasera. Usa barras de seguridad o a alguien que te asista en el trabajo pesado con barra, ajusta el ángulo del banco antes de tus series de calentamiento y aprende los ejercicios nuevos, como el press JM, primero con pesos ligeros."
+        "body": "Calienta antes de cada serie top con 3-4 series de aproximación (por ejemplo 50% x 8, 70% x 4, 85% x 2). Usa topes de seguridad o un compañero, nunca pelees ni falles una serie pesada, y sáltate la serie top si dormiste mal o te molestan las articulaciones. Usa las mismas mancuernas para el press inclinado y el plano. Si algo duele, detente y consulta a un profesional calificado."
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho y espalda · pesado" },
-      "arms-a": { "name": "Brazos A", "focus": "Hombros y brazos · pesado" },
-      "lower-body-a": { "name": "Tren inferior A", "focus": "Piernas y core · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho y espalda · volumen" },
-      "arms-b": { "name": "Brazos B", "focus": "Hombros y brazos · volumen" },
-      "lower-body-b": { "name": "Tren inferior B", "focus": "Piernas y core · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho y espalda · pesado"
+      },
+      "arms-a": {
+        "name": "Brazos A",
+        "focus": "Hombros y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Tren inferior A",
+        "focus": "Piernas y core · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho y espalda · volumen"
+      },
+      "arms-b": {
+        "name": "Brazos B",
+        "focus": "Hombros y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Tren inferior B",
+        "focus": "Piernas y core · volumen"
+      }
     },
     "notes": {
-      "chest-back-a/D1": "Agrega cinturón de lastre si es fácil; usa la máquina asistida si hace falta.",
-      "chest-back-a/E1": "Inclínate al frente para el pecho; agrega cinturón cuando las reps sean fáciles.",
-      "chest-back-a/F1": "Lleva los codos atrás hacia la cadera; el pecho no se despega del apoyo.",
-      "arms-a/F1": "Reps por brazo.",
-      "lower-body-a/C1": "Reps por pierna.",
-      "lower-body-a/D1": "Reps por pierna.",
-      "lower-body-a/F1": "Extiéndete más lejos a medida que ganes fuerza.",
-      "chest-back-b/D1": "Agrega cinturón de lastre si es fácil; usa la máquina asistida si hace falta.",
-      "chest-back-b/E1": "Inclínate al frente para el pecho; agrega cinturón cuando las reps sean fáciles.",
-      "chest-back-b/F1": "Lleva los codos atrás hacia la cadera; el pecho no se despega del apoyo.",
-      "arms-b/F1": "Reps por brazo.",
-      "lower-body-b/C1": "Reps por pierna.",
-      "lower-body-b/D1": "Reps por pierna.",
-      "lower-body-b/F1": "Extiéndete más lejos a medida que ganes fuerza."
+      "chest-back-a/A1": "Serie top de 4 con 1-2 reps en reserva, luego un 10% más ligero.",
+      "chest-back-a/C1": "Doble ángulo: primero inclinado, luego las mismas mancuernas en plano.",
+      "chest-back-a/D1": "Mismas mancuernas que el press inclinado; baja el banco a plano.",
+      "chest-back-a/E1": "Agrega un cinturón si es fácil; usa la máquina asistida si hace falta.",
+      "chest-back-a/F1": "Inclínate al frente. Última serie: rest-pause, 15 s y 2 mini-series.",
+      "chest-back-a/G1": "Lleva los codos hacia la cadera; el pecho no se despega del apoyo.",
+      "arms-a/A1": "Serie top de 4 con 1-2 reps en reserva, luego un 10% más ligero.",
+      "arms-a/B1": "Última serie: myo-reps, 3 mini-series de 4, 5 respiraciones de pausa.",
+      "arms-a/E1": "Reps por brazo. Última serie: suma 4-6 medias reps en el estiramiento.",
+      "lower-body-a/A1": "Topes puestos. Serie top de 5, 1-2 reps en reserva, nunca la pelees.",
+      "lower-body-a/B1": "Baja en 3 segundos hasta estirar fuerte los isquiotibiales.",
+      "lower-body-a/C1": "Las reps son por pierna.",
+      "lower-body-a/D1": "Reps por pierna. Última serie: rest-pause, 15 s y 2 mini-series.",
+      "lower-body-a/E1": "Pausa de 2 s abajo en cada rep.",
+      "lower-body-a/E2": "Rueda más lejos a medida que te haces más fuerte.",
+      "chest-back-b/C1": "Doble ángulo: primero inclinado, luego las mismas mancuernas en plano.",
+      "chest-back-b/D1": "Mismas mancuernas que el press inclinado; baja el banco a plano.",
+      "chest-back-b/E1": "Agrega un cinturón si es fácil; usa la máquina asistida si hace falta.",
+      "chest-back-b/F1": "Inclínate al frente para el pecho; baja en 3 segundos.",
+      "chest-back-b/G1": "Lleva los codos hacia la cadera; el pecho no se despega del apoyo.",
+      "arms-b/A1": "Baja la barra en 3 segundos en cada rep.",
+      "arms-b/C1": "Sube el peso cada serie mientras bajan las reps.",
+      "arms-b/E1": "Reps por brazo. Última serie: suma 4-6 medias reps en el estiramiento.",
+      "lower-body-b/C1": "Las reps son por pierna.",
+      "lower-body-b/D1": "Reps por pierna; baja el peso un 25% y sigue sin descanso.",
+      "lower-body-b/E1": "Pausa de 2 s abajo en cada rep.",
+      "lower-body-b/E2": "Rueda más lejos a medida que te haces más fuerte."
     }
   },
   "block-2026-12-28-hypertrophy-pyramid-ii": {
     "name": "Masa · De ligero a pesado + superseries II",
-    "summary": "Un bloque de volumen de 6 semanas con pirámides ascendentes y superseries: trabajo de pecho inclinado a 45 grados y declinado, aprovechando la fuerza del bloque 7. La semana 1 cae en las fiestas de fin de año y es una semana más ligera antes de volver a las sesiones completas.",
+    "summary": "Un bloque de volumen de 6 semanas: pirámides ascendentes en los ejercicios principales (los días A terminan con una serie de 6), una o dos superseries por día como press declinado con aperturas declinadas, y myo-reps, parciales, rest-pause o drop sets en la última serie. La semana 1 es más ligera.",
     "insights": [
       {
         "title": "Objetivo",
-        "body": "Convertir la fuerza construida en el bloque 7 en más músculo con volumen alto y una serie tope pesada por ejercicio. También sirve para retomar con calma después de las fiestas y de diez meses de entrenamiento, y da paso a la intensidad en pirámide inversa del bloque 9."
+        "body": "Convertir la fuerza del bloque 7 en más músculo con mucho volumen y una última serie de pirámide más pesada. Sirve para volver tras las fiestas y prepara la intensidad de pirámide inversa del bloque 9."
       },
       {
         "title": "Cómo funciona",
-        "body": "El primer ejercicio de cada músculo es una pirámide ascendente: empieza ligero a 15 repeticiones y luego agrega peso en cada serie mientras las repeticiones bajan a 12, 10 y 8. Los ejercicios principales incluyen el press inclinado con barra a 45 grados, el press de hombros con mancuernas y la sentadilla en máquina Smith, con hasta 2 minutos de descanso. Luego vienen superseries con unos 10 segundos entre ejercicios, como press declinado con mancuernas con aperturas declinadas para el pecho bajo, y elevaciones en Y con curl araña en un banco a 45 grados."
+        "body": "Cada ejercicio principal es una pirámide ascendente: empiezas ligero y subes el peso cada serie mientras bajan las reps (12-10-8-6 los días A). Los principales son el press inclinado con barra a 45 grados, el press de hombros con mancuernas y la sentadilla en Smith. Cada día tiene una o dos superseries con unos 10 segundos entre ejercicios, como press declinado con mancuernas con aperturas declinadas para el pecho bajo. El resto son series rectas, con uno o dos extras en la última serie según las notas: myo-reps en Y-raises y pantorrillas, parciales en extensiones, rest-pause en remos y un drop set en patadas de tríceps."
       },
       {
         "title": "Días A vs. días B",
-        "body": "Los días A hacen la pirámide a 15-12-10-8 y las superseries a 10 + 15 repeticiones; los días B usan los mismos ejercicios a 20-15-12-10 y 12 + 20 con menos peso. Los días A llegan a una serie tope más pesada, mientras que los días B acumulan repeticiones y bombeo."
+        "body": "Los días A hacen la pirámide a 12-10-8-6 con superseries más pesadas de unas 10 reps. Los días B usan 20-15-12-10 y series rectas y superseries de más reps con menos peso. Los días A llegan a una serie final más pesada; los días B acumulan reps y bombeo."
       },
       {
         "title": "Cómo progresar",
-        "body": "La semana 1 es más ligera: haz las mismas sesiones pero detén cada serie unas 3 repeticiones antes del fallo y sáltate la última serie de cada ejercicio. Desde la semana 2, entrena completo y progresa el peso de cada serie de la pirámide por separado, sumando un pequeño incremento cuando completes limpiamente sus repeticiones. En las superseries, sube el peso de cada ejercicio cuando completes todas sus repeticiones."
+        "body": "La semana 1 es más ligera: termina cada serie a unas 3 reps del fallo, sáltate la última serie de cada ejercicio y todos los extras. Desde la semana 2, progresa el peso de cada serie de la pirámide por separado, subiendo un poco cuando completes sus reps limpias. Sube cada ejercicio de superserie cuando completes todas sus reps. La semana 6 siempre es de descarga: la mitad de las series, sin extras."
       },
       {
         "title": "Qué esperar",
-        "body": "La semana 1 debe sentirse fácil y renovadora, no como una prueba. Desde la semana 2, las primeras series ligeras sirven de calentamiento, el esfuerzo crece hasta una última serie dura y las superseries dan un bombeo fuerte. Espera que tus pesos de la serie tope superen los del bloque 4 en ejercicios similares."
+        "body": "La semana 1 debe sentirse renovadora, no como una prueba. Desde la semana 2 las primeras series ligeras sirven de calentamiento, el esfuerzo sube hasta una serie final dura, y las superseries y myo-reps dan un bombeo fuerte. Espera superar los pesos del bloque 4 en ejercicios parecidos."
       },
       {
         "title": "Consejos clave",
-        "body": "Resiste las ganas de ir con todo en la semana 1; la semana ligera te ayuda a empezar el año fresco. Planea tus saltos de peso para cada serie de la pirámide antes de la sesión. Prepara el banco para cada superserie antes de empezarla y mantén corta la pausa de 10 segundos."
+        "body": "Planea los saltos de peso de cada serie de la pirámide antes de la sesión. Prepara el banco de una superserie antes de empezarla y mantén corta la pausa de 10 segundos. Myo-reps: después de la última serie normal, descansa unas 5 respiraciones, haz 4-5 reps y repite 3 veces. Si un movimiento duele, detente y consulta a un profesional calificado."
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho y espalda · pesado" },
-      "arms-a": { "name": "Brazos A", "focus": "Hombros y brazos · pesado" },
-      "lower-body-a": { "name": "Tren inferior A", "focus": "Piernas y core · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho y espalda · volumen" },
-      "arms-b": { "name": "Brazos B", "focus": "Hombros y brazos · volumen" },
-      "lower-body-b": { "name": "Tren inferior B", "focus": "Piernas y core · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho y espalda · pesado"
+      },
+      "arms-a": {
+        "name": "Brazos A",
+        "focus": "Hombros y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Tren inferior A",
+        "focus": "Piernas y core · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho y espalda · volumen"
+      },
+      "arms-b": {
+        "name": "Brazos B",
+        "focus": "Hombros y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Tren inferior B",
+        "focus": "Piernas y core · volumen"
+      }
     },
     "notes": {
-      "arms-a/D2": "Reps por brazo.",
-      "lower-body-a/B1": "Reps por pierna.",
-      "lower-body-a/B2": "Puntas hacia arriba (dorsiflexión), giradas un poco hacia afuera.",
-      "lower-body-a/C2": "Puntas hacia arriba (dorsiflexión), apuntando al frente.",
-      "arms-b/D2": "Reps por brazo.",
-      "lower-body-b/B1": "Reps por pierna.",
-      "lower-body-b/B2": "Puntas hacia arriba (dorsiflexión), giradas un poco hacia afuera.",
-      "lower-body-b/C2": "Puntas hacia arriba (dorsiflexión), apuntando al frente."
+      "chest-back-a/A1": "Serie final de 6 con 1-2 reps en reserva; usa compañero o topes.",
+      "chest-back-a/D1": "Última serie: rest-pause, 15 s y 2 mini-series.",
+      "chest-back-a/E1": "Pausa de 2 s en el estiramiento detrás de la cabeza.",
+      "arms-a/B1": "Última serie: myo-reps, 3 mini-series de 4, 5 respiraciones de pausa.",
+      "arms-a/F1": "Reps por brazo; baja el peso un 25% y sigue sin descanso.",
+      "lower-body-a/A1": "Serie final de 6 con 1-2 reps en reserva; pon los topes de seguridad.",
+      "lower-body-a/B1": "Las reps son por pierna.",
+      "lower-body-a/C1": "Puntas arriba, un poco afuera. Última serie: 5 medias reps abajo.",
+      "lower-body-a/D2": "Puntas hacia arriba (dorsiflexión), apuntando al frente.",
+      "lower-body-a/E1": "Última serie: myo-reps, 3 mini-series de 5, 5 respiraciones de pausa.",
+      "chest-back-b/D2": "Pausa de 2 s en el estiramiento detrás de la cabeza.",
+      "arms-b/D1": "Última serie: suma 4-6 medias reps abajo.",
+      "arms-b/E1": "Las reps son por brazo.",
+      "lower-body-b/B1": "Las reps son por pierna.",
+      "lower-body-b/B2": "Puntas hacia arriba (dorsiflexión), un poco hacia afuera.",
+      "lower-body-b/C1": "Sube el peso cada serie mientras bajan las reps.",
+      "lower-body-b/D1": "Puntas hacia arriba; baja en 3 segundos en cada rep.",
+      "lower-body-b/E1": "Pausa de 2 s en el estiramiento profundo de abajo, en cada rep."
     }
   },
   "block-2027-02-08-hypertrophy-reverse-pyramid-iii": {
     "name": "Masa · De pesado a ligero + drop sets III",
-    "summary": "Un bloque de intensidad de 6 semanas: pirámides inversas pesadas en los ejercicios principales más drop sets, con press de banca plano, aperturas en inclinación baja y curl inclinado a 60 grados, aprovechando la fuerza del bloque 7 y el volumen del bloque 8.",
+    "summary": "Un bloque de intensidad de 6 semanas: pirámides inversas con serie top de 5 reps en press de banca, remo T y sentadilla frontal, hasta 2 drop sets por día, una superserie de curl y tríceps, aperturas a 15 y luego 0 grados, y rest-pause o parciales en la última serie.",
     "insights": [
       {
         "title": "Objetivo",
-        "body": "Subir la intensidad después de la fase de volumen del bloque 8: levanta tus pesos más altos estando fresco y luego suma fatiga profunda con series más ligeras y drop sets. Aprovecha la fuerza ganada en el bloque 7 e introduce ejercicios principales con peso libre, como el press de banca con barra y la sentadilla frontal."
+        "body": "Subir la intensidad después del volumen del bloque 8: levantar tus pesos más altos estando fresco y luego sumar fatiga con series más ligeras y algunos drop sets. Usa la fuerza del bloque 7 y trae ejercicios principales con peso libre como el press de banca con barra y la sentadilla frontal."
       },
       {
         "title": "Cómo funciona",
-        "body": "El primer ejercicio grande de cada músculo es una pirámide inversa: la serie más pesada primero a 8 repeticiones y luego el peso baja mientras las repeticiones suben a 10, 12 y 15. Después vienen los drop sets: 12 repeticiones cerca del fallo, baja el peso un 20-30% aproximadamente y luego 12 más sin descanso. Los ejercicios principales son el press de banca plano con barra, el press militar de pie, el curl inclinado a 60 grados y la sentadilla frontal, con unos 90 segundos de descanso (2 minutos en la sentadilla frontal)."
+        "body": "Cada ejercicio principal es una pirámide inversa: la serie más pesada primero, luego más ligero mientras suben las reps. Los días A, el press de banca, el remo T y la sentadilla frontal abren con una serie top de 5 reps (5-8-10-12); los demás principales usan 8-10-12-15. Los drop sets (cerca del fallo, baja 20-30% y sigue) se limitan a dos por día en máquinas y poleas. Las aperturas se hacen a 15 grados y luego en plano. Los días de brazos combinan curl inclinado con extensión sobre la cabeza en superserie. Rest-pause, parciales o tempo aparecen en las notas."
       },
       {
         "title": "Días A vs. días B",
-        "body": "Los días A usan 8-10-12-15 en la pirámide y drop sets de 12+12; los días B usan 10-12-15-20 y 15+15 con menos peso. Los días A se tratan de cargar pesado, mientras que los días B suman volumen y bombeo con menos carga para las articulaciones."
+        "body": "Los días A usan pirámides de 5-8-10-12 u 8-10-12-15 y drop sets de 12+12. Los días B usan 10-12-15-20 y 15+15 con menos peso. Los días A son de carga pesada; los días B suman volumen y bombeo con menos estrés en las articulaciones."
       },
       {
         "title": "Cómo progresar",
-        "body": "Progresa cada serie de la pirámide por separado, sumándole un pequeño incremento a una serie cuando completes todas sus repeticiones con buena técnica. En los drop sets, sube el peso inicial cuando completes ambas mitades. Si te faltan repeticiones, mantén el peso y busca una repetición más la próxima semana."
+        "body": "Progresa cada serie de la pirámide por separado, subiendo un poco cuando completes todas sus reps con buena técnica. Deja las series top a 1-2 reps del fallo. En los drop sets, sube el peso inicial cuando completes ambas mitades. Semana 1: sin serie top (empieza en la segunda serie) y sin drop sets. La semana 6 siempre es de descarga: la mitad de las series, sin extras."
       },
       {
         "title": "Qué esperar",
-        "body": "Las sesiones son duras y agotadoras, con un ardor fuerte durante los drop sets. La primera serie pesada de cada ejercicio principal exige concentración, y la sentadilla frontal y el press de pie piden más equilibrio que las máquinas. Espera que tus ejercicios principales suban de forma constante durante las seis semanas."
+        "body": "Sesiones duras, con un ardor fuerte en los drop sets. La primera serie pesada de cada principal pide concentración, y la sentadilla frontal y el press de pie exigen más equilibrio que las máquinas. Espera que tus principales suban de forma constante durante las seis semanas."
       },
       {
         "title": "Consejos clave",
-        "body": "Calienta con algunas series de aproximación antes de cada primera serie pesada. Aprende la sentadilla frontal y el press militar de pie con pesos moderados en la semana 1 antes de exigirte en la pirámide. En el curl inclinado a 60 grados, deja que los brazos cuelguen por completo abajo en cada repetición. Usa máquinas y poleas para los drop sets para cambiar el peso rápido."
+        "body": "Calienta con 3-4 series de aproximación antes de cada serie top y usa topes de seguridad o un compañero. Aprende la sentadilla frontal y el press de pie con pesos moderados en la semana 1. En el curl inclinado, deja colgar los brazos del todo abajo. Usa máquinas y poleas para los drop sets para cambiar el peso rápido. Si algo duele, detente y consulta a un profesional calificado."
       }
     ],
     "days": {
-      "chest-back-a": { "name": "Pecho y Espalda A", "focus": "Pecho y espalda · pesado" },
-      "arms-a": { "name": "Brazos A", "focus": "Hombros y brazos · pesado" },
-      "lower-body-a": { "name": "Tren inferior A", "focus": "Piernas y core · pesado" },
-      "chest-back-b": { "name": "Pecho y Espalda B", "focus": "Pecho y espalda · volumen" },
-      "arms-b": { "name": "Brazos B", "focus": "Hombros y brazos · volumen" },
-      "lower-body-b": { "name": "Tren inferior B", "focus": "Piernas y core · volumen" }
+      "chest-back-a": {
+        "name": "Pecho y Espalda A",
+        "focus": "Pecho y espalda · pesado"
+      },
+      "arms-a": {
+        "name": "Brazos A",
+        "focus": "Hombros y brazos · pesado"
+      },
+      "lower-body-a": {
+        "name": "Tren inferior A",
+        "focus": "Piernas y core · pesado"
+      },
+      "chest-back-b": {
+        "name": "Pecho y Espalda B",
+        "focus": "Pecho y espalda · volumen"
+      },
+      "arms-b": {
+        "name": "Brazos B",
+        "focus": "Hombros y brazos · volumen"
+      },
+      "lower-body-b": {
+        "name": "Tren inferior B",
+        "focus": "Piernas y core · volumen"
+      }
     },
     "notes": {
-      "chest-back-a/F1": "Lleva los codos atrás hacia la cadera; el pecho no se despega del apoyo.",
+      "chest-back-a/A1": "Serie top de 5 con 1-2 reps en reserva; compañero o topes.",
+      "chest-back-a/C1": "Doble ángulo: primero inclinación baja, luego aperturas en plano.",
+      "chest-back-a/D1": "Mismas mancuernas que la apertura inclinada; estira profundo y lento.",
+      "chest-back-a/E1": "Serie top de 5 con 1-2 reps en reserva; espalda recta todo el tiempo.",
+      "chest-back-a/G1": "Lleva los codos hacia la cadera; el pecho no se despega del apoyo.",
       "arms-a/B1": "Haz ambos lados y luego descansa.",
-      "arms-a/C1": "Deja los brazos colgando rectos, por detrás del cuerpo.",
+      "arms-a/C1": "Pirámide inversa. Deja colgar los brazos rectos detrás del cuerpo.",
+      "arms-a/C2": "Pirámide inversa: aligera un poco la barra en cada ronda.",
+      "arms-a/E1": "Aprieta 1 s con el codo extendido en cada rep.",
+      "lower-body-a/A1": "Topes puestos. Serie top de 5 con 1-2 reps en reserva.",
       "lower-body-a/B1": "Puntas hacia arriba (dorsiflexión), apuntando al frente.",
-      "lower-body-a/D1": "Reps por pierna.",
-      "lower-body-a/F1": "Sostén un disco sobre el pecho cuando tu peso corporal se vuelva fácil.",
-      "chest-back-b/F1": "Lleva los codos atrás hacia la cadera; el pecho no se despega del apoyo.",
+      "lower-body-a/D1": "Las reps son por pierna.",
+      "lower-body-a/E1": "Pausa de 2 s en el estiramiento profundo de abajo, en cada rep.",
+      "lower-body-a/F1": "Sostén un disco en el pecho cuando tu peso corporal sea fácil.",
+      "chest-back-b/C1": "Doble ángulo: primero inclinación baja, luego aperturas en plano.",
+      "chest-back-b/D1": "Mismas mancuernas que la apertura inclinada; estira profundo y lento.",
+      "chest-back-b/F1": "Última serie: rest-pause, 15 s y 2 mini-series.",
+      "chest-back-b/G1": "Lleva los codos hacia la cadera; el pecho no se despega del apoyo.",
       "arms-b/B1": "Haz ambos lados y luego descansa.",
-      "arms-b/C1": "Deja los brazos colgando rectos, por detrás del cuerpo.",
+      "arms-b/C1": "Pirámide inversa. Deja colgar los brazos rectos detrás del cuerpo.",
+      "arms-b/C2": "Pirámide inversa: aligera un poco la barra en cada ronda.",
+      "arms-b/D1": "Baja en 3 segundos en cada rep.",
+      "arms-b/E1": "Última serie: rest-pause, 15 s y 2 mini-series.",
       "lower-body-b/B1": "Puntas hacia arriba (dorsiflexión), apuntando al frente.",
-      "lower-body-b/D1": "Reps por pierna.",
-      "lower-body-b/F1": "Sostén un disco sobre el pecho cuando tu peso corporal se vuelva fácil."
+      "lower-body-b/B2": "Las reps son por pierna.",
+      "lower-body-b/D1": "Última serie: suma 6 medias reps abajo (estiramiento profundo).",
+      "lower-body-b/E1": "Sostén un disco en el pecho cuando tu peso corporal sea fácil."
     }
   }
 }
