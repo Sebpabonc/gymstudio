@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { WorkoutEntry } from '../types'
-import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, findPrefillSelection, summarizeCompletedEntry, upsertScopedEntry } from './completedExercises'
+import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, findPrefillSelection, findWeekCompletion, summarizeCompletedEntry, upsertScopedEntry } from './completedExercises'
 
 const entry = (overrides: Partial<WorkoutEntry> = {}): WorkoutEntry => ({
   id: 'e1',
@@ -123,5 +123,22 @@ describe('upsertScopedEntry', () => {
     const other = { ...make('x'), exerciseId: 'row' }
     const result = upsertScopedEntry([make('a'), make('b'), other], make('c'), scope)
     expect(result.history.map((e) => e.exerciseId).sort()).toEqual(['press', 'row'])
+  })
+})
+
+describe('findWeekCompletion (active Monday–Sunday week)', () => {
+  const e = (id: string, date: string, dayKey = 'chest-back-a') =>
+    ({ id, exerciseId: 'press', date, blockId: 'b6', dayKey, sets: [{ id: `${id}-s`, weight: 20, reps: 10 }] })
+  const scope = { date: '2026-10-08', blockId: 'b6', dayKey: 'chest-back-a' } // Thursday
+
+  it('counts a log from Monday of the same week as done', () => {
+    expect(findWeekCompletion([e('mon', '2026-10-05')], scope)?.id).toBe('mon')
+  })
+  it('starts empty again the next Monday', () => {
+    expect(findWeekCompletion([e('mon', '2026-10-05')], { ...scope, date: '2026-10-12' })).toBeUndefined()
+  })
+  it('ignores other day slots and returns the latest log of the week', () => {
+    const list = [e('mon', '2026-10-05'), e('wed', '2026-10-07'), e('other', '2026-10-08', 'arms-a')]
+    expect(findWeekCompletion(list, scope)?.id).toBe('wed')
   })
 })
