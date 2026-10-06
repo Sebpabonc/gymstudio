@@ -2778,6 +2778,7 @@ button {
 }
 
 .exercise-swap-button {
+  position: relative;
   display: inline-grid;
   flex: 0 0 44px;
   place-items: center;
@@ -2805,6 +2806,25 @@ button {
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.exercise-swap-badge {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--nav-active);
+}
+
+.exercise-swap-button .exercise-swap-badge svg {
+  width: 10px;
+  height: 10px;
+  stroke: var(--bg-dark);
+  stroke-width: 3.5;
 }
 
 .exercise-swap-origin {

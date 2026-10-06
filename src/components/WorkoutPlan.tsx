@@ -401,9 +401,15 @@ export function ExerciseSwapButton({
         onClick(event)
       }}
     >
+      {/* Dumbbell with a small swap badge (PO pick 2026-10-06, option B). */}
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M20 7V3m0 4h-4M4 17v4m0-4h4M5.6 9a7 7 0 0 1 11.9-2L20 7M4 17l2.5.1A7 7 0 0 0 18.4 15" />
+        <path d="M7 9v6M17 9v6M4 10.5v3M20 10.5v3M7 12h10" />
       </svg>
+      <span className="exercise-swap-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M5 8h12l-3-3M19 16H7l3 3" />
+        </svg>
+      </span>
     </button>
   )
 }
