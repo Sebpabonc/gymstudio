@@ -18,3 +18,6 @@
   `.claude/agents/uxer.md`; proposals land in `docs/ux/proposals/` and need his approval before
   becoming Issues. AI features follow the guardrails in `docs/ux/README.md` (server-side key,
   grounded answers, no medical advice, provider-agnostic).
+- When Sebas asks for marketing, social media or promo content ("Socialer"): run the agent in
+  `.claude/agents/socialer.md`; drafts land in `docs/marketing/`, fitness claims go to the PT, and nothing is
+  published without Sebas's approval.
