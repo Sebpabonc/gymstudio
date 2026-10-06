@@ -33,7 +33,7 @@ for (const day of block.days) {
     const setReps = ex.reps.map((r) => parseRepPrescription(r)[0]).filter((r) => r > 0)
     const target = { min: Math.min(...setReps), max: Math.max(...setReps) }
     const evidence = buildEvidence(entries, ex.exerciseId, blocks, today, day.key)
-    const rec = recommend({ history: evidence, today, target, sets: ex.sets, equipment: equipment.get(ex.exerciseId), technique: ex.technique, setReps, deload: week === 6 })
+    const rec = recommend({ history: evidence, today, target, sets: ex.sets, equipment: equipment.get(ex.exerciseId), technique: ex.technique, setReps, deload: week === 6, exerciseId: ex.exerciseId })
     const last = evidence[0] ? evidence[0].sets.map((s) => `${s.weight}×${s.reps}`).join(' ') : '—'
     const loads = rec.setWeights ? rec.setWeights.join('/') : String(rec.weight ?? '—')
     if (evidence.length && (rec.weight === 0 || rec.setWeights?.some((w) => w <= 0))) problems.push(`${day.key} ${ex.code} 0 kg`)

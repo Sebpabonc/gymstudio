@@ -291,7 +291,7 @@ describe('progress calculations', () => {
     )
     expect(lowerBodySuggestion[0]).toMatchObject({
       type: 'add-weight',
-      message: 'Leg Press: next A day, aim for 85 kg × 8 reps.',
+      message: 'Leg Press: next A day, aim for 82.5 kg × 8 reps.',
     })
 
     const stalledEntries: ProgressEntry[] = []
