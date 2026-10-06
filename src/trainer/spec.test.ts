@@ -209,3 +209,15 @@ describe('calibration integration (PT B + Sebas: never lower after hitting the t
     expect(recommend({ ...base, history, deload: true, calibrationOffset: 3 })).toMatchObject({ weight: 40, sets: 2 })
   })
 })
+
+describe('PT 2026-10-07: conversion on coarse steps and the 0 kg floor', () => {
+  it('cable lateral raise 5 kg × 15 → today 4 × 20: 5 kg, increase reps (never 0)', () => {
+    const history = [sess([s(5, 15), s(5, 14), s(5, 15), s(5, 14)], { target: rng(15) })]
+    expect(recommend({ history, today: TODAY, target: rng(20), sets: 4, equipment: 'cable' }))
+      .toMatchObject({ weight: 5, action: 'increase_reps' })
+  })
+  it('fine step still converts: squat 100 × 8 → 12 reps is a multi-step drop above 0 (engine formula: 87.5)', () => {
+    const history = [sess([s(100, 8), s(100, 8), s(100, 8)], { target: rng(8) })]
+    expect(recommend({ history, today: TODAY, target: rng(12), sets: 3, equipment: 'barbell' }).weight).toBe(87.5)
+  })
+})

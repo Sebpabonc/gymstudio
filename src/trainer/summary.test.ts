@@ -72,13 +72,13 @@ describe('buildWorkoutSummary', () => {
     expect(buildWorkoutSummary([today], [], [sameRangeBlock], catalogue, today.date)[0]?.trend).toBe('same')
   })
 
-  it('marks a repeated below-target result as a downward trend', () => {
+  it('marks a repeated below-target result as a downward trend (PT: two misses drop one step on coarse loads)', () => {
     const previous = entry('previous', '2026-10-01', 'day-a', 7)
     const today = entry('today', '2026-10-05', 'day-a', 7)
 
     expect(buildWorkoutSummary([today], [previous], [block], catalogue, today.date)[0]).toMatchObject({
       trend: 'down',
-      next: { action: 'decrease_weight' },
+      next: { action: 'decrease_weight', weight: 8 },
     })
   })
 
