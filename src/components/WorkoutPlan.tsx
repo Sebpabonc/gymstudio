@@ -384,6 +384,23 @@ function splitExerciseTitle(name: string) {
   return { main: name, details: '' }
 }
 
+/** Keeps the image-search arrow glued to the last word so it never wraps onto a line of its own. */
+function NameWithArrow({ name }: { name: string }) {
+  const cut = name.lastIndexOf(' ')
+  return (
+    <>
+      {cut > 0 ? name.slice(0, cut + 1) : ''}
+      <span className="exercise-image-link-tail">
+        {cut > 0 ? name.slice(cut + 1) : name}
+        <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 16L16 8" />
+          <path d="M9.5 8H16v6.5" />
+        </svg>
+      </span>
+    </>
+  )
+}
+
 export function ExerciseSwapButton({
   label,
   onClick,
@@ -456,11 +473,7 @@ export function ExerciseSwapSheet({
                 void openExternal(event.currentTarget.href)
               }}
             >
-              {getExerciseDisplayName(alternative, language)}
-              <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8 16L16 8" />
-                <path d="M9.5 8H16v6.5" />
-              </svg>
+              <NameWithArrow name={getExerciseDisplayName(alternative, language)} />
             </a>
             <div className="chip-row chip-row-tight">
               <span className="chip">{t('workout.swap.muscle')}: {localizeMuscle(alternative.primaryMuscle, language)}</span>
@@ -2530,11 +2543,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             void openExternal(event.currentTarget.href)
                           }}
                         >
-                          {displayTitle.main}
-                          <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M8 16L16 8" />
-                            <path d="M9.5 8H16v6.5" />
-                          </svg>
+                          <NameWithArrow name={displayTitle.main} />
                         </a>
                         {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
                       </span>
