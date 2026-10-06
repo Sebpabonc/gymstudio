@@ -54,7 +54,6 @@ export type ProgressSuggestion =
       type: 'add-weight'
       exerciseId: string
       dayType: DayType
-      increment: number
       message: string
       why: string
     }

@@ -1,12 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { mapAiGatewayError, requestExerciseFeedback, requestNextSessionPlan, summariseSession } from '../ai/gateway'
+import { mapAiGatewayError, requestExerciseFeedback, summariseSession } from '../ai/gateway'
 import {
   buildExerciseFeedbackPayload,
-  buildNextSessionPlanPayload,
   limitAiNoteToTwoSentences,
-  validateNextSessionPlan,
-  type CoachPlanExercise,
-  type NextSessionPlan,
 } from '../ai/coachLoop'
 import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue from './SqueezeCue'
@@ -30,8 +26,6 @@ import {
   getSessionStorageValue,
   loadExercises,
   loadLocalExerciseSwaps,
-  loadWeightTargets,
-  consumeWeightTarget,
   loadWorkoutHistory,
   normalizeExerciseName,
   saveLocalExerciseSwaps,
@@ -41,12 +35,9 @@ import {
   setActiveBlockId,
   upsertExerciseRecord,
   getAskExerciseAiConsent,
-  loadAiSessionPlan,
-  saveAiSessionPlan,
   setAskExerciseAiConsent,
 } from '../utils/storage'
 import type { AskExerciseAiConsent } from '../utils/storage'
-import { applyTargetToWeights, targetAppliesToDay } from '../utils/weightTargets'
 import {
   blockDateRange,
   blockWeek,
@@ -79,7 +70,14 @@ import { loadDemoBlocks } from '../plans/demoBlock'
 import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
 import type { ExerciseSwap } from '../plans/exerciseSwaps'
 import { fetchExerciseSwaps, removeExerciseSwap, saveExerciseSwap } from '../utils/profileData'
+import { saveTrainerRecommendation } from '../utils/profileData'
+import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
+import { recommend } from '../trainer/engine'
+import { buildEvidence } from '../trainer/evidence'
+import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
+import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
+import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
 import {
   captureUndoSnapshots,
   createSessionSummary,
@@ -133,8 +131,9 @@ type PlanDraft = {
   dropSetWeights: number[]
   dropSetReps: number[]
   setDone: boolean[]
+  setAt?: Array<number | undefined>
   notes: string
-}
+} & TrainerDraftValues
 
 type PlanMode = 'preset' | 'custom'
 
@@ -149,10 +148,6 @@ type DaySessionSummary = SessionSummary & {
   date: string
   blockId?: string
   dayKey?: string
-  nextPlanBlockId?: string
-  nextPlanDayKey?: string
-  nextPlanSummary?: string
-  nextPlanPending?: boolean
 }
 
 type ExerciseFeedbackState = {
@@ -224,8 +219,14 @@ function SteppedNumberInput({
 
 const CUSTOM_PLAN_KEY = 'gym-studio.custom-plan'
 const BLOCK_CARD_EXPANDED_KEY = 'gym-studio.block-card-expanded'
-const getAiPlanKey = (blockId: string, dayKey: string) =>
-  JSON.stringify([storageKey('gym-studio.ai-session-plan'), blockId, dayKey])
+
+function createRecommendationId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
+    const random = Math.floor(Math.random() * 16)
+    return (character === 'x' ? random : (random & 0x3) | 0x8).toString(16)
+  })
+}
 
 const defaultCustomExercise: PlanExercise = {
   name: '',
@@ -549,7 +550,6 @@ export default function WorkoutPlan({
   const [customExerciseDraft, setCustomExerciseDraft] = useState<PlanExercise>(defaultCustomExercise)
   const [selectedLibraryExerciseId, setSelectedLibraryExerciseId] = useState('')
   const [logError, setLogError] = useState<Record<string, string>>({})
-  const [weightTargets, setWeightTargets] = useState(() => loadWeightTargets())
   const [rawExerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
   const [rawTrainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
   const [exerciseSwaps, setExerciseSwaps] = useState<ExerciseSwap[]>(() => loadLocalExerciseSwaps())
@@ -577,6 +577,7 @@ export default function WorkoutPlan({
   const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
   const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({})
   const [completedSupersetSets, setCompletedSupersetSets] = useState<Record<string, boolean[]>>({})
+  const [completedSupersetAt, setCompletedSupersetAt] = useState<Record<string, Array<number | undefined>>>({})
   const [supersetLogOpen, setSupersetLogOpen] = useState<Record<string, boolean>>({})
   const [progressSectionsVisible, setProgressSectionsVisible] = useState<Record<string, boolean>>({})
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
@@ -590,12 +591,10 @@ export default function WorkoutPlan({
   const [aiConsent, setAiConsent] = useState<AskExerciseAiConsent | null>(() => getAskExerciseAiConsent())
   const [showAiConsent, setShowAiConsent] = useState(false)
   const [exerciseFeedbackByEntryId, setExerciseFeedbackByEntryId] = useState<Record<string, ExerciseFeedbackState>>({})
-  const [aiPlans, setAiPlans] = useState<Record<string, NextSessionPlan>>({})
-  const [aiPlanLoading, setAiPlanLoading] = useState<Record<string, boolean>>({})
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const aiSummaryRequestId = useRef(0)
   const exerciseFeedbackRequests = useRef(new Set<string>())
-  const aiPlanRequests = useRef(new Set<string>())
+  const trainerRecommendationIds = useRef(new Map<string, string>())
   const swapChangesDuringLoad = useRef(new Set<string>())
 
   const requestAiSummary = async () => {
@@ -771,12 +770,6 @@ export default function WorkoutPlan({
       )
     : []
   const todayDay = activeBlock ? todayTrainingDay(activeBlock, history, today) : undefined
-  const activeAiPlanKey = activeBlock && activeDay ? getAiPlanKey(activeBlock.id, activeDay.key) : ''
-  const activeCoachPlan = activeAiPlanKey
-    ? aiPlans[activeAiPlanKey] ?? (activeBlock && activeDay ? loadAiSessionPlan(activeBlock.id, activeDay.key) ?? undefined : undefined)
-    : undefined
-  const getAiPlanExercise = (exercise: PlanExercise) =>
-    exercise.code ? activeCoachPlan?.exercises.find((item) => item.code === exercise.code) : undefined
   const personalRecordBadgesByEntryId = useMemo(
     () => new Map(
       history
@@ -1144,99 +1137,6 @@ export default function WorkoutPlan({
       sets: target.setCount,
     })
 
-  const buildCoachPlanExercises = (
-    block: TrainingBlock,
-    day: TrainingBlock['days'][number],
-    entries: WorkoutEntry[]
-  ): CoachPlanExercise[] => {
-    const week = blockWeek(block, today) ?? 1
-    return day.exercises.map((planned) => {
-      const prescription = prescriptionForWeek(planned, week)
-      const exercise: PlanExercise = {
-        name: getBlockExerciseName(prescription, exerciseCatalog),
-        sets: String(prescription.sets),
-        reps: prescription.reps.join(' · '),
-        repsPerSet: prescription.reps,
-        rest: `${prescription.restSeconds} s`,
-        restSeconds: prescription.restSeconds,
-        focus: day.focus ?? '',
-        goal: '',
-        tip: '',
-        exerciseId: prescription.exerciseId,
-        code: prescription.code,
-        technique: prescription.technique,
-      }
-      const prefill = findPrefillSelection(entries, prescription.exerciseId, day.key)
-      const lastEntry = prefill?.entry
-      const target = lastEntry && prefill?.basis !== 'other-day'
-        ? getNextTarget(exercise, lastEntry.sets, week === 6)
-        : null
-      const setCount = target?.setCount ?? prescription.sets
-      const reps = target?.reps ?? getExerciseTargetReps(exercise).slice(0, setCount)
-      const otherDayWeight = prefill?.basis === 'other-day'
-        ? scaleWeightForOtherDay(lastEntry?.sets[0]?.weight ?? 0, lastEntry?.sets[0]?.reps, reps[0])
-        : undefined
-      return {
-        code: prescription.code,
-        exerciseId: prescription.exerciseId,
-        name: exercise.name,
-        sets: setCount,
-        reps,
-        ruleTarget: {
-          weight: target?.weight ?? otherDayWeight ?? lastEntry?.sets[0]?.weight ?? 0,
-          reps,
-        },
-        ...(prefill?.basis === 'other-day' ? { basis: 'other-day' as const } : {}),
-        last: (lastEntry?.sets ?? []).map(({ weight, reps: loggedReps }) => ({
-          weight,
-          reps: loggedReps,
-        })),
-      }
-    })
-  }
-
-  const requestAiPlan = async (
-    block: TrainingBlock,
-    day: TrainingBlock['days'][number],
-    entries: WorkoutEntry[]
-  ) => {
-    if (demoMode || authStatus !== 'signed-in' || aiConsent !== 'enabled') return
-    const planKey = getAiPlanKey(block.id, day.key)
-    const setSummary = (summary: string | undefined, pending: boolean) => {
-      setSessionSummary((current) =>
-        current?.nextPlanBlockId === block.id && current.nextPlanDayKey === day.key
-          ? { ...current, nextPlanSummary: summary, nextPlanPending: pending }
-          : current
-      )
-    }
-    const saved = loadAiSessionPlan(block.id, day.key)
-    if (saved) {
-      setAiPlans((current) => ({ ...current, [planKey]: saved }))
-      setSummary(saved.summary, false)
-      return
-    }
-    if (aiPlanRequests.current.has(planKey)) return
-
-    aiPlanRequests.current.add(planKey)
-    setAiPlanLoading((current) => ({ ...current, [planKey]: true }))
-    setSummary(undefined, true)
-    try {
-      const ruleExercises = buildCoachPlanExercises(block, day, entries)
-      const payload = buildNextSessionPlanPayload(block.id, day.key, blockWeek(block, today) ?? 1, ruleExercises)
-      const response = await requestNextSessionPlan(payload, language)
-      const plan = validateNextSessionPlan(response.answer, ruleExercises)
-      if (!plan) throw new Error('invalid_plan')
-      saveAiSessionPlan(block.id, day.key, plan)
-      setAiPlans((current) => ({ ...current, [planKey]: plan }))
-      setSummary(plan.summary, false)
-    } catch {
-      setSummary(undefined, false)
-    } finally {
-      aiPlanRequests.current.delete(planKey)
-      setAiPlanLoading((current) => ({ ...current, [planKey]: false }))
-    }
-  }
-
   const requestExerciseNote = (entry: WorkoutEntry, exercise: PlanExercise, target: NextTarget | null) => {
     if (!target) return
     if (exerciseFeedbackRequests.current.has(entry.id)) return
@@ -1281,13 +1181,7 @@ export default function WorkoutPlan({
     })
   }
 
-  const getAppliedTarget = (exercise?: PlanExercise, exerciseId?: string) => {
-    if (!exercise || !exerciseId) return undefined
-    const target = weightTargets[exerciseId]
-    return targetAppliesToDay(target, planMode === 'preset' ? activeDay?.key : undefined) ? target : undefined
-  }
-
-  const getDraftForExercise = (exerciseName: string, exercise?: PlanExercise) => {
+  const getOriginalDraftForExercise = (exerciseName: string, exercise?: PlanExercise): PlanDraft => {
     const key = getPlanDraftKey(exerciseName)
     const best = bestProgressByName.get(normalizeExerciseName(exerciseName))
     const bestReps = best && best.sets.length ? Math.max(...best.sets.map((set) => set.reps), 0) : 8
@@ -1296,43 +1190,38 @@ export default function WorkoutPlan({
     const prefillExerciseId =
       exercise?.exerciseId ??
       exerciseCatalog.find((item) => normalizeExerciseName(item.name) === normalizeExerciseName(exerciseName))?.id
-    const prefillSelection =
-      exercise && prefillExerciseId
-        ? findPrefillSelection(history, prefillExerciseId, planMode === 'preset' ? activeDay?.key : undefined)
-        : undefined
-    const prefill = prefillSelection?.entry
+    const prefillSelection = planMode === 'custom' && exercise && prefillExerciseId
+      ? findPrefillSelection(history, prefillExerciseId)
+      : undefined
+    const prefill = planMode === 'preset' && prefillExerciseId
+      ? history
+          .filter((entry) => entry.exerciseId === prefillExerciseId && entry.date !== today && entry.sets.length > 0)
+          .slice()
+          .sort((a, b) => b.date.localeCompare(a.date))[0]
+      : prefillSelection?.entry
     const noSwapHistory = !!exercise?.swappedFrom &&
-      !history.some((entry) => entry.exerciseId === prefillExerciseId)
-    const bestWeight = noSwapHistory ? 0 : best ? workoutMaxWeight(best.sets) : 0
-    const otherDayPrefill = prefillSelection?.basis === 'other-day'
-    const nextTarget = exercise && prefill && !otherDayPrefill ? getNextTarget(exercise, prefill.sets) : null
+      !history.some((entry) => entry.exerciseId === prefillExerciseId && entry.date !== today)
+    const bestWeight = noSwapHistory
+      ? 0
+      : planMode === 'preset'
+        ? prefill ? workoutMaxWeight(prefill.sets) : 0
+        : best ? workoutMaxWeight(best.sets) : 0
+    const nextTarget = planMode === 'custom' && exercise && prefill ? getNextTarget(exercise, prefill.sets) : null
     const lastWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       const weight = Number(source?.weight ?? bestWeight) || 0
-      return otherDayPrefill
+      return planMode === 'custom' && prefillSelection?.basis === 'other-day'
         ? scaleWeightForOtherDay(weight, source?.reps, exercise ? getExerciseTargetReps(exercise)[index] : undefined)
         : weight
     })
-    const appliedTarget = noSwapHistory ? undefined : getAppliedTarget(exercise, prefillExerciseId)
-    // Ignore an AI weight that no longer matches the history it was built from (e.g. a trial log was deleted).
-    const ruleWeight = nextTarget?.weight ?? lastWeights[0] ?? 0
-    const plannedAi = exercise && !exercise.swappedFrom ? getAiPlanExercise(exercise) : undefined
-    const aiExercise = plannedAi && (ruleWeight <= 0 || Math.abs(plannedAi.weight - ruleWeight) <= ruleWeight * 0.1)
-      ? plannedAi
-      : undefined
-    const baseSetWeights = aiExercise
-      ? Array.from({ length: fallbackSetCount }, () => aiExercise.weight)
-      : nextTarget
-        ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
-        : appliedTarget && !otherDayPrefill
-          ? applyTargetToWeights(lastWeights, appliedTarget)
-          : lastWeights
+    const baseSetWeights = nextTarget
+      ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
+      : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       return Number(source?.drop?.weight) || Number(((baseSetWeights[index] ?? 0) * 0.75).toFixed(2))
     })
     const baseSetReps = Array.from({ length: fallbackSetCount }, (_, index) => {
-      if (aiExercise) return aiExercise.reps[index] ?? aiExercise.reps[aiExercise.reps.length - 1] ?? fallbackReps
       const prescribed = exercise?.repsPerSet?.[index] ?? exercise?.reps ?? ''
       return parseRepPrescription(prescribed)[0] || Number(fallbackReps) || 8
     })
@@ -1340,19 +1229,112 @@ export default function WorkoutPlan({
       exercise ? getDefaultDropRepTarget(exercise, index) : baseSetReps[index]
     )
 
-    return (
-      plannedDrafts[key] ?? {
-        reps: baseSetReps[0] ?? (Number(fallbackReps) || 8),
-        weight: baseSetWeights[0] ?? 0,
-        setWeights: baseSetWeights,
-        setWeightTouched: baseSetWeights.map((weight) => weight !== 0),
-        setReps: baseSetReps,
-        dropSetWeights: baseDropWeights,
-        dropSetReps: baseDropSetReps,
-        setDone: Array.from({ length: fallbackSetCount }, () => false),
-        notes: '',
-      }
-    )
+    return {
+      reps: baseSetReps[0] ?? (Number(fallbackReps) || 8),
+      weight: baseSetWeights[0] ?? 0,
+      setWeights: baseSetWeights,
+      setWeightTouched: baseSetWeights.map((weight) => weight !== 0),
+      setReps: baseSetReps,
+      dropSetWeights: baseDropWeights,
+      dropSetReps: baseDropSetReps,
+      setDone: Array.from({ length: fallbackSetCount }, () => false),
+      notes: '',
+    }
+  }
+
+  const getTrainerRecommendationId = (key: string) => {
+    const id = trainerRecommendationIds.current.get(key)
+    if (id) return id
+    const nextId = createRecommendationId()
+    trainerRecommendationIds.current.set(key, nextId)
+    return nextId
+  }
+
+  const getDraftForExercise = (exerciseName: string, exercise?: PlanExercise) => {
+    const key = getPlanDraftKey(exerciseName)
+    const saved = plannedDrafts[key]
+    if (saved) return saved
+    const original = getOriginalDraftForExercise(exerciseName, exercise)
+    return planMode === 'preset' && exercise?.exerciseId
+      ? { ...original, recommendationId: getTrainerRecommendationId(key) }
+      : original
+  }
+
+  const getTrainerRecommendation = (exercise: PlanExercise) => {
+    if (planMode !== 'preset' || !activeBlock || !activeDay || !exercise.exerciseId) return null
+    const original = getOriginalDraftForExercise(exercise.name, exercise)
+    const reps = (exercise.repsPerSet ?? [exercise.reps ?? '8']).flatMap(parseRepPrescription)
+    const target = reps.length
+      ? { min: Math.min(...reps), max: Math.max(...reps) }
+      : { min: 8, max: 8 }
+    const planned = activeDay.exercises.find((item) => item.exerciseId === exercise.exerciseId)
+    const plannedSets = planned?.sets ?? getDefaultSetCount(exercise)
+    const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
+    const evidence = buildEvidence(history, exercise.exerciseId, trainingBlocks, today)
+    const recommendation = recommend({
+      history: evidence,
+      today,
+      target,
+      sets: plannedSets,
+      equipment,
+      plannedWeight: original.weight > 0 ? original.weight : undefined,
+      deload: activeBlockWeek === 6,
+    })
+    return {
+      recommendation,
+      original,
+      target,
+      evidence,
+      id: getTrainerRecommendationId(getPlanDraftKey(exercise.name)),
+    }
+  }
+
+  const trainerRangeLabel = (range: { min: number; max: number }) => formatTrainerRange(range, language)
+
+  const saveTrainerChoice = (
+    exercise: PlanExercise,
+    choice: TrainerChoice,
+    context: NonNullable<ReturnType<typeof getTrainerRecommendation>>
+  ) => {
+    const key = getPlanDraftKey(exercise.name)
+    const current = getDraftForExercise(exercise.name, exercise)
+    const updated = applyTrainerRecommendation(current, context.recommendation, choice, context.original)
+    const nextDraft = { ...current, ...updated, recommendationId: context.id }
+    setPlannedDrafts((drafts) => ({ ...drafts, [key]: nextDraft }))
+    saveTrainerResult(exercise, nextDraft, context)
+  }
+
+  const saveTrainerResult = (
+    exercise: PlanExercise,
+    draft: PlanDraft,
+    context: NonNullable<ReturnType<typeof getTrainerRecommendation>>,
+    resultEntryId?: string
+  ) => {
+    if (authStatus !== 'signed-in' || demoMode || !exercise.exerciseId) return
+    const row: TrainerRecommendationRow = {
+      id: draft.recommendationId ?? context.id,
+      exerciseId: exercise.exerciseId,
+      date: today,
+      blockId: activeBlock?.id,
+      dayKey: activeDay?.key,
+      original: {
+        weight: context.original.weight > 0 ? context.original.weight : null,
+        reps: context.target,
+        sets: getDefaultSetCount(exercise),
+      },
+      recommended: {
+        weight: context.recommendation.weight,
+        reps: context.recommendation.reps,
+        sets: context.recommendation.sets,
+      },
+      action: context.recommendation.action,
+      reason: context.recommendation.reason,
+      confidence: context.recommendation.confidence,
+      evidence: context.recommendation.evidence,
+      status: draft.trainerChoice ?? 'shown',
+      ...(resultEntryId ? { resultEntryId } : {}),
+    }
+    void saveTrainerRecommendation(row).catch(() => undefined)
   }
 
   const copyPlanSetOneWeight = (exercise: PlanExercise, setCount: number) => {
@@ -1383,12 +1365,14 @@ export default function WorkoutPlan({
       { length: setCount },
       (_, index) => currentDraft.setDone[index] ?? false
     )
+    const nextSetAt = Array.from({ length: setCount }, (_, index) => currentDraft.setAt?.[index])
     nextCompleted[setIndex] = !nextCompleted[setIndex]
+    nextSetAt[setIndex] = nextCompleted[setIndex] ? Date.now() : undefined
     setPlannedDrafts((current) => ({
       ...current,
-      [key]: { ...(current[key] ?? currentDraft), setDone: nextCompleted },
+      [key]: { ...(current[key] ?? currentDraft), setDone: nextCompleted, setAt: nextSetAt },
     }))
-    if (nextCompleted.every(Boolean)) void logPlannedExercise(exercise, nextCompleted)
+    if (nextCompleted.every(Boolean)) void logPlannedExercise(exercise, nextCompleted, nextSetAt)
   }
 
   const toggleExerciseCollapse = (exerciseName: string) => {
@@ -1546,16 +1530,12 @@ export default function WorkoutPlan({
       date: activeCompletionScope.date,
       blockId: activeCompletionScope.blockId,
       dayKey: activeCompletionScope.dayKey,
-      nextPlanBlockId: nextDay ? activeBlock.id : undefined,
-      nextPlanDayKey: nextDay?.key,
-      nextPlanPending: !!nextDay && !demoMode && authStatus === 'signed-in' && aiConsent === 'enabled',
     })
     setAiSummary('')
     setAiRemainingToday(null)
     setAiSummaryError('')
     setAiSummaryPending(false)
     setShowAiConsent(false)
-    if (nextDay) void requestAiPlan(activeBlock, nextDay, nextHistory)
   }
 
   const undoLastLog = () => {
@@ -1567,7 +1547,11 @@ export default function WorkoutPlan({
     dismissSessionSummary()
   }
 
-  const logPlannedExercise = async (exercise: PlanExercise, completedRows?: boolean[]) => {
+  const logPlannedExercise = async (
+    exercise: PlanExercise,
+    completedRows?: boolean[],
+    completedAt?: Array<number | undefined>
+  ) => {
     const exerciseKey = getPlanDraftKey(exercise.name)
     const sectionKey = normalizeExerciseName(exercise.name)
     const canonicalId =
@@ -1580,11 +1564,14 @@ export default function WorkoutPlan({
       })).id
 
     const draft = getDraftForExercise(exercise.name, exercise)
+    const trainer = getTrainerRecommendation(exercise)
     const setCount = getDefaultSetCount(exercise) || 1
     const allSets = Array.from({ length: setCount }, (_, index) => {
       const currentWeight = draft.setWeights?.[index] ?? draft.weight ?? 0
       const currentReps = draft.setReps?.[index] ?? draft.reps ?? getDefaultRepTarget(exercise)
       const set = createSet(Number(currentReps) || getDefaultRepTarget(exercise), Number(currentWeight) || 0)
+      const setAt = completedAt?.[index] ?? draft.setAt?.[index]
+      if (setAt !== undefined) set.at = setAt
       if (exercise.technique === 'drop-set') {
         set.drop = {
           reps: Number(draft.dropSetReps?.[index]) || getDefaultDropRepTarget(exercise, index),
@@ -1617,6 +1604,15 @@ export default function WorkoutPlan({
       exerciseId: canonicalId,
       date: localIsoDate(),
       sets: validSets,
+      ...(trainer ? {
+        target: {
+          sets: setCount,
+          reps: draft.trainerChoice === 'accepted' ? trainer.recommendation.reps : trainer.target,
+          weight: draft.setWeights[0] ?? draft.weight,
+          technique: exercise.technique,
+          recommendationId: draft.recommendationId ?? trainer.id,
+        },
+      } : {}),
       ...(planMode === 'preset' && activeBlock && activeDay
         ? { blockId: activeBlock.id, dayKey: activeDay.key }
         : {}),
@@ -1625,6 +1621,7 @@ export default function WorkoutPlan({
 
     const storedHistory = await loadWorkoutHistory()
     const { history: nextHistory, entry: entryToSave } = upsertScopedEntry(storedHistory, nextEntry, activeCompletionScope)
+    if (trainer) saveTrainerResult(exercise, draft, trainer, entryToSave.id)
     const loggedAt = Date.now()
     startSession(loggedAt, activeCompletionScope)
 
@@ -1634,7 +1631,6 @@ export default function WorkoutPlan({
     showLogToast([entryToSave], storedHistory, activeCompletionScope, [exercise])
     requestExerciseNote(entryToSave, exercise, getNextTarget(exercise, entryToSave.sets))
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
-    setWeightTargets(consumeWeightTarget(entryToSave.exerciseId, entryToSave.sets))
     setExerciseCatalog(await loadExercises())
 
     setPlannedDrafts((current) => {
@@ -1648,6 +1644,7 @@ export default function WorkoutPlan({
           ...currentDraft,
           notes: '',
           setDone: Array.from({ length: setCount }, () => false),
+          setAt: Array.from({ length: setCount }, () => undefined),
         },
       }
     })
@@ -1672,7 +1669,12 @@ export default function WorkoutPlan({
     }))
   }
 
-  const logSuperset = async (exercises: PlanExercise[], groupKey: string, completedRows: boolean[]) => {
+  const logSuperset = async (
+    exercises: PlanExercise[],
+    groupKey: string,
+    completedRows: boolean[],
+    completedAt?: Array<number | undefined>
+  ) => {
     const setCount = Math.max(...exercises.map(getDefaultSetCount))
     const entryInputs = await Promise.all(exercises.map(async (exercise) => {
       const canonicalId =
@@ -1689,6 +1691,8 @@ export default function WorkoutPlan({
         const reps = draft.setReps[index] ?? parseRepPrescription(prescribedReps)[0] ?? getDefaultRepTarget(exercise)
         const weight = draft.setWeights[index] ?? draft.weight ?? 0
         const set = createSet(Number(reps) || getDefaultRepTarget(exercise), Number(weight) || 0)
+        const setAt = completedAt?.[index]
+        if (setAt !== undefined) set.at = setAt
         if (exercise.technique === 'drop-set') {
           set.drop = {
             reps: Number(draft.dropSetReps[index]) || getDefaultDropRepTarget(exercise, index),
@@ -1705,7 +1709,23 @@ export default function WorkoutPlan({
       }
     }))
     const date = localIsoDate()
-    const nextEntries = createSupersetEntries(entryInputs, { ...activeCompletionScope, date })
+    const nextEntries = createSupersetEntries(entryInputs, { ...activeCompletionScope, date }).map((entry) => {
+      const exercise = exercises.find((item) => item.exerciseId === entry.exerciseId)
+      if (!exercise) return entry
+      const trainer = getTrainerRecommendation(exercise)
+      if (!trainer) return entry
+      const draft = getDraftForExercise(exercise.name, exercise)
+      return {
+        ...entry,
+        target: {
+          sets: getDefaultSetCount(exercise),
+          reps: draft.trainerChoice === 'accepted' ? trainer.recommendation.reps : trainer.target,
+          weight: draft.setWeights[0] ?? draft.weight,
+          technique: exercise.technique,
+          recommendationId: draft.recommendationId ?? trainer.id,
+        },
+      }
+    })
 
     if (nextEntries.length === 0) {
       setLogError((current) => ({
@@ -1722,6 +1742,12 @@ export default function WorkoutPlan({
       nextHistory = result.history
       return result.entry
     })
+    for (const entry of entriesToSave) {
+      const exercise = exercises.find((item) => item.exerciseId === entry.exerciseId)
+      if (!exercise) continue
+      const trainer = getTrainerRecommendation(exercise)
+      if (trainer) saveTrainerResult(exercise, getDraftForExercise(exercise.name, exercise), trainer, entry.id)
+    }
     const loggedAt = Date.now()
     const scope = { ...activeCompletionScope, date }
     startSession(loggedAt, scope)
@@ -1738,7 +1764,6 @@ export default function WorkoutPlan({
     }))
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    for (const entry of entriesToSave) setWeightTargets(consumeWeightTarget(entry.exerciseId, entry.sets))
     if (entriesToSave.length === exercises.length) {
       onStartRest(
         exercises[exercises.length - 1]?.restSeconds ?? 90,
@@ -1756,6 +1781,10 @@ export default function WorkoutPlan({
     ))
     setCompletedSupersetSets((current) => {
       const { [groupKey]: _completedRows, ...remaining } = current
+      return remaining
+    })
+    setCompletedSupersetAt((current) => {
+      const { [groupKey]: _completedTimes, ...remaining } = current
       return remaining
     })
     setLoggedAtByExercise((current) => ({
@@ -2301,17 +2330,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             <p className="day-focus-label">{activeDay.focus}</p>
           </>
         )}
-        {activeCoachPlan ? (
-          <aside className="next-block-banner ai-plan-today" aria-live="polite">
-            <strong>{t('workout.ai.planToday')}</strong>
-            <p>{activeCoachPlan.summary}</p>
-          </aside>
-        ) : activeAiPlanKey && aiPlanLoading[activeAiPlanKey] ? (
-          <aside className="next-block-banner ai-plan-today" role="status" aria-live="polite">
-            <strong>{t('workout.ai.planToday')}</strong>
-            <small className="ai-inline-status">{t('workout.ai.coachThinking')}</small>
-          </aside>
-        ) : null}
         </>
       ) : (
         <section className="custom-plan-builder">
@@ -2431,6 +2449,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const previousSetsByExercise = new Map<string, ReturnType<typeof getPreviousWorkoutSets>>()
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
+            const trainer = getTrainerRecommendation(exercise)
             const setCount = getDefaultSetCount(exercise)
             const setWeights = draft.setWeights.length ? draft.setWeights : Array.from({ length: setCount }, () => Number(draft.weight) || 0)
             const setReps = draft.setReps.length ? draft.setReps : Array.from({ length: setCount }, () => Number(draft.reps) || 8)
@@ -2465,9 +2484,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const previousDayType = previousSelection?.basis === 'other-day'
               ? getDayKeyType(previousEntry?.dayKey)
               : undefined
-            const previousTarget = previousEntry && previousSelection?.basis !== 'other-day'
-              ? getNextTarget(exercise, previousEntry.sets)
-              : null
             previousSetsByExercise.set(exercise.code ?? exercise.name, previousSets)
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
               id: entry.id,
@@ -2494,7 +2510,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
             const postureTips = getPostureTips(exercise, libraryMatch)
             const completedEntry = findExerciseCompletion(exercise, history)
-            const aiPlanExercise = getAiPlanExercise(exercise)
             const recordBadges =
               completedEntry?.date === today
                 ? personalRecordBadgesByEntryId.get(completedEntry.id) ?? []
@@ -2634,16 +2649,54 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <p className="planned-meta-line">
                       {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
                     </p>
-                    {aiPlanExercise && (
-                      <div className="ai-plan-exercise">
-                        {aiPlanExercise.note && <p>{aiPlanExercise.note}</p>}
-                      </div>
-                    )}
-                    {previousTarget && (
-                      <aside className="next-target-card previous-target-card">
-                        <strong>{getNextTargetLabel(previousTarget)}</strong>
-                        <p>{getNextTargetWhy(previousTarget)}</p>
-                      </aside>
+                    {!completedEntry && trainer && (
+                      <TrainerRecommendationCard
+                        title={t('workout.trainer.title')}
+                        lastTime={trainer.evidence[0]
+                          ? t('workout.trainer.lastTime', {
+                              weight: formatNumber(language, trainer.evidence[0].sets[0]?.weight ?? 0),
+                              reps: trainer.evidence[0].sets.map((set) => formatNumber(language, set.reps)).join(' · '),
+                            })
+                          : t('workout.trainer.noPrevious')}
+                        original={t('workout.trainer.original', {
+                          weight: formatNumber(language, trainer.original.weight),
+                          reps: trainerRangeLabel(trainer.target),
+                        })}
+                        recommended={t('workout.trainer.recommended', {
+                          weight: formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
+                          reps: trainerRangeLabel(trainer.recommendation.reps),
+                        })}
+                        why={t('workout.trainer.why', {
+                          reason: trainerReason(t, language, trainer.recommendation, trainer.target),
+                        })}
+                        confidence={t(`workout.trainer.confidence.${trainer.recommendation.confidence}` as TranslationKey)}
+                        collectData={trainer.recommendation.action === 'collect_data'}
+                        sameAsOriginal={
+                          trainer.recommendation.weight === trainer.original.weight &&
+                          trainer.recommendation.reps.min === trainer.target.min &&
+                          trainer.recommendation.reps.max === trainer.target.max &&
+                          trainer.recommendation.sets === setCount
+                        }
+                        choiceText={draft.trainerChoice
+                          ? t(draft.trainerChoice === 'accepted'
+                            ? 'workout.trainer.choice.accepted'
+                            : 'workout.trainer.choice.keptOriginal', {
+                              weight: formatNumber(language, draft.weight),
+                              reps: trainerRangeLabel(draft.trainerChoice === 'accepted'
+                                ? trainer.recommendation.reps
+                                : trainer.target),
+                            })
+                          : undefined}
+                        acceptLabel={t('workout.trainer.accept')}
+                        keepOriginalLabel={t('workout.trainer.keepOriginal')}
+                        collectDataText={t('workout.trainer.collectData')}
+                        sameAsOriginalText={t('workout.trainer.sameAsOriginal', {
+                          weight: formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
+                          reps: trainerRangeLabel(trainer.recommendation.reps),
+                        })}
+                        onAccept={() => saveTrainerChoice(exercise, 'accepted', trainer)}
+                        onKeepOriginal={() => saveTrainerChoice(exercise, 'kept_original', trainer)}
+                      />
                     )}
                     {/* TODO(i18n): PT will provide approved translations */}
                     {exercise.weekNote && (
@@ -2668,11 +2721,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     {!group.isSuperset && (
                       <div className="planned-set-section">
                         <div className="planned-set-header">
-                          {getAppliedTarget(exercise, exercise.exerciseId) && (
-                            <span className="weight-target-chip">
-                              {t('workout.target.applied', { value: getAppliedTarget(exercise, exercise.exerciseId)?.increaseKg ?? 0 })}
-                            </span>
-                          )}
                           <div className="planned-set-actions">
                             <button
                               type="button"
@@ -2877,6 +2925,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               supersetSetCount
             )
             const supersetCompletedRows = completedSupersetSets[group.key] ?? loggedSupersetRows
+            const supersetCompletedTimes = completedSupersetAt[group.key] ?? []
             const supersetCompletedCount = supersetCompletedRows.filter(Boolean).length
             const supersetError = supersetExercises
               .map((exercise) => logError[getPlanDraftKey(exercise.name)])
@@ -2952,8 +3001,14 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                               aria-pressed={supersetCompletedRows[setIndex]}
                               onClick={() => {
                                 const nextCompleted = [...supersetCompletedRows]
+                                const nextCompletedAt = Array.from(
+                                  { length: supersetSetCount },
+                                  (_, index) => supersetCompletedTimes[index]
+                                )
                                 nextCompleted[setIndex] = !nextCompleted[setIndex]
+                                nextCompletedAt[setIndex] = nextCompleted[setIndex] ? Date.now() : undefined
                                 setCompletedSupersetSets((current) => ({ ...current, [group.key]: nextCompleted }))
+                                setCompletedSupersetAt((current) => ({ ...current, [group.key]: nextCompletedAt }))
                                 // Rest is taken after the pair, using the last exercise's prescribed rest.
                                 if (nextCompleted[setIndex]) {
                                   onStartRest(
@@ -2962,7 +3017,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   )
                                 }
                                 if (nextCompleted.every(Boolean)) {
-                                  void logSuperset(supersetExercises, group.key, nextCompleted)
+                                  void logSuperset(supersetExercises, group.key, nextCompleted, nextCompletedAt)
                                 }
                               }}
                             >
@@ -3051,7 +3106,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         <button
                           type="button"
                           className="primary-button small-button"
-                          onClick={() => void logSuperset(supersetExercises, group.key, supersetCompletedRows)}
+                          onClick={() => void logSuperset(supersetExercises, group.key, supersetCompletedRows, supersetCompletedTimes)}
                         >
                           {t('workout.superset.finish')}
                         </button>
@@ -3136,15 +3191,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               </section>
             )}
             {sessionSummary.nextSession && <p className="session-summary-next">{t('workout.session.next', { session: sessionSummary.nextSession })}</p>}
-            {sessionSummary.nextPlanPending && (
-              <p className="ai-inline-status" role="status">{t('workout.ai.coachThinking')}</p>
-            )}
-            {sessionSummary.nextPlanSummary && (
-              <aside className="next-block-banner">
-                <strong>{t('workout.ai.planReady')}</strong>
-                <p>{sessionSummary.nextPlanSummary}</p>
-              </aside>
-            )}
             {!aiSummary && (
               <div className="ai-session-summary">
                 <button

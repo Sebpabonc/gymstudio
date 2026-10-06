@@ -3,9 +3,7 @@ import { Exercise, PlannedExercise, TrainingBlock, TrainingDay, WorkoutEntry } f
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { isDemoMode } from './demoMode'
-import { isTargetMet, WeightTarget, WeightTargets } from './weightTargets'
 import { RestTimerState } from './restTimer'
-import type { NextSessionPlan } from '../ai/coachLoop'
 import { fetchActiveUserPlan as fetchRemoteActiveUserPlan } from './profileData'
 import type { SavedUserPlan } from './profileData'
 
@@ -16,13 +14,11 @@ const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
 const ACTIVE_USER_PLAN_KEY = 'gym-studio.active-user-plan'
 const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
 const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
-const WEIGHT_TARGETS_KEY = 'gym-studio.weight-targets'
 const ASK_EXERCISE_AI_CONSENT_KEY = 'gym-studio.ai-consent.ask-exercise'
 const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
-const AI_SESSION_PLAN_KEY = 'gym-studio.ai-session-plan'
 const EXERCISE_SWAPS_KEY = 'gym-studio.exercise-swaps'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
 let helpAiAppOpensThisLoad: number | null = null
@@ -217,43 +213,6 @@ export function setAskExerciseAiConsent(choice: AskExerciseAiConsent) {
   }
 }
 
-function aiSessionPlanStorageKey(blockId: string, dayKey: string) {
-  return `${AI_SESSION_PLAN_KEY}.${encodeURIComponent(blockId)}.${encodeURIComponent(dayKey)}`
-}
-
-export function loadAiSessionPlan(blockId: string, dayKey: string): NextSessionPlan | null {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(storageKey(aiSessionPlanStorageKey(blockId, dayKey))) ?? 'null')
-    if (
-      typeof parsed !== 'object' ||
-      parsed === null ||
-      !('summary' in parsed) ||
-      typeof parsed.summary !== 'string' ||
-      !('exercises' in parsed) ||
-      !Array.isArray(parsed.exercises)
-    ) return null
-
-    const exercises = parsed.exercises.filter((exercise): exercise is NextSessionPlan['exercises'][number] =>
-      typeof exercise === 'object' &&
-      exercise !== null &&
-      'code' in exercise &&
-      typeof exercise.code === 'string' &&
-      'weight' in exercise &&
-      typeof exercise.weight === 'number' &&
-      Number.isFinite(exercise.weight) &&
-      'reps' in exercise &&
-      Array.isArray(exercise.reps) &&
-      exercise.reps.every((reps: unknown) => typeof reps === 'number' && Number.isFinite(reps)) &&
-      'note' in exercise &&
-      typeof exercise.note === 'string'
-    )
-    if (exercises.length !== parsed.exercises.length) return null
-    return { summary: parsed.summary, exercises }
-  } catch {
-    return null
-  }
-}
-
 /** Exercise swaps on this device: today-only swaps plus a cache of the account's permanent swaps. */
 export function loadLocalExerciseSwaps(): ExerciseSwap[] {
   try {
@@ -278,17 +237,6 @@ export function saveLocalExerciseSwaps(swaps: ExerciseSwap[], today: string) {
     // The swap still applies for this session.
   }
   return kept
-}
-
-export function saveAiSessionPlan(blockId: string, dayKey: string, plan: NextSessionPlan) {
-  try {
-    localStorage.setItem(
-      storageKey(aiSessionPlanStorageKey(blockId, dayKey)),
-      JSON.stringify(plan)
-    )
-  } catch {
-    // The workout remains usable when browser storage is unavailable.
-  }
 }
 
 export function recordHelpAiAppOpen() {
@@ -930,16 +878,6 @@ export async function deleteWorkoutEntry(entryId: string): Promise<WorkoutEntry[
   const history = await loadWorkoutHistoryEntries()
   if (!history.some((entry) => entry.id === entryId)) return loadWorkoutHistory()
 
-  // An AI plan for this day was built from the history that included this log; drop it so it is rebuilt.
-  const deleted = history.find((entry) => entry.id === entryId)
-  if (deleted?.blockId && deleted.dayKey) {
-    try {
-      localStorage.removeItem(storageKey(aiSessionPlanStorageKey(deleted.blockId, deleted.dayKey)))
-    } catch {
-      // Storage unavailable: nothing cached to clear.
-    }
-  }
-
   const metadata = loadSyncMetadata()
   const now = new Date().toISOString()
   metadata.entries[entryId] = { updatedAt: now, dirty: true, deletedAt: now }
@@ -1033,32 +971,4 @@ export async function addWorkoutEntry(entry: WorkoutEntry) {
   return nextHistory
 }
 
-export function loadWeightTargets(): WeightTargets {
-  const parsed = readJson<unknown>(storageKey(WEIGHT_TARGETS_KEY), {})
-  return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as WeightTargets) : {}
-}
-
-function saveWeightTargets(targets: WeightTargets) {
-  localStorage.setItem(storageKey(WEIGHT_TARGETS_KEY), JSON.stringify(targets))
-}
-
-export function applyWeightTarget(exerciseId: string, target: Omit<WeightTarget, 'appliedAt'>): WeightTargets {
-  const next = { ...loadWeightTargets(), [exerciseId]: { ...target, appliedAt: new Date().toISOString() } }
-  saveWeightTargets(next)
-  return next
-}
-
-export function removeWeightTarget(exerciseId: string): WeightTargets {
-  const { [exerciseId]: _removed, ...rest } = loadWeightTargets()
-  saveWeightTargets(rest)
-  return rest
-}
-
-// Removes the target when the logged sets reach it; returns the remaining targets.
-export function consumeWeightTarget(exerciseId: string, sets: { weight: number }[]): WeightTargets {
-  const targets = loadWeightTargets()
-  const target = targets[exerciseId]
-  if (!target || !isTargetMet(target, sets)) return targets
-  return removeWeightTarget(exerciseId)
-}
 export const mergeExercisesForTest = mergeExercises

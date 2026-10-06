@@ -53,21 +53,17 @@ import type { ExerciseSwap } from '../plans/exerciseSwaps'
 import { fetchExerciseSwaps } from '../utils/profileData'
 import { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import {
-  applyWeightTarget,
   fetchActiveUserPlan,
   fetchTrainingBlocks,
   getCachedActiveUserPlan,
   getCachedTrainingBlocks,
   getExerciseDisplayName,
   getAskExerciseAiConsent,
-  loadWeightTargets,
   loadLocalExerciseSwaps,
-  removeWeightTarget,
   saveLocalExerciseSwaps,
   setAskExerciseAiConsent,
 } from '../utils/storage'
 import type { AskExerciseAiConsent } from '../utils/storage'
-import { baseWeightFromHistory } from '../utils/weightTargets'
 import { defaultActiveBlock, trainingBlockDateStatus } from '../utils/trainingBlocks'
 
 type Props = {
@@ -299,7 +295,6 @@ export default function ProgressScreen({
   const [exerciseSearch, setExerciseSearch] = useState('')
   const [exercisePickerOpen, setExercisePickerOpen] = useState(false)
   const exercisePickerButtonRef = useRef<HTMLButtonElement>(null)
-  const [targets, setTargets] = useState(() => loadWeightTargets())
   const [confirmDeleteId, setConfirmDeleteId] = useState('')
   const [undoEntry, setUndoEntry] = useState<WorkoutEntry | null>(null)
   const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -353,7 +348,6 @@ export default function ProgressScreen({
       blocks,
       exercises,
       today,
-      new Set(Object.keys(targets)),
       i18n,
       activeBlock
     ))
@@ -383,7 +377,7 @@ export default function ProgressScreen({
       weekly,
       options,
     }
-  }, [blocks, entries, exercises, language, t, today, targets])
+  }, [blocks, entries, exercises, language, t, today])
 
   if (!blocks || !data) {
     return <section className="card" aria-live="polite"><p className="empty-state">{t('progress.loading')}</p></section>
@@ -473,15 +467,6 @@ export default function ProgressScreen({
     if (id) onOpenExercise(id)
   }
 
-  const applySuggestion = (suggestion: Extract<ProgressSuggestion, { type: 'add-weight' }>) => {
-    setTargets(applyWeightTarget(suggestion.exerciseId, {
-      dayType: suggestion.dayType,
-      increaseKg: suggestion.increment,
-      baseWeightKg: baseWeightFromHistory(entries, blocks, suggestion.exerciseId, suggestion.dayType),
-    }))
-  }
-  const appliedTargets = Object.entries(targets)
-
   return (
     <>
       {undoEntry && (
@@ -527,28 +512,8 @@ export default function ProgressScreen({
             })}
           </p>
         )}
-        {suggestions.length || appliedTargets.length ? (
+        {suggestions.length ? (
           <ul className="progress-suggestions">
-            {appliedTargets.map(([exerciseId, target]) => (
-              <li key={`applied-${exerciseId}`} className="suggestion-actions">
-                <div className="suggestion-button static">
-                  <span className="suggestion-tag add-weight">{t('progress.suggestions.tag.addWeight')}</span>
-                  <span>
-                    {t('progress.suggestions.applied', {
-                      exercise: nameFor(exerciseId),
-                      session: target.dayType
-                        ? t('progress.suggestions.nextDay', { dayType: target.dayType })
-                        : t('progress.suggestions.nextSession'),
-                      kg: formatNumber(language, target.increaseKg),
-                      unit: t('progress.unit.kg'),
-                    })}
-                  </span>
-                </div>
-                <button type="button" className="suggestion-action-button" onClick={() => setTargets(removeWeightTarget(exerciseId))}>
-                  {t('progress.suggestions.undo')}
-                </button>
-              </li>
-            ))}
             {suggestions.map((suggestion, index) => {
               const exerciseId = suggestionExerciseId(suggestion)
               return (
@@ -577,11 +542,6 @@ export default function ProgressScreen({
                       <span>{suggestion.message}</span>
                       <p className="suggestion-why"><strong>{t('progress.suggestions.why')}</strong> {suggestion.why}</p>
                     </div>
-                  )}
-                  {suggestion.type === 'add-weight' && (
-                    <button type="button" className="suggestion-action-button" onClick={() => applySuggestion(suggestion)}>
-                      {t('progress.suggestions.apply')}
-                    </button>
                   )}
                 </li>
               )

@@ -2455,11 +2455,6 @@ button {
   color: var(--muted-strong);
 }
 
-.ai-plan-today {
-  margin: 12px 0;
-}
-
-.ai-plan-today p,
 .next-block-banner p {
   margin: 0;
   color: var(--muted-strong);
@@ -2716,18 +2711,6 @@ button {
   font-size: 0.68rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
-}
-
-.ai-plan-exercise {
-  display: grid;
-  gap: 5px;
-}
-
-.ai-plan-exercise p {
-  margin: 0;
-  color: var(--muted-strong);
-  font-size: 0.68rem;
-  line-height: 1.4;
 }
 
 .planned-exercise-card.collapsed {
@@ -3603,16 +3586,6 @@ button[class] {
 .suggestion-tag.plateau,
 .suggestion-tag.fatigue {
   color: #e6c27a;
-}
-
-.weight-target-chip {
-  min-height: 36px;
-  font-size: var(--font-caption);
-  font-weight: 700;
-  color: #9fd6a6;
-  border: 1px solid rgba(159, 214, 166, 0.4);
-  border-radius: 999px;
-  padding: 2px 8px;
 }
 
 .suggestion-actions {
@@ -4693,8 +4666,56 @@ button[class] {
   color: var(--muted-strong);
 }
 
-.previous-target-card {
-  margin-top: 8px;
+.trainer-recommendation-card {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  overflow-wrap: anywhere;
+}
+
+.trainer-recommendation-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.trainer-card-heading,
+.trainer-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trainer-recommendation-card .trainer-confidence {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  font-size: 0.64rem;
+}
+
+.trainer-recommendation-card .trainer-recommended {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.trainer-card-actions {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.trainer-card-actions button {
+  min-height: 36px;
+  flex: 1 1 auto;
+  padding: 0 10px;
 }
 
 .log-toast.in-summary {
