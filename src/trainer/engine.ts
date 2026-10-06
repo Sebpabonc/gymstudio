@@ -241,17 +241,25 @@ function monotonic(weights: number[], reps: number[]) {
   return weights
 }
 
-/** PT 2026-10-07 global floor: a weighted exercise is never recommended at 0 kg (minimum one step). */
-function withFloor(result: Recommendation, lastWeight: number, step: number): Recommendation {
-  if (lastWeight > 0 && result.weight !== null && result.weight <= 0) {
-    return { ...result, weight: step > 0 ? Math.min(step, lastWeight) : lastWeight }
-  }
-  return result
-}
-
 type Make = (action: TrainerAction, weight: number | null, reason: ReasonCode, extra?: Partial<Recommendation>) => Recommendation
 
+/** Every recommendation passes the PT global floor (never 0 kg for a weighted exercise, minimum one step). */
 export function recommend(input: RecommendInput): Recommendation {
+  const result = recommendUnfloored(input)
+  const lastMax = Math.max(0, ...input.history.flatMap((session) => session.sets.map((set) => set.weight)))
+  if (!(lastMax > 0)) return result
+  const unit = isBodyweight(input.equipment) ? 2.5 : equipmentStep(input.equipment)
+  const minimum = Math.min(unit, lastMax)
+  const floor = (weight: number) => (weight > 0 ? weight : minimum)
+  if (result.weight === null && !result.setWeights) return result
+  return {
+    ...result,
+    ...(result.weight !== null ? { weight: floor(result.weight) } : {}),
+    ...(result.setWeights ? { setWeights: result.setWeights.map(floor) } : {}),
+  }
+}
+
+function recommendUnfloored(input: RecommendInput): Recommendation {
   const { today, target, sets, plannedWeight } = input
   const step = equipmentStep(input.equipment)
   const pyramid = isPyramid(input.technique, input.setReps)
@@ -320,7 +328,7 @@ export function recommend(input: RecommendInput): Recommendation {
 
   if (pyramid && input.setReps) return recommendPyramid(input, progressing, capacity, confidence, step, make)
 
-  const result = withFloor(recommendStraight(input, progressing, lastSets, lastWeight, capacity, confidence, step, make), lastWeight, step)
+  const result = recommendStraight(input, progressing, lastSets, lastWeight, capacity, confidence, step, make)
   // R3: drop-set — the drop is 75 % of the recommended main load, rounded down.
   if (input.technique === 'drop-set' && result.weight !== null && result.weight > 0) {
     return { ...result, dropWeight: roundToStep(result.weight * 0.75, step, 'down') }
