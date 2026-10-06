@@ -900,6 +900,16 @@ export async function deleteWorkoutEntry(entryId: string): Promise<WorkoutEntry[
   const history = await loadWorkoutHistoryEntries()
   if (!history.some((entry) => entry.id === entryId)) return loadWorkoutHistory()
 
+  // An AI plan for this day was built from the history that included this log; drop it so it is rebuilt.
+  const deleted = history.find((entry) => entry.id === entryId)
+  if (deleted?.blockId && deleted.dayKey) {
+    try {
+      localStorage.removeItem(storageKey(aiSessionPlanStorageKey(deleted.blockId, deleted.dayKey)))
+    } catch {
+      // Storage unavailable: nothing cached to clear.
+    }
+  }
+
   const metadata = loadSyncMetadata()
   const now = new Date().toISOString()
   metadata.entries[entryId] = { updatedAt: now, dirty: true, deletedAt: now }

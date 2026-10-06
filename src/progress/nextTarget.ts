@@ -22,7 +22,13 @@ export function recommendNextTarget(
   const loggedSets = sets.filter((set) => Number.isFinite(set.weight) && Number.isFinite(set.reps))
   if (plannedReps.length === 0 || loggedSets.length === 0 || loggedSets[0].weight < 0) return null
 
-  const weight = loggedSets[0].weight
+  // Working weight = the load used on most sets (e.g. 20 / 22.5 / 22.5 → 22.5); ties keep the first set's load.
+  const counts = new Map<number, number>()
+  for (const set of loggedSets) counts.set(set.weight, (counts.get(set.weight) ?? 0) + 1)
+  const weight = loggedSets.reduce(
+    (best, set) => ((counts.get(set.weight) ?? 0) > (counts.get(best) ?? 0) ? set.weight : best),
+    loggedSets[0].weight
+  )
   const shortSets = plannedReps.flatMap((target, index) =>
     loggedSets[index] && loggedSets[index].reps < target ? [index + 1] : []
   )
