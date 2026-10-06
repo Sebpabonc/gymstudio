@@ -31,6 +31,12 @@ describe('recommend — same target as last time', () => {
     expect(result.evidence.lastReps).toEqual([14, 14, 14])
   })
 
+
+
+
+
+
+
   it('PO case: 26 kg × 12 on a heavy 8-rep day → 28 kg, never 28.5', () => {
     const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(26, 12, 12, 12), target: range(8) }]
     expect(recommend({ ...base, today: '2026-10-12', history, target: range(8) })).toMatchObject({ action: 'increase_weight', weight: 28 })

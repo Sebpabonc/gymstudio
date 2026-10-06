@@ -73,4 +73,11 @@ describe('buildEvidence', () => {
 
     expect(evidence[0]?.target).toEqual({ min: 12, max: 12 })
   })
+
+  it('preserves a reported zero RIR in trainer evidence', () => {
+    const logged = entry('rir', '2026-10-05', 'day-a')
+    logged.sets[0].rir = 0
+
+    expect(buildEvidence([logged], 'press', blocks, '2026-10-08')[0]?.sets[0]?.rir).toBe(0)
+  })
 })

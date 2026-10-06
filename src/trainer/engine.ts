@@ -427,7 +427,6 @@ function recommendStraight(
     : Math.max(lastWeight + step, Math.min(lastWeight * (1 + MAX_INCREASE_PCT), lastWeight + 2 * step))
   const capped = (weight: number) => Math.min(weight, roundToStep(maxWeight, step, 'down'))
   const strong = confidence !== 'low'
-
   // R8: light loads — when one step is more than 10 % of the load, add reps to max + 2 before adding the step.
   // (Added load on bodyweight work follows normal straight-set rules — R7, T9/T21.)
   if (!isBodyweight(input.equipment) && lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT && sameRange(lastTarget, target)) {
