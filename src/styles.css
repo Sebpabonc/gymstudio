@@ -1230,8 +1230,7 @@ button {
   cursor: not-allowed;
 }
 
-.ai-explanation,
-.ai-session-summary {
+.ai-explanation {
   display: grid;
   justify-items: start;
   gap: 8px;
@@ -1265,17 +1264,6 @@ button {
 
 .ai-inline-error {
   color: var(--danger, #ff8b8b);
-}
-
-.ai-session-summary-button {
-  min-height: 44px;
-}
-
-.ai-summary-bullets {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding-left: 20px;
 }
 
 .tips-box.collapsed .tips-header {
@@ -4612,6 +4600,7 @@ button[class] {
   display: grid;
   gap: 4px;
   padding: 10px;
+  overflow-wrap: anywhere;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel);
@@ -4660,10 +4649,6 @@ button[class] {
   color: var(--muted);
   font-size: 0.72rem;
   line-height: 1.4;
-}
-
-.next-target-card .ai-exercise-note {
-  color: var(--muted-strong);
 }
 
 .trainer-recommendation-card {
