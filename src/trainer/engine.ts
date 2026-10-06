@@ -437,7 +437,14 @@ function recommendStraight(
     finalSet.rir >= 3 &&
     lastReps.every((reps) => reps >= lastTarget.min)
 
-  if (complete && sameRange(lastTarget, target) && rirExceeded && capacity) {
+  if (
+    complete &&
+    lastWeight > 0 &&
+    step / lastWeight <= MAX_INCREASE_PCT &&
+    sameRange(lastTarget, target) &&
+    rirExceeded &&
+    capacity
+  ) {
     const byCapacity = roundToStep(loadForReps(capacity.oneRepMax, target.min), step, strong ? 'up' : 'down')
     return make('increase_weight', capped(Math.max(byCapacity, lastWeight + step)), capacity.latestIsOutlier ? 'outlier_capped' : 'exceeded_target')
   }
