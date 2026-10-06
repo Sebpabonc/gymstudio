@@ -74,6 +74,8 @@ export type Recommendation = {
   setReps?: number[]
   /** Drop-set: recommended drop load (R3). */
   dropWeight?: number
+  /** Set when per-user calibration moved the load away from the rule result (spec 1.10). */
+  calibration?: { offset: number; uncalibratedWeight: number; capped: boolean }
   evidence: {
     lastDate?: string
     lastWeight?: number
@@ -100,6 +102,8 @@ export type RecommendInput = {
   tempo?: boolean
   /** Double-angle follower (R5): use the leading exercise's recommended load today. */
   followLoad?: number
+  /** Per-user calibration offset O in reps (continuous-learning spec 1.2); 0 when not enough evidence. */
+  calibrationOffset?: number
 }
 
 const MAX_REPS_FOR_ESTIMATE = 15
@@ -107,6 +111,9 @@ const RESERVE_REPS = 2
 const CAPACITY_WINDOW_DAYS = 42
 const OUTLIER_JUMP = 0.12
 const MAX_INCREASE_PCT = 0.1
+
+/** Continuous-learning spec 1.3: rir_eff = clamp(rir_tgt − O, 0, rir_tgt + 3). */
+const effectiveReserve = (rirTarget: number, offset = 0) => Math.min(rirTarget + 3, Math.max(0, rirTarget - offset))
 
 /** Load increment (spec "Definitions"): dumbbell 2 kg, machine/cable stacks 5 kg, everything else 2.5 kg. */
 export function equipmentStep(equipment?: string) {
@@ -364,7 +371,7 @@ function recommendPyramid(
     }
   } else if (capacity) {
     // R1.3: first time with this pyramid — top set from capacity at ~1 RIR, round up only with medium/high confidence.
-    top = roundToStep(loadForReps(capacity.oneRepMax, topReps, 1), step, confidence === 'low' ? 'down' : 'up')
+    top = roundToStep(loadForReps(capacity.oneRepMax, topReps, effectiveReserve(1, input.calibrationOffset)), step, confidence === 'low' ? 'down' : 'up')
     action = 'increase_weight'
     reason = 'converted_rep_range'
   } else {
@@ -439,7 +446,7 @@ function recommendStraight(
 
   // Different rep range today (e.g. Monday 8-10 → Thursday 12-15): convert through capacity, never copy the load.
   if (!sameRange(lastTarget, target) && capacity) {
-    let weight = roundToStep(loadForReps(capacity.oneRepMax, target.min), step, strong ? 'nearest' : 'down')
+    let weight = roundToStep(loadForReps(capacity.oneRepMax, target.min, effectiveReserve(RESERVE_REPS, input.calibrationOffset)), step, strong ? 'nearest' : 'down')
     if (complete && lastWeight >= weight && lastReps.every((reps) => reps >= target.max + 2)) {
       return make('increase_weight', capped(lastWeight + step), 'original_too_easy', {
         reps: { min: Math.max(1, target.max - 2), max: target.max },
@@ -455,25 +462,45 @@ function recommendStraight(
   const belowBy3 = lastReps.filter((reps) => lastTarget.min - reps >= 3).length
   const dropOff = lastReps.length > 1 && lastReps[0] >= lastTarget.min && lastReps.slice(1).some((reps) => lastTarget.min - reps >= 3)
 
-  if (!complete) {
-    // R6: incomplete session → at most the same load.
+  const stepResult = (): Recommendation => {
+    if (!complete) {
+      // R6: incomplete session → at most the same load.
+      if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, 'slightly_below_target')
+      return make('maintain', lastWeight, 'incomplete_session')
+    }
+    if (exceeded && capacity) {
+      const byCapacity = roundToStep(loadForReps(capacity.oneRepMax, target.min, effectiveReserve(RESERVE_REPS, input.calibrationOffset)), step, strong ? 'up' : 'down')
+      return make('increase_weight', capped(Math.max(byCapacity, lastWeight + step)), capacity.latestIsOutlier ? 'outlier_capped' : 'exceeded_target')
+    }
+    if (atTop) return make('increase_weight', capped(lastWeight + step), 'reached_top_of_range')
+    if (dropOff) return make('maintain', lastWeight, 'drop_off_across_sets')
+    if (belowBy3 >= 2) {
+      const previous = progressing[1]
+      const previousTarget = previous?.target ?? lastTarget
+      const previousBelow = previous && progressionSets(previous.sets, sets).filter((set) => previousTarget.min - set.reps >= 3).length >= 2
+      if (previousBelow) return make('decrease_weight', roundToStep(lastWeight * 0.925, step, 'down'), 'below_target_twice')
+      return make('maintain', lastWeight, 'below_target_once')
+    }
     if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, 'slightly_below_target')
-    return make('maintain', lastWeight, 'incomplete_session')
+    if (progressing.length === 1 && confidence === 'low') return make('collect_data', lastWeight, 'no_history')
+    return make('increase_reps', lastWeight, 'within_range')
   }
-  if (exceeded && capacity) {
-    const byCapacity = roundToStep(loadForReps(capacity.oneRepMax, target.min), step, strong ? 'up' : 'down')
-    return make('increase_weight', capped(Math.max(byCapacity, lastWeight + step)), capacity.latestIsOutlier ? 'outlier_capped' : 'exceeded_target')
-  }
-  if (atTop) return make('increase_weight', capped(lastWeight + step), 'reached_top_of_range')
-  if (dropOff) return make('maintain', lastWeight, 'drop_off_across_sets')
-  if (belowBy3 >= 2) {
-    const previous = progressing[1]
-    const previousTarget = previous?.target ?? lastTarget
-    const previousBelow = previous && progressionSets(previous.sets, sets).filter((set) => previousTarget.min - set.reps >= 3).length >= 2
-    if (previousBelow) return make('decrease_weight', roundToStep(lastWeight * 0.925, step, 'down'), 'below_target_twice')
-    return make('maintain', lastWeight, 'below_target_once')
-  }
-  if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, 'slightly_below_target')
-  if (progressing.length === 1 && confidence === 'low') return make('collect_data', lastWeight, 'no_history')
-  return make('increase_reps', lastWeight, 'within_range')
+
+  // Continuous-learning integration (PT, approved by Sebas 2026-10-07): with |O| ≥ 1 the calibrated capacity load
+  // L_c can raise (O ≥ +1: max) or lower (O ≤ −1: min) the step result S; never below the last load when the last
+  // session reached the top of the range (Sebas); per-set guardrail last; deload/bodyweight/light loads untouched.
+  const base = stepResult()
+  const offset = input.calibrationOffset ?? 0
+  if (Math.abs(offset) < 1 || !capacity || base.weight === null || base.action === 'collect_data') return base
+  const calibrated = roundToStep(loadForReps(capacity.oneRepMax, target.min, effectiveReserve(RESERVE_REPS, offset)), step, 'down')
+  let weight = offset > 0 ? Math.max(base.weight, calibrated) : Math.min(base.weight, calibrated)
+  // PT pre-merge review: a calibration decrease is at most −5 % of the last load per session.
+  if (offset < 0) weight = Math.max(weight, roundToStep(lastWeight * 0.95, step, 'down'))
+  if (atTop && complete) weight = Math.max(weight, lastWeight)
+  const limit = roundToStep(maxWeight, step, 'down')
+  const hitGuardrail = weight > limit
+  weight = Math.min(weight, limit)
+  if (weight === base.weight) return base
+  const action: TrainerAction = weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
+  return { ...base, action, weight, calibration: { offset, uncalibratedWeight: base.weight, capped: hitGuardrail } }
 }

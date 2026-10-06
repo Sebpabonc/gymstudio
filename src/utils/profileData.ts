@@ -284,3 +284,33 @@ export async function saveTrainerRecommendation(row: TrainerRecommendationRow): 
   }, { onConflict: 'id' })
   throwIfError(error)
 }
+
+/** Recommendations with a logged result, for per-user calibration (continuous-learning spec 1). */
+export async function fetchCalibrationRecommendations(): Promise<TrainerRecommendationRow[]> {
+  const client = await getClient()
+  const since = new Date(Date.now() - 120 * 86_400_000).toISOString().slice(0, 10)
+  const { data, error } = await client
+    .from('trainer_recommendations')
+    .select('id, exercise_id, date, block_id, day_key, original, recommended, action, reason, confidence, evidence, status, result_entry_id')
+    .in('status', ['accepted', 'kept_original'])
+    .not('result_entry_id', 'is', null)
+    .gte('date', since)
+    .order('date', { ascending: false })
+    .limit(1000)
+  throwIfError(error)
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    exerciseId: row.exercise_id,
+    date: row.date,
+    blockId: row.block_id ?? undefined,
+    dayKey: row.day_key ?? undefined,
+    original: row.original,
+    recommended: row.recommended,
+    action: row.action,
+    reason: row.reason,
+    confidence: row.confidence,
+    evidence: row.evidence ?? {},
+    status: row.status,
+    resultEntryId: row.result_entry_id ?? undefined,
+  }))
+}

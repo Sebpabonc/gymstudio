@@ -65,11 +65,13 @@ import { loadDemoBlocks } from '../plans/demoBlock'
 import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
 import type { ExerciseSwap } from '../plans/exerciseSwaps'
 import { fetchExerciseSwaps, removeExerciseSwap, saveExerciseSwap } from '../utils/profileData'
-import { saveTrainerRecommendation } from '../utils/profileData'
+import { fetchCalibrationRecommendations, saveTrainerRecommendation } from '../utils/profileData'
 import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { equipmentStep, recommend } from '../trainer/engine'
 import { buildEvidence, isDoubleAngleFollower } from '../trainer/evidence'
+import { bucketFor, computeCalibration } from '../trainer/calibration'
+import { buildExposures } from '../trainer/exposures'
 import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
@@ -578,6 +580,20 @@ export default function WorkoutPlan({
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const trainerRecommendationIds = useRef(new Map<string, string>())
+  // Continuous learning (PT spec, approved 2026-10-07): the user's past recommendations + results calibrate the engine.
+  const [calibrationRows, setCalibrationRows] = useState<Awaited<ReturnType<typeof fetchCalibrationRecommendations>>>([])
+  useEffect(() => {
+    if (demoMode || authStatus !== 'signed-in') return
+    let cancelled = false
+    void fetchCalibrationRecommendations()
+      .then((rows) => { if (!cancelled) setCalibrationRows(rows) })
+      .catch(() => undefined)
+    return () => { cancelled = true }
+  }, [authStatus, demoMode, history.length])
+  const calibrationExposures = useMemo(
+    () => buildExposures(calibrationRows, history, trainingBlocks, exerciseCatalog),
+    [calibrationRows, history, trainingBlocks, exerciseCatalog]
+  )
   // Phase 4: PT sentence from the AI for the engine's decision; the template sentence shows until (or unless) it arrives.
   const [trainerExplanations, setTrainerExplanations] = useState<Record<string, string>>({})
   const requestedExplanations = useRef(new Set<string>())
@@ -1209,6 +1225,16 @@ export default function WorkoutPlan({
       setReps: reps,
       tempo: /\btempo\b/i.test(exercise.notes ?? ''),
       followLoad: followLoadFor(exercise),
+      calibrationOffset: computeCalibration(
+        calibrationExposures,
+        today,
+        {
+          exerciseId: exercise.exerciseId,
+          pattern: exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.movementPattern,
+          bucket: bucketFor(exercise.technique),
+        },
+        history.map((entry) => entry.date.slice(0, 10)).filter((date) => date < today)
+      ).offset,
     })
     return {
       recommendation,
@@ -2674,7 +2700,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             trainer.recommendation,
                             { weight: trainer.original.weight, target: trainer.target },
                             trainerReason(t, language, trainer.recommendation, trainer.target)
-                          ),
+                          ) + (trainer.recommendation.calibration
+                            ? ' ' + t(
+                                trainer.recommendation.calibration.offset > 0
+                                  ? 'workout.trainer.calibration.up'
+                                  : 'workout.trainer.calibration.down',
+                                {
+                                  reps: formatNumber(language, Math.abs(trainer.recommendation.calibration.offset)),
+                                  delta: formatNumber(language, Math.abs((trainer.recommendation.weight ?? 0) - trainer.recommendation.calibration.uncalibratedWeight)),
+                                }
+                              ) + (trainer.recommendation.calibration.capped ? ' ' + t('workout.trainer.calibration.capped') : '')
+                            : ''),
                         })}
                         confidence={t(`workout.trainer.confidence.${trainer.recommendation.confidence}` as TranslationKey)}
                         collectData={trainer.recommendation.action === 'collect_data'}
