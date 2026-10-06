@@ -2696,15 +2696,27 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       <TrainerRecommendationCard
                         title={t('workout.trainer.title')}
                         lastTime={trainer.evidence[0]
-                          ? t('workout.trainer.lastTime', {
-                              weight: formatNumber(language, trainer.evidence[0].sets[0]?.weight ?? 0),
-                              reps: trainer.evidence[0].sets.map((set) => formatNumber(language, set.reps)).join(' · '),
-                            })
+                          ? new Set(trainer.evidence[0].sets.map((set) => set.weight)).size > 1
+                            // Different loads per set (e.g. 20 / 22.5 / 22.5): show each set, not only the first.
+                            ? t('workout.trainer.lastTimeSets', {
+                                sets: trainer.evidence[0].sets
+                                  .map((set) => `${formatNumber(language, set.weight)} × ${formatNumber(language, set.reps)}`)
+                                  .join(' · '),
+                              })
+                            : t('workout.trainer.lastTime', {
+                                weight: formatNumber(language, trainer.evidence[0].sets[0]?.weight ?? 0),
+                                reps: trainer.evidence[0].sets.map((set) => formatNumber(language, set.reps)).join(' · '),
+                              })
                           : t('workout.trainer.noPrevious')}
-                        original={t('workout.trainer.original', {
-                          weight: formatNumber(language, trainer.original.weight),
-                          reps: trainerRangeLabel(trainer.target),
-                        })}
+                        original={new Set(trainer.original.setWeights).size > 1
+                          ? t('workout.trainer.originalSets', {
+                              weights: trainer.original.setWeights.map((weight) => formatNumber(language, weight)).join(' / '),
+                              reps: trainerRangeLabel(trainer.target),
+                            })
+                          : t('workout.trainer.original', {
+                              weight: formatNumber(language, trainer.original.weight),
+                              reps: trainerRangeLabel(trainer.target),
+                            })}
                         recommended={t('workout.trainer.recommended', {
                           weight: trainer.recommendation.setWeights && new Set(trainer.recommendation.setWeights).size > 1
                             ? trainer.recommendation.setWeights.map((weight) => formatNumber(language, weight)).join(' / ')
