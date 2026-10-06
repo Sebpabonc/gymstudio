@@ -246,3 +246,41 @@ export async function removeExerciseSwap(fromExerciseId: string): Promise<void> 
   const { error } = await client.from('exercise_swaps').delete().eq('from_exercise_id', fromExerciseId)
   throwIfError(error)
 }
+
+export type TrainerRecommendationRow = {
+  id: string
+  exerciseId: string
+  date: string
+  blockId?: string
+  dayKey?: string
+  original: { weight?: number | null; reps: { min: number; max: number }; sets: number }
+  recommended: { weight?: number | null; reps: { min: number; max: number }; sets: number }
+  action: string
+  reason: string
+  confidence: 'low' | 'medium' | 'high'
+  evidence: Record<string, unknown>
+  status: 'shown' | 'accepted' | 'kept_original' | 'ignored'
+  resultEntryId?: string
+}
+
+/** Stores (or updates) a recommendation the AI Trainer showed and what the user did with it. */
+export async function saveTrainerRecommendation(row: TrainerRecommendationRow): Promise<void> {
+  const client = await getClient()
+  const { error } = await client.from('trainer_recommendations').upsert({
+    id: row.id,
+    exercise_id: row.exerciseId,
+    date: row.date,
+    block_id: row.blockId ?? null,
+    day_key: row.dayKey ?? null,
+    original: row.original,
+    recommended: row.recommended,
+    action: row.action,
+    reason: row.reason,
+    confidence: row.confidence,
+    evidence: row.evidence,
+    status: row.status,
+    result_entry_id: row.resultEntryId ?? null,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'id' })
+  throwIfError(error)
+}
