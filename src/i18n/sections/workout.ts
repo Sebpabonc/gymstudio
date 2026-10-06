@@ -153,7 +153,7 @@ export const workout = {
     'workout.trainer.reason.long_break': 'It has been {days} days since your last session, so I reduced the load from {weight} kg.',
     'workout.trainer.reason.outlier_capped': 'Last time you did {reps} reps at {weight} kg, but I capped the increase to one available step.',
     'workout.trainer.reason.incomplete_session': 'Last time only some sets were logged, so I kept {weight} kg until a full session confirms it.',
-    'workout.trainer.reason.light_load_add_reps': 'At {weight} kg the next dumbbell or plate is a big jump, so build reps first ({reps} last time).',
+    'workout.trainer.reason.light_load_add_reps': 'At {weight} kg the next weight step is a big jump, so build reps first ({reps} last time).',
     'workout.trainer.reason.bodyweight_add_reps': 'Bodyweight work: add reps before adding load ({reps} last time).',
     'workout.trainer.reason.double_angle': 'Same weight as the previous angle; do as many clean reps as you can, about 1 short of failure.',
     'workout.nextTarget.label': 'Next: {weight} kg × {reps} reps · {sets} sets',
