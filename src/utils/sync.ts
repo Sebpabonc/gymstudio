@@ -18,6 +18,7 @@ export type RemoteWorkoutEntry = {
   notes: string | null
   block_id: string | null
   day_key: string | null
+  target?: WorkoutEntry['target'] | null
   updated_at: string
   deleted_at: string | null
 }
@@ -36,6 +37,7 @@ function fromRemoteEntry(entry: RemoteWorkoutEntry): SyncWorkoutEntry {
     notes: entry.notes ?? undefined,
     blockId: entry.block_id ?? undefined,
     dayKey: entry.day_key ?? undefined,
+    ...(entry.target ? { target: entry.target } : {}),
     updatedAt: entry.updated_at,
     dirty: false,
     deletedAt: entry.deleted_at ?? undefined,
@@ -92,6 +94,7 @@ export async function syncWorkoutHistory(userId: string) {
       notes: entry.notes ?? null,
       block_id: entry.blockId ?? null,
       day_key: entry.dayKey ?? null,
+      target: entry.target ?? null,
       updated_at: entry.updatedAt,
       deleted_at: entry.deletedAt ?? null,
     }))
@@ -117,7 +120,7 @@ export async function syncWorkoutHistory(userId: string) {
   for (let from = 0; ; from += 1_000) {
     let query = client
       .from('workout_entries')
-      .select('id, exercise_id, date, sets, notes, block_id, day_key, updated_at, deleted_at')
+      .select('id, exercise_id, date, sets, notes, block_id, day_key, target, updated_at, deleted_at')
     if (lastPulledAt) query = query.gte('updated_at', lastPulledAt)
     const { data, error } = await query
       .eq('user_id', userId)

@@ -28,6 +28,19 @@ export type WorkoutSet = {
   reps: number
   weight: number
   drop?: { reps: number; weight: number }
+  /** Reps in reserve reported for this set (optional, AI Trainer phase 6). */
+  rir?: number
+  /** When the set was ticked (epoch ms), for set-by-set coaching. */
+  at?: number
+}
+
+/** What the plan/trainer asked for when an exercise was logged (AI Trainer phase 2). */
+export type EntryTarget = {
+  sets: number
+  reps: { min: number; max: number }
+  weight?: number
+  technique?: string
+  recommendationId?: string
 }
 
 export type WorkoutEntry = {
@@ -38,6 +51,7 @@ export type WorkoutEntry = {
   blockId?: string
   dayKey?: string
   notes?: string
+  target?: EntryTarget
 }
 
 export type TrainingTechnique = 'straight' | 'superset' | 'drop-set' | 'pyramid' | 'reverse-pyramid'
