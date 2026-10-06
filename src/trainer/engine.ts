@@ -407,12 +407,7 @@ function recommendStraight(
   const last = progressing[0]
   const lastTarget = last.target ?? target
   const lastReps = lastSets.map((set) => set.reps)
-  const finalSet = lastSets[lastSets.length - 1]
   const complete = lastSets.length >= sets
-
-  if (finalSet?.rir === 0 && finalSet.reps < target.min) {
-    return make('maintain', lastWeight, 'slightly_below_target')
-  }
 
   // R7: bodyweight with no added load — progress reps; +2.5 kg after two sessions at target max + 2.
   if (isBodyweight(input.equipment) && lastWeight === 0) {
@@ -432,23 +427,6 @@ function recommendStraight(
     : Math.max(lastWeight + step, Math.min(lastWeight * (1 + MAX_INCREASE_PCT), lastWeight + 2 * step))
   const capped = (weight: number) => Math.min(weight, roundToStep(maxWeight, step, 'down'))
   const strong = confidence !== 'low'
-  const rirExceeded =
-    finalSet?.rir !== undefined &&
-    finalSet.rir >= 3 &&
-    lastReps.every((reps) => reps >= lastTarget.min)
-
-  if (
-    complete &&
-    lastWeight > 0 &&
-    step / lastWeight <= MAX_INCREASE_PCT &&
-    sameRange(lastTarget, target) &&
-    rirExceeded &&
-    capacity
-  ) {
-    const byCapacity = roundToStep(loadForReps(capacity.oneRepMax, target.min), step, strong ? 'up' : 'down')
-    return make('increase_weight', capped(Math.max(byCapacity, lastWeight + step)), capacity.latestIsOutlier ? 'outlier_capped' : 'exceeded_target')
-  }
-
   // R8: light loads — when one step is more than 10 % of the load, add reps to max + 2 before adding the step.
   // (Added load on bodyweight work follows normal straight-set rules — R7, T9/T21.)
   if (!isBodyweight(input.equipment) && lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT && sameRange(lastTarget, target)) {

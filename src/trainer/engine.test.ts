@@ -31,35 +31,11 @@ describe('recommend — same target as last time', () => {
     expect(result.evidence.lastReps).toEqual([14, 14, 14])
   })
 
-  it('RIR 0 on a final below-target set prefers maintaining the load', () => {
-    const history: SessionEvidence[] = [{
-      date: '2026-10-05',
-      sets: [...sets(40, 10, 10), { weight: 40, reps: 9, rir: 0 }],
-      target: range(10),
-    }]
-    expect(recommend({ ...base, equipment: 'barbell', history, target: range(10) }))
-      .toMatchObject({ action: 'maintain', weight: 40, reason: 'slightly_below_target' })
-  })
 
-  it('RIR 3 or more with the target met allows the exceeded-target path', () => {
-    const history: SessionEvidence[] = [{
-      date: '2026-10-05',
-      sets: [...sets(40, 10, 10), { weight: 40, reps: 10, rir: 3 }],
-      target: range(10),
-    }]
-    expect(recommend({ ...base, equipment: 'barbell', history, target: range(10) }))
-      .toMatchObject({ action: 'increase_weight', reason: 'exceeded_target' })
-  })
 
-  it('RIR 3 does not bypass the light-load reps-before-weight guardrail', () => {
-    const history: SessionEvidence[] = [{
-      date: '2026-10-05',
-      sets: [...sets(10, 10, 10), { weight: 10, reps: 10, rir: 3 }],
-      target: range(10),
-    }]
-    expect(recommend({ ...base, history, target: range(10) }))
-      .toMatchObject({ action: 'increase_reps', weight: 10, reason: 'light_load_add_reps' })
-  })
+
+
+
 
   it('PO case: 26 kg × 12 on a heavy 8-rep day → 28 kg, never 28.5', () => {
     const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(26, 12, 12, 12), target: range(8) }]
