@@ -105,4 +105,9 @@ describe('recommendNextTarget', () => {
       weight: 2.5,
     })
   })
+
+  it('uses the working weight (most sets), not the warm-up first set', () => {
+    expect(recommendNextTarget([{ weight: 20, reps: 10 }, { weight: 22.5, reps: 10 }, { weight: 22.5, reps: 10 }], [8, 8, 8], 'upper'))
+      .toMatchObject({ action: 'increase', weight: 25 })
+  })
 })

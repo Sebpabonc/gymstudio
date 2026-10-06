@@ -1083,7 +1083,12 @@ export default function WorkoutPlan({
         : weight
     })
     const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
-    const aiExercise = exercise ? getAiPlanExercise(exercise) : undefined
+    // Ignore an AI weight that no longer matches the history it was built from (e.g. a trial log was deleted).
+    const ruleWeight = nextTarget?.weight ?? lastWeights[0] ?? 0
+    const plannedAi = exercise ? getAiPlanExercise(exercise) : undefined
+    const aiExercise = plannedAi && (ruleWeight <= 0 || Math.abs(plannedAi.weight - ruleWeight) <= ruleWeight * 0.1)
+      ? plannedAi
+      : undefined
     const baseSetWeights = aiExercise
       ? Array.from({ length: fallbackSetCount }, () => aiExercise.weight)
       : nextTarget
