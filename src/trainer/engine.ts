@@ -432,6 +432,15 @@ function recommendStraight(
     : Math.max(lastWeight + step, Math.min(lastWeight * (1 + MAX_INCREASE_PCT), lastWeight + 2 * step))
   const capped = (weight: number) => Math.min(weight, roundToStep(maxWeight, step, 'down'))
   const strong = confidence !== 'low'
+  const rirExceeded =
+    finalSet?.rir !== undefined &&
+    finalSet.rir >= 3 &&
+    lastReps.every((reps) => reps >= lastTarget.min)
+
+  if (complete && sameRange(lastTarget, target) && rirExceeded && capacity) {
+    const byCapacity = roundToStep(loadForReps(capacity.oneRepMax, target.min), step, strong ? 'up' : 'down')
+    return make('increase_weight', capped(Math.max(byCapacity, lastWeight + step)), capacity.latestIsOutlier ? 'outlier_capped' : 'exceeded_target')
+  }
 
   // R8: light loads — when one step is more than 10 % of the load, add reps to max + 2 before adding the step.
   // (Added load on bodyweight work follows normal straight-set rules — R7, T9/T21.)
@@ -456,11 +465,7 @@ function recommendStraight(
     return make(action, weight, 'converted_rep_range')
   }
 
-  const exceeded =
-    lastReps.every((reps) => reps >= lastTarget.max + 3) ||
-    (finalSet?.rir !== undefined &&
-      finalSet.rir >= 3 &&
-      lastReps.every((reps) => reps >= lastTarget.min))
+  const exceeded = lastReps.every((reps) => reps >= lastTarget.max + 3)
   const atTop = lastReps.every((reps) => reps >= lastTarget.max)
   const belowBy3 = lastReps.filter((reps) => lastTarget.min - reps >= 3).length
   const dropOff = lastReps.length > 1 && lastReps[0] >= lastTarget.min && lastReps.slice(1).some((reps) => lastTarget.min - reps >= 3)

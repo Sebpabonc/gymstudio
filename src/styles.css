@@ -4651,6 +4651,63 @@ button[class] {
   line-height: 1.4;
 }
 
+.trainer-rir-prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted-strong);
+  font-size: 0.75rem;
+}
+
+.trainer-rir-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trainer-rir-options button,
+.trainer-set-hint button {
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+}
+
+.trainer-rir-options .trainer-rir-skip,
+.trainer-set-hint .trainer-set-hint-dismiss {
+  color: var(--muted);
+}
+
+.trainer-set-hint {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 8px;
+  color: var(--muted-strong);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.trainer-set-hint span {
+  flex: 1 1 100%;
+}
+
+.trainer-set-hint .trainer-set-hint-dismiss {
+  min-width: 32px;
+  padding: 0;
+  font-size: 1rem;
+}
+
 .trainer-recommendation-card {
   display: grid;
   gap: 6px;

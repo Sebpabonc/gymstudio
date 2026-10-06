@@ -68,8 +68,9 @@ import { fetchExerciseSwaps, removeExerciseSwap, saveExerciseSwap } from '../uti
 import { saveTrainerRecommendation } from '../utils/profileData'
 import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
-import { recommend } from '../trainer/engine'
+import { equipmentStep, recommend } from '../trainer/engine'
 import { buildEvidence, isDoubleAngleFollower } from '../trainer/evidence'
+import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
@@ -564,6 +565,8 @@ export default function WorkoutPlan({
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
   const [selectedCalendarBlockId, setSelectedCalendarBlockId] = useState('')
   const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
+  const [dismissedSetHints, setDismissedSetHints] = useState<Record<string, boolean>>({})
+  const [dismissedRirEntries, setDismissedRirEntries] = useState<Record<string, boolean>>({})
   const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({})
   const [completedSupersetSets, setCompletedSupersetSets] = useState<Record<string, boolean[]>>({})
   const [completedSupersetAt, setCompletedSupersetAt] = useState<Record<string, Array<number | undefined>>>({})
@@ -1300,6 +1303,50 @@ export default function WorkoutPlan({
       [key]: { ...(current[key] ?? currentDraft), setDone: nextCompleted, setAt: nextSetAt },
     }))
     if (nextCompleted.every(Boolean)) void logPlannedExercise(exercise, nextCompleted, nextSetAt)
+  }
+
+  const useSetHint = (exercise: PlanExercise, setCount: number, weight: number) => {
+    const key = getPlanDraftKey(exercise.name)
+    const fallback = getDraftForExercise(exercise.name, exercise)
+    setPlannedDrafts((current) => {
+      const draft = current[key] ?? fallback
+      const setWeights = Array.from(
+        { length: setCount },
+        (_, index) => draft.setWeights[index] ?? draft.weight
+      )
+      const setWeightTouched = Array.from(
+        { length: setCount },
+        (_, index) => draft.setWeightTouched[index] ?? (setWeights[index] !== 0)
+      )
+      setWeights.forEach((_, index) => {
+        if (draft.setDone[index]) return
+        setWeights[index] = weight
+        setWeightTouched[index] = true
+      })
+      return {
+        ...current,
+        [key]: {
+          ...draft,
+          weight: setWeights[0] ?? draft.weight,
+          setWeights,
+          setWeightTouched,
+        },
+      }
+    })
+  }
+
+  const saveSetRir = (entry: WorkoutEntry, rir: number) => {
+    const nextHistory = history.map((item) => {
+      if (item.id !== entry.id || item.sets.length === 0) return item
+      const lastIndex = item.sets.length - 1
+      return {
+        ...item,
+        sets: item.sets.map((set, index) => index === lastIndex ? { ...set, rir } : set),
+      }
+    })
+    setHistory(nextHistory)
+    saveWorkoutHistory(nextHistory)
+    setDismissedRirEntries((current) => ({ ...current, [entry.id]: true }))
   }
 
   const toggleExerciseCollapse = (exerciseName: string) => {
@@ -2430,6 +2477,37 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               (_, index) => draft.setDone[index] ?? false
             )
             const completedSetCount = completedRows.filter(Boolean).length
+            const completedSetsForHint = completedRows
+              .flatMap((complete, index) => complete ? [{
+                weight: setWeights[index] ?? draft.weight,
+                reps: setReps[index] ?? draft.reps,
+                at: draft.setAt?.[index] ?? index,
+              }] : [])
+              .sort((a, b) => a.at - b.at)
+            const prescribedHintReps = (exercise.repsPerSet ?? [exercise.reps ?? '8'])
+              .map((rep) => parseRepPrescription(rep)[0])
+              .filter((reps) => reps > 0)
+            const fallbackHintTarget = prescribedHintReps.length
+              ? { min: Math.min(...prescribedHintReps), max: Math.max(...prescribedHintReps) }
+              : { min: 8, max: 8 }
+            const hintTarget = trainer
+              ? draft.trainerChoice === 'accepted' ? trainer.recommendation.reps : trainer.target
+              : fallbackHintTarget
+            const nextUncheckedIndex = completedRows.findIndex((complete) => !complete)
+            const setHint = !group.isSuperset && exercise.technique === 'straight' && nextUncheckedIndex >= 0
+              ? nextSetHint({
+                  target: hintTarget,
+                  plannedWeight: setWeights[nextUncheckedIndex] ?? draft.weight,
+                  completedSets: completedSetsForHint,
+                  step: equipmentStep(libraryMatch?.equipment),
+                })
+              : null
+            const setHintDismissalKey = `${getPlanDraftKey(exercise.name)}:${nextUncheckedIndex}`
+            const finalLoggedSet = completedEntry?.sets[completedEntry.sets.length - 1]
+            const shouldAskRir = completedEntry?.date === today &&
+              !!finalLoggedSet &&
+              finalLoggedSet.rir === undefined &&
+              !dismissedRirEntries[completedEntry.id]
             const cardClasses = [
               'planned-exercise-card',
               isCollapsed ? 'collapsed' : '',
@@ -2530,6 +2608,29 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <strong>{getNextTargetLabel(insightTarget)}</strong>
                     <p>{getNextTargetWhy(insightTarget)}</p>
                   </aside>
+                )}
+                {shouldAskRir && completedEntry && (
+                  <div className="trainer-rir-prompt" role="group" aria-label={t('workout.rir.question')}>
+                    <span>{t('workout.rir.question')}</span>
+                    <div className="trainer-rir-options">
+                      {[
+                        { label: 'workout.rir.zero', value: 0 },
+                        { label: 'workout.rir.oneTwo', value: 2 },
+                        { label: 'workout.rir.threePlus', value: 3 },
+                      ].map(({ label, value }) => (
+                        <button key={value} type="button" onClick={() => saveSetRir(completedEntry, value)}>
+                          {t(label as TranslationKey)}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        className="trainer-rir-skip"
+                        onClick={() => setDismissedRirEntries((current) => ({ ...current, [completedEntry.id]: true }))}
+                      >
+                        {t('workout.rir.skip')}
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 {!isCollapsed && (
@@ -2724,6 +2825,36 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                 >
                                   ✓
                                 </button>
+                                {setHint &&
+                                  index === nextUncheckedIndex &&
+                                  !dismissedSetHints[setHintDismissalKey] && (
+                                    <div className="trainer-set-hint" role="status">
+                                      <span>
+                                        {t('workout.setHint.message', {
+                                          reps: formatNumber(language, completedSetsForHint[completedSetsForHint.length - 1]?.reps ?? 0),
+                                          weight: formatNumber(language, completedSetsForHint[completedSetsForHint.length - 1]?.weight ?? 0),
+                                          suggestedWeight: formatNumber(language, setHint.weight),
+                                        })}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          useSetHint(exercise, setCount, setHint.weight)
+                                          setDismissedSetHints((current) => ({ ...current, [setHintDismissalKey]: true }))
+                                        }}
+                                      >
+                                        {t('workout.setHint.use', { weight: formatNumber(language, setHint.weight) })}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="trainer-set-hint-dismiss"
+                                        aria-label={t('workout.setHint.dismiss')}
+                                        onClick={() => setDismissedSetHints((current) => ({ ...current, [setHintDismissalKey]: true }))}
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  )}
                                 {exercise.technique === 'drop-set' && (
                                   <div className="planned-drop-set-row">
                                     <strong>{t('workout.technique.drop')}</strong>

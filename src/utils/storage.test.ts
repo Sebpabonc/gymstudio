@@ -786,6 +786,22 @@ describe('workout history', () => {
     expect(await loadWorkoutHistory()).toEqual([plannedEntry])
   })
 
+  it('persists RIR on sets in the history sync payload', async () => {
+    const rirEntry: WorkoutEntry = {
+      ...entry('rir-entry', '2026-09-15'),
+      exerciseId: 'barbell-bench-press',
+      sets: [{ id: 'rir-set', reps: 9, weight: 60, rir: 0 }],
+    }
+
+    await addWorkoutEntry(rirEntry)
+
+    expect((await loadWorkoutHistoryForSync())[0]).toMatchObject({
+      id: rirEntry.id,
+      dirty: true,
+      sets: [{ id: 'rir-set', reps: 9, weight: 60, rir: 0 }],
+    })
+  })
+
   it('soft-deletes a log for sync, hides it from history, and can restore it', async () => {
     const loggedEntry = { ...entry('delete-me', '2026-09-15'), exerciseId: 'barbell-bench-press' }
     await addWorkoutEntry(loggedEntry)
