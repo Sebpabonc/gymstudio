@@ -1309,6 +1309,8 @@ export default function WorkoutPlan({
       equipment,
       plannedWeight: original.weight > 0 ? original.weight : undefined,
       deload: activeBlockWeek === 6,
+      technique: exercise.technique,
+      setReps: reps,
     })
     return {
       recommendation,
@@ -2693,8 +2695,12 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           reps: trainerRangeLabel(trainer.target),
                         })}
                         recommended={t('workout.trainer.recommended', {
-                          weight: formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
-                          reps: trainerRangeLabel(trainer.recommendation.reps),
+                          weight: trainer.recommendation.setWeights && new Set(trainer.recommendation.setWeights).size > 1
+                            ? trainer.recommendation.setWeights.map((weight) => formatNumber(language, weight)).join(' / ')
+                            : formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
+                          reps: trainer.recommendation.setReps
+                            ? trainer.recommendation.setReps.map((reps) => formatNumber(language, reps)).join(' · ')
+                            : trainerRangeLabel(trainer.recommendation.reps),
                         })}
                         why={t('workout.trainer.why', {
                           reason: trainerWhy(
@@ -2707,6 +2713,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         confidence={t(`workout.trainer.confidence.${trainer.recommendation.confidence}` as TranslationKey)}
                         collectData={trainer.recommendation.action === 'collect_data'}
                         sameAsOriginal={
+                          !(trainer.recommendation.setWeights && new Set(trainer.recommendation.setWeights).size > 1) &&
                           trainer.recommendation.weight === trainer.original.weight &&
                           trainer.recommendation.reps.min === trainer.target.min &&
                           trainer.recommendation.reps.max === trainer.target.max &&

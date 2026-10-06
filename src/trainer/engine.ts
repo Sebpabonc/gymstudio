@@ -48,6 +48,9 @@ export type Recommendation = {
   sets: number
   reason: ReasonCode
   confidence: Confidence
+  /** Per-set loads/reps when the sets differ (pyramids); otherwise every set uses `weight` and `reps.min`. */
+  setWeights?: number[]
+  setReps?: number[]
   evidence: {
     lastDate?: string
     lastWeight?: number
@@ -67,6 +70,9 @@ export type RecommendInput = {
   equipment?: string
   plannedWeight?: number
   deload?: boolean
+  /** Planned technique and per-set reps; pyramids get a weight per set (PO 2026-10-07). */
+  technique?: string
+  setReps?: number[]
 }
 
 const MAX_REPS_FOR_ESTIMATE = 15
@@ -175,7 +181,7 @@ function sameRange(a?: RepRange, b?: RepRange) {
   return !!a && !!b && a.min === b.min && a.max === b.max
 }
 
-export function recommend(input: RecommendInput): Recommendation {
+function recommendBase(input: RecommendInput): Recommendation {
   const { today, target, sets, plannedWeight, deload } = input
   const step = equipmentStep(input.equipment)
   const history = [...input.history].filter((session) => session.sets.length > 0).sort((a, b) => b.date.localeCompare(a.date))
@@ -272,4 +278,53 @@ export function recommend(input: RecommendInput): Recommendation {
   if (lastReps.some((reps) => reps < lastTarget.min)) return result('maintain', lastWeight, 'slightly_below_target')
   if (history.length === 1 && confidence === 'low') return result('collect_data', lastWeight, 'no_history')
   return result('increase_reps', lastWeight, 'within_range')
+}
+
+/**
+ * Pyramids change the load every set: lighter for the high-rep sets, heavier for the low-rep sets. Each set's load
+ * comes from current capacity at ~1 rep in reserve; the heaviest set rounds up only with medium/high confidence
+ * and never passes the session guardrail (the base recommendation's weight + one step).
+ */
+export function pyramidSetWeights(
+  oneRepMax: number,
+  setReps: number[],
+  step: number,
+  confidence: Confidence,
+  maxWeight: number
+): number[] {
+  const minReps = Math.min(...setReps)
+  const raw = setReps.map((reps) => oneRepMax / (1 + (reps + 1) / 30))
+  const weights = raw.map((weight, index) =>
+    roundToStep(weight, step, setReps[index] === minReps && confidence !== 'low' ? 'up' : 'nearest')
+  ).map((weight) => Math.min(weight, maxWeight))
+  // Fewer reps never means less weight.
+  const order = setReps.map((reps, index) => ({ reps, index })).sort((a, b) => b.reps - a.reps)
+  for (let i = 1; i < order.length; i += 1) {
+    const prev = weights[order[i - 1].index]
+    if (weights[order[i].index] < prev) weights[order[i].index] = prev
+  }
+  const span = Math.max(...setReps) - minReps
+  const heaviest = order[order.length - 1].index
+  const lightest = order[0].index
+  if (span >= 4 && step > 0 && weights[heaviest] === weights[lightest] && weights[heaviest] + step <= maxWeight) {
+    weights[heaviest] += step
+  }
+  return weights
+}
+
+export function recommend(input: RecommendInput): Recommendation {
+  const base = recommendBase(input)
+  const setReps = input.setReps?.filter((reps) => reps > 0) ?? []
+  const pyramid = input.technique === 'pyramid' || input.technique === 'reverse-pyramid'
+  if (!pyramid || setReps.length < 2 || new Set(setReps).size < 2) return base
+  if (base.action === 'collect_data' || base.action === 'deload' || base.action === 'regress' || base.weight === null) return base
+  const capacity = estimateCapacity(input.history, input.today)
+  if (!capacity) return base
+  const step = equipmentStep(input.equipment)
+  const reps = setReps.slice(0, base.sets)
+  const weights = pyramidSetWeights(capacity.oneRepMax, reps, step, base.confidence, base.weight + step)
+  const top = Math.max(...weights)
+  const last = base.evidence.lastWeight ?? top
+  const action: TrainerAction = top > last ? 'increase_weight' : top < last ? 'decrease_weight' : base.action
+  return { ...base, action, weight: top, setWeights: weights, setReps: reps }
 }
