@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { explainTrainerRecommendation, mapAiGatewayError, requestExerciseFeedback, summariseSession } from '../ai/gateway'
+import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
-import {
-  buildExerciseFeedbackPayload,
-  limitAiNoteToTwoSentences,
-} from '../ai/coachLoop'
 import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue from './SqueezeCue'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
@@ -12,7 +8,6 @@ import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT 
 import type { TranslationKey } from '../i18n'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
 import { openExternal } from '../native/openExternal'
-import AiConsentPrompt from './AiConsentPrompt'
 import { localIsoDate } from '../lib/dates'
 import { isDemoMode } from '../utils/demoMode'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
@@ -37,10 +32,7 @@ import {
   storageKey,
   setActiveBlockId,
   upsertExerciseRecord,
-  getAskExerciseAiConsent,
-  setAskExerciseAiConsent,
 } from '../utils/storage'
-import type { AskExerciseAiConsent } from '../utils/storage'
 import {
   blockDateRange,
   blockWeek,
@@ -78,6 +70,7 @@ import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { recommend } from '../trainer/engine'
 import { buildEvidence } from '../trainer/evidence'
+import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
@@ -147,17 +140,10 @@ type LogToast = {
 
 type DaySessionSummary = SessionSummary & {
   nextSession?: string
-  nextTargets: Array<{ exerciseId: string; exerciseKey: string; target: NextTarget; why: string }>
+  performance: WorkoutSummaryRow[]
   date: string
   blockId?: string
   dayKey?: string
-}
-
-type ExerciseFeedbackState = {
-  target: NextTarget
-  pending: boolean
-  note?: string
-  unavailable?: boolean
 }
 
 function SteppedNumberInput({
@@ -587,16 +573,7 @@ export default function WorkoutPlan({
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
-  const [aiSummary, setAiSummary] = useState('')
-  const [aiRemainingToday, setAiRemainingToday] = useState<number | null>(null)
-  const [aiSummaryError, setAiSummaryError] = useState('')
-  const [aiSummaryPending, setAiSummaryPending] = useState(false)
-  const [aiConsent, setAiConsent] = useState<AskExerciseAiConsent | null>(() => getAskExerciseAiConsent())
-  const [showAiConsent, setShowAiConsent] = useState(false)
-  const [exerciseFeedbackByEntryId, setExerciseFeedbackByEntryId] = useState<Record<string, ExerciseFeedbackState>>({})
   const sessionStartedAt = useRef<SessionStart | null>(null)
-  const aiSummaryRequestId = useRef(0)
-  const exerciseFeedbackRequests = useRef(new Set<string>())
   const trainerRecommendationIds = useRef(new Map<string, string>())
   // Phase 4: PT sentence from the AI for the engine's decision; the template sentence shows until (or unless) it arrives.
   const [trainerExplanations, setTrainerExplanations] = useState<Record<string, string>>({})
@@ -627,60 +604,8 @@ export default function WorkoutPlan({
   }
   const swapChangesDuringLoad = useRef(new Set<string>())
 
-  const requestAiSummary = async () => {
-    if (!sessionSummary || aiSummaryPending || aiSummary) return
-    if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      setAiSummaryError(mapAiGatewayError('offline', language))
-      return
-    }
-    const requestId = aiSummaryRequestId.current
-    setAiSummaryPending(true)
-    setAiSummaryError('')
-    try {
-      const response = await summariseSession(sessionSummary.date, sessionSummary.blockId, sessionSummary.dayKey, language)
-      if (requestId !== aiSummaryRequestId.current) return
-      setAiSummary(response.answer)
-      setAiRemainingToday(response.remainingToday)
-    } catch (requestError) {
-      if (requestId !== aiSummaryRequestId.current) return
-      setAiSummaryError(requestError instanceof Error ? requestError.message : t('workout.ai.error.unavailable'))
-    } finally {
-      if (requestId === aiSummaryRequestId.current) setAiSummaryPending(false)
-    }
-  }
-
   const dismissSessionSummary = () => {
-    aiSummaryRequestId.current += 1
     setSessionSummary(null)
-    setAiSummaryPending(false)
-  }
-
-  const chooseAiConsent = (choice: AskExerciseAiConsent) => {
-    setAskExerciseAiConsent(choice)
-    setAiConsent(choice)
-    if (choice === 'enabled') {
-      setShowAiConsent(false)
-      void requestAiSummary()
-    } else {
-      setShowAiConsent(false)
-    }
-  }
-
-  const openAiSummary = () => {
-    if (demoMode) return
-    if (authStatus !== 'signed-in') {
-      onSignIn()
-      return
-    }
-    if (aiSummary || aiSummaryPending || !sessionSummary) return
-    setAiSummaryError('')
-    const savedConsent = getAskExerciseAiConsent()
-    setAiConsent(savedConsent)
-    if (savedConsent !== 'enabled') {
-      setShowAiConsent(true)
-      return
-    }
-    void requestAiSummary()
   }
 
   useEffect(() => {
@@ -1167,50 +1092,6 @@ export default function WorkoutPlan({
       sets: target.setCount,
     })
 
-  const requestExerciseNote = (entry: WorkoutEntry, exercise: PlanExercise, target: NextTarget | null) => {
-    if (!target) return
-    if (exerciseFeedbackRequests.current.has(entry.id)) return
-    const baseState = { target, pending: false }
-    setExerciseFeedbackByEntryId((current) => ({ ...current, [entry.id]: baseState }))
-    if (demoMode || authStatus !== 'signed-in' || aiConsent !== 'enabled') return
-
-    exerciseFeedbackRequests.current.add(entry.id)
-    setExerciseFeedbackByEntryId((current) => ({
-      ...current,
-      [entry.id]: { target, pending: true },
-    }))
-    const targetReps = getExerciseTargetReps(exercise)
-    const payload = buildExerciseFeedbackPayload(
-      entry.exerciseId,
-      language,
-      entry.sets,
-      {
-        sets: getDefaultSetCount(exercise),
-        reps: targetReps.slice(0, getDefaultSetCount(exercise)),
-        weight: entry.sets[0]?.weight,
-      },
-      target
-    )
-    void requestExerciseFeedback(payload).then((response) => {
-      setAiRemainingToday(response.remainingToday)
-      const note = limitAiNoteToTwoSentences(response.answer)
-      if (!note) throw new Error('empty_note')
-      setExerciseFeedbackByEntryId((current) => ({
-        ...current,
-        [entry.id]: {
-          target,
-          pending: false,
-          note,
-        },
-      }))
-    }).catch(() => {
-      setExerciseFeedbackByEntryId((current) => ({
-        ...current,
-        [entry.id]: { target, pending: false, unavailable: true },
-      }))
-    })
-  }
-
   const getOriginalDraftForExercise = (exerciseName: string, exercise?: PlanExercise): PlanDraft => {
     const key = getPlanDraftKey(exerciseName)
     const best = bestProgressByName.get(normalizeExerciseName(exerciseName))
@@ -1532,21 +1413,9 @@ export default function WorkoutPlan({
         entry.blockId === activeCompletionScope.blockId &&
         entry.dayKey === activeCompletionScope.dayKey
     )
-    const nextTargets = entries.flatMap((entry) => {
-      const exercise = activeExercises.find((item) => item.exerciseId === entry.exerciseId)
-      const target = exercise ? getNextTarget(exercise, entry.sets) : null
-      return target && exercise
-        ? [{
-          exerciseId: entry.exerciseId,
-          exerciseKey: normalizeExerciseName(exercise.name),
-          target,
-          why: getNextTargetWhy(target),
-        }]
-        : []
-    })
+    const performance = buildWorkoutSummary(entries, nextHistory, trainingBlocks, exerciseCatalog, today)
     const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
     const scopeKey = getSessionScopeKey(activeCompletionScope, planMode)
-    aiSummaryRequestId.current += 1
     setSessionSummary({
       ...createSessionSummary(
         entries,
@@ -1556,16 +1425,11 @@ export default function WorkoutPlan({
         language
       ),
       nextSession: nextDay ? t('workout.day.title', { position: nextDay.position, name: nextDay.name }) : undefined,
-      nextTargets,
+      performance,
       date: activeCompletionScope.date,
       blockId: activeCompletionScope.blockId,
       dayKey: activeCompletionScope.dayKey,
     })
-    setAiSummary('')
-    setAiRemainingToday(null)
-    setAiSummaryError('')
-    setAiSummaryPending(false)
-    setShowAiConsent(false)
   }
 
   const undoLastLog = () => {
@@ -1659,7 +1523,6 @@ export default function WorkoutPlan({
     saveWorkoutHistory(nextHistory)
     onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
     showLogToast([entryToSave], storedHistory, activeCompletionScope, [exercise])
-    requestExerciseNote(entryToSave, exercise, getNextTarget(exercise, entryToSave.sets))
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
     setExerciseCatalog(await loadExercises())
 
@@ -1782,10 +1645,6 @@ export default function WorkoutPlan({
     const scope = { ...activeCompletionScope, date }
     startSession(loggedAt, scope)
     showLogToast(entriesToSave, storedHistory, scope, exercises)
-    for (const entry of entriesToSave) {
-      const exercise = exercises.find((item) => item.exerciseId === entry.exerciseId)
-      if (exercise) requestExerciseNote(entry, exercise, getNextTarget(exercise, entry.sets))
-    }
     maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
 
     setLogError((current) => ({
@@ -2547,10 +2406,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const toastRecommendation = toast?.recommendations.find(
               (recommendation) => recommendation.exerciseKey === exerciseKey
             )
-            const exerciseFeedback = completedEntry
-              ? exerciseFeedbackByEntryId[completedEntry.id]
-              : undefined
-            const insightTarget = exerciseFeedback?.target ?? toastRecommendation?.target
+            const insightTarget = completedEntry
+              ? getNextTarget(exercise, completedEntry.sets)
+              : toastRecommendation?.target
             const completedRows = Array.from(
               { length: setCount },
               (_, index) => draft.setDone[index] ?? false
@@ -2651,17 +2509,10 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                   </button>
                 </div>
 
-                {insightTarget && (toastRecommendation || exerciseFeedback) && (
+                {insightTarget && (toastRecommendation || completedEntry) && (
                   <aside className="next-target-card" role="status" aria-live="polite">
                     <strong>{getNextTargetLabel(insightTarget)}</strong>
                     <p>{getNextTargetWhy(insightTarget)}</p>
-                    {exerciseFeedback?.pending && (
-                      <small className="ai-inline-status">{t('workout.ai.coachThinking')}</small>
-                    )}
-                    {exerciseFeedback?.note && <p className="ai-exercise-note">{exerciseFeedback.note}</p>}
-                    {exerciseFeedback?.unavailable && (
-                      <small className="ai-inline-status">{t('workout.ai.noteUnavailable')}</small>
-                    )}
                   </aside>
                 )}
 
@@ -3176,7 +3027,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             onClick={(event) => event.stopPropagation()}
           >
             <header className="session-summary-header">
-              <h2 id="session-summary-title">{t('workout.session.complete')}</h2>
+              <h2 id="session-summary-title">{t('workout.session.performance')}</h2>
               <button
                 type="button"
                 className="session-summary-close"
@@ -3208,17 +3059,39 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 <p>{t('workout.session.noRecords')}</p>
               )}
             </section>
-            {sessionSummary.nextTargets.length > 0 && (
-              <section className="session-summary-targets" aria-label={t('workout.session.targets')}>
-                <h3>{t('workout.session.targets')}</h3>
+            {sessionSummary.performance.length > 0 && (
+              <section className="session-summary-targets" aria-label={t('workout.session.performance')}>
+                <h3>{t('workout.session.performance')}</h3>
                 <ul>
-                  {sessionSummary.nextTargets.map(({ exerciseId, exerciseKey, target, why }) => {
+                  {sessionSummary.performance.map((row) => {
+                    const { exerciseId, trend, actual, target, next, nextDate } = row
                     const exercise = exerciseCatalog.find((item) => item.id === exerciseId)
+                    const template = trainerReason(t, language, next, target.reps)
+                    const why = trainerWhy(
+                      exerciseId,
+                      next,
+                      { weight: target.weight ?? actual.weight, target: target.reps },
+                      template
+                    )
                     return (
-                      <li key={exerciseKey}>
-                        <strong>{exercise ? displayExerciseName(exercise) : exerciseId}</strong>
-                        <strong>{getNextTargetLabel(target)}</strong>
-                        <p>{why}</p>
+                      <li key={exerciseId}>
+                        <strong>
+                          {exercise ? displayExerciseName(exercise) : exerciseId}{' '}
+                          <span aria-label={t(`workout.session.trend.${trend}` as TranslationKey)}>
+                            {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
+                          </span>
+                        </strong>
+                        <p>{t('workout.session.performanceActual', {
+                          weight: formatNumber(language, actual.weight),
+                          reps: actual.reps.map((reps) => formatNumber(language, reps)).join(' · '),
+                          target: trainerRangeLabel(target.reps),
+                        })}</p>
+                        <p>{t('workout.session.performanceNext', {
+                          day: nextDate ? formatWeekdayDate(language, `${nextDate}T00:00:00Z`).split(' ')[0] : '',
+                          weight: formatNumber(language, next.weight ?? actual.weight),
+                          reps: trainerRangeLabel(next.reps),
+                        })}</p>
+                        <p>{t('workout.session.performanceWhy', { reason: why })}</p>
                       </li>
                     )
                   })}
@@ -3226,57 +3099,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               </section>
             )}
             {sessionSummary.nextSession && <p className="session-summary-next">{t('workout.session.next', { session: sessionSummary.nextSession })}</p>}
-            {!aiSummary && (
-              <div className="ai-session-summary">
-                <button
-                  type="button"
-                  className="primary-button ai-session-summary-button"
-                  disabled={demoMode || authStatus === 'loading' || aiSummaryPending}
-                  onClick={demoMode || authStatus === 'signed-out' ? onSignIn : openAiSummary}
-                >
-                  {demoMode || authStatus === 'signed-out'
-                    ? t('workout.ai.signIn')
-                    : aiSummaryPending
-                      ? t('workout.ai.thinking')
-                      : t('workout.ai.summary')}
-                </button>
-                {showAiConsent && (
-                  <div className="ai-inline-consent">
-                    {aiConsent === null ? (
-                      <AiConsentPrompt onChoice={chooseAiConsent} />
-                    ) : (
-                      <p>{t('workout.ai.off')}</p>
-                    )}
-                  </div>
-                )}
-                {aiSummaryError && (
-                  <div className="ai-inline-error" role="alert">
-                    <p>{aiSummaryError}</p>
-                  {aiSummaryError === mapAiGatewayError('sign_in_required', language) && (
-                    <button type="button" className="secondary-button" onClick={onSignIn}>{t('workout.action.signIn')}</button>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            {aiSummary && (
-              <section className="ai-session-summary" aria-label={t('workout.ai.summary')} aria-live="polite">
-                <h3>{t('workout.ai.summary')}</h3>
-                <ul className="ai-summary-bullets">
-                  {aiSummary.split(/\n+/).map((line) => line.trim()).filter(Boolean).map((line, index) => (
-                    <li key={index}>{line.replace(/^(?:[-*•]|\d+[.)])\s*/, '')}</li>
-                  ))}
-                </ul>
-                {aiRemainingToday !== null && (
-                  <small>
-                    {t(aiRemainingToday === 1 ? 'workout.ai.leftToday.one' : 'workout.ai.leftToday.other', {
-                      count: aiRemainingToday,
-                    })}
-                  </small>
-                )}
-                <small>{t('workout.ai.disclaimer')}</small>
-              </section>
-            )}
             {toast && (
               <div className="log-toast in-summary" role="status" aria-live="polite">
                 <button type="button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
