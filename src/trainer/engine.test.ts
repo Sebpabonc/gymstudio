@@ -123,3 +123,24 @@ describe('same-week adaptation and different rep ranges', () => {
     expect(capacity!.oneRepMax).toBeLessThan(14.7)
   })
 })
+
+describe('pyramids get a weight per set', () => {
+  it('PO case: 26 kg × 12 on Day A → Day B pyramid 14·12·10 climbs instead of 26 across', () => {
+    const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(26, 12, 12, 12), target: range(8) }]
+    const result = recommend({
+      history, today: '2026-10-08', target: range(10, 14), sets: 3, equipment: 'dumbbell',
+      plannedWeight: 26, technique: 'pyramid', setReps: [14, 12, 10],
+    })
+    expect(result.setReps).toEqual([14, 12, 10])
+    expect(result.setWeights).toEqual([24, 26, 28])
+    expect(result.action).toBe('increase_weight')
+    expect(result.setWeights![0]).toBeLessThan(result.setWeights![2])
+    expect(result.setWeights!.every((weight) => weight % 2 === 0)).toBe(true)
+    expect(result.setWeights![2]).toBeLessThanOrEqual(28)
+  })
+
+  it('straight sets keep one weight', () => {
+    const history: SessionEvidence[] = [{ date: '2026-10-05', sets: sets(26, 12, 12, 12), target: range(8) }]
+    expect(recommend({ history, today: '2026-10-08', target: range(8), sets: 3, equipment: 'dumbbell', technique: 'straight', setReps: [8, 8, 8] }).setWeights).toBeUndefined()
+  })
+})

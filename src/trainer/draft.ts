@@ -23,13 +23,15 @@ export function applyTrainerRecommendation<T extends TrainerDraftValues>(
   const reps = useRecommendation ? recommendation.reps.min : original.reps
   const setCount = useRecommendation ? recommendation.sets : original.setWeights.length
 
+  const perSetWeights = useRecommendation && recommendation.setWeights?.length ? recommendation.setWeights : null
+  const perSetReps = useRecommendation && recommendation.setReps?.length ? recommendation.setReps : null
   return {
     ...draft,
     reps,
     weight,
-    setWeights: Array.from({ length: setCount }, () => weight),
+    setWeights: Array.from({ length: setCount }, (_, index) => perSetWeights?.[index] ?? weight),
     setWeightTouched: Array.from({ length: setCount }, () => useRecommendation && weight > 0),
-    setReps: Array.from({ length: setCount }, () => reps),
+    setReps: Array.from({ length: setCount }, (_, index) => perSetReps?.[index] ?? (useRecommendation ? reps : original.setReps[index] ?? reps)),
     trainerChoice: choice,
   }
 }
