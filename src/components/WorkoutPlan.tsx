@@ -1468,7 +1468,8 @@ export default function WorkoutPlan({
               entry.exerciseId.replace(/-custom$/, '')
           )
         )
-        const target = exercise ? getNextTarget(exercise, entry.sets) : null
+        // Old rule only for custom plans; preset plans use the AI Trainer engine (single source of recommendations).
+        const target = planMode === 'custom' && exercise ? getNextTarget(exercise, entry.sets) : null
         return target && exercise
           ? [{ exerciseKey: normalizeExerciseName(exercise.name), target, why: getNextTargetWhy(target) }]
           : []

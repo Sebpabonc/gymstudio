@@ -128,6 +128,20 @@ npm run build        # typecheck + production build
 npm run mobile:sync  # build + copy into the iOS project
 ```
 
+## AI Trainer release checklist (PO 2026-10-07, after the 0 kg / missing-data bugs)
+
+Any change that can affect a recommended load or what the trainer card shows:
+1. **PT owns the rule.** Fitness rules come from an approved PT spec (`docs/fitness/approved/`) with exact test cases;
+   the Tech Lead/Copilot never invent progression rules. Engine changes get a PT pre-merge review.
+2. **Invariants pass** (`src/trainer/invariants.test.ts`): never 0 kg for a weighted exercise, never a non-existent
+   weight, never a jump above the PT guardrail, never "no data" with recent sessions — for every planned exercise.
+3. **Real-history replay**: export the PO's entries read-only to a local file (never committed) and run
+   `npx vite-node scripts/trainer-replay.ts <entries.json> [today]`; the PT reviews anything unusual before release.
+4. **Single source**: preset plans get every recommendation from `src/trainer/engine.ts` (no old rules on any screen).
+5. **QAer week flow** before trainer releases: at 375 px, log a day, open the paired day the same day, mid-week
+   counters, a pyramid, a cable/light load, a superset.
+6. **Tell the PO what to check**: every install on his phone comes with 2–3 lines on what changed and what to look at.
+
 ## Definition of done
 
 - Acceptance criteria in the issue are met.
