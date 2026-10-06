@@ -19,6 +19,7 @@ import AiConsentPrompt from './AiConsentPrompt'
 import { localIsoDate } from '../lib/dates'
 import { isDemoMode } from '../utils/demoMode'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
+import type { Language, Translate } from '../i18n'
 import {
   fetchTrainingBlocks,
   fetchActiveUserPlan,
@@ -381,6 +382,113 @@ function splitExerciseTitle(name: string) {
   return { main: name, details: '' }
 }
 
+export function ExerciseSwapButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: React.MouseEventHandler<HTMLButtonElement>
+}) {
+  return (
+    <button
+      type="button"
+      className="exercise-swap-button"
+      aria-label={label}
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick(event)
+      }}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 7V3m0 4h-4M4 17v4m0-4h4M5.6 9a7 7 0 0 1 11.9-2L20 7M4 17l2.5.1A7 7 0 0 0 18.4 15" />
+      </svg>
+    </button>
+  )
+}
+
+export function ExerciseSwapSheet({
+  alternatives,
+  language,
+  t,
+  onCancel,
+  onSelect,
+}: {
+  alternatives: Exercise[]
+  language: Language
+  t: Translate
+  onCancel: () => void
+  onSelect: (exerciseId: string, scope: ExerciseSwap['scope']) => void
+}) {
+  return (
+    <section
+      className="exercise-swap-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="exercise-swap-title"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <header className="exercise-swap-header">
+        <h2 id="exercise-swap-title">{t('workout.swap.suggestions')}</h2>
+        <button type="button" className="secondary-button" onClick={onCancel}>
+          {t('workout.swap.cancel')}
+        </button>
+      </header>
+      <div className="exercise-swap-suggestions">
+        {alternatives.map((alternative) => (
+          <article className="exercise-swap-suggestion" key={alternative.id}>
+            <a
+              className="exercise-swap-name exercise-image-link"
+              href={exerciseImageSearchUrl(exerciseImageQuery(alternative.id, getExerciseDisplayName(alternative, language), alternative.equipment))}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t('workout.exercise.imageSearch', { name: getExerciseDisplayName(alternative, language) })}
+              onClick={(event) => {
+                event.stopPropagation()
+                event.preventDefault()
+                void openExternal(event.currentTarget.href)
+              }}
+            >
+              {getExerciseDisplayName(alternative, language)}
+              <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 16L16 8" />
+                <path d="M9.5 8H16v6.5" />
+              </svg>
+            </a>
+            <div className="chip-row chip-row-tight">
+              <span className="chip">{t('workout.swap.muscle')}: {localizeMuscle(alternative.primaryMuscle, language)}</span>
+              {alternative.equipment && (
+                <span className="chip subtle">
+                  {t('workout.swap.equipment')}: {
+                    swapEquipmentKeys[alternative.equipment]
+                      ? t(swapEquipmentKeys[alternative.equipment])
+                      : alternative.equipment
+                  }
+                </span>
+              )}
+            </div>
+            <div className="exercise-swap-actions">
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => onSelect(alternative.id, 'today')}
+              >
+                {t('workout.swap.justToday')}
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => onSelect(alternative.id, 'always')}
+              >
+                {t('workout.swap.always')}
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function sanitizeLoggedComment(rawNote: string | undefined, fragments: Array<string | undefined>) {
   let text = rawNote?.trim() ?? ''
   if (!text) return ''
@@ -467,6 +575,7 @@ export default function WorkoutPlan({
   const aiSummaryRequestId = useRef(0)
   const exerciseFeedbackRequests = useRef(new Set<string>())
   const aiPlanRequests = useRef(new Set<string>())
+  const swapChangesDuringLoad = useRef(new Set<string>())
 
   const requestAiSummary = async () => {
     if (!sessionSummary || aiSummaryPending || aiSummary) return
@@ -532,6 +641,15 @@ export default function WorkoutPlan({
     window.addEventListener('keydown', closeOnEscape)
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [blockSelectorOpen])
+
+  useEffect(() => {
+    if (!swapTarget) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSwapTarget(null)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [swapTarget])
 
   const text = {
     sets: t('workout.label.sets'),
@@ -651,6 +769,7 @@ export default function WorkoutPlan({
   const chooseExerciseSwap = (toExerciseId: string, scope: ExerciseSwap['scope']) => {
     if (!swapTarget) return
     const fromExerciseId = swapTarget.fromExerciseId
+    swapChangesDuringLoad.current.add(fromExerciseId)
     const remaining = exerciseSwaps.filter((swap) =>
       swap.fromExerciseId !== fromExerciseId || (scope === 'today' && swap.scope === 'always')
     )
@@ -664,14 +783,20 @@ export default function WorkoutPlan({
     }
   }
   const undoExerciseSwap = (fromExerciseId: string) => {
-    const hadPermanentSwap = exerciseSwaps.some(
+    swapChangesDuringLoad.current.add(fromExerciseId)
+    const hasTodaySwap = exerciseSwaps.some(
+      (swap) => swap.fromExerciseId === fromExerciseId && swap.scope === 'today' && swap.date === today
+    )
+    const removePermanentSwap = !hasTodaySwap && exerciseSwaps.some(
       (swap) => swap.fromExerciseId === fromExerciseId && swap.scope === 'always'
     )
     setExerciseSwaps(saveLocalExerciseSwaps(
-      exerciseSwaps.filter((swap) => swap.fromExerciseId !== fromExerciseId),
+      exerciseSwaps.filter((swap) =>
+        swap.fromExerciseId !== fromExerciseId || (hasTodaySwap && swap.scope === 'always')
+      ),
       today
     ))
-    if (hadPermanentSwap && authStatus === 'signed-in' && !demoMode) {
+    if (removePermanentSwap && authStatus === 'signed-in' && !demoMode) {
       void removeExerciseSwap(fromExerciseId).catch(() => undefined)
     }
   }
@@ -740,10 +865,17 @@ export default function WorkoutPlan({
       ]).then(([globalBlocks, activePlan, remoteSwaps]) => {
         if (cancelled) return
         if (remoteSwaps) {
+          const currentLocalSwaps = loadLocalExerciseSwaps()
+          const changedSources = swapChangesDuringLoad.current
           const swaps: ExerciseSwap[] = [
-            ...localSwaps.filter((swap) => swap.scope === 'today'),
-            ...remoteSwaps.map((swap) => ({ ...swap, scope: 'always' as const })),
+            ...currentLocalSwaps.filter((swap) =>
+              swap.scope === 'today' || changedSources.has(swap.fromExerciseId)
+            ),
+            ...remoteSwaps
+              .filter((swap) => !changedSources.has(swap.fromExerciseId))
+              .map((swap) => ({ ...swap, scope: 'always' as const })),
           ]
+          changedSources.clear()
           setExerciseSwaps(saveLocalExerciseSwaps(swaps, today))
         }
         const blocks = selectPlanBlocks(globalBlocks, activePlan, signedIn, demoMode)
@@ -1133,7 +1265,6 @@ export default function WorkoutPlan({
   const getDraftForExercise = (exerciseName: string, exercise?: PlanExercise) => {
     const key = getPlanDraftKey(exerciseName)
     const best = bestProgressByName.get(normalizeExerciseName(exerciseName))
-    const bestWeight = best ? workoutMaxWeight(best.sets) : 0
     const bestReps = best && best.sets.length ? Math.max(...best.sets.map((set) => set.reps), 0) : 8
     const fallbackReps = exercise ? getDefaultRepTarget(exercise) : bestReps
     const fallbackSetCount = exercise ? getDefaultSetCount(exercise) : 1
@@ -1145,6 +1276,9 @@ export default function WorkoutPlan({
         ? findPrefillSelection(history, prefillExerciseId, planMode === 'preset' ? activeDay?.key : undefined)
         : undefined
     const prefill = prefillSelection?.entry
+    const noSwapHistory = !!exercise?.swappedFrom &&
+      !history.some((entry) => entry.exerciseId === prefillExerciseId)
+    const bestWeight = noSwapHistory ? 0 : best ? workoutMaxWeight(best.sets) : 0
     const otherDayPrefill = prefillSelection?.basis === 'other-day'
     const nextTarget = exercise && prefill && !otherDayPrefill ? getNextTarget(exercise, prefill.sets) : null
     const lastWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
@@ -1154,7 +1288,7 @@ export default function WorkoutPlan({
         ? scaleWeightForOtherDay(weight, source?.reps, exercise ? getExerciseTargetReps(exercise)[index] : undefined)
         : weight
     })
-    const appliedTarget = getAppliedTarget(exercise, prefillExerciseId)
+    const appliedTarget = noSwapHistory ? undefined : getAppliedTarget(exercise, prefillExerciseId)
     // Ignore an AI weight that no longer matches the history it was built from (e.g. a trial log was deleted).
     const ruleWeight = nextTarget?.weight ?? lastWeights[0] ?? 0
     const plannedAi = exercise && !exercise.swappedFrom ? getAiPlanExercise(exercise) : undefined
@@ -2384,22 +2518,15 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
                       </span>
                       {planMode === 'preset' && libraryMatch && completedEntry?.date !== today && (
-                        <button
-                          type="button"
-                          className="exercise-swap-button"
-                          aria-label={t('workout.swap.change')}
-                          onClick={(event) => {
-                            event.stopPropagation()
+                        <ExerciseSwapButton
+                          label={t('workout.swap.change')}
+                          onClick={() => {
                             setSwapTarget({
                               exercise: libraryMatch,
                               fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
                             })
                           }}
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M20 7V3m0 4h-4M4 17v4m0-4h4M5.6 9a7 7 0 0 1 11.9-2L20 7M4 17l2.5.1A7 7 0 0 0 18.4 15" />
-                          </svg>
-                        </button>
+                        />
                       )}
                     </span>
                     {exercise.swappedFrom && (
@@ -2903,72 +3030,13 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
       )}
       {swapTarget && (
         <div className="exercise-swap-backdrop" role="presentation" onClick={() => setSwapTarget(null)}>
-          <section
-            className="exercise-swap-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="exercise-swap-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <header className="exercise-swap-header">
-              <h2 id="exercise-swap-title">{t('workout.swap.suggestions')}</h2>
-              <button type="button" className="secondary-button" onClick={() => setSwapTarget(null)}>
-                {t('workout.swap.cancel')}
-              </button>
-            </header>
-            <div className="exercise-swap-suggestions">
-              {swapSuggestions.map((alternative) => (
-                <article className="exercise-swap-suggestion" key={alternative.id}>
-                  <a
-                    className="exercise-swap-name exercise-image-link"
-                    href={exerciseImageSearchUrl(exerciseImageQuery(alternative.id, displayExerciseName(alternative), alternative.equipment))}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={t('workout.exercise.imageSearch', { name: displayExerciseName(alternative) })}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      event.preventDefault()
-                      void openExternal(event.currentTarget.href)
-                    }}
-                  >
-                    {displayExerciseName(alternative)}
-                    <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M8 16L16 8" />
-                      <path d="M9.5 8H16v6.5" />
-                    </svg>
-                  </a>
-                  <div className="chip-row chip-row-tight">
-                    <span className="chip">{t('workout.swap.muscle')}: {localizeMuscle(alternative.primaryMuscle, language)}</span>
-                    {alternative.equipment && (
-                      <span className="chip subtle">
-                        {t('workout.swap.equipment')}: {
-                          swapEquipmentKeys[alternative.equipment]
-                            ? t(swapEquipmentKeys[alternative.equipment])
-                            : alternative.equipment
-                        }
-                      </span>
-                    )}
-                  </div>
-                  <div className="exercise-swap-actions">
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => chooseExerciseSwap(alternative.id, 'today')}
-                    >
-                      {t('workout.swap.justToday')}
-                    </button>
-                    <button
-                      type="button"
-                      className="primary-button"
-                      onClick={() => chooseExerciseSwap(alternative.id, 'always')}
-                    >
-                      {t('workout.swap.always')}
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
+          <ExerciseSwapSheet
+            alternatives={swapSuggestions}
+            language={language}
+            t={t}
+            onCancel={() => setSwapTarget(null)}
+            onSelect={chooseExerciseSwap}
+          />
         </div>
       )}
       {sessionSummary && (
