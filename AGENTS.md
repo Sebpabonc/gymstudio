@@ -19,6 +19,7 @@ The app UI is **bilingual (English / Spanish)** with an EN | ES toggle in the he
 | Developer | GitHub Copilot | Implementing issues inside the approved design, tests, small refactors needed by the task | Redesign architecture |
 | QA ("QAer") | Claude QA agent (`.claude/agents/qaer.md`), run when Sebas says "QAer" | End-to-end functional, design-consistency and content checks on the live app (`docs/qa/README.md`); writes `docs/qa/reports/`, files `qa` issues | Change code, content or data; sign in |
 | UX & AI team ("UXer") | Claude agent (`.claude/agents/uxer.md`) | UX research, design and AI-first product proposals in `docs/ux/proposals/` (see `docs/ux/README.md`) | Change code/content/data; decide architecture or cost |
+| Marketing ("Socialer") | Claude agent (`.claude/agents/socialer.md`), run when Sebas asks for marketing/social/promo work | Social content, promo videos, campaigns as drafts/prototypes in `docs/marketing/`; works with UXer (brand), PT (fitness claims), Tech Lead (accuracy), QAer (real screens) | Post or publish anything, buy ads, make claims the PT/PO haven't approved |
 | PT / Fitness Expert | Specialist agent | Drafting fitness knowledge (technique, cues, classifications) | Modify code or app data directly |
 
 ## How work flows
