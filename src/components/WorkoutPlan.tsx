@@ -507,7 +507,6 @@ export default function WorkoutPlan({
   }, [blockSelectorOpen])
 
   const text = {
-    badge: t('workout.badge.block'),
     sets: t('workout.label.sets'),
     reps: t('workout.label.reps'),
     repsShort: t('workout.label.repsShort'),
@@ -516,7 +515,6 @@ export default function WorkoutPlan({
     comments: t('workout.label.comments'),
     noProgressHistory: t('workout.progress.empty'),
     posture: t('workout.posture.title'),
-    modePreset: t('workout.mode.preset'),
     modeCustom: t('workout.mode.custom'),
     customTitle: t('workout.custom.title'),
     customHint: t('workout.custom.hint'),
@@ -1684,7 +1682,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               />
             </svg>
           </button>
-          <span className="plan-badge">{planMode === 'preset' ? text.badge : text.customBadge}</span>
+          <span className="plan-badge">{planMode === 'preset'
+            ? t('workout.badge.block', { weeks: activeBlock?.weeks ?? 6, days: activeBlock?.days.length ?? 6 })
+            : text.customBadge}</span>
         </div>
       </div>
 
@@ -1724,7 +1724,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             onClick={() => setSelectedCalendarBlockId(expanded ? '' : block.id)}
                           >
                             <span className="calendar-block-title-row">
-                              <strong>{t('workout.block.optionTitle', { number: block.number, name: block.name })}</strong>
+                              <strong>{block.number === 0 ? block.name : t('workout.block.optionTitle', { number: block.number, name: block.name })}</strong>
                               <span className="calendar-block-status">
                                 {t(blockStatusKey[trainingBlockDateStatus(block, today)])}
                               </span>
@@ -1860,7 +1860,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             className={planMode === 'preset' ? 'tab-button active' : 'tab-button'}
             onClick={() => setPlanMode('preset')}
           >
-            {text.modePreset}
+            {t('workout.mode.preset', { weeks: activeBlock?.weeks ?? 6 })}
           </button>
           <button
             type="button"
@@ -1897,7 +1897,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 </span>
               </span>
               <span className="training-block-badges">
-                <span className="training-block-number">{t('workout.block.number', { number: activeBlock.number })}</span>
+                <span className="training-block-number">{activeBlock.number === 0 ? t('workout.block.personal') : t('workout.block.number', { number: activeBlock.number })}</span>
                 <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
                 {pinnedBlockId === activeBlock.id && <span className="training-block-number">{t('workout.block.pinned')}</span>}
               </span>
@@ -1986,7 +1986,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       <span className="block-selector-option-content">
                         <span className="block-selector-option-heading">
                           {/* TODO(i18n): PT will provide approved translations */}
-                          <strong>{t('workout.block.optionTitle', { number: block.number, name: block.name })}</strong>
+                          <strong>{block.number === 0 ? block.name : t('workout.block.optionTitle', { number: block.number, name: block.name })}</strong>
                           <span className="origin-badge">{block.origin === 'pt' ? text.pt : text.coach}</span>
                         </span>
                         <small>{`${blockDateRange(block, language)} · ${formatBlockMethod(block.method, language)}`}</small>
