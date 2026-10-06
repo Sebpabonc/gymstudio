@@ -2763,9 +2763,69 @@ button {
   min-width: 0;
 }
 
+.planned-exercise-name-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
 .planned-exercise-name-wrap {
   display: grid;
+  flex: 1;
+  min-width: 0;
   gap: 0;
+}
+
+.exercise-swap-button {
+  display: inline-grid;
+  flex: 0 0 44px;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 9px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted-strong);
+  cursor: pointer;
+}
+
+.exercise-swap-button:hover,
+.exercise-swap-button:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.exercise-swap-button svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.exercise-swap-origin {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.exercise-swap-origin button {
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--nav-active);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
 }
 
 .planned-exercise-main-name {
@@ -5907,6 +5967,88 @@ body:has([aria-modal='true']) .help-ai-button {
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.85;
+}
+
+.exercise-swap-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(12, 12, 13, 0.68);
+}
+
+.exercise-swap-sheet {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 560px);
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 20px 16px max(20px, env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+  background: var(--bg-soft);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.45);
+}
+
+.exercise-swap-header,
+.exercise-swap-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.exercise-swap-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.exercise-swap-suggestions {
+  display: grid;
+  gap: 10px;
+}
+
+.exercise-swap-suggestion {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.exercise-swap-name {
+  min-height: 36px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.exercise-swap-suggestion .chip-row {
+  margin-top: 0;
+  gap: 6px;
+}
+
+.exercise-swap-suggestion .chip {
+  min-height: 32px;
+}
+
+.exercise-swap-actions > button {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+}
+
+.exercise-swap-sheet {
+  position: relative;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(170%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(170%);
+  border-color: var(--glass-border);
 }
 
 .planned-exercise-header {
