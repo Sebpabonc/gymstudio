@@ -1,0 +1,217 @@
+<title>GymStudio Promo 30s</title>
+<style>
+:root{color-scheme:dark;--bg:#0f0f10;--soft:#171719;--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);--line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#c8c7c4;--brand:#8d5e63;--brand2:#5a474b;--brandsoft:rgba(141,94,99,.18);--accent:#c99ca1;--ok:#dfe7df;--btn:linear-gradient(135deg,#7a5d60 0%,#2f2f31 100%)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f0f10;color:var(--text);font-family:Inter,-apple-system,"SF Pro Text",system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;gap:12px}
+.controls{display:flex;gap:8px;align-items:center;width:100%;max-width:400px;justify-content:space-between}
+.controls button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font:600 13px inherit;cursor:pointer}
+.controls button.on{background:var(--brand);border-color:var(--brand)}
+.note{font-size:11px;color:var(--muted);max-width:400px;text-align:center}
+.frame{position:relative;width:100%;max-width:400px;aspect-ratio:9/16;background:radial-gradient(120% 70% at 50% 0%,#241b1d 0%,#0f0f10 60%);border-radius:22px;overflow:hidden;border:1px solid var(--line)}
+.prog{position:absolute;top:0;left:0;height:3px;background:var(--accent);z-index:20;width:0}
+.cap{position:absolute;left:7%;right:14%;top:9%;font-weight:800;font-size:clamp(20px,6.4vw,27px);line-height:1.15;letter-spacing:-.02em;opacity:0;transform:translateY(12px);transition:.35s cubic-bezier(.2,.8,.2,1);z-index:10;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+.cap.on{opacity:1;transform:none}
+.cap em{font-style:normal;color:var(--accent)}
+.phone{position:absolute;left:7%;right:7%;top:27%;bottom:15%;background:var(--bg);border:1px solid var(--line);border-radius:24px;overflow:hidden;transform:translateY(110%);transition:transform .6s cubic-bezier(.2,.8,.2,1);box-shadow:0 28px 80px rgba(0,0,0,.5)}
+.phone.on{transform:none}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);font-size:11px}
+.hdr b{font-size:13px;letter-spacing:-.01em}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:9px;font-weight:700}
+.lang span{padding:3px 7px;color:var(--muted);transition:.25s}
+.lang span.act{background:var(--brand);color:#fff}
+.view{position:absolute;inset:38px 0 0 0;padding:10px 12px;opacity:0;transition:opacity .35s, transform .35s;transform:translateX(18px)}
+.view.on{opacity:1;transform:none}
+.ex{font-size:12px;font-weight:700;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ex .swap{color:var(--muted);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;font-size:10.5px;line-height:1.4}
+.card .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:6px;display:flex;justify-content:space-between}
+.card .t i{font-style:normal;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:500}
+.ln{opacity:0;transform:translateY(6px);transition:.3s;margin:3px 0;color:var(--muted)}
+.ln.on{opacity:1;transform:none}
+.ln.rec{color:var(--text);font-weight:800;font-size:13px;background:var(--brandsoft);border-radius:8px;padding:4px 6px}
+.ln.rec.on{animation:pop .45s}
+@keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+.btns{display:flex;gap:6px;margin-top:8px}
+.btn{flex:1;text-align:center;padding:7px;border-radius:10px;font-weight:700;font-size:10.5px;border:1px solid var(--line);position:relative;overflow:hidden}
+.btn.pri{background:var(--btn);border-color:transparent}
+.btn.tap::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.45);transform:translate(-50%,-50%);animation:rip .6s forwards}
+@keyframes rip{to{width:180px;height:180px;opacity:0}}
+.okmsg{color:var(--ok);font-weight:600}
+.sets{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.row{display:grid;grid-template-columns:22px 1fr 1fr 26px;gap:6px;align-items:center;font-size:11px}
+.row .n{color:var(--muted);font-weight:700;text-align:center}
+.cell{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center;font-weight:700;color:var(--muted);transition:.3s}
+.cell.f{color:var(--text);border-color:rgba(201,156,161,.5)}
+.chk{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;transition:.3s}
+.chk.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.rir,.hint{margin-top:7px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px;font-size:10px;opacity:0;transform:translateY(8px);transition:.3s}
+.rir.on,.hint.on{opacity:1;transform:none}
+.rir .opts{display:flex;gap:5px;margin-top:5px}
+.rir .opts span{flex:1;text-align:center;border:1px solid var(--line);border-radius:7px;padding:4px;font-weight:700}
+.rir .opts span.sel{background:var(--brand);border-color:var(--brand)}
+.hint{border-color:rgba(201,156,161,.45)}
+.hint .use{display:inline-block;margin-top:5px;background:var(--btn);padding:4px 9px;border-radius:7px;font-weight:700}
+.timer{display:flex;flex-direction:column;align-items:center;margin-top:10px;gap:6px}
+.ring{width:110px;height:110px;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring .num{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.restbtn{font-size:10px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--btn)}
+.days{display:flex;gap:4px;margin-bottom:9px}
+.days span{flex:1;text-align:center;border:1px solid var(--line);border-radius:9px;padding:4px 0;font-size:9.5px;font-weight:700;line-height:1.25;color:var(--muted)}
+.days span small{display:block;font-weight:500;font-size:8px}
+.days span.done{color:var(--ok)}
+.days span.act{background:var(--brand);border-color:var(--brand);color:#fff}
+.mt{display:flex;flex-direction:column;gap:7px}
+.mini{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;font-size:10.5px;opacity:0;transform:translateY(8px);transition:.4s}
+.mini.on{opacity:1;transform:none}
+.mini b{display:block;font-size:13px;margin-top:2px}
+.mini .lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700}
+.arrow{text-align:center;color:var(--accent);font-size:18px;opacity:0;transition:.3s}
+.arrow.on{opacity:1;animation:pop .45s}
+.sum h4{font-size:13px;margin-bottom:8px}
+.srow{display:grid;grid-template-columns:20px 1fr;gap:6px;padding:7px 0;border-bottom:1px solid var(--line);font-size:10px;opacity:0;transform:translateX(10px);transition:.3s}
+.srow.on{opacity:1;transform:none}
+.srow .ar{font-size:15px;font-weight:800;text-align:center}
+.up{color:#bfe3c2}.eq{color:var(--muted)}.dn{color:#e6b3a0}
+.srow b{font-size:11px}
+.srow .nx{color:var(--muted);margin-top:2px}
+.end{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 10% ;gap:14px;opacity:0;transition:.5s;z-index:15;background:radial-gradient(90% 60% at 50% 45%,#2a1f21 0%,#0f0f10 70%)}
+.end.on{opacity:1}
+.word{font-size:34px;font-weight:800;letter-spacing:-.03em}
+.word span{color:var(--accent)}
+.tag{font-size:15px;line-height:1.35;color:var(--muted)}
+.cta{background:var(--btn);padding:11px 22px;border-radius:999px;font-weight:800;font-size:15px;border:1px solid rgba(255,255,255,.14)}
+.url{font-size:11px;color:var(--muted)}
+.qk{position:absolute;inset:0;display:grid;place-items:center;font-size:90px;font-weight:800;color:rgba(201,156,161,.13);opacity:0;transition:.3s}
+.qk.on{opacity:1;animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.4}}
+</style>
+
+<div class="controls">
+  <div><button id="bEN" class="on">EN</button> <button id="bES">ES</button></div>
+  <button id="replay">Replay</button>
+</div>
+
+<div class="frame" id="frame">
+  <div class="prog" id="prog"></div>
+  <div class="qk" data-from="0" data-to="2">? kg</div>
+
+  <div class="cap" data-from="0" data-to="2" data-k="c1"></div>
+  <div class="cap" data-from="2" data-to="4" data-k="c2"></div>
+  <div class="cap" data-from="4" data-to="9" data-k="c3"></div>
+  <div class="cap" data-from="9" data-to="13" data-k="c4"></div>
+  <div class="cap" data-from="13" data-to="16" data-k="c5"></div>
+  <div class="cap" data-from="16" data-to="21" data-k="c6"></div>
+  <div class="cap" data-from="21" data-to="25" data-k="c7"></div>
+  <div class="cap" data-from="25" data-to="27" data-k="c8"></div>
+
+  <div class="phone" data-from="2" data-to="27">
+    <div class="hdr"><b>GymStudio</b><span data-k="day4"></span>
+      <div class="lang"><span id="lEN" class="act">EN</span><span id="lES">ES</span></div></div>
+
+    <!-- Trainer card -->
+    <div class="view" data-from="2" data-to="9">
+      <div class="ex"><span data-k="exName"></span><span class="swap">⟳</span></div>
+      <div class="card">
+        <div class="t"><span data-k="trTitle"></span><i data-k="conf"></i></div>
+        <div class="ln" data-at="4.5" data-k="last"></div>
+        <div class="ln" data-at="5" data-k="orig"></div>
+        <div class="ln rec" data-at="5.5" data-k="rec"></div>
+        <div class="ln" data-at="6" data-k="why"></div>
+        <div class="btns ln" data-at="6.5"><div class="btn pri" id="acc" data-k="accept"></div><div class="btn" data-k="keep"></div></div>
+        <div class="ln okmsg" data-at="8" data-k="accepted"></div>
+      </div>
+    </div>
+
+    <!-- Logging -->
+    <div class="view" data-from="9" data-to="16">
+      <div class="ex"><span data-k="exName"></span><span class="swap">⟳</span></div>
+      <div class="card" style="padding:8px">
+        <div class="t"><span data-k="recShort"></span></div>
+        <div class="sets">
+          <div class="row"><span class="n">1</span><span class="cell" data-fill="9.3">12 kg</span><span class="cell" data-fill="9.6" data-k="r15"></span><span class="chk" data-at="10">✓</span></div>
+          <div class="row"><span class="n">2</span><span class="cell" id="w2" data-fill="12">12 kg</span><span class="cell" data-fill="15" data-k="r11"></span><span class="chk" data-at="15.3">✓</span></div>
+          <div class="row"><span class="n">3</span><span class="cell">—</span><span class="cell">—</span><span class="chk">✓</span></div>
+        </div>
+      </div>
+      <div class="rir" data-at="10.3" data-to="11.6"><span data-k="rirQ"></span>
+        <div class="opts"><span>0</span><span>1–2</span><span id="rir3">3+</span><span data-k="skip"></span></div></div>
+      <div class="hint" data-at="11.6" data-to="13"><span data-k="hint"></span><br><span class="use" id="use" data-k="use"></span></div>
+      <div class="timer ln" data-at="13" data-to="15">
+        <div class="ring"><svg width="110" height="110"><circle cx="55" cy="55" r="48" stroke="rgba(255,255,255,.11)" stroke-width="7" fill="none"/><circle id="arc" cx="55" cy="55" r="48" stroke="#c99ca1" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="0"/></svg><div class="num" id="tnum">1:30</div></div>
+        <span class="restbtn" data-k="rest"></span>
+      </div>
+    </div>
+
+    <!-- Week adaptation -->
+    <div class="view" data-from="16" data-to="21">
+      <div class="days"><span class="done">D1<small>6/6</small></span><span class="done">D2<small>5/5</small></span><span class="done">D3<small>6/6</small></span><span class="act">D4<small>1/6</small></span><span>D5<small>0/5</small></span><span>D6<small>0/6</small></span></div>
+      <div class="mt">
+        <div class="mini" data-at="16.5"><span class="lbl" data-k="mon"></span><b>10 kg × 14 · 14 · 14</b><span data-k="monT"></span></div>
+        <div class="arrow" data-at="18">↓</div>
+        <div class="mini" data-at="18.5" style="border-color:rgba(201,156,161,.5)"><span class="lbl" data-k="thu"></span><b>12 kg × 10–12</b><span data-k="thuT"></span></div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="view sum" data-from="21" data-to="27">
+      <h4 data-k="perf"></h4>
+      <div class="srow" data-at="21.6"><span class="ar up">↑</span><div><b data-k="s1"></b><div data-k="s1a"></div><div class="nx" data-k="s1n"></div></div></div>
+      <div class="srow" data-at="22.3"><span class="ar eq">→</span><div><b data-k="s2"></b><div data-k="s2a"></div><div class="nx" data-k="s2n"></div></div></div>
+      <div class="srow" data-at="23"><span class="ar dn">↓</span><div><b data-k="s3"></b><div data-k="s3a"></div><div class="nx" data-k="s3n"></div></div></div>
+    </div>
+  </div>
+
+  <div class="end" data-from="27" data-to="30.1">
+    <div class="word">Gym<span>Studio</span></div>
+    <div class="tag" data-k="tagline"></div>
+    <div class="cta" data-k="cta"></div>
+    <div class="url">sebpabonc.github.io/gymstudio</div>
+  </div>
+</div>
+<p class="note">Prototype only, not published. Faithful recreation of the app UI; example numbers pending PT approval. No music embedded.</p>
+
+<script>
+const D={en:{c1:'Guessing your weights <em>every session?</em>',c2:'Your <em>AI Trainer</em> remembers.',c3:"It recalculates today's load — <em>and tells you why.</em>",c4:'Log every set. <em>Get a hint</em> for the next one.',c5:'Rest timer <em>built in.</em>',c6:"Monday's sets change <em>Thursday's target.</em>",c7:"See how you did — <em>and what's next.</em>",c8:'In English <em>or Spanish.</em>',
+day4:'Thu · D4',exName:'Seated dumbbell shoulder press',trTitle:'AI Trainer',conf:'High confidence',last:'Last time: 10 kg × 14 · 14 · 14',orig:'Original today: 10 kg × 10–12',rec:'Recommended: 12 kg × 10–12',why:"Why: Last time you did 14 reps at 10 kg; today's target is 10–12. I have moved the load up.",accept:'Accept',keep:'Keep original',accepted:'Accepted: 12 kg × 10–12.',recShort:'Recommended: 12 kg × 10–12',r15:'15 reps',r11:'11 reps',rirQ:'Reps left in the tank?',skip:'Skip',hint:'15 reps at 12 kg — consider 14 kg for the next set',use:'Use 14 kg',rest:'Start rest',
+mon:'Monday · D1 · target 10',monT:'Beat the target on every set',thu:'Thursday · D4 · Recommended',thuT:'Load moved up from Monday',perf:"Today's performance",
+s1:'Seated dumbbell shoulder press',s1a:'12 kg × 15 vs 10–12',s1n:'Next (D1): 14 kg × 10–12',s2:'Lat pulldown',s2a:'45 kg × 10 vs 10–12',s2n:'Next (D1): 45 kg × 10–12',s3:'Cable lateral raise',s3a:'7.5 kg × 9 vs 12–15',s3n:'Next (D1): 7.5 kg × 12–15',
+tagline:'Train with an AI Personal Trainer that learns from every set.',cta:'Try the demo'},
+es:{c1:'¿Adivinas tus pesos <em>en cada sesión?</em>',c2:'Tu <em>Entrenador IA</em> lo recuerda.',c3:'Recalcula el peso de hoy — <em>y te dice por qué.</em>',c4:'Registra cada serie. <em>Recibe una pista</em> para la siguiente.',c5:'Temporizador de descanso <em>incluido.</em>',c6:'Las series del lunes cambian <em>el objetivo del jueves.</em>',c7:'Mira cómo te fue — <em>y qué sigue.</em>',c8:'En español <em>o en inglés.</em>',
+day4:'Jue · D4',exName:'Press de hombro con mancuernas sentado',trTitle:'Entrenador IA',conf:'Confianza alta',last:'Última vez: 10 kg × 14 · 14 · 14',orig:'Original de hoy: 10 kg × 10–12',rec:'Recomendado: 12 kg × 10–12',why:'Por qué: La última vez hiciste 14 repeticiones con 10 kg; el objetivo de hoy es 10–12. He subido el peso.',accept:'Aceptar',keep:'Mantener original',accepted:'Aceptado: 12 kg × 10–12.',recShort:'Recomendado: 12 kg × 10–12',r15:'15 reps',r11:'11 reps',rirQ:'¿Cuántas te quedaban?',skip:'Omitir',hint:'15 reps con 12 kg — considera 14 kg para la siguiente serie',use:'Usar 14 kg',rest:'Iniciar descanso',
+mon:'Lunes · D1 · objetivo 10',monT:'Superaste el objetivo en cada serie',thu:'Jueves · D4 · Recomendado',thuT:'El peso sube desde el lunes',perf:'Tu rendimiento de hoy',
+s1:'Press de hombro con mancuernas sentado',s1a:'12 kg × 15 frente a 10–12',s1n:'Siguiente (D1): 14 kg × 10–12',s2:'Jalón al pecho',s2a:'45 kg × 10 frente a 10–12',s2n:'Siguiente (D1): 45 kg × 10–12',s3:'Elevación lateral en polea',s3a:'7.5 kg × 9 frente a 12–15',s3n:'Siguiente (D1): 7.5 kg × 12–15',
+tagline:'Entrena con un Entrenador Personal IA que aprende de cada serie.',cta:'Prueba la demo'}};
+let lang='en',t0=performance.now(),inApp='en';const DUR=30;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function paint(l){$$('[data-k]').forEach(e=>{e.innerHTML=D[l][e.dataset.k]});$('#lEN').classList.toggle('act',l==='en');$('#lES').classList.toggle('act',l==='es')}
+function setLang(l){lang=l;$('#bEN').classList.toggle('on',l==='en');$('#bES').classList.toggle('on',l==='es');inApp=null}
+$('#bEN').onclick=()=>setLang('en');$('#bES').onclick=()=>setLang('es');
+$('#replay').onclick=()=>{t0=performance.now()};
+function tick(now){
+  const t=((now-t0)/1000)%DUR;
+  $('#prog').style.width=(t/DUR*100)+'%';
+  $$('[data-from]').forEach(e=>e.classList.toggle('on',t>=+e.dataset.from&&t<+e.dataset.to));
+  $$('[data-at]').forEach(e=>{const to=e.dataset.to?+e.dataset.to:99;e.classList.toggle('on',t>=+e.dataset.at&&t<to)});
+  $$('[data-fill]').forEach(e=>e.classList.toggle('f',t>=+e.dataset.fill));
+  $('#acc').classList.toggle('tap',t>=7.5&&t<8.1);
+  $('#rir3').classList.toggle('sel',t>=11);
+  $('#use').classList.toggle('tap',t>=12.3&&t<12.9);
+  $('#w2').textContent=t>=12.5?'14 kg':'12 kg';
+  // rest timer: 1:30 counting down fast between 13 and 15 s
+  const p=Math.min(Math.max((t-13)/2,0),1),secs=Math.round(90-p*24);
+  $('#tnum').textContent=Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
+  $('#arc').style.strokeDashoffset=301.6*(1-secs/90);
+  // in-app EN/ES flip at 25.5 s
+  const want=(t>=25.5&&t<27)?(lang==='en'?'es':'en'):lang;
+  if(want!==inApp){inApp=want;paint(want);
+    if(t>=25.5&&t<27){$$('.view').forEach(v=>v.classList.remove('on'));$('.view[data-from="2"]').style.opacity=''}}
+  // show trainer card again during the language flip
+  const tv=$('.view[data-from="2"]');
+  if(t>=25&&t<27){tv.classList.add('on');tv.querySelectorAll('.ln').forEach(x=>x.classList.add('on'));$$('.view.sum').forEach(v=>v.classList.remove('on'))}
+  // captions stay in the viewer's chosen language
+  $$('.cap').forEach(c=>c.innerHTML=D[lang][c.dataset.k]);
+  $$('.end [data-k]').forEach(c=>c.innerHTML=D[lang][c.dataset.k]);
+  requestAnimationFrame(tick)}
+paint('en');requestAnimationFrame(tick);
+</script>
