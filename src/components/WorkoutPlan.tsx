@@ -1125,12 +1125,14 @@ export default function WorkoutPlan({
       : undefined
     const prefill = planMode === 'preset' && prefillExerciseId
       ? history
-          .filter((entry) => entry.exerciseId === prefillExerciseId && entry.date !== today && entry.sets.length > 0)
+          .filter((entry) => entry.exerciseId === prefillExerciseId && entry.sets.length > 0 &&
+            (entry.date !== today || (!!activeDay && entry.dayKey !== activeDay.key)))
           .slice()
           .sort((a, b) => b.date.localeCompare(a.date))[0]
       : prefillSelection?.entry
     const noSwapHistory = !!exercise?.swappedFrom &&
-      !history.some((entry) => entry.exerciseId === prefillExerciseId && entry.date !== today)
+      !history.some((entry) => entry.exerciseId === prefillExerciseId &&
+        (entry.date !== today || (!!activeDay && entry.dayKey !== activeDay.key)))
     const bestWeight = noSwapHistory
       ? 0
       : planMode === 'preset'
@@ -1212,7 +1214,7 @@ export default function WorkoutPlan({
     const planned = activeDay.exercises.find((item) => item.exerciseId === exercise.exerciseId)
     const plannedSets = planned?.sets ?? getDefaultSetCount(exercise)
     const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
-    const evidence = buildEvidence(history, exercise.exerciseId, trainingBlocks, today)
+    const evidence = buildEvidence(history, exercise.exerciseId, trainingBlocks, today, activeDay.key)
     const recommendation = recommend({
       history: evidence,
       today,
@@ -2495,9 +2497,15 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const toastRecommendation = toast?.recommendations.find(
               (recommendation) => recommendation.exerciseKey === exerciseKey
             )
-            const insightTarget = completedEntry
-              ? getNextTarget(exercise, completedEntry.sets)
-              : toastRecommendation?.target
+            // Preset plans: the "Next" box comes from the AI Trainer engine (next occurrence), not the old rule.
+            const trainerNext = planMode === 'preset' && completedEntry
+              ? buildWorkoutSummary([completedEntry], history, trainingBlocks, exerciseCatalog, today)[0]
+              : undefined
+            const insightTarget = planMode === 'preset'
+              ? null
+              : completedEntry
+                ? getNextTarget(exercise, completedEntry.sets)
+                : toastRecommendation?.target
             const completedRows = Array.from(
               { length: setCount },
               (_, index) => draft.setDone[index] ?? false
@@ -2629,6 +2637,16 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                   </button>
                 </div>
 
+                {trainerNext && (
+                  <aside className="next-target-card">
+                    <strong>{t('workout.session.performanceNext', {
+                      day: trainerNext.nextDate ? formatWeekdayDate(language, `${trainerNext.nextDate}T00:00:00Z`).split(' ')[0] : '',
+                      weight: formatNumber(language, trainerNext.next.weight ?? trainerNext.actual.weight),
+                      reps: trainerRangeLabel(trainerNext.next.reps),
+                    })}</strong>
+                    <p>{trainerReason(t, language, trainerNext.next, trainerNext.target.reps)}</p>
+                  </aside>
+                )}
                 {insightTarget && (toastRecommendation || completedEntry) && (
                   <aside className="next-target-card" role="status" aria-live="polite">
                     <strong>{getNextTargetLabel(insightTarget)}</strong>
