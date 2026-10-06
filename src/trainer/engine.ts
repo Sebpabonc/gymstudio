@@ -241,6 +241,14 @@ function monotonic(weights: number[], reps: number[]) {
   return weights
 }
 
+/** PT 2026-10-07 global floor: a weighted exercise is never recommended at 0 kg (minimum one step). */
+function withFloor(result: Recommendation, lastWeight: number, step: number): Recommendation {
+  if (lastWeight > 0 && result.weight !== null && result.weight <= 0) {
+    return { ...result, weight: step > 0 ? Math.min(step, lastWeight) : lastWeight }
+  }
+  return result
+}
+
 type Make = (action: TrainerAction, weight: number | null, reason: ReasonCode, extra?: Partial<Recommendation>) => Recommendation
 
 export function recommend(input: RecommendInput): Recommendation {
@@ -312,7 +320,7 @@ export function recommend(input: RecommendInput): Recommendation {
 
   if (pyramid && input.setReps) return recommendPyramid(input, progressing, capacity, confidence, step, make)
 
-  const result = recommendStraight(input, progressing, lastSets, lastWeight, capacity, confidence, step, make)
+  const result = withFloor(recommendStraight(input, progressing, lastSets, lastWeight, capacity, confidence, step, make), lastWeight, step)
   // R3: drop-set — the drop is 75 % of the recommended main load, rounded down.
   if (input.technique === 'drop-set' && result.weight !== null && result.weight > 0) {
     return { ...result, dropWeight: roundToStep(result.weight * 0.75, step, 'down') }
@@ -451,6 +459,21 @@ function recommendStraight(
       return make('increase_weight', capped(lastWeight + step), 'original_too_easy', {
         reps: { min: Math.max(1, target.max - 2), max: target.max },
       })
+    }
+    // PT 2026-10-07: the R8 coarse-step guard also covers rep-range conversion — when one step is more than 10 % of
+    // the last load, keep the load and use today's reps (never convert a 5 kg cable load down to 0 kg).
+    if (lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT) {
+      // PT: one session missed by 3+ reps on 2+ sets → keep; two in a row → drop exactly one step (never 0).
+      const missedBy3 = (session?: SessionEvidence) => {
+        if (!session) return false
+        const t = session.target ?? target
+        return progressionSets(session.sets, sets).filter((set) => t.min - set.reps >= 3).length >= 2
+      }
+      if (missedBy3(last) && missedBy3(progressing[1])) {
+        return make('decrease_weight', Math.max(step, lastWeight - step), 'below_target_twice')
+      }
+      const missed = missedBy3(last)
+      return make(!missed && target.min > lastTarget.max ? 'increase_reps' : 'maintain', lastWeight, missed ? 'below_target_once' : 'light_load_add_reps')
     }
     weight = Math.min(weight, roundToStep(maxWeight, step, 'down'))
     const action: TrainerAction = weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
