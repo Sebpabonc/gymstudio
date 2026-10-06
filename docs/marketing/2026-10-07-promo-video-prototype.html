@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GymStudio Promo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-dark:#0f0f10; --bg-soft:#171719; --text:#f3f3f1; --muted:#c8c7c4; --muted-strong:#efefeb;
+  --brand:#8d5e63; --brand-strong:#5a474b; --brand-soft:rgba(141,94,99,.18); --nav-active:#c99ca1;
+  --line:rgba(255,255,255,.11); --glass-fill:rgba(22,22,24,.48); --glass-border:rgba(255,255,255,.14);
+  --button-dark:linear-gradient(135deg,#7a5d60 0%,#2f2f31 100%); --success:#dfe7df;
+  --radius-card:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg-dark);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+.frame{position:relative;width:100%;max-width:400px;aspect-ratio:9/16;border-radius:26px;overflow:hidden;
+  background:radial-gradient(120% 60% at 50% 0%,rgba(141,94,99,.35),transparent 60%),var(--bg-dark);
+  border:1px solid var(--line);box-shadow:0 28px 80px rgba(0,0,0,.5);container-type:inline-size}
+.controls{display:flex;gap:8px}
+.controls button{font:inherit;font-size:13px;font-weight:700;color:var(--text);background:var(--bg-soft);
+  border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+.controls button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand)}
+.layer{position:absolute;inset:0;padding:9cqw 7cqw;display:flex;flex-direction:column;justify-content:center;opacity:0}
+.hook h1{font-size:10.5cqw;line-height:1.08;font-weight:800;margin:0;letter-spacing:-.02em}
+.hook h1 em{font-style:normal;color:var(--nav-active)}
+.app{justify-content:center;gap:3cqw}
+.ex{border-radius:var(--radius-card);background:var(--glass-fill);border:1px solid var(--glass-border);
+  backdrop-filter:blur(24px);padding:5cqw;display:grid;gap:3cqw}
+.ex-head small{display:block;color:var(--muted);font-size:3cqw;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.ex-head b{font-size:5.6cqw}
+.card{display:grid;gap:1.8cqw;padding:3.6cqw;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04)}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:2cqw}
+.card-h strong{font-size:4.2cqw}
+.pill{padding:.8cqw 2.2cqw;border:1px solid var(--line);border-radius:999px;color:var(--muted-strong);font-size:2.9cqw}
+.card p{margin:0;color:var(--muted);font-size:3.7cqw;line-height:1.4;opacity:0;transform:translateY(6px)}
+.card p.rec{color:var(--text);font-weight:700;font-size:4.3cqw}
+.card p.rec span{color:var(--nav-active)}
+.actions{display:flex;gap:2cqw;opacity:0}
+.btn{position:relative;font-size:3.4cqw;font-weight:700;border-radius:999px;padding:2cqw 4cqw;border:1px solid var(--line);color:var(--text);background:transparent}
+.btn.primary{background:var(--button-dark);border-color:transparent}
+.tap{position:absolute;left:50%;top:50%;width:9cqw;height:9cqw;margin:-4.5cqw;border-radius:50%;background:rgba(255,255,255,.55);opacity:0}
+.chosen{display:none;color:var(--muted-strong);font-size:3.7cqw;margin:0}
+.sets{display:grid;gap:1.6cqw}
+.set{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:3cqw;padding:2.4cqw 3cqw;border:1px solid var(--line);border-radius:12px;font-size:3.6cqw}
+.set i{font-style:normal;color:var(--muted);font-size:3cqw}
+.tick{width:6.4cqw;height:6.4cqw;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:3.6cqw;color:transparent}
+.set.done{border-color:var(--brand);background:var(--brand-soft)}
+.set.done .tick{background:var(--nav-active);border-color:var(--nav-active);color:var(--bg-dark)}
+.rest{justify-self:center;opacity:0;padding:1.6cqw 4cqw;border-radius:999px;background:var(--bg-soft);border:1px solid var(--line);font-size:3.4cqw;font-weight:700}
+.rest b{color:var(--nav-active)}
+.end{align-items:center;text-align:center;gap:4cqw}
+.logo{width:16cqw;height:16cqw;border-radius:22%;background:var(--button-dark);display:grid;place-items:center;font-weight:800;font-size:7cqw;border:1px solid var(--glass-border)}
+.end h2{margin:0;font-size:9cqw;font-weight:800;letter-spacing:-.02em}
+.end p{margin:0;font-size:5cqw;line-height:1.3;color:var(--muted-strong)}
+.end p span{color:var(--nav-active)}
+.progress{position:absolute;left:0;bottom:0;height:3px;background:var(--nav-active);width:0}
+/* timeline (8 s) */
+
+.play .hook{animation:hook 8s linear forwards}
+@keyframes hook{0%{opacity:0;transform:scale(.96)}3%{opacity:1;transform:none}14%{opacity:1}17%,100%{opacity:0;transform:translateY(-20px)}}
+.play .app{animation:app 8s linear forwards}
+@keyframes app{0%,14%{opacity:0;transform:translateY(30px)}18%{opacity:1;transform:none}78%{opacity:1}82%,100%{opacity:0}}
+.play .l1{animation:line .4s ease-out 1.4s forwards}
+.play .l2{animation:line .4s ease-out 2.4s forwards}
+.play .l3{animation:line .4s ease-out 3.4s forwards,pop .5s ease-out 3.4s}
+.play .l4{animation:line .4s ease-out 3.9s forwards}
+.play .actions{animation:line .3s ease-out 3.9s forwards}
+.play .tap{animation:tap .6s ease-out 4.7s}
+@keyframes line{to{opacity:1;transform:none}}
+@keyframes pop{50%{transform:scale(1.05)}}
+@keyframes tap{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(2.2)}}
+.play .rest{animation:line .3s ease-out 5.6s forwards}
+.play .end{animation:endc 8s linear forwards}
+@keyframes endc{0%,80%{opacity:0;transform:scale(.97)}84%,100%{opacity:1;transform:none}}
+.play .progress{animation:prog 8s linear forwards}
+@keyframes prog{to{width:100%}}
+@media (prefers-reduced-motion:reduce){.play *{animation-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div class="frame" id="frame" aria-label="GymStudio promo video prototype, 9:16">
+  <section class="layer hook"><h1 data-t="hook"></h1></section>
+  <section class="layer app">
+    <div class="ex">
+      <div class="ex-head"><small data-t="day"></small><b data-t="exercise"></b></div>
+      <aside class="card">
+        <div class="card-h"><strong data-t="title"></strong><span class="pill" data-t="conf"></span></div>
+        <p class="l1" data-t="last"></p>
+        <p class="l2" data-t="orig"></p>
+        <p class="l3 rec" data-t="rec"></p>
+        <p class="l4" data-t="why"></p>
+        <div class="actions"><span class="btn primary"><span data-t="accept"></span><span class="tap"></span></span><span class="btn" data-t="keep"></span></div>
+        <p class="chosen" data-t="accepted"></p>
+      </aside>
+      <div class="sets">
+        <div class="set" id="s1"><span class="tick">✓</span><span>12 kg × <b id="r1">—</b></span><i data-t="set1"></i></div>
+        <div class="set"><span class="tick">✓</span><span>12 kg × —</span><i data-t="set2"></i></div>
+      </div>
+      <div class="rest"><span data-t="rest"></span> <b id="timer">1:30</b></div>
+    </div>
+  </section>
+  <section class="layer end">
+    <div class="logo">G</div>
+    <h2>GymStudio</h2>
+    <p data-t="tag"></p>
+  </section>
+  <div class="progress"></div>
+</div>
+<div class="controls">
+  <button id="en" aria-pressed="true">EN</button>
+  <button id="es" aria-pressed="false">ES</button>
+  <button id="replay">↻ Replay</button>
+</div>
+<script>
+const T={
+ en:{hook:'Your trainer <em>remembers</em> every set.',day:'Upper A · Today',exercise:'Dumbbell Bench Press',title:'AI Trainer',conf:'High confidence',
+  last:'Last time: 10 kg × 14 · 14 · 14',orig:'Original today: 10 kg × 12',rec:'Recommended: <span>12 kg</span> × 10–12',
+  why:'Why: you beat your target by 4 reps',accept:'Accept',keep:'Keep original',accepted:'Accepted: 12 kg × 10–12.',
+  set1:'Set 1',set2:'Set 2',rest:'Rest',tag:'Train with an <span>AI Personal Trainer</span> that learns from every set.',replay:'↻ Replay'},
+ es:{hook:'Tu entrenador <em>recuerda</em> cada serie.',day:'Tren superior A · Hoy',exercise:'Press de banca con mancuernas',title:'Entrenador IA',conf:'Confianza alta',
+  last:'Última vez: 10 kg × 14 · 14 · 14',orig:'Original de hoy: 10 kg × 12',rec:'Recomendado: <span>12 kg</span> × 10–12',
+  why:'Por qué: superaste tu objetivo por 4 reps',accept:'Aceptar',keep:'Mantener original',accepted:'Aceptado: 12 kg × 10–12.',
+  set1:'Serie 1',set2:'Serie 2',rest:'Descanso',tag:'Entrena con un <span>Entrenador Personal IA</span> que aprende de cada serie.',replay:'↻ Repetir'}
+};
+let lang='en',timers=[];
+const $=id=>document.getElementById(id), frame=$('frame');
+function apply(){document.documentElement.lang=lang;document.querySelectorAll('[data-t]').forEach(e=>e.innerHTML=T[lang][e.dataset.t]);
+ $('replay').textContent=T[lang].replay;$('en').setAttribute('aria-pressed',lang==='en');$('es').setAttribute('aria-pressed',lang==='es')}
+function play(){
+ timers.forEach(clearTimeout);timers=[];
+ frame.classList.remove('play');void frame.offsetWidth;frame.classList.add('play');
+ const act=document.querySelector('.actions'),ch=document.querySelector('.chosen'),s1=$('s1');
+ act.style.display='';ch.style.display='none';s1.classList.remove('done');$('r1').textContent='—';$('timer').textContent='1:30';
+ const at=(ms,f)=>timers.push(setTimeout(f,ms));
+ at(5000,()=>{act.style.display='none';ch.style.display='block'});
+ at(5400,()=>{s1.classList.add('done');$('r1').textContent='11'});
+ [1,2,3,4].forEach(i=>at(5700+i*500,()=>{$('timer').textContent='1:'+String(30-i).padStart(2,'0')}));
+ at(8400,play); // loop
+}
+$('en').onclick=()=>{lang='en';apply();play()};
+$('es').onclick=()=>{lang='es';apply();play()};
+$('replay').onclick=play;
+apply();play();
+</script>
+</body>
+</html>
