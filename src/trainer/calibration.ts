@@ -16,7 +16,7 @@ export type Exposure = {
   repsTarget: number
   rirTarget: number
   /** Progression sets as logged. */
-  sets: Array<{ weight: number; reps: number; rir?: number }>
+  sets: Array<{ weight: number; reps: number; rir?: number; repsTarget?: number; rirTarget?: number; weightRecommended?: number }>
   /** Deload, double-angle follower, incomplete (R6), return-after-break, bodyweight without load. */
   excluded?: boolean
 }
@@ -54,8 +54,11 @@ export function bucketFor(technique?: string): TechniqueBucket {
 
 /** Spec 1.1: mean per-set residual (reps the user had vs reps expected), each set clamped to ±5. */
 export function exposureResidual(exposure: Exposure) {
-  const { weightRecommended: wRec, repsTarget: rTgt, rirTarget: rirTgt } = exposure
   const residuals = exposure.sets.map((set) => {
+    // Per-set targets override the exposure's (pyramid heaviest set: 1 RIR — PT pre-merge review).
+    const wRec = set.weightRecommended ?? exposure.weightRecommended
+    const rTgt = set.repsTarget ?? exposure.repsTarget
+    const rirTgt = set.rirTarget ?? exposure.rirTarget
     let repsEquivalent = set.reps
     if (set.weight !== wRec && wRec > 0 && set.weight > 0) {
       const oneRepMax = set.weight * (1 + set.reps / 30)

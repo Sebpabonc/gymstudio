@@ -180,3 +180,32 @@ describe('R10 partials and baseline', () => {
     expect(recommend({ history, today: TODAY, target: rng(8, 10), sets: 3, equipment: 'barbell' }).weight).toBe(42.5)
   })
 })
+
+describe('calibration integration (PT B + Sebas: never lower after hitting the top)', () => {
+  const base = { today: TODAY, target: rng(8, 10), sets: 3, equipment: 'barbell' }
+  it('O +2 raises a "keep" result to the calibrated load (C18-style)', () => {
+    // Calibration only exists after ≥ 4 exposures, so the history has more than one session.
+    const history = [
+      sess([s(80, 10), s(80, 10), s(80, 9)], { target: rng(8, 10) }),
+      sess([s(80, 10), s(80, 10), s(80, 9)], { date: '2026-10-03', target: rng(8, 10) }),
+    ]
+    const result = recommend({ ...base, history, calibrationOffset: 2 })
+    expect(result).toMatchObject({ weight: 82.5, action: 'increase_weight', calibration: { offset: 2, uncalibratedWeight: 80 } })
+  })
+  it('O −2 after hitting the top never goes below the last load (Sebas, replaces C20)', () => {
+    const history = [sess([s(80, 10), s(80, 10), s(80, 10)], { target: rng(8, 10) })]
+    expect(recommend({ ...base, history, calibrationOffset: -2 }).weight).toBe(80)
+  })
+  it('O −2 without hitting the top lowers to the calibrated load', () => {
+    const history = [sess([s(80, 8), s(80, 8), s(80, 8)], { target: rng(8, 10) })]
+    expect(recommend({ ...base, history, calibrationOffset: -2 })).toMatchObject({ weight: 75, action: 'decrease_weight', calibration: { uncalibratedWeight: 80 } }) // L_c 70, floor −5 % → 75
+  })
+  it('|O| < 1 changes nothing', () => {
+    const history = [sess([s(80, 10), s(80, 10), s(80, 9)], { target: rng(8, 10) })]
+    expect(recommend({ ...base, history, calibrationOffset: 0.5 }).calibration).toBeUndefined()
+  })
+  it('deload ignores calibration (C13)', () => {
+    const history = [sess([s(40, 10), s(40, 10), s(40, 10)], { target: rng(8, 10) })]
+    expect(recommend({ ...base, history, deload: true, calibrationOffset: 3 })).toMatchObject({ weight: 40, sets: 2 })
+  })
+})
