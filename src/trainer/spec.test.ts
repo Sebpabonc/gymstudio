@@ -63,17 +63,17 @@ describe('R3 drop-sets, rest-pause, myo-reps', () => {
   })
   const drop = (main: number, reps: number, dropW: number, dropR: number) =>
     sess([0, 1, 2].map(() => s(main, reps, { drop: { weight: dropW, reps: dropR } })), { target: rng(12) })
-  it('T10 machine 40×14 → main 45 reps 12, drop 30', () => {
+  it('T10 (v2 step 2.5) machine 40×14 → main 42.5 reps 12, drop 30', () => {
     const result = recommend({ history: [drop(40, 14, 30, 12)], today: TODAY, target: rng(12), sets: 3, equipment: 'machine', technique: 'drop-set' })
-    expect(result).toMatchObject({ weight: 45, reps: { min: 12, max: 12 }, dropWeight: 30 })
+    expect(result).toMatchObject({ weight: 42.5, reps: { min: 12, max: 12 }, dropWeight: 30 })
   })
-  it('T11 machine 40×12 → main 40 (needs 14), drop 30', () => {
+  it('T11 (v2) machine 40×12 → main 42.5, drop 30', () => {
     const result = recommend({ history: [drop(40, 12, 30, 10)], today: TODAY, target: rng(12), sets: 3, equipment: 'machine', technique: 'drop-set' })
-    expect(result).toMatchObject({ weight: 40, dropWeight: 30 })
+    expect(result).toMatchObject({ weight: 42.5, dropWeight: 30 })
   })
-  it('T12 cable 50×12 → main 55, drop 40', () => {
+  it('T12 (v2) cable 50×12 → main 52.5, drop 37.5', () => {
     const result = recommend({ history: [drop(50, 12, 40, 12)], today: TODAY, target: rng(12), sets: 3, equipment: 'cable', technique: 'drop-set' })
-    expect(result).toMatchObject({ weight: 55, dropWeight: 40 })
+    expect(result).toMatchObject({ weight: 52.5, dropWeight: 37.5 })
   })
 })
 
@@ -148,13 +148,13 @@ describe('R8 light loads', () => {
     const history = [sess([s(8, 17), s(8, 17), s(8, 17)], { target: rng(12, 15) })]
     expect(recommend({ history, today: TODAY, target: rng(12, 15), sets: 3, equipment: 'dumbbell' })).toMatchObject({ weight: 10, reps: { min: 12, max: 12 } })
   })
-  it('T24 machine 45×12 → 45, add reps', () => {
+  it('T24 (v2) machine 45×12 → 47.5, top of range', () => {
     const history = [sess([s(45, 12), s(45, 12), s(45, 12)], { target: rng(10, 12) })]
-    expect(recommend({ history, today: TODAY, target: rng(10, 12), sets: 3, equipment: 'machine' })).toMatchObject({ action: 'increase_reps', weight: 45 })
+    expect(recommend({ history, today: TODAY, target: rng(10, 12), sets: 3, equipment: 'machine' })).toMatchObject({ action: 'increase_weight', weight: 47.5 })
   })
-  it('T25 machine 45×14 → 50, reps 10', () => {
+  it('T25 (v2) machine 45×14 → 47.5, reps 10-12', () => {
     const history = [sess([s(45, 14), s(45, 14), s(45, 14)], { target: rng(10, 12) })]
-    expect(recommend({ history, today: TODAY, target: rng(10, 12), sets: 3, equipment: 'machine' })).toMatchObject({ weight: 50, reps: { min: 10, max: 10 } })
+    expect(recommend({ history, today: TODAY, target: rng(10, 12), sets: 3, equipment: 'machine' })).toMatchObject({ weight: 47.5, reps: { min: 10, max: 12 } })
   })
 })
 
@@ -216,8 +216,8 @@ describe('PT 2026-10-07: conversion on coarse steps and the 0 kg floor', () => {
     expect(recommend({ history, today: TODAY, target: rng(20), sets: 4, equipment: 'cable' }))
       .toMatchObject({ weight: 5, action: 'increase_reps' })
   })
-  it('fine step still converts: squat 100 × 8 → 12 reps is a multi-step drop above 0 (engine formula: 87.5)', () => {
+  it('fine step still converts: squat 100 × 8 → 12 reps is a multi-step drop above 0 (v2 R13 floor: 90)', () => {
     const history = [sess([s(100, 8), s(100, 8), s(100, 8)], { target: rng(8) })]
-    expect(recommend({ history, today: TODAY, target: rng(12), sets: 3, equipment: 'barbell' }).weight).toBe(87.5)
+    expect(recommend({ history, today: TODAY, target: rng(12), sets: 3, equipment: 'barbell' }).weight).toBe(90)
   })
 })

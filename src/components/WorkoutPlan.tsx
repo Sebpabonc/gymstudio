@@ -1225,6 +1225,7 @@ export default function WorkoutPlan({
       deload: activeBlockWeek === 6,
       technique: exercise.technique,
       setReps: reps,
+      exerciseId: exercise.exerciseId,
       tempo: /\btempo\b/i.test(exercise.notes ?? ''),
       followLoad: followLoadFor(exercise),
       calibrationOffset: computeCalibration(

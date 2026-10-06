@@ -1,5 +1,6 @@
 // AI Trainer progression engine. Implements the PT-approved spec
-// docs/fitness/approved/2026-10-07-progression-engine-spec.md (rules R1–R11, test cases T1–T29).
+// docs/fitness/approved/2026-10-07-progression-engine-spec.md (R1–R11, T1–T29) and its v2 amendment
+// docs/fitness/approved/2026-10-07-progression-engine-spec-v2.md (R12–R19, T30–T51).
 // The PT owns these rules; change them only through an approved PT spec with test cases.
 // Pure functions: the LLM never chooses numbers — it only explains the structured recommendation returned here.
 
@@ -58,6 +59,7 @@ export type ReasonCode =
   | 'light_load_add_reps'
   | 'bodyweight_add_reps'
   | 'double_angle'
+  | 'consolidate_load'
 
 export type Confidence = 'low' | 'medium' | 'high'
 
@@ -104,6 +106,10 @@ export type RecommendInput = {
   followLoad?: number
   /** Per-user calibration offset O in reps (continuous-learning spec 1.2); 0 when not enough evidence. */
   calibrationOffset?: number
+  /** Catalogue id (R16 cable crunch). */
+  exerciseId?: string
+  /** R12a: a configured per-exercise step wins over the equipment default. */
+  step?: number
 }
 
 const MAX_REPS_FOR_ESTIMATE = 15
@@ -115,15 +121,12 @@ const MAX_INCREASE_PCT = 0.1
 /** Continuous-learning spec 1.3: rir_eff = clamp(rir_tgt − O, 0, rir_tgt + 3). */
 const effectiveReserve = (rirTarget: number, offset = 0) => Math.min(rirTarget + 3, Math.max(0, rirTarget - offset))
 
-/** Load increment (spec "Definitions"): dumbbell 2 kg, machine/cable stacks 5 kg, everything else 2.5 kg. */
+/** Load increment (R12a, Sebas's gym): dumbbell/kettlebell 2 kg; machines, cables and everything else 2.5 kg. */
 export function equipmentStep(equipment?: string) {
   switch (equipment) {
     case 'dumbbell':
     case 'kettlebell':
       return 2
-    case 'machine':
-    case 'cable':
-      return 5
     default:
       return 2.5
   }
@@ -228,7 +231,8 @@ const isPyramid = (technique?: string, setReps?: number[]) =>
 
 /** Per-set guardrail (spec "Definitions"): max(1 step, min(+10 %, 2 steps)) above that set's last load, rounded down. */
 function setCap(lastLoad: number, step: number) {
-  return roundToStep(lastLoad + Math.max(step, Math.min(lastLoad * MAX_INCREASE_PCT, 2 * step)), step, 'down')
+  // R12a: odd logged loads (e.g. 6.25 on a 2.5 kg machine) keep their offset — the increment is what is rounded.
+  return Number((lastLoad + roundToStep(Math.max(step, Math.min(lastLoad * MAX_INCREASE_PCT, 2 * step)), step, 'down')).toFixed(2))
 }
 
 /** Fewer reps never means less weight. */
@@ -261,7 +265,7 @@ export function recommend(input: RecommendInput): Recommendation {
 
 function recommendUnfloored(input: RecommendInput): Recommendation {
   const { today, target, sets, plannedWeight } = input
-  const step = equipmentStep(input.equipment)
+  const step = input.step ?? equipmentStep(input.equipment)
   const pyramid = isPyramid(input.technique, input.setReps)
 
   // R5 / R10 / R4: which past sessions count.
@@ -347,7 +351,10 @@ function recommendPyramid(
   const planned = input.setReps!
   const topReps = Math.min(...planned)
   const topIndex = planned.indexOf(topReps)
-  const sameTechnique = progressing.filter((session) => session.technique === input.technique)
+  // R17: a "pyramid" session logged at one load on every set is straight-set history.
+  const sameTechnique = progressing.filter((session) =>
+    session.technique === input.technique &&
+    new Set(progressionSets(session.sets, planned.length).map((set) => set.weight)).size > 1)
   const lastPyramid = sameTechnique[0]
   const heaviestOf = (sets: LoggedSet[]) => sets[topIndex] ?? sets.reduce((a, b) => (b.weight > a.weight ? b : a))
 
@@ -388,7 +395,8 @@ function recommendPyramid(
   } else if (capacity) {
     // R1.3: first time with this pyramid — top set from capacity at ~1 RIR, round up only with medium/high confidence.
     top = roundToStep(loadForReps(capacity.oneRepMax, topReps, effectiveReserve(1, input.calibrationOffset)), step, confidence === 'low' ? 'down' : 'up')
-    action = 'increase_weight'
+    const lastLoad = progressing[0] ? workingWeight(progressionSets(progressing[0].sets, planned.length)) : 0
+    action = top === lastLoad ? 'maintain' : 'increase_weight'
     reason = 'converted_rep_range'
   } else {
     return make('collect_data', input.plannedWeight ?? null, 'no_history')
@@ -406,6 +414,33 @@ function recommendPyramid(
     return load
   })
   if (!backOffFormat) monotonic(setWeights, planned)
+  // R12b: final jump cap against the last working load when the pyramid is built from straight-set history (R1.3/R17).
+  if (!lastLoads && progressing[0]) {
+    const lastSession = progressionSets(progressing[0].sets, planned.length)
+    const lastLoad = workingWeight(lastSession)
+    if (lastLoad > 0) {
+      // R17b: a pyramid built from single-load history never goes above that load, unless (a) the two most recent
+      // sessions were both single-load at that load and reached the top of their range, or (b) the last was too easy.
+      const single = (session?: SessionEvidence) => {
+        const loaded = session ? progressionSets(session.sets, planned.length) : []
+        return loaded.length > 0 && new Set(loaded.map((set) => set.weight)).size === 1 ? loaded : null
+      }
+      const reachedTop = (session?: SessionEvidence) => {
+        const loaded = single(session)
+        const range = session?.target ?? { min: topReps, max: topReps }
+        return !!loaded && loaded[0].weight === lastLoad && loaded.every((set) => set.reps >= range.max)
+      }
+      const lastRange = progressing[0].target ?? { min: topReps, max: topReps }
+      const tooEasy = lastSession.every((set) => set.reps >= lastRange.max) &&
+        lastSession.filter((set) => set.reps >= lastRange.max + 3).length >= Math.ceil(lastSession.length / 2)
+      const singleLoad = !!single(progressing[0])
+      const earned = (reachedTop(progressing[0]) && reachedTop(progressing[1])) || tooEasy
+      const cap = singleLoad && !earned ? lastLoad : setCap(lastLoad, step)
+      setWeights.forEach((weight, index) => { setWeights[index] = Math.min(weight, cap) })
+      top = setWeights[topIndex]
+      if (top === lastLoad) action = 'maintain'
+    }
+  }
   const lastTopLoad = lastLoads?.[topIndex]
   const finalAction: TrainerAction =
     lastTopLoad === undefined ? action : top > lastTopLoad ? 'increase_weight' : top < lastTopLoad ? 'decrease_weight' : action
@@ -417,6 +452,41 @@ function recommendPyramid(
 }
 
 function recommendStraight(
+  input: RecommendInput,
+  progressing: SessionEvidence[],
+  lastSets: LoggedSet[],
+  lastWeight: number,
+  capacity: Capacity | null,
+  confidence: Confidence,
+  step: number,
+  make: Make
+): Recommendation {
+  const result = recommendStraightRules(input, progressing, lastSets, lastWeight, capacity, confidence, step, make)
+  if (result.weight === null || isBodyweight(input.equipment) && lastWeight === 0) return applyR15(result, lastSets, input.target)
+  let { weight, action, reason } = result
+  // R18: add load only when every working set used the working load.
+  const allAtLoad = lastSets.every((set) => set.weight >= lastWeight)
+  if (!allAtLoad && weight > lastWeight) {
+    weight = lastWeight
+    action = 'maintain'
+    reason = 'consolidate_load'
+  }
+  // R12b: final jump cap — max(1 step, min(+10 %, 2 steps)) above the last working load, rounded down.
+  if (lastWeight > 0) weight = Math.min(weight, setCap(lastWeight, step))
+  const finalAction: TrainerAction = weight === result.weight ? action
+    : weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
+  return applyR15({ ...result, weight, action: finalAction, reason }, lastSets, input.target)
+}
+
+/** R15: an "increase reps" target always asks for more reps than the lowest set last time. */
+function applyR15(result: Recommendation, lastSets: LoggedSet[], target: RepRange): Recommendation {
+  if (result.action !== 'increase_reps' || !lastSets.length) return result
+  const atLoad = lastSets.filter((set) => set.weight === result.weight)
+  const mLast = Math.min(...(atLoad.length ? atLoad : lastSets).map((set) => set.reps))
+  return { ...result, reps: { min: Math.max(target.min, mLast + 1), max: Math.max(target.min, mLast + 2) } }
+}
+
+function recommendStraightRules(
   input: RecommendInput,
   progressing: SessionEvidence[],
   lastSets: LoggedSet[],
@@ -450,10 +520,24 @@ function recommendStraight(
     : Math.max(lastWeight + step, Math.min(lastWeight * (1 + MAX_INCREASE_PCT), lastWeight + 2 * step))
   const capped = (weight: number) => Math.min(weight, roundToStep(maxWeight, step, 'down'))
   const strong = confidence !== 'low'
+  // R14: "too easy" = complete, every set at the top of the range and at least half 3+ reps above it.
+  const tooEasyFor = (range: RepRange) =>
+    complete && lastReps.every((reps) => reps >= range.max) &&
+    lastReps.filter((reps) => reps >= range.max + 3).length >= Math.ceil(lastReps.length / 2)
+
+  // R16: cable crunch — reps first, then exactly one step once every set reaches max + 2.
+  if (input.exerciseId === 'cable-crunch' && lastWeight > 0 && sameRange(lastTarget, target)) {
+    if (complete && lastReps.every((reps) => reps >= target.max + 2)) {
+      return make('increase_weight', lastWeight + step, 'reached_top_of_range')
+    }
+    if (lastReps.some((reps) => reps < target.min)) return make('maintain', lastWeight, 'slightly_below_target')
+    return make('increase_reps', lastWeight, 'light_load_add_reps')
+  }
+
   // R8: light loads — when one step is more than 10 % of the load, add reps to max + 2 before adding the step.
   // (Added load on bodyweight work follows normal straight-set rules — R7, T9/T21.)
   if (!isBodyweight(input.equipment) && lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT && sameRange(lastTarget, target)) {
-    if (complete && lastReps.every((reps) => reps >= target.max + 2)) {
+    if ((complete && lastReps.every((reps) => reps >= target.max + 2)) || tooEasyFor(target)) {
       return make('increase_weight', lastWeight + step, 'reached_top_of_range', { reps: { min: target.min, max: target.min } })
     }
     if (lastReps.some((reps) => reps < target.min)) return make('maintain', lastWeight, 'slightly_below_target')
@@ -480,15 +564,29 @@ function recommendStraight(
       if (missedBy3(last) && missedBy3(progressing[1])) {
         return make('decrease_weight', Math.max(step, lastWeight - step), 'below_target_twice')
       }
+      // R19: higher rep target after any miss (even one rep) drops exactly one step when Epley says so.
+      const anyMiss = lastReps.some((reps) => reps < lastTarget.min)
+      if (target.min > lastTarget.max && anyMiss) {
+        const meanReps = lastReps.reduce((sum, reps) => sum + reps, 0) / lastReps.length
+        const e1rm = lastWeight * (1 + meanReps / 30)
+        const load = e1rm / (1 + (target.min + 2) / 30)
+        if (load <= lastWeight - step / 2) return make('maintain', Math.max(step, lastWeight - step), 'converted_rep_range')
+      }
       const missed = missedBy3(last)
       return make(!missed && target.min > lastTarget.max ? 'increase_reps' : 'maintain', lastWeight, missed ? 'below_target_once' : 'light_load_add_reps')
     }
+    // R13: never below the load that matches what was already done at those reps.
+    const atWorking = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps).sort((a, b) => a - b)
+    const middle = Math.floor(atWorking.length / 2)
+    const rDone = atWorking.length % 2 ? atWorking[middle] : (atWorking[middle - 1] + atWorking[middle]) / 2
+    const floorLoad = target.min <= rDone ? lastWeight : roundToStep(lastWeight * (1 + rDone / 30) / (1 + target.min / 30), step, 'down')
+    weight = Math.max(weight, floorLoad)
     weight = Math.min(weight, roundToStep(maxWeight, step, 'down'))
     const action: TrainerAction = weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
     return make(action, weight, 'converted_rep_range')
   }
 
-  const exceeded = lastReps.every((reps) => reps >= lastTarget.max + 3)
+  const exceeded = tooEasyFor(lastTarget) // R14 replaces "every set ≥ max + 3"
   const atTop = lastReps.every((reps) => reps >= lastTarget.max)
   const belowBy3 = lastReps.filter((reps) => lastTarget.min - reps >= 3).length
   const dropOff = lastReps.length > 1 && lastReps[0] >= lastTarget.min && lastReps.slice(1).some((reps) => lastTarget.min - reps >= 3)

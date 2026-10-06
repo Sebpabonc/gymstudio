@@ -109,6 +109,7 @@ export function buildWorkoutSummary(
       deload: blockWeek(block, nextOccurrence.date) === 6,
       // PT spec inputs: technique, per-set main reps (pyramids), tempo slots (R10).
       technique: occurrencePrescription.technique,
+      exerciseId,
       setReps: occurrencePrescription.reps.map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0),
       tempo: /\btempo\b/i.test(occurrencePrescription.notes ?? ''),
     })
