@@ -1,0 +1,204 @@
+<title>GymStudio Simple</title>
+<style>
+:root{color-scheme:dark;--bg-dark:#0f0f10;--bg-soft:#171719;--text:#f3f3f1;--muted:#c8c7c4;--line:rgba(255,255,255,.11);--panel:rgba(255,255,255,.05);--panel-strong:rgba(255,255,255,.09);--brand:#8d5e63;--brand-soft:rgba(141,94,99,.18);--nav-active:#c99ca1;--glass-fill:rgba(22,22,24,.48);--glass-border:rgba(255,255,255,.14);--up:#9fd3a8;--down:#e3a08f}
+*{box-sizing:border-box;margin:0}
+body{background:#0a0a0b;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;padding:16px 0;min-height:100vh}
+.phone{width:375px;max-width:100vw;height:780px;max-height:calc(100vh - 32px);background:radial-gradient(120% 60% at 50% 0%,#2a1f21 0%,var(--bg-dark) 60%);border:1px solid var(--line);border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+@media (max-width:420px){body{padding:0}.phone{border-radius:0;border:0;height:100vh;max-height:none}}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 18px 8px}
+.logo{font-weight:800;letter-spacing:.02em}
+.lang{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.lang button{background:none;border:0;color:var(--muted);padding:6px 10px;font-size:12px;font-weight:700}
+.lang button.on{background:var(--brand);color:#fff}
+main{flex:1;overflow:auto;padding:4px 16px 16px}
+.screen{display:none}.screen.on{display:block}
+.glass{background:var(--glass-fill);border:1px solid var(--glass-border);border-radius:22px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.dayrow{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 10px}
+.day{font-size:13px;color:var(--muted);font-weight:600}
+.finish-link{background:none;border:0;color:var(--nav-active);font-weight:700;font-size:13px}
+.bar{height:6px;background:var(--panel-strong);border-radius:9px;overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;background:var(--nav-active);transition:width .3s}
+.count{font-size:12px;color:var(--muted);text-align:right;margin-bottom:12px}
+.card{padding:20px}
+.nextup{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--nav-active);font-weight:700}
+h1{font-size:26px;font-weight:800;line-height:1.15;margin:6px 0 14px}
+.target{font-size:34px;font-weight:800}
+.why{display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-size:14px;color:var(--muted);line-height:1.35}
+.ai{background:var(--brand-soft);color:var(--nav-active);font-size:10px;font-weight:800;padding:3px 6px;border-radius:6px;white-space:nowrap}
+.dots{display:flex;gap:6px;align-items:center;margin:18px 0 12px;font-size:13px;color:var(--muted)}
+.dots b{width:10px;height:10px;border-radius:50%;background:var(--panel-strong);display:inline-block}
+.dots b.done{background:var(--nav-active)}.dots b.cur{outline:2px solid var(--nav-active);outline-offset:2px}
+.stepper{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:8px;margin-bottom:10px}
+.stepper button{width:56px;height:56px;border-radius:14px;border:0;background:var(--panel-strong);color:var(--text);font-size:26px;font-weight:700}
+.val{text-align:center}.val strong{font-size:30px;font-weight:800}.val span{display:block;font-size:12px;color:var(--muted)}
+.log{width:100%;height:64px;border:0;border-radius:18px;background:linear-gradient(135deg,#a5737a,#8d5e63);color:#fff;font-size:20px;font-weight:800;margin-top:4px}
+.log:active{transform:scale(.98)}
+.hint{display:none;margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--brand-soft);font-size:13px;color:var(--text)}
+.hint button{background:none;border:0;color:var(--nav-active);font-weight:800;margin-left:6px}
+.row2{display:flex;justify-content:space-between;margin-top:14px}
+.ghost{background:none;border:1px solid var(--line);color:var(--text);border-radius:99px;padding:10px 16px;font-size:14px;font-weight:600}
+.rest{text-align:center;padding:30px 20px}
+.ring{width:200px;height:200px;margin:10px auto 18px;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800}
+.restbtns{display:flex;gap:10px;justify-content:center;margin-top:18px}
+.sumrow{display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.arrow{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;flex:none}
+.up{background:rgba(159,211,168,.15);color:var(--up)}.eq{background:var(--panel-strong);color:var(--muted)}.dn{background:rgba(227,160,143,.15);color:var(--down)}
+.sumrow .n{font-weight:700;font-size:15px}.sumrow .d{font-size:12px;color:var(--muted);margin-top:2px}
+h2{font-size:22px;font-weight:800;margin:6px 0 4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+.stats{display:flex;gap:8px;margin:12px 0}
+.stat{flex:1;padding:14px;text-align:center}.stat strong{font-size:24px;display:block}.stat span{font-size:11px;color:var(--muted)}
+.lift{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.lift small{color:var(--muted);display:block;font-size:12px}
+nav{display:flex;border-top:1px solid var(--line);background:rgba(15,15,16,.9)}
+nav button{flex:1;background:none;border:0;color:rgba(243,243,241,.55);padding:12px 0 18px;font-size:12px;font-weight:700}
+nav button.on{color:var(--nav-active)}
+.sheetbg{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--bg-soft);border-radius:24px 24px 0 0;border-top:1px solid var(--glass-border);padding:10px 18px 24px;transform:translateY(100%);transition:transform .25s;max-height:75%;overflow:auto}
+.sheet.on{transform:none}
+.grab{width:40px;height:5px;background:var(--line);border-radius:9px;margin:0 auto 12px}
+.sheet h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--nav-active);margin:14px 0 6px}
+.sheet p,.sheet li{font-size:14px;color:var(--muted);line-height:1.45}
+.sheet ul{padding-left:18px}
+.sheet .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:10px;font:inherit;font-size:14px}
+.toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:var(--panel-strong);border:1px solid var(--line);padding:8px 14px;border-radius:99px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+</style>
+
+<div class="phone" id="app">
+  <header><div class="logo">GymStudio</div>
+    <div class="lang"><button data-l="en" class="on">EN</button><button data-l="es">ES</button></div></header>
+  <main>
+    <!-- TODAY -->
+    <section class="screen on" id="s-today">
+      <div class="dayrow"><span class="day" data-t="day"></span><button class="finish-link" id="finishBtn" data-t="finish"></button></div>
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="count" id="count"></div>
+      <div class="glass card" id="card">
+        <div class="nextup" data-t="nextup"></div>
+        <h1 id="exName"></h1>
+        <div class="target" id="target"></div>
+        <div class="why"><span class="ai" data-t="ai"></span><span id="why"></span></div>
+        <div class="dots" id="dots"></div>
+        <div class="stepper"><button data-s="w" data-d="-1" aria-label="-">−</button><div class="val"><strong id="w"></strong><span>kg</span></div><button data-s="w" data-d="1" aria-label="+">+</button></div>
+        <div class="stepper"><button data-s="r" data-d="-1" aria-label="-">−</button><div class="val"><strong id="r"></strong><span data-t="reps"></span></div><button data-s="r" data-d="1" aria-label="+">+</button></div>
+        <button class="log" id="logBtn"></button>
+        <div class="hint" id="hint"></div>
+        <div class="row2"><button class="ghost" id="moreBtn" data-t="more"></button><button class="ghost" id="nextBtn" data-t="next"></button></div>
+      </div>
+    </section>
+    <!-- REST -->
+    <section class="screen" id="s-rest">
+      <div class="glass rest">
+        <div class="nextup" data-t="rest"></div>
+        <div class="ring"><svg width="200" height="200"><circle cx="100" cy="100" r="88" stroke="rgba(255,255,255,.09)" stroke-width="10" fill="none"/><circle id="arc" cx="100" cy="100" r="88" stroke="#c99ca1" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="0"/></svg><div class="t" id="restT"></div></div>
+        <div class="sub" id="restNext"></div>
+        <div class="restbtns"><button class="ghost" id="plus30">+30 s</button><button class="ghost" id="skipRest" data-t="skip"></button></div>
+      </div>
+    </section>
+    <!-- FINISH -->
+    <section class="screen" id="s-finish">
+      <h2 data-t="done"></h2><div class="sub" id="finSub"></div>
+      <div class="glass card" id="sumList"></div>
+      <div class="sub" style="margin-top:12px" data-t="legend"></div>
+      <button class="log" id="closeFin" data-t="close"></button>
+    </section>
+    <!-- PROGRESS -->
+    <section class="screen" id="s-progress">
+      <h2 data-t="progress"></h2><div class="sub" data-t="block"></div>
+      <div class="stats"><div class="glass stat"><strong>3/4</strong><span data-t="week"></span></div><div class="glass stat"><strong style="color:var(--up)">↑ 9</strong><span data-t="beat"></span></div><div class="glass stat"><strong>→ 4</strong><span data-t="ontgt"></span></div></div>
+      <div class="glass card" id="lifts"></div>
+    </section>
+  </main>
+  <nav><button class="on" data-n="today" data-t="today"></button><button data-n="progress" data-t="progress"></button><button data-n="profile" data-t="profile"></button></nav>
+  <div class="toast" id="toast"></div>
+  <div class="sheetbg" id="sheetbg"></div>
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+const T={en:{day:"Push · Day 4 · Week 1",finish:"Finish",nextup:"Next up",ai:"AI",reps:"reps",log:"✓ Log set",logged:"Set logged",more:"More",next:"Next ›",rest:"Rest",skip:"Skip",nextSet:"Next: set {n} · {t}",nextEx:"Next: {e}",done:"Workout done",close:"Done",legend:"↑ beat target · → on target · ↓ short",progress:"Progress",today:"Today",profile:"Profile",block:"Block 6 · Week 1 of 6",week:"workouts this week",beat:"sets beat target",ontgt:"on target",of:"{a}/{b} exercises",setOf:"Set {a} of {b}",tips:"Technique",cue:"Squeeze cue",swap:"⟳ Swap exercise",keep:"Keep original ({o})",hist:"History",notes:"Notes",notesPh:"e.g. seat on 4",rir:"Reps left in the tank? (optional)",nextTime:"Next time: {t}",profileMsg:"Profile keeps sign-in, plan and language.",hintTxt:"15 reps at 12 kg — consider 14 kg for the next set",use:"Use {w} kg",exs:6},
+es:{day:"Empuje · Día 4 · Semana 1",finish:"Terminar",nextup:"Siguiente",ai:"IA",reps:"reps",log:"✓ Registrar serie",logged:"Serie registrada",more:"Más",next:"Siguiente ›",rest:"Descanso",skip:"Saltar",nextSet:"Siguiente: serie {n} · {t}",nextEx:"Siguiente: {e}",done:"Entreno terminado",close:"Listo",legend:"↑ superaste el objetivo · → en objetivo · ↓ por debajo",progress:"Progreso",today:"Hoy",profile:"Perfil",block:"Bloque 6 · Semana 1 de 6",week:"entrenos esta semana",beat:"series sobre objetivo",ontgt:"en objetivo",of:"{a}/{b} ejercicios",setOf:"Serie {a} de {b}",tips:"Técnica",cue:"Señal de contracción",swap:"⟳ Cambiar ejercicio",keep:"Mantener original ({o})",hist:"Historial",notes:"Notas",notesPh:"ej. asiento en 4",rir:"¿Cuántas te quedaban? (opcional)",nextTime:"Próxima vez: {t}",profileMsg:"Perfil guarda sesión, plan e idioma.",hintTxt:"15 reps con 12 kg — considera 14 kg en la siguiente serie",use:"Usar {w} kg"}};
+// Engine-consistent example data (PT spec v1+v2: dumbbell 2 kg, machine/cable 2.5 kg)
+const EX=[
+ {n:{en:"Seated dumbbell shoulder press",es:"Press de hombro sentado con mancuernas"},w:12,lo:10,hi:12,sets:3,orig:"10 kg × 10–12",rest:90,step:2,
+  why:{en:"Last time 10 kg × 14·14·14 (target 10) — beat it by 4 reps, so +2 kg.",es:"La última vez 10 kg × 14·14·14 (objetivo 10) — la superaste por 4 reps, así que +2 kg."},
+  hist:["10 kg × 14 · 14 · 14","10 kg × 12 · 11 · 11"],tips:{en:["Elbows slightly in front of the shoulders","Stop just short of lockout"],es:["Codos un poco delante de los hombros","Para justo antes de bloquear"]},cue:{en:"Push up and slightly back; ribs down.",es:"Empuja arriba y un poco atrás; costillas abajo."}},
+ {n:{en:"Incline dumbbell press",es:"Press inclinado con mancuernas"},w:20,lo:8,hi:10,sets:3,orig:"20 kg × 8–10",rest:120,step:2,
+  why:{en:"Last time 20 kg × 9·9·8 — inside the range, keep the load and add reps.",es:"La última vez 20 kg × 9·9·8 — dentro del rango, mantén el peso y suma reps."},
+  hist:["20 kg × 9 · 9 · 8"],tips:{en:["Bench at 30°","Shoulder blades back and down"],es:["Banco a 30°","Escápulas atrás y abajo"]},cue:{en:"Squeeze the chest at the top.",es:"Aprieta el pecho arriba."}},
+ {n:{en:"Wide-grip chest press",es:"Press de pecho agarre ancho"},w:47.5,lo:10,hi:12,sets:3,orig:"45 kg × 10–12",rest:90,step:2.5,
+  why:{en:"Last time 45 kg × 12·12·12 — top of the range on every set, so +2.5 kg.",es:"La última vez 45 kg × 12·12·12 — tope del rango en todas, así que +2,5 kg."},
+  hist:["45 kg × 12 · 12 · 12"],tips:{en:["Handles at mid-chest"],es:["Agarres a media altura del pecho"]},cue:{en:"Drive through the palms.",es:"Empuja con las palmas."}},
+ {n:{en:"Cable lateral raise",es:"Elevación lateral en polea"},w:7.5,lo:12,hi:15,sets:3,orig:"7.5 kg × 12–15",rest:60,step:2.5,
+  why:{en:"Last time 7.5 kg × 13·12·11 — repeat the load and aim for 12+ on every set.",es:"La última vez 7,5 kg × 13·12·11 — repite el peso y busca 12+ en cada serie."},
+  hist:["7.5 kg × 13 · 12 · 11"],tips:{en:["Lead with the elbow"],es:["Guía con el codo"]},cue:{en:"Raise out, not up.",es:"Sube hacia fuera, no hacia arriba."}},
+ {n:{en:"Rope overhead triceps extension",es:"Extensión de tríceps sobre la cabeza con cuerda"},w:20,lo:10,hi:12,sets:3,orig:"20 kg × 10–12",rest:60,step:2.5,
+  why:{en:"Last time 20 kg × 12·11·10 — keep the load, add one rep.",es:"La última vez 20 kg × 12·11·10 — mantén el peso, suma una rep."},
+  hist:["20 kg × 12 · 11 · 10"],tips:{en:["Elbows close to the head"],es:["Codos cerca de la cabeza"]},cue:{en:"Spread the rope at the end.",es:"Abre la cuerda al final."}},
+ {n:{en:"Cable crunch",es:"Crunch en polea"},w:30,lo:12,hi:15,sets:3,orig:"30 kg × 12–15",rest:60,step:2.5,
+  why:{en:"Reps first: last time 30 kg × 15·14·14 — same load, go for 15 on every set.",es:"Primero reps: la última vez 30 kg × 15·14·14 — mismo peso, busca 15 en todas."},
+  hist:["30 kg × 15 · 14 · 14"],tips:{en:["Hips stay still"],es:["La cadera no se mueve"]},cue:{en:"Curl ribs to pelvis.",es:"Lleva costillas hacia la pelvis."}}];
+let L="en",i=0,st=EX.map(e=>({w:e.w,r:e.hi,done:[]})),timer=null,left=0,total=0;
+// pretend first 2 exercises done earlier (shows 2/6 at start → prototype starts on exercise 1 for demo)
+const $=id=>document.getElementById(id),f=(s,o)=>s.replace(/\{(\w)\}/g,(_,k)=>o[k]),t=k=>T[L][k];
+const fmt=w=>(L==="es"?String(w).replace(".",","):w);
+function tgt(e){return fmt(e.w)+" kg × "+e.lo+"–"+e.hi}
+function render(){
+ document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
+ const e=EX[i],s=st[i],doneEx=st.filter((x,k)=>x.done.length>=EX[k].sets).length;
+ $("barFill").style.width=(doneEx/EX.length*100)+"%";$("count").textContent=f(t("of"),{a:doneEx,b:EX.length});
+ $("exName").textContent=e.n[L];$("target").textContent=tgt(e);$("why").textContent=e.why[L];
+ const cur=Math.min(s.done.length,e.sets-1);
+ $("dots").innerHTML=Array.from({length:e.sets},(_,k)=>`<b class="${k<s.done.length?"done":k===s.done.length?"cur":""}"></b>`).join("")+`<span style="margin-left:6px">${f(t("setOf"),{a:Math.min(s.done.length+1,e.sets),b:e.sets})}</span>`;
+ $("w").textContent=fmt(s.w);$("r").textContent=s.r;
+ $("logBtn").textContent=s.done.length>=e.sets?"✓ "+t("next").replace(" ›",""):t("log");
+ $("hint").style.display="none";
+}
+function toast(m){$("toast").textContent=m;$("toast").classList.add("on");setTimeout(()=>$("toast").classList.remove("on"),1300)}
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-"+id))}
+document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{const s=st[i],d=+b.dataset.d;if(b.dataset.s==="w")s.w=Math.max(0,+(s.w+d*EX[i].step).toFixed(1));else s.r=Math.max(1,s.r+d);render()});
+$("logBtn").onclick=()=>{const e=EX[i],s=st[i];if(s.done.length>=e.sets){go(1);return}
+ s.done.push({w:s.w,r:s.r});toast(t("logged"));
+ if(i===0&&s.done.length===1&&s.r>=15&&s.w===12){render();$("hint").innerHTML=t("hintTxt")+`<button id="useW">${f(t("use"),{w:14})}</button>`;$("hint").style.display="block";$("useW").onclick=()=>{s.w=14;render()};}
+ if(s.done.length<e.sets)startRest(e.rest,f(t("nextSet"),{n:s.done.length+1,t:fmt(s.w)+" kg × "+e.lo+"–"+e.hi}));
+ else if(i<EX.length-1)startRest(e.rest,f(t("nextEx"),{e:EX[i+1].n[L]}),true);
+ else finish();
+ if(document.querySelector("#hint").style.display!=="block")render();};
+function startRest(sec,label,adv){left=total=sec;$("restNext").textContent=label;show("rest");tick();clearInterval(timer);timer=setInterval(()=>{left--;tick();if(left<=0)endRest(adv)},1000);$("skipRest").onclick=()=>endRest(adv);}
+function tick(){$("restT").textContent=Math.floor(left/60)+":"+String(Math.max(left,0)%60).padStart(2,"0");$("arc").style.strokeDashoffset=553*(1-left/total)}
+$("plus30").onclick=()=>{left+=30;total+=30;tick()};
+function endRest(adv){clearInterval(timer);if(adv)i++;render();show("today");if(adv&&i===0)render()}
+function go(d){i=(i+d+EX.length)%EX.length;render()}
+$("nextBtn").onclick=()=>go(1);
+let sx=null;$("card").addEventListener("touchstart",e=>sx=e.touches[0].clientX);$("card").addEventListener("touchend",e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>60)go(dx<0?1:-1);sx=null});
+$("finishBtn").onclick=finish;
+function finish(){clearInterval(timer);
+ const rows=EX.map((e,k)=>{const d=st[k].done;let cls="eq",a="→",det;
+  if(!d.length){det="—";}else{const reps=d.map(x=>x.r);det=fmt(d[0].w)+" kg × "+reps.join(" · ");
+   if(d[0].w>e.w||reps.every(r=>r>=e.hi)&&reps.some(r=>r>e.hi)){cls="up";a="↑"}else if(reps.some(r=>r<e.lo)||d[0].w<e.w){cls="dn";a="↓"}}
+  const nxt=cls==="up"?fmt(+(d[0]?.w+e.step).toFixed(1))+" kg × "+e.lo+"–"+e.hi:cls==="dn"?fmt(e.w)+" kg × "+e.lo+"–"+e.hi:tgt(e);
+  return `<div class="sumrow"><div class="arrow ${cls}">${a}</div><div><div class="n">${e.n[L]}</div><div class="d">${det} · ${f(t("nextTime"),{t:nxt})}</div></div></div>`}).join("");
+ $("sumList").innerHTML=rows;$("finSub").textContent=t("day");show("finish");}
+$("closeFin").onclick=()=>{nav("progress")};
+function nav(n){document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.n===n));
+ if(n==="profile"){toast(t("profileMsg"));return}
+ if(n==="progress"){$("lifts").innerHTML=[["Seated DB shoulder press","10 → 12 kg",[6,7,8,8,10]],["Incline DB press","18 → 20 kg",[5,6,6,8,8]],["Wide-grip chest press","40 → 47.5 kg",[4,5,7,8,9]]].map(x=>`<div class="lift"><div>${x[0]}<small>${x[1]}</small></div><svg width="70" height="24">${x[2].map((h,j)=>`<rect x="${j*14}" y="${24-h*2.2}" width="9" height="${h*2.2}" rx="2" fill="${j===4?"#c99ca1":"rgba(255,255,255,.18)"}"/>`).join("")}</svg></div>`).join("");show("progress")}
+ else{render();show("today")}}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>nav(b.dataset.n));
+function openSheet(){const e=EX[i];$("sheet").innerHTML=`<div class="grab"></div><h1 style="font-size:20px;margin:0">${e.n[L]}</h1>
+ <h3>${t("tips")}</h3><ul>${e.tips[L].map(x=>`<li>${x}</li>`).join("")}</ul><h3>${t("cue")}</h3><p>${e.cue[L]}</p>
+ <h3>${t("hist")}</h3>${e.hist.map(h=>`<p>${L==="es"?h.replace(/\./g,","):h}</p>`).join("")}
+ <h3>${t("rir")}</h3><div class="acts">${["0","1–2","3+"].map(x=>`<button class="ghost">${x}</button>`).join("")}</div>
+ <h3>${t("notes")}</h3><textarea rows="2" placeholder="${t("notesPh")}"></textarea>
+ <div class="acts" style="margin-top:14px"><button class="ghost">${t("swap")}</button><button class="ghost" id="keepO">${f(t("keep"),{o:e.orig})}</button></div>`;
+ $("sheet").classList.add("on");$("sheetbg").style.display="block";
+ $("keepO").onclick=()=>{const m=e.orig.match(/[\d.]+/);st[i].w=+m[0];closeSheet();render()}}
+function closeSheet(){$("sheet").classList.remove("on");$("sheetbg").style.display="none"}
+$("moreBtn").onclick=openSheet;$("sheetbg").onclick=closeSheet;
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.l;document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x===b));render();if($("s-finish").classList.contains("on"))finish();if($("s-progress").classList.contains("on"))nav("progress")});
+render();
+</script>
