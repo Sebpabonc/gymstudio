@@ -6247,10 +6247,6 @@ a.planned-exercise-main-name {
   color: var(--muted-strong);
 }
 
-.bulk-delete-open {
-  margin: 4px 0;
-  font-size: 0.8rem;
-}
 
 .session-list {
   display: grid;

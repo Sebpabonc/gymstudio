@@ -1,5 +1,4 @@
 import { cleanNumberInput, selectOnFocus } from '../utils/numberInput'
-import { todaysEntriesForDay } from '../utils/sessions'
 import SwipeToDelete from './SwipeToDelete'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { explainTrainerRecommendation } from '../ai/gateway'
@@ -585,9 +584,7 @@ export default function WorkoutPlan({
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const trainerRecommendationIds = useRef(new Map<string, string>())
-  const [bulkConfirmDay, setBulkConfirmDay] = useState('')
   const [swipeUndo, setSwipeUndo] = useState<WorkoutEntry | null>(null)
-  const [bulkUndo, setBulkUndo] = useState<{ dayKey: string; entries: WorkoutEntry[] } | null>(null)
   // Continuous learning (PT spec, approved 2026-10-07): the user's past recommendations + results calibrate the engine.
   const [calibrationRows, setCalibrationRows] = useState<Awaited<ReturnType<typeof fetchCalibrationRecommendations>>>([])
   useEffect(() => {
@@ -2334,42 +2331,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
           <>
             {/* TODO(i18n): PT will provide approved translations */}
             <h2 className="selected-day-name">{t('workout.day.title', { position: activeDay.position, name: activeDay.name })}</h2>
-            {planMode === 'preset' && activeBlock && (() => {
-              // PO 2026-10-07: one tap removes today's logs for this day (e.g. logged on the wrong day), with Undo.
-              const todays = todaysEntriesForDay(history, today, activeBlock.id, activeDay.key)
-              if (bulkUndo && bulkUndo.dayKey === activeDay.key) {
-                return (
-                  <div className="bulk-delete-bar" role="status">
-                    <span>{t('workout.bulkDelete.deleted', { count: bulkUndo.entries.length })}</span>
-                    <button type="button" className="text-button" onClick={() => {
-                      let next = history
-                      for (const entry of bulkUndo.entries) next = restoreWorkoutEntry(entry)
-                      setHistory(next)
-                      setBulkUndo(null)
-                    }}>{t('workout.action.undo')}</button>
-                  </div>
-                )
-              }
-              if (!todays.length) return null
-              return bulkConfirmDay === activeDay.key ? (
-                <div className="bulk-delete-bar" role="group" aria-label={t('workout.bulkDelete.confirm', { count: todays.length, day: activeDay.name })}>
-                  <span>{t('workout.bulkDelete.confirm', { count: todays.length, day: activeDay.name })}</span>
-                  <button type="button" className="text-button danger" onClick={async () => {
-                    let next = history
-                    for (const entry of todays) next = await deleteWorkoutEntry(entry.id)
-                    setHistory(next)
-                    setBulkConfirmDay('')
-                    setBulkUndo({ dayKey: activeDay.key, entries: todays })
-                    window.setTimeout(() => setBulkUndo((current) => (current?.entries === todays ? null : current)), 8000)
-                  }}>{t('workout.bulkDelete.delete')}</button>
-                  <button type="button" className="text-button" onClick={() => setBulkConfirmDay('')}>{t('progress.delete.cancel')}</button>
-                </div>
-              ) : (
-                <button type="button" className="text-button bulk-delete-open" onClick={() => setBulkConfirmDay(activeDay.key)}>
-                  {t('workout.bulkDelete.open')}
-                </button>
-              )
-            })()}
           </>
         )}
         {activeDay?.focus && (
