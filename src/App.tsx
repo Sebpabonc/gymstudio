@@ -431,10 +431,8 @@ export default function App() {
               <Suspense fallback={<section className="card account-screen">{t('account.loading')}</section>}>
                 {status === 'signed-in'
                   ? <ProfileScreen onClose={() => setActiveTab('today')} />
-                  : <>
-                    <ProfileDataSections />
-                    <LoginScreen onClose={() => setActiveTab('today')} />
-                  </>}
+                  // Signed out: sign-in first; goal/plan/measurements need an account, so they appear after signing in.
+                  : <LoginScreen onClose={() => setActiveTab('today')} />}
               </Suspense>
             )
           ) : activeTab === 'progress' ? (
