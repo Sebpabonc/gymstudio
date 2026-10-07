@@ -71,7 +71,7 @@ import { fetchCalibrationRecommendations, saveTrainerRecommendation } from '../u
 import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { equipmentStep, recommend } from '../trainer/engine'
-import { buildEvidence, isDoubleAngleFollower } from '../trainer/evidence'
+import { buildEvidence, isDoubleAngleFollower, progressionEvidence } from '../trainer/evidence'
 import { bucketFor, computeCalibration } from '../trainer/calibration'
 import { buildExposures } from '../trainer/exposures'
 import { nextSetHint } from '../trainer/setSignal'
@@ -1226,7 +1226,10 @@ export default function WorkoutPlan({
     const planned = activeDay.exercises.find((item) => item.exerciseId === exercise.exerciseId)
     const plannedSets = planned?.sets ?? getDefaultSetCount(exercise)
     const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
-    const evidence = buildEvidence(history, exercise.exerciseId, trainingBlocks, today, activeDay.key)
+    const evidence = progressionEvidence(
+      buildEvidence(history, exercise.exerciseId, trainingBlocks, today, activeDay.key),
+      plannedSets
+    )
     const recommendation = recommend({
       history: evidence,
       today,

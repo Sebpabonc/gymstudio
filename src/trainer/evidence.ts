@@ -2,7 +2,7 @@ import type { TrainingBlock, WorkoutEntry } from '../types'
 import { blockWeek, findEntryBlock, plannedExerciseForEntry } from '../progress/utils'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { parseRepPrescription } from '../utils/workoutSets'
-import type { SessionEvidence } from './engine'
+import { progressionSets, type SessionEvidence } from './engine'
 
 export function buildEvidence(
   history: WorkoutEntry[],
@@ -47,6 +47,13 @@ export function buildEvidence(
       }
     })
     .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+export function progressionEvidence(evidence: SessionEvidence[], planned: number): SessionEvidence[] {
+  return evidence.flatMap((session) => {
+    const sets = progressionSets(session.sets, planned)
+    return sets.length ? [{ ...session, sets }] : []
+  })
 }
 
 /** R5: the second exercise of a double-angle pair says it reuses the previous exercise's dumbbells. */

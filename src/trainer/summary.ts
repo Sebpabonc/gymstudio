@@ -2,8 +2,8 @@ import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { blockWeek, dateWeekday, findBlockForDate } from '../progress/utils'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { parseRepPrescription } from '../utils/workoutSets'
-import { buildEvidence } from './evidence'
-import { recommend, workingWeight, type Recommendation, type RepRange } from './engine'
+import { buildEvidence, progressionEvidence } from './evidence'
+import { progressionSets, recommend, workingWeight, type Recommendation, type RepRange } from './engine'
 
 export type WorkoutSummaryRow = {
   exerciseId: string
@@ -93,12 +93,18 @@ export function buildWorkoutSummary(
     const targetReps = entries.find((entry) => entry.target?.reps)?.target?.reps
       ?? (currentPrescription ? repRange(currentPrescription.reps) : repRange([]))
     const targetWeight = entries.find((entry) => entry.target?.weight !== undefined)?.target?.weight
-    const actualSets = entries.flatMap((entry) => entry.sets.map(({ weight, reps }) => ({ weight, reps })))
+    const actualSets = entries.flatMap((entry) =>
+      progressionSets(entry.sets, entry.target?.sets ?? entry.sets.length)
+        .map(({ weight, reps }) => ({ weight, reps }))
+    )
     const occurrencePrescription = prescriptionForWeek(nextOccurrence.planned, nextOccurrence.week)
     const nextTarget = repRange(occurrencePrescription.reps)
     const entryIds = new Set(entries.map((entry) => entry.id))
     const evidenceHistory = [...history.filter((entry) => !entryIds.has(entry.id)), ...entries]
-    const evidence = buildEvidence(evidenceHistory, exerciseId, blocks, nextOccurrence.date)
+    const evidence = progressionEvidence(
+      buildEvidence(evidenceHistory, exerciseId, blocks, nextOccurrence.date),
+      occurrencePrescription.sets
+    )
     const recommendation = recommend({
       history: evidence,
       today: nextOccurrence.date,

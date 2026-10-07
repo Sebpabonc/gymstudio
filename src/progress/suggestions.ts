@@ -4,8 +4,8 @@ import { getExerciseDisplayName } from '../utils/storage'
 import { defaultActiveBlock, trainingBlockDateStatus } from '../utils/trainingBlocks'
 import { parseRepPrescription } from '../utils/workoutSets'
 import { prescriptionForWeek } from '../plans/weekPrescription'
-import { buildEvidence } from '../trainer/evidence'
-import { recommend, workingWeight } from '../trainer/engine'
+import { buildEvidence, progressionEvidence } from '../trainer/evidence'
+import { progressionSets, recommend, workingWeight } from '../trainer/engine'
 import { trainerReason } from '../trainer/presentation'
 import { ProgressEntry, ProgressSuggestion } from './types'
 import {
@@ -73,6 +73,7 @@ export function progressSuggestions(
     const daySessions = ordered.filter((session) => getDayType(session, blocks) === dayType)
     const latest = daySessions[daySessions.length - 1]
     if (!latest) continue
+    const latestMainSets = progressionSets(latest.sets, latest.sets.length)
     const exercise = exerciseFor(exercises, latest.exerciseId)
     const name = exercise ? getExerciseDisplayName(exercise, language) : latest.exerciseId
 
@@ -83,17 +84,18 @@ export function progressSuggestions(
     const target = reps.length
       ? { min: Math.min(...reps), max: Math.max(...reps) }
       : { min: 8, max: 8 }
-    const evidence = buildEvidence(entries, exerciseId, blocks, today)
+    const plannedSetCount = planned?.sets ?? Math.max(1, latestMainSets.length)
+    const evidence = progressionEvidence(buildEvidence(entries, exerciseId, blocks, today), plannedSetCount)
     const recommendation = recommend({
       history: evidence,
       today,
       target,
-      sets: planned?.sets ?? latest.sets.length,
+      sets: plannedSetCount,
       equipment: exercise?.equipment,
-      plannedWeight: workingWeight(latest.sets) || undefined,
+      plannedWeight: workingWeight(latestMainSets) || undefined,
       deload: blockWeek(block, today) === 6,
     })
-    const previousWeight = recommendation.evidence.lastWeight ?? workingWeight(latest.sets)
+    const previousWeight = recommendation.evidence.lastWeight ?? workingWeight(latestMainSets)
     if (
       recommendation.action === 'increase_weight' &&
       recommendation.weight !== null &&
