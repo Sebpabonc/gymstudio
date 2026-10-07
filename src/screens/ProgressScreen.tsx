@@ -65,6 +65,7 @@ import {
 } from '../utils/storage'
 import type { AskExerciseAiConsent } from '../utils/storage'
 import { defaultActiveBlock, trainingBlockDateStatus } from '../utils/trainingBlocks'
+import { groupSessions, type LoggedSession } from '../utils/sessions'
 
 type Props = {
   entries: WorkoutEntry[]
@@ -280,6 +281,8 @@ export default function ProgressScreen({
 }: Props) {
   const { t, language } = useT()
   const demoMode = isDemoMode()
+  const [confirmSession, setConfirmSession] = useState('')
+  const [sessionUndo, setSessionUndo] = useState<WorkoutEntry[] | null>(null)
   const [rawBlocks, setBlocks] = useState<TrainingBlock[] | null>(null)
   const [exerciseSwaps, setExerciseSwaps] = useState<ExerciseSwap[]>(() => loadLocalExerciseSwaps())
   const today = localIsoDate()
@@ -720,6 +723,50 @@ export default function ProgressScreen({
           <button type="button" className="secondary-button" onClick={() => onOpenExercise(selectedId)}>
             {t('progress.strength.openExercise')}
           </button>
+        )}
+      </SectionCard>
+
+      <SectionCard id="sessions" title={t('progress.section.sessions')}>
+        {/* PO 2026-10-07: delete a whole session at once, with Undo. */}
+        {sessionUndo && (
+          <p className="bulk-delete-bar" role="status">
+            <span>{t('progress.sessions.deleted', { count: sessionUndo.length })}</span>
+            <button type="button" className="text-button" onClick={async () => {
+              for (const entry of sessionUndo) await onRestoreEntry(entry)
+              setSessionUndo(null)
+            }}>{t('progress.delete.undo')}</button>
+          </p>
+        )}
+        {groupSessions(entries).slice(0, 12).length ? (
+          <ul className="session-list">
+            {groupSessions(entries).slice(0, 12).map((session: LoggedSession) => {
+              const dayName = blocks?.find((block) => block.id === session.blockId)?.days.find((day) => day.key === session.dayKey)?.name ?? ''
+              return (
+                <li key={session.key} className="session-row">
+                  <div>
+                    <strong>{formatShortDate(language, session.date)}{dayName ? ` · ${dayName}` : ''}</strong>
+                    <small>{t('progress.sessions.count', { count: session.entries.length })}</small>
+                  </div>
+                  {confirmSession === session.key ? (
+                    <span className="progress-delete-confirm" role="group" aria-label={t('progress.sessions.confirm', { count: session.entries.length })}>
+                      <span>{t('progress.sessions.confirm', { count: session.entries.length })}</span>
+                      <button type="button" className="text-button" onClick={async () => {
+                        for (const entry of session.entries) await onDeleteEntry(entry.id)
+                        setConfirmSession('')
+                        setSessionUndo(session.entries)
+                        window.setTimeout(() => setSessionUndo((current) => (current === session.entries ? null : current)), 8000)
+                      }}>{t('progress.delete.action')}</button>
+                      <button type="button" className="text-button" onClick={() => setConfirmSession('')}>{t('progress.delete.cancel')}</button>
+                    </span>
+                  ) : (
+                    <button type="button" className="text-button" onClick={() => setConfirmSession(session.key)}>{t('progress.sessions.delete')}</button>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        ) : (
+          <p className="empty-state">{t('progress.sessions.empty')}</p>
         )}
       </SectionCard>
 
