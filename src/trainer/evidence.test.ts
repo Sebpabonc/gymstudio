@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { TrainingBlock, WorkoutEntry } from '../types'
-import { buildEvidence } from './evidence'
+import { buildEvidence, progressionEvidence } from './evidence'
+import { recommend } from './engine'
 
 const blocks: TrainingBlock[] = [{
   id: 'block-1',
@@ -87,5 +88,30 @@ describe('same-day evidence across day slots', () => {
     const doneToday = { ...entry('d2', '2026-10-08', 'day-a') }
     expect(buildEvidence([doneToday], 'press', blocks, '2026-10-08', 'day-b')).toHaveLength(1)
     expect(buildEvidence([doneToday], 'press', blocks, '2026-10-08', 'day-a')).toHaveLength(0)
+  })
+})
+
+describe('progression evidence', () => {
+  it('excludes tagged-only sessions and prevents tagged loads from affecting recommendations', () => {
+    const mainSets = [10, 10, 10].map((reps) => ({ weight: 40, reps }))
+    const withTaggedExtras = [{
+      date: '2026-10-05',
+      sets: [
+        ...mainSets,
+        { weight: 200, reps: 30, tag: 'mini' as const },
+        { weight: 150, reps: 20, tag: 'partial' as const },
+      ],
+      target: { min: 10, max: 10 },
+    }]
+    const mainOnly = [{ ...withTaggedExtras[0], sets: mainSets }]
+    const input = { today: '2026-10-08', target: { min: 10, max: 10 }, sets: 3, equipment: 'barbell' }
+
+    expect(progressionEvidence(withTaggedExtras, 3)).toEqual(mainOnly)
+    expect(recommend({ ...input, history: progressionEvidence(withTaggedExtras, 3) }))
+      .toEqual(recommend({ ...input, history: progressionEvidence(mainOnly, 3) }))
+    expect(progressionEvidence([{
+      date: '2026-10-05',
+      sets: [{ weight: 200, reps: 30, tag: 'mini' as const }],
+    }], 3)).toEqual([])
   })
 })

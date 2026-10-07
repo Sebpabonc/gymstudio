@@ -15,8 +15,19 @@ export function workoutVolume(sets: WorkoutSet[]) {
   return sets.reduce((total, set) => total + workoutSetVolume(set), 0)
 }
 
+export function isProgressionWorkoutSet(set: Pick<WorkoutSet, 'tag'>) {
+  return !set.tag || set.tag === 'main'
+}
+
 export function workoutMaxWeight(sets: WorkoutSet[]) {
-  return Math.max(...sets.map((set) => set.weight), 0)
+  return Math.max(...sets.filter(isProgressionWorkoutSet).map((set) => set.weight), 0)
+}
+
+export function extraSetTagsForPlanNotes(notes?: string): Array<'mini' | 'partial'> {
+  const tags: Array<'mini' | 'partial'> = []
+  if (/rest-pause|myo-rep/i.test(notes ?? '')) tags.push('mini')
+  if (/partial/i.test(notes ?? '')) tags.push('partial')
+  return tags
 }
 
 /**
@@ -33,10 +44,11 @@ export function scaleWeightForOtherDay(weight: number, doneReps?: number, target
 }
 
 export function getPreviousWorkoutSets(history: WorkoutEntry[], exerciseId?: string) {
-  return history
+  const sets = history
     .filter((entry) => !exerciseId || entry.exerciseId === exerciseId)
     .slice()
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.sets ?? []
+  return sets.filter(isProgressionWorkoutSet)
 }
 
 export function getPreviousWorkoutSetRow(previousSetsByExercise: WorkoutSet[][], setIndex: number) {

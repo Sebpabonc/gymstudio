@@ -10,6 +10,7 @@ import {
   blockReports,
   dayTypeForEntry,
   epleyOneRepMax,
+  getWorkingSets,
   personalRecords,
   progressSuggestions,
   suggestionSourceBlock,
@@ -20,6 +21,35 @@ import { ProgressEntry } from './types'
 import { entriesWithinBlock, startOfWeek } from './utils'
 import { defaultActiveBlock, nextUnloggedDay } from '../utils/trainingBlocks'
 import { formatShortDate } from '../i18n/format'
+
+describe('tagged workout sets', () => {
+  it('keeps mini-set and partial volume but excludes them from records and e1RM', () => {
+    const mainSet = { id: 'main', reps: 8, weight: 40 }
+    const entries: ProgressEntry[] = ['2026-09-28', '2026-10-01', '2026-10-04', '2026-10-07'].map((date, index) => ({
+      id: `entry-${index}`,
+      exerciseId: 'bench',
+      date,
+      sets: [
+        mainSet,
+        ...(index === 3
+          ? [
+              { id: 'mini', reps: 30, weight: 40, tag: 'mini' as const },
+              { id: 'partial', reps: 20, weight: 100, tag: 'partial' as const },
+            ]
+          : []),
+      ],
+    }))
+    const latestSets = entries[3].sets
+
+    expect(getWorkingSets(latestSets)).toEqual([mainSet])
+    expect(bestSetE1RM(latestSets)).toBeCloseTo(40 * (1 + 8 / 30))
+    const records = personalRecords(entries, [])
+    const points = strengthTrend(entries, [], 'bench', '2026-10-08', 'all').points
+    expect(records[records.length - 1]?.badges).toEqual([])
+    expect(points[points.length - 1]?.volume)
+      .toBe(8 * 40 + 30 * 40 + 20 * 100)
+  })
+})
 
 const approvedBlocks = (blockRows as unknown as Array<{
   id: string

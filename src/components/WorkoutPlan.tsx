@@ -48,9 +48,11 @@ import { findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelect
 import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
+  extraSetTagsForPlanNotes,
   filterLoggableSets,
   getPreviousWorkoutSets,
   getPreviousWorkoutSetRow,
+  isProgressionWorkoutSet,
   parseRepPrescription,
   selectCompletedSets,
   scaleWeightForOtherDay,
@@ -69,7 +71,7 @@ import { fetchCalibrationRecommendations, saveTrainerRecommendation } from '../u
 import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { equipmentStep, recommend } from '../trainer/engine'
-import { buildEvidence, isDoubleAngleFollower } from '../trainer/evidence'
+import { buildEvidence, isDoubleAngleFollower, progressionEvidence } from '../trainer/evidence'
 import { bucketFor, computeCalibration } from '../trainer/calibration'
 import { buildExposures } from '../trainer/exposures'
 import { nextSetHint } from '../trainer/setSignal'
@@ -131,8 +133,14 @@ type PlanDraft = {
   dropSetReps: number[]
   setDone: boolean[]
   setAt?: Array<number | undefined>
+  extraSets: TaggedSetDraft[]
   notes: string
 } & TrainerDraftValues
+
+type TaggedSetDraft = Omit<WorkoutSet, 'tag'> & {
+  tag: 'mini' | 'partial'
+  done: boolean
+}
 
 type PlanMode = 'preset' | 'custom'
 
@@ -338,7 +346,7 @@ function getBlockExerciseName(exercise: BlockExercise, exercises: Exercise[]) {
   return exercises.find((item) => item.id === exercise.exerciseId)?.name ?? exercise.exerciseId
 }
 
-function createSet(reps = 8, weight = 0): WorkoutSet {
+function createSet(reps = 8, weight = 0, tag?: WorkoutSet['tag']): WorkoutSet {
   return {
     id:
       typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -346,6 +354,7 @@ function createSet(reps = 8, weight = 0): WorkoutSet {
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     reps,
     weight,
+    ...(tag ? { tag } : {}),
   }
 }
 
@@ -1067,7 +1076,7 @@ export default function WorkoutPlan({
 
   const getNextTarget = (
     exercise: PlanExercise,
-    sets: Pick<WorkoutSet, 'weight' | 'reps'>[],
+    sets: Pick<WorkoutSet, 'weight' | 'reps' | 'tag'>[],
     deload = planMode === 'preset' && activeBlockWeek === 6
   ) => {
     const exerciseInfo =
@@ -1079,7 +1088,7 @@ export default function WorkoutPlan({
         ? 'lower'
         : 'upper'
     const targetReps = getExerciseTargetReps(exercise)
-    return recommendNextTarget(sets, targetReps, progressionType, deload)
+    return recommendNextTarget(sets.filter(isProgressionWorkoutSet), targetReps, progressionType, deload)
   }
 
   const getExerciseTargetReps = (exercise: PlanExercise) =>
@@ -1114,7 +1123,8 @@ export default function WorkoutPlan({
   const getOriginalDraftForExercise = (exerciseName: string, exercise?: PlanExercise): PlanDraft => {
     const key = getPlanDraftKey(exerciseName)
     const best = bestProgressByName.get(normalizeExerciseName(exerciseName))
-    const bestReps = best && best.sets.length ? Math.max(...best.sets.map((set) => set.reps), 0) : 8
+    const bestMainSets = best?.sets.filter(isProgressionWorkoutSet) ?? []
+    const bestReps = bestMainSets.length ? Math.max(...bestMainSets.map((set) => set.reps), 0) : 8
     const fallbackReps = exercise ? getDefaultRepTarget(exercise) : bestReps
     const fallbackSetCount = exercise ? getDefaultSetCount(exercise) : 1
     const prefillExerciseId =
@@ -1130,17 +1140,18 @@ export default function WorkoutPlan({
           .slice()
           .sort((a, b) => b.date.localeCompare(a.date))[0]
       : prefillSelection?.entry
+    const prefillSets = prefill?.sets.filter(isProgressionWorkoutSet) ?? []
     const noSwapHistory = !!exercise?.swappedFrom &&
       !history.some((entry) => entry.exerciseId === prefillExerciseId &&
         (entry.date !== today || (!!activeDay && entry.dayKey !== activeDay.key)))
     const bestWeight = noSwapHistory
       ? 0
       : planMode === 'preset'
-        ? prefill ? workoutMaxWeight(prefill.sets) : 0
+        ? prefill ? workoutMaxWeight(prefillSets) : 0
         : best ? workoutMaxWeight(best.sets) : 0
-    const nextTarget = planMode === 'custom' && exercise && prefill ? getNextTarget(exercise, prefill.sets) : null
+    const nextTarget = planMode === 'custom' && exercise && prefill ? getNextTarget(exercise, prefillSets) : null
     const lastWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
-      const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
+      const source = prefillSets[index] ?? prefillSets[prefillSets.length - 1]
       const weight = Number(source?.weight ?? bestWeight) || 0
       return planMode === 'custom' && prefillSelection?.basis === 'other-day'
         ? scaleWeightForOtherDay(weight, source?.reps, exercise ? getExerciseTargetReps(exercise)[index] : undefined)
@@ -1150,7 +1161,7 @@ export default function WorkoutPlan({
       ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
       : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
-      const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
+      const source = prefillSets[index] ?? prefillSets[prefillSets.length - 1]
       return Number(source?.drop?.weight) || Number(((baseSetWeights[index] ?? 0) * 0.75).toFixed(2))
     })
     const baseSetReps = Array.from({ length: fallbackSetCount }, (_, index) => {
@@ -1170,6 +1181,7 @@ export default function WorkoutPlan({
       dropSetWeights: baseDropWeights,
       dropSetReps: baseDropSetReps,
       setDone: Array.from({ length: fallbackSetCount }, () => false),
+      extraSets: [],
       notes: '',
     }
   }
@@ -1214,7 +1226,10 @@ export default function WorkoutPlan({
     const planned = activeDay.exercises.find((item) => item.exerciseId === exercise.exerciseId)
     const plannedSets = planned?.sets ?? getDefaultSetCount(exercise)
     const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
-    const evidence = buildEvidence(history, exercise.exerciseId, trainingBlocks, today, activeDay.key)
+    const evidence = progressionEvidence(
+      buildEvidence(history, exercise.exerciseId, trainingBlocks, today, activeDay.key),
+      plannedSets
+    )
     const recommendation = recommend({
       history: evidence,
       today,
@@ -1332,6 +1347,58 @@ export default function WorkoutPlan({
       [key]: { ...(current[key] ?? currentDraft), setDone: nextCompleted, setAt: nextSetAt },
     }))
     if (nextCompleted.every(Boolean)) void logPlannedExercise(exercise, nextCompleted, nextSetAt)
+  }
+
+  const addExtraPlanSet = (
+    exercise: PlanExercise,
+    tag: 'mini' | 'partial',
+    setCount: number
+  ) => {
+    const key = getPlanDraftKey(exercise.name)
+    const draft = getDraftForExercise(exercise.name, exercise)
+    const weight = draft.setWeights[setCount - 1] ?? draft.weight
+    const reps = draft.setReps[setCount - 1] ?? draft.reps
+    const set = createSet(reps, weight, tag)
+    setPlannedDrafts((current) => {
+      const latest = current[key] ?? draft
+      return {
+        ...current,
+        [key]: { ...latest, extraSets: [...latest.extraSets, { ...set, tag, done: false }] },
+      }
+    })
+  }
+
+  const updateExtraPlanSet = (
+    exercise: PlanExercise,
+    index: number,
+    changes: Partial<Pick<TaggedSetDraft, 'weight' | 'reps' | 'done'>>
+  ) => {
+    const key = getPlanDraftKey(exercise.name)
+    const draft = getDraftForExercise(exercise.name, exercise)
+    setPlannedDrafts((current) => {
+      const latest = current[key] ?? draft
+      return {
+        ...current,
+        [key]: {
+          ...latest,
+          extraSets: latest.extraSets.map((set, setIndex) =>
+            setIndex === index ? { ...set, ...changes } : set
+          ),
+        },
+      }
+    })
+  }
+
+  const removeExtraPlanSet = (exercise: PlanExercise, index: number) => {
+    const key = getPlanDraftKey(exercise.name)
+    const draft = getDraftForExercise(exercise.name, exercise)
+    setPlannedDrafts((current) => {
+      const latest = current[key] ?? draft
+      return {
+        ...current,
+        [key]: { ...latest, extraSets: latest.extraSets.filter((_, setIndex) => setIndex !== index) },
+      }
+    })
   }
 
   const useSetHint = (exercise: PlanExercise, setCount: number, weight: number) => {
@@ -1569,7 +1636,12 @@ export default function WorkoutPlan({
     })
     const equipment = exerciseCatalog.find((item) => item.id === canonicalId)?.equipment
     const validSets = filterLoggableSets(
-      selectCompletedSets(allSets, completedRows ?? draft.setDone),
+      [
+        ...selectCompletedSets(allSets, completedRows ?? draft.setDone),
+        ...draft.extraSets
+          .filter((set) => set.done)
+          .map(({ done: _done, ...set }) => set),
+      ],
       equipment
     )
 
@@ -1631,6 +1703,7 @@ export default function WorkoutPlan({
           notes: '',
           setDone: Array.from({ length: setCount }, () => false),
           setAt: Array.from({ length: setCount }, () => undefined),
+          extraSets: [],
         },
       }
     })
@@ -1689,7 +1762,10 @@ export default function WorkoutPlan({
       })
       return {
         exerciseId: canonicalId,
-        sets: selectCompletedSets(allSets, completedRows),
+        sets: [
+          ...selectCompletedSets(allSets, completedRows),
+          ...draft.extraSets.filter((set) => set.done).map(({ done: _done, ...set }) => set),
+        ],
         equipment: exerciseCatalog.find((item) => item.id === canonicalId)?.equipment,
         notes: draft.notes,
       }
@@ -1757,7 +1833,7 @@ export default function WorkoutPlan({
     setPlannedDrafts((current) => Object.fromEntries(
       Object.entries(current).map(([key, draft]) =>
         exerciseKeys.some((exerciseKey) => key.endsWith(`:${exerciseKey}`))
-          ? [key, { ...draft, notes: '' }]
+          ? [key, { ...draft, notes: '', extraSets: [] }]
           : [key, draft]
       )
     ))
@@ -1885,6 +1961,76 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
     })
 
   }
+
+  const renderExtraPlanSets = (
+    exercise: PlanExercise,
+    draft: PlanDraft,
+    setCount: number,
+    tags: Array<'mini' | 'partial'> = extraSetTagsForPlanNotes(exercise.notes)
+  ) => (
+    <div className="tagged-set-section">
+      {tags.map((tag) => (
+        <button
+          key={tag}
+          type="button"
+          className="tagged-set-add"
+          onClick={() => addExtraPlanSet(exercise, tag, setCount)}
+        >
+          + {t(`workout.set.tag.${tag}`)}
+        </button>
+      ))}
+      {draft.extraSets.map((set, index) => {
+        const label = t(`workout.set.tag.${set.tag}`)
+        return (
+          <div className={`tagged-set-row${set.done ? ' completed' : ''}`} key={set.id}>
+            <strong>{label}</strong>
+            <SteppedNumberInput
+              value={set.weight}
+              step={2.5}
+              min={0}
+              label={t('workout.set.taggedWeightLabel', { label, set: index + 1 })}
+              decreaseLabel={t('workout.set.weightDecrease', { set: index + 1 })}
+              increaseLabel={t('workout.set.weightIncrease', { set: index + 1 })}
+              onFocus={(event) => event.currentTarget.select()}
+              onClick={(event) => event.currentTarget.select()}
+              onChange={(value) => updateExtraPlanSet(exercise, index, { weight: Number(value) || 0 })}
+            />
+            <input
+              className="set-reps-input"
+              type="number"
+              inputMode="numeric"
+              min="1"
+              value={set.reps}
+              aria-label={t('workout.set.taggedRepsLabel', { label, set: index + 1 })}
+              onChange={(event) => updateExtraPlanSet(exercise, index, { reps: Number(event.target.value) || 0 })}
+            />
+            <div className="tagged-set-actions">
+              <button
+                type="button"
+                className="complete-set-button"
+                aria-label={t(set.done ? 'workout.set.tagged.unmark' : 'workout.set.tagged.mark', {
+                  label,
+                  set: index + 1,
+                })}
+                aria-pressed={set.done}
+                onClick={() => updateExtraPlanSet(exercise, index, { done: !set.done })}
+              >
+                ✓
+              </button>
+              <button
+                type="button"
+                className="tagged-set-remove"
+                aria-label={t('workout.set.tagged.remove', { label, set: index + 1 })}
+                onClick={() => removeExtraPlanSet(exercise, index)}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
 
   if (planMode === 'preset' && blocksLoaded && trainingBlocks.length === 0) {
     const signedInUser = authStatus === 'signed-in' && !demoMode
@@ -2433,6 +2579,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
             const trainer = getTrainerRecommendation(exercise)
+            const trainerLastSets = trainer?.evidence[0]?.sets.filter(isProgressionWorkoutSet) ?? []
             const setCount = getDefaultSetCount(exercise)
             const setWeights = draft.setWeights.length ? draft.setWeights : Array.from({ length: setCount }, () => Number(draft.weight) || 0)
             const setReps = draft.setReps.length ? draft.setReps : Array.from({ length: setCount }, () => Number(draft.reps) || 8)
@@ -2463,7 +2610,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               ? findPrefillSelection(history, exercise.exerciseId, planMode === 'preset' ? activeDay?.key : undefined)
               : undefined
             const previousEntry = previousSelection?.entry ?? (exercise.exerciseId ? undefined : exerciseHistory[0])
-            const previousSets = previousEntry?.sets ?? []
+            const previousSets = previousEntry?.sets.filter(isProgressionWorkoutSet) ?? []
+            const extraSetTags = extraSetTagsForPlanNotes(exercise.notes)
             const previousDayType = previousSelection?.basis === 'other-day'
               ? getDayKeyType(previousEntry?.dayKey)
               : undefined
@@ -2540,7 +2688,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 })
               : null
             const setHintDismissalKey = `${getPlanDraftKey(exercise.name)}:${nextUncheckedIndex}`
-            const finalLoggedSet = completedEntry?.sets[completedEntry.sets.length - 1]
+            const finalLoggedSet = completedEntry?.sets.filter(isProgressionWorkoutSet).slice(-1)[0]
             const shouldAskRir = completedEntry?.date === today &&
               !!finalLoggedSet &&
               finalLoggedSet.rir === undefined &&
@@ -2697,17 +2845,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     {!completedEntry && trainer && (
                       <TrainerRecommendationCard
                         title={t('workout.trainer.title')}
-                        lastTime={trainer.evidence[0]
-                          ? new Set(trainer.evidence[0].sets.map((set) => set.weight)).size > 1
+                        lastTime={trainerLastSets.length > 0
+                          ? new Set(trainerLastSets.map((set) => set.weight)).size > 1
                             // Different loads per set (e.g. 20 / 22.5 / 22.5): show each set, not only the first.
                             ? t('workout.trainer.lastTimeSets', {
-                                sets: trainer.evidence[0].sets
+                                sets: trainerLastSets
                                   .map((set) => `${formatNumber(language, set.weight)} × ${formatNumber(language, set.reps)}`)
                                   .join(' · '),
                               })
                             : t('workout.trainer.lastTime', {
-                                weight: formatNumber(language, trainer.evidence[0].sets[0]?.weight ?? 0),
-                                reps: trainer.evidence[0].sets.map((set) => formatNumber(language, set.reps)).join(' · '),
+                                weight: formatNumber(language, trainerLastSets[0].weight),
+                                reps: trainerLastSets.map((set) => formatNumber(language, set.reps)).join(' · '),
                               })
                           : t('workout.trainer.noPrevious')}
                         original={new Set(trainer.original.setWeights).size > 1
@@ -2954,6 +3102,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             )
                           })}
                         </div>
+                        {extraSetTags.length > 0 && renderExtraPlanSets(exercise, draft, setCount, extraSetTags)}
 
                         {logError[getPlanDraftKey(exercise.name)] && (
                           <p role="alert" aria-live="assertive" className="account-error log-error">{logError[getPlanDraftKey(exercise.name)]}</p>
@@ -3028,12 +3177,17 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             )
             const supersetSetCount = Math.max(...supersetExercises.map(getDefaultSetCount))
             const loggedSupersetRows = getLoggedSupersetRounds(
-              supersetExercises.map((exercise) => findExerciseCompletion(exercise, history)?.sets.length ?? 0),
+              supersetExercises.map((exercise) =>
+                findExerciseCompletion(exercise, history)?.sets.filter(isProgressionWorkoutSet).length ?? 0
+              ),
               supersetSetCount
             )
             const supersetCompletedRows = completedSupersetSets[group.key] ?? loggedSupersetRows
             const supersetCompletedTimes = completedSupersetAt[group.key] ?? []
             const supersetCompletedCount = supersetCompletedRows.filter(Boolean).length
+            const hasCompletedTaggedSets = supersetExercises.some((exercise) =>
+              getDraftForExercise(exercise.name, exercise).extraSets.some((set) => set.done)
+            )
             const supersetError = supersetExercises
               .map((exercise) => logError[getPlanDraftKey(exercise.name)])
               .find(Boolean)
@@ -3191,6 +3345,19 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                           })}
                         </div>
                       ))}
+                      <div className="superset-extra-set-list">
+                        {supersetExercises.map((exercise) => {
+                          const tags = extraSetTagsForPlanNotes(exercise.notes)
+                          if (tags.length === 0) return null
+                          const draft = getDraftForExercise(exercise.name, exercise)
+                          return (
+                            <div className="superset-extra-set-group" key={`${group.key}-${exercise.code}-extras`}>
+                              <strong>{exercise.code} · {displayExerciseName(exercise.name)}</strong>
+                              {renderExtraPlanSets(exercise, draft, supersetSetCount, tags)}
+                            </div>
+                          )
+                        })}
+                      </div>
                       <details className="superset-notes">
                         <summary>{t('workout.label.notes')}</summary>
                         {supersetExercises.map((exercise) => {
@@ -3209,7 +3376,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                         })}
                       </details>
                       {supersetError && <p role="alert" aria-live="assertive" className="account-error log-error">{supersetError}</p>}
-                      {(supersetCompletedCount < supersetSetCount || supersetError) && (
+                      {(supersetCompletedCount < supersetSetCount || hasCompletedTaggedSets || supersetError) && (
                         <button
                           type="button"
                           className="primary-button small-button"

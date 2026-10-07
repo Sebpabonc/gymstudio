@@ -33,6 +33,13 @@ describe('dictionaries', () => {
     expect(es['rest.label']).toBe('Descanso')
   })
 
+  it('labels mini-sets and partials in English and Spanish', () => {
+    expect(en['workout.set.tag.mini']).toBe('Mini-set')
+    expect(es['workout.set.tag.mini']).toBe('Mini-serie')
+    expect(en['workout.set.tag.partial']).toBe('Partial')
+    expect(es['workout.set.tag.partial']).toBe('Parcial')
+  })
+
   it('uses sentence case for posture section labels', () => {
     expect(en['workout.posture.title']).toBe('Posture tips')
     expect(es['workout.posture.title']).toBe('Consejos de postura')
