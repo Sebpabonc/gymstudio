@@ -24,14 +24,19 @@ export function loadSpanishContent() {
     import('../../docs/fitness/approved/es/catalogue-chest-shoulders.json'),
     import('../../docs/fitness/approved/es/catalogue-legs-glutes.json'),
     import('../../docs/fitness/approved/es/blocks.json'),
-  ]).then(([armsCore, back, chestShoulders, legsGlutes, blocks]) => {
+    import('../../docs/fitness/approved/es/templates.json'),
+  ]).then(([armsCore, back, chestShoulders, legsGlutes, blocks, templates]) => {
     EXERCISES_ES = {
       ...(armsCore.default as Record<string, ExerciseTextEs>),
       ...(back.default as Record<string, ExerciseTextEs>),
       ...(chestShoulders.default as Record<string, ExerciseTextEs>),
       ...(legsGlutes.default as Record<string, ExerciseTextEs>),
     }
-    BLOCKS_ES = blocks.default as Record<string, BlockTextEs>
+    // Personal plans are built from PT templates; their blocks are keyed "user-<template id>".
+    const templateTexts = Object.fromEntries(
+      Object.entries(templates.default as Record<string, BlockTextEs>).map(([id, text]) => [`user-${id}`, text])
+    )
+    BLOCKS_ES = { ...(blocks.default as Record<string, BlockTextEs>), ...templateTexts }
   })
   return spanishContent
 }
