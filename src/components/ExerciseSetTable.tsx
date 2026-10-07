@@ -1,3 +1,4 @@
+import { cleanNumberInput, selectOnFocus } from '../utils/numberInput'
 import React from 'react'
 import { WorkoutSet } from '../types'
 import { stepWorkoutValue } from '../utils/workoutSets'
@@ -70,7 +71,8 @@ export default function ExerciseSetTable({
                 step="2.5"
                 value={set.weight}
                 aria-label={weightLabel}
-                onChange={(event) => onUpdateSet(index, 'weight', event.target.value)}
+                onFocus={selectOnFocus}
+                onChange={(event) => onUpdateSet(index, 'weight', cleanNumberInput(event))}
               />
               <button
                 type="button"
@@ -88,7 +90,8 @@ export default function ExerciseSetTable({
               min={0}
               value={set.reps}
               aria-label={t('setTable.repsAria', { n: index + 1 })}
-              onChange={(event) => onUpdateSet(index, 'reps', event.target.value)}
+              onFocus={selectOnFocus}
+              onChange={(event) => onUpdateSet(index, 'reps', cleanNumberInput(event))}
             />
             <button
               type="button"

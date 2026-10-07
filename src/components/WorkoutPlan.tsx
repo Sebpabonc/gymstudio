@@ -1,3 +1,4 @@
+import { cleanNumberInput, selectOnFocus } from '../utils/numberInput'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
@@ -193,9 +194,9 @@ function SteppedNumberInput({
         aria-label={label}
         aria-invalid={invalid}
         data-log-weight={dataLogWeight ? true : undefined}
-        onFocus={onFocus}
+        onFocus={(event) => { event.currentTarget.select(); onFocus?.(event) }}
         onClick={onClick}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => onChange(cleanNumberInput(event))}
       />
       <button
         type="button"
@@ -2877,7 +2878,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   min="1"
                                   value={setReps[index] ?? draft.reps}
                                   aria-label={t('workout.set.repsLabel', { set: index + 1 })}
-                                  onChange={(event) => updatePlanSetValue(exercise, index, 'reps', event.target.value, setCount)}
+                                  onFocus={selectOnFocus}
+                                  onChange={(event) => updatePlanSetValue(exercise, index, 'reps', cleanNumberInput(event), setCount)}
                                 />
                                 <button
                                   type="button"
@@ -2945,7 +2947,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                       min="1"
                                       value={dropSetReps[index] ?? setReps[index] ?? draft.reps}
                                       aria-label={t('workout.set.dropRepsLabel', { set: index + 1 })}
-                                      onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', event.target.value, setCount)}
+                                      onFocus={selectOnFocus}
+                                      onChange={(event) => updatePlanSetValue(exercise, index, 'dropReps', cleanNumberInput(event), setCount)}
                                     />
                                     <span aria-hidden="true" />
                                   </div>
@@ -3182,8 +3185,9 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                   min="1"
                                   value={reps}
                                   aria-label={t('workout.superset.repsLabel', { set: setIndex + 1, code })}
+                                  onFocus={selectOnFocus}
                                   onChange={(event) =>
-                                    updatePlanSetValue(exercise, setIndex, 'reps', event.target.value, supersetSetCount)
+                                    updatePlanSetValue(exercise, setIndex, 'reps', cleanNumberInput(event), supersetSetCount)
                                   }
                                 />
                               </div>
