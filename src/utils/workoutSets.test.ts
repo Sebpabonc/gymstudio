@@ -46,6 +46,21 @@ describe('workout sets', () => {
     expect(history).toEqual([older, otherExercise, latest])
   })
 
+  it('does not return tagged extra sets as previous main-set values', () => {
+    const history = [{
+      id: 'entry',
+      exerciseId: 'press',
+      date: '2026-02-01',
+      sets: [
+        { id: 'main', reps: 8, weight: 40 },
+        { id: 'mini', reps: 5, weight: 40, tag: 'mini' as const },
+        { id: 'partial', reps: 4, weight: 40, tag: 'partial' as const },
+      ],
+    }]
+
+    expect(getPreviousWorkoutSets(history, 'press')).toEqual([history[0].sets[0]])
+  })
+
   it('maps each superset set row to the matching previous set for each exercise', () => {
     const previousSets = [
       [

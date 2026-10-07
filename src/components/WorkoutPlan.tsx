@@ -1076,7 +1076,7 @@ export default function WorkoutPlan({
 
   const getNextTarget = (
     exercise: PlanExercise,
-    sets: Pick<WorkoutSet, 'weight' | 'reps'>[],
+    sets: Pick<WorkoutSet, 'weight' | 'reps' | 'tag'>[],
     deload = planMode === 'preset' && activeBlockWeek === 6
   ) => {
     const exerciseInfo =
@@ -1088,7 +1088,7 @@ export default function WorkoutPlan({
         ? 'lower'
         : 'upper'
     const targetReps = getExerciseTargetReps(exercise)
-    return recommendNextTarget(sets, targetReps, progressionType, deload)
+    return recommendNextTarget(sets.filter(isProgressionWorkoutSet), targetReps, progressionType, deload)
   }
 
   const getExerciseTargetReps = (exercise: PlanExercise) =>

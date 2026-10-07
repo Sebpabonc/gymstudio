@@ -44,10 +44,11 @@ export function scaleWeightForOtherDay(weight: number, doneReps?: number, target
 }
 
 export function getPreviousWorkoutSets(history: WorkoutEntry[], exerciseId?: string) {
-  return history
+  const sets = history
     .filter((entry) => !exerciseId || entry.exerciseId === exerciseId)
     .slice()
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.sets ?? []
+  return sets.filter(isProgressionWorkoutSet)
 }
 
 export function getPreviousWorkoutSetRow(previousSetsByExercise: WorkoutSet[][], setIndex: number) {
