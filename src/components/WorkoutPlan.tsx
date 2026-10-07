@@ -2485,7 +2485,8 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             const editingEntry = findExerciseCompletion(exercise, history)
             const previousSelection = exercise.exerciseId
               ? findPrefillSelection(
-                  editingEntry ? history.filter((entry) => entry.id !== editingEntry.id) : history,
+                  // Never today's own logs (any day slot): "Previous" is the last session before today.
+                  history.filter((entry) => entry.id !== editingEntry?.id && entry.date.slice(0, 10) !== today),
                   exercise.exerciseId,
                   planMode === 'preset' ? activeDay?.key : undefined
                 )
