@@ -1,4 +1,5 @@
 import { type Language, localeFor, translate } from '../i18n/translate'
+import { formatNumber } from '../i18n/format'
 import { WorkoutEntry } from '../types'
 import { workoutMaxWeight } from './workoutSets'
 
@@ -44,6 +45,12 @@ export function summarizeCompletedEntry(entry: WorkoutEntry, language: Language 
   const count = entry.sets.length
   const top = workoutMaxWeight(entry.sets)
   const base = translate(language, count === 1 ? 'workout.set.one' : 'workout.set.other', { count })
+  if (new Set(entry.sets.map((set) => set.weight)).size > 1) {
+    const loads = entry.sets
+      .map((set) => `${formatNumber(language, set.weight)} kg × ${formatNumber(language, set.reps)}`)
+      .join(' · ')
+    return translate(language, 'workout.completed.perSet', { sets: base, loads })
+  }
   return top > 0 ? translate(language, 'workout.completed.top', { sets: base, weight: top }) : base
 }
 

@@ -52,6 +52,7 @@ import {
   getPreviousWorkoutSets,
   getPreviousWorkoutSetRow,
   parseRepPrescription,
+  prefillStraightSetWeights,
   selectCompletedSets,
   scaleWeightForOtherDay,
   stepWorkoutValue,
@@ -1148,7 +1149,9 @@ export default function WorkoutPlan({
     })
     const baseSetWeights = nextTarget
       ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
-      : lastWeights
+      : planMode === 'preset' && exercise?.technique === 'straight'
+        ? prefillStraightSetWeights(lastWeights, fallbackSetCount)
+        : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
       const source = prefill ? prefill.sets[index] ?? prefill.sets[prefill.sets.length - 1] : undefined
       return Number(source?.drop?.weight) || Number(((baseSetWeights[index] ?? 0) * 0.75).toFixed(2))
@@ -3302,11 +3305,18 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                             {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
                           </span>
                         </strong>
-                        <p>{t('workout.session.performanceActual', {
-                          weight: formatNumber(language, actual.weight),
-                          reps: actual.reps.map((reps) => formatNumber(language, reps)).join(' · '),
-                          target: trainerRangeLabel(target.reps),
-                        })}</p>
+                        {new Set(actual.setWeights).size > 1
+                          ? <p>{t('workout.session.performanceActualSets', {
+                              sets: actual.setWeights.map((weight, index) =>
+                                `${formatNumber(language, weight)} kg × ${formatNumber(language, actual.reps[index] ?? 0)}`
+                              ).join(' · '),
+                              target: trainerRangeLabel(target.reps),
+                            })}</p>
+                          : <p>{t('workout.session.performanceActual', {
+                              weight: formatNumber(language, actual.weight),
+                              reps: actual.reps.map((reps) => formatNumber(language, reps)).join(' · '),
+                              target: trainerRangeLabel(target.reps),
+                            })}</p>}
                         <p>{t('workout.session.performanceNext', {
                           day: nextDate ? formatWeekdayDate(language, `${nextDate}T00:00:00Z`).split(' ')[0] : '',
                           weight: formatNumber(language, next.weight ?? actual.weight),
