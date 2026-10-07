@@ -168,6 +168,11 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
       </button>
       {errorMessage && <p className="account-error" role="alert">{errorMessage}</p>}
       {notice && <p className="account-message" role="status">{notice}</p>}
+
+      {/* PO 2026-10-07: make the demo an obvious option next to signing in. */}
+      <div className="account-divider"><span>{t('login.or')}</span></div>
+      <a className="secondary-button login-demo-button" href="?demo=1">{t('login.tryDemo')}</a>
+      <p className="account-message login-demo-hint">{t('login.tryDemoHint')}</p>
     </section>
   )
 }
