@@ -1,3 +1,4 @@
+import CollapsibleCard from './CollapsibleCard'
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import { getSupabaseClient } from '../lib/supabaseClient'
@@ -49,9 +50,8 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      <section className="card account-screen profile-screen">
+      <CollapsibleCard className="card account-screen profile-screen" titleId="profile-account-title" title={t('profile.title')} defaultOpen>
         <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
-        <h2>{t('profile.title')}</h2>
         {name && <p className="profile-name">{name}</p>}
         <p className="profile-email">{user?.email}</p>
         <p className="account-message" role="status" aria-live="polite">
@@ -61,7 +61,7 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
           {busy ? t('profile.signingOut') : t('profile.signOut')}
         </button>
         {error && <p className="account-error" role="alert">{error}</p>}
-      </section>
+      </CollapsibleCard>
       <ProfileDataSections />
     </>
   )

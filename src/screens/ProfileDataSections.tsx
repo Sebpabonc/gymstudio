@@ -1,3 +1,4 @@
+import CollapsibleCard from './CollapsibleCard'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import { formatNumber, formatShortDate, Language, TranslationKey, useT } from '../i18n'
@@ -310,8 +311,7 @@ export default function ProfileDataSections() {
 
   return (
     <>
-      <section className="card profile-data-card" aria-labelledby="profile-goal-title">
-        <h2 id="profile-goal-title">{t('profile.goal.title')}</h2>
+      <CollapsibleCard className="card profile-data-card" titleId="profile-goal-title" title={t('profile.goal.title')}>
         <p className="profile-data-hint">{t('profile.goal.copy')}</p>
         {disabled && <p className="profile-data-hint">{t('profile.goal.signIn')}</p>}
         {loading ? (
@@ -340,7 +340,7 @@ export default function ProfileDataSections() {
             </button>
           </form>
         )}
-      </section>
+      </CollapsibleCard>
       <MyPlanSection
         signedOut={disabled}
         goal={savedGoal}
@@ -357,8 +357,7 @@ export default function ProfileDataSections() {
         onConfirmRegeneration={confirmRegeneration}
         onCancelRegeneration={() => setConfirmingRegeneration(false)}
       />
-      <section className="card profile-data-card" aria-labelledby="profile-measurements-title">
-        <h2 id="profile-measurements-title">{t('profile.measurements.title')}</h2>
+      <CollapsibleCard className="card profile-data-card" titleId="profile-measurements-title" title={t('profile.measurements.title')}>
         {disabled && <p className="profile-data-hint">{t('profile.data.signIn')}</p>}
         <form onSubmit={submitMetric}>
           <fieldset className="profile-data-fields" disabled={disabled || busy || metricLoading}>
@@ -426,7 +425,7 @@ export default function ProfileDataSections() {
             {visibleMetrics.length === 0 && <p className="profile-data-hint">{t('profile.measurements.empty')}</p>}
           </div>
         )}
-      </section>
+      </CollapsibleCard>
       {(error || notice) && (
         <div className="profile-data-feedback">
           {error && <p className="account-error" role="alert">{error}</p>}

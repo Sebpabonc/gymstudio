@@ -1,3 +1,4 @@
+import CollapsibleCard from './CollapsibleCard'
 import React from 'react'
 import { formatShortDate, useT } from '../i18n'
 import type { BuiltPlan } from '../plans/buildMyPlan'
@@ -95,8 +96,7 @@ export default function MyPlanSection({
   )
 
   return (
-    <section className="card profile-data-card personal-plan-card" aria-labelledby="profile-plan-title">
-      <h2 id="profile-plan-title">{t('profile.plan.title')}</h2>
+    <CollapsibleCard className="card profile-data-card personal-plan-card" titleId="profile-plan-title" title={t('profile.plan.title')}>
       {signedOut ? (
         <p className="profile-data-hint">{t('profile.plan.signIn')}</p>
       ) : !goal && (
@@ -136,6 +136,6 @@ export default function MyPlanSection({
       {building && (!preview || confirmingRegeneration) && (
         <p className="profile-data-hint" role="status">{t('profile.plan.building')}</p>
       )}
-    </section>
+    </CollapsibleCard>
   )
 }

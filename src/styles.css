@@ -6184,3 +6184,42 @@ a.planned-exercise-main-name {
 .app-content {
   grid-auto-rows: max-content;
 }
+
+/* Profile: every section folds behind its title (PO 2026-10-07). */
+.collapsible-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.collapsible-card-header h2 {
+  margin: 0;
+}
+
+.collapsible-card-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--nav-active);
+  font-size: 1.2rem;
+}
+
+.collapsible-card-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
