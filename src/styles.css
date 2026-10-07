@@ -6223,3 +6223,16 @@ a.planned-exercise-main-name {
   gap: 12px;
   margin-top: 12px;
 }
+
+.login-demo-button {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  text-decoration: none;
+}
+
+.login-demo-hint {
+  margin-top: -4px;
+  text-align: center;
+  font-size: 0.75rem;
+}
