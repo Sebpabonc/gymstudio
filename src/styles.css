@@ -6236,3 +6236,15 @@ a.planned-exercise-main-name {
   text-align: center;
   font-size: 0.75rem;
 }
+
+.finish-workout-button {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.duplicate-prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
