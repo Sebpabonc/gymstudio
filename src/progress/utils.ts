@@ -1,6 +1,7 @@
 import { createTranslator, type Language, type Translate } from '../i18n/translate'
 import { Exercise, PlannedExercise, TrainingBlock } from '../types'
 import { DayType, ProgressEntry, ProgressSet } from './types'
+import { latestPerExerciseDate } from '../utils/completedExercises'
 import { defaultActiveBlock } from '../utils/trainingBlocks'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -74,7 +75,7 @@ export function getDayType(entry: Pick<ProgressEntry, 'date' | 'dayKey'>, blocks
 
 export function groupExerciseSessions(entries: ProgressEntry[]): ExerciseSession[] {
   const sessions = new Map<string, ExerciseSession>()
-  for (const entry of entries) {
+  for (const entry of latestPerExerciseDate(entries)) {
     const key = `${entry.exerciseId}:${entry.date.slice(0, 10)}`
     const session = sessions.get(key) ?? {
       exerciseId: entry.exerciseId,

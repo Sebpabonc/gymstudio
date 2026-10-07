@@ -18,6 +18,7 @@ import {
   fetchActiveUserPlan,
   getCachedActiveUserPlan,
   getCachedTrainingBlocks,
+  deleteWorkoutEntry,
   getActiveBlockId,
   getExerciseDisplayName,
   getSessionStorageValue,
@@ -45,7 +46,7 @@ import {
   todayTrainingDay,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
-import { findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
+import { findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelection, findSameDayDuplicate, latestPerExerciseDate, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
@@ -579,6 +580,12 @@ export default function WorkoutPlan({
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
+  const [duplicatePrompt, setDuplicatePrompt] = useState<{
+    names: string[]
+    dayName: string
+    run: (decision: 'move' | 'keep') => void
+  } | null>(null)
+  const [finishedScopeKey, setFinishedScopeKey] = useState<string | null>(null)
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const trainerRecommendationIds = useRef(new Map<string, string>())
   // Continuous learning (PT spec, approved 2026-10-07): the user's past recommendations + results calibrate the engine.
@@ -1507,6 +1514,7 @@ export default function WorkoutPlan({
   const startSession = (loggedAt: number, scope: typeof activeCompletionScope) => {
     if (planMode !== 'preset') return
     const scopeKey = getSessionScopeKey(scope, planMode)
+    setFinishedScopeKey((current) => (current === scopeKey ? null : current))
     if (sessionStartedAt.current?.scopeKey !== scopeKey) {
       sessionStartedAt.current = { scopeKey, timestamp: loggedAt }
     }
@@ -1521,13 +1529,18 @@ export default function WorkoutPlan({
     const wasComplete = activeExercises.every((exercise) => findExerciseCompletion(exercise, previousHistory))
     const isComplete = activeExercises.every((exercise) => findExerciseCompletion(exercise, nextHistory))
     if (!isComplete || wasComplete) return
+    showSessionSummary(nextHistory, loggedAt)
+  }
 
-    const entries = nextHistory.filter(
+  const showSessionSummary = (nextHistory: WorkoutEntry[], loggedAt: number) => {
+    if (planMode !== 'preset' || !activeBlock || !activeDay) return
+    const entries = latestPerExerciseDate(nextHistory.filter(
       (entry) =>
         entry.date === activeCompletionScope.date &&
         entry.blockId === activeCompletionScope.blockId &&
         entry.dayKey === activeCompletionScope.dayKey
-    )
+    ))
+    if (entries.length === 0) return
     const performance = buildWorkoutSummary(entries, nextHistory, trainingBlocks, exerciseCatalog, today)
     const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
     const scopeKey = getSessionScopeKey(activeCompletionScope, planMode)
@@ -1547,6 +1560,28 @@ export default function WorkoutPlan({
     })
   }
 
+  const finishWorkout = async () => {
+    const storedHistory = await loadWorkoutHistory()
+    showSessionSummary(storedHistory, Date.now())
+    setFinishedScopeKey(getSessionScopeKey(activeCompletionScope, planMode))
+  }
+
+  const askDuplicateDecision = (
+    duplicates: WorkoutEntry[],
+    run: (decision: 'move' | 'keep') => void
+  ) => {
+    const dayKey = duplicates[0]?.dayKey
+    const day = activeBlock?.days.find((item) => item.key === dayKey)
+    setDuplicatePrompt({
+      names: duplicates.map((entry) => {
+        const match = exerciseCatalog.find((item) => item.id === entry.exerciseId)
+        return match ? displayExerciseName(match) : entry.exerciseId
+      }),
+      dayName: day ? t('workout.day.title', { position: day.position, name: day.name }) : dayKey ?? '',
+      run,
+    })
+  }
+
   const undoLastLog = () => {
     if (!toast) return
     const nextHistory = undoLoggedEntries(history, toast.undoSnapshots)
@@ -1559,7 +1594,8 @@ export default function WorkoutPlan({
   const logPlannedExercise = async (
     exercise: PlanExercise,
     completedRows?: boolean[],
-    completedAt?: Array<number | undefined>
+    completedAt?: Array<number | undefined>,
+    duplicateDecision?: 'move' | 'keep'
   ) => {
     const exerciseKey = getPlanDraftKey(exercise.name)
     const sectionKey = normalizeExerciseName(exercise.name)
@@ -1628,7 +1664,13 @@ export default function WorkoutPlan({
       notes: draft.notes?.trim() ?? '',
     }
 
-    const storedHistory = await loadWorkoutHistory()
+    let storedHistory = await loadWorkoutHistory()
+    const duplicate = planMode === 'preset' ? findSameDayDuplicate(storedHistory, canonicalId, activeCompletionScope) : undefined
+    if (duplicate && !duplicateDecision) {
+      askDuplicateDecision([duplicate], (decision) => void logPlannedExercise(exercise, completedRows, completedAt, decision))
+      return
+    }
+    if (duplicate && duplicateDecision === 'move') storedHistory = await deleteWorkoutEntry(duplicate.id)
     const { history: nextHistory, entry: entryToSave } = upsertScopedEntry(storedHistory, nextEntry, activeCompletionScope)
     if (trainer) saveTrainerResult(exercise, draft, trainer, entryToSave.id)
     const loggedAt = Date.now()
@@ -1681,7 +1723,8 @@ export default function WorkoutPlan({
     exercises: PlanExercise[],
     groupKey: string,
     completedRows: boolean[],
-    completedAt?: Array<number | undefined>
+    completedAt?: Array<number | undefined>,
+    duplicateDecision?: 'move' | 'keep'
   ) => {
     const setCount = Math.max(...exercises.map(getDefaultSetCount))
     const entryInputs = await Promise.all(exercises.map(async (exercise) => {
@@ -1743,7 +1786,21 @@ export default function WorkoutPlan({
       return
     }
 
-    const storedHistory = await loadWorkoutHistory()
+    let storedHistory = await loadWorkoutHistory()
+    const duplicates = planMode === 'preset'
+      ? nextEntries.flatMap((entry) => {
+          const duplicate = findSameDayDuplicate(storedHistory, entry.exerciseId, { ...activeCompletionScope, date })
+          return duplicate ? [duplicate] : []
+        })
+      : []
+    if (duplicates.length > 0 && !duplicateDecision) {
+      askDuplicateDecision(duplicates, (decision) =>
+        void logSuperset(exercises, groupKey, completedRows, completedAt, decision))
+      return
+    }
+    if (duplicateDecision === 'move') {
+      for (const duplicate of duplicates) storedHistory = await deleteWorkoutEntry(duplicate.id)
+    }
     let nextHistory = storedHistory
     const entriesToSave = nextEntries.map((entry) => {
       const result = upsertScopedEntry(nextHistory, entry, { ...activeCompletionScope, date })
@@ -3257,6 +3314,22 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             )
           })}
         </div>
+        {planMode === 'preset' && (
+          <button
+            type="button"
+            className="primary-button finish-workout-button"
+            disabled={!history.some((entry) =>
+              entry.date === activeCompletionScope.date &&
+              entry.blockId === activeCompletionScope.blockId &&
+              entry.dayKey === activeCompletionScope.dayKey &&
+              entry.sets.length > 0)}
+            onClick={() => void finishWorkout()}
+          >
+            {finishedScopeKey === getSessionScopeKey(activeCompletionScope, planMode)
+              ? t('workout.finish.done')
+              : t('workout.finish.button')}
+          </button>
+        )}
       </section>
       )}
       {swapTarget && (
@@ -3268,6 +3341,48 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             onCancel={() => setSwapTarget(null)}
             onSelect={chooseExerciseSwap}
           />
+        </div>
+      )}
+      {duplicatePrompt && (
+        <div className="session-summary-backdrop" onClick={() => setDuplicatePrompt(null)}>
+          <section
+            className="session-summary-sheet duplicate-prompt"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="duplicate-prompt-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="duplicate-prompt-title">
+              {t('workout.duplicate.title', { exercise: duplicatePrompt.names.join(', '), day: duplicatePrompt.dayName })}
+            </h2>
+            <div className="duplicate-prompt-actions">
+              <button
+                type="button"
+                className="primary-button small-button"
+                onClick={() => {
+                  const { run } = duplicatePrompt
+                  setDuplicatePrompt(null)
+                  run('move')
+                }}
+              >
+                {t('workout.duplicate.move')}
+              </button>
+              <button
+                type="button"
+                className="secondary-button small-button"
+                onClick={() => {
+                  const { run } = duplicatePrompt
+                  setDuplicatePrompt(null)
+                  run('keep')
+                }}
+              >
+                {t('workout.duplicate.keep')}
+              </button>
+              <button type="button" className="secondary-button small-button" onClick={() => setDuplicatePrompt(null)}>
+                {t('workout.duplicate.cancel')}
+              </button>
+            </div>
+          </section>
         </div>
       )}
       {sessionSummary && (
