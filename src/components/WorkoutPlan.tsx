@@ -1,5 +1,6 @@
 import { cleanNumberInput, selectOnFocus } from '../utils/numberInput'
 import { todaysEntriesForDay } from '../utils/sessions'
+import SwipeToDelete from './SwipeToDelete'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
@@ -585,6 +586,7 @@ export default function WorkoutPlan({
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const trainerRecommendationIds = useRef(new Map<string, string>())
   const [bulkConfirmDay, setBulkConfirmDay] = useState('')
+  const [swipeUndo, setSwipeUndo] = useState<WorkoutEntry | null>(null)
   const [bulkUndo, setBulkUndo] = useState<{ dayKey: string; entries: WorkoutEntry[] } | null>(null)
   // Continuous learning (PT spec, approved 2026-10-07): the user's past recommendations + results calibrate the engine.
   const [calibrationRows, setCalibrationRows] = useState<Awaited<ReturnType<typeof fetchCalibrationRecommendations>>>([])
@@ -3055,7 +3057,18 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       {isProgressSectionVisible && (progressItems.length > 0 ? (
                         <div className="planned-history-list">
                           {progressItems.map((item) => (
-                            <article key={item.id} className="planned-history-item">
+                            <SwipeToDelete
+                              key={item.id}
+                              label={t('progress.delete.action')}
+                              onDelete={async () => {
+                                const entry = history.find((candidate) => candidate.id === item.id)
+                                if (!entry) return
+                                setHistory(await deleteWorkoutEntry(entry.id))
+                                setSwipeUndo(entry)
+                                window.setTimeout(() => setSwipeUndo((current) => (current?.id === entry.id ? null : current)), 6000)
+                              }}
+                            >
+                            <article className="planned-history-item">
                               <div className="planned-history-topline">
                                 <span>{formatHistoryDate(language, item.date)}</span>
                                 <strong>{formatNumber(language, item.maxWeight)} kg</strong>
@@ -3070,9 +3083,22 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                                 </p>
                               ) : null}
                             </article>
+                            </SwipeToDelete>
                           ))}
                         </div>
                       ) : <p className="empty-state">{text.noProgressHistory}</p>)}
+                      {isProgressSectionVisible && progressItems.length > 0 && !swipeUndo && (
+                        <small className="swipe-hint">{t('workout.progress.swipeHint')}</small>
+                      )}
+                      {swipeUndo && swipeUndo.exerciseId === exercise.exerciseId && (
+                        <div className="bulk-delete-bar" role="status">
+                          <span>{t('progress.delete.deleted')}</span>
+                          <button type="button" className="text-button" onClick={() => {
+                            setHistory(restoreWorkoutEntry(swipeUndo))
+                            setSwipeUndo(null)
+                          }}>{t('progress.delete.undo')}</button>
+                        </div>
+                      )}
                     </div>
                     {!group.isSuperset && (
                       <label className="planned-notes-field">

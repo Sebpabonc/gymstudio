@@ -6279,3 +6279,35 @@ a.planned-exercise-main-name {
 .session-row small {
   color: var(--muted);
 }
+
+/* Swipe a Progress row left to delete it (PO 2026-10-07). */
+.swipe-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.swipe-row-delete {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 88px;
+  border: 0;
+  background: #8d3b3b;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+}
+
+.swipe-row-content {
+  position: relative;
+  background: var(--bg-soft);
+  transition: transform 0.18s ease-out;
+  touch-action: pan-y;
+}
+
+.swipe-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
