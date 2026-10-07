@@ -3,10 +3,12 @@ import { WorkoutSet } from '../types'
 import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
+  extraSetTagsForPlanNotes,
   filterLoggableSets,
   formatWorkoutSet,
   getPreviousWorkoutSets,
   getPreviousWorkoutSetRow,
+  isProgressionWorkoutSet,
   parseRepPrescription,
   scaleWeightForOtherDay,
   selectCompletedSets,
@@ -115,6 +117,25 @@ describe('workout sets', () => {
     expect(workoutVolume(sets)).toBe(12 * 30 + 12 * 22 + 8 * 40)
     expect(workoutMaxWeight(sets)).toBe(40)
     expect(workoutVolume([{ id: 'legacy-set', reps: 8, weight: 50 }])).toBe(400)
+  })
+
+  it('counts tagged sets in volume but excludes them from progression weight and set selection', () => {
+    const sets: WorkoutSet[] = [
+      { id: 'main', reps: 8, weight: 40 },
+      { id: 'mini', reps: 12, weight: 40, tag: 'mini' },
+      { id: 'partial', reps: 20, weight: 60, tag: 'partial' },
+    ]
+
+    expect(workoutVolume(sets)).toBe(8 * 40 + 12 * 40 + 20 * 60)
+    expect(workoutMaxWeight(sets)).toBe(40)
+    expect(sets.filter(isProgressionWorkoutSet)).toEqual([sets[0]])
+  })
+
+  it('offers only the extra-set techniques named in plan notes', () => {
+    expect(extraSetTagsForPlanNotes('Rest-pause, then myo-reps')).toEqual(['mini'])
+    expect(extraSetTagsForPlanNotes('Use partial reps after the final set')).toEqual(['partial'])
+    expect(extraSetTagsForPlanNotes('Rest-pause with partial reps')).toEqual(['mini', 'partial'])
+    expect(extraSetTagsForPlanNotes('Controlled tempo')).toEqual([])
   })
 })
 

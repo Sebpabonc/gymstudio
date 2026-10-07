@@ -2935,6 +2935,88 @@ button {
   min-width: 0;
 }
 
+.tagged-set-section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tagged-set-add {
+  justify-self: start;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tagged-set-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(54px, 0.7fr) auto;
+  align-items: center;
+  gap: 6px;
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tagged-set-row.completed {
+  background: rgba(180, 211, 184, 0.08);
+}
+
+.tagged-set-row > strong {
+  grid-column: 1 / -1;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+}
+
+.tagged-set-row .set-stepper {
+  grid-column: 1;
+}
+
+.tagged-set-row .set-reps-input {
+  grid-column: 2;
+}
+
+.tagged-set-actions {
+  display: flex;
+  grid-column: 3;
+  gap: 4px;
+}
+
+.tagged-set-remove {
+  width: 32px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted-strong);
+  background: transparent;
+  font-size: 1.2rem;
+}
+
+.superset-extra-set-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.superset-extra-set-group {
+  display: grid;
+  gap: 6px;
+}
+
+.superset-extra-set-group > strong {
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+}
+
 .planned-set-column-headers,
 .planned-set-row,
 .planned-drop-set-row {

@@ -31,6 +31,27 @@ describe('recommend — same target as last time', () => {
     expect(result.evidence.lastReps).toEqual([14, 14, 14])
   })
 
+  it('mini-sets and partials do not change the recommendation or evidence', () => {
+    const mainSets = sets(40, 10, 10, 10)
+    const history: SessionEvidence[] = [{
+      date: '2026-10-05',
+      sets: [
+        ...mainSets,
+        { weight: 40, reps: 25, tag: 'mini' },
+        { weight: 40, reps: 30, tag: 'partial' },
+      ],
+      target: range(10),
+    }]
+
+    expect(recommend({ ...base, equipment: 'barbell', history, target: range(10) }))
+      .toEqual(recommend({
+        ...base,
+        equipment: 'barbell',
+        history: [{ ...history[0], sets: mainSets }],
+        target: range(10),
+      }))
+  })
+
 
 
 

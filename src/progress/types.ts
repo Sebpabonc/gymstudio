@@ -8,6 +8,7 @@ export type ProgressSet = {
   reps: number
   weight: number
   drop?: { reps: number; weight: number }
+  tag?: 'main' | 'mini' | 'partial'
 }
 
 export type ProgressEntry = Omit<WorkoutEntry, 'sets'> & {

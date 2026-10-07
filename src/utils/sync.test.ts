@@ -28,7 +28,11 @@ const localEntry: WorkoutEntry = {
   id: 'entry-1',
   exerciseId: 'barbell-bench-press',
   date: '2026-10-03',
-  sets: [{ id: 'set-1', reps: 8, weight: 60 }],
+  sets: [
+    { id: 'set-1', reps: 8, weight: 60 },
+    { id: 'set-2', reps: 20, weight: 60, tag: 'mini' },
+    { id: 'set-3', reps: 12, weight: 50, tag: 'partial' },
+  ],
 }
 
 const remoteEntry = (

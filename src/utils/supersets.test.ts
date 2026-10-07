@@ -77,7 +77,11 @@ describe('createSupersetEntries', () => {
         { exerciseId: 'press', sets: [{ id: 'p1', reps: 10, weight: 0 }] },
         {
           exerciseId: 'fly',
-          sets: [{ id: 'f1', reps: 12, weight: 8, drop: { reps: 12, weight: 6 } }],
+          sets: [
+            { id: 'f1', reps: 12, weight: 8, drop: { reps: 12, weight: 6 } },
+            { id: 'f2', reps: 15, weight: 8, tag: 'mini' },
+            { id: 'f3', reps: 6, weight: 8, tag: 'partial' },
+          ],
         },
       ],
       scope,
@@ -87,6 +91,7 @@ describe('createSupersetEntries', () => {
     expect(entries).toHaveLength(1)
     expect(entries[0].exerciseId).toBe('fly')
     expect(entries[0].sets[0].drop).toEqual({ reps: 12, weight: 6 })
+    expect(entries[0].sets.slice(1).map((set) => set.tag)).toEqual(['mini', 'partial'])
   })
 
   it('returns no entries when neither exercise has a filled set', () => {

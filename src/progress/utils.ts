@@ -1,5 +1,6 @@
 import { createTranslator, type Language, type Translate } from '../i18n/translate'
 import { Exercise, PlannedExercise, TrainingBlock } from '../types'
+import { isProgressionWorkoutSet } from '../utils/workoutSets'
 import { DayType, ProgressEntry, ProgressSet } from './types'
 import { defaultActiveBlock } from '../utils/trainingBlocks'
 
@@ -92,9 +93,10 @@ export function groupExerciseSessions(entries: ProgressEntry[]): ExerciseSession
 }
 
 export function workingSets(sets: ProgressSet[]) {
-  const maxWeight = sets.reduce((maximum, set) => Math.max(maximum, set.weight), 0)
-  if (maxWeight <= 0) return sets
-  return sets.filter((set) => set.weight >= maxWeight * 0.5)
+  const progressionSets = sets.filter(isProgressionWorkoutSet)
+  const maxWeight = progressionSets.reduce((maximum, set) => Math.max(maximum, set.weight), 0)
+  if (maxWeight <= 0) return progressionSets
+  return progressionSets.filter((set) => set.weight >= maxWeight * 0.5)
 }
 
 export function bestSetIndex(sets: ProgressSet[]) {
