@@ -1188,6 +1188,27 @@ export default function WorkoutPlan({
     const saved = plannedDrafts[key]
     if (saved) return saved
     const original = getOriginalDraftForExercise(exerciseName, exercise)
+    // PO 2026-10-07: reopening an exercise already done this week shows what was logged, so it can be edited
+    // (re-logging the same day updates that entry) instead of the plan's defaults.
+    const done = exercise ? findExerciseCompletion(exercise, history) : undefined
+    if (done?.sets.length) {
+      const count = Math.max(original.setWeights.length, done.sets.length)
+      const pick = <T,>(values: T[], fallback: T[], index: number) => values[index] ?? fallback[index] ?? fallback[fallback.length - 1]
+      const weights = done.sets.map((set) => set.weight)
+      const reps = done.sets.map((set) => set.reps)
+      return {
+        ...original,
+        weight: weights[0],
+        reps: reps[0],
+        setWeights: Array.from({ length: count }, (_, index) => pick(weights, original.setWeights, index)),
+        setReps: Array.from({ length: count }, (_, index) => pick(reps, original.setReps, index)),
+        setWeightTouched: Array.from({ length: count }, () => true),
+        dropSetWeights: Array.from({ length: count }, (_, index) => done.sets[index]?.drop?.weight ?? original.dropSetWeights[index] ?? 0),
+        dropSetReps: Array.from({ length: count }, (_, index) => done.sets[index]?.drop?.reps ?? original.dropSetReps[index] ?? 0),
+        setDone: Array.from({ length: count }, (_, index) => index < done.sets.length),
+        notes: done.notes ?? original.notes,
+      }
+    }
     return planMode === 'preset' && exercise?.exerciseId
       ? { ...original, recommendationId: getTrainerRecommendationId(key) }
       : original
@@ -2460,8 +2481,14 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                 return match && normalizeExerciseName(match.name) === exerciseKey
               })
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            // "Previous" is the session before this week's logged one, never the entry being edited.
+            const editingEntry = findExerciseCompletion(exercise, history)
             const previousSelection = exercise.exerciseId
-              ? findPrefillSelection(history, exercise.exerciseId, planMode === 'preset' ? activeDay?.key : undefined)
+              ? findPrefillSelection(
+                  editingEntry ? history.filter((entry) => entry.id !== editingEntry.id) : history,
+                  exercise.exerciseId,
+                  planMode === 'preset' ? activeDay?.key : undefined
+                )
               : undefined
             const previousEntry = previousSelection?.entry ?? (exercise.exerciseId ? undefined : exerciseHistory[0])
             const previousSets = previousEntry?.sets ?? []
