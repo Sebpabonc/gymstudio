@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GymStudio Simple v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3f2;--phone:#fffdfc;--text:#1b1a1a;--muted:#6b6566;--line:rgba(0,0,0,.1);--panel:rgba(0,0,0,.035);--panel2:rgba(0,0,0,.07);--brand:#8d5e63;--brand-soft:rgba(141,94,99,.13);--brand-text:#7a4d52;--up:#2f7d43;--down:#b0503a;--hint:#fff4d6;--hint-text:#5c4a12}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0a0b;--phone:#121213;--text:#f3f3f1;--muted:#b9b7b4;--line:rgba(255,255,255,.11);--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);--brand:#8d5e63;--brand-soft:rgba(141,94,99,.22);--brand-text:#d9aeb3;--up:#9fd3a8;--down:#e3a08f;--hint:#3a3220;--hint-text:#f1dfae}}
+:root[data-theme="dark"]{--bg:#0a0a0b;--phone:#121213;--text:#f3f3f1;--muted:#b9b7b4;--line:rgba(255,255,255,.11);--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);--brand:#8d5e63;--brand-soft:rgba(141,94,99,.22);--brand-text:#d9aeb3;--up:#9fd3a8;--down:#e3a08f;--hint:#3a3220;--hint-text:#f1dfae}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;padding:16px 0;min-height:100vh;font-size:14px}
+.phone{width:375px;max-width:100vw;height:800px;max-height:calc(100vh - 32px);background:var(--phone);border:1px solid var(--line);border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+@media (max-width:420px){body{padding:0}.phone{border-radius:0;border:0;height:100vh;max-height:none}}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px;gap:8px}
+.logo{font-weight:800;letter-spacing:.02em}.logo span{color:var(--brand-text)}
+.hdr-r{display:flex;gap:6px;align-items:center}
+.seg{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--muted);padding:6px 9px;font:700 12px inherit;font-family:inherit;cursor:pointer}
+.seg button.on{background:var(--brand);color:#fff}
+.icon-btn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:99px;padding:6px 10px;font:600 12px inherit;font-family:inherit;display:flex;gap:5px;align-items:center;cursor:pointer}
+main{flex:1;overflow:auto;padding:4px 16px 96px}
+.screen{display:none}.screen.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px}
+.muted{color:var(--muted)}.small{font-size:12px}
+.row{display:flex;align-items:center;gap:8px}
+.between{justify-content:space-between}
+h1{font-size:20px;font-weight:800;margin:2px 0 6px}
+h2{font-size:15px;font-weight:700;margin:14px 0 8px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px}
+.chip{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:99px;padding:6px 10px;font:600 12px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-text)}
+.badge{display:inline-flex;align-items:center;gap:3px;border-radius:6px;padding:2px 6px;font-size:11px;font-weight:700;background:var(--brand-soft);color:var(--brand-text);border:0;cursor:pointer;font-family:inherit}
+.badge.plain{background:var(--panel2);color:var(--muted);cursor:default}
+.badge .i{display:inline-grid;place-items:center;width:13px;height:13px;border-radius:50%;border:1.5px solid currentColor;font-size:9px}
+.hint{background:var(--hint);color:var(--hint-text);border-radius:12px;padding:10px 12px;font-size:12px;display:flex;gap:8px;align-items:flex-start;margin:8px 0}
+.hint b{font-weight:700}.hint button{margin-left:auto;background:none;border:0;color:inherit;font:700 12px inherit;font-family:inherit;text-decoration:underline;cursor:pointer;flex:none}
+.ex{display:flex;gap:10px;align-items:center;padding:11px 10px;border-radius:14px;border:1px solid var(--line);background:var(--panel);margin-bottom:8px;cursor:pointer;width:100%;text-align:left;color:inherit;font-family:inherit}
+.ex .code{flex:none;width:30px;height:30px;border-radius:9px;background:var(--panel2);display:grid;place-items:center;font-weight:800;font-size:12px}
+.ex .nm{font-weight:700;font-size:14px}
+.ex .meta{font-size:12px;color:var(--muted);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ex .st{margin-left:auto;text-align:right;font-size:12px;flex:none}
+.ex.done .code{background:var(--up);color:#fff}
+.ss{border-left:3px solid var(--brand);padding-left:8px;margin:4px 0 10px}
+.ss-l{font-size:11px;font-weight:700;color:var(--brand-text);margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em}
+.btn{border:0;border-radius:14px;padding:13px 14px;font:700 15px inherit;font-family:inherit;cursor:pointer;width:100%}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--text)}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+.act{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 2px;font:600 11px inherit;font-family:inherit;color:var(--text);cursor:pointer;min-height:56px}
+.act svg{width:20px;height:20px}
+.target{background:var(--brand-soft);border-radius:14px;padding:12px;margin:8px 0}
+.target .big{font-size:20px;font-weight:800}
+.tog{display:flex;background:var(--panel2);border-radius:10px;padding:3px;margin-top:8px}
+.tog button{flex:1;border:0;background:none;border-radius:8px;padding:7px;font:700 12px inherit;font-family:inherit;color:var(--muted);cursor:pointer}
+.tog button.on{background:var(--phone);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;color:var(--muted);font-weight:600;text-align:left;padding:4px 2px}
+td{padding:5px 2px;vertical-align:middle;font-size:13px}
+tr.sub td{padding-top:0;font-size:12px;color:var(--muted)}
+.num{width:52px;padding:8px 4px;border:1px solid var(--line);background:var(--phone);color:var(--text);border-radius:9px;font:700 14px inherit;font-family:inherit;text-align:center}
+.ck{width:40px;height:40px;border-radius:12px;border:2px solid var(--line);background:none;color:var(--muted);font-size:18px;cursor:pointer}
+.ck.on{background:var(--up);border-color:var(--up);color:#fff}
+.mini{background:none;border:1px dashed var(--line);border-radius:99px;padding:4px 9px;font:600 11px inherit;font-family:inherit;color:var(--brand-text);cursor:pointer}
+details{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--panel)}
+summary{font-weight:700;cursor:pointer}
+.rest{position:absolute;left:10px;right:10px;bottom:70px;background:var(--text);color:var(--phone);border-radius:16px;padding:10px 12px;display:none;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.rest.on{display:flex}.rest .t{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.rest button{background:rgba(127,127,127,.25);border:0;color:inherit;border-radius:10px;padding:8px 9px;font:700 12px inherit;font-family:inherit;cursor:pointer}
+nav{position:absolute;bottom:0;left:0;right:0;display:flex;border-top:1px solid var(--line);background:var(--phone)}
+nav button{flex:1;background:none;border:0;padding:9px 0 14px;color:var(--muted);font:600 11px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+nav button.on{color:var(--brand-text)}nav svg{width:22px;height:22px}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:5}
+.sheet-bg.on{display:flex}
+.sheet{background:var(--phone);width:100%;border-radius:20px 20px 0 0;padding:16px;max-height:80%;overflow:auto}
+.sw{position:relative;overflow:hidden;border-radius:12px;margin-bottom:6px}
+.sw .del{position:absolute;inset:0;background:var(--down);color:#fff;display:flex;justify-content:flex-end;align-items:center;padding-right:16px;font-weight:700;font-size:12px}
+.sw .fg{position:relative;background:var(--panel2);display:flex;align-items:center;gap:8px;padding:10px;transition:transform .2s;background-clip:padding-box}
+.sw .fg{background:var(--phone);border:1px solid var(--line);border-radius:12px}
+.trash{margin-left:auto;background:none;border:1px solid var(--line);border-radius:9px;padding:6px 8px;color:var(--down);cursor:pointer;font:600 11px inherit;font-family:inherit}
+.bar{height:6px;border-radius:9px;background:var(--panel2);overflow:hidden}.bar i{display:block;height:100%;background:var(--brand)}
+.up{color:var(--up)}.down{color:var(--down)}
+.toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:var(--text);color:var(--phone);padding:8px 14px;border-radius:99px;font-size:12px;font-weight:700;display:none;z-index:9}
+.note{font-size:11px;color:var(--muted);text-align:center;margin:14px 0 4px}
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <header>
+    <div class="logo">Gym<span>Studio</span></div>
+    <div class="hdr-r">
+      <button class="icon-btn" id="helpBtn" aria-label="Help"><b>?</b><span data-t="help"></span></button>
+      <div class="seg" aria-label="Theme"><button data-theme-set="light">☀</button><button data-theme-set="dark">☾</button></div>
+      <div class="seg" aria-label="Language"><button data-lang="en" class="on">EN</button><button data-lang="es">ES</button></div>
+    </div>
+  </header>
+  <div class="toast" id="toast"></div>
+  <main id="main">
+    <!-- TODAY -->
+    <section class="screen on" id="s-today">
+      <button class="row between card" id="blockBtn" style="width:100%;color:inherit;font-family:inherit;cursor:pointer;text-align:left">
+        <div><div class="small muted" data-t="blockLine"></div><div style="font-weight:700">Size · Light-to-Heavy + Supersets II</div></div>
+        <div style="text-align:right"><div class="small muted" data-t="thisWeek"></div><div style="font-weight:800">2 / 4 ›</div></div>
+      </button>
+      <div class="chips" id="dayChips"></div>
+      <h1 id="dayTitle"></h1>
+      <div class="hint" id="hint-list"><span>💡</span><span data-t="hintList"></span><button data-dismiss="hint-list" data-t="gotIt"></button></div>
+      <div id="exList"></div>
+      <button class="btn primary" id="finishBtn" style="margin-top:6px" data-t="finish"></button>
+      <p class="note" data-t="demoNote"></p>
+    </section>
+    <!-- FOCUS -->
+    <section class="screen" id="s-focus"></section>
+    <!-- SUMMARY -->
+    <section class="screen" id="s-summary"></section>
+    <!-- PROGRESS -->
+    <section class="screen" id="s-progress"></section>
+  </main>
+  <div class="rest" id="rest">
+    <div><div class="small" data-t="rest" style="opacity:.7"></div><div class="t" id="restT">1:30</div></div>
+    <div class="small" id="restNext" style="flex:1;opacity:.85"></div>
+    <button id="restAdd">+30s</button><button id="restSkip" data-t="skip"></button>
+  </div>
+  <nav>
+    <button class="on" data-go="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg><span data-t="navToday"></span></button>
+    <button data-go="progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><span data-t="navProgress"></span></button>
+    <button data-go="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span data-t="navProfile"></span></button>
+  </nav>
+  <div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet"></div></div>
+</div>
+<script>
+// ---- i18n (UI only; approved fitness content stays English until PT approves ES) ----
+const T={en:{help:"Help",blockLine:"Block 8 · Week 3 of 6 · tap for details",thisWeek:"This week",hintList:"<b>Tap any exercise</b> to log its sets. Badges like <b>Pyramid ⓘ</b> explain the technique.",gotIt:"Got it",finish:"Finish workout",demoNote:"Prototype · demo weights · exercises and notes from the approved Block 8 & 9 plans",navToday:"Today",navProgress:"Progress",navProfile:"Profile",rest:"Rest",skip:"Skip",back:"‹ All exercises",google:"Search on Google",swap:"Swap",notes:"Notes",history:"History",howTo:"How to do it",target:"Today's target",aiT:"AI target",orig:"Original plan",set:"Set",last:"Last time",tgt:"Target",kg:"kg",reps:"Reps",same:"Same as set 1",drop:"+ drop",rir:"Reps left in the tank? (last set)",hintFocus:"<b>New:</b> “Search on Google” shows pictures of this exercise. “Swap” changes it just today or always.",done:"Done",edit:"Edit",sets:"sets",why:"Why",conf:"High confidence",sumTitle:"Workout done",sumNext:"Next-time targets",prs:"Personal records",duration:"Duration",volume:"Volume",close:"Back to Today",progTitle:"Progress",week:"This week: 2 of 4 sessions · 1 PR · on track",swipeHint:"<b>Swipe a log left</b> or tap the trash icon to delete it. You can Undo.",deleted:"Log deleted",undo:"Undo",recent:"Incline barbell bench · set history",suggest:"Suggestions",askWhy:"Ask AI why",calendar:"Calendar",exercises:"Exercises",weeklySets:"Weekly sets by muscle",swapTitle:"Suggested alternatives",justToday:"Just today",always:"Always",cancel:"Cancel",about:"About this block",change:"Change block",helpTitle:"Where things are",profileSoon:"Profile keeps sign-in, My plan (make your own), language, AI settings and data — unchanged.",nextUp:"Next",inProg:"in progress",squeeze:"Squeeze at the top of each rep.",ss:"Superset · ~10 s between, rest after the pair"},
+es:{help:"Ayuda",blockLine:"Bloque 8 · Semana 3 de 6 · toca para ver",thisWeek:"Esta semana",hintList:"<b>Toca un ejercicio</b> para registrar sus series. Etiquetas como <b>Pirámide ⓘ</b> explican la técnica.",gotIt:"Entendido",finish:"Terminar entreno",demoNote:"Prototipo · pesos de ejemplo · ejercicios y notas de los planes aprobados (bloques 8 y 9, en inglés hasta revisión del PT)",navToday:"Hoy",navProgress:"Progreso",navProfile:"Perfil",rest:"Descanso",skip:"Saltar",back:"‹ Todos los ejercicios",google:"Buscar en Google",swap:"Cambiar",notes:"Notas",history:"Historial",howTo:"Cómo se hace",target:"Objetivo de hoy",aiT:"Objetivo IA",orig:"Plan original",set:"Serie",last:"Última vez",tgt:"Objetivo",kg:"kg",reps:"Reps",same:"Igual que serie 1",drop:"+ descarga",rir:"¿Reps en reserva? (última serie)",hintFocus:"<b>Nuevo:</b> “Buscar en Google” muestra fotos del ejercicio. “Cambiar” lo sustituye solo hoy o siempre.",done:"Hecho",edit:"Editar",sets:"series",why:"Por qué",conf:"Confianza alta",sumTitle:"Entreno terminado",sumNext:"Objetivos próxima vez",prs:"Récords personales",duration:"Duración",volume:"Volumen",close:"Volver a Hoy",progTitle:"Progreso",week:"Esta semana: 2 de 4 sesiones · 1 récord · al día",swipeHint:"<b>Desliza un registro a la izquierda</b> o toca la papelera para borrarlo. Puedes deshacer.",deleted:"Registro borrado",undo:"Deshacer",recent:"Press inclinado con barra · historial",suggest:"Sugerencias",askWhy:"Preguntar a la IA",calendar:"Calendario",exercises:"Ejercicios",weeklySets:"Series por músculo",swapTitle:"Alternativas sugeridas",justToday:"Solo hoy",always:"Siempre",cancel:"Cancelar",about:"Sobre este bloque",change:"Cambiar bloque",helpTitle:"Dónde está cada cosa",profileSoon:"Perfil mantiene sesión, Mi plan, idioma, ajustes de IA y datos — sin cambios.",nextUp:"Siguiente",inProg:"en curso",squeeze:"Aprieta arriba en cada repetición.",ss:"Superserie · ~10 s entre ejercicios, descanso tras el par"}};
+let lang="en";const t=k=>T[lang][k]??k;
+const TECH={pyramid:{en:"Pyramid",es:"Pirámide",info:"Ascending pyramid: start light, then add weight each set as reps drop (12-10-8-6 on A days)."},"reverse-pyramid":{en:"Reverse pyramid",es:"Pirámide inversa",info:"Reverse pyramid: heaviest set first, then lighter as reps rise."},superset:{en:"Superset",es:"Superserie",info:"Do the first exercise, rest about 10 seconds, do the second, then rest after the pair."},"drop-set":{en:"Drop set",es:"Descarga",info:"Drop set: near failure, cut the weight 20-30% and continue."},straight:{en:"Straight sets",es:"Series rectas",info:"Same weight and reps on every set."}};
+// ---- data from blocks.json (block 8 day A, block 8 arms A drop-set) + demo weights ----
+const DAYS=[
+ {name:"Chest-Back A",focus:"Chest & back · heavy",ex:[
+  {code:"A1",name:"Incline barbell bench press",tech:"pyramid",angle:"Incline 45°",reps:["12","10","8","6"],rest:150,last:[[60,12],[65,10],[70,8],[75,5]],w:[62.5,67.5,72.5,75],why:"You reached the target on every set except the last; keep 75 kg on set 4 and add 2.5 kg on sets 1–3.",orig:[60,65,70,75],note:"Final set of 6 at 1-2 reps in reserve; use a spotter or pins.",done:2},
+  {code:"B1",name:"Decline dumbbell bench press",tech:"superset",angle:"Decline 15°",reps:["10","10","10"],rest:10,last:[[24,10],[24,10],[24,9]],w:[24,24,24],why:"Set 3 fell short. Keep the weight and aim for 10 reps on every set.",orig:[24,24,24],ss:1},
+  {code:"B2",name:"Decline dumbbell fly",tech:"superset",angle:"Decline 15°",reps:["15","15","15"],rest:90,last:[[10,15],[10,15],[10,15]],w:[12,12,12],why:"You reached the target on every set; increase by 2 kg and keep the reps.",orig:[10,10,10],ss:1},
+  {code:"C1",name:"Plate-loaded lat pulldown",tech:"pyramid",reps:["15","12","10","8"],rest:90,last:[[40,15],[45,12],[50,10],[55,8]],w:[42.5,47.5,52.5,57.5],why:"You reached the target on every set; increase by 2.5 kg and keep the reps.",orig:[40,45,50,55]},
+  {code:"D1",name:"Plate-loaded low row",tech:"straight",reps:["10","10","10"],rest:90,last:[[50,10],[50,10],[50,8]],w:[50,50,50],why:"Set 3 fell short. Keep the weight and aim for 10 reps on every set.",orig:[50,50,50],note:"Last set: rest-pause, 15 s, then 2 mini-sets."},
+  {code:"E1",name:"EZ-bar pullover",tech:"straight",angle:"Flat bench",reps:["15","15","15"],rest:60,last:null,w:[20,20,20],why:"Not enough data yet — keep the load so I can set a baseline.",orig:[20,20,20],note:"Pause 2 s in the stretch behind your head."}]},
+ {name:"Arms A",focus:"Shoulders & arms · heavy",ex:[
+  {code:"A1",name:"Dumbbell shoulder press",tech:"pyramid",angle:"Incline 75°",reps:["12","10","8","6"],rest:150,last:[[16,12],[18,10],[20,8],[22,6]],w:[18,20,22,24],why:"You reached the target on every set; increase by 2 kg and keep the reps.",orig:[16,18,20,22]},
+  {code:"D1",name:"Machine preacher curl",tech:"superset",reps:["10","10","10"],rest:10,last:[[25,10],[25,10],[25,10]],w:[27.5,27.5,27.5],why:"You reached the target on every set; increase by 2.5 kg and keep the reps.",orig:[25,25,25],ss:1},
+  {code:"D2",name:"Decline dumbbell skull crusher",tech:"superset",angle:"Decline 15°",reps:["10","10","10"],rest:90,last:[[10,10],[10,10],[10,9]],w:[10,10,10],why:"Set 3 fell short. Keep the weight and aim for 10 reps on every set.",orig:[10,10,10],ss:1},
+  {code:"F1",name:"Cable triceps kickback",tech:"drop-set",reps:["12+12","12+12","12+12"],rest:60,last:[[7.5,12],[7.5,12],[7.5,11]],w:[7.5,7.5,7.5],drop:[5,5,5],why:"Set 3 fell short. Keep the weight and aim for 12 reps on every set.",orig:[7.5,7.5,7.5],note:"Reps are per arm; drop the pin about 25% and keep going."}]}];
+let day=0,cur=null,useAI=true;const doneSets={};
+const fmt=n=>(""+n).replace(".",lang==="es"?",":".");
+const techName=k=>TECH[k][lang];
+function key(d,i){return d+"-"+i}
+function setsDone(d,i){const e=DAYS[d].ex[i];const k=key(d,i);if(!doneSets[k]){doneSets[k]=e.reps.map((_,j)=>j<(e.done||0))}return doneSets[k]}
+// ---- render: Today list ----
+function renderToday(){
+ document.getElementById("dayChips").innerHTML=DAYS.map((d,i)=>`<button class="chip ${i===day?'on':''}" data-day="${i}">D${i+1} · ${d.name}${i===0?' •':''}</button>`).join("");
+ document.getElementById("dayTitle").innerHTML=`D${day+1} · ${DAYS[day].name} <span class="small muted" style="font-weight:600">${DAYS[day].focus}</span>`;
+ let h="",inSS=false;
+ DAYS[day].ex.forEach((e,i)=>{
+  const s=setsDone(day,i),n=s.filter(Boolean).length,all=n===s.length;
+  if(e.ss&&!inSS){h+=`<div class="ss"><div class="ss-l">${t("ss")}</div>`;inSS=true}
+  if(!e.ss&&inSS){h+=`</div>`;inSS=false}
+  h+=`<button class="ex ${all?'done':''}" data-open="${i}"><span class="code">${all?'✓':e.code}</span><span style="min-width:0"><span class="nm">${e.name}</span><span class="meta">${e.reps.length}×${e.reps.join("-")} <span class="badge" data-tech="${e.tech}">${techName(e.tech)} <span class="i">i</span></span>${e.angle?`<span class="badge plain">${e.angle}</span>`:''}</span></span><span class="st">${all?`<span class="up">${t("done")}</span><br><span style="color:var(--brand-text);font-weight:700">${t("edit")} ›</span>`:`<b>${n}/${s.length}</b><br><span class="muted">${n?t("inProg"):t("sets")}</span>`}</span></button>`;
+ });
+ if(inSS)h+=`</div>`;
+ document.getElementById("exList").innerHTML=h;
+}
+// ---- render: Focus ----
+function renderFocus(){
+ const e=DAYS[day].ex[cur],s=setsDone(day,cur),w=useAI?e.w:e.orig;
+ const q=encodeURIComponent(e.name+" exercise");
+ let rows=e.reps.map((r,j)=>{
+  const l=e.last?`${fmt(e.last[j][0])}×${e.last[j][1]}`:"—";
+  return `<tr><td><b>${j+1}</b></td><td class="muted">${l}</td><td>${fmt(w[j])}×${r}</td><td><input class="num" value="${fmt(w[j])}" inputmode="decimal" aria-label="${t('set')} ${j+1} kg"></td><td><input class="num" value="${r.split('+')[0]}" inputmode="numeric" aria-label="${t('set')} ${j+1} reps"></td><td><button class="ck ${s[j]?'on':''}" data-ck="${j}" aria-label="${t('set')} ${j+1} ✓">✓</button></td></tr>`+
+  (e.drop?`<tr class="sub"><td></td><td colspan="2">${t("drop")}</td><td><input class="num" value="${fmt(e.drop[j])}"></td><td><input class="num" value="12"></td><td></td></tr>`:"")+
+  (j===0&&!s[1]?`<tr class="sub"><td></td><td colspan="5"><button class="mini" data-same>⧉ ${t("same")}</button></td></tr>`:"");
+ }).join("");
+ const lastAllDone=s.every(Boolean);
+ document.getElementById("s-focus").innerHTML=`
+ <div class="row between"><button class="icon-btn" data-back>${t("back")}</button><span class="small muted">${e.code} · ${cur+1}/${DAYS[day].ex.length}</span></div>
+ <h1 style="margin-top:10px">${e.name}</h1>
+ <div class="row" style="flex-wrap:wrap;gap:6px"><span class="badge" data-tech="${e.tech}">${techName(e.tech)} <span class="i">i</span></span>${e.angle?`<span class="badge plain">${e.angle}</span>`:''}<span class="badge plain">${t("rest")} ${e.rest}s</span></div>
+ <div class="hint" id="hint-focus" ${dismissed["hint-focus"]?'hidden':''}><span>💡</span><span>${t("hintFocus")}</span><button data-dismiss="hint-focus">${t("gotIt")}</button></div>
+ <div class="actions">
+  <a class="act" href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>${t("google")}</a>
+  <button class="act" data-swap><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg>${t("swap")}</button>
+  <button class="act" data-notes><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5zM8 9h8M8 13h8M8 17h5"/></svg>${t("notes")}</button>
+  <button class="act" data-hist><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4M12 7v5l3 2"/></svg>${t("history")}</button>
+ </div>
+ <div class="target">
+  <div class="small muted">${t("target")} · AI Trainer · <span class="up">● ${t("conf")}</span></div>
+  <div class="big">${w.map(fmt).join(" / ")} kg × ${e.reps.join("-")}</div>
+  <div class="small" style="margin-top:4px"><b>${t("why")}:</b> ${e.why}</div>
+  <div class="tog"><button class="${useAI?'on':''}" data-ai="1">${t("aiT")}</button><button class="${!useAI?'on':''}" data-ai="0">${t("orig")} · ${e.orig.map(fmt).join("/")} kg</button></div>
+ </div>
+ ${e.note?`<div class="small" style="margin:6px 0"><b>Note:</b> ${e.note}</div>`:''}
+ <table><thead><tr><th>${t("set")}</th><th>${t("last")}</th><th>${t("tgt")}</th><th>${t("kg")}</th><th>${t("reps")}</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+ ${lastAllDone?`<div class="card" style="margin-top:8px"><div class="small" style="font-weight:700;margin-bottom:6px">${t("rir")}</div><div class="row">${["0","1–2","3+",t("skip")].map(x=>`<button class="chip">${x}</button>`).join("")}</div></div>`:''}
+ <details><summary>${t("howTo")}</summary><p class="small" style="margin-top:8px">${TECH[e.tech].info}</p><p class="small muted" style="margin-top:6px">${t("google")} ↗</p></details>
+ <div class="row" style="gap:8px;margin-top:8px">${cur>0?`<button class="btn ghost" data-nav="-1">‹</button>`:''}${cur<DAYS[day].ex.length-1?`<button class="btn ghost" data-nav="1">${t("nextUp")}: ${DAYS[day].ex[cur+1].code} ›</button>`:`<button class="btn primary" data-finish>${t("finish")}</button>`}</div>`;
+}
+// ---- Summary ----
+function renderSummary(){
+ const rows=DAYS[day].ex.map(e=>{const d=e.w[0]>e.orig[0]?'up':e.why.startsWith("Set")?'down':'';return `<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><span>${e.code} ${e.name}</span><span class="${d}" style="font-weight:700">${d==='up'?'↑':d==='down'?'↓':'→'} ${fmt(e.w[e.w.length-1])} kg</span></div>`}).join("");
+ document.getElementById("s-summary").innerHTML=`<h1>${t("sumTitle")} 🎉</h1>
+ <div class="row" style="gap:8px;margin:10px 0"><div class="card" style="flex:1"><div class="small muted">${t("duration")}</div><b>58 min</b></div><div class="card" style="flex:1"><div class="small muted">${t("volume")}</div><b>9,840 kg</b></div><div class="card" style="flex:1"><div class="small muted">PR</div><b>1</b></div></div>
+ <h2>${t("prs")}</h2><div class="card">🏅 Incline barbell bench press · 75 kg × 6</div>
+ <h2>${t("sumNext")}</h2><div class="card">${rows}</div>
+ <button class="btn primary" style="margin-top:12px" data-back>${t("close")}</button>`;
+}
+// ---- Progress ----
+const logs=[["Oct 6","62.5×12 · 67.5×10 · 72.5×8 · 75×6"],["Sep 29","60×12 · 65×10 · 70×8 · 75×5"],["Sep 22","60×12 · 65×10 · 70×7 · 72.5×6"]];
+function renderProgress(){
+ document.getElementById("s-progress").innerHTML=`<h1>${t("progTitle")}</h1>
+ <div class="chips"><button class="chip on">${t("progTitle")}</button><button class="chip">${t("exercises")}</button><button class="chip">${t("calendar")}</button></div>
+ <div class="card"><div style="font-weight:700">${t("week")}</div><div class="bar" style="margin-top:8px"><i style="width:50%"></i></div></div>
+ <h2>${t("suggest")}</h2><div class="card small">Lat pulldown: 3 sessions without beating your best. <button class="mini">${t("askWhy")}</button></div>
+ <h2>${t("weeklySets")}</h2><div class="card small">${[["Chest",9,12],["Back",8,12],["Shoulders",4,10],["Arms",0,10]].map(([m,d,p])=>`<div class="row between" style="margin:4px 0"><span>${m}</span><span class="muted">${d} / ${p}</span></div><div class="bar"><i style="width:${d/p*100}%"></i></div>`).join("")}</div>
+ <h2>${t("recent")}</h2>
+ <div class="hint" id="hint-swipe" ${dismissed["hint-swipe"]?'hidden':''}><span>👈</span><span>${t("swipeHint")}</span><button data-dismiss="hint-swipe">${t("gotIt")}</button></div>
+ <div id="logs">${logs.map((l,i)=>`<div class="sw" data-log="${i}"><div class="del">🗑</div><div class="fg"><b style="flex:none;width:52px">${l[0]}</b><span class="small">${l[1]}</span><button class="trash" data-del="${i}" aria-label="Delete">🗑</button></div></div>`).join("")}</div>`;
+ document.querySelectorAll(".sw").forEach(sw=>{let x0=null;const fg=sw.querySelector(".fg");
+  sw.addEventListener("pointerdown",ev=>{x0=ev.clientX});
+  sw.addEventListener("pointermove",ev=>{if(x0!==null){const dx=Math.min(0,ev.clientX-x0);fg.style.transform=`translateX(${dx}px)`}});
+  const end=ev=>{if(x0===null)return;const dx=ev.clientX-x0;x0=null;if(dx<-90)delLog(+sw.dataset.log);else fg.style.transform=""};
+  sw.addEventListener("pointerup",end);sw.addEventListener("pointerleave",end);});
+}
+let removed=null;
+function delLog(i){removed=[i,logs.splice(i,1)[0]];renderProgress();toast(`${t("deleted")} · <u style="cursor:pointer" id="undo">${t("undo")}</u>`);document.getElementById("undo").onclick=()=>{logs.splice(removed[0],0,removed[1]);renderProgress();hideToast()}}
+// ---- helpers ----
+let toastTimer;function toast(h){const el=document.getElementById("toast");el.innerHTML=h;el.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(hideToast,4000)}
+function hideToast(){document.getElementById("toast").style.display="none"}
+const dismissed={};
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-"+id));document.getElementById("main").scrollTop=0}
+function sheet(h){document.getElementById("sheet").innerHTML=h;document.getElementById("sheetBg").classList.add("on")}
+function closeSheet(){document.getElementById("sheetBg").classList.remove("on")}
+let restLeft=0,restI;
+function startRest(sec,next){restLeft=sec;document.getElementById("restNext").textContent=next;document.getElementById("rest").classList.add("on");tick();clearInterval(restI);restI=setInterval(()=>{restLeft--;tick();if(restLeft<=0){clearInterval(restI);document.getElementById("rest").classList.remove("on")}},1000)}
+function tick(){const m=Math.floor(restLeft/60),s=restLeft%60;document.getElementById("restT").textContent=`${m}:${String(s).padStart(2,"0")}`}
+function applyLang(){document.documentElement.lang=lang;document.querySelectorAll("[data-t]").forEach(el=>el.innerHTML=t(el.dataset.t));document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("on",b.dataset.lang===lang));renderToday();if(cur!==null)renderFocus();renderSummary();renderProgress()}
+// ---- events ----
+document.addEventListener("click",ev=>{
+ const el=ev.target.closest("button,a");if(!el)return;const d=el.dataset;
+ if(d.tech!==undefined){ev.stopPropagation();const k=d.tech;sheet(`<h2 style="margin-top:0">${techName(k)}</h2><p>${TECH[k].info}</p><p class="small muted" style="margin-top:8px">Block 8–9 · approved plan</p><button class="btn ghost" style="margin-top:12px" data-close>${t("gotIt")}</button>`);return}
+ if(d.lang){lang=d.lang;applyLang()}
+ if(d.themeSet){document.documentElement.dataset.theme=d.themeSet}
+ if(d.day!==undefined){day=+d.day;renderToday()}
+ if(d.open!==undefined){cur=+d.open;useAI=true;renderFocus();show("focus")}
+ if(d.back!==undefined){renderToday();show("today")}
+ if(d.nav){cur+=+d.nav;renderFocus();document.getElementById("main").scrollTop=0}
+ if(d.ai!==undefined){useAI=d.ai==="1";renderFocus()}
+ if(d.ck!==undefined){const s=setsDone(day,cur),j=+d.ck;s[j]=!s[j];const e=DAYS[day].ex[cur];renderFocus();
+  if(s[j]){const nx=s.findIndex(v=>!v);if(nx>=0)startRest(e.rest,`${t("nextUp")}: ${t("set")} ${nx+1} · ${fmt((useAI?e.w:e.orig)[nx])} kg × ${e.reps[nx]}`);else if(cur<DAYS[day].ex.length-1)startRest(e.rest,`${t("nextUp")}: ${DAYS[day].ex[cur+1].name}`);if(j===3&&e.code==="A1"&&day===0)toast("🏅 New weight PR 75 kg")}}
+ if(d.same!==undefined){const s=setsDone(day,cur);toast("⧉ "+t("same"))}
+ if(d.swap!==undefined){const e=DAYS[day].ex[cur];sheet(`<h2 style="margin-top:0">${t("swapTitle")}</h2><p class="small muted">Instead of ${e.name}</p>${["Machine chest press (incline)","Dumbbell bench press (incline)"].map(n=>`<div class="card" style="margin-top:8px"><b>${n}</b><div class="row" style="margin-top:8px"><button class="chip" data-close>${t("justToday")}</button><button class="chip" data-close>${t("always")}</button><a class="chip" style="text-decoration:none;margin-left:auto" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(n)}">🖼 Google</a></div></div>`).join("")}<button class="btn ghost" style="margin-top:12px" data-close>${t("cancel")}</button>`)}
+ if(d.notes!==undefined){sheet(`<h2 style="margin-top:0">${t("notes")}</h2><textarea style="width:100%;height:90px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:10px;font-family:inherit"></textarea><button class="btn primary" style="margin-top:10px" data-close>OK</button>`)}
+ if(d.hist!==undefined){sheet(`<h2 style="margin-top:0">${t("history")}</h2>${logs.map(l=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><b style="width:52px">${l[0]}</b><span class="small">${l[1]}</span></div>`).join("")}<p class="small muted" style="margin-top:8px">${t("swipeHint")}</p><button class="btn ghost" style="margin-top:12px" data-close>OK</button>`)}
+ if(d.close!==undefined)closeSheet();
+ if(d.dismiss){dismissed[d.dismiss]=1;const h=document.getElementById(d.dismiss);if(h)h.hidden=true}
+ if(d.del!==undefined)delLog(+d.del);
+ if(d.finish!==undefined||el.id==="finishBtn"){renderSummary();show("summary");document.getElementById("rest").classList.remove("on")}
+ if(d.go){document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b===el));if(d.go==="profile"){sheet(`<h2 style="margin-top:0">${t("navProfile")}</h2><p class="small">${t("profileSoon")}</p><button class="btn ghost" style="margin-top:12px" data-close>OK</button>`)}else{if(d.go==="progress")renderProgress();show(d.go)}}
+ if(el.id==="blockBtn")sheet(`<h2 style="margin-top:0">Block 8 · Week 3 of 6</h2><p class="small">Size · Light-to-Heavy + Supersets II</p><p class="small" style="margin-top:8px">${TECH.pyramid.info}</p><div class="row" style="margin-top:12px"><button class="chip" data-close>${t("about")}</button><button class="chip" data-close>${t("change")}</button><button class="chip" data-close>${t("calendar")}</button></div>`);
+ if(el.id==="helpBtn")sheet(`<h2 style="margin-top:0">${t("helpTitle")}</h2><ul class="small" style="padding-left:18px;line-height:1.7"><li>${t("google")} · ${t("swap")} · ${t("notes")} · ${t("history")} → exercise screen</li><li>ⓘ badges → technique</li><li>${t("aiT")} / ${t("orig")} → target card</li><li>${t("done")} · ${t("edit")} → Today list</li><li>🗑 / swipe → ${t("navProgress")}</li></ul><button class="btn ghost" style="margin-top:12px" data-close>OK</button>`);
+ if(el.id==="restAdd"){restLeft+=30;tick()}
+ if(el.id==="restSkip"){restLeft=0;tick();clearInterval(restI);document.getElementById("rest").classList.remove("on")}
+});
+document.getElementById("sheetBg").addEventListener("click",e=>{if(e.target.id==="sheetBg")closeSheet()});
+applyLang();
+</script>
+</body>
+</html>
