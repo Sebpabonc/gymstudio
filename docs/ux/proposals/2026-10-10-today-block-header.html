@@ -1,0 +1,149 @@
+<title>Today Block Header</title>
+<style>
+:root{--bg:#0f0f10;--soft:#171719;--card:#1d1d20;--line:#2a2a2e;--tx:#f3f3f4;--mut:#9a9aa2;--rose:#e8557a;--rose2:rgba(232,85,122,.14);--ok:#5fcf8f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 -apple-system,system-ui,sans-serif}
+.bar{position:sticky;top:0;z-index:5;background:#09090a;padding:8px 16px;border-bottom:1px solid var(--line)}
+.grp{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:3px 0}.grp em{font-style:normal;font-size:11px;color:var(--mut);width:52px}
+.bar button{background:var(--soft);color:var(--tx);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font:inherit;font-size:12px}
+.bar button.on{background:var(--rose);border-color:var(--rose);color:#fff}
+.note{max-width:375px;margin:10px auto 0;padding:0 16px;color:var(--mut);font-size:12px}
+.phone{width:375px;max-width:100%;margin:10px auto 40px;background:var(--bg);border:1px solid var(--line);border-radius:28px;overflow:hidden;position:relative;min-height:700px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:16px}.top h1{margin:0;font-size:22px}
+.round{width:40px;height:40px;border-radius:50%;background:var(--soft);border:1px solid var(--line);color:var(--tx);font-size:17px}
+.pad{padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--rose);font-weight:700}
+.card h2{margin:4px 0 6px;font-size:18px}.card p{margin:0 0 10px;color:var(--mut)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.chip{font-size:11px;padding:3px 8px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--mut)}.chip.r{background:var(--rose2);color:var(--rose);border-color:transparent}
+.btns{display:flex;gap:8px}.btn{flex:1;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--soft);color:var(--tx);font:inherit;font-weight:600}.btn.p{background:var(--rose);border-color:var(--rose);color:#fff}
+.line{width:100%;display:flex;align-items:center;gap:10px;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--tx);font:inherit;text-align:left;margin-bottom:10px}
+.line .m{color:var(--mut);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{display:flex;gap:3px;margin-top:6px}.seg i{flex:1;height:4px;border-radius:2px;background:var(--line)}.seg i.c{background:linear-gradient(90deg,var(--rose) 80%,var(--line) 80%)}
+.wk{display:flex;align-items:center;gap:8px;margin-bottom:6px}.wk button{background:var(--soft);border:1px solid var(--line);color:var(--tx);width:32px;height:32px;border-radius:50%;font-size:16px}.wk button:disabled{opacity:.3}.wk .l{flex:1;text-align:center;font-weight:600}.wk .l small{display:block;color:var(--mut);font-weight:400;font-size:11px}
+.back{background:var(--rose2);color:var(--rose);border:0;border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;margin-bottom:8px}
+/* old tabs */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.tab{min-width:52px;padding:8px 6px;border-radius:12px;background:var(--soft);border:1px solid var(--line);text-align:center;font-size:12px;color:var(--mut)}.tab b{display:block;color:var(--tx)}.tab.a{background:var(--rose);border-color:var(--rose);color:#fff}.tab.a b{color:#fff}
+/* V1 chips */
+.dch{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.dc{scroll-snap-align:start;flex:0 0 112px;width:112px;height:78px;position:relative;display:block;padding:8px 10px;border-radius:14px;background:var(--soft);border:1.5px solid var(--line);color:var(--tx);font:inherit;text-align:left;overflow:hidden}
+.dc b{display:block;font-size:14px;line-height:18px}.dc .dn{display:block;font-size:12px;line-height:16px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:2px}
+.dc .tg{display:inline-block;margin-top:3px;font-size:9px;line-height:12px;padding:0 5px;border-radius:999px;background:var(--rose2);color:var(--rose);font-weight:700;text-transform:uppercase;letter-spacing:.04em;position:absolute;left:10px;bottom:7px}
+.dc.a{border-color:var(--rose)}.dc.nx .tg{background:none;border:1px solid var(--rose)}
+.dc .ring{position:absolute;top:7px;right:7px;width:22px;height:22px;flex:none;font-size:9px}.dc .ring>span{width:17px!important;height:17px!important}
+.dc .dn.w{padding-right:0}
+.ring{width:30px;height:30px;flex:0 0 30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700}
+/* V2 list */
+.dl{border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.dr{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;background:var(--card);border:0;border-top:1px solid var(--line);color:var(--tx);font:inherit;text-align:left}.dr:first-child{border-top:0}
+.dr .dt{width:38px;text-align:center;flex:0 0 38px}.dr .dt small{display:block;font-size:10px;color:var(--mut);text-transform:uppercase}.dr .dt b{font-size:17px}
+.dr .nm{flex:1;min-width:0}.dr .nm small{display:block;color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr.a{background:var(--rose2);box-shadow:inset 3px 0 var(--rose)}
+.st{font-size:11px;padding:3px 8px;border-radius:999px;background:var(--soft);color:var(--mut);white-space:nowrap}.st.done{color:var(--ok)}.st.today{background:var(--rose);color:#fff}.st.next{background:var(--rose2);color:var(--rose)}
+/* V3 focus */
+.fc{background:var(--card);border:1px solid var(--rose);border-radius:18px;padding:14px}.fc h2{margin:2px 0;font-size:19px}.fc small{color:var(--mut)}
+.pbar{height:6px;border-radius:3px;background:var(--line);margin:10px 0 4px;overflow:hidden}.pbar i{display:block;height:100%;background:var(--rose)}
+.nxl{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border-radius:14px;background:var(--soft);border:1px solid var(--line);width:100%;color:var(--tx);font:inherit;text-align:left}
+.dots{display:flex;gap:6px;margin-top:8px}.dots button{flex:1;padding:6px 0;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--mut);font:inherit;font-size:11px}.dots button.d{color:var(--ok)}.dots button.t{border-color:var(--rose);color:var(--rose)}.dots button.a{background:var(--rose);color:#fff;border-color:var(--rose)}
+.lnk{background:none;border:0;color:var(--rose);font:inherit;font-size:13px;padding:8px 0}
+.ex{min-height:60px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-top:12px;display:flex;align-items:center;padding:12px 14px;color:var(--mut)}
+.pv{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px}.pv h3{margin:0 0 2px;font-size:15px}
+.note2{font-size:12px;color:var(--mut);background:var(--soft);border-radius:10px;padding:8px;margin:8px 0}
+.er{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}.er small{color:var(--mut);white-space:nowrap}.er span small{white-space:normal}
+.lock{width:100%;margin-top:8px;padding:10px;border-radius:12px;border:1px dashed var(--line);background:none;color:var(--mut);font:inherit}
+.sheet{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end}.sheet.open{display:flex}
+.sh{background:var(--card);width:100%;border-radius:22px 22px 0 0;padding:8px 16px 20px;max-height:85%;overflow:auto}.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 12px}
+.row{display:flex;gap:10px;padding:12px 0;border-top:1px solid var(--line)}.row span{flex:1}
+.seg2{display:flex;background:var(--soft);border-radius:10px;padding:3px;margin:8px 0 4px}.seg2 button{flex:1;border:0;border-radius:8px;padding:7px;background:none;color:var(--mut);font:inherit}.seg2 .on{background:var(--rose);color:#fff}
+details{border-top:1px solid var(--line);padding:10px 0}summary{font-weight:600}.x{background:none;border:0;color:var(--mut);font-size:18px;float:right}
+/* FIT variants */
+.fr{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;scroll-snap-type:x mandatory}
+.fk{scroll-snap-align:start;flex:none;position:relative;padding:10px;border-radius:14px;background:var(--soft);border:1.5px solid var(--line);color:var(--tx);font:inherit;text-align:left;line-height:1.25}
+.fk.a{border-color:var(--rose)}
+.fk .w{display:block;font-size:13px;color:var(--mut)}.fk .d{display:block;font-size:15px;font-weight:700}.fk .s{display:block;font-size:13px;color:var(--mut);white-space:nowrap}
+.fk .ic{display:block;font-size:20px;line-height:24px;margin-bottom:2px}
+.fk .bd{position:absolute;top:8px;right:8px;width:14px;height:14px;border-radius:50%;font-size:10px;line-height:14px;text-align:center}
+.bd.done{background:var(--ok);color:#0f0f10}.bd.today{background:var(--rose)}.bd.next{border:2px solid var(--rose)}.bd.up{border:1.5px solid var(--line)}
+.f1{width:84px;height:76px;padding-top:24px!important}.f2{width:76px;height:56px;padding-top:24px!important}.f3{width:76px;height:64px}
+.fk .dl1{display:block;font-size:15px;font-weight:700;white-space:nowrap}
+.cap{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:8px 0 2px;line-height:1.35}.cap b{font-size:15px}.cap small{font-size:13px;color:var(--mut)}
+.cap .tg2{font-size:13px;color:var(--rose);font-weight:600}
+.hl{width:100%;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--tx);font:inherit;text-align:left;margin-bottom:10px;line-height:1.35;display:block}
+.hl .t1{font-size:15px;font-weight:700}.hl .t2{display:block;font-size:13px;color:var(--mut)}.hl .r{float:right;color:var(--mut);font-size:15px}
+.hl .pill{float:right;font-size:13px;padding:2px 8px;border-radius:999px;background:var(--rose2);color:var(--rose);margin-right:6px}
+.fk.f2{display:flex!important;flex-direction:row!important;align-items:center;justify-content:center;gap:6px;width:92px!important;flex:0 0 92px!important;height:44px!important;padding:0 8px!important}
+.fk.f2 .dl1{order:1;white-space:nowrap;font-size:15px;line-height:20px;position:static!important}
+.fk.f2 .bd{order:2;position:static!important;margin:0!important;flex:none}
+</style>
+<div class="bar" id="bar"></div>
+<p class="note" id="note"></p>
+<div class="phone" id="phone"></div>
+<script>
+const DAYS=[{"en": "Chest & Back A", "es": "Pecho y Espalda A", "fen": "Chest, back & abs · heavy", "fes": "Pecho, espalda y abdomen · pesado", "ex": [["Dumbbell Bench Press (Incline)", "Press de banca con mancuernas (inclinado)", 3, "8", "straight"], ["Plate-Loaded T-Bar Row (Chest-Supported)", "Remo en T en máquina de discos (con apoyo de pecho)", 3, "8-10-12", "reverse-pyramid"], ["Dumbbell Bench Press", "Press de banca con mancuernas", 3, "10", "superset"], ["Cable Lat Pulldown (Underhand Grip)", "Jalón al pecho en polea (agarre supino)", 3, "10", "superset"], ["Cable Fly (High to Low)", "Aperturas en polea (de arriba hacia abajo)", 3, "12", "superset"], ["Cable Straight-Arm Pulldown", "Jalón con brazos rectos en polea", 3, "12", "superset"], ["Cable Crunch (Kneeling)", "Crunch en polea (de rodillas)", 3, "10+10", "drop-set"]]}, {"en": "Shoulders & Arms A", "es": "Hombros y Brazos A", "fen": "Delts & arms · heavy", "fes": "Deltoides y brazos · pesado", "ex": [["Smith Machine Shoulder Press (Seated)", "Press de hombros en máquina Smith (sentado)", 3, "8", "straight"], ["Dumbbell Curl (Incline)", "Curl con mancuernas (inclinado)", 3, "12", "superset"], ["Dumbbell Lateral Raise (Standing)", "Elevaciones laterales con mancuernas (de pie)", 3, "15", "superset"], ["Cable Lateral Raise (Single Arm)", "Elevaciones laterales en polea (a una mano)", 4, "15", "superset"], ["Cable Overhead Triceps Extension (Rope)", "Extensión de tríceps sobre la cabeza en polea (cuerda)", 4, "12", "superset"], ["EZ-Bar Preacher Curl", "Curl predicador con barra Z", 4, "12", "straight"], ["Reverse Pec Deck Fly", "Aperturas inversas en máquina (pec deck)", 3, "12+12", "drop-set"]]}, {"en": "Legs A", "es": "Piernas A", "fen": "Legs & calves · heavy", "fes": "Piernas y pantorrillas · pesado", "ex": [["Plate-Loaded Pendulum Squat", "Sentadilla péndulo en máquina de discos", 3, "8-10-12", "reverse-pyramid"], ["Barbell Romanian Deadlift", "Peso muerto rumano con barra", 3, "10", "straight"], ["Dumbbell Bulgarian Split Squat", "Sentadilla búlgara con mancuernas", 3, "10", "straight"], ["Machine Seated Leg Curl", "Curl femoral sentado en máquina", 4, "12", "superset"], ["Machine Leg Extension", "Extensión de cuádriceps en máquina", 4, "12", "superset"], ["Machine Standing Calf Raise", "Elevación de talones de pie en máquina", 5, "15", "straight"]]}, {"en": "Chest & Back B", "es": "Pecho y Espalda B", "fen": "Chest, back & abs · volume", "fes": "Pecho, espalda y abdomen · volumen", "ex": [["Dumbbell Bench Press (Incline)", "Press de banca con mancuernas (inclinado)", 3, "14-12-10", "pyramid"], ["Plate-Loaded T-Bar Row (Chest-Supported)", "Remo en T en máquina de discos (con apoyo de pecho)", 3, "10", "straight"], ["Dumbbell Bench Press", "Press de banca con mancuernas", 3, "12", "superset"], ["Cable Lat Pulldown (Underhand Grip)", "Jalón al pecho en polea (agarre supino)", 3, "12", "superset"], ["Cable Fly (High to Low)", "Aperturas en polea (de arriba hacia abajo)", 3, "15", "superset"], ["Cable Straight-Arm Pulldown", "Jalón con brazos rectos en polea", 3, "15", "superset"], ["Cable Crunch (Kneeling)", "Crunch en polea (de rodillas)", 3, "15", "straight"]]}, {"en": "Shoulders & Arms B", "es": "Hombros y Brazos B", "fen": "Delts & arms · volume", "fes": "Deltoides y brazos · volumen", "ex": [["Smith Machine Shoulder Press (Seated)", "Press de hombros en máquina Smith (sentado)", 3, "10", "straight"], ["Dumbbell Curl (Incline)", "Curl con mancuernas (inclinado)", 3, "15", "superset"], ["Dumbbell Lateral Raise (Standing)", "Elevaciones laterales con mancuernas (de pie)", 3, "20", "superset"], ["Cable Lateral Raise (Single Arm)", "Elevaciones laterales en polea (a una mano)", 4, "20", "superset"], ["Cable Overhead Triceps Extension (Rope)", "Extensión de tríceps sobre la cabeza en polea (cuerda)", 4, "15", "superset"], ["EZ-Bar Preacher Curl", "Curl predicador con barra Z", 4, "15", "straight"], ["Reverse Pec Deck Fly", "Aperturas inversas en máquina (pec deck)", 4, "20", "straight"]]}, {"en": "Legs B", "es": "Piernas B", "fen": "Legs & calves · volume", "fes": "Piernas y pantorrillas · volumen", "ex": [["Plate-Loaded Pendulum Squat", "Sentadilla péndulo en máquina de discos", 3, "15-12-10", "pyramid"], ["Barbell Romanian Deadlift", "Peso muerto rumano con barra", 3, "12", "straight"], ["Dumbbell Bulgarian Split Squat", "Sentadilla búlgara con mancuernas", 3, "12", "straight"], ["Machine Seated Leg Curl", "Curl femoral sentado en máquina", 4, "15", "superset"], ["Machine Leg Extension", "Extensión de cuádriceps en máquina", 4, "15", "superset"], ["Machine Standing Calf Raise", "Elevación de talones de pie en máquina", 5, "20", "straight"]]}];
+const T={en:{today:'Today',wk:'Week {w} of 6',bl:'Block 6',name:'Size · Straight Sets, Stretch Focus',sum:'Six weeks of muscle building, each muscle twice a week. Straight sets on the main lifts, at most two supersets per day. Week 6 is lighter.',newb:'New block',det:'Block details',got:'Got it',full:'Full week',del:'Deload',cal:'Calendar & history',chg:'Change block',about:'About this block',preset:'6-week plan',custom:'Custom',dates:'Oct 5 – Nov 15',close:'Close',wd:['Mon','Tue','Wed','Thu','Fri','Sat'],mo:'Oct',week:'Week',thisw:'This week',nextw:'Next week',back:'Back to this week',next:'Next',done:'Done',tod:'Today',up:'Upcoming',missed:'Missed',prev:'Preview',target:'Your target weight is set on the day by the AI Trainer, from your latest logs.',lock:'Logging opens on the day',work:'Exercise cards for today…',sum2:'Done · open summary',showWeek:'See the whole week',hideWeek:'Hide week',of:'{a}/{b} exercises',tap:'Tap a day to preview it',
+tech:{straight:'Straight sets','reverse-pyramid':'Reverse pyramid',pyramid:'Pyramid',superset:'Superset','drop-set':'Drop set'}},
+es:{today:'Hoy',wk:'Semana {w} de 6',bl:'Bloque 6',name:'Masa · Series rectas, enfoque en estiramiento',sum:'Seis semanas para ganar músculo, cada músculo dos veces por semana. Series rectas en los básicos, máximo dos superseries por día. La semana 6 es más ligera.',newb:'Bloque nuevo',det:'Detalles del bloque',got:'Entendido',full:'Semana completa',del:'Descarga',cal:'Calendario e historial',chg:'Cambiar bloque',about:'Sobre este bloque',preset:'Plan de 6 semanas',custom:'Personalizado',dates:'5 oct – 15 nov',close:'Cerrar',wd:['Lun','Mar','Mié','Jue','Vie','Sáb'],mo:'oct',week:'Semana',thisw:'Esta semana',nextw:'Próxima',back:'Volver a esta semana',next:'Siguiente',done:'Hecho',tod:'Hoy',up:'Pendiente',missed:'Sin registrar',prev:'Vista previa',target:'El objetivo de peso lo calcula el AI Trainer el mismo día, con tus últimos registros.',lock:'Podrás registrar este día cuando llegue',work:'Tarjetas de ejercicios de hoy…',sum2:'Hecho · ver resumen',showWeek:'Ver toda la semana',hideWeek:'Ocultar semana',of:'{a}/{b} ejercicios',tap:'Toca un día para verlo',
+tech:{straight:'Series rectas','reverse-pyramid':'Pirámide inversa',pyramid:'Pirámide',superset:'Superserie','drop-set':'Serie descendente'}}};
+const SHORT={es:['Pecho A','Brazos A','Piernas A','Pecho B','Brazos B','Piernas B'],en:['Chest A','Arms A','Legs A','Chest B','Arms B','Legs B']};const ICON=['🏋️','💪','🦵','🏋️','💪','🦵'];
+let S={fit:'2',v:'B',days:'1',st:'compact',lang:'es',open:false,wk:1,sel:null,weekOpen:false};
+const NOTES={A:'Header A · intro card → one line.',B:'Header B (recommended) · one line + week bar, opens the Block sheet.',C:'Header C · block info merged into the title.'};
+const FNOTES={'1':'Fit 1 · less text: date big + short day label; full name under the row. Header: Block 6 · Wk 1/6.','2':'Fit 2 (recommended) · two-tier: small date chips (5 visible) + one caption row for the selected day. Header: title + subtitle.','3':'Fit 3 · icon-led: muscle icon + date; caption row below. Header: title + week pill.'};
+const DNOTES={'0':'Days 0 · current prod tabs (for comparison).','1':'Days 1 (PO pick) · identical 112×78 chips: date / day name, ring or ✓ top-right, Hoy/Siguiente tag inside.','2':'Days 2 · vertical week list: one row per day with date, name, muscles and status.','3':'Days 3 · Today + Next focus card; the week is a compact strip that expands to the list.'};
+const f=(s,o)=>s.replace(/\{(\w)\}/g,(_,k)=>o[k]);
+// model: compact = Sat Oct 10 (week 1, D6 today, D1–D5 done, today 2/6 in progress). new = Mon Oct 5, nothing done.
+function model(){const isNew=S.st==='new';const today=isNew?0:5;const cur=1;
+ const st=(w,i)=>{if(w<cur||(w===cur&&i<today))return 'done';if(w===cur&&i===today)return 'today';const n=next();if(w===n.w&&i===n.i)return 'next';return 'up'};
+ const next=()=>today===5?{w:2,i:0}:{w:1,i:today+1};
+ const prog=(w,i)=>{const s=st(w,i),n=DAYS[i].ex.length;return s==='done'?[n,n]:s==='today'?[isNew?0:2,n]:[0,n]};
+ return {today,cur,st,next:next(),prog};}
+function date(w,i){const n=5+(w-1)*7+i;return n>31?{d:n-31,m:S.lang==='es'?'nov':'Nov'}:{d:n,m:T[S.lang].mo}}
+function dlabel(w,i){const t=T[S.lang],x=date(w,i);return `${t.wd[i]} ${x.d}`}
+function dlong(w,i){const t=T[S.lang],x=date(w,i);return S.lang==='es'?`${t.wd[i]} ${x.d} ${x.m}`:`${t.wd[i]} ${x.m} ${x.d}`}
+function dname(i){return S.lang==='es'?DAYS[i].es:DAYS[i].en}
+function dfocus(i){return S.lang==='es'?DAYS[i].fes:DAYS[i].fen}
+function ring(p,s){const pc=p[1]?p[0]/p[1]:0;const col=s==='done'?'var(--ok)':'var(--rose)';return `<span class="ring" style="background:conic-gradient(${col} ${pc*360}deg,var(--line) 0);"><span style="width:24px;height:24px;border-radius:50%;background:var(--bg);display:grid;place-items:center">${s==='done'?'✓':p[0]+'/'+p[1]}</span></span>`}
+function stBadge(s){const t=T[S.lang];return `<span class="st ${s}">${s==='done'?'✓ '+t.done:s==='today'?t.tod:s==='next'?t.next:t.up}</span>`}
+function selDay(M){return S.sel??(S.wk===M.cur?M.today:null)}
+function weekSwitch(M){const t=T[S.lang],wk=S.wk,a=date(wk,0),b=date(wk,5);
+ let h=`<div class="wk"><button aria-label="prev" ${wk<=1?'disabled':''} onclick="S.wk--;S.sel=null;render()">‹</button><div class="l">${t.week} ${wk}${wk===M.cur?' · '+t.thisw:wk===M.cur+1?' · '+t.nextw:''}<small>${a.d} – ${b.d} ${b.m}${wk===6?' · '+t.del:''}</small></div><button aria-label="next" ${wk>=6?'disabled':''} onclick="S.wk++;S.sel=null;render()">›</button></div>`;
+ if(wk!==M.cur)h+=`<button class="back" onclick="S.wk=${M.cur};S.sel=null;render()">↩ ${t.back}</button>`;return h}
+function body(M){const t=T[S.lang],sel=selDay(M);if(sel===null)return `<div class="ex">${t.tap}</div>`;const s=M.st(S.wk,sel);
+ if(s==='today')return `<div class="ex">${t.work}</div><div class="ex"></div>`;
+ if(s==='done')return `<div class="ex">✓ ${dname(sel)} · ${t.sum2} ›</div>`;
+ return `<div class="pv"><div class="eyebrow">${t.prev} · ${dlabel(S.wk,sel)}</div><h3>${dname(sel)}</h3><small style="color:var(--mut)">${dfocus(sel)}</small><div class="note2">${t.target}</div>`+
+  DAYS[sel].ex.map(e=>`<div class="er"><span>${S.lang==='es'?e[1]:e[0]}<br><small>${t.tech[e[4]]||e[4]}</small></span><small>${e[2]} × ${e[3]}</small></div>`).join('')+`<button class="lock" disabled>🔒 ${t.lock}</button></div>`}
+function days(M){const t=T[S.lang],wk=S.wk,sel=selDay(M);let h='';
+ if(S.days==='0'){h+=weekSwitch(M)+'<div class="tabs">'+DAYS.map((d,i)=>{const p=M.prog(wk,i),s=M.st(wk,i);return `<div class="tab ${i===sel?'a':''}" onclick="S.sel=${i};render()"><b>D${i+1}</b>${p[0]}/${p[1]}${s==='today'?'<div>'+t.tod+'</div>':''}</div>`}).join('')+'</div>'}
+ if(S.days==='1'&&S.fit!=='0'){const cls='f'+S.fit;h+=weekSwitch(M)+'<div class="fr">'+DAYS.map((d,i)=>{const s=M.st(wk,i),x=date(wk,i);
+ const dl1=`<span class="dl1">${t.wd[i]} ${x.d}</span>`;const inner=S.fit==='1'?`${dl1}<span class="s">${SHORT[S.lang][i]}</span>`:S.fit==='2'?dl1:`<span class="ic" aria-hidden="true">${ICON[i]}</span>${dl1}`;
+ return `<button class="fk ${cls} ${i===sel?'a':''} ${s==='today'?'td':''}" aria-label="${dlabel(wk,i)} · ${dname(i)}" onclick="S.sel=${i};render()"><span class="bd ${s}">${s==='done'?'✓':''}</span>${inner}</button>`}).join('')+'</div>';
+ if(sel!==null){const s=M.st(wk,sel);h+=`<div class="cap">${s==='today'||s==='next'?`<span class="tg2">${s==='today'?t.tod:t.next} · ${dlong(wk,sel)}</span>`:`<small>${dlong(wk,sel)}</small>`}<b>${dname(sel)}</b><small>${dfocus(sel)}</small></div>`}
+ return h+body(M)}
+ if(S.days==='1'){h+=weekSwitch(M)+'<div class="dch" id="dch">'+DAYS.map((d,i)=>{const s=M.st(wk,i),tg=s==='today'?t.tod:s==='next'?t.next:'';return `<button class="dc ${i===sel?'a':''} ${s==='next'?'nx':''} ${s==='today'?'td':''}" onclick="S.sel=${i};render()">${s==='up'||s==='next'?'<span class="ring" style="border:1.5px solid var(--line)"></span>':ring(M.prog(wk,i),s)}<b>${dlabel(wk,i)}</b><span class="dn">${dname(i)}</span>${tg?`<span class="tg">${tg}</span>`:''}</button>`}).join('')+'</div>'}
+ if(S.days==='2'){h+=weekSwitch(M)+'<div class="dl">'+DAYS.map((d,i)=>{const s=M.st(wk,i),x=date(wk,i);return `<button class="dr ${i===sel?'a':''}" onclick="S.sel=${i};render()"><span class="dt"><small>${t.wd[i]}</small><b>${x.d}</b></span><span class="nm"><b>${dname(i)}</b><small>${dfocus(i)}</small></span>${stBadge(s)}</button>`}).join('')+'</div>'}
+ if(S.days==='3'){const home=wk===M.cur&&!S.weekOpen;
+  if(home){const i=M.today,p=M.prog(wk,i),n=M.next;const nn=n.i;
+   h+=`<div class="fc" onclick="S.sel=${i};render()"><div class="eyebrow">${t.tod} · ${dlabel(wk,i)}</div><h2>${dname(i)}</h2><small>${dfocus(i)}</small><div class="pbar"><i style="width:${p[0]/p[1]*100}%"></i></div><small>${f(t.of,{a:p[0],b:p[1]})}</small></div>`;
+   h+=`<button class="nxl" onclick="S.wk=${n.w};S.sel=${nn};S.weekOpen=true;render()"><span style="flex:1"><small style="color:var(--rose)">${t.next} · ${dlabel(n.w,nn)}</small><br><b>${dname(nn)}</b> <small style="color:var(--mut)">· ${dfocus(nn)}</small></span><span style="color:var(--mut)">›</span></button>`;
+   h+='<div class="dots">'+DAYS.map((d,i)=>{const s=M.st(wk,i);return `<button class="${s==='done'?'d':''} ${s==='today'?'t':''}" onclick="S.sel=${i};S.weekOpen=true;render()">${t.wd[i]}<br>${s==='done'?'✓':date(wk,i).d}</button>`}).join('')+'</div>';
+   h+=`<button class="lnk" onclick="S.weekOpen=true;render()">${t.showWeek} ›</button>`;}
+  else{h+=weekSwitch(M)+'<div class="dl">'+DAYS.map((d,i)=>{const s=M.st(wk,i),x=date(wk,i);return `<button class="dr ${i===sel?'a':''}" onclick="S.sel=${i};render()"><span class="dt"><small>${t.wd[i]}</small><b>${x.d}</b></span><span class="nm"><b>${dname(i)}</b><small>${dfocus(i)}</small></span>${stBadge(s)}</button>`}).join('')+`</div><button class="lnk" onclick="S.weekOpen=false;S.wk=1;S.sel=null;render()">‹ ${t.hideWeek}</button>`;}
+  if(home)return h+`<div class="ex">${t.work}</div>`;}
+ return h+body(M)}
+function render(){const t=T[S.lang],M=model(),isNew=S.st==='new';
+ const B=(k,v,l)=>`<button class="${S[k]==v?'on':''}" onclick="S.${k}='${v}';S.wk=1;S.sel=null;S.weekOpen=false;render()">${l}</button>`;
+ document.getElementById('bar').innerHTML=`<div class="grp"><em>Days</em>${B('days','0','Now')}${B('days','1','1 Chips ★')}${B('days','2','2 List')}${B('days','3','3 Focus')}</div><div class="grp"><em>Header</em>${B('v','A','A')}${B('v','B','B ★')}${B('v','C','C')}${B('st','compact','Compact')}${B('st','new','New block')}</div><div class="grp"><em>Fit</em>${B('fit','0','Off')}${B('fit','1','Fit 1')}${B('fit','2','Fit 2 ★')}${B('fit','3','Fit 3')}</div><div class="grp"><em>Lang</em>${B('lang','es','ES')}${B('lang','en','EN')}</div>`;
+ document.getElementById('note').textContent=NOTES[S.v]+' '+DNOTES[S.days]+(S.days==='1'&&S.fit!=='0'?' '+FNOTES[S.fit]:'');
+ const title=(S.v==='C'&&!isNew)?`<button onclick="S.open=true;render()" style="all:unset;cursor:pointer"><h1>${t.today}</h1><div style="color:var(--mut);font-size:12px">${t.bl} · ${f(t.wk,{w:1})} ›</div></button>`:`<h1>${t.today}</h1>`;
+ let h=`<div class="top">${title}<button class="round" aria-label="${t.cal}" onclick="S.open=true;render()">📅</button></div><div class="pad">`;
+ if(isNew)h+=`<section class="card"><button class="x" aria-label="${t.got}" onclick="S.st='compact';render()">×</button><div class="eyebrow">${t.newb} · ${t.bl} · PT</div><h2>${t.name}</h2><div class="chips"><span class="chip r">${f(t.wk,{w:1})}</span><span class="chip">${t.dates}</span><span class="chip">${t.full}</span></div><p>${t.sum}</p><div class="btns"><button class="btn" onclick="S.open=true;render()">${t.det}</button><button class="btn p" onclick="S.st='compact';render()">${t.got}</button></div></section>`;
+else if(S.v==='B'&&S.days==='1'&&S.fit!=='0'){const seg='<span class="seg"><i class="c"></i><i></i><i></i><i></i><i></i><i></i></span>';
+ h+= S.fit==='1'?`<button class="hl" onclick="S.open=true;render()"><span class="r">›</span><span class="t1">${t.bl} · ${S.lang==='es'?'Sem':'Wk'} 1/6</span>${seg}</button>`
+ : S.fit==='2'?`<button class="hl" onclick="S.open=true;render()"><span class="r">›</span><span class="t1">${t.bl} · ${f(t.wk,{w:1})}</span><span class="t2">${t.name}</span>${seg}</button>`
+ : `<button class="hl" onclick="S.open=true;render()"><span class="r">›</span><span class="pill">${S.lang==='es'?'Sem':'Wk'} 1/6</span><span class="t1">${t.bl}</span><span class="t2">${t.name}</span></button>`;}
+ else if(S.v!=='C')h+=`<button class="line" onclick="S.open=true;render()"><span style="flex:1;min-width:0"><span style="display:flex;gap:8px"><b>${t.bl}</b><span class="m">${f(t.wk,{w:1})} · ${t.name}</span><span>›</span></span>${S.v==='B'?'<span class="seg"><i class="c"></i><i></i><i></i><i></i><i></i><i></i></span>':''}</span></button>`;
+ h+=days(M)+'</div>';
+ h+=`<div class="sheet ${S.open?'open':''}" onclick="if(event.target===this){S.open=false;render()}"><div class="sh"><div class="grab"></div><div class="eyebrow">${t.bl} · PT</div><h2 style="margin:4px 0">${t.name}</h2><div class="chips"><span class="chip r">${f(t.wk,{w:1})}</span><span class="chip">${t.dates}</span><span class="chip">${t.full}</span></div><div class="seg2"><button class="on">${t.preset}</button><button>${t.custom}</button></div><details><summary>${t.about}</summary><p style="color:var(--mut)">${t.sum}</p></details><div class="row"><span>📅 ${t.cal}</span>›</div><div class="row"><span>⇄ ${t.chg}</span>›</div><button class="btn" style="width:100%;margin-top:8px" onclick="S.open=false;render()">${t.close}</button></div></div>`;
+ document.getElementById('phone').innerHTML=h;
+ const a=document.querySelector('.dc.a,.fk.a')||document.querySelector('.dc.td,.fk.td');if(a){const c=a.parentElement;c.scrollLeft=a.offsetLeft-c.offsetLeft-(c.clientWidth-a.offsetWidth)/2;}}
+render();
+</script>
