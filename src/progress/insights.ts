@@ -70,6 +70,16 @@ type ClassifiedMovement = {
 export function classifyMovementPattern(exercise: Exercise | undefined): ClassifiedMovement {
   const pattern = exercise?.movementPattern?.trim().toLowerCase()
   const primary = exercise?.primaryMuscles ?? (exercise?.primaryMuscle ? [exercise.primaryMuscle] : [])
+  const muscle = primary[0]
+  const regionForPrimaryMuscle: BodyRegion = muscle && PUSH_MUSCLES.has(muscle)
+    ? 'upper'
+    : muscle && PULL_MUSCLES.has(muscle)
+      ? 'upper'
+      : muscle && LOWER_MUSCLES.has(muscle)
+        ? 'lower'
+        : muscle && CORE_MUSCLES.has(muscle)
+          ? 'core'
+          : 'other'
   let group: MovementGroup
   let region: BodyRegion
 
@@ -85,8 +95,10 @@ export function classifyMovementPattern(exercise: Exercise | undefined): Classif
   } else if (pattern === 'core') {
     group = 'core'
     region = 'core'
-  } else {
-    const muscle = primary[0]
+  } else if (pattern === 'carry') {
+    group = 'other'
+    region = regionForPrimaryMuscle
+  } else if (pattern === 'isolation') {
     if (muscle && PUSH_MUSCLES.has(muscle)) {
       group = 'push'
       region = 'upper'
@@ -103,6 +115,9 @@ export function classifyMovementPattern(exercise: Exercise | undefined): Classif
       group = 'other'
       region = 'other'
     }
+  } else {
+    group = 'other'
+    region = 'other'
   }
 
   return { group, region }
@@ -111,6 +126,14 @@ export function classifyMovementPattern(exercise: Exercise | undefined): Classif
 function addDays(date: string, days: number) {
   const value = new Date(dateValue(date) + days * DAY_MS)
   return `${value.getUTCFullYear()}-${String(value.getUTCMonth() + 1).padStart(2, '0')}-${String(value.getUTCDate()).padStart(2, '0')}`
+}
+
+function weekStartsInRange(start: string, end: string) {
+  const starts: string[] = []
+  for (let week = startOfWeek(start); dateValue(week) <= dateValue(end); week = addDays(week, 7)) {
+    starts.push(week)
+  }
+  return starts
 }
 
 function windowStart(range: ProgressRange, activeBlock: TrainingBlock | null, today: string) {
@@ -170,7 +193,7 @@ function trendForLift(sessions: Array<{ date: string; value: number }>): { chang
   if (firstMean === null || firstMean === 0 || lastMean === null) {
     return { changePercent: null, trend: 'not-enough-data' }
   }
-  const changePercent = ((lastMean / firstMean) - 1) * 100
+  const changePercent = Number((((lastMean / firstMean) - 1) * 100).toFixed(10))
   const band = PROGRESS_THRESHOLDS.trendFlatPercent
   return {
     changePercent,
@@ -188,7 +211,9 @@ function distinctSessionDays(sessions: Array<{ date: string }>) {
 
 function weekStreak(entries: ProgressEntry[], today: string) {
   const activeWeek = startOfWeek(today)
-  const loggedWeeks = new Set(groupExerciseSessions(entries).map((session) => startOfWeek(session.date)))
+  const loggedWeeks = new Set(groupExerciseSessions(entries)
+    .filter((session) => session.date <= today)
+    .map((session) => startOfWeek(session.date)))
   let week = loggedWeeks.has(activeWeek) ? activeWeek : addDays(activeWeek, -7)
   if (!loggedWeeks.has(week)) return 0
   let streak = 0
@@ -223,7 +248,7 @@ function repPersonalRecords(entries: ProgressEntry[], blocks: TrainingBlock[], s
     for (const set of sets) {
       const key = `${session.exerciseId}:${set.weight}`
       const previousBest = bestByLoad.get(key) ?? 0
-      if (!deload && set.reps > previousBest && rangeContains(session.date, start, today)) {
+      if (!deload && previousBest > 0 && set.reps > previousBest && rangeContains(session.date, start, today)) {
         events.push({ exerciseId: session.exerciseId, date: session.date, weight: set.weight, reps: set.reps, previousBest })
       }
       if (!deload) bestByLoad.set(key, Math.max(previousBest, set.reps))
@@ -237,7 +262,7 @@ function weekForDate(activeBlock: TrainingBlock | null, date: string) {
 }
 
 function volumeForSets(sets: ProgressSet[]) {
-  return sets.reduce((total, set) => total + set.weight * set.reps
+  return workingSets(sets).reduce((total, set) => total + set.weight * set.reps
     + (set.drop ? set.drop.weight * set.drop.reps : 0), 0)
 }
 
@@ -259,6 +284,8 @@ function rirByBlockWeek(entries: ProgressEntry[], block: TrainingBlock, lastWeek
       week,
       mean: mean(withRir.map((set) => set.rir as number)),
       coverage: sets.length ? withRir.length / sets.length : 0,
+      setCount: sets.length,
+      rirSetCount: withRir.length,
     }
   })
 }
@@ -318,7 +345,7 @@ export function calculateProgressInsights(
   const worstMover = [...eligibleLifts].sort((a, b) => (a.changePercent ?? Infinity) - (b.changePercent ?? Infinity))[0]
   const noNewBest = [...mainLiftIds].flatMap((exerciseId) => {
     const history = sessions
-      .filter((session) => session.exerciseId === exerciseId && !isDeloadWeek(findEntryBlock(blocks, session), session.date))
+      .filter((session) => session.exerciseId === exerciseId && session.date <= today && !isDeloadWeek(findEntryBlock(blocks, session), session.date))
       .map((session) => ({ date: session.date, value: sessionE1RM(session.sets) }))
       .filter((point): point is { date: string; value: number } => point.value !== null)
     let best = -Infinity
@@ -349,27 +376,57 @@ export function calculateProgressInsights(
   const latestWeek = startOfWeek(today)
   const previousWeekStarts = recentWeekStarts(addDays(latestWeek, -7), 3)
   const currentWeeklySets = weeklySets(entries, blocks, exercises, today, activeBlock)
-  const previousWeekly = previousWeekStarts.map((week) => weeklySets(entries, blocks, exercises, week, activeBlock))
+  const previousWeekly = previousWeekStarts.map((week) => weeklySets(entries, blocks, exercises, week, null))
+  const groupByMuscle: Record<string, WeeklyMuscleSets['groups'][number]['muscleGroup']> = {
+    Chest: 'Chest',
+    'Upper Chest': 'Chest',
+    Lats: 'Back',
+    'Upper Back': 'Back',
+    'Side Delts': 'Shoulders (side and rear)',
+    'Rear Delts': 'Shoulders (side and rear)',
+    'Front Delts': 'Front delts',
+    Biceps: 'Biceps',
+    Triceps: 'Triceps',
+    Quads: 'Quads',
+    Hamstrings: 'Hamstrings',
+    Glutes: 'Glutes',
+    Calves: 'Calves',
+    Abs: 'Core',
+    Obliques: 'Core',
+  }
+  const primaryGroups = new Set(
+    (activeBlock?.days.flatMap((day) => day.exercises.map((item) =>
+      exerciseFor(exercises, item.exerciseId)
+    )) ?? []).flatMap((exercise) => {
+      const primary = exercise?.primaryMuscles ?? (exercise?.primaryMuscle ? [exercise.primaryMuscle] : [])
+      return primary.map((muscle) => groupByMuscle[muscle] ?? 'Other')
+    })
+  )
   const weeklyMuscles = currentWeeklySets.groups.map((group) => ({
     muscleGroup: group.muscleGroup,
     thisWeek: group.done,
     previousThreeWeekAverage: mean(previousWeekly.map((week) =>
       week.groups.find((item) => item.muscleGroup === group.muscleGroup)?.done ?? 0
     )) ?? 0,
-    commonRange: group.planned > 0,
+    commonRange: primaryGroups.has(group.muscleGroup),
   }))
 
   const volumeWeeks = recentWeekStarts(today, 6)
   const weeklyVolume = volumeWeeks.map((weekStart) => {
     const end = addDays(weekStart, 6)
-    const weekSessions = sessions.filter((session) => rangeContains(session.date, weekStart, end))
-    const total = weekSessions.reduce((sum, session) => sum + volumeForSets(session.sets), 0)
-    return { weekStart, total, sessionCount: weekSessions.length, perSession: weekSessions.length ? total / weekSessions.length : 0 }
+    const workoutVolumes = new Map<string, number>()
+    for (const session of sessions.filter((item) => rangeContains(item.date, weekStart, end))) {
+      const key = `${session.date}:${session.dayKey ?? ''}`
+      workoutVolumes.set(key, (workoutVolumes.get(key) ?? 0) + volumeForSets(session.sets))
+    }
+    const total = [...workoutVolumes.values()].reduce((sum, value) => sum + value, 0)
+    const sessionCount = workoutVolumes.size
+    return { weekStart, total, sessionCount, perSession: sessionCount ? total / sessionCount : 0 }
   })
   const currentWeekVolume = weeklyVolume[weeklyVolume.length - 1]
   const firstWeekVolume = weeklyVolume.find((week) => week.sessionCount > 0)
-  const volumePerSessionChange = firstWeekVolume && currentWeekVolume.sessionCount
-    ? currentWeekVolume.perSession - firstWeekVolume.perSession
+  const volumePerSessionChange = firstWeekVolume && currentWeekVolume.sessionCount && firstWeekVolume.perSession > 0
+    ? ((currentWeekVolume.perSession / firstWeekVolume.perSession) - 1) * 100
     : null
 
   const blockWeekNumber = currentBlockWeek(activeBlock, today)
@@ -451,20 +508,28 @@ export function calculateProgressInsights(
       .filter((session) => rangeContains(session.date, addDays(today, -83), today))
       .filter((session) => new Date(dateValue(session.date)).getUTCDay() === weekday)).length,
   }))
+  const loggedDates = new Set(sessions.map((session) => session.date))
+  const gridStart = addDays(startOfWeek(today), -77)
+  const consistencyGrid = Array.from({ length: 84 }, (_, index) => {
+    const date = addDays(gridStart, index)
+    return { date, hasSession: date <= today && loggedDates.has(date) }
+  })
+  const windowWeeks = Math.max(0, Math.round((dateValue(today) - dateValue(start) + 1) / (7 * DAY_MS)))
   const plannedSessions = activeBlock
     ? range === 'block'
       ? Math.max(0, Math.min(blockWeekNumber, activeBlock.weeks) * activeBlock.days.length)
-      : Math.max(0, Math.round((dateValue(today) - dateValue(start) + 1) / (7 * DAY_MS) * activeBlock.days.length))
+      : windowWeeks * activeBlock.days.length
     : 0
-  const weeklyAdherence = recentWeekStarts(today, range === '12weeks' ? 12 : 4)
-    .map((week) => adherence(entries, blocks, week).week.sessionsDone)
-  const sessionCount = rangeSessions.length
-  const sessionsDone = weeklyAdherence.length
-    ? Math.min(sessionCount, weeklyAdherence.reduce((total, done) => total + done, 0))
-    : sessionCount
+  const rangeEntries = entries.filter((entry) => rangeContains(entry.date, start, today))
+  const weeklyAdherence = weekStartsInRange(start, today)
+    .map((week) => adherence(rangeEntries, blocks, week).week.sessionsDone)
+  const sessionCount = new Set(rangeSessions.map((session) => session.date)).size
+  const sessionsDone = Math.min(sessionCount, weeklyAdherence.reduce((total, done) => total + done, 0))
   const sessionsPlanned = range === 'block' && activeBlock
     ? plannedSessions
-    : plannedSessions || weeklyAdherence.length * 6
+    : activeBlock
+      ? plannedSessions
+      : weeklyAdherence.length * 6
 
   const recentStart = addDays(today, -PROGRESS_THRESHOLDS.recentRecordDays + 1)
   const recentRecordsCount = records.filter((record) => rangeContains(record.date, recentStart, today))
@@ -500,6 +565,7 @@ export function calculateProgressInsights(
     },
     weeklyVolume,
     volumePerSessionChange,
+    consistencyGrid,
     currentTonnage,
     previousTonnage,
     topSetLoads,

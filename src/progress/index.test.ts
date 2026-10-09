@@ -333,8 +333,8 @@ describe('progress calculations', () => {
     const entries = [
       makeEntry('press', '2026-01-05', [[40, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('press', '2026-01-12', [[40, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-01-26', [[44, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('press', '2026-02-02', [[44, 8]], { dayKey: 'chest-back-a' }),
-      makeEntry('press', '2026-02-09', [[44, 8]], { dayKey: 'chest-back-a' }),
     ]
     const report = blockReports(entries, [block], [dumbbellExercise])[0]
     expect(report.method).toBe('flat')
@@ -353,14 +353,14 @@ describe('progress calculations', () => {
     const entries = [
       makeEntry('press', '2026-01-05', [[40, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('press', '2026-01-12', [[40, 8]], { dayKey: 'chest-back-a' }),
+      makeEntry('press', '2026-01-26', [[44, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('press', '2026-02-02', [[44, 8]], { dayKey: 'chest-back-a' }),
-      makeEntry('press', '2026-02-09', [[44, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('row', '2026-01-05', [[30, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('row', '2026-01-12', [[30, 8]], { dayKey: 'chest-back-a' }),
       makeEntry('curl', '2026-01-05', [[10, 20]], { dayKey: 'chest-back-a' }),
       makeEntry('curl', '2026-01-12', [[10, 20]], { dayKey: 'chest-back-a' }),
+      makeEntry('curl', '2026-01-26', [[10, 20]], { dayKey: 'chest-back-a' }),
       makeEntry('curl', '2026-02-02', [[10, 20]], { dayKey: 'chest-back-a' }),
-      makeEntry('curl', '2026-02-09', [[10, 20]], { dayKey: 'chest-back-a' }),
     ]
     const report = blockReports(entries, [block])[0]
     expect(report.lifts.map((lift) => lift.exerciseId).sort()).toEqual(['curl', 'press'])

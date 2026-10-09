@@ -123,7 +123,11 @@ export function sessionE1RM(sets: ProgressSet[]) {
 }
 
 export function isDeloadWeek(block: TrainingBlock | null, date: string) {
-  return block !== null && blockWeek(block, date) === PROGRESS_THRESHOLDS.deloadWeek
+  if (!block) return false
+  const week = blockWeek(block, date)
+  return week === PROGRESS_THRESHOLDS.deloadWeek
+    || (block.number === PROGRESS_THRESHOLDS.legacyDeloadBlockNumber
+      && week === PROGRESS_THRESHOLDS.legacyDeloadWeek)
 }
 
 export function exerciseFor(exercises: Exercise[], exerciseId: string) {

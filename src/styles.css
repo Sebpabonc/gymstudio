@@ -6276,6 +6276,448 @@ a.planned-exercise-main-name {
   color: var(--muted);
 }
 
+.progress-panel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.progress-panel > h3,
+.progress-panel h4 {
+  margin: 0;
+}
+
+.progress-panel h3 {
+  font-size: 1rem;
+}
+
+.progress-panel h4 {
+  font-size: 0.85rem;
+}
+
+.progress-heading-row,
+.progress-detail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.progress-heading-row h2,
+.progress-detail-heading h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.progress-block-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.progress-range-toggle {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.progress-range-toggle .tab-button {
+  min-width: 0;
+  min-height: 40px;
+  padding: 6px 4px;
+  font-size: 0.75rem;
+}
+
+.progress-hero {
+  display: grid;
+  gap: 3px;
+}
+
+.progress-hero h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+.progress-hero p,
+.progress-data-line {
+  margin: 0;
+  color: var(--muted-strong);
+}
+
+.progress-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.progress-stat {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.progress-stat strong {
+  font-size: 1.05rem;
+}
+
+.progress-stat span {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.progress-insight-list,
+.progress-lift-list,
+.progress-fact-list,
+.progress-muscle-bars,
+.progress-volume-bars,
+.progress-rir-bars,
+.progress-weekday-bars {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-insight-card {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.progress-insight-card p {
+  min-width: 0;
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.progress-insight-rank {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(201, 156, 161, 0.16);
+  color: var(--nav-active);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.progress-sparkline {
+  display: block;
+  width: 72px;
+  height: 28px;
+  overflow: visible;
+}
+
+.progress-sparkline path {
+  fill: none;
+  stroke: var(--nav-active);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.progress-sparkline circle {
+  fill: #e6c27a;
+  stroke: var(--bg-dark);
+  stroke-width: 1;
+}
+
+.progress-mini-bars {
+  display: block;
+  width: 48px;
+  height: 28px;
+}
+
+.progress-mini-bars rect {
+  fill: var(--nav-active);
+}
+
+.progress-sparkline-empty {
+  display: block;
+  width: 72px;
+}
+
+.progress-panel > h4,
+.progress-panel .progress-subsection > h4 {
+  margin: 0;
+}
+
+.progress-subsection {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.progress-lift-list li {
+  min-width: 0;
+}
+
+.progress-lift-button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  grid-template-areas: "name spark" "value change";
+  align-items: center;
+  gap: 4px 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.progress-lift-name {
+  grid-area: name;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress-lift-button .progress-sparkline {
+  grid-area: spark;
+}
+
+.progress-lift-button > strong {
+  grid-area: value;
+  font-size: 0.82rem;
+}
+
+.progress-change {
+  grid-area: change;
+  justify-self: end;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: right;
+}
+
+.progress-change.positive {
+  color: #a8d5af;
+}
+
+.progress-fact-list {
+  padding-left: 18px;
+  list-style: disc;
+  color: var(--muted-strong);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.progress-bar-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.progress-bar-heading span {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.progress-muscle-copy {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.progress-muscle-track,
+.progress-volume-track,
+.progress-region-track {
+  position: relative;
+  display: block;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.progress-muscle-range {
+  position: absolute;
+  inset-block: 0;
+  background: rgba(201, 156, 161, 0.14);
+}
+
+.progress-muscle-average {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 2px;
+  background: #e6c27a;
+}
+
+.progress-muscle-current,
+.progress-volume-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+}
+
+.progress-volume-bars li {
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+}
+
+.progress-volume-bars li > span:first-child {
+  color: var(--muted);
+}
+
+.progress-volume-bars strong {
+  text-align: right;
+}
+
+.progress-region-track span {
+  display: block;
+  float: left;
+  height: 100%;
+  background: var(--brand);
+}
+
+.progress-region-track span + span {
+  background: #c99ca1;
+}
+
+.progress-rir-bars {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: end;
+  min-height: 90px;
+}
+
+.progress-rir-bars li,
+.progress-weekday-bars li {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.progress-rir-track,
+.progress-weekday-track {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  width: 100%;
+  height: 54px;
+  overflow: hidden;
+  border-radius: 6px 6px 2px 2px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.progress-rir-track > span,
+.progress-weekday-track > span {
+  display: block;
+  width: 70%;
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--brand);
+}
+
+.progress-rir-bars strong,
+.progress-weekday-bars strong {
+  color: var(--text);
+}
+
+.progress-weekday-bars {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+}
+
+.progress-consistency-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+.progress-consistency-grid span {
+  aspect-ratio: 1;
+  min-width: 0;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.progress-consistency-grid span.has-session {
+  background: var(--nav-active);
+}
+
+.progress-detail-backdrop {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-top: 24px;
+  background: rgba(0, 0, 0, 0.68);
+}
+
+.progress-detail-sheet {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 640px);
+  max-height: 92dvh;
+  overflow: auto;
+  padding: 16px 16px max(20px, env(safe-area-inset-bottom));
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+  background: var(--panel-strong);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.progress-detail-heading button {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  font-size: 1.5rem;
+}
+
+.progress-detail-sheet .set-history {
+  min-width: 0;
+}
+
+@media (max-width: 380px) {
+  .progress-insight-card {
+    grid-template-columns: 22px minmax(0, 1fr) 56px;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .progress-insight-card .progress-sparkline {
+    width: 56px;
+  }
+
+  .progress-range-toggle .tab-button {
+    font-size: 0.68rem;
+  }
+}
+
 /* Swipe a Progress row left to delete it (PO 2026-10-07). */
 .swipe-row {
   position: relative;
