@@ -387,6 +387,20 @@ describe('approved progress insight thresholds', () => {
     expect(result.volumePerSessionChange).toBeCloseTo(-61.53846)
   })
 
+  it('uses this week so far, with no comparison, when there is no complete week of history yet', () => {
+    const glutes: Exercise = { id: 'glutes', name: 'Glutes', primaryMuscle: 'Glutes', mechanic: 'isolation', movementPattern: 'isolation' }
+    const block = makeBlock(['glutes'])
+    const result = calculateProgressInsights([
+      makeEntry('2026-01-27', 40, { exerciseId: 'glutes', sets: 3 }),
+    ], [block], [glutes], block, '2026-01-28', 'block')
+    expect(result.weeklySetsBasis).toBe('week-to-date')
+    expect(result.weeklyMuscles.find((muscle) => muscle.muscleGroup === 'Glutes')).toMatchObject({
+      thisWeek: 3,
+      previousThreeWeekAverage: null,
+    })
+    expect(result.weeklyVolume.every((week) => week.weekStart >= '2026-01-26')).toBe(true)
+  })
+
   it('compares the last complete muscle week with the previous three complete weeks', () => {
     const glutes: Exercise = { id: 'glutes', name: 'Glutes', primaryMuscle: 'Glutes', mechanic: 'isolation', movementPattern: 'isolation' }
     const hamstrings: Exercise = { id: 'hamstrings', name: 'Hamstrings', primaryMuscle: 'Hamstrings', secondaryMuscles: ['Glutes'], mechanic: 'isolation', movementPattern: 'isolation' }
@@ -399,7 +413,8 @@ describe('approved progress insight thresholds', () => {
     ], [block], [glutes, hamstrings], block, '2026-01-26', 'block')
     expect(result.weeklyMuscles.find((muscle) => muscle.muscleGroup === 'Glutes')).toMatchObject({
       thisWeek: 12,
-      previousThreeWeekAverage: 3,
+      // Weeks before the first logged session are not averaged in (PO 2026-10-10): (0 + 9) / 2.
+      previousThreeWeekAverage: 4.5,
       commonRange: true,
     })
     expect(result.weeklyMuscles.find((muscle) => muscle.muscleGroup === 'Hamstrings')?.commonRange).toBe(false)
