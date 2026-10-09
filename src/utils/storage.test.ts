@@ -360,6 +360,21 @@ describe('loadExercises', () => {
     expect(exercises.some((exercise) => exercise.name === 'Lat Pulldown')).toBe(false)
   })
 
+  it('restores missing movement patterns from the bundled catalogue for older caches', async () => {
+    localStorage.setItem(
+      'gym-studio.catalogue',
+      JSON.stringify({
+        fetchedAt: '2026-10-03T00:00:00Z',
+        exercises: [{ id: 'lat-pulldown', name: 'Lat Pulldown (Wide Grip)', primaryMuscle: 'Lats', mechanic: 'compound' }],
+        aliases: {},
+      })
+    )
+
+    const exercise = (await loadExercises(false)).find((item) => item.id === 'lat-pulldown')
+
+    expect(exercise?.movementPattern).toBe('pull vertical')
+  })
+
   it('uses cached posture tips', async () => {
     const bundled = exerciseLibrary.find((exercise) => exercise.id === 'romanian-deadlift')!
     const cachedTips = ['Cached one', 'Cached two', 'Cached three', 'Cached four', 'Cached five']
@@ -414,6 +429,7 @@ describe('remote catalogue', () => {
       secondary_muscles: ['Glutes', 'Lower Back'],
       equipment: 'barbell',
       mechanic: 'compound',
+      movement_pattern: 'hinge',
       posture_tips: [
         'Tip one',
         'Tip two',
@@ -434,6 +450,7 @@ describe('remote catalogue', () => {
       secondary_muscles: ['Upper Back', 'Biceps'],
       equipment: 'cable',
       mechanic: 'compound',
+      movement_pattern: 'pull vertical',
       posture_tips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
       squeeze_cue: null,
       aliases: [],
@@ -462,6 +479,7 @@ describe('remote catalogue', () => {
       secondaryMuscles: ['Glutes', 'Lower Back'],
       equipment: 'barbell',
       mechanic: 'compound',
+      movementPattern: 'hinge',
       postureTips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
       squeezeCue: 'Squeeze the target muscle at lockout.',
     })
@@ -498,6 +516,7 @@ describe('remote catalogue', () => {
     expect(deadlift?.secondaryMuscles).toEqual(['Glutes', 'Lower Back'])
     expect(deadlift?.equipment).toBe('barbell')
     expect(deadlift?.mechanic).toBe('compound')
+    expect(deadlift?.movementPattern).toBe('hinge')
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.squeezeCue).toBe('Squeeze the target muscle at lockout.')

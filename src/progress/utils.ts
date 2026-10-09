@@ -2,6 +2,7 @@ import { createTranslator, type Language, type Translate } from '../i18n/transla
 import { Exercise, PlannedExercise, TrainingBlock } from '../types'
 import { DayType, ProgressEntry, ProgressSet } from './types'
 import { defaultActiveBlock } from '../utils/trainingBlocks'
+import { PROGRESS_THRESHOLDS } from './thresholds'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -122,7 +123,11 @@ export function sessionE1RM(sets: ProgressSet[]) {
 }
 
 export function isDeloadWeek(block: TrainingBlock | null, date: string) {
-  return block?.number === 8 && blockWeek(block, date) === 1
+  if (!block) return false
+  const week = blockWeek(block, date)
+  return week === PROGRESS_THRESHOLDS.deloadWeek
+    || (block.number === PROGRESS_THRESHOLDS.legacyDeloadBlockNumber
+      && week === PROGRESS_THRESHOLDS.legacyDeloadWeek)
 }
 
 export function exerciseFor(exercises: Exercise[], exerciseId: string) {

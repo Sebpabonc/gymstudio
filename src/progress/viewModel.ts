@@ -338,6 +338,10 @@ export function formatBlockMethod(method: string, { t }: ProgressI18n = defaultP
   return key ? t(key) : plainFormatBlockMethod(method)
 }
 
+export function formatProgressBlockLabel(block: TrainingBlock, { t }: ProgressI18n = defaultProgressI18n) {
+  return block.number > 0 ? t('progress.block.label', { number: block.number }) : block.name
+}
+
 export function muscleGroupLabel(group: MuscleGroup, { t }: ProgressI18n = defaultProgressI18n) {
   return t(MUSCLE_GROUP_LABELS[group])
 }
