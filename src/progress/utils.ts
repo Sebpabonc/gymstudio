@@ -125,8 +125,9 @@ export function sessionE1RM(sets: ProgressSet[]) {
 export function isDeloadWeek(block: TrainingBlock | null, date: string) {
   if (!block) return false
   const week = blockWeek(block, date)
-  // Approved thresholds (2026-10-10): deload = block week 6, same as the AI Trainer evidence.
   return week === PROGRESS_THRESHOLDS.deloadWeek
+    || (block.number === PROGRESS_THRESHOLDS.legacyDeloadBlockNumber
+      && week === PROGRESS_THRESHOLDS.legacyDeloadWeek)
 }
 
 export function exerciseFor(exercises: Exercise[], exerciseId: string) {
