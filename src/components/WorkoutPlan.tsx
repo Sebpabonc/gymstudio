@@ -582,6 +582,8 @@ export default function WorkoutPlan({
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
+  // Workout mode: focus one exercise (or superset) at a time, same cards as the full Today list.
+  const [workoutGroupIndex, setWorkoutGroupIndex] = useState<number | null>(null)
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const trainerRecommendationIds = useRef(new Map<string, string>())
   const [swipeUndo, setSwipeUndo] = useState<WorkoutEntry | null>(null)
@@ -1525,13 +1527,18 @@ export default function WorkoutPlan({
     const wasComplete = activeExercises.every((exercise) => findExerciseCompletion(exercise, previousHistory))
     const isComplete = activeExercises.every((exercise) => findExerciseCompletion(exercise, nextHistory))
     if (!isComplete || wasComplete) return
+    openSessionSummary(nextHistory, loggedAt)
+  }
 
+  const openSessionSummary = (nextHistory: WorkoutEntry[], loggedAt: number) => {
+    if (planMode !== 'preset' || !activeBlock || !activeDay) return
     const entries = nextHistory.filter(
       (entry) =>
         entry.date === activeCompletionScope.date &&
         entry.blockId === activeCompletionScope.blockId &&
         entry.dayKey === activeCompletionScope.dayKey
     )
+    if (entries.length === 0) return
     const performance = buildWorkoutSummary(entries, nextHistory, trainingBlocks, exerciseCatalog, today)
     const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
     const scopeKey = getSessionScopeKey(activeCompletionScope, planMode)
@@ -1549,6 +1556,34 @@ export default function WorkoutPlan({
       blockId: activeCompletionScope.blockId,
       dayKey: activeCompletionScope.dayKey,
     })
+  }
+
+  const workoutGroups = groupSupersets(activeExercises)
+  const isWorkoutMode = planMode === 'preset' && workoutGroupIndex !== null && workoutGroupIndex < workoutGroups.length
+  const groupExerciseKeys = (index: number) =>
+    (workoutGroups[index]?.items ?? []).map(({ exercise }) => normalizeExerciseName(exercise.name))
+  const goToWorkoutGroup = (index: number) => {
+    setWorkoutGroupIndex(index)
+    setCollapsedExercises((current) => ({
+      ...current,
+      ...Object.fromEntries(groupExerciseKeys(index).map((key) => [key, false] as const)),
+    }))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const startWorkout = () => {
+    const firstOpen = workoutGroups.findIndex((group) =>
+      group.items.some(({ exercise }) => !findExerciseCompletion(exercise, history))
+    )
+    startSession(Date.now(), activeCompletionScope)
+    goToWorkoutGroup(firstOpen >= 0 ? firstOpen : 0)
+  }
+  const exitWorkout = () => {
+    setWorkoutGroupIndex(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const finishWorkout = () => {
+    exitWorkout()
+    openSessionSummary(history, Date.now())
   }
 
   const undoLastLog = () => {
@@ -2301,6 +2336,7 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
               aria-pressed={day.key === (activeDay?.key ?? selectedDay)}
               onClick={() => {
                 setSelectedDay(day.key)
+                setWorkoutGroupIndex(null)
                 collapseAllExerciseSections()
               }}
             >
@@ -2338,6 +2374,13 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             {/* TODO(i18n): PT will provide approved translations */}
             <p className="day-focus-label">{activeDay.focus}</p>
           </>
+        )}
+        {activeDay && activeExercises.length > 0 && !isWorkoutMode && (
+          <button type="button" className="primary-button start-workout-button" onClick={startWorkout}>
+            {activeExercises.some((exercise) => findExerciseCompletion(exercise, history))
+              ? t('workout.run.resume')
+              : t('workout.run.start')}
+          </button>
         )}
         </>
       ) : (
@@ -2453,8 +2496,19 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
 
       {activeExercises.length > 0 && (
       <section className="day-plan-card">
+        {isWorkoutMode && workoutGroupIndex !== null && (
+          <div className="workout-mode-bar" role="navigation" aria-label={t('workout.run.modeAria')}>
+            <button type="button" className="secondary-button small-button" onClick={exitWorkout}>
+              {t('workout.run.exit')}
+            </button>
+            <span className="workout-mode-progress">
+              {t('workout.run.progress', { current: workoutGroupIndex + 1, total: workoutGroups.length })}
+            </span>
+          </div>
+        )}
         <div className="day-exercises">
-          {groupSupersets(activeExercises).map((group) => {
+          {workoutGroups.map((group, groupIndex) => {
+            if (isWorkoutMode && groupIndex !== workoutGroupIndex) return null
             const previousSetsByExercise = new Map<string, ReturnType<typeof getPreviousWorkoutSets>>()
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
@@ -3285,6 +3339,32 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             )
           })}
         </div>
+        {isWorkoutMode && workoutGroupIndex !== null && (
+          <div className="workout-mode-nav">
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={workoutGroupIndex === 0}
+              onClick={() => goToWorkoutGroup(workoutGroupIndex - 1)}
+            >
+              {t('workout.run.previous')}
+            </button>
+            {workoutGroupIndex < workoutGroups.length - 1 ? (
+              <button type="button" className="primary-button" onClick={() => goToWorkoutGroup(workoutGroupIndex + 1)}>
+                {t('workout.run.next')}
+              </button>
+            ) : (
+              <button type="button" className="primary-button" onClick={finishWorkout}>
+                {t('workout.run.finish')}
+              </button>
+            )}
+          </div>
+        )}
+        {isWorkoutMode && workoutGroupIndex !== null && workoutGroupIndex < workoutGroups.length - 1 && (
+          <button type="button" className="secondary-button workout-mode-finish" onClick={finishWorkout}>
+            {t('workout.run.finish')}
+          </button>
+        )}
       </section>
       )}
       {swapTarget && (
