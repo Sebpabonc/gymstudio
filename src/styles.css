@@ -6345,3 +6345,34 @@ a.planned-exercise-main-name {
   width: 100%;
   margin-top: 8px;
 }
+
+.volume-trend {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.volume-trend-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.volume-trend-head strong {
+  color: var(--muted-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.volume-trend-up { color: #7fc58f; }
+.volume-trend-down { color: #e0907a; }
+
+.volume-trend svg {
+  width: 100%;
+  height: 64px;
+}

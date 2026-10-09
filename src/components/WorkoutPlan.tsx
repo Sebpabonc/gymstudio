@@ -62,6 +62,8 @@ import {
   workoutMaxWeight,
   workoutVolume,
 } from '../utils/workoutSets'
+import { VolumeTrend } from './VolumeTrend'
+import { volumeTrendPoints } from '../utils/volumeTrend'
 import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from '../utils/supersets'
 import { recommendNextTarget, type NextTarget, type ProgressionType } from '../progress/nextTarget'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
@@ -1215,9 +1217,12 @@ export default function WorkoutPlan({
         notes: done.notes ?? original.notes,
       }
     }
-    return planMode === 'preset' && exercise?.exerciseId
-      ? { ...original, recommendationId: getTrainerRecommendationId(key) }
-      : original
+    if (planMode !== 'preset' || !exercise?.exerciseId) return original
+    // PO 2026-10-09: the AI Trainer recommendation is always applied (no accept / keep-original card).
+    const trainer = getTrainerRecommendation(exercise)
+    return trainer
+      ? { ...applyTrainerRecommendation(original, trainer.recommendation, 'accepted', trainer.original), recommendationId: getTrainerRecommendationId(key) }
+      : { ...original, recommendationId: getTrainerRecommendationId(key) }
   }
 
   // PT spec R5: a double-angle follower ("Same dumbbells as …") uses the previous exercise's recommended load today.
@@ -2781,87 +2786,6 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                     <p className="planned-meta-line">
                       {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
                     </p>
-                    {!completedEntry && trainer && (
-                      <TrainerRecommendationCard
-                        title={t('workout.trainer.title')}
-                        lastTime={trainer.evidence[0]
-                          ? new Set(trainer.evidence[0].sets.map((set) => set.weight)).size > 1
-                            // Different loads per set (e.g. 20 / 22.5 / 22.5): show each set, not only the first.
-                            ? t('workout.trainer.lastTimeSets', {
-                                sets: trainer.evidence[0].sets
-                                  .map((set) => `${formatNumber(language, set.weight)} × ${formatNumber(language, set.reps)}`)
-                                  .join(' · '),
-                              })
-                            : t('workout.trainer.lastTime', {
-                                weight: formatNumber(language, trainer.evidence[0].sets[0]?.weight ?? 0),
-                                reps: trainer.evidence[0].sets.map((set) => formatNumber(language, set.reps)).join(' · '),
-                              })
-                          : t('workout.trainer.noPrevious')}
-                        original={new Set(trainer.original.setWeights).size > 1
-                          ? t('workout.trainer.originalSets', {
-                              weights: trainer.original.setWeights.map((weight) => formatNumber(language, weight)).join(' / '),
-                              reps: trainerRangeLabel(trainer.target),
-                            })
-                          : t('workout.trainer.original', {
-                              weight: formatNumber(language, trainer.original.weight),
-                              reps: trainerRangeLabel(trainer.target),
-                            })}
-                        recommended={t('workout.trainer.recommended', {
-                          weight: trainer.recommendation.setWeights && new Set(trainer.recommendation.setWeights).size > 1
-                            ? trainer.recommendation.setWeights.map((weight) => formatNumber(language, weight)).join(' / ')
-                            : formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
-                          reps: trainer.recommendation.setReps
-                            ? trainer.recommendation.setReps.map((reps) => formatNumber(language, reps)).join(' · ')
-                            : trainerRangeLabel(trainer.recommendation.reps),
-                        })}
-                        why={t('workout.trainer.why', {
-                          reason: trainerWhy(
-                            exercise.exerciseId,
-                            trainer.recommendation,
-                            { weight: trainer.original.weight, target: trainer.target },
-                            trainerReason(t, language, trainer.recommendation, trainer.target)
-                          ) + (trainer.recommendation.calibration
-                            ? ' ' + t(
-                                trainer.recommendation.calibration.offset > 0
-                                  ? 'workout.trainer.calibration.up'
-                                  : 'workout.trainer.calibration.down',
-                                {
-                                  reps: formatNumber(language, Math.abs(trainer.recommendation.calibration.offset)),
-                                  delta: formatNumber(language, Math.abs((trainer.recommendation.weight ?? 0) - trainer.recommendation.calibration.uncalibratedWeight)),
-                                }
-                              ) + (trainer.recommendation.calibration.capped ? ' ' + t('workout.trainer.calibration.capped') : '')
-                            : ''),
-                        })}
-                        confidence={t(`workout.trainer.confidence.${trainer.recommendation.confidence}` as TranslationKey)}
-                        collectData={trainer.recommendation.action === 'collect_data'}
-                        sameAsOriginal={
-                          !(trainer.recommendation.setWeights && new Set(trainer.recommendation.setWeights).size > 1) &&
-                          trainer.recommendation.weight === trainer.original.weight &&
-                          trainer.recommendation.reps.min === trainer.target.min &&
-                          trainer.recommendation.reps.max === trainer.target.max &&
-                          trainer.recommendation.sets === setCount
-                        }
-                        choiceText={draft.trainerChoice
-                          ? t(draft.trainerChoice === 'accepted'
-                            ? 'workout.trainer.choice.accepted'
-                            : 'workout.trainer.choice.keptOriginal', {
-                              weight: formatNumber(language, draft.weight),
-                              reps: trainerRangeLabel(draft.trainerChoice === 'accepted'
-                                ? trainer.recommendation.reps
-                                : trainer.target),
-                            })
-                          : undefined}
-                        acceptLabel={t('workout.trainer.accept')}
-                        keepOriginalLabel={t('workout.trainer.keepOriginal')}
-                        collectDataText={t('workout.trainer.collectData')}
-                        sameAsOriginalText={t('workout.trainer.sameAsOriginal', {
-                          weight: formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
-                          reps: trainerRangeLabel(trainer.recommendation.reps),
-                        })}
-                        onAccept={() => saveTrainerChoice(exercise, 'accepted', trainer)}
-                        onKeepOriginal={() => saveTrainerChoice(exercise, 'kept_original', trainer)}
-                      />
-                    )}
                     {/* TODO(i18n): PT will provide approved translations */}
                     {exercise.weekNote && (
                       <p className="planned-exercise-notes">
@@ -3069,6 +2993,14 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
                       >
                         {text.progress}<span aria-hidden="true">{isProgressSectionVisible ? '−' : '+'}</span>
                       </button>
+                      {isProgressSectionVisible && (
+                        <VolumeTrend
+                          points={volumeTrendPoints(exerciseHistory)}
+                          title={t('workout.progress.volumeTrend')}
+                          changeLabel={(change) => t('workout.progress.volumeChange', { change: `${change > 0 ? '+' : ''}${formatNumber(language, change)}` })}
+                          formatValue={(value) => t('workout.volume.value', { value: formatNumber(language, value) })}
+                        />
+                      )}
                       {isProgressSectionVisible && (progressItems.length > 0 ? (
                         <div className="planned-history-list">
                           {progressItems.map((item) => (
