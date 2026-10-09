@@ -32,11 +32,13 @@ import {
   normalizeExerciseName,
   saveLocalExerciseSwaps,
   saveWorkoutHistory,
+  loadCustomPlan,
+  saveCustomPlan,
   setSessionStorageValue,
-  storageKey,
   setActiveBlockId,
   upsertExerciseRecord,
 } from '../utils/storage'
+import type { CustomPlan, CustomPlanDay, CustomPlanExercise } from '../utils/storage'
 import {
   blockDateRange,
   blockWeek,
@@ -111,6 +113,7 @@ type PlanExercise = {
   notes?: string
   swappedFrom?: string
   weekNote?: string
+  customPlanExerciseId?: string
 }
 
 const swapEquipmentKeys: Record<string, TranslationKey> = {
@@ -215,7 +218,6 @@ function SteppedNumberInput({
   )
 }
 
-const CUSTOM_PLAN_KEY = 'gym-studio.custom-plan'
 const BLOCK_CARD_EXPANDED_KEY = 'gym-studio.block-card-expanded'
 
 function createRecommendationId() {
@@ -226,42 +228,65 @@ function createRecommendationId() {
   })
 }
 
-const defaultCustomExercise: PlanExercise = {
-  name: '',
-  sets: '3',
-  reps: '8-10',
-  rest: "1'30\"",
-  focus: 'General',
-  goal: '',
-  tip: '',
+const customPlanMuscles = ['Glutes', 'Legs', 'Back', 'Chest', 'Shoulders', 'Arms', 'Core'] as const
+type CustomPlanMuscle = typeof customPlanMuscles[number]
+
+type CustomPlanSheetDraft = {
+  dayId: string
+  customPlanExerciseId?: string
+  exerciseId?: string
+  name: string
+  muscle: string
+  sets: number
+  repMin: number
+  repMax: number
+  restSeconds: number
+  selected: boolean
+  custom: boolean
 }
 
-function loadCustomPlan(): PlanExercise[] {
-  const raw = localStorage.getItem(storageKey(CUSTOM_PLAN_KEY))
-  if (!raw) return []
-
-  try {
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-
-    return parsed
-      .map((item) => ({
-        name: typeof item?.name === 'string' ? item.name.trim() : '',
-        sets: typeof item?.sets === 'string' ? item.sets : '3',
-        reps: typeof item?.reps === 'string' ? item.reps : '8-10',
-        rest: typeof item?.rest === 'string' ? item.rest : "1'30\"",
-        focus: typeof item?.focus === 'string' ? item.focus : 'General',
-        goal: typeof item?.goal === 'string' ? item.goal : '',
-        tip: typeof item?.tip === 'string' ? item.tip : '',
-      }))
-      .filter((item) => item.name.length > 0)
-  } catch {
-    return []
+function customPlanMuscleMatches(exercise: Exercise, muscle: CustomPlanMuscle) {
+  const exerciseMuscles = [exercise.primaryMuscle, ...(exercise.primaryMuscles ?? []), ...(exercise.secondaryMuscles ?? [])]
+    .join(' ')
+    .toLowerCase()
+  const patterns: Record<CustomPlanMuscle, RegExp> = {
+    Glutes: /glute|butt/,
+    Legs: /quadr|hamstring|calf|leg|adductor|abductor/,
+    Back: /back|lat|trap|rhomboid|erector/,
+    Chest: /chest|pectoral/,
+    Shoulders: /shoulder|deltoid/,
+    Arms: /bicep|tricep|forearm|arm/,
+    Core: /core|abdom|oblique/,
   }
+  return patterns[muscle].test(exerciseMuscles)
 }
 
-function saveCustomPlan(exercises: PlanExercise[]) {
-  localStorage.setItem(storageKey(CUSTOM_PLAN_KEY), JSON.stringify(exercises))
+function customPlanRepRange(reps: string) {
+  const values = reps.match(/\d+/g)?.map(Number) ?? [8, 10]
+  return { repMin: values[0] ?? 8, repMax: values[1] ?? values[0] ?? 10 }
+}
+
+function CustomPlanNumberStepper({
+  label,
+  value,
+  onChange,
+  t,
+}: {
+  label: string
+  value: number
+  onChange: (value: number) => void
+  t: Translate
+}) {
+  return (
+    <div className="custom-plan-stepper">
+      <span>{label}</span>
+      <div>
+        <button type="button" aria-label={t('workout.custom.decrease', { label })} onClick={() => onChange(Math.max(1, value - 1))}>−</button>
+        <output aria-label={label}>{value}</output>
+        <button type="button" aria-label={t('workout.custom.increase', { label })} onClick={() => onChange(Math.min(100, value + 1))}>+</button>
+      </div>
+    </div>
+  )
 }
 
 function createTipIllustration(muscle: string, variant: number) {
@@ -544,9 +569,14 @@ export default function WorkoutPlan({
   const demoMode = isDemoMode()
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
-  const [customPlan, setCustomPlan] = useState<PlanExercise[]>(() => loadCustomPlan())
-  const [customExerciseDraft, setCustomExerciseDraft] = useState<PlanExercise>(defaultCustomExercise)
-  const [selectedLibraryExerciseId, setSelectedLibraryExerciseId] = useState('')
+  const [customPlan, setCustomPlan] = useState<CustomPlan>(() => loadCustomPlan())
+  const [selectedCustomDayId, setSelectedCustomDayId] = useState('')
+  const [customPlanSheetDraft, setCustomPlanSheetDraft] = useState<CustomPlanSheetDraft | null>(null)
+  const [customPlanSearch, setCustomPlanSearch] = useState('')
+  const [customPlanMuscleFilter, setCustomPlanMuscleFilter] = useState<CustomPlanMuscle | 'All'>('All')
+  const [renamingCustomDayId, setRenamingCustomDayId] = useState('')
+  const [customDayNameDraft, setCustomDayNameDraft] = useState('')
+  const [customPlanUndo, setCustomPlanUndo] = useState<{ dayId: string; exercise: CustomPlanExercise; index: number } | null>(null)
   const [logError, setLogError] = useState<Record<string, string>>({})
   const [rawExerciseCatalog, setExerciseCatalog] = useState<Exercise[]>([])
   const [rawTrainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([])
@@ -654,6 +684,15 @@ export default function WorkoutPlan({
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [swapTarget])
 
+  useEffect(() => {
+    if (!customPlanSheetDraft) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setCustomPlanSheetDraft(null)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [customPlanSheetDraft !== null])
+
   const text = {
     sets: t('workout.label.sets'),
     reps: t('workout.label.reps'),
@@ -668,17 +707,9 @@ export default function WorkoutPlan({
     customHint: t('workout.custom.hint'),
     customName: t('workout.custom.name'),
     customSets: t('workout.custom.sets'),
-    customReps: t('workout.custom.reps'),
     customRest: t('workout.custom.rest'),
-    customFocus: t('workout.custom.focus'),
-    customGoal: t('workout.custom.goal'),
-    customTip: t('workout.custom.tip'),
     customAdd: t('workout.custom.add'),
-    customLibrary: t('workout.custom.library'),
-    customLibraryPlaceholder: t('workout.custom.libraryPlaceholder'),
-    customAddLibrary: t('workout.custom.addLibrary'),
     customEmpty: t('workout.custom.empty'),
-    customRemove: t('workout.custom.remove'),
     customBadge: t('workout.custom.badge'),
     calendar: t('workout.calendar.title'),
     close: t('workout.action.close'),
@@ -700,6 +731,10 @@ export default function WorkoutPlan({
     }
     return getExerciseDisplayName(exerciseOrName, language)
   }
+  const displayCustomDayName = (name: string) => {
+    const defaultName = name.match(/^Day ([A-Z])$/)
+    return defaultName ? t('workout.custom.dayDefault', { letter: defaultName[1] }) : name
+  }
   const blockStatusKey = {
     Current: 'workout.block.status.current',
     Upcoming: 'workout.block.status.upcoming',
@@ -719,6 +754,19 @@ export default function WorkoutPlan({
     [history, selectedCalendarBlock]
   )
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
+  const activeCustomDay = customPlan.days.find((day) => day.id === selectedCustomDayId) ?? customPlan.days[0]
+  const activeCustomExercises: PlanExercise[] = (activeCustomDay?.exercises ?? []).map((exercise) => ({
+    name: exercise.name,
+    sets: exercise.sets,
+    reps: exercise.reps,
+    rest: `${exercise.restSeconds} s`,
+    restSeconds: exercise.restSeconds,
+    focus: exercise.muscle,
+    goal: '',
+    tip: '',
+    exerciseId: exercise.exerciseId,
+    customPlanExerciseId: exercise.id,
+  }))
   const activeBlockExercises = useMemo(
     () =>
       activeDay?.exercises.map((exercise) => {
@@ -744,7 +792,25 @@ export default function WorkoutPlan({
       }) ?? [],
     [activeBlockWeek, activeDay, exerciseCatalog]
   )
-  const activeExercises = planMode === 'preset' ? activeBlockExercises : customPlan
+  const activeExercises = planMode === 'preset' ? activeBlockExercises : activeCustomExercises
+  const recentLibraryExerciseIds = new Map<string, number>()
+  const recentEntries = [...history]
+    .sort((a, b) => b.date.localeCompare(a.date))
+  recentEntries.forEach((entry, index) => {
+    if (!recentLibraryExerciseIds.has(entry.exerciseId)) recentLibraryExerciseIds.set(entry.exerciseId, index)
+  })
+  const customPlanSearchResults = exerciseCatalog
+    .filter((exercise) => {
+      const query = customPlanSearch.trim().toLocaleLowerCase(locale)
+      const names = [exercise.name, exercise.nameEs ?? '', displayExerciseName(exercise)].join(' ').toLocaleLowerCase(locale)
+      return (!query || names.includes(query)) &&
+        (customPlanMuscleFilter === 'All' || customPlanMuscleMatches(exercise, customPlanMuscleFilter))
+    })
+    .sort((a, b) => {
+      const recentDifference = (recentLibraryExerciseIds.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+        (recentLibraryExerciseIds.get(b.id) ?? Number.MAX_SAFE_INTEGER)
+      return recentDifference || displayExerciseName(a).localeCompare(displayExerciseName(b), locale)
+    })
   const swapSuggestions = swapTarget
     ? suggestAlternatives(
         swapTarget.exercise,
@@ -1857,100 +1923,159 @@ export default function WorkoutPlan({
     }))
   }
 
-const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => {
-    setCustomExerciseDraft((current) => ({
-      ...current,
-      [field]: value,
-    }))
-  }
+ const updateCustomPlanDays = (days: CustomPlanDay[]) => {
+   const nextPlan = { version: 2 as const, days }
+   setCustomPlan(nextPlan)
+   saveCustomPlan(nextPlan)
+ }
 
-  const addLibraryExerciseToCustomPlan = () => {
-    if (!selectedLibraryExerciseId) return
+ const startAddingCustomExercise = () => {
+   if (!activeCustomDay) return
+   setCustomPlanSearch('')
+   setCustomPlanMuscleFilter('All')
+   setCustomPlanSheetDraft({
+     dayId: activeCustomDay.id,
+     name: '',
+     muscle: '',
+     sets: 3,
+     repMin: 8,
+     repMax: 10,
+     restSeconds: 90,
+     selected: false,
+     custom: false,
+   })
+ }
 
-    const match = exerciseCatalog.find((exercise) => exercise.id === selectedLibraryExerciseId)
-    if (!match) return
+ const startCreatingCustomExercise = () => {
+   if (!customPlanSheetDraft) return
+   setCustomPlanSheetDraft({ ...customPlanSheetDraft, name: '', muscle: '', exerciseId: undefined, selected: true, custom: true })
+ }
 
-    const tipText = match.postureTips?.[0] ?? (match.tips?.length
-      ? typeof match.tips[0] === 'string'
-        ? match.tips[0]
-        : match.tips[0].text
-      : '')
+ const startEditingCustomExercise = (day: CustomPlanDay, exercise: CustomPlanExercise) => {
+   const { repMin, repMax } = customPlanRepRange(exercise.reps)
+   const libraryExercise = exerciseCatalog.find((item) => item.id === exercise.exerciseId) ??
+     exerciseCatalog.find((item) => normalizeExerciseName(item.name) === normalizeExerciseName(exercise.name))
+   setCustomPlanSheetDraft({
+     dayId: day.id,
+     customPlanExerciseId: exercise.id,
+     exerciseId: exercise.exerciseId ?? libraryExercise?.id,
+     name: exercise.name,
+     muscle: exercise.muscle || libraryExercise?.primaryMuscle || '',
+     sets: Number.parseInt(exercise.sets, 10) || 3,
+     repMin,
+     repMax,
+     restSeconds: exercise.restSeconds,
+     selected: true,
+     custom: !libraryExercise,
+   })
+   setCustomPlanSearch('')
+   setCustomPlanMuscleFilter('All')
+ }
 
-    const nextExercise: PlanExercise = {
-      name: match.name,
-      sets: '3',
-      reps: '8-10',
-      rest: "1'30\"",
-      focus: match.primaryMuscle || 'General',
-      goal: match.overallStatement ?? match.notes ?? match.name,
-      tip: tipText ?? '',
-    }
+ const selectCustomPlanExercise = (exercise: Exercise) => {
+   if (!customPlanSheetDraft) return
+   const templateExercise = activeBlock?.days
+     .flatMap((day) => day.exercises)
+     .find((item) => item.exerciseId === exercise.id)
+   const prescription = templateExercise ? prescriptionForWeek(templateExercise, activeBlockWeek ?? 1) : null
+   const repValues = (prescription?.reps.length ? prescription.reps : ['8', '10'])
+     .flatMap((reps) => reps.match(/\d+/g)?.map(Number) ?? [])
+   if (!repValues.length) repValues.push(8, 10)
+   setCustomPlanSheetDraft({
+     ...customPlanSheetDraft,
+     exerciseId: exercise.id,
+     name: exercise.name,
+     muscle: exercise.primaryMuscle || 'General',
+     sets: prescription?.sets ?? 3,
+     repMin: Math.min(...repValues),
+     repMax: Math.max(...repValues),
+     restSeconds: prescription?.restSeconds ?? 90,
+     selected: true,
+     custom: false,
+   })
+ }
 
-    const key = normalizeExerciseName(nextExercise.name)
-    const alreadyInPlan = customPlan.some((exercise) => normalizeExerciseName(exercise.name) === key)
-    if (alreadyInPlan) return
+ const saveCustomPlanExercise = () => {
+   if (!customPlanSheetDraft || !customPlanSheetDraft.name.trim() || !customPlanSheetDraft.selected) return
+   const draft = customPlanSheetDraft
+   const exercise: CustomPlanExercise = {
+     id: draft.customPlanExerciseId ?? createRecommendationId(),
+     ...(draft.exerciseId ? { exerciseId: draft.exerciseId } : {}),
+     name: draft.name.trim(),
+     muscle: draft.muscle,
+     sets: String(Math.max(1, draft.sets)),
+     reps: draft.repMin === draft.repMax ? String(draft.repMin) : `${draft.repMin}-${draft.repMax}`,
+     restSeconds: draft.restSeconds,
+   }
+   updateCustomPlanDays(customPlan.days.map((day) => {
+     if (day.id !== draft.dayId) return day
+     const index = day.exercises.findIndex((item) => item.id === draft.customPlanExerciseId)
+     const exercises = [...day.exercises]
+     if (index >= 0) exercises[index] = exercise
+     else exercises.push(exercise)
+     return { ...day, exercises }
+   }))
+   setSelectedCustomDayId(draft.dayId)
+   setCustomPlanSheetDraft(null)
+ }
 
-    const nextPlan = [...customPlan, nextExercise]
-    setCustomPlan(nextPlan)
-    saveCustomPlan(nextPlan)
-    setSelectedLibraryExerciseId('')
-    setCollapsedExercises((current) => ({ ...current, [key]: true }))
-    setProgressSectionsVisible((current) => ({ ...current, [key]: false }))
-    setPostureTipsVisible((current) => ({ ...current, [key]: true }))
-  }
+ const deleteCustomPlanExercise = () => {
+   if (!customPlanSheetDraft?.customPlanExerciseId) return
+   const draft = customPlanSheetDraft
+   const day = customPlan.days.find((item) => item.id === draft.dayId)
+   const exercise = day?.exercises.find((item) => item.id === draft.customPlanExerciseId)
+   if (!day || !exercise) return
+   const index = day.exercises.findIndex((item) => item.id === exercise.id)
+   updateCustomPlanDays(customPlan.days.map((item) =>
+     item.id === day.id ? { ...item, exercises: item.exercises.filter((entry) => entry.id !== exercise.id) } : item
+   ))
+   setCustomPlanUndo({ dayId: day.id, exercise, index })
+   setCustomPlanSheetDraft(null)
+ }
 
-  const addCustomExercise = () => {
-    const trimmedName = customExerciseDraft.name.trim()
-    if (!trimmedName) return
+ const undoDeleteCustomPlanExercise = () => {
+   if (!customPlanUndo) return
+   updateCustomPlanDays(customPlan.days.map((day) => {
+     if (day.id !== customPlanUndo.dayId) return day
+     const exercises = [...day.exercises]
+     exercises.splice(customPlanUndo.index, 0, customPlanUndo.exercise)
+     return { ...day, exercises }
+   }))
+   setCustomPlanUndo(null)
+ }
 
-    const nextExercise: PlanExercise = {
-      ...customExerciseDraft,
-      name: trimmedName,
-      sets: customExerciseDraft.sets?.trim() || '3',
-      reps: customExerciseDraft.reps?.trim() || '8-10',
-      rest: customExerciseDraft.rest.trim() || "1'30\"",
-      focus: customExerciseDraft.focus.trim() || 'General',
-      goal: customExerciseDraft.goal.trim(),
-      tip: customExerciseDraft.tip.trim(),
-    }
+ const moveCustomPlanExercise = (day: CustomPlanDay, index: number, offset: -1 | 1) => {
+   const target = index + offset
+   if (target < 0 || target >= day.exercises.length) return
+   const exercises = [...day.exercises]
+   ;[exercises[index], exercises[target]] = [exercises[target], exercises[index]]
+   updateCustomPlanDays(customPlan.days.map((item) => item.id === day.id ? { ...item, exercises } : item))
+ }
 
-    const nextPlan = [...customPlan, nextExercise]
-    const key = normalizeExerciseName(nextExercise.name)
+ const addCustomPlanDay = () => {
+   const day: CustomPlanDay = {
+     id: createRecommendationId(),
+     name: `Day ${String.fromCharCode(65 + customPlan.days.length)}`,
+     exercises: [],
+   }
+   updateCustomPlanDays([...customPlan.days, day])
+   setSelectedCustomDayId(day.id)
+   setCustomPlanUndo(null)
+ }
 
-    setCustomPlan(nextPlan)
-    saveCustomPlan(nextPlan)
-    setCustomExerciseDraft(defaultCustomExercise)
-    setCollapsedExercises((current) => ({ ...current, [key]: true }))
-    setProgressSectionsVisible((current) => ({ ...current, [key]: false }))
-    setPostureTipsVisible((current) => ({ ...current, [key]: true }))
-  }
+ const deleteCustomPlanDay = (day: CustomPlanDay) => {
+   if (customPlan.days.length <= 1) return
+   const days = customPlan.days.filter((item) => item.id !== day.id)
+   updateCustomPlanDays(days)
+   if (selectedCustomDayId === day.id) setSelectedCustomDayId(days[0].id)
+   setRenamingCustomDayId('')
+ }
 
-  const removeCustomExercise = (exerciseName: string) => {
-    const key = normalizeExerciseName(exerciseName)
-    const nextPlan = customPlan.filter((exercise) => normalizeExerciseName(exercise.name) !== key)
-
-    setCustomPlan(nextPlan)
-    saveCustomPlan(nextPlan)
-
-    setCollapsedExercises((current) => {
-      const next = { ...current }
-      delete next[key]
-      return next
-    })
-
-    setProgressSectionsVisible((current) => {
-      const next = { ...current }
-      delete next[key]
-      return next
-    })
-
-    setPostureTipsVisible((current) => {
-      const next = { ...current }
-      delete next[key]
-      return next
-    })
-
-  }
+ const saveCustomDayName = (day: CustomPlanDay) => {
+   const name = customDayNameDraft.trim()
+   if (name) updateCustomPlanDays(customPlan.days.map((item) => item.id === day.id ? { ...item, name } : item))
+   setRenamingCustomDayId('')
+ }
 
   if (planMode === 'preset' && blocksLoaded && trainingBlocks.length === 0) {
     const signedInUser = authStatus === 'signed-in' && !demoMode
@@ -2394,109 +2519,271 @@ const updateCustomExerciseDraft = (field: keyof PlanExercise, value: string) => 
             <p>{text.customHint}</p>
           </div>
 
-          <div className="custom-library-row">
-            <label>
-              <span>{text.customLibrary}</span>
-              <select
-                value={selectedLibraryExerciseId}
-                onChange={(event) => setSelectedLibraryExerciseId(event.target.value)}
+          <div className="custom-plan-day-tabs" role="tablist" aria-label={t('workout.custom.daysAria')}>
+            {customPlan.days.map((day) => (
+              <button
+                type="button"
+                role="tab"
+                key={day.id}
+                aria-selected={day.id === activeCustomDay?.id}
+                className={day.id === activeCustomDay?.id ? 'custom-plan-day-tab active' : 'custom-plan-day-tab'}
+                onClick={() => setSelectedCustomDayId(day.id)}
               >
-                <option value="">{text.customLibraryPlaceholder}</option>
-                {exerciseCatalog
-                  .slice()
-                  .sort((a, b) =>
-                    displayExerciseName(a).localeCompare(displayExerciseName(b), locale)
-                  )
-                  .map((exercise) => (
-                    <option key={exercise.id} value={exercise.id}>
-                      {displayExerciseName(exercise)}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <button type="button" className="secondary-button" onClick={addLibraryExerciseToCustomPlan}>
-              {text.customAddLibrary}
+                {displayCustomDayName(day.name)}
+              </button>
+            ))}
+            <button type="button" className="custom-plan-add-day" onClick={addCustomPlanDay} aria-label={t('workout.custom.addDay')}>
+              +
             </button>
           </div>
 
-          <div className="custom-plan-grid">
-            <label>
-              <span>{text.customName}</span>
-              <input
-                type="text"
-                value={customExerciseDraft.name}
-                onChange={(event) => updateCustomExerciseDraft('name', event.target.value)}
-              />
-            </label>
-            <label>
-              <span>{text.customSets}</span>
-              <input
-                type="text"
-                value={customExerciseDraft.sets}
-                onChange={(event) => updateCustomExerciseDraft('sets', event.target.value)}
-              />
-            </label>
-            <label>
-              <span>{text.customReps}</span>
-              <input
-                type="text"
-                value={customExerciseDraft.reps}
-                onChange={(event) => updateCustomExerciseDraft('reps', event.target.value)}
-              />
-            </label>
-            <label>
-              <span>{text.customRest}</span>
-              <input
-                type="text"
-                value={customExerciseDraft.rest}
-                onChange={(event) => updateCustomExerciseDraft('rest', event.target.value)}
-              />
-            </label>
-            <label>
-              <span>{text.customFocus}</span>
-              <input
-                type="text"
-                value={customExerciseDraft.focus}
-                onChange={(event) => updateCustomExerciseDraft('focus', event.target.value)}
-              />
-            </label>
-            <label>
-              <span>{text.customGoal}</span>
-              <input
-                type="text"
-                value={customExerciseDraft.goal}
-                onChange={(event) => updateCustomExerciseDraft('goal', event.target.value)}
-              />
-            </label>
-            <label className="custom-plan-full">
-              <span>{text.customTip}</span>
-              <input
-                type="text"
-                value={customExerciseDraft.tip}
-                onChange={(event) => updateCustomExerciseDraft('tip', event.target.value)}
-              />
-            </label>
-          </div>
-
-          <button type="button" className="secondary-button" onClick={addCustomExercise}>
-            {text.customAdd}
-          </button>
-
-          {customPlan.length > 0 ? (
-            <div className="custom-plan-list" aria-label={t('workout.custom.listAria')}>
-              {customPlan.map((exercise) => (
-                <div key={`custom-${exercise.name}`} className="custom-plan-item">
-                  <span>{displayExerciseName(exercise.name)}</span>
-                  <button type="button" className="remove-set-button" onClick={() => removeCustomExercise(exercise.name)}>
-                    {text.customRemove}
+          {activeCustomDay && (
+            <>
+              {renamingCustomDayId === activeCustomDay.id ? (
+                <form
+                  className="custom-plan-rename"
+                  onSubmit={(event) => { event.preventDefault(); saveCustomDayName(activeCustomDay) }}
+                >
+                  <input
+                    aria-label={t('workout.custom.renameDay')}
+                    value={customDayNameDraft}
+                    onChange={(event) => setCustomDayNameDraft(event.target.value)}
+                  />
+                  <button type="submit" className="secondary-button">{t('workout.custom.save')}</button>
+                  <button type="button" className="secondary-button" onClick={() => setRenamingCustomDayId('')}>
+                    {t('workout.custom.cancel')}
+                  </button>
+                </form>
+              ) : (
+                <div className="custom-plan-day-actions">
+                  <button
+                    type="button"
+                    className="secondary-button small-button"
+                    onClick={() => { setRenamingCustomDayId(activeCustomDay.id); setCustomDayNameDraft(activeCustomDay.name) }}
+                  >
+                    {t('workout.custom.renameDay')}
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button small-button"
+                    disabled={customPlan.days.length <= 1}
+                    onClick={() => deleteCustomPlanDay(activeCustomDay)}
+                  >
+                    {t('workout.custom.deleteDay')}
                   </button>
                 </div>
-              ))}
+              )}
+
+              {activeCustomDay.exercises.length ? (
+                <div className="custom-plan-list" aria-label={t('workout.custom.listAria')}>
+                  {activeCustomDay.exercises.map((exercise, index) => (
+                    <div className="custom-plan-item" key={exercise.id}>
+                      <button
+                        type="button"
+                        className="custom-plan-exercise-edit"
+                        onClick={() => startEditingCustomExercise(activeCustomDay, exercise)}
+                      >
+                        <strong>{displayExerciseName(exercise.name)}</strong>
+                        <span>{exercise.sets} × {exercise.reps}</span>
+                      </button>
+                      <div className="custom-plan-reorder">
+                        <button
+                          type="button"
+                          aria-label={t('workout.custom.moveUp', { name: displayExerciseName(exercise.name) })}
+                          disabled={index === 0}
+                          onClick={() => moveCustomPlanExercise(activeCustomDay, index, -1)}
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={t('workout.custom.moveDown', { name: displayExerciseName(exercise.name) })}
+                          disabled={index === activeCustomDay.exercises.length - 1}
+                          onClick={() => moveCustomPlanExercise(activeCustomDay, index, 1)}
+                        >
+                          ↓
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-state">{text.customEmpty}</p>
+              )}
+              <button type="button" className="primary-button custom-plan-add-exercise" onClick={startAddingCustomExercise}>
+                + {text.customAdd}
+              </button>
+            </>
+          )}
+
+          {customPlanUndo && (
+            <div className="custom-plan-undo" role="status">
+              <span>{t('workout.custom.undoMessage', { name: displayExerciseName(customPlanUndo.exercise.name) })}</span>
+              <button type="button" onClick={undoDeleteCustomPlanExercise}>{t('workout.custom.undo')}</button>
             </div>
-          ) : (
-            <p className="empty-state">{text.customEmpty}</p>
           )}
         </section>
+      )}
+
+      {customPlanSheetDraft && (
+        <div className="custom-plan-sheet-backdrop" onClick={() => setCustomPlanSheetDraft(null)}>
+          <section
+            className="custom-plan-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="custom-plan-sheet-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="custom-plan-sheet-header">
+              <h2 id="custom-plan-sheet-title">
+                {customPlanSheetDraft.custom
+                  ? t('workout.custom.createTitle')
+                  : customPlanSheetDraft.customPlanExerciseId
+                    ? t('workout.custom.editTitle')
+                    : text.customAdd}
+              </h2>
+              <button type="button" className="toggle-button" onClick={() => setCustomPlanSheetDraft(null)}>
+                {text.close}
+              </button>
+            </div>
+            {!customPlanSheetDraft.selected ? (
+              <>
+                <input
+                  className="search-input"
+                  type="search"
+                  autoFocus
+                  placeholder={t('workout.custom.searchPlaceholder')}
+                  aria-label={t('workout.custom.searchPlaceholder')}
+                  value={customPlanSearch}
+                  onChange={(event) => setCustomPlanSearch(event.target.value)}
+                />
+                <div className="custom-plan-muscle-filters" role="group" aria-label={t('workout.custom.muscleFilterAria')}>
+                  {(['All', ...customPlanMuscles] as const).map((muscle) => (
+                    <button
+                      type="button"
+                      key={muscle}
+                      className={customPlanMuscleFilter === muscle ? 'chip active' : 'chip'}
+                      aria-pressed={customPlanMuscleFilter === muscle}
+                      onClick={() => setCustomPlanMuscleFilter(muscle)}
+                    >
+                      {muscle === 'All' ? t('workout.custom.allMuscles') : localizeMuscle(muscle, language)}
+                    </button>
+                  ))}
+                </div>
+                <div className="custom-plan-search-results">
+                  {customPlanSearchResults.length ? customPlanSearchResults.map((exercise) => (
+                    <button
+                      type="button"
+                      className="custom-plan-search-result"
+                      key={exercise.id}
+                      onClick={() => selectCustomPlanExercise(exercise)}
+                    >
+                      <strong>{displayExerciseName(exercise)}</strong>
+                      <span>{localizeMuscle(exercise.primaryMuscle, language)}</span>
+                    </button>
+                  )) : <p className="empty-state">{t('workout.custom.noResults')}</p>}
+                </div>
+                <button type="button" className="custom-plan-create-link" onClick={startCreatingCustomExercise}>
+                  {t('workout.custom.create')}
+                </button>
+              </>
+            ) : (
+              <>
+                {customPlanSheetDraft.custom ? (
+                  <>
+                    <label className="custom-plan-custom-name">
+                      <span>{text.customName}</span>
+                      <input
+                        autoFocus
+                        value={customPlanSheetDraft.name}
+                        onChange={(event) => setCustomPlanSheetDraft({ ...customPlanSheetDraft, name: event.target.value })}
+                      />
+                    </label>
+                    <div className="custom-plan-custom-muscles" role="group" aria-label={t('workout.custom.selectMuscle')}>
+                      {customPlanMuscles.map((muscle) => (
+                        <button
+                          type="button"
+                          key={muscle}
+                          className={customPlanSheetDraft.muscle === muscle ? 'chip active' : 'chip'}
+                          aria-pressed={customPlanSheetDraft.muscle === muscle}
+                          onClick={() => setCustomPlanSheetDraft({ ...customPlanSheetDraft, muscle })}
+                        >
+                          {localizeMuscle(muscle, language)}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="custom-plan-selected-exercise">
+                    <strong>{displayExerciseName(customPlanSheetDraft.name)}</strong>
+                    <button type="button" onClick={() => setCustomPlanSheetDraft({ ...customPlanSheetDraft, selected: false })}>
+                      {t('workout.custom.changeExercise')}
+                    </button>
+                  </div>
+                )}
+                <div className="custom-plan-prescription">
+                  <CustomPlanNumberStepper
+                    label={text.customSets}
+                    value={customPlanSheetDraft.sets}
+                    onChange={(sets) => setCustomPlanSheetDraft({ ...customPlanSheetDraft, sets })}
+                    t={t}
+                  />
+                  <CustomPlanNumberStepper
+                    label={t('workout.custom.repsMin')}
+                    value={customPlanSheetDraft.repMin}
+                    onChange={(repMin) => setCustomPlanSheetDraft({
+                      ...customPlanSheetDraft,
+                      repMin,
+                      repMax: Math.max(repMin, customPlanSheetDraft.repMax),
+                    })}
+                    t={t}
+                  />
+                  <CustomPlanNumberStepper
+                    label={t('workout.custom.repsMax')}
+                    value={customPlanSheetDraft.repMax}
+                    onChange={(repMax) => setCustomPlanSheetDraft({
+                      ...customPlanSheetDraft,
+                      repMax,
+                      repMin: Math.min(repMax, customPlanSheetDraft.repMin),
+                    })}
+                    t={t}
+                  />
+                </div>
+                <fieldset className="custom-plan-rest-options">
+                  <legend>{text.customRest}</legend>
+                  {([60, 90, 120] as const).map((seconds) => (
+                    <button
+                      type="button"
+                      key={seconds}
+                      className={customPlanSheetDraft.restSeconds === seconds ? 'chip active' : 'chip'}
+                      aria-pressed={customPlanSheetDraft.restSeconds === seconds}
+                      onClick={() => setCustomPlanSheetDraft({ ...customPlanSheetDraft, restSeconds: seconds })}
+                    >
+                      {t('workout.custom.restChoice', { seconds })}
+                    </button>
+                  ))}
+                </fieldset>
+                <div className="custom-plan-sheet-actions">
+                  {customPlanSheetDraft.customPlanExerciseId && (
+                    <button type="button" className="remove-set-button" onClick={deleteCustomPlanExercise}>
+                      {t('workout.custom.deleteExercise')}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="primary-button"
+                    disabled={!customPlanSheetDraft.name.trim() || (customPlanSheetDraft.custom && !customPlanSheetDraft.muscle)}
+                    onClick={saveCustomPlanExercise}
+                  >
+                    {customPlanSheetDraft.customPlanExerciseId
+                      ? t('workout.custom.save')
+                      : t('workout.custom.addToDay', { day: displayCustomDayName(activeCustomDay?.name ?? '') })}
+                  </button>
+                </div>
+              </>
+            )}
+          </section>
+        </div>
       )}
 
       {activeExercises.length > 0 && (

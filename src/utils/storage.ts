@@ -24,6 +24,27 @@ const TRAINER_EXPLANATIONS_KEY = 'gym-studio.trainer-explanations'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
 let helpAiAppOpensThisLoad: number | null = null
 
+export type CustomPlanExercise = {
+  id: string
+  exerciseId?: string
+  name: string
+  muscle: string
+  sets: string
+  reps: string
+  restSeconds: number
+}
+
+export type CustomPlanDay = {
+  id: string
+  name: string
+  exercises: CustomPlanExercise[]
+}
+
+export type CustomPlan = {
+  version: 2
+  days: CustomPlanDay[]
+}
+
 export type SyncWorkoutEntry = WorkoutEntry & {
   updatedAt: string
   dirty: boolean
@@ -62,6 +83,104 @@ const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
 const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY, LANGUAGE_KEY])
 
 let storageNamespace: string | null = null
+
+function createCustomPlanId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
+    const random = Math.floor(Math.random() * 16)
+    return (character === 'x' ? random : (random & 0x3) | 0x8).toString(16)
+  })
+}
+
+function emptyCustomPlan(): CustomPlan {
+  return {
+    version: 2,
+    days: [{ id: createCustomPlanId(), name: 'Day A', exercises: [] }],
+  }
+}
+
+function customPlanRestSeconds(item: Record<string, unknown>) {
+  if (typeof item.restSeconds === 'number' && Number.isFinite(item.restSeconds) && item.restSeconds > 0) {
+    return item.restSeconds
+  }
+  if (typeof item.rest !== 'string') return 90
+  const clock = item.rest.match(/^(\d+):(\d{1,2})$/)
+  if (clock) return Number(clock[1]) * 60 + Number(clock[2])
+  const minutes = item.rest.match(/(\d+)\s*(?:'|′|m(?:in(?:ute)?s?)?)/i)
+  const seconds = item.rest.match(/(\d+)\s*(?:"|″|s(?:ec(?:ond)?s?)?)/i)
+  if (minutes || seconds) return Number(minutes?.[1] ?? 0) * 60 + Number(seconds?.[1] ?? 0)
+  const numeric = Number(item.rest)
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 90
+}
+
+function normalizeCustomPlanExercise(value: unknown): CustomPlanExercise | null {
+  if (!value || typeof value !== 'object') return null
+  const item = value as Record<string, unknown>
+  const name = typeof item.name === 'string' ? item.name.trim() : ''
+  if (!name) return null
+  return {
+    id: typeof item.id === 'string' && item.id ? item.id : createCustomPlanId(),
+    ...(typeof item.exerciseId === 'string' && item.exerciseId ? { exerciseId: item.exerciseId } : {}),
+    name,
+    muscle: typeof item.muscle === 'string'
+      ? item.muscle
+      : typeof item.focus === 'string' ? item.focus : 'General',
+    sets: typeof item.sets === 'string' || typeof item.sets === 'number' ? String(item.sets) : '3',
+    reps: typeof item.reps === 'string' || typeof item.reps === 'number' ? String(item.reps) : '8-10',
+    restSeconds: customPlanRestSeconds(item),
+  }
+}
+
+export function loadCustomPlan(): CustomPlan {
+  try {
+    const raw = localStorage.getItem(storageKey(CUSTOM_PLAN_STORAGE_KEY))
+    if (!raw) {
+      const plan = emptyCustomPlan()
+      saveCustomPlan(plan)
+      return plan
+    }
+    const parsed: unknown = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      const migrated = {
+        version: 2 as const,
+        days: [{
+          id: createCustomPlanId(),
+          name: 'Day A',
+          exercises: parsed
+            .map(normalizeCustomPlanExercise)
+            .filter((exercise): exercise is CustomPlanExercise => exercise !== null),
+        }],
+      }
+      saveCustomPlan(migrated)
+      return migrated
+    }
+    if (!parsed || typeof parsed !== 'object' || !('version' in parsed) || parsed.version !== 2 || !('days' in parsed) || !Array.isArray(parsed.days)) {
+      return emptyCustomPlan()
+    }
+    const days = parsed.days
+      .filter((day): day is Record<string, unknown> => !!day && typeof day === 'object')
+      .map((day) => ({
+        id: typeof day.id === 'string' && day.id ? day.id : createCustomPlanId(),
+        name: typeof day.name === 'string' && day.name.trim() ? day.name.trim() : 'Day',
+        exercises: Array.isArray(day.exercises)
+          ? day.exercises
+            .map(normalizeCustomPlanExercise)
+            .filter((exercise): exercise is CustomPlanExercise => exercise !== null)
+          : [],
+      }))
+    return { version: 2, days: days.length ? days : emptyCustomPlan().days }
+  } catch {
+    return emptyCustomPlan()
+  }
+}
+
+export function saveCustomPlan(plan: CustomPlan) {
+  try {
+    localStorage.setItem(storageKey(CUSTOM_PLAN_STORAGE_KEY), JSON.stringify(plan))
+  } catch {
+    // Custom plans remain usable if browser storage is unavailable.
+  }
+}
 
 // Signed-in accounts get their own local namespace; signed-out use is the "guest" namespace
 // (the original, un-prefixed keys). Catalogue caches and device-level state are shared.

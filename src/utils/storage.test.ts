@@ -32,10 +32,12 @@ import {
   setStorageNamespace,
   hasGuestWorkoutData,
   isGuestDataClaimed,
+  loadCustomPlan,
   moveGuestDataToAccount,
   getLanguage,
   recordHelpAiAppOpen,
   setLanguage,
+  saveCustomPlan,
 } from './storage'
 
 const supabaseMock = vi.hoisted(() => {
@@ -150,6 +152,78 @@ describe('active user plan cache', () => {
     } finally {
       setStorageNamespace(null)
     }
+  })
+})
+
+describe('custom plan storage', () => {
+  it('migrates the legacy flat exercise list to one v2 day without losing its values', () => {
+    localStorage.setItem('gym-studio.custom-plan', JSON.stringify([
+      {
+        name: 'Hip thrust',
+        exerciseId: 'history-exercise-id',
+        sets: '4',
+        reps: '8-10',
+        rest: `1'30"`,
+        focus: 'Glutes',
+        goal: 'Old goal',
+        tip: 'Old tip',
+      },
+    ]))
+
+    const plan = loadCustomPlan()
+
+    expect(plan.version).toBe(2)
+    expect(plan.days).toHaveLength(1)
+    expect(plan.days[0].name).toBe('Day A')
+    expect(plan.days[0].id).toBeTruthy()
+    expect(plan.days[0].exercises).toHaveLength(1)
+    expect(plan.days[0].exercises[0]).toMatchObject({
+      exerciseId: 'history-exercise-id',
+      name: 'Hip thrust',
+      muscle: 'Glutes',
+      sets: '4',
+      reps: '8-10',
+      restSeconds: 90,
+    })
+    expect(plan.days[0].exercises[0].id).toBeTruthy()
+    expect(JSON.parse(localStorage.getItem('gym-studio.custom-plan') ?? 'null')).toEqual(plan)
+  })
+
+  it('returns an empty Day A for missing or corrupted data', () => {
+    const missing = loadCustomPlan()
+    expect(missing.version).toBe(2)
+    expect(missing.days).toHaveLength(1)
+    expect(missing.days[0].name).toBe('Day A')
+    expect(missing.days[0].exercises).toEqual([])
+    expect(loadCustomPlan()).toEqual(missing)
+
+    localStorage.setItem('gym-studio.custom-plan', '{')
+    const corrupted = loadCustomPlan()
+    expect(corrupted.version).toBe(2)
+    expect(corrupted.days).toHaveLength(1)
+    expect(corrupted.days[0].exercises).toEqual([])
+  })
+
+  it('preserves ids and day layout when reading a v2 plan', () => {
+    const plan = {
+      version: 2 as const,
+      days: [{
+        id: 'day-stable',
+        name: 'Push',
+        exercises: [{
+          id: 'exercise-stable',
+          exerciseId: 'catalogue-id',
+          name: 'Bench press',
+          muscle: 'Chest',
+          sets: '3',
+          reps: '8',
+          restSeconds: 60,
+        }],
+      }],
+    }
+    saveCustomPlan(plan)
+
+    expect(loadCustomPlan()).toEqual(plan)
   })
 })
 
