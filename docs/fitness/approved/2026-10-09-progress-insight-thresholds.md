@@ -1,10 +1,10 @@
 ---
 title: Progress insight thresholds (insights #1, #7, #8, #9, #15, #18, #19, #20)
-status: approved (Sebas, 2026-10-10)
+status: approved
 author: pt-fitness-expert
 created: 2026-10-09
-approved_by:
-approved_on:
+approved_by: Sebas (PO)
+approved_on: 2026-10-10
 exercises: []            # rules apply by catalogue fields, no per-exercise content
 ---
 
