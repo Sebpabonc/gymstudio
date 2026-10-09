@@ -134,9 +134,9 @@ describe('approved progress insight thresholds', () => {
       makeEntry('2026-01-05', 100),
       makeEntry('2026-01-12', 100),
       makeEntry('2026-02-09', 80),
-      makeEntry('2026-02-16', 103),
-      makeEntry('2026-02-23', 103),
-    ], { today: '2026-02-23' })
+      makeEntry('2026-02-02', 103),
+      makeEntry('2026-02-06', 103),
+    ], { today: '2026-02-10' })
     expect(result.lifts[0]).toMatchObject({ sessions: 4, trend: 'improving' })
   })
 
@@ -252,6 +252,19 @@ describe('approved progress insight thresholds', () => {
     expect(result.sessionsDone).toBe(3)
     expect(result.sessionsPlanned).toBe(2)
     expect(result.streakWeeks).toBe(2)
+  })
+
+  it('keeps a completed block range within its dates and plans all of its weeks', () => {
+    const block = makeBlock()
+    const result = insights([
+      makeEntry('2026-01-05', 50),
+      makeEntry('2026-02-09', 50),
+      makeEntry('2026-02-16', 50),
+    ], { block, today: '2026-02-20' })
+    expect(result.rangeEnd).toBe('2026-02-15')
+    expect(result.sessionsDone).toBe(2)
+    expect(result.sessionsPlanned).toBe(6)
+    expect(result.activeBlockWeek).toBe(6)
   })
 
   it('marks strict all-history e1RM bests and counts rep PRs only at the same load', () => {

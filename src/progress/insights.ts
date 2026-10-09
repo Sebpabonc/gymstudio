@@ -141,6 +141,12 @@ function windowStart(range: ProgressRange, activeBlock: TrainingBlock | null, to
   return addDays(today, range === '4weeks' ? -27 : -83)
 }
 
+function windowEnd(range: ProgressRange, activeBlock: TrainingBlock | null, today: string) {
+  if (range !== 'block' || !activeBlock) return today
+  const blockEnd = addDays(activeBlock.startDate, activeBlock.weeks * 7 - 1)
+  return dateValue(today) < dateValue(blockEnd) ? today : blockEnd
+}
+
 function mean(values: number[]) {
   return values.length ? values.reduce((total, value) => total + value, 0) / values.length : null
 }
@@ -202,7 +208,12 @@ function trendForLift(sessions: Array<{ date: string; value: number }>): { chang
 }
 
 function currentBlockWeek(activeBlock: TrainingBlock | null, today: string) {
-  return activeBlock ? blockWeek(activeBlock, today) ?? 0 : 0
+  if (!activeBlock) return 0
+  const week = blockWeek(activeBlock, today)
+  if (week !== null) return week
+  return dateValue(today) >= dateValue(addDays(activeBlock.startDate, activeBlock.weeks * 7))
+    ? activeBlock.weeks
+    : 0
 }
 
 function distinctSessionDays(sessions: Array<{ date: string }>) {
@@ -299,8 +310,9 @@ export function calculateProgressInsights(
   range: ProgressRange = 'block'
 ) {
   const start = windowStart(range, activeBlock, today)
+  const end = windowEnd(range, activeBlock, today)
   const sessions = groupExerciseSessions(entries)
-  const rangeSessions = sessions.filter((session) => rangeContains(session.date, start, today))
+  const rangeSessions = sessions.filter((session) => rangeContains(session.date, start, end))
   const planExerciseIds = new Set(activeBlock?.days.flatMap((day) => day.exercises.map((item) => item.exerciseId)) ?? [])
   const liftSessions = new Map<string, Array<{ date: string; value: number }>>()
   for (const session of rangeSessions) {
@@ -334,7 +346,7 @@ export function calculateProgressInsights(
     return {
       exerciseId,
       sessions: points.length,
-      points: sessionE1rmPoints(entries, blocks, exerciseId, start, today),
+      points: sessionE1rmPoints(entries, blocks, exerciseId, start, end),
       ...trend,
     }
   }).sort((a, b) => a.exerciseId.localeCompare(b.exerciseId))
@@ -371,8 +383,8 @@ export function calculateProgressInsights(
       || a.exerciseId.localeCompare(b.exerciseId))[0] ?? null
 
   const records = personalRecords(entries, blocks)
-    .filter((record) => rangeContains(record.date, start, today) && record.badges.length)
-  const repPrs = repPersonalRecords(entries, blocks, start, today)
+    .filter((record) => rangeContains(record.date, start, end) && record.badges.length)
+  const repPrs = repPersonalRecords(entries, blocks, start, end)
   const latestWeek = startOfWeek(today)
   const previousWeekStarts = recentWeekStarts(addDays(latestWeek, -7), 3)
   const currentWeeklySets = weeklySets(entries, blocks, exercises, today, activeBlock)
@@ -514,14 +526,14 @@ export function calculateProgressInsights(
     const date = addDays(gridStart, index)
     return { date, hasSession: date <= today && loggedDates.has(date) }
   })
-  const windowWeeks = Math.max(0, Math.round((dateValue(today) - dateValue(start) + 1) / (7 * DAY_MS)))
+  const windowWeeks = Math.max(0, Math.round((dateValue(end) - dateValue(start) + 1) / (7 * DAY_MS)))
   const plannedSessions = activeBlock
     ? range === 'block'
       ? Math.max(0, Math.min(blockWeekNumber, activeBlock.weeks) * activeBlock.days.length)
       : windowWeeks * activeBlock.days.length
     : 0
-  const rangeEntries = entries.filter((entry) => rangeContains(entry.date, start, today))
-  const weeklyAdherence = weekStartsInRange(start, today)
+  const rangeEntries = entries.filter((entry) => rangeContains(entry.date, start, end))
+  const weeklyAdherence = weekStartsInRange(start, end)
     .map((week) => adherence(rangeEntries, blocks, week).week.sessionsDone)
   const sessionCount = new Set(rangeSessions.map((session) => session.date)).size
   const sessionsDone = Math.min(sessionCount, weeklyAdherence.reduce((total, done) => total + done, 0))
@@ -529,7 +541,7 @@ export function calculateProgressInsights(
     ? plannedSessions
     : activeBlock
       ? plannedSessions
-      : weeklyAdherence.length * 6
+      : windowWeeks * 6
 
   const recentStart = addDays(today, -PROGRESS_THRESHOLDS.recentRecordDays + 1)
   const recentRecordsCount = records.filter((record) => rangeContains(record.date, recentStart, today))
@@ -537,7 +549,7 @@ export function calculateProgressInsights(
 
   return {
     rangeStart: start,
-    rangeEnd: today,
+    rangeEnd: end,
     lifts,
     eligibleLifts,
     improvingCount: improvingLifts.length,

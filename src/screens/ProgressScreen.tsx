@@ -275,7 +275,10 @@ export default function ProgressScreen({
       exercises,
       { language, t }
     )
-    const points = trend.points.filter((point) => point.date >= (data?.insights.rangeStart ?? '') && point.date <= today)
+    const points = trend.points.filter((point) =>
+      point.date >= (data?.insights.rangeStart ?? '')
+      && point.date <= (data?.insights.rangeEnd ?? today)
+    )
     const recordDates = new Set([
       ...selectedLift.points.filter((point) => point.isBestEver).map((point) => point.date),
       ...data?.insights.records
