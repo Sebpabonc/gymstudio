@@ -3019,7 +3019,8 @@ export default function WorkoutPlan({
                   </button>
                 </div>
 
-                {trainerNext && (
+                {/* PO 2026-10-10: the Next box lives inside the expanded card. */}
+                {trainerNext && !isCollapsed && (
                   <aside className="next-target-card">
                     <strong>{t('workout.session.performanceNext', {
                       day: trainerNext.nextDate ? formatWeekdayDate(language, `${trainerNext.nextDate}T00:00:00Z`).split(' ')[0] : '',
@@ -3029,7 +3030,7 @@ export default function WorkoutPlan({
                     <p>{trainerReason(t, language, trainerNext.next, trainerNext.next.reps)}</p>
                   </aside>
                 )}
-                {insightTarget && (toastRecommendation || completedEntry) && (
+                {insightTarget && !isCollapsed && (toastRecommendation || completedEntry) && (
                   <aside className="next-target-card" role="status" aria-live="polite">
                     <strong>{getNextTargetLabel(insightTarget)}</strong>
                     <p>{getNextTargetWhy(insightTarget)}</p>
