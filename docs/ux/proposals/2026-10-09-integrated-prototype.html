@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GymStudio Integrated Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f10;--soft:#171719;--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);--line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#c8c7c4;--dim:rgba(243,243,241,.55);--brand:#8d5e63;--rose:#c99ca1;--brandsoft:rgba(141,94,99,.18);--btn:linear-gradient(135deg,#7a5d60 0%,#2f2f31 100%);--ok:#9fd6a6;--up:#9fd6a6;--down:#ffb4a9;--gold:#e6c27a}
+*{box-sizing:border-box;margin:0}
+body{background:#050506;color:var(--text);font-family:Inter,'Segoe UI',sans-serif;font-size:14px;display:flex;justify-content:center}
+.phone{width:100%;max-width:375px;min-height:100vh;background:var(--bg);position:relative;padding-bottom:84px}
+.notes{max-width:300px;padding:20px;color:var(--dim);font-size:12px;line-height:1.5;display:none}
+@media(min-width:760px){.notes{display:block}.phone{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+header{padding:14px 16px 6px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:10px;letter-spacing:.18em;color:var(--dim);font-weight:700}.brand b{color:var(--rose)}
+.lang{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}.lang button{background:none;border:0;color:var(--dim);font:600 11px Inter;padding:5px 9px}.lang .on{background:var(--brandsoft);color:var(--rose)}
+.wrap{padding:0 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px}
+h1{font-size:20px;font-weight:800}h2{font-size:11px;letter-spacing:.14em;color:var(--dim);font-weight:700;text-transform:uppercase;margin:18px 0 8px}
+.sub{color:var(--muted);font-size:12px;margin-top:3px}
+.bar{height:6px;border-radius:9px;background:var(--panel2);margin:10px 0}.bar i{display:block;height:100%;border-radius:9px;background:var(--rose)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{flex:1;min-height:40px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;font:600 12px Inter;padding:8px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer}
+.chip.pri{background:var(--btn);border-color:transparent}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.day{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:9px 6px;text-align:center;cursor:pointer;color:var(--text);font-family:Inter}
+.day b{display:block;font-size:13px}.day small{display:block;font-size:10.5px;color:var(--dim);margin-top:2px}.day em{font-style:normal;font-size:10px;color:var(--rose)}
+.day.sel{border-color:var(--rose);background:var(--brandsoft)}.day.done em{color:var(--ok)}
+.ex{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);cursor:pointer}
+.ex:last-child{border-bottom:0}
+.num{width:28px;height:28px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.ex.d .num{background:var(--ok);color:#111}
+.ex .t{flex:1;min-width:0}.ex .t b{display:block;font-size:14px;font-weight:600}.ex .t span{font-size:12px;color:var(--muted)}
+.chev{color:var(--dim)}
+.ss{border-left:3px solid var(--rose);margin:6px 0 6px 6px;border-radius:0 12px 12px 0;background:rgba(201,156,161,.05)}
+.sslab{font-size:10px;letter-spacing:.12em;color:var(--rose);font-weight:700;padding:8px 12px 0}
+.list{padding:0}
+.big{width:100%;min-height:52px;border:0;border-radius:16px;background:var(--btn);color:#fff;font:700 15px Inter;margin-top:14px;cursor:pointer}
+.ghost{background:none;border:1px solid var(--line);color:var(--text)}
+nav{position:fixed;bottom:0;width:100%;max-width:375px;display:flex;background:rgba(15,15,16,.95);border-top:1px solid var(--line);padding:6px 0 14px}
+nav button{flex:1;background:none;border:0;color:var(--dim);font:600 11px Inter;padding:6px;cursor:pointer}nav button i{display:block;font-style:normal;font-size:18px}
+nav .on{color:var(--rose)}
+.back{background:none;border:0;color:var(--rose);font:600 13px Inter;padding:4px 0;cursor:pointer}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.tools .chip{flex-direction:column;font-size:10.5px;min-height:52px}
+.ai{margin-top:12px;border:1px solid rgba(201,156,161,.4);background:var(--brandsoft);border-radius:14px;padding:12px}
+.ai .h{display:flex;justify-content:space-between;align-items:center}
+.seg{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}.seg button{background:none;border:0;color:var(--dim);font:600 11px Inter;padding:5px 10px;cursor:pointer}.seg .on{background:var(--rose);color:#111}
+.why{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th{font-size:10px;color:var(--dim);font-weight:600;text-align:left;padding:4px 3px;letter-spacing:.06em;text-transform:uppercase}
+td{padding:5px 3px;font-size:13px;border-top:1px solid var(--line)}
+td input{width:54px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--text);font:600 15px Inter;text-align:center}
+.ck{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:16px;cursor:pointer}
+tr.ok .ck{background:var(--ok);color:#111;border-color:transparent}
+.rest{position:fixed;bottom:76px;width:calc(100% - 32px);max-width:343px;left:50%;transform:translateX(-50%);background:#2a2023;border:1px solid var(--rose);border-radius:14px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:5}
+.rest.show{display:flex}.rest b{font-size:20px;flex:1}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:9}.sheet.show{display:flex}
+.sheet>div{width:100%;max-width:375px;background:var(--soft);border-radius:20px 20px 0 0;padding:18px 16px 28px;max-height:80vh;overflow:auto}
+.sum{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.u{color:var(--up)}.dn{color:var(--down)}.eq{color:var(--muted)}
+.log{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line)}
+.log .t{flex:1}.trash{background:none;border:1px solid var(--line);color:var(--down);border-radius:10px;padding:8px 10px;font:600 11px Inter;cursor:pointer}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#2b2b2d;border:1px solid var(--line);padding:10px 14px;border-radius:12px;font-size:12px;display:none;z-index:20;gap:10px}
+.toast.show{display:flex}.toast button{background:none;border:0;color:var(--rose);font:700 12px Inter}
+.hide{display:none!important}
+.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--panel2);color:var(--muted);margin-right:4px}
+.ph{padding:18px 16px 8px}.ph .k{font-size:10px;letter-spacing:.2em;color:var(--dim);font-weight:700}.ph .g{font-size:30px;font-weight:800;letter-spacing:.02em;margin-top:2px}.ph .tt{font-size:22px;font-weight:700;color:var(--rose);margin-top:2px}
+.hrow{display:flex;justify-content:space-between;align-items:flex-start}.icb{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:18px}
+.pill{display:inline-block;margin-top:10px;font-size:10px;letter-spacing:.14em;font-weight:700;padding:6px 10px;border-radius:99px;background:var(--brandsoft);color:var(--rose)}
+.dtabs{display:flex;gap:6px;margin-top:12px}.dtab{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:8px 0;font:700 13px Inter;text-align:center}.dtab small{display:block;font-weight:500;font-size:10px;color:var(--dim)}.dtab.sel{background:var(--btn);border-color:transparent}
+.pc{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;margin-top:10px}
+.pc .top{display:flex;gap:10px;align-items:flex-start}.code{font-size:11px;font-weight:800;color:var(--rose);background:var(--brandsoft);border-radius:8px;padding:4px 6px}
+.pc a{color:var(--text);font-weight:700;text-decoration:none;font-size:14px}.sw{font:600 11px Inter;border:1px solid var(--line);background:none;color:var(--muted);border-radius:99px;padding:3px 8px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0}.chips span{font-size:10.5px;padding:3px 8px;border-radius:99px;background:var(--panel2);color:var(--muted)}.chips span:first-child{background:var(--brandsoft);color:var(--rose)}
+.nt{border-left:3px solid var(--rose);background:var(--brandsoft);border-radius:0 10px 10px 0;padding:8px 10px;font-size:12px;margin-top:8px}
+.ssw{border:1px solid rgba(201,156,161,.4);border-radius:20px;padding:4px 8px 10px;margin-top:12px}
+.start{position:sticky;bottom:84px;z-index:4}
+.wohead{display:flex;justify-content:space-between;align-items:center;padding:10px 16px}.mini{display:flex;gap:5px;overflow-x:auto;padding:4px 0 2px}.mini button{flex:none;min-width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:700 12px Inter}.mini .cur{border-color:var(--rose);color:var(--rose)}.mini .dn{background:var(--ok);color:#111}.mini .br{border-top:3px solid var(--rose)}
+body.wo .rest{bottom:12px}body.wo .phone{padding-bottom:96px}
+</style></head><body>
+<div class="phone" id="app"></div>
+<div class="notes"><b style="color:var(--rose)">Integrated prototype (2026-10-09)</b><br><br>Today = faithful replica of prod. Simplified v2 appears only in Workout mode (Start workout). Data: approved PT template <i>Upper / Lower · 4 Days</i> (tpl-4d-upper-lower-gym). Names and tips from catalogue-v2. Weights, "last time" and AI targets are illustrative placeholders, not engine output.<br><br>Try: Start workout → tick a set (rest bar) → Done / Next → Finish workout → summary → Back to Today. Progress tab: delete with Undo. EN/ES top right.</div>
+<div class="rest" id="rest"><span>⏱</span><b id="restT">1:30</b><button class="chip" style="flex:none" onclick="addRest(15)">+15s</button><button class="chip" style="flex:none" onclick="stopRest()" data-i="skip"></button></div>
+<div class="sheet" id="sheet" onclick="if(event.target===this)closeSheet()"><div id="sheetC"></div></div>
+<div class="toast" id="toast"><span id="toastT"></span><button onclick="undo()" data-i="undo"></button></div>
+<nav id="nav"></nav>
+<script>
+const DATA={"days": [{"name": "Upper A", "focus": "Upper body · heavy", "ex": [["barbell-bench-press", ["8", "8", "8"], 150, "straight", "A1"], ["plate-loaded-t-bar-row-chest-supported", ["8", "8", "8"], 150, "straight", "B1"], ["dumbbell-shoulder-press", ["10", "10", "10"], 10, "superset", "C1"], ["lat-pulldown", ["10", "10", "10"], 120, "superset", "C2"], ["cable-lateral-raise", ["15", "15", "15"], 10, "superset", "D1"], ["ez-bar-curl", ["12", "12", "12"], 60, "superset", "D2"], ["rope-low-cable-oh-tricep-extensions", ["12", "12", "12"], 10, "superset", "E1"], ["cable-face-pull", ["15", "15", "15"], 60, "superset", "E2"]]}, {"name": "Lower A", "focus": "Legs & abs · heavy", "ex": [["back-squat", ["8", "8", "8"], 180, "straight", "A1"], ["romanian-deadlift", ["10", "10", "10"], 150, "straight", "B1"], ["leg-press-quad-dominant", ["10", "10", "10"], 120, "straight", "C1"], ["seated-leg-curl-toes-dorsiflexed-neutral", ["12", "12", "12"], 10, "superset", "D1"], ["leg-extensions-toes-dorsiflexed-neutral", ["12", "12", "12"], 90, "superset", "D2"], ["standing-calf-raises-toes-neutral", ["15", "15", "15"], 10, "superset", "E1"], ["cable-crunch", ["12", "12", "12"], 60, "superset", "E2"]]}, {"name": "Upper B", "focus": "Upper body · light", "ex": [["barbell-bench-press", ["10", "10", "10"], 120, "straight", "A1"], ["plate-loaded-t-bar-row-chest-supported", ["10", "10", "10"], 120, "straight", "B1"], ["dumbbell-shoulder-press", ["12", "12", "12"], 10, "superset", "C1"], ["lat-pulldown", ["12", "12", "12"], 90, "superset", "C2"], ["cable-lateral-raise", ["20", "20", "20"], 10, "superset", "D1"], ["ez-bar-curl", ["15", "15", "15"], 60, "superset", "D2"], ["rope-low-cable-oh-tricep-extensions", ["15", "15", "15"], 10, "superset", "E1"], ["cable-face-pull", ["20", "20", "20"], 60, "superset", "E2"]]}, {"name": "Lower B", "focus": "Legs & abs · light", "ex": [["back-squat", ["10", "10", "10"], 150, "straight", "A1"], ["romanian-deadlift", ["12", "12", "12"], 120, "straight", "B1"], ["leg-press-quad-dominant", ["12", "12", "12"], 90, "straight", "C1"], ["seated-leg-curl-toes-dorsiflexed-neutral", ["15", "15", "15"], 10, "superset", "D1"], ["leg-extensions-toes-dorsiflexed-neutral", ["15", "15", "15"], 90, "superset", "D2"], ["standing-calf-raises-toes-neutral", ["20", "20", "20"], 10, "superset", "E1"], ["cable-crunch", ["15", "15", "15"], 60, "superset", "E2"]]}], "cat": {"barbell-bench-press": {"en": "Barbell Bench Press", "es": "Press de banca con barra", "tip": "Lie with your eyes under the bar, feet planted, and grip just wider than shoulder width so forearms are vertical at the bottom.", "sq": "Squeeze your chest as if trying to bend the bar into a U and bring your biceps toward each other as you press up.", "m": ["Chest"]}, "plate-loaded-t-bar-row-chest-supported": {"en": "Plate-Loaded T-Bar Row (Chest-Supported)", "es": "Remo en T en máquina de discos (con apoyo de pecho)", "tip": "Step onto the platform, rest your chest on the pad and grab the handles with straight arms.", "sq": "Drive your elbows behind your body and squeeze your shoulder blades together hard while your chest stays glued to the pad.", "m": ["Upper Back", "Lats"]}, "dumbbell-shoulder-press": {"en": "Dumbbell Shoulder Press (Seated)", "es": "Press de hombros con mancuernas (sentado)", "tip": "Sit on a bench with a near-vertical back pad and kick the dumbbells up to shoulder height.", "sq": "Drive up and feel the front of your shoulders work, as if pushing the ceiling away while your biceps close toward your ears.", "m": ["Front Delts"]}, "lat-pulldown": {"en": "Cable Lat Pulldown (Wide Grip)", "es": "Jalón al pecho en polea (agarre ancho)", "tip": "Set the thigh pad snug over your legs and grip the bar overhand, wider than your shoulders.", "sq": "Pull your elbows down into your back pockets and squeeze your lats hard at the bottom.", "m": ["Lats"]}, "cable-lateral-raise": {"en": "Cable Lateral Raise (Single Arm)", "es": "Elevaciones laterales en polea (a una mano)", "tip": "Set the pulley low and grab the handle with the hand farthest from the machine.", "sq": "Lead with your elbow and feel the side of your shoulder lift, as if pushing your hand far out to the wall.", "m": ["Side Delts"]}, "ez-bar-curl": {"en": "EZ-Bar Curl", "es": "Curl con barra Z", "tip": "Grip the EZ-bar on the inner or outer bends with your palms angled slightly inward.", "sq": "Curl the bar up and squeeze the biceps hard at the top, as if bringing your forearms to touch your upper arms.", "m": ["Biceps"]}, "rope-low-cable-oh-tricep-extensions": {"en": "Cable Overhead Triceps Extension (Rope)", "es": "Extensión de tríceps sobre la cabeza en polea (cuerda)", "tip": "Face away from the pulley, hold the rope behind your head, and stagger your feet.", "sq": "Extend fully overhead, pull the rope ends apart, and squeeze the back of your arms all the way up to the armpit.", "m": ["Triceps"]}, "cable-face-pull": {"en": "Cable Face Pull (Rope)", "es": "Face pull en polea (cuerda)", "tip": "Set the pulley at face height or slightly higher and grip the rope with palms facing down.", "sq": "Pull the rope apart and finish like a double-biceps pose, squeezing the back of your shoulders and between your shoulder blades.", "m": ["Rear Delts"]}, "back-squat": {"en": "Barbell Back Squat", "es": "Sentadilla trasera con barra", "tip": "Set the bar on your upper traps, brace your core, and stand feet shoulder-width apart with toes turned out slightly.", "sq": "Drive up by squeezing your quads and glutes together, as if spreading the floor apart with your feet.", "m": ["Quads", "Glutes"]}, "romanian-deadlift": {"en": "Barbell Romanian Deadlift", "es": "Peso muerto rumano con barra", "tip": "Start standing with the bar at hip height and a grip just outside your thighs.", "sq": "Feel your hamstrings stretch like rubber bands, then snap your hips forward by squeezing your glutes.", "m": ["Hamstrings", "Glutes"]}, "leg-press-quad-dominant": {"en": "Plate-Loaded Leg Press", "es": "Prensa de piernas en máquina de discos", "tip": "Sit with your back and hips flat against the pad and your feet hip-width apart.", "sq": "Squeeze your quads to press the sled away, as if trying to push your feet through the platform.", "m": ["Quads"]}, "seated-leg-curl-toes-dorsiflexed-neutral": {"en": "Machine Seated Leg Curl", "es": "Curl femoral sentado en máquina", "tip": "Set the back pad so your knee lines up with the pivot, and lower the thigh pad onto your legs.", "sq": "Squeeze your hamstrings to dig your heels under the seat, as if dragging your heels through sand.", "m": ["Hamstrings"]}, "leg-extensions-toes-dorsiflexed-neutral": {"en": "Machine Leg Extension", "es": "Extensión de cuádriceps en máquina", "tip": "Line your knee up with the machine's pivot and set the roller just above your ankle.", "sq": "Lock out and squeeze your quads hard for a second, as if pulling your kneecaps up toward your hips.", "m": ["Quads"]}, "standing-calf-raises-toes-neutral": {"en": "Machine Standing Calf Raise", "es": "Elevación de talones de pie en máquina", "tip": "Set your shoulders under the pads and the balls of your feet on the edge of the step.", "sq": "Rise onto your big toes and squeeze your calves hard at the top, as if trying to grow an inch taller.", "m": ["Calves"]}, "cable-crunch": {"en": "Cable Crunch (Kneeling)", "es": "Crunch en polea (de rodillas)", "tip": "Kneel facing a high pulley and hold the rope beside your head.", "sq": "Pull your ribs toward your hips and squeeze your abs hard at the bottom, as if curling into a ball.", "m": ["Abs"]}}};
+const I={en:{brand:'TRAIN WITH INTENT · ',week:'Week 4 of 6',cal:'Calendar',full:'Full plan',change:'Change plan',today:'Today',tomorrow:'Tomorrow',days:'Your days',ex:'exercises',sets:'sets',reps:'reps',rest:'rest',ss:'SUPERSET · do back-to-back, rest after both',finish:'Finish workout',back:'‹ Back',google:'Search on Google',swap:'Swap',notes:'Notes',hist:'History',tech:'Technique',done:'Done',edit:'Edit',last:'Last time',target:'Target',kg:'kg',aiT:'AI target',orig:'Original',why:'Why: last time you hit all reps at this weight with reps to spare, so the plan adds the smallest step. Rule from the PT progression spec.',skip:'Skip',summary:'Workout summary',vs:'vs last time',close:'Close',progress:'Progress',recent:'Recent logs',del:'Delete',undo:'Undo',deleted:'Log deleted',profile:'Profile',profTxt:'Account, language, plan settings and sign-in live here (unchanged from production).',squeeze:'Squeeze cue',setup:'Setup',tipNote:'Technique text is shown in English until the PT approves the Spanish version.',notesPh:'Seat 4, pin 2…',save:'Save',swapTxt:'Swap suggestions come only from approved alternatives for the same muscle (PT list).',histTxt:'Last 3 sessions',of:'of',wk:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],nextUp:'Next up',done2:'done',startW:'Start workout',resume:'Resume workout',exitW:'Exit',nextEx:'Next',miniHint:'Tap a number to jump · rose line = superset',backToday:'Back to Today',tStraight:'Straight sets'},
+es:{brand:'ENTRENA CON INTENCIÓN · ',week:'Semana 4 de 6',cal:'Calendario',full:'Plan completo',change:'Cambiar plan',today:'Hoy',tomorrow:'Mañana',days:'Tus días',ex:'ejercicios',sets:'series',reps:'reps',rest:'descanso',ss:'SUPERSERIE · seguidos, descansa después de ambos',finish:'Terminar entreno',back:'‹ Atrás',google:'Buscar en Google',swap:'Cambiar',notes:'Notas',hist:'Historial',tech:'Técnica',done:'Hecho',edit:'Editar',last:'Última vez',target:'Objetivo',kg:'kg',aiT:'Objetivo IA',orig:'Original',why:'Por qué: la última vez completaste todas las reps con este peso y te sobraron reps, así que el plan sube el paso más pequeño. Regla del spec de progresión del PT.',skip:'Saltar',summary:'Resumen del entreno',vs:'vs la última vez',close:'Cerrar',progress:'Progreso',recent:'Registros recientes',del:'Borrar',undo:'Deshacer',deleted:'Registro borrado',profile:'Perfil',profTxt:'Cuenta, idioma, ajustes del plan e inicio de sesión van aquí (igual que en producción).',squeeze:'Clave de contracción',setup:'Colocación',tipNote:'La técnica se muestra en inglés hasta que el PT apruebe la versión en español.',notesPh:'Asiento 4, pin 2…',save:'Guardar',swapTxt:'Las alternativas vienen solo de la lista aprobada del PT para el mismo músculo.',histTxt:'Últimas 3 sesiones',of:'de',wk:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],nextUp:'Siguiente',done2:'hechos',startW:'Empezar entreno',resume:'Seguir entreno',exitW:'Salir',nextEx:'Siguiente',miniHint:'Toca un número para saltar · línea rosa = superserie',backToday:'Volver a Hoy',tStraight:'Series rectas'}};
+const BASE={'barbell-bench-press':60,'plate-loaded-t-bar-row-chest-supported':40,'dumbbell-shoulder-press':18,'lat-pulldown':55,'cable-lateral-raise':7.5,'ez-bar-curl':25,'rope-low-cable-oh-tricep-extensions':20,'cable-face-pull':20,'back-squat':80,'romanian-deadlift':70,'leg-press-quad-dominant':140,'seated-leg-curl-toes-dorsiflexed-neutral':40,'leg-extensions-toes-dorsiflexed-neutral':45,'standing-calf-raises-toes-neutral':60,'cable-crunch':35};
+const STEP=id=>/dumbbell|cable|curl|crunch|raise|extension/.test(id)?(id.includes('dumbbell')?2:2.5):2.5;
+let S={lang:'en',tab:'today',day:0,ex:null,mode:'ai',logs:{},done:{},timer:null,left:0,lastDel:null,
+ hist:[{id:'barbell-bench-press',d:'Mon',s:'3 × 8 · 57.5 kg'},{id:'lat-pulldown',d:'Mon',s:'3 × 10 · 52.5 kg'},{id:'back-squat',d:'Tue',s:'3 × 8 · 77.5 kg'},{id:'romanian-deadlift',d:'Tue',s:'3 × 10 · 67.5 kg'}]};
+const t=k=>I[S.lang][k];const nm=id=>DATA.cat[id][S.lang];
+function dayWhen(i){const dt=new Date();dt.setDate(dt.getDate()+[0,1,3,4][i]);return i===0?t('today'):i===1?t('tomorrow'):t('wk')[dt.getDay()]}
+function groups(day){const g=[];day.ex.forEach((e,i)=>{const c=e[4],L=c[0];const last=g[g.length-1];if(e[3]==='superset'&&last&&last.L===L&&last.ss)last.items.push(i);else g.push({L,ss:e[3]==='superset',items:[i]})});return g}
+function key(i){return S.day+':'+i}
+function render(){
+ document.documentElement.lang=S.lang;
+ document.querySelectorAll('[data-i]').forEach(b=>b.textContent=t(b.dataset.i));
+ const a=document.getElementById('app');
+ const hdr0=`<header><div class="brand">${t('brand')}<b>GYM STUDIO</b></div><div class="lang"><button class="${S.lang==='en'?'on':''}" onclick="setL('en')">EN</button><button class="${S.lang==='es'?'on':''}" onclick="setL('es')">ES</button></div></header>`;
+ const hdr=hdr0;if(S.tab==='today'&&!S.wo)a.innerHTML=prodToday();
+ else if(S.tab==='today')a.innerHTML=woView();
+ else if(S.tab==='progress')a.innerHTML=hdr+progress();
+ else a.innerHTML=hdr+`<div class="wrap"><h1 style="margin-top:12px">${t('profile')}</h1><p class="sub" style="margin-top:10px">${t('profTxt')}</p></div>`;
+ document.getElementById('nav').classList.toggle('hide',!!(S.wo&&S.tab==='today'));document.body.classList.toggle('wo',!!(S.wo&&S.tab==='today'));
+ document.getElementById('nav').innerHTML=[['today','◉',t('today')],['progress','↗',t('progress')],['profile','◯',t('profile')]].map(([k,ic,l])=>`<button class="${S.tab===k?'on':''}" onclick="go('${k}')"><i>${ic}</i>${l}</button>`).join('');
+}
+function today(){
+ const d=DATA.days[S.day];let n=0;
+ const days=DATA.days.map((x,i)=>{const c=x.ex.filter((_,j)=>S.done[i+':'+j]).length;return `<button class="day ${i===S.day?'sel':''} ${c===x.ex.length?'done':''}" onclick="S.day=${i};render()"><b>${x.name}</b><small>${dayWhen(i)}</small><em>${c}/${x.ex.length}</em></button>`}).join('');
+ const list=groups(d).map(g=>{const rows=g.items.map(i=>{n++;const e=d.ex[i];const dn=S.done[key(i)];return `<div class="ex ${dn?'d':''}" onclick="openEx(${i})"><div class="num">${dn?'✓':n}</div><div class="t"><b>${nm(e[0])}</b><span>${e[1].length} ${t('sets')} × ${e[1][0]} ${t('reps')} · ${target(i)} ${t('kg')}</span></div><span class="chev">›</span></div>`}).join('');return g.ss?`<div class="ss"><div class="sslab">${t('ss')}</div>${rows}</div>`:rows}).join('');
+ return `<div class="wrap"><div class="card"><h1>Upper / Lower</h1><div class="sub">${t('week')} · 4 ${S.lang==='en'?'days/week':'días/semana'} · <span class="tag">MY PLAN · PT</span></div><div class="bar"><i style="width:${(3/6+ (1/6)*0.5)*100}%"></i></div><div class="row"><button class="chip" onclick="info('cal')">📅 ${t('cal')}</button><button class="chip" onclick="info('full')">☰ ${t('full')}</button><button class="chip" onclick="info('change')">⇄ ${t('change')}</button></div></div>
+ <h2>${t('days')}</h2><div class="days">${days}</div>
+ <h2>${d.name} · ${d.focus} · ${d.ex.length} ${t('ex')}</h2><div class="card list">${list}</div>
+ <button class="big" onclick="finish()">${t('finish')}</button></div>`
+}
+function prodToday(){
+ const d=DATA.days[S.day];const lang=`<div class="lang" style="margin-top:4px"><button class="${S.lang==='en'?'on':''}" onclick="setL('en')">EN</button><button class="${S.lang==='es'?'on':''}" onclick="setL('es')">ES</button></div>`;
+ const tabs=DATA.days.map((x,i)=>{const c=x.ex.filter((_,j)=>S.done[i+':'+j]).length;return `<button class="dtab ${i===S.day?'sel':''}" onclick="S.day=${i};render()">D${i+1}<small>${c}/${x.ex.length}</small></button>`}).join('');
+ let html='',k=0;const gs=groups(d);
+ gs.forEach(g=>{const cards=g.items.map(i=>card(i)).join('');html+=g.ss?`<div class="ssw"><div class="sslab">${t('ss')}</div>${cards}</div>`:cards});
+ const started=Object.keys(S.done).some(x=>x.startsWith(S.day+':'));
+ return `<div class="ph"><div class="hrow"><div><div class="k">${S.lang==='en'?'TRAIN WITH INTENT':'ENTRENA CON INTENCIÓN'}</div><div class="g">GYM STUDIO</div><div class="tt">${t('today')}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><button class="icb" aria-label="${t('cal')}" onclick="info('cal')">📅</button>${lang}</div></div><span class="pill">${S.lang==='en'?'6-WEEK PLAN · 4 DAYS/WEEK':'PLAN DE 6 SEMANAS · 4 DÍAS/SEMANA'}</span></div>
+ <div class="wrap"><div class="card"><div class="hrow"><div><b style="font-size:16px">Upper / Lower</b><div class="sub">4 ${S.lang==='en'?'Days':'Días'} · ${t('week')}</div></div><span class="tag">MY PLAN · PT</span></div><div class="row" style="margin-top:10px"><button class="chip" onclick="info('full')">${t('full')}</button><button class="chip" style="flex:none;width:44px" onclick="info('change')">+</button></div></div>
+ <div class="dtabs">${tabs}</div>
+ <button class="big start" onclick="startWo()">▶ ${started?t('resume'):t('startW')} · ${d.name}</button>
+ ${html}</div>`}
+function card(i){const d=DATA.days[S.day],e=d.ex[i],id=e[0],c=DATA.cat[id],dn=S.done[key(i)];
+ const tech={straight:t('tStraight'),superset:'Superset'}[e[3]]||e[3];
+ return `<div class="pc"><div class="top"><span class="code">${e[4]}</span><div style="flex:1"><a href="#" onclick="return false">${nm(id)} ↗</a><br><button class="sw">⇄ ${t('swap')}</button>${dn?` <span class="tag" style="background:var(--ok);color:#111">✓ ${t('done')}</span>`:''}</div><button class="icb" style="width:32px;height:32px;font-size:14px">−</button></div>
+ <div class="chips"><span>${tech}</span>${c.m.map(m=>`<span>${m}</span>`).join('')}</div>
+ <div class="sub">${e[1].length} ${t('sets')} · ${e[1].join('·')} ${t('reps')} · ${t('rest')} ${e[2]}s</div>
+ <table><tr><th>${S.lang==='en'?'Set':'Serie'}</th><th>${S.lang==='en'?'Previous':'Anterior'}</th><th>${t('kg')}</th><th>${t('reps')}</th><th></th></tr>${e[1].map((r,j)=>`<tr><td>${j+1}</td><td class="eq">${BASE[id]}×${r}</td><td><input placeholder="${BASE[id]}"></td><td><input placeholder="${r}"></td><td><button class="ck">✓</button></td></tr>`).join('')}</table>
+ <div class="nt"><b>${S.lang==='en'?'Next':'Siguiente'}: ${target(i)} kg × ${e[1][0]}</b><div class="why" style="margin-top:3px">${t('why')}</div></div>
+ <p class="why" style="margin-top:8px">💡 ${c.tip}</p><div class="row" style="margin-top:8px"><button class="chip">${t('notes')}</button><button class="chip pri">${S.lang==='en'?'Log exercise':'Registrar ejercicio'}</button></div></div>`}
+function startWo(){S.wo=true;const d=DATA.days[S.day];const f=d.ex.findIndex((_,i)=>!S.done[key(i)]);S.ex=f<0?0:f;render();scrollTo(0,0)}
+function woView(){const d=DATA.days[S.day];let n=0;
+ const mini=groups(d).map(g=>g.items.map(i=>{n++;return `<button class="${i===S.ex?'cur':''} ${S.done[key(i)]?'dn':''} ${g.ss?'br':''}" title="${g.ss?'Superset':''}" onclick="S.ex=${i};render()">${n}</button>`}).join('')).join('<span style="width:4px"></span>');
+ const nxt=S.ex<d.ex.length-1;
+ return `<div class="wohead"><button class="back" onclick="exitWo()">✕ ${t('exitW')}</button><b style="font-size:13px">${d.name} · ${S.ex+1}/${d.ex.length}</b><div class="lang"><button class="${S.lang==='en'?'on':''}" onclick="setL('en')">EN</button><button class="${S.lang==='es'?'on':''}" onclick="setL('es')">ES</button></div></div>
+ <div class="wrap"><div class="mini">${mini}</div><div class="sub" style="font-size:10px;margin-bottom:6px">${t('miniHint')}</div></div>`+exView()+`<div class="wrap"><div class="row" style="margin-top:10px">${nxt?`<button class="chip pri" style="min-height:48px" onclick="S.ex++;render();scrollTo(0,0)">${t('nextEx')} › ${nm(d.ex[S.ex+1][0])}</button>`:''}</div><button class="big ghost" onclick="finish()">${t('finish')}</button></div>`}
+function exitWo(){S.wo=false;S.ex=null;stopRest();render()}
+function target(i){const id=DATA.days[S.day].ex[i][0];return S.mode==='ai'?BASE[id]+STEP(id):BASE[id]}
+function exView(){
+ const i=S.ex,e=DATA.days[S.day].ex[i],id=e[0],c=DATA.cat[id],k=key(i);S.logs[k]=S.logs[k]||e[1].map(()=>({w:'',r:'',ok:false}));
+ const rows=e[1].map((r,j)=>{const L=S.logs[k][j];return `<tr class="${L.ok?'ok':''}"><td>${j+1}</td><td class="eq">${BASE[id]}×${r}</td><td><b>${target(i)}×${r}</b></td><td><input inputmode="decimal" value="${L.w}" placeholder="${target(i)}" onchange="S.logs['${k}'][${j}].w=this.value"></td><td><input inputmode="numeric" value="${L.r}" placeholder="${r}" onchange="S.logs['${k}'][${j}].r=this.value"></td><td><button class="ck" aria-label="log set" onclick="tick(${j})">✓</button></td></tr>`}).join('');
+ const dn=S.done[k];
+ return `<div class="wrap"><h1 style="margin-top:6px">${nm(id)} <button class="chip" style="display:inline-flex;flex:none;min-height:28px;padding:2px 8px" onclick="sheet('tech')">ⓘ ${t('tech')}</button></h1>
+ <div class="sub">${c.m.join(', ')} · ${e[1].length} ${t('sets')} · ${t('rest')} ${e[2]}s${e[3]==='superset'?' · <span class="tag">SUPERSET</span>':''}</div>
+ <div class="tools"><button class="chip" onclick="window.open('https://www.google.com/search?q='+encodeURIComponent('${c.en} how to'),'_blank')">🔎<span>${t('google')}</span></button><button class="chip" onclick="sheet('swap')">⇄<span>${t('swap')}</span></button><button class="chip" onclick="sheet('notes')">✎<span>${t('notes')}</span></button><button class="chip" onclick="sheet('hist')">⟲<span>${t('hist')}</span></button></div>
+ <div class="ai"><div class="h"><b>${S.mode==='ai'?t('aiT'):t('orig')}: ${target(i)} ${t('kg')} × ${e[1][0]}</b><div class="seg"><button class="${S.mode==='ai'?'on':''}" onclick="S.mode='ai';render()">AI</button><button class="${S.mode==='orig'?'on':''}" onclick="S.mode='orig';render()">${t('orig')}</button></div></div>${S.mode==='ai'?`<div class="why">${t('why')}</div>`:''}</div>
+ <table><tr><th>#</th><th>${t('last')}</th><th>${t('target')}</th><th>${t('kg')}</th><th>${t('reps')}</th><th></th></tr>${rows}</table>
+ <button class="big ${dn?'ghost':''}" onclick="toggleDone()">${dn?'✓ '+t('done')+' · '+t('edit'):t('done')}</button></div>`
+}
+function progress(){
+ return `<div class="wrap"><h1 style="margin-top:12px">${t('progress')}</h1><h2>${t('recent')}</h2><div class="card list">${S.hist.map((h,i)=>`<div class="log"><div class="t"><b style="font-size:13px">${nm(h.id)}</b><div class="sub">${h.d} · ${h.s}</div></div><button class="trash" onclick="delLog(${i})">🗑 ${t('del')}</button></div>`).join('')}</div></div>`
+}
+function setL(l){S.lang=l;render()}
+function go(k){S.tab=k;S.ex=null;render()}
+function openEx(i){S.ex=i;render();scrollTo(0,0)}
+function tick(j){const k=key(S.ex);const L=S.logs[k][j];L.ok=!L.ok;if(L.ok){if(!L.w)L.w=target(S.ex);if(!L.r)L.r=DATA.days[S.day].ex[S.ex][1][j];startRest(DATA.days[S.day].ex[S.ex][2])}if(S.logs[k].every(x=>x.ok))S.done[k]=true;render()}
+function toggleDone(){const k=key(S.ex);if(S.done[k]){S.done[k]=false;render();return}S.done[k]=true;S.logs[k].forEach((L,j)=>{L.ok=true;L.w=L.w||target(S.ex);L.r=L.r||DATA.days[S.day].ex[S.ex][1][j]});if(S.ex<DATA.days[S.day].ex.length-1)S.ex++;render();scrollTo(0,0)}
+function startRest(s){S.left=s;document.getElementById('rest').classList.add('show');clearInterval(S.timer);showT();S.timer=setInterval(()=>{S.left--;showT();if(S.left<=0)stopRest()},1000)}
+function addRest(n){S.left+=n;showT()}
+function showT(){document.getElementById('restT').textContent=Math.floor(S.left/60)+':'+String(S.left%60).padStart(2,'0')}
+function stopRest(){clearInterval(S.timer);document.getElementById('rest').classList.remove('show')}
+function sheet(kind){const id=DATA.days[S.day].ex[S.ex][0],c=DATA.cat[id];let h='';
+ if(kind==='tech')h=`<h1>${nm(id)}</h1><h2>${t('setup')}</h2><p class="why">${c.tip}</p><h2>${t('squeeze')}</h2><p class="why">${c.sq}</p>${S.lang==='es'?`<p class="sub" style="margin-top:10px">${t('tipNote')}</p>`:''}`;
+ if(kind==='swap')h=`<h1>${t('swap')}</h1><p class="why">${t('swapTxt')}</p>`;
+ if(kind==='notes')h=`<h1>${t('notes')}</h1><textarea style="width:100%;height:90px;margin-top:12px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;font:14px Inter" placeholder="${t('notesPh')}"></textarea><button class="big" onclick="closeSheet()">${t('save')}</button>`;
+ if(kind==='hist')h=`<h1>${t('hist')}</h1><h2>${t('histTxt')}</h2>${[0,1,2].map(n=>`<div class="sum"><span>${['Oct 6','Sep 29','Sep 22'][n]}</span><span>${BASE[id]-STEP(id)*n} kg × ${DATA.days[S.day].ex[S.ex][1].join('/')}</span></div>`).join('')}`;
+ document.getElementById('sheetC').innerHTML=h+(kind!=='notes'?`<button class="big ghost" onclick="closeSheet()">${t('close')}</button>`:'');document.getElementById('sheet').classList.add('show')}
+function info(k){document.getElementById('sheetC').innerHTML=`<h1>${t(k)}</h1><p class="why">${k==='full'?DATA.days.map(d=>`<b>${d.name}</b> — ${d.ex.map(e=>nm(e[0])).join(', ')}`).join('<br><br>'):(k==='cal'?t('week'):'Upper / Lower · 4 Days')}</p><button class="big ghost" onclick="closeSheet()">${t('close')}</button>`;document.getElementById('sheet').classList.add('show')}
+function closeSheet(){document.getElementById('sheet').classList.remove('show')}
+function finish(){stopRest();const d=DATA.days[S.day];const r=d.ex.map((e,i)=>{const dn=S.done[key(i)];const ar=!dn?'<span class="eq">—</span>':(S.mode==='ai'?'<span class="u">↑ +'+STEP(e[0])+' kg</span>':'<span class="eq">→</span>');return `<div class="sum"><span>${nm(e[0])}</span>${ar}</div>`}).join('');const c=d.ex.filter((_,i)=>S.done[key(i)]).length;
+ document.getElementById('sheetC').innerHTML=`<h1>${t('summary')}</h1><p class="sub">${d.name} · ${c} ${t('of')} ${d.ex.length} ${t('done2')} · ${t('vs')}: <span class="u">↑</span> <span class="eq">→</span> <span class="dn">↓</span></p><div style="margin-top:10px">${r}</div><button class="big" onclick="closeSheet();exitWo()">${t('backToday')}</button>`;document.getElementById('sheet').classList.add('show')}
+function delLog(i){S.lastDel=[i,S.hist.splice(i,1)[0]];render();document.getElementById('toastT').textContent=t('deleted');const T=document.getElementById('toast');T.classList.add('show');clearTimeout(S.tt);S.tt=setTimeout(()=>T.classList.remove('show'),5000)}
+function undo(){if(S.lastDel){S.hist.splice(S.lastDel[0],0,S.lastDel[1]);S.lastDel=null}document.getElementById('toast').classList.remove('show');render()}
+render();
+</script></body></html>
