@@ -13,7 +13,5 @@ export const PROGRESS_THRESHOLDS = {
   commonRangeMinimumSets: 10,
   commonRangeMaximumSets: 20,
   deloadWeek: 6,
-  legacyDeloadBlockNumber: 8,
-  legacyDeloadWeek: 1,
   recentRecordDays: 7,
 } as const
