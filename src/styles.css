@@ -6307,3 +6307,41 @@ a.planned-exercise-main-name {
   color: var(--muted);
   font-size: 0.72rem;
 }
+
+/* Workout mode (Start workout): same cards, one exercise at a time. */
+.start-workout-button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 4px;
+}
+
+.workout-mode-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.workout-mode-progress {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-mode-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.workout-mode-nav button,
+.workout-mode-finish {
+  min-height: 48px;
+}
+
+.workout-mode-finish {
+  width: 100%;
+  margin-top: 8px;
+}
