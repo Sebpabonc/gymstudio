@@ -40,10 +40,49 @@ describe('WorkoutPlan', () => {
 
     expect(html).toContain('<h3>Make your plan</h3>')
     expect(html).toContain('No exercises added yet.')
+    expect(html).toContain('role="tablist" aria-label="Plan days"')
+    expect(html).toContain('Day A')
+    expect(html).toContain('Add exercise')
     expect(html).not.toContain('day-plan-card')
   })
 
-  it('places rest and posture controls with the set and squeeze sections', () => {
+  it('renders each custom-plan day and the selected day prescription', () => {
+    const plan = {
+      version: 2,
+      days: [
+        {
+          id: 'day-a',
+          name: 'Day A',
+          exercises: [{
+            id: 'row-a',
+            exerciseId: 'catalogue-bench',
+            name: 'Bench press',
+            muscle: 'Chest',
+            sets: '4',
+            reps: '8-10',
+            restSeconds: 90,
+          }],
+        },
+        { id: 'day-b', name: 'Day B', exercises: [] },
+      ],
+    }
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => key === 'gym-studio.custom-plan' ? JSON.stringify(plan) : null,
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    })
+
+    const html = renderToString(
+      <WorkoutPlan mode="custom" lockMode onSignIn={() => undefined} onStartRest={() => undefined} />
+    )
+
+    expect(html).toContain('Day A')
+    expect(html).toContain('Day B')
+    expect(html).toContain('Bench press')
+    expect(html).toMatch(/class="custom-plan-exercise-edit"[\s\S]*?Bench press[\s\S]*?4[\s\S]*?×[\s\S]*?8-10/)
+  })
+
+  it('keeps workout rest controls without restoring removed custom-plan tips', () => {
     vi.stubGlobal('localStorage', {
       getItem: (key: string) =>
         key === 'gym-studio.custom-plan'
@@ -70,10 +109,8 @@ describe('WorkoutPlan', () => {
     expect(html.match(/class="rest-start-button"/g)).toHaveLength(1)
     expect(html.indexOf('Same as set 1')).toBeLessThan(html.indexOf('Start rest'))
     expect(html.indexOf('Start rest')).toBeLessThan(html.indexOf('class="planned-set-grid"'))
-    expect(html).toContain('class="squeeze-cue-box"')
-    expect(html).toContain('aria-controls="posture-tips-test-exercise"')
-    expect(html).toContain('id="posture-tips-test-exercise" class="squeeze-cue-tips" hidden=""')
-    expect(html).not.toContain('class="exercise-detail-toggle">Posture tips')
+    expect(html).not.toContain('Brace before each rep.')
+    expect(html).not.toContain('Posture tips')
   })
 
   it('renders the change icon as an accessible labeled button', () => {

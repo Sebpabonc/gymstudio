@@ -134,7 +134,11 @@ function normalizeCustomPlanExercise(value: unknown): CustomPlanExercise | null 
 export function loadCustomPlan(): CustomPlan {
   try {
     const raw = localStorage.getItem(storageKey(CUSTOM_PLAN_STORAGE_KEY))
-    if (!raw) return emptyCustomPlan()
+    if (!raw) {
+      const plan = emptyCustomPlan()
+      saveCustomPlan(plan)
+      return plan
+    }
     const parsed: unknown = JSON.parse(raw)
     if (Array.isArray(parsed)) {
       const migrated = {

@@ -160,6 +160,7 @@ describe('custom plan storage', () => {
     localStorage.setItem('gym-studio.custom-plan', JSON.stringify([
       {
         name: 'Hip thrust',
+        exerciseId: 'history-exercise-id',
         sets: '4',
         reps: '8-10',
         rest: `1'30"`,
@@ -177,6 +178,7 @@ describe('custom plan storage', () => {
     expect(plan.days[0].id).toBeTruthy()
     expect(plan.days[0].exercises).toHaveLength(1)
     expect(plan.days[0].exercises[0]).toMatchObject({
+      exerciseId: 'history-exercise-id',
       name: 'Hip thrust',
       muscle: 'Glutes',
       sets: '4',
@@ -193,6 +195,7 @@ describe('custom plan storage', () => {
     expect(missing.days).toHaveLength(1)
     expect(missing.days[0].name).toBe('Day A')
     expect(missing.days[0].exercises).toEqual([])
+    expect(loadCustomPlan()).toEqual(missing)
 
     localStorage.setItem('gym-studio.custom-plan', '{')
     const corrupted = loadCustomPlan()
