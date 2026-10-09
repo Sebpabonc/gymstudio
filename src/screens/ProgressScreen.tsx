@@ -6,6 +6,7 @@ import { localIsoDate } from '../lib/dates'
 import { isDemoMode } from '../utils/demoMode'
 import {
   calculateProgressInsights,
+  mostFrequentWeekdays,
   strengthTrend,
 } from '../progress'
 import type { LiftInsight, ProgressEntry, ProgressRange } from '../progress'
@@ -14,6 +15,7 @@ import {
   chartSummary,
   CHART_SIZE,
   formatPercent,
+  formatProgressBlockLabel,
   muscleGroupLabel,
 } from '../progress/viewModel'
 import { workingSets } from '../progress/utils'
@@ -473,7 +475,7 @@ export default function ProgressScreen({
       <section className="card progress-headline" aria-label={t('progress.title')}>
         <div className="progress-heading-row">
           <h2>{t('progress.title')}</h2>
-          {activeBlock && <span className="progress-block-label">{t('progress.block.label', { number: activeBlock.number })}</span>}
+          {activeBlock && <span className="progress-block-label">{formatProgressBlockLabel(activeBlock, data.i18n)}</span>}
         </div>
         <div className="plan-mode-tabs progress-range-toggle" role="group" aria-label={t('progress.range.label')}>
           {rangeOptions.map((option) => (
@@ -715,25 +717,28 @@ export default function ProgressScreen({
         </div>
         <div className="progress-subsection">
           <h4>{t('progress.habits.sessionsPerWeek')}</h4>
-          <ul className="progress-volume-bars">
+          <ul className="progress-volume-bars progress-block-week-bars">
             {insights.sessionsPerBlockWeek.map((week) => (
               <li key={week.week}>
                 <span>{formatNumber(language, week.week)}</span>
-                <span className="progress-volume-track"><span style={{ width: `${week.planned ? week.done / week.planned * 100 : 0}%` }} /></span>
-                <strong>{formatNumber(language, week.done)}/{formatNumber(language, week.planned)}</strong>
+                <span className="progress-volume-track"><span style={{ width: `${week.planned ? Math.min(week.done / week.planned, 1) * 100 : 0}%` }} /></span>
+                <strong>{t('progress.habits.sessionsDonePlanned', {
+                  done: formatNumber(language, week.done),
+                  planned: formatNumber(language, week.planned),
+                })}</strong>
               </li>
             ))}
           </ul>
         </div>
         <div className="progress-subsection">
           <h4>{t('progress.habits.weekdayFrequency')}</h4>
-          <p className="chart-legend">{t('progress.habits.mostFrequentDays', {
-            days: [...insights.weekdayCounts]
-              .sort((a, b) => b.sessions - a.sessions)
-              .slice(0, 2)
-              .map((item) => weekdayName(item.weekday))
-              .join(' · '),
-          })}</p>
+          {mostFrequentWeekdays(insights.weekdayCounts).length > 0 && (
+            <p className="chart-legend">{t('progress.habits.mostFrequentDays', {
+              days: mostFrequentWeekdays(insights.weekdayCounts)
+                .map((item) => weekdayName(item.weekday))
+                .join(' · '),
+            })}</p>
+          )}
           <ul className="progress-weekday-bars">
             {insights.weekdayCounts.map((item) => (
               <li key={item.weekday} aria-label={`${weekdayName(item.weekday)} ${item.sessions}`}>

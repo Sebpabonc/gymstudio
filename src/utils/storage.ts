@@ -387,6 +387,7 @@ type CatalogueExercise = Pick<
   | 'secondaryMuscles'
   | 'equipment'
   | 'mechanic'
+  | 'movementPattern'
   | 'postureTips'
   | 'squeezeCue'
 >
@@ -613,6 +614,7 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
       secondaryMuscles: exercise.secondaryMuscles ?? current?.secondaryMuscles,
       equipment: exercise.equipment ?? current?.equipment,
       mechanic: exercise.mechanic ?? current?.mechanic,
+      movementPattern: exercise.movementPattern ?? current?.movementPattern,
       postureTips: exercise.postureTips ?? current?.postureTips,
       squeezeCue: exercise.squeezeCue ?? current?.squeezeCue,
       notes: exercise.notes ?? current?.notes,
@@ -643,6 +645,7 @@ function loadCatalogueCache(): CatalogueCache | null {
         secondaryMuscles: exercise.secondaryMuscles,
         equipment: exercise.equipment,
         mechanic: exercise.mechanic,
+        movementPattern: exercise.movementPattern,
         postureTips: exercise.postureTips,
         squeezeCue: exercise.squeezeCue,
       })),
@@ -720,6 +723,7 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
           secondaryMuscles: exercise.secondaryMuscles,
           equipment: exercise.equipment,
           mechanic: exercise.mechanic,
+          movementPattern: exercise.movementPattern,
           postureTips: exercise.postureTips,
           squeezeCue: exercise.squeezeCue,
         })),
@@ -738,8 +742,14 @@ export async function loadExercises(useBundledFallback = true): Promise<Exercise
   const catalogue = loadCatalogueCache()
   if (!catalogue && !useBundledFallback) return []
 
-  const bundled = catalogue ? undefined : await getBundledCatalogue()
-  const baseExercises = catalogue?.exercises ?? bundled?.exerciseLibrary ?? []
+  const bundled = !catalogue || catalogue.exercises.some((exercise) => !exercise.movementPattern)
+    ? await getBundledCatalogue()
+    : undefined
+  const bundledById = new Map(bundled?.exerciseLibrary.map((exercise) => [exercise.id, exercise]))
+  const baseExercises = catalogue?.exercises.map((exercise) => ({
+    ...exercise,
+    movementPattern: exercise.movementPattern ?? bundledById.get(exercise.id)?.movementPattern,
+  })) ?? bundled?.exerciseLibrary ?? []
   let savedExercises: Partial<Exercise>[] = []
   try {
     if (raw) {

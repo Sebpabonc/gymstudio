@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { Exercise, TrainingBlock } from '../types'
-import { calculateProgressInsights, classifyMovementPattern, PROGRESS_THRESHOLDS } from './insights'
+import { calculateProgressInsights, classifyMovementPattern, mostFrequentWeekdays, PROGRESS_THRESHOLDS } from './insights'
 import { ProgressEntry } from './types'
 
 const squat: Exercise = {
@@ -199,8 +199,9 @@ describe('approved progress insight thresholds', () => {
       { id: 'curl', name: 'Curl', primaryMuscle: 'Biceps', mechanic: 'isolation', movementPattern: 'isolation', equipment: 'dumbbell' },
       { id: 'bodyweight', name: 'Bodyweight squat', primaryMuscle: 'Quads', mechanic: 'compound', movementPattern: 'squat', equipment: 'bodyweight' },
       { id: 'hinge-short', name: 'Hinge', primaryMuscle: 'Hamstrings', mechanic: 'compound', movementPattern: 'hinge', equipment: 'barbell' },
+      { id: 'unplanned', name: 'Unplanned row', primaryMuscle: 'Lats', mechanic: 'compound', movementPattern: 'pull horizontal', equipment: 'barbell' },
     ]
-    const block = makeBlock(exercises.map((exercise) => exercise.id))
+    const block = makeBlock(exercises.filter((exercise) => exercise.id !== 'unplanned').map((exercise) => exercise.id))
     const addHistory = (id: string, count: number, load = 50) => Array.from({ length: count }, (_, index) => {
       const date = new Date(Date.UTC(2026, 0, 5 + index * 7)).toISOString().slice(0, 10)
       return makeEntry(date, id === 'bodyweight' ? 0 : load, {
@@ -214,8 +215,9 @@ describe('approved progress insight thresholds', () => {
       ...addHistory('curl', 5),
       ...addHistory('bodyweight', 6),
       ...addHistory('hinge-short', 2),
+      ...addHistory('unplanned', 4),
     ], { block, exercises, today: '2026-02-10' })
-    expect(result.lifts.map((lift) => lift.exerciseId)).toEqual(['press', 'squat'])
+    expect(result.lifts.map((lift) => lift.exerciseId)).toEqual(['press', 'squat', 'unplanned'])
 
     const fallbackExercises = [squat, exercises[2], { ...exercises[2], id: 'triceps', primaryMuscle: 'Triceps' }]
     const fallbackBlock = makeBlock(fallbackExercises.map((exercise) => exercise.id))
@@ -254,6 +256,41 @@ describe('approved progress insight thresholds', () => {
     expect(result.streakWeeks).toBe(2)
   })
 
+  it('keeps the streak when the current week has no session and breaks it at a missing week', () => {
+    const block = makeBlock()
+    const result = insights([
+      makeEntry('2026-01-05', 50),
+      makeEntry('2026-01-12', 50),
+      makeEntry('2026-01-19', 50),
+    ], { block, today: '2026-01-28' })
+    expect(result.streakWeeks).toBe(3)
+
+    const withGap = insights([
+      makeEntry('2026-01-05', 50),
+      makeEntry('2026-01-19', 50),
+    ], { block, today: '2026-01-28' })
+    expect(withGap.streakWeeks).toBe(1)
+  })
+
+  it('selects and charts main lifts only from the selected range, including unplanned lifts', () => {
+    const block = makeBlock()
+    const row: Exercise = { id: 'row', name: 'Row', primaryMuscle: 'Lats', mechanic: 'compound', movementPattern: 'pull horizontal' }
+    const result = calculateProgressInsights([
+      makeEntry('2026-01-05', 50, { exerciseId: 'row' }),
+      makeEntry('2026-01-12', 50, { exerciseId: 'row' }),
+      makeEntry('2026-01-19', 50, { exerciseId: 'row' }),
+      makeEntry('2026-01-26', 52, { exerciseId: 'row' }),
+      makeEntry('2026-02-02', 54, { exerciseId: 'row' }),
+      makeEntry('2026-02-09', 56, { exerciseId: 'row' }),
+      makeEntry('2026-02-16', 58, { exerciseId: 'row' }),
+    ], [block], [row], block, '2026-02-15', '4weeks')
+    expect(result.lifts.map((lift) => lift.exerciseId)).toEqual(['row'])
+    expect(result.lifts[0]).toMatchObject({ sessions: 3 })
+    expect(result.lifts[0].points.map((point) => point.date)).toEqual([
+      '2026-01-19', '2026-01-26', '2026-02-02', '2026-02-09',
+    ])
+  })
+
   it('keeps a completed block range within its dates and plans all of its weeks', () => {
     const block = makeBlock()
     const result = insights([
@@ -289,9 +326,23 @@ describe('approved progress insight thresholds', () => {
       makeEntry('2026-01-26', 50, { reps: 8 }),
       makeEntry('2026-02-02', 55, { reps: 8 }),
     ], { today: '2026-02-02' })
-    expect(result.prCount).toBe(3)
-    expect(result.recentRecordsCount).toBe(3)
+    expect(result.prCount).toBe(1)
+    expect(result.recentRecordsCount).toBe(1)
     expect(result.records[result.records.length - 1]).toMatchObject({ date: '2026-02-02', badges: ['e1rm', 'weight', 'reps'] })
+  })
+
+  it('counts PR sessions in the selected range rather than counting their badge types', () => {
+    const entries = [
+      ...['2025-12-01', '2025-12-08', '2025-12-15', '2025-12-22'].map((date) => makeEntry(date, 50)),
+      ...['2026-01-05', '2026-01-12', '2026-01-19', '2026-01-26', '2026-02-02'].map((date, index) =>
+        makeEntry(date, 51 + index)
+      ),
+    ]
+    const block = makeBlock(['squat'], '2026-01-05')
+    const forRange = (range: 'block' | '4weeks') =>
+      calculateProgressInsights(entries, [block], [squat], block, '2026-02-02', range)
+    expect(forRange('block').prCount).toBe(5)
+    expect(forRange('4weeks').prCount).toBe(4)
   })
 
   it('compares block tonnage and mean top-set loads through the same block week', () => {
@@ -336,17 +387,18 @@ describe('approved progress insight thresholds', () => {
     expect(result.volumePerSessionChange).toBeCloseTo(-61.53846)
   })
 
-  it('compares muscle sets with the prior three complete weeks and labels planned primary muscles', () => {
+  it('compares the last complete muscle week with the previous three complete weeks', () => {
     const glutes: Exercise = { id: 'glutes', name: 'Glutes', primaryMuscle: 'Glutes', mechanic: 'isolation', movementPattern: 'isolation' }
     const hamstrings: Exercise = { id: 'hamstrings', name: 'Hamstrings', primaryMuscle: 'Hamstrings', secondaryMuscles: ['Glutes'], mechanic: 'isolation', movementPattern: 'isolation' }
     const block = makeBlock(['glutes'])
     const result = calculateProgressInsights([
       makeEntry('2026-01-05', 40, { exerciseId: 'glutes', sets: 9 }),
-      makeEntry('2026-01-26', 40, { exerciseId: 'glutes', sets: 12 }),
+      makeEntry('2026-01-19', 40, { exerciseId: 'glutes', sets: 12 }),
       makeEntry('2026-01-26', 40, { exerciseId: 'hamstrings', sets: 4 }),
+      makeEntry('2026-01-26', 40, { exerciseId: 'glutes', sets: 30 }),
     ], [block], [glutes, hamstrings], block, '2026-01-26', 'block')
     expect(result.weeklyMuscles.find((muscle) => muscle.muscleGroup === 'Glutes')).toMatchObject({
-      thisWeek: 14,
+      thisWeek: 12,
       previousThreeWeekAverage: 3,
       commonRange: true,
     })
@@ -357,7 +409,7 @@ describe('approved progress insight thresholds', () => {
     const glutes: Exercise = { id: 'glutes', name: 'Glutes', primaryMuscle: 'Glutes', mechanic: 'isolation', movementPattern: 'isolation' }
     const block = makeBlock(['glutes'])
     const forSets = (count: number) => calculateProgressInsights([
-      makeEntry('2026-01-26', 40, { exerciseId: 'glutes', sets: count, blockId: block.id }),
+      makeEntry('2026-01-19', 40, { exerciseId: 'glutes', sets: count, blockId: block.id }),
     ], [block], [glutes], block, '2026-01-26', 'block').weeklyMuscles.find((muscle) => muscle.muscleGroup === 'Glutes')
     expect(forSets(12)).toMatchObject({ thisWeek: 12, commonRange: true })
     expect(forSets(6)).toMatchObject({ thisWeek: 6, commonRange: true })
@@ -382,6 +434,24 @@ describe('approved progress insight thresholds', () => {
     expect(result.weekdayCounts[1].sessions).toBe(2)
     expect(result.weekdayCounts[2].sessions).toBe(1)
     expect(result.upperLower).toEqual({ upper: 2, lower: 4, total: 6 })
+  })
+
+  it('returns every weekday tied for the highest frequency and none when history is empty', () => {
+    expect(mostFrequentWeekdays([
+      { weekday: 0, sessions: 10 },
+      { weekday: 1, sessions: 8 },
+      { weekday: 2, sessions: 10 },
+      { weekday: 3, sessions: 4 },
+      { weekday: 4, sessions: 10 },
+    ])).toEqual([
+      { weekday: 0, sessions: 10 },
+      { weekday: 2, sessions: 10 },
+      { weekday: 4, sessions: 10 },
+    ])
+    expect(mostFrequentWeekdays([
+      { weekday: 0, sessions: 0 },
+      { weekday: 1, sessions: 0 },
+    ])).toEqual([])
   })
 
   it('shows a push/pull note only beyond the two-to-one ratio and twenty classified sets', () => {

@@ -6580,12 +6580,20 @@ a.planned-exercise-main-name {
   font-size: 0.72rem;
 }
 
+.progress-block-week-bars li {
+  grid-template-columns: 32px minmax(0, 1fr) minmax(118px, auto);
+}
+
 .progress-volume-bars li > span:first-child {
   color: var(--muted);
 }
 
 .progress-volume-bars strong {
   text-align: right;
+}
+
+.progress-block-week-bars strong {
+  white-space: nowrap;
 }
 
 .progress-region-track span {

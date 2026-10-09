@@ -160,7 +160,7 @@ function sessionE1rmPoints(
   blocks: TrainingBlock[],
   exerciseId: string,
   start: string,
-  today: string
+  end: string
 ): E1rmPoint[] {
   const allSessions = groupExerciseSessions(entries).filter((session) => session.exerciseId === exerciseId)
   const allValues = allSessions.map((session) => ({
@@ -178,7 +178,7 @@ function sessionE1rmPoints(
     }
   }
   return allValues
-    .filter((point) => point.value !== null && rangeContains(point.date, start, today))
+    .filter((point) => point.value !== null && rangeContains(point.date, start, end))
     .map((point) => ({
       date: point.date,
       value: point.value as number,
@@ -313,10 +313,9 @@ export function calculateProgressInsights(
   const end = windowEnd(range, activeBlock, today)
   const sessions = groupExerciseSessions(entries)
   const rangeSessions = sessions.filter((session) => rangeContains(session.date, start, end))
-  const planExerciseIds = new Set(activeBlock?.days.flatMap((day) => day.exercises.map((item) => item.exerciseId)) ?? [])
   const liftSessions = new Map<string, Array<{ date: string; value: number }>>()
   for (const session of rangeSessions) {
-    if (!planExerciseIds.has(session.exerciseId) || isDeloadWeek(findEntryBlock(blocks, session), session.date)) continue
+    if (isDeloadWeek(findEntryBlock(blocks, session), session.date)) continue
     const value = sessionE1RM(session.sets)
     if (value === null) continue
     liftSessions.set(session.exerciseId, [...(liftSessions.get(session.exerciseId) ?? []), { date: session.date, value }])
@@ -386,9 +385,10 @@ export function calculateProgressInsights(
     .filter((record) => rangeContains(record.date, start, end) && record.badges.length)
   const repPrs = repPersonalRecords(entries, blocks, start, end)
   const latestWeek = startOfWeek(today)
-  const previousWeekStarts = recentWeekStarts(addDays(latestWeek, -7), 3)
-  const currentWeeklySets = weeklySets(entries, blocks, exercises, today, activeBlock)
-  const previousWeekly = previousWeekStarts.map((week) => weeklySets(entries, blocks, exercises, week, null))
+  const completedWeekStart = addDays(latestWeek, -7)
+  const currentWeeklySets = weeklySets(entries, blocks, exercises, completedWeekStart, activeBlock)
+  const previousWeekly = recentWeekStarts(addDays(completedWeekStart, -7), 3)
+    .map((week) => weeklySets(entries, blocks, exercises, week, null))
   const groupByMuscle: Record<string, WeeklyMuscleSets['groups'][number]['muscleGroup']> = {
     Chest: 'Chest',
     'Upper Chest': 'Chest',
@@ -564,9 +564,9 @@ export function calculateProgressInsights(
     noNewBest,
     mostImproved,
     records,
-    prCount: records.reduce((total, record) => total + record.badges.length, 0),
+    prCount: records.length,
     repPrs,
-    recentRecordsCount: recentRecordsCount.reduce((total, record) => total + record.badges.length, 0) + recentRepPrs.length,
+    recentRecordsCount: recentRecordsCount.length + recentRepPrs.length,
     sessionsDone,
     sessionsPlanned,
     streakWeeks: weekStreak(entries, today),
@@ -599,6 +599,11 @@ export function calculateProgressInsights(
     weekdayCounts,
     activeBlockWeek: blockWeekNumber,
   }
+}
+
+export function mostFrequentWeekdays(weekdayCounts: Array<{ weekday: number; sessions: number }>) {
+  const maximum = Math.max(0, ...weekdayCounts.map((item) => item.sessions))
+  return maximum === 0 ? [] : weekdayCounts.filter((item) => item.sessions === maximum)
 }
 
 export type ProgressInsights = ReturnType<typeof calculateProgressInsights>
