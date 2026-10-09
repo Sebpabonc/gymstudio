@@ -386,8 +386,16 @@ export function calculateProgressInsights(
   const repPrs = repPersonalRecords(entries, blocks, start, end)
   const latestWeek = startOfWeek(today)
   const completedWeekStart = addDays(latestWeek, -7)
-  const currentWeeklySets = weeklySets(entries, blocks, exercises, completedWeekStart, activeBlock)
-  const previousWeekly = recentWeekStarts(addDays(completedWeekStart, -7), 3)
+  // PO 2026-10-10: never compare against weeks before the first logged session (they read as "0").
+  const firstWeek = sessions.length ? startOfWeek(sessions[0].date) : latestWeek
+  const completedWeekSets = weeklySets(entries, blocks, exercises, completedWeekStart, activeBlock)
+  const completedWeekHasSets = completedWeekStart >= firstWeek && completedWeekSets.groups.some((group) => group.done > 0)
+  // No complete week with data yet: show this week so far.
+  const weeklySetsBasis: 'complete-week' | 'week-to-date' = completedWeekHasSets ? 'complete-week' : 'week-to-date'
+  const setsWeekStart = completedWeekHasSets ? completedWeekStart : latestWeek
+  const currentWeeklySets = completedWeekHasSets ? completedWeekSets : weeklySets(entries, blocks, exercises, latestWeek, activeBlock)
+  const previousWeekly = recentWeekStarts(addDays(setsWeekStart, -7), 3)
+    .filter((week) => week >= firstWeek)
     .map((week) => weeklySets(entries, blocks, exercises, week, null))
   const groupByMuscle: Record<string, WeeklyMuscleSets['groups'][number]['muscleGroup']> = {
     Chest: 'Chest',
@@ -417,13 +425,15 @@ export function calculateProgressInsights(
   const weeklyMuscles = currentWeeklySets.groups.map((group) => ({
     muscleGroup: group.muscleGroup,
     thisWeek: group.done,
-    previousThreeWeekAverage: mean(previousWeekly.map((week) =>
-      week.groups.find((item) => item.muscleGroup === group.muscleGroup)?.done ?? 0
-    )) ?? 0,
+    previousThreeWeekAverage: previousWeekly.length
+      ? mean(previousWeekly.map((week) =>
+        week.groups.find((item) => item.muscleGroup === group.muscleGroup)?.done ?? 0
+      )) ?? 0
+      : null,
     commonRange: primaryGroups.has(group.muscleGroup),
   }))
 
-  const volumeWeeks = recentWeekStarts(today, 6)
+  const volumeWeeks = recentWeekStarts(today, 6).filter((week) => week >= firstWeek)
   const weeklyVolume = volumeWeeks.map((weekStart) => {
     const end = addDays(weekStart, 6)
     const workoutVolumes = new Map<string, number>()
@@ -571,6 +581,7 @@ export function calculateProgressInsights(
     sessionsPlanned,
     streakWeeks: weekStreak(entries, today),
     weeklyMuscles,
+    weeklySetsBasis,
     commonRange: {
       min: PROGRESS_THRESHOLDS.commonRangeMinimumSets,
       max: PROGRESS_THRESHOLDS.commonRangeMaximumSets,

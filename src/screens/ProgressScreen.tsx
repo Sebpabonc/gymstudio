@@ -427,7 +427,11 @@ export default function ProgressScreen({
       lift: insights.worstMover,
     })
   }
-  const largestMuscleChange = [...insights.weeklyMuscles]
+  // Only compare complete weeks that both have history (PO 2026-10-10: no "0 vs 0" cards).
+  const comparableMuscles = insights.weeklySetsBasis === 'complete-week'
+    ? insights.weeklyMuscles.flatMap((muscle) => muscle.previousThreeWeekAverage === null ? [] : [{ ...muscle, previousThreeWeekAverage: muscle.previousThreeWeekAverage }])
+    : []
+  const largestMuscleChange = comparableMuscles
     .filter((muscle) => muscle.thisWeek > 0 || muscle.previousThreeWeekAverage > 0)
     .sort((a, b) => Math.abs(b.thisWeek - b.previousThreeWeekAverage) - Math.abs(a.thisWeek - a.previousThreeWeekAverage))[0]
   if (largestMuscleChange) {
@@ -444,10 +448,25 @@ export default function ProgressScreen({
 
   const percentText = (value: number | null) => value === null ? '—' : signedPercent(value, language)
   const weeklyMuscles = [...insights.weeklyMuscles]
-    .filter((muscle) => muscle.commonRange || muscle.thisWeek > 0 || muscle.previousThreeWeekAverage > 0)
-    .sort((a, b) => Math.max(b.thisWeek, b.previousThreeWeekAverage) - Math.max(a.thisWeek, a.previousThreeWeekAverage))
+    .filter((muscle) => muscle.thisWeek > 0 || (muscle.previousThreeWeekAverage ?? 0) > 0)
+    .sort((a, b) => Math.max(b.thisWeek, b.previousThreeWeekAverage ?? 0) - Math.max(a.thisWeek, a.previousThreeWeekAverage ?? 0))
     .slice(0, 6)
-  const muscleScale = Math.max(24, ...weeklyMuscles.flatMap((muscle) => [muscle.thisWeek, muscle.previousThreeWeekAverage]))
+  const muscleScale = Math.max(24, ...weeklyMuscles.flatMap((muscle) => [muscle.thisWeek, muscle.previousThreeWeekAverage ?? 0]))
+  const muscleCopy = (muscle: (typeof weeklyMuscles)[number]) => {
+    const values = {
+      muscle: muscleGroupLabel(muscle.muscleGroup, data.i18n),
+      current: formatNumber(language, muscle.thisWeek, { maximumFractionDigits: 1 }),
+      average: formatNumber(language, muscle.previousThreeWeekAverage ?? 0, { maximumFractionDigits: 1 }),
+    }
+    if (insights.weeklySetsBasis === 'week-to-date') {
+      return muscle.previousThreeWeekAverage === null
+        ? t('progress.weeklySets.weekToDate', values)
+        : t('progress.weeklySets.weekToDateCompare', values)
+    }
+    return muscle.previousThreeWeekAverage === null
+      ? t('progress.weeklySets.completeWeekOnly', values)
+      : t('progress.weeklySets.compare', values)
+  }
   const volumeBarScale = Math.max(...insights.weeklyVolume.map((week) => week.perSession), 1)
   const totalRegions = insights.upperLower.total
   const upperPercent = totalRegions ? Math.round(insights.upperLower.upper / totalRegions * 100) : 0
@@ -616,22 +635,14 @@ export default function ProgressScreen({
                   <li key={muscle.muscleGroup}>
                     <div className="progress-bar-heading">
                       <strong>{muscleGroupLabel(muscle.muscleGroup, data.i18n)}</strong>
-                      <span>{formatNumber(language, muscle.thisWeek, { maximumFractionDigits: 1 })} / {formatNumber(language, muscle.previousThreeWeekAverage, { maximumFractionDigits: 1 })}</span>
+                      <span>{formatNumber(language, muscle.thisWeek, { maximumFractionDigits: 1 })}{muscle.previousThreeWeekAverage !== null && ` / ${formatNumber(language, muscle.previousThreeWeekAverage, { maximumFractionDigits: 1 })}`}</span>
                     </div>
-                    <div className="progress-muscle-track" role="img" aria-label={t('progress.weeklySets.compare', {
-                      muscle: muscleGroupLabel(muscle.muscleGroup, data.i18n),
-                      current: formatNumber(language, muscle.thisWeek, { maximumFractionDigits: 1 }),
-                      average: formatNumber(language, muscle.previousThreeWeekAverage, { maximumFractionDigits: 1 }),
-                    })}>
+                    <div className="progress-muscle-track" role="img" aria-label={muscleCopy(muscle)}>
                       {muscle.commonRange && <span className="progress-muscle-range" style={{ left: `${10 / muscleScale * 100}%`, width: `${10 / muscleScale * 100}%` }} />}
-                      <span className="progress-muscle-average" style={{ left: `${Math.min(muscle.previousThreeWeekAverage / muscleScale, 1) * 100}%` }} />
+                      {muscle.previousThreeWeekAverage !== null && <span className="progress-muscle-average" style={{ left: `${Math.min(muscle.previousThreeWeekAverage / muscleScale, 1) * 100}%` }} />}
                       <span className="progress-muscle-current" style={{ width: `${Math.min(muscle.thisWeek / muscleScale, 1) * 100}%` }} />
                     </div>
-                    <small className="progress-muscle-copy">{t('progress.weeklySets.compare', {
-                      muscle: muscleGroupLabel(muscle.muscleGroup, data.i18n),
-                      current: formatNumber(language, muscle.thisWeek, { maximumFractionDigits: 1 }),
-                      average: formatNumber(language, muscle.previousThreeWeekAverage, { maximumFractionDigits: 1 }),
-                    })}</small>
+                    <small className="progress-muscle-copy">{muscleCopy(muscle)}</small>
                   </li>
                 ))}
               </ul>
