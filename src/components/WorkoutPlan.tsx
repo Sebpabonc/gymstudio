@@ -3441,7 +3441,7 @@ export default function WorkoutPlan({
                           <div className={`planned-set-column-headers${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`} aria-hidden="true">
                             <span>{t('workout.label.set')}</span>
                             <span>
-                              {t('workout.label.previous')}
+                              {t(isWorkoutMode ? 'workout.run.lastTime' : 'workout.label.previous')}
                               {previousDayType && (
                                 <small className="previous-day-label">{t('workout.previous.day', { day: previousDayType })}</small>
                               )}
@@ -3771,7 +3771,7 @@ export default function WorkoutPlan({
                       </button>
                       <div className={`superset-round-columns${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`} aria-hidden="true">
                         <span />
-                        <span>{t('workout.label.previous')}</span>
+                        <span>{t(isWorkoutMode ? 'workout.run.lastTime' : 'workout.label.previous')}</span>
                         {isWorkoutMode && <span>{t('workout.run.target')}</span>}
                         <span>kg</span>
                         <span>{text.repsShort}</span>
