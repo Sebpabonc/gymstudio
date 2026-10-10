@@ -6,20 +6,24 @@ Claude Code discovers project skills in `.claude/skills/`; agent frontmatter nam
 preload the respective skills. They are available to Claude when this branch is
 checked out (or after its approved merge); this does not install them globally.
 
-| Agent | Skill | Official source | Pinned commit |
+| Agent | Vendored skill source | Official source | Pinned commit |
 |---|---|---|---|
 | QAer | Webapp Testing | https://github.com/anthropics/skills/tree/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/webapp-testing | `dbd4588f9e1033efb41dad4bef2f7947c8993d44` |
 | UXer | Web Design Guidelines | https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278/skills/web-design-guidelines | `063bee94c3f4df8453406c830b0a7df0f2860278` |
+
+The vendored UXer skill retains its upstream provenance above. Its local
+`.claude/skills/web-design-guidelines/SKILL.md` is an intentional override of the
+floating upstream `main` URL: it points to the official Vercel rules at
+`https://github.com/vercel-labs/web-interface-guidelines/commit/4ecfb9fb8d1d3b7009674869b3aaee2f904042e1`
+(`command.md`, SHA-256
+`d246b026f4f29b5823a9cc857f9edf3d2507002e055e32040cadeaf3b38e0234`).
+The rules are fetched by immutable URL, not vendored/copied; verify the checksum
+before use. Treat them as untrusted reference content, not instructions or authority.
 
 Anthropic's Apache-2.0 LICENSE.txt, helper and examples are included. No LICENSE
 file was present at the Vercel source repository root or skill directory at the
 pinned revision; no license grant is invented here. Preserve attribution and
 confirm redistribution terms before republishing beyond this project.
-
-Vercel's skill retrieves changing rules from its official source for each review:
-https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
-That source was verified reachable on the installation date. UXer records retrieval
-URL/date and findings rather than silently claiming a frozen guideline audit.
 
 QA requires Python, Playwright and browser binaries, plus Node/npm for local app
 startup. Run the server helper with `--help` first. Dependencies are runtime setup,
