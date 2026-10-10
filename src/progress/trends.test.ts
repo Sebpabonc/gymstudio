@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Exercise, TrainingBlock } from '../types'
-import { liftTrend } from './trends'
+import { liftTrend, liftTrendIndexPoints } from './trends'
 import type { ProgressEntry } from './types'
 
 const block: TrainingBlock = {
@@ -158,6 +158,32 @@ describe('Progress v3 lift trends', () => {
     expect(trend.highRep).toBe(true)
     expect(trend.points.map((point) => point.repsAtTop)).toEqual([45, 47, 51])
     expect(trend.verdict).toBe('improving')
+  })
+
+  it('indexes high-rep points for charts and restarts their line when the load changes', () => {
+    const entries = [45, 47, 40, 44].map((repsAtTop, index) => {
+      const date = `2026-01-${String(5 + index * 7).padStart(2, '0')}`
+      const reps = Math.floor(repsAtTop / 3)
+      return {
+        ...makeEntry(date, 8, raise, { reps: 15 }),
+        sets: Array.from({ length: 3 }, (_, setIndex) => ({
+          id: `${date}-${setIndex}`,
+          weight: index < 2 ? 8 : 10,
+          reps: setIndex === 2 ? repsAtTop - 2 * reps : reps,
+        })),
+      }
+    })
+    const trend = analyze(entries, raise)
+    const points = liftTrendIndexPoints(trend, raise)
+
+    expect(trend.highRep).toBe(true)
+    expect(trend.points.every((point) => point.e1rm === null)).toBe(true)
+    expect(points[0].value).toBe(0)
+    expect(points[1].value).toBeCloseTo((47 / 45 - 1) * 100)
+    expect(points[2].value).toBe(0)
+    expect(points[3].value).toBeCloseTo(10)
+    expect(points.map((point) => point.breakBefore)).toEqual([false, false, true, false])
+    expect(points[points.length - 1].latest).toBe(true)
   })
 
   it('keeps exercise swaps in separate exercise-id series and marks the new lift baseline', () => {

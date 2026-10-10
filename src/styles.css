@@ -7566,43 +7566,51 @@ summary:focus-visible,
 }
 
 .pv3-gauge {
+  display: grid;
+  grid-template-rows: auto 34px auto;
+  gap: 2px;
+  margin: 6px 4px 10px;
+}
+
+.pv3-gauge-plot {
   position: relative;
-  height: 30px;
-  margin: 2px 4px 14px;
+  min-width: 0;
 }
 
 .pv3-gauge-track,
 .pv3-gauge-band,
-.pv3-gauge-marker {
+.pv3-gauge-marker,
+.pv3-gauge-value {
   position: absolute;
 }
 
 .pv3-gauge-track {
-  inset: 12px 0 auto;
+  top: 15px;
+  right: 0;
+  left: 0;
   height: 6px;
   border-radius: 8px;
   background: var(--panel-strong);
 }
 
 .pv3-gauge-band {
-  top: 12px;
+  top: 15px;
   height: 6px;
   border-radius: 8px;
   background: var(--brand-soft);
 }
 
 .pv3-gauge-marker {
-  top: 5px;
+  top: 8px;
   width: 2px;
   height: 20px;
   background: var(--nav-active);
 }
 
 .pv3-gauge-value {
-  position: absolute;
-  top: -7px;
+  top: -5px;
   padding: 0 3px;
-  background: var(--bg-dark);
+  background: var(--bg-soft);
   color: var(--text);
   font-size: var(--font-caption);
   transform: translateX(-50%);
@@ -7610,7 +7618,7 @@ summary:focus-visible,
 
 .pv3-gauge-axis {
   position: absolute;
-  inset: 19px 0 auto;
+  inset: 25px 0 auto;
   display: flex;
   justify-content: space-between;
   color: var(--muted);
@@ -7618,18 +7626,13 @@ summary:focus-visible,
 }
 
 .pv3-gauge-band-label {
-  position: absolute;
-  top: 26px;
-  left: 0;
+  display: block;
   color: var(--muted);
   font-size: var(--font-caption);
   white-space: nowrap;
 }
 
 .pv3-gauge-average-label {
-  position: absolute;
-  top: -17px;
-  left: 0;
   color: var(--muted);
   font-size: var(--font-caption);
 }
@@ -7644,7 +7647,7 @@ summary:focus-visible,
 .pv3-week-bars {
   display: grid;
   gap: 3px;
-  align-items: end;
+  align-items: stretch;
   min-width: 0;
   margin-top: 6px;
   overflow-x: auto;
@@ -7652,12 +7655,20 @@ summary:focus-visible,
 
 .pv3-week-column {
   display: grid;
+  grid-template-rows: 1.2em 70px 1.2em 2.4em 2.4em;
   min-width: 22px;
   justify-items: center;
   gap: 2px;
   color: var(--muted);
   font-size: var(--font-caption);
   text-align: center;
+}
+
+.pv3-week-block {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pv3-week-track {
@@ -7715,6 +7726,12 @@ summary:focus-visible,
 .pv3-consistency-week > small {
   color: var(--muted);
   font-size: var(--font-caption);
+}
+
+.pv3-consistency-week-label small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pv3-day-dots {
@@ -7943,6 +7960,8 @@ summary:focus-visible,
     max-width: 42%;
     white-space: normal;
   }
+}
+
 /* Weekly progress bar (replaces the D1–Dn tiles, PO 2026-10-10). */
 .week-progress {
   display: grid;

@@ -28,6 +28,7 @@ import {
   equivalentLiftSessions,
   exerciseVolumeTrend,
   liftTrend,
+  liftTrendIndexPoints,
   latestEquivalentComparisons,
   muscleTrend,
   overallProgressStatus,
@@ -38,6 +39,7 @@ import {
   watchObservations,
 } from '../progress'
 import { workingSets, dateValue } from '../progress/utils'
+import { MUSCLE_CHART_MAXIMUM, MUSCLE_COMMON_RANGE } from '../progress/muscles'
 import type { WatchObservation } from '../progress/comparison'
 import type { ProgressStatus } from '../progress/status'
 import type { TranslationKey } from '../i18n/en'
@@ -151,19 +153,8 @@ function rateText(trend: LiftTrend, language: 'en' | 'es', t: ReturnType<typeof 
   return t('progress.v3.rate.perWeek', { value: signed })
 }
 
-function pointIndex(trend: LiftTrend) {
-  const points = trend.points.filter((point) => !point.deload && point.e1rm !== null)
-  const baseline = points[0]?.e1rm
-  if (!baseline) return []
-  return points.map((point) => ({
-    date: point.date,
-    value: ((point.e1rm ?? baseline) / baseline - 1) * 100,
-    latest: point === points[points.length - 1],
-  }))
-}
-
-function Sparkline({ trend, min, max }: { trend: LiftTrend; min: number; max: number }) {
-  const points = pointIndex(trend)
+function Sparkline({ trend, min, max, exercise }: { trend: LiftTrend; min: number; max: number; exercise?: Exercise }) {
+  const points = liftTrendIndexPoints(trend, exercise)
   if (!points.length) {
     return <svg className="pv3-sparkline" viewBox="0 0 100 28" aria-hidden="true"><line x1="2" y1="14" x2="98" y2="14" /></svg>
   }
@@ -173,7 +164,7 @@ function Sparkline({ trend, min, max }: { trend: LiftTrend; min: number; max: nu
     x: 3 + index / Math.max(points.length - 1, 1) * 94,
     y: 24 - (point.value - min) / span * 20,
   }))
-  const path = plotted.map((point, index) => `${index ? 'L' : 'M'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ')
+  const path = plotted.map((point, index) => `${index === 0 || point.breakBefore ? 'M' : 'L'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ')
   const latest = plotted[plotted.length - 1]
   return (
     <svg className="pv3-sparkline" viewBox="0 0 100 28" aria-hidden="true">
@@ -184,8 +175,11 @@ function Sparkline({ trend, min, max }: { trend: LiftTrend; min: number; max: nu
   )
 }
 
-function MiniTrendChart({ trend }: { trend: LiftTrend }) {
-  const values = trend.points.map((point) => point.e1rm).filter((value): value is number => value !== null)
+function MiniTrendChart({ trend, t }: { trend: LiftTrend; t: ReturnType<typeof useT>['t'] }) {
+  const values = trend.points.map((point) => trend.highRep
+    ? point.topLoad === null ? null : point.repsAtTop
+    : point.e1rm
+  ).filter((value): value is number => value !== null)
   if (!values.length) return <div className="pv3-chart-empty" aria-hidden="true" />
   const width = 320
   const height = 76
@@ -201,7 +195,7 @@ function MiniTrendChart({ trend }: { trend: LiftTrend }) {
   const ySpan = max - min || 1
   const x = (date: string) => left + (dateValue(date) - minTime) / span * (right - left)
   const y = (value: number) => bottom - (value - min) / ySpan * (bottom - top)
-  const line = trend.points
+  const line = trend.highRep ? '' : trend.points
     .filter((point) => point.movingAverage !== null)
     .map((point, index, points) => {
       const previous = points[index - 1]
@@ -210,16 +204,16 @@ function MiniTrendChart({ trend }: { trend: LiftTrend }) {
     })
     .join(' ')
   return (
-    <svg className="pv3-mini-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Lift trend">
-      {trend.points.map((point, index) => (
-        <circle
-          key={`${point.date}-${index}`}
-          cx={x(point.date)}
-          cy={point.e1rm === null ? bottom : y(point.e1rm)}
-          r={point.deload ? 3.5 : 2.5}
-          className={point.deload ? 'pv3-point pv3-deload' : 'pv3-point'}
-        />
-      ))}
+    <svg className="pv3-mini-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={t(trend.highRep ? 'progress.v3.trends.highRepNote' : 'progress.v3.trends.e1rmNote')}>
+      {trend.points.map((point, index) => {
+        const value = trend.highRep
+          ? point.topLoad === null ? null : point.repsAtTop
+          : point.e1rm
+        if (value === null) return null
+        return trend.highRep
+          ? <rect key={`${point.date}-${index}`} x={x(point.date) - 3} y={y(value)} width="6" height={Math.max(2, bottom - y(value))} className={point.deload ? 'pv3-rep-bar pv3-deload' : 'pv3-rep-bar'} />
+          : <circle key={`${point.date}-${index}`} cx={x(point.date)} cy={y(value)} r={point.deload ? 3.5 : 2.5} className={point.deload ? 'pv3-point pv3-deload' : 'pv3-point'} />
+      })}
       {line && <path className="pv3-moving-average" d={line} />}
     </svg>
   )
@@ -318,7 +312,7 @@ function LiftTrendChart({
       {blockMarks.map((block) => (
         <g key={block.id}>
           <line x1={x(block.startDate)} x2={x(block.startDate)} y1={top} y2={bottom} className="pv3-block-marker" />
-          <text x={x(block.startDate) + 2} y={top - 5} className="pv3-chart-date">{t('progress.v3.muscles.block', { number: block.number })}</text>
+          {block.name.trim() && <text x={x(block.startDate) + 2} y={top - 5} className="pv3-chart-date">{block.name}</text>}
         </g>
       ))}
       {swapMarker && <text x={left} y={height - 1} className="pv3-swap-marker">{`⇄ ${t('progress.v3.detail.swap')}`}</text>}
@@ -379,21 +373,29 @@ function Gauge({
   averageLabel,
   language,
 }: {
-  value: number
+  value: number | null
   label: string
   averageLabel: string
   language: 'en' | 'es'
 }) {
-  const percent = Math.max(0, Math.min(value, 30)) / 30 * 100
+  const percent = value === null
+    ? null
+    : Math.max(0, Math.min(value, MUSCLE_CHART_MAXIMUM)) / MUSCLE_CHART_MAXIMUM * 100
+  const bandStart = MUSCLE_COMMON_RANGE.min / MUSCLE_CHART_MAXIMUM * 100
+  const bandWidth = (MUSCLE_COMMON_RANGE.max - MUSCLE_COMMON_RANGE.min) / MUSCLE_CHART_MAXIMUM * 100
   return (
-    <div className="pv3-gauge" role="img" aria-label={`${averageLabel}: ${value}. ${label}: 10–20`}>
-      <span className="pv3-gauge-track" />
-      <span className="pv3-gauge-band" />
-      <span className="pv3-gauge-marker" style={{ left: `${percent}%` }} />
-      <strong className="pv3-gauge-value" style={{ left: `${percent}%` }}>{formatNumber(language, value, { maximumFractionDigits: 1 })}</strong>
-      <div className="pv3-gauge-axis"><span>0</span><span>10</span><span>20</span><span>30</span></div>
-      <small className="pv3-gauge-band-label">↑ 10–20 {label}</small>
-      <small className="pv3-gauge-average-label">{averageLabel}</small>
+    <div className="pv3-gauge" role="img" aria-label={value === null ? `${label}: 10–20. ${averageLabel} unavailable` : `${averageLabel}: ${value}. ${label}: 10–20`}>
+      {value !== null && <small className="pv3-gauge-average-label">{averageLabel}</small>}
+      <div className="pv3-gauge-plot">
+        <span className="pv3-gauge-track" />
+        <span className="pv3-gauge-band" style={{ left: `${bandStart}%`, width: `${bandWidth}%` }} />
+        {value !== null && percent !== null && <>
+          <span className="pv3-gauge-marker" style={{ left: `${percent}%` }} />
+          <strong className="pv3-gauge-value" style={{ left: `${percent}%` }}>{formatNumber(language, value, { maximumFractionDigits: 1 })}</strong>
+        </>}
+        <div className="pv3-gauge-axis"><span>0</span><span>{MUSCLE_COMMON_RANGE.min}</span><span>{MUSCLE_COMMON_RANGE.max}</span><span>{MUSCLE_CHART_MAXIMUM}</span></div>
+      </div>
+      <small className="pv3-gauge-band-label">↑ {MUSCLE_COMMON_RANGE.min}–{MUSCLE_COMMON_RANGE.max} {label}</small>
     </div>
   )
 }
@@ -572,8 +574,9 @@ export default function ProgressScreen({
     () => blocks ? blockLiftComparisons(progressEntries, blocks, exercises, activeBlock) : [],
     [progressEntries, blocks, exercises, activeBlock]
   )
-  const allTrends = [...overviewTrends.values()]
-  const allIndexValues = allTrends.flatMap((trend) => pointIndex(trend).map((point) => point.value))
+  const allIndexValues = [...overviewTrends.entries()].flatMap(([id, trend]) =>
+    liftTrendIndexPoints(trend, exerciseById.get(id)).map((point) => point.value)
+  )
   const sparkMin = allIndexValues.length ? Math.min(...allIndexValues, 0) : -6
   const sparkMax = allIndexValues.length ? Math.max(...allIndexValues, 0) : 6
   const selectedExercise: Exercise | null = selectedLiftId
@@ -710,7 +713,9 @@ export default function ProgressScreen({
             {mainLiftIds.map((id) => {
               const trend = overviewTrends.get(id)
               if (!trend) return null
-              const latest = trend.points.filter((point) => !point.deload && point.e1rm !== null).slice(-1)[0]
+              const latest = trend.points.some((point) => !point.deload && (trend.highRep
+                ? point.topLoad !== null && point.repsAtTop > 0
+                : point.e1rm !== null))
               const reason = worthReasons.get(id)
               const comparison = latestComparisons.get(id)?.comparison
               return (
@@ -727,14 +732,14 @@ export default function ProgressScreen({
                       })}</small>}
                       {reason && <em className="pv3-worth-tag">{t('progress.v3.worthLooking')}: {reason}</em>}
                     </span>
-                    <Sparkline trend={trend} min={sparkMin} max={sparkMax} />
+                    <Sparkline trend={trend} min={sparkMin} max={sparkMax} exercise={exerciseById.get(id)} />
                   </button>
                 </li>
               )
             })}
           </ul>
         ) : <p className="empty-state">{t('progress.v3.verdict.insufficient')}</p>}
-        <p className="pv3-caption">{t('progress.v3.sparklineNote')}</p>
+        <p className="pv3-caption">{mainTrends.some((trend) => trend.highRep) ? t('progress.v3.sparklineHighRepNote') : t('progress.v3.sparklineNote')}</p>
       </section>
 
       <section className="card pv3-card">
@@ -753,7 +758,7 @@ export default function ProgressScreen({
         <h3>{t('progress.v3.consistency.title')} · {t('progress.v3.muscles.title')}</h3>
         {currentAdherence !== null
           ? <p>{t('progress.v3.overview.consistency', {
-              adherence: formatNumber(language, currentAdherence * 100),
+              adherence: formatNumber(language, currentAdherence * 100, { maximumFractionDigits: 0 }),
               streak: formatNumber(language, consistencyData.currentStreak),
             })}</p>
           : <p>{t('progress.v3.overview.building', {
@@ -776,8 +781,8 @@ export default function ProgressScreen({
   )
 
   const renderTrends = () => {
-    const currentAdherenceText = currentAdherence === null ? '—' : `${formatNumber(language, currentAdherence * 100)}%`
-    const previousAdherenceText = previousAdherence === null ? '—' : `${formatNumber(language, previousAdherence * 100)}%`
+    const currentAdherenceText = currentAdherence === null ? '—' : `${formatNumber(language, currentAdherence * 100, { maximumFractionDigits: 0 })}%`
+    const previousAdherenceText = previousAdherence === null ? '—' : `${formatNumber(language, previousAdherence * 100, { maximumFractionDigits: 0 })}%`
     const mainChangeText = averageMainChange === null ? '—' : `${averageMainChange > 0 ? '+' : ''}${formatNumber(language, averageMainChange, { maximumFractionDigits: 1 })}%`
     const currentOverloadText = overload?.rate === null || overload?.rate === undefined ? '—' : `${formatNumber(language, overload.rate * 100)}%`
     const previousOverloadText = previousOverload.rate === null ? '—' : `${formatNumber(language, previousOverload.rate * 100)}%`
@@ -806,8 +811,8 @@ export default function ProgressScreen({
             return (
               <button type="button" className="pv3-trend-lift" key={id} onClick={() => setSelectedLiftId(id)}>
                 <span className="pv3-trend-heading"><strong>{displayName(id)}</strong><span>{translatedVerdict(trend.verdict, t)}</span></span>
-                {trend.verdict !== 'not-enough-data' && <span className="pv3-trend-detail">{rateText(trend, language, t)} · {t(`progress.v3.confidence.${trend.confidence === 'based-on' ? 'basedOn' : trend.confidence ?? 'early'}`, { count: formatNumber(language, trend.points.filter((point) => !point.deload).length) })}</span>}
-                <MiniTrendChart trend={trend} />
+                {trend.verdict !== 'not-enough-data' && <span className="pv3-trend-detail">{rateText(trend, language, t)}{rateText(trend, language, t) ? ' · ' : ''}{t(`progress.v3.confidence.${trend.confidence === 'based-on' ? 'basedOn' : trend.confidence ?? 'early'}`, { count: formatNumber(language, trend.points.filter((point) => !point.deload).length) })}</span>}
+                <MiniTrendChart trend={trend} t={t} />
               </button>
             )
           })}
@@ -878,18 +883,31 @@ export default function ProgressScreen({
           <p className="pv3-caption">{t('progress.v3.muscles.scale')}</p>
           {groupNames.length ? groupNames.map((group) => {
             const average = muscles?.averages[group]
-                    const title = t(MUSCLE_KEYS[group])
+            const title = t(MUSCLE_KEYS[group])
             return (
               <article className="pv3-muscle-row" key={group}>
                 <h4>{title}</h4>
-                {average !== undefined
-                  ? <Gauge
-                      value={average}
-                      label={t('progress.v3.muscles.common')}
-                      averageLabel={t('progress.v3.muscles.average')}
-                      language={language}
-                    />
-                  : <p className="pv3-caption">{t('progress.v3.muscles.unlock', { count: formatNumber(language, Math.min(unlockedMuscleWeeks, 4)) })}</p>}
+                <>
+                  <Gauge
+                    value={average ?? null}
+                    label={t('progress.v3.muscles.common')}
+                    averageLabel={t('progress.v3.muscles.average')}
+                    language={language}
+                  />
+                  {average !== undefined
+                    ? <>
+                      <p className="pv3-muscle-takeaway">{t('progress.v3.muscles.takeaway', {
+                        muscle: title,
+                        sets: formatNumber(language, average, { maximumFractionDigits: 1 }),
+                        range: t(average < MUSCLE_COMMON_RANGE.min
+                          ? 'progress.v3.muscles.belowRange'
+                          : average > MUSCLE_COMMON_RANGE.max
+                            ? 'progress.v3.muscles.aboveRange'
+                            : 'progress.v3.muscles.insideRange'),
+                      })}</p>
+                    </>
+                    : <p className="pv3-caption">{t('progress.v3.muscles.unlock', { count: formatNumber(language, Math.min(unlockedMuscleWeeks, 4)) })}</p>}
+                </>
                 <div className="pv3-week-bars" style={{ gridTemplateColumns: `repeat(${Math.max(visibleWeeks.length, 1)}, minmax(0, 1fr))` }}>
                   {visibleWeeks.map((week) => {
                     const value = week.values[group] ?? 0
@@ -915,7 +933,7 @@ export default function ProgressScreen({
                           />
                         </div>
                         <small>{weekNumber === null ? formatShortDate(language, week.weekStart) : `${t('progress.v3.muscles.week')}${formatNumber(language, weekNumber)}`}</small>
-                        {blockStartThisWeek && <small>{t('progress.v3.muscles.block', { number: weekBlock.number })}</small>}
+                        <small className="pv3-week-block" title={blockStartThisWeek ? weekBlock.name : undefined}>{blockStartThisWeek ? weekBlock.name : ''}</small>
                         <small>{week.deload ? t('progress.v3.muscles.deload') : value === 0 ? t('progress.v3.muscles.noTraining') : formatShortDate(language, week.weekStart)}</small>
                       </div>
                     )
@@ -939,7 +957,7 @@ export default function ProgressScreen({
             <div className="pv3-consistency-summary">
               <div><strong>{formatNumber(language, consistencyData.currentStreak)} {t('progress.v3.consistency.weeks')}</strong><span>{t('progress.v3.consistency.currentStreak')}</span></div>
               <div><strong>{formatNumber(language, consistencyData.longestStreak)} {t('progress.v3.consistency.weeks')}</strong><span>{t('progress.v3.consistency.longestStreak')}</span></div>
-              <div><strong>{formatNumber(language, consistencyData.adherenceFourWeeks * 100)}%</strong><span>{t('progress.v3.consistency.adherence4w')}</span></div>
+              <div><strong>{formatNumber(language, consistencyData.adherenceFourWeeks * 100, { maximumFractionDigits: 0 })}%</strong><span>{t('progress.v3.consistency.adherence4w')}</span></div>
             </div>
           </section>}
       <section className="card pv3-card">
@@ -951,12 +969,11 @@ export default function ProgressScreen({
               return dateValue(week.weekStart) >= startTime && dateValue(week.weekStart) < startTime + item.weeks * 7 * 86_400_000
             })
             const percent = week.adherence === null ? null : Math.round(week.adherence * 100)
-            const fraction = week.plannedDays ? Math.min(week.loggedPlannedDays / week.plannedDays, 1) : 0
             return (
               <div className="pv3-consistency-week" key={week.weekStart}>
                 <div className="pv3-consistency-week-label">
                   <strong>{t('progress.v3.consistency.week', { number: block ? Math.max(1, Math.floor((dateValue(week.weekStart) - dateValue(block.startDate)) / (7 * 86_400_000)) + 1) : formatShortDate(language, week.weekStart) })}</strong>
-                  {block && <small>{t('progress.block.short', { number: block.number })}</small>}
+                  {block && <small title={block.name}>{block.name}</small>}
                 </div>
                 <div className="pv3-day-dots" aria-label={week.plannedDays ? t('progress.v3.consistency.days', {
                   done: week.loggedPlannedDays,
@@ -1145,7 +1162,7 @@ export default function ProgressScreen({
         : <>
             <div className="pv3-page-heading">
               <h2>{t('progress.title')}</h2>
-              {activeBlock && <span>{t('progress.block.label', { number: activeBlock.number })}</span>}
+              {activeBlock?.name.trim() && <span>{activeBlock.name}</span>}
             </div>
             <div className="pv3-tabs" role="tablist" aria-label={t('progress.title')}>
               {TABS.map((item) => (

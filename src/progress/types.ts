@@ -178,6 +178,13 @@ export type LiftTrend = {
   worthLookingAt: { date: string; sessions: number } | null
 }
 
+export type LiftTrendIndexPoint = {
+  date: string
+  value: number
+  latest: boolean
+  breakBefore: boolean
+}
+
 export type SessionComparison = {
   verdict: 'improved' | 'held' | 'dropped' | 'mixed' | 'traded' | 'target-changed' | 'baseline'
   improvedSets: number

@@ -1,7 +1,7 @@
 import { TrainingBlock, Exercise } from '../types'
 import { dateValue, findEntryBlock, groupExerciseSessions, isDeloadWeek, sessionE1RM, workingSets } from './utils'
 import { PROGRESS_THRESHOLDS } from './thresholds'
-import type { LiftTrend, LiftTrendPoint, ProgressEntry, ProgressLiftSession, ProgressV3Range } from './types'
+import type { LiftTrend, LiftTrendIndexPoint, LiftTrendPoint, ProgressEntry, ProgressLiftSession, ProgressV3Range } from './types'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -266,4 +266,34 @@ export function liftTrend(
     confidence: highRep ? (result.verdict === 'not-enough-data' ? null : 'early') : confidenceFor(points),
     worthLookingAt,
   }
+}
+
+export function liftTrendIndexPoints(trend: LiftTrend, exercise?: Exercise): LiftTrendIndexPoint[] {
+  const points = trend.points.filter((point) => trend.highRep
+    ? point.topLoad !== null && point.repsAtTop > 0
+    : point.e1rm !== null)
+  if (!points.length) return []
+
+  let baseline = 0
+  let previousLoad: number | null = null
+  return points.map((point, index) => {
+    let value: number
+    let breakBefore = point.breakDays !== null && point.breakDays >= PROGRESS_THRESHOLDS.trendBreakDays
+    if (trend.highRep) {
+      const load = point.topLoad ?? 0
+      breakBefore ||= previousLoad !== null && !sameLoad(load, previousLoad, equipmentStep(exercise))
+      if (breakBefore || index === 0) baseline = point.repsAtTop
+      value = baseline ? (point.repsAtTop / baseline - 1) * 100 : 0
+      previousLoad = load
+    } else {
+      if (index === 0) baseline = point.e1rm ?? 0
+      value = baseline ? ((point.e1rm ?? baseline) / baseline - 1) * 100 : 0
+    }
+    return {
+      date: point.date,
+      value,
+      latest: index === points.length - 1,
+      breakBefore,
+    }
+  })
 }
