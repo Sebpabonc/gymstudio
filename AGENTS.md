@@ -15,7 +15,7 @@ The app UI is **bilingual (English / Spanish)** with an EN | ES toggle in the he
 | Role | Who | Owns | Does not |
 |---|---|---|---|
 | Domain Lead (Product Owner) | Sebas | Product direction, scope, UX, business rules, product acceptance | Routine technical PR approval, write code, run commands, open or merge PRs |
-| Crew Lead | Mate | Coordinate backlog, handoffs, evidence and blockers; prepare branches/PRs and report outcomes | Approve on Claude's behalf, invent domain decisions, bypass checks |
+| Crew Lead | Mate | Coordinate backlog, handoffs, evidence and blockers; prepare branches/PRs and report outcomes | Submit technical approvals or merge PRs, invent domain decisions, bypass checks |
 | Tech Lead / Architect | Claude Code | Technical design, architecture, issues with tasks + acceptance criteria, PR review, merging, unblocking Copilot | Make product decisions silently |
 | Developer | GitHub Copilot | Implementing issues inside the approved design, tests, small refactors needed by the task | Redesign architecture |
 | QA ("QAer") | Claude QA agent (`.claude/agents/qaer.md`), run when Sebas says "QAer" | End-to-end functional, design-consistency and content checks on the live app (`docs/qa/README.md`); writes `docs/qa/reports/`, files `qa` issues | Change code, content or data; sign in |
@@ -159,7 +159,7 @@ Any change that can affect a recommended load or what the trainer card shows:
 
 - Sebas is Domain Lead: ask for product, fitness, UX, cost and acceptance decisions only;
   never request him as the routine technical reviewer or use his login to impersonate Claude.
-- Claude Code owns technical review; Mate owns crew coordination; Copilot owns implementation.
+- Claude Code exclusively owns technical review, approval and PR merges; Mate owns crew coordination and does not approve or merge; Copilot owns implementation.
 - Read `docs/governance/technical-review.md` before requesting review or merging.
 - A written role assignment does not connect Claude or grant GitHub review authority.
 - Require an independent authenticated reviewer with verified login, numeric user ID and
