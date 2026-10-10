@@ -1,5 +1,12 @@
 export const workout = {
   en: {
+    'workout.superset.roundOf': 'Round {round} of {total}',
+    'workout.superset.handoff': 'Go to {code} · {seconds}s',
+    'workout.superset.tick': 'Mark {code}, round {round} complete',
+    'workout.superset.tickUndo': 'Unmark {code}, round {round}',
+    'workout.superset.repsDecrease': 'Decrease reps for {code}, round {set}',
+    'workout.superset.repsIncrease': 'Increase reps for {code}, round {set}',
+    'workout.superset.saveError': 'Could not save rounds. Try again.',
     'workout.action.close': 'Close',
     'workout.action.logExercise': 'Log exercise',
     'workout.action.signIn': 'Sign in',
@@ -308,6 +315,13 @@ export const workout = {
     'workout.weekNote.intro': 'Week 1: straight sets, 3-second lowering, 2-3 reps in reserve.',
   },
   es: {
+    'workout.superset.roundOf': 'Ronda {round} de {total}',
+    'workout.superset.handoff': 'Ahora {code} · {seconds}s',
+    'workout.superset.tick': 'Marcar {code}, ronda {round} completada',
+    'workout.superset.tickUndo': 'Desmarcar {code}, ronda {round}',
+    'workout.superset.repsDecrease': 'Reducir repeticiones de {code}, ronda {set}',
+    'workout.superset.repsIncrease': 'Aumentar repeticiones de {code}, ronda {set}',
+    'workout.superset.saveError': 'No se pudieron guardar las rondas. Inténtalo de nuevo.',
     'workout.action.close': 'Cerrar',
     'workout.action.logExercise': 'Registrar ejercicio',
     'workout.action.signIn': 'Iniciar sesión',

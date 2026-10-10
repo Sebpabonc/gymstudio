@@ -5,6 +5,7 @@ import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
 import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue from './SqueezeCue'
+import { SupersetLogger } from './SupersetLogger'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
 import type { TranslationKey } from '../i18n'
@@ -1889,7 +1890,8 @@ export default function WorkoutPlan({
     exercises: PlanExercise[],
     groupKey: string,
     completedRows: boolean[],
-    completedAt?: Array<number | undefined>
+    completedAt?: Array<number | undefined>,
+    startRest = true
   ) => {
     const setCount = Math.max(...exercises.map(getDefaultSetCount))
     const entryInputs = await Promise.all(exercises.map(async (exercise) => {
@@ -1902,7 +1904,7 @@ export default function WorkoutPlan({
           tips: [exercise.tip],
         })).id
       const draft = getDraftForExercise(exercise.name, exercise)
-      const allSets = Array.from({ length: setCount }, (_, index) => {
+      const allSets = Array.from({ length: isWorkoutMode ? getDefaultSetCount(exercise) : setCount }, (_, index) => {
         const prescribedReps = exercise.repsPerSet?.[index] ?? exercise.reps ?? ''
         const reps = draft.setReps[index] ?? parseRepPrescription(prescribedReps)[0] ?? getDefaultRepTarget(exercise)
         const weight = draft.setWeights[index] ?? draft.weight ?? 0
@@ -1976,7 +1978,7 @@ export default function WorkoutPlan({
     }))
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    if (entriesToSave.length === exercises.length) {
+    if (startRest && entriesToSave.length === exercises.length) {
       onStartRest(
         exercises[exercises.length - 1]?.restSeconds ?? 90,
         exercises.map((item) => displayExerciseName(item.name)).join(' + ')
@@ -3156,6 +3158,86 @@ export default function WorkoutPlan({
               .map((reps) => formatNumber(language, reps))
               .join('/')
             const workoutFinished = !!completedEntry || completedRows.every(Boolean)
+            if (isWorkoutMode && group.isSuperset) {
+              return (
+                <React.Fragment key={exercise.code ?? exercise.name}>
+                  <div className="workout-mode-tools">
+                    <button type="button" className="secondary-button small-button" onClick={() => void openExternal(exerciseImageSearchUrl(
+                      exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
+                    ))}>{t('workout.run.searchGoogle')}</button>
+                    {libraryMatch && completedEntry?.date !== today && (
+                      <button type="button" className="secondary-button small-button" onClick={() => setSwapTarget({
+                        exercise: libraryMatch, fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
+                      })}>{t('workout.run.swap')}</button>
+                    )}
+                    <button type="button" className="secondary-button small-button" onClick={(event) => {
+                      const notes = event.currentTarget.closest('.superset-actions-panel')?.querySelector<HTMLDetailsElement>('.superset-notes')
+                      if (notes) {
+                        notes.open = !notes.open
+                        if (notes.open) notes.querySelector('textarea')?.focus()
+                      }
+                    }}>{t('workout.label.notes')}</button>
+                    <button type="button" className="secondary-button small-button" aria-expanded={isProgressSectionVisible}
+                      onClick={() => toggleProgressSection(exercise.name)}>{t('workout.run.history')}</button>
+                    <button type="button" className="secondary-button small-button" aria-expanded={isTipsVisible}
+                      onClick={() => togglePostureTips(exercise.name)}>{t('workout.run.technique')}</button>
+                  </div>
+                  <details className="superset-notes">
+                    <summary>{t('workout.label.notes')}</summary>
+                    <label className="planned-notes-field">
+                      <span>{displayName}</span>
+                      <textarea rows={2} value={draft.notes} placeholder={t('workout.notes.placeholder')}
+                        onChange={(event) => updatePlanDraft(exercise, 'notes', event.target.value)} />
+                    </label>
+                  </details>
+                  {isTipsVisible && (
+                    <SqueezeCue cue={libraryMatch?.squeezeCue} cueLabel={t('workout.squeezeCue')}
+                      tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
+                      expanded={isTipsVisible} onToggle={() => togglePostureTips(exercise.name)} />
+                  )}
+                  {isProgressSectionVisible && (
+                    <div className="planned-history-list">
+                      {progressItems.length === 0 && <p className="empty-state">{text.noProgressHistory}</p>}
+                      {progressItems.map((item) => {
+                        const entry = history.find((candidate) => candidate.id === item.id)
+                        return (
+                          <React.Fragment key={item.id}>
+                            <SwipeToDelete label={t('progress.delete.action')}
+                              accessibleLabel={t('progress.delete.logFor', { exercise: displayName, date: formatShortDate(language, item.date) })}
+                              onDelete={() => setProgressDeleteConfirmId(item.id)}>
+                              <article className="planned-history-item">
+                                <div className="planned-history-topline">
+                                  <span>{entry ? loggedDayLabel(entry) : formatHistoryDate(language, item.date)}</span>
+                                  <strong>{formatNumber(language, item.maxWeight)} kg</strong>
+                                </div>
+                                <div className="planned-history-meta">
+                                  <small>{t('workout.volume.value', { value: formatNumber(language, item.totalVolume) })}</small>
+                                  <small>{setLabel(item.setsCount)}</small>
+                                </div>
+                                {item.comments && <p className="planned-history-comment"><strong>{text.comments}:</strong> {item.comments}</p>}
+                              </article>
+                            </SwipeToDelete>
+                            {progressDeleteConfirmId === item.id && entry && (
+                              <div className="planned-history-delete-confirm" role="group" aria-label={t('progress.delete.confirm')}>
+                                <span>{t('progress.delete.confirmFor', { day: loggedDayLabel(entry) })}</span>
+                                <button type="button" className="text-button" onClick={() => void deleteProgressEntry(entry)}>{t('progress.delete.action')}</button>
+                                <button type="button" className="text-button" onClick={() => setProgressDeleteConfirmId('')}>{t('progress.delete.cancel')}</button>
+                              </div>
+                            )}
+                          </React.Fragment>
+                        )
+                      })}
+                      {swipeUndo?.exerciseId === exercise.exerciseId && (
+                        <div className="bulk-delete-bar" role="status">
+                          <span>{t('progress.delete.deleted')}</span>
+                          <button type="button" className="text-button" onClick={undoProgressDelete}>{t('progress.delete.undo')}</button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </React.Fragment>
+              )
+            }
             if (isWorkoutMode && isCollapsed && workoutFinished) {
               return (
                 <article
@@ -3693,6 +3775,50 @@ export default function WorkoutPlan({
               (exercise) => previousSetsByExercise.get(exercise.code ?? exercise.name) ?? []
             )
             const supersetSetCount = Math.max(...supersetExercises.map(getDefaultSetCount))
+            if (isWorkoutMode) {
+              const loggerExercises = supersetExercises.map((exercise, index) => {
+                const draft = getDraftForExercise(exercise.name, exercise)
+                const trainer = getTrainerRecommendation(exercise)
+                const original = getOriginalDraftForExercise(exercise.name, exercise)
+                const target = trainer
+                  ? applyTrainerRecommendation(original, trainer.recommendation, 'accepted', trainer.original)
+                  : original
+                const sets = Array.from({ length: getDefaultSetCount(exercise) }, (_, round) => ({
+                  weight: draft.setWeights[round] ?? draft.weight,
+                  reps: draft.setReps[round] ?? getDefaultRepTarget(exercise),
+                }))
+                const libraryMatch = exerciseCatalog.find((item) => item.id === exercise.exerciseId)
+                return {
+                  code: codes[index],
+                  name: language === 'es' && libraryMatch?.nameEs?.trim() ? libraryMatch.nameEs : displayExerciseName(exercise.name),
+                  sets,
+                  targets: sets.map((_, round) => ({
+                    weight: target.setWeights[round] ?? target.weight,
+                    reps: target.setReps[round] ?? target.reps,
+                  })),
+                  previousSets: supersetPreviousSets[index],
+                  restSeconds: exercise.restSeconds ?? 90,
+                  actions: cards[index],
+                }
+              })
+              // A shorter exercise is complete once all of its own prescribed sets are saved.
+              const loggedRounds = getLoggedSupersetRounds(supersetExercises.map((exercise) => {
+                const count = findExerciseCompletion(exercise, history)?.sets.length ?? 0
+                return count >= getDefaultSetCount(exercise) ? supersetSetCount : count
+              }), supersetSetCount)
+              const error = supersetExercises.map((exercise) => logError[getPlanDraftKey(exercise.name)]).find(Boolean)
+              return (
+                <SupersetLogger
+                  key={`${getPlanDraftKey(group.key)}:${supersetExercises.map((exercise) => `${exercise.exerciseId}:${getDefaultSetCount(exercise)}`).join(',')}`}
+                  exercises={loggerExercises} loggedRounds={loggedRounds} groupIndex={groupIndex}
+                  current={groupIndex === workoutGroupIndex} t={t} language={language} error={error}
+                  onChange={(exerciseIndex, round, field, value) =>
+                    updatePlanSetValue(supersetExercises[exerciseIndex], round, field, value, getDefaultSetCount(supersetExercises[exerciseIndex]))}
+                  onStartRest={onStartRest}
+                  onSave={(rounds, times) => logSuperset(supersetExercises, group.key, rounds, times, false)}
+                />
+              )
+            }
             const loggedSupersetRows = getLoggedSupersetRounds(
               supersetExercises.map((exercise) => findExerciseCompletion(exercise, history)?.sets.length ?? 0),
               supersetSetCount
@@ -3700,24 +3826,9 @@ export default function WorkoutPlan({
             const supersetCompletedRows = completedSupersetSets[group.key] ?? loggedSupersetRows
             const supersetCompletedTimes = completedSupersetAt[group.key] ?? []
             const supersetCompletedCount = supersetCompletedRows.filter(Boolean).length
-            const supersetCollapsed = group.items.every(({ exercise }) =>
-              collapsedExercises[normalizeExerciseName(exercise.name)]
-            )
             const supersetError = supersetExercises
               .map((exercise) => logError[getPlanDraftKey(exercise.name)])
               .find(Boolean)
-            if (isWorkoutMode && groupDone && supersetCollapsed) {
-              return (
-                <div
-                  key={group.key}
-                  className="workout-mode-finished-superset"
-                  data-workout-group={groupIndex}
-                  tabIndex={-1}
-                >
-                  {cards}
-                </div>
-              )
-            }
             return (
               <div
                 key={group.key}

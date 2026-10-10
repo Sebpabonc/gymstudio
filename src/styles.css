@@ -8374,3 +8374,164 @@ summary:focus-visible,
   padding-inline: 2px;
   text-align: center;
 }
+
+.superset-workout-card {
+  min-width: 0;
+  padding: 12px;
+}
+
+.superset-compact-header,
+.superset-compact-exercise {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.superset-compact-header {
+  flex-wrap: wrap;
+}
+
+.superset-compact-header > span,
+.superset-last-time,
+.superset-compact-instructions {
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.superset-compact-exercise {
+  margin-top: 10px;
+}
+
+.superset-compact-exercise > div {
+  min-width: 0;
+}
+
+.superset-compact-exercise .workout-mode-target {
+  margin: 3px 0 0;
+}
+
+.superset-exercise-actions > summary {
+  display: grid;
+  place-items: center;
+  list-style: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.superset-exercise-actions > summary::-webkit-details-marker {
+  display: none;
+}
+
+.superset-compact-exercise:has(.superset-exercise-actions[open]) {
+  flex-wrap: wrap;
+}
+
+.superset-exercise-actions[open] {
+  width: 100%;
+}
+
+.superset-exercise-actions[open] > summary {
+  width: 44px;
+  margin-left: auto;
+}
+
+.superset-actions-panel {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-soft);
+}
+
+.superset-actions-panel .superset-notes:not([open]) > summary {
+  display: none;
+}
+
+.superset-workout-round,
+.superset-round-summary {
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.superset-workout-round.current {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.superset-workout-round.future {
+  opacity: 0.6;
+}
+
+.superset-round-summary {
+  width: 100%;
+  min-height: 44px;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+}
+
+.superset-cell-inputs {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1.15fr) minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.superset-cell-inputs .set-stepper {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 22px;
+  gap: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.superset-cell-inputs .set-stepper input,
+.superset-cell-inputs .stepper-button {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  padding: 2px;
+  text-align: center;
+}
+
+.superset-cell-inputs .complete-set-button {
+  width: 44px;
+  min-height: 44px;
+}
+
+.superset-cell-inputs .complete-set-button.checked {
+  color: var(--success);
+  border-color: var(--success);
+  background: rgba(100, 160, 110, 0.2);
+}
+
+.superset-last-time {
+  display: block;
+  margin: 2px 0 0 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+button.superset-last-time {
+  min-height: 24px;
+}
+
+.superset-handoff {
+  margin: 4px 0 0 26px;
+  color: var(--nav-active);
+  font-variant-numeric: tabular-nums;
+}
+
+.superset-unavailable {
+  padding: 8px 0;
+  color: var(--muted);
+}
