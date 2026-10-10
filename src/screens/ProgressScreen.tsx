@@ -36,6 +36,7 @@ import {
 } from '../utils/storage'
 import { defaultActiveBlock } from '../utils/trainingBlocks'
 import { groupSessions, type LoggedSession } from '../utils/sessions'
+import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 
 type Props = {
   entries: WorkoutEntry[]
@@ -290,6 +291,8 @@ export default function ProgressScreen({
     const chart = buildChartModel(points, blocks, recordDates, { language, t })
     return { points, chart, summary: chartSummary(points, trend.takeaway, { language, t }) }
   }, [selectedLift, blocks, entries, today, exercises, language, t, data])
+
+  useBodyScrollLock(!!selectedLift && !!detail)
 
   useEffect(() => {
     if (!selectedLiftId) return
@@ -799,7 +802,7 @@ export default function ProgressScreen({
       </SectionCard>
 
       {selectedLift && detail && (
-        <div className="progress-detail-backdrop" onClick={(event) => {
+        <div className="progress-detail-backdrop" role="presentation" onClick={(event) => {
           if (event.target === event.currentTarget) setSelectedLiftId('')
         }}>
           <section className="progress-detail-sheet" role="dialog" aria-modal="true" aria-labelledby="progress-lift-detail-title">

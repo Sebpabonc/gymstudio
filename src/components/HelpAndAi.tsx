@@ -11,6 +11,7 @@ import {
 } from '../utils/storage'
 import { TranslationKey, useT } from '../i18n'
 import AiConsentPrompt from './AiConsentPrompt'
+import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 
 const suggestedQuestionKeys = ['help.ai.suggestion1', 'help.ai.suggestion2', 'help.ai.suggestion3'] as const
 const feedbackTypes: Array<{ value: FeedbackType; label: TranslationKey }> = [
@@ -44,6 +45,8 @@ export default function HelpAndAi({ activeTab, hidden, showPulse, onSignIn }: He
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
   const chatRef = useRef<HTMLDivElement>(null)
+
+  useBodyScrollLock(open)
 
   useEffect(() => {
     if (!open) return

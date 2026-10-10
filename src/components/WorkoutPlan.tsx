@@ -84,6 +84,8 @@ import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
+import { nextWorkoutGroupIndex } from '../utils/workoutMode'
+import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
 import {
   captureUndoSnapshots,
@@ -619,6 +621,22 @@ export default function WorkoutPlan({
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const trainerRecommendationIds = useRef(new Map<string, string>())
   const [swipeUndo, setSwipeUndo] = useState<WorkoutEntry | null>(null)
+  const [progressDeleteConfirmId, setProgressDeleteConfirmId] = useState('')
+  const hasOpenSheet = !!customPlanSheetDraft || calendarOpen || blockSelectorOpen || !!swapTarget || !!sessionSummary
+  useBodyScrollLock(hasOpenSheet)
+  useEffect(() => {
+    if (!hasOpenSheet) return undefined
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      if (customPlanSheetDraft) setCustomPlanSheetDraft(null)
+      else if (swapTarget) setSwapTarget(null)
+      else if (blockSelectorOpen) setBlockSelectorOpen(false)
+      else if (calendarOpen) setCalendarOpen(false)
+      else setSessionSummary(null)
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => document.removeEventListener('keydown', closeOnEscape)
+  }, [hasOpenSheet, customPlanSheetDraft, swapTarget, blockSelectorOpen, calendarOpen])
   // Continuous learning (PT spec, approved 2026-10-07): the user's past recommendations + results calibrate the engine.
   const [calibrationRows, setCalibrationRows] = useState<Awaited<ReturnType<typeof fetchCalibrationRecommendations>>>([])
   useEffect(() => {
@@ -1634,17 +1652,29 @@ export default function WorkoutPlan({
   const groupExerciseKeys = (index: number) =>
     (workoutGroups[index]?.items ?? []).map(({ exercise }) => normalizeExerciseName(exercise.name))
   const goToWorkoutGroup = (index: number) => {
+    if (index < 0 || index >= workoutGroups.length) return
     setWorkoutGroupIndex(index)
     setCollapsedExercises((current) => ({
       ...current,
       ...Object.fromEntries(groupExerciseKeys(index).map((key) => [key, false] as const)),
     }))
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.requestAnimationFrame(() => {
+      const target = document.querySelector<HTMLElement>(`[data-workout-group="${index}"]`)
+      target?.focus({ preventScroll: true })
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
   }
   const startWorkout = () => {
-    const firstOpen = workoutGroups.findIndex((group) =>
-      group.items.some(({ exercise }) => !findExerciseCompletion(exercise, history))
+    const completed = workoutGroups.map((group) =>
+      group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, history))
     )
+    const firstOpen = nextWorkoutGroupIndex(completed, -1)
+    setCollapsedExercises(Object.fromEntries(
+      activeExercises.map((exercise) => [
+        normalizeExerciseName(exercise.name),
+        !!findExerciseCompletion(exercise, history),
+      ])
+    ))
     startSession(Date.now(), activeCompletionScope)
     goToWorkoutGroup(firstOpen >= 0 ? firstOpen : 0)
   }
@@ -1664,6 +1694,19 @@ export default function WorkoutPlan({
     saveWorkoutHistory(nextHistory)
     setToast(null)
     dismissSessionSummary()
+  }
+
+  const deleteProgressEntry = async (entry: WorkoutEntry) => {
+    setHistory(await deleteWorkoutEntry(entry.id))
+    setSwipeUndo(entry)
+    setProgressDeleteConfirmId('')
+    window.setTimeout(() => setSwipeUndo((current) => (current?.id === entry.id ? null : current)), 6000)
+  }
+
+  const undoProgressDelete = () => {
+    if (!swipeUndo) return
+    setHistory(restoreWorkoutEntry(swipeUndo))
+    setSwipeUndo(null)
   }
 
   const logPlannedExercise = async (
@@ -1774,17 +1817,35 @@ export default function WorkoutPlan({
 
     setLoggedAtByExercise((current) => ({ ...current, [entryToSave.id]: Date.now() }))
 
-    const currentIndex = activeExercises.findIndex((item) => normalizeExerciseName(item.name) === sectionKey)
-    const nextIndex = findNextPendingIndex(
-      activeExercises.map((item) => !!findExerciseCompletion(item, nextHistory)),
-      currentIndex
-    )
-    const nextExercise = nextIndex >= 0 ? activeExercises[nextIndex] : undefined
     setCollapsedExercises((current) => ({
       ...current,
       [sectionKey]: true,
-      ...(nextExercise ? { [normalizeExerciseName(nextExercise.name)]: false } : {}),
     }))
+    if (isWorkoutMode) {
+      const currentGroup = workoutGroups.findIndex((group) =>
+        group.items.some(({ exercise: item }) => normalizeExerciseName(item.name) === sectionKey)
+      )
+      const nextGroup = nextWorkoutGroupIndex(
+        workoutGroups.map((group) =>
+          group.items.every(({ exercise: item }) => !!findExerciseCompletion(item, nextHistory))
+        ),
+        currentGroup
+      )
+      if (nextGroup >= 0) goToWorkoutGroup(nextGroup)
+    } else {
+      const currentIndex = activeExercises.findIndex((item) => normalizeExerciseName(item.name) === sectionKey)
+      const nextIndex = findNextPendingIndex(
+        activeExercises.map((item) => !!findExerciseCompletion(item, nextHistory)),
+        currentIndex
+      )
+      const nextExercise = nextIndex >= 0 ? activeExercises[nextIndex] : undefined
+      if (nextExercise) {
+        setCollapsedExercises((current) => ({
+          ...current,
+          [normalizeExerciseName(nextExercise.name)]: false,
+        }))
+      }
+    }
   }
 
   const logSuperset = async (
@@ -1906,21 +1967,38 @@ export default function WorkoutPlan({
       ...Object.fromEntries(entriesToSave.map((entry) => [entry.id, Date.now()])),
     }))
 
-    const nextIndex = findNextPendingIndex(
-      activeExercises.map((item) => !!findExerciseCompletion(item, nextHistory)),
-      Math.max(...exercises.map((exercise) => activeExercises.findIndex((item) => item.name === exercise.name)))
-    )
-    const nextExercise = nextIndex >= 0 ? activeExercises[nextIndex] : undefined
     setCollapsedExercises((current) => ({
       ...current,
       ...Object.fromEntries(exercises.map((exercise) => [
         normalizeExerciseName(exercise.name),
         !!findExerciseCompletion(exercise, nextHistory),
       ])),
-      ...(exercises.every((exercise) => findExerciseCompletion(exercise, nextHistory)) && nextExercise
-        ? { [normalizeExerciseName(nextExercise.name)]: false }
-        : {}),
     }))
+    if (isWorkoutMode) {
+      const currentGroup = workoutGroups.findIndex((group) => group.key === groupKey)
+      const nextGroup = nextWorkoutGroupIndex(
+        workoutGroups.map((group) =>
+          group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, nextHistory))
+        ),
+        currentGroup
+      )
+      if (nextGroup >= 0) goToWorkoutGroup(nextGroup)
+    } else {
+      const currentIndex = Math.max(...exercises.map((exercise) =>
+        activeExercises.findIndex((item) => item.name === exercise.name)
+      ))
+      const nextIndex = findNextPendingIndex(
+        activeExercises.map((item) => !!findExerciseCompletion(item, nextHistory)),
+        currentIndex
+      )
+      const nextExercise = nextIndex >= 0 ? activeExercises[nextIndex] : undefined
+      if (exercises.every((exercise) => findExerciseCompletion(exercise, nextHistory)) && nextExercise) {
+        setCollapsedExercises((current) => ({
+          ...current,
+          [normalizeExerciseName(nextExercise.name)]: false,
+        }))
+      }
+    }
   }
 
  const updateCustomPlanDays = (days: CustomPlanDay[]) => {
@@ -2273,7 +2351,7 @@ export default function WorkoutPlan({
                     <article key={item.id} className="calendar-history-item">
                       <div className="calendar-history-row">
                         <span>{item.name}</span>
-                        <strong>{item.maxWeight} kg</strong>
+                        <strong>{formatNumber(language, item.maxWeight)} kg</strong>
                       </div>
                       <div className="calendar-history-row muted-row">
                         <small>{t('workout.volume.value', { value: formatNumber(language, item.totalVolume) })}</small>
@@ -2459,7 +2537,7 @@ export default function WorkoutPlan({
               type="button"
               className={day.key === (activeDay?.key ?? selectedDay) ? 'day-tab active' : 'day-tab'}
               aria-label={t('workout.day.aria', {
-                position: day.position,
+                position: formatNumber(language, day.position),
                 name: day.name,
                 today: todayDay?.key === day.key ? ` · ${t('workout.day.today')}` : '',
               })}
@@ -2470,7 +2548,7 @@ export default function WorkoutPlan({
                 collapseAllExerciseSections()
               }}
             >
-              <span className="day-tab-label">{t('workout.day.short', { position: day.position })}</span>
+              <span className="day-tab-label">{t('workout.day.short', { position: formatNumber(language, day.position) })}</span>
               {(() => {
                 const week = weekBounds(localIsoDate())
                 const done = day.exercises.filter((item) =>
@@ -2485,7 +2563,7 @@ export default function WorkoutPlan({
                 ).length
                 return (
                   <>
-                    <span className="day-tab-progress">{`${done}/${day.exercises.length}`}</span>
+                    <span className="day-tab-progress">{`${formatNumber(language, done)}/${formatNumber(language, day.exercises.length)}`}</span>
                     {todayDay?.key === day.key && <span className="day-tab-today">{t('workout.day.today')}</span>}
                   </>
                 )
@@ -2626,7 +2704,7 @@ export default function WorkoutPlan({
       )}
 
       {customPlanSheetDraft && (
-        <div className="custom-plan-sheet-backdrop" onClick={() => setCustomPlanSheetDraft(null)}>
+        <div className="custom-plan-sheet-backdrop" role="presentation" onClick={() => setCustomPlanSheetDraft(null)}>
           <section
             className="custom-plan-sheet"
             role="dialog"
@@ -2651,7 +2729,6 @@ export default function WorkoutPlan({
                 <input
                   className="search-input"
                   type="search"
-                  autoFocus
                   placeholder={t('workout.custom.searchPlaceholder')}
                   aria-label={t('workout.custom.searchPlaceholder')}
                   value={customPlanSearch}
@@ -2694,7 +2771,6 @@ export default function WorkoutPlan({
                     <label className="custom-plan-custom-name">
                       <span>{text.customName}</span>
                       <input
-                        autoFocus
                         value={customPlanSheetDraft.name}
                         onChange={(event) => setCustomPlanSheetDraft({ ...customPlanSheetDraft, name: event.target.value })}
                       />
@@ -2794,13 +2870,15 @@ export default function WorkoutPlan({
               {t('workout.run.exit')}
             </button>
             <span className="workout-mode-progress">
-              {t('workout.run.progress', { current: workoutGroupIndex + 1, total: workoutGroups.length })}
+              {t('workout.run.progress', {
+                current: formatNumber(language, workoutGroupIndex + 1),
+                total: formatNumber(language, workoutGroups.length),
+              })}
             </span>
           </div>
         )}
         <div className="day-exercises">
           {workoutGroups.map((group, groupIndex) => {
-            if (isWorkoutMode && groupIndex !== workoutGroupIndex) return null
             const previousSetsByExercise = new Map<string, ReturnType<typeof getPreviousWorkoutSets>>()
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
@@ -2928,13 +3006,47 @@ export default function WorkoutPlan({
               'planned-exercise-card',
               isCollapsed ? 'collapsed' : '',
               completedEntry ? 'completed' : '',
+              isWorkoutMode && groupIndex === workoutGroupIndex ? 'workout-mode-current' : '',
             ].filter(Boolean).join(' ')
+
+            const checkedSummarySets = completedRows.flatMap((done, index) => done
+              ? [{ weight: setWeights[index] ?? draft.weight, reps: setReps[index] ?? draft.reps }]
+              : [])
+            const summarySets = completedEntry?.sets ?? checkedSummarySets
+            const summaryReps = [...new Set(summarySets.map((set) => set.reps))]
+              .map((reps) => formatNumber(language, reps))
+              .join('/')
+            const workoutFinished = !!completedEntry || completedRows.every(Boolean)
+            if (isWorkoutMode && isCollapsed && workoutFinished) {
+              return (
+                <article
+                  key={`${planMode}-${activeDay?.key ?? 'custom'}-${exercise.code ?? exercise.name}`}
+                  className="planned-exercise-card collapsed workout-mode-completed-card"
+                  data-workout-group={groupIndex}
+                  tabIndex={-1}
+                >
+                  <button
+                    type="button"
+                    className="workout-mode-completed-summary"
+                    aria-label={`${displayName} ${summarySets.length} × ${summaryReps} · ${formatNumber(language, Math.max(...summarySets.map((set) => set.weight), 0))} kg`}
+                    onClick={() => goToWorkoutGroup(groupIndex)}
+                  >
+                    <span className="workout-mode-completed-name">✓ {displayName}</span>
+                    <span className="workout-mode-completed-details">
+                      {formatNumber(language, summarySets.length)}×{summaryReps} · {formatNumber(language, Math.max(...summarySets.map((set) => set.weight), 0))} kg
+                    </span>
+                  </button>
+                </article>
+              )
+            }
 
             return (
               <article
                 key={`${planMode}-${activeDay?.key ?? 'custom'}-${exercise.code ?? exercise.name}`}
                 className={cardClasses}
                 data-exercise-card={exerciseKey}
+                data-workout-group={groupIndex}
+                tabIndex={isWorkoutMode ? -1 : undefined}
               >
                 <div
                   className="planned-exercise-header"
@@ -3151,7 +3263,7 @@ export default function WorkoutPlan({
                                       updatePlanSetValue(exercise, index, 'reps', String(previousSet.reps), setCount)
                                     }}
                                   >
-                                    {`${previousSet.weight} × ${previousSet.reps}`}
+                                    {`${formatNumber(language, previousSet.weight)} × ${formatNumber(language, previousSet.reps)}`}
                                   </button>
                                 ) : (
                                   <span className="previous-set-value">—</span>
@@ -3291,35 +3403,48 @@ export default function WorkoutPlan({
                       )}
                       {isProgressSectionVisible && (progressItems.length > 0 ? (
                         <div className="planned-history-list">
-                          {progressItems.map((item) => (
-                            <SwipeToDelete
-                              key={item.id}
-                              label={t('progress.delete.action')}
-                              onDelete={async () => {
-                                const entry = history.find((candidate) => candidate.id === item.id)
-                                if (!entry) return
-                                setHistory(await deleteWorkoutEntry(entry.id))
-                                setSwipeUndo(entry)
-                                window.setTimeout(() => setSwipeUndo((current) => (current?.id === entry.id ? null : current)), 6000)
-                              }}
-                            >
-                            <article className="planned-history-item">
-                              <div className="planned-history-topline">
-                                <span>{formatHistoryDate(language, item.date)}</span>
-                                <strong>{formatNumber(language, item.maxWeight)} kg</strong>
-                              </div>
-                              <div className="planned-history-meta">
-                                <small>{t('workout.volume.value', { value: formatNumber(language, item.totalVolume) })}</small>
-                                <small>{setLabel(item.setsCount)}</small>
-                              </div>
-                              {item.comments ? (
-                                <p className="planned-history-comment">
-                                  <strong>{text.comments}:</strong> {item.comments}
-                                </p>
-                              ) : null}
-                            </article>
-                            </SwipeToDelete>
-                          ))}
+                          {progressItems.map((item) => {
+                            const entry = history.find((candidate) => candidate.id === item.id)
+                            return (
+                              <React.Fragment key={item.id}>
+                                <SwipeToDelete
+                                  label={t('progress.delete.action')}
+                                  accessibleLabel={t('progress.delete.logFor', {
+                                    exercise: displayName,
+                                    date: formatShortDate(language, item.date),
+                                  })}
+                                  onDelete={() => setProgressDeleteConfirmId(item.id)}
+                                >
+                                  <article className="planned-history-item">
+                                    <div className="planned-history-topline">
+                                      <span>{formatHistoryDate(language, item.date)}</span>
+                                      <strong>{formatNumber(language, item.maxWeight)} kg</strong>
+                                    </div>
+                                    <div className="planned-history-meta">
+                                      <small>{t('workout.volume.value', { value: formatNumber(language, item.totalVolume) })}</small>
+                                      <small>{setLabel(item.setsCount)}</small>
+                                    </div>
+                                    {item.comments ? (
+                                      <p className="planned-history-comment">
+                                        <strong>{text.comments}:</strong> {item.comments}
+                                      </p>
+                                    ) : null}
+                                  </article>
+                                </SwipeToDelete>
+                                {progressDeleteConfirmId === item.id && entry && (
+                                  <div className="planned-history-delete-confirm" role="group" aria-label={t('progress.delete.confirm')}>
+                                    <span>{t('progress.delete.confirm')}</span>
+                                    <button type="button" className="text-button" onClick={() => void deleteProgressEntry(entry)}>
+                                      {t('progress.delete.action')}
+                                    </button>
+                                    <button type="button" className="text-button" onClick={() => setProgressDeleteConfirmId('')}>
+                                      {t('progress.delete.cancel')}
+                                    </button>
+                                  </div>
+                                )}
+                              </React.Fragment>
+                            )
+                          })}
                         </div>
                       ) : <p className="empty-state">{text.noProgressHistory}</p>)}
                       {isProgressSectionVisible && progressItems.length > 0 && !swipeUndo && (
@@ -3328,10 +3453,7 @@ export default function WorkoutPlan({
                       {swipeUndo && swipeUndo.exerciseId === exercise.exerciseId && (
                         <div className="bulk-delete-bar" role="status">
                           <span>{t('progress.delete.deleted')}</span>
-                          <button type="button" className="text-button" onClick={() => {
-                            setHistory(restoreWorkoutEntry(swipeUndo))
-                            setSwipeUndo(null)
-                          }}>{t('progress.delete.undo')}</button>
+                          <button type="button" className="text-button" onClick={undoProgressDelete}>{t('progress.delete.undo')}</button>
                         </div>
                       )}
                     </div>
@@ -3367,11 +3489,35 @@ export default function WorkoutPlan({
             const supersetCompletedRows = completedSupersetSets[group.key] ?? loggedSupersetRows
             const supersetCompletedTimes = completedSupersetAt[group.key] ?? []
             const supersetCompletedCount = supersetCompletedRows.filter(Boolean).length
+            const supersetCollapsed = group.items.every(({ exercise }) =>
+              collapsedExercises[normalizeExerciseName(exercise.name)]
+            )
             const supersetError = supersetExercises
               .map((exercise) => logError[getPlanDraftKey(exercise.name)])
               .find(Boolean)
+            if (isWorkoutMode && groupDone && supersetCollapsed) {
+              return (
+                <div
+                  key={group.key}
+                  className="workout-mode-finished-superset"
+                  data-workout-group={groupIndex}
+                  tabIndex={-1}
+                >
+                  {cards}
+                </div>
+              )
+            }
             return (
-              <div key={group.key} className={groupDone ? 'superset-group completed' : 'superset-group'}>
+              <div
+                key={group.key}
+                className={[
+                  'superset-group',
+                  groupDone ? 'completed' : '',
+                  isWorkoutMode && groupIndex === workoutGroupIndex ? 'workout-mode-current' : '',
+                ].filter(Boolean).join(' ')}
+                data-workout-group={groupIndex}
+                tabIndex={isWorkoutMode ? -1 : undefined}
+              >
                 <div className="superset-group-header">
                   <span className="chip technique-chip">{t('workout.technique.superset')}</span>
                   {groupDone && <span className="done-badge" role="status"><span aria-hidden="true">✓ </span>{t('workout.status.done')}</span>}
@@ -3399,7 +3545,7 @@ export default function WorkoutPlan({
                     onClick={() => setSupersetLogOpen((current) => ({ ...current, [group.key]: !current[group.key] }))}
                   >
                     <span className="superset-log-title">{t('workout.superset.logRounds')}</span>
-                    <span className="superset-log-progress">{`${supersetCompletedCount}/${supersetSetCount} ${roundWord(supersetSetCount).toLowerCase()}`}</span>
+                    <span className="superset-log-progress">{`${formatNumber(language, supersetCompletedCount)}/${formatNumber(language, supersetSetCount)} ${roundWord(supersetSetCount).toLowerCase()}`}</span>
                     <span className="toggle-button expand-toggle" aria-hidden="true">
                       {supersetLogOpen[group.key] ? '−' : '+'}
                     </span>
@@ -3492,7 +3638,7 @@ export default function WorkoutPlan({
                                       updatePlanSetValue(exercise, setIndex, 'reps', String(previousSet.reps), supersetSetCount)
                                     }}
                                   >
-                                    {previousSet.weight}×{previousSet.reps}
+                                    {formatNumber(language, previousSet.weight)}×{formatNumber(language, previousSet.reps)}
                                   </button>
                                 ) : (
                                   <span className="previous-set-value">—</span>
@@ -3599,7 +3745,7 @@ export default function WorkoutPlan({
         </div>
       )}
       {sessionSummary && (
-        <div className="session-summary-backdrop" onClick={dismissSessionSummary}>
+        <div className="session-summary-backdrop" role="presentation" onClick={dismissSessionSummary}>
           <section
             className="session-summary-sheet"
             role="dialog"
@@ -3620,7 +3766,7 @@ export default function WorkoutPlan({
             </header>
             <div className="session-summary-metrics">
               <div><strong>{sessionSummary.duration}</strong><span>{t('workout.session.duration')}</span></div>
-              <div><strong>{sessionSummary.sets}</strong><span>{text.sets}</span></div>
+              <div><strong>{formatNumber(language, sessionSummary.sets)}</strong><span>{text.sets}</span></div>
               <div><strong>{formatNumber(language, sessionSummary.volume)} kg</strong><span>{t('workout.session.volume')}</span></div>
             </div>
             <section className="session-summary-records" aria-label={t('workout.session.records')}>

@@ -534,6 +534,6 @@ describe('progress calculations', () => {
       makeEntry('press', '2026-01-12', [[44, 8]], { blockId: block.id, dayKey: 'chest-back-a' }),
     ]
     expect(strengthTrend(trendEntries, [block], 'press', '2026-01-12', 'A', [dumbbellExercise], es).takeaway)
-      .toBe('Press con mancuernas: 1RM est. +10% en este bloque (50.7 → 55.7 kg).')
+      .toBe('Press con mancuernas: 1RM est. +10% en este bloque (50,7 → 55,7 kg).')
   })
 })

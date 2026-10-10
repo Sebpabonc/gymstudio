@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { en } from './en'
 import { es } from './es'
 import { dictionaries, createTranslator, detectLanguage, translate } from './translate'
-import { formatShortDate, formatWeekdayDate } from './format'
+import { formatNumber, formatShortDate, formatWeekdayDate } from './format'
 import { useT } from './LanguageProvider'
 import { filterExercises } from '../utils/exerciseFilters'
 import { getExerciseDisplayName } from '../utils/storage'
@@ -111,6 +111,14 @@ describe('date formatting', () => {
   it('formats weekday dates in both languages', () => {
     expect(formatWeekdayDate('en', '2026-10-05')).toBe('Mon 5 Oct')
     expect(formatWeekdayDate('es', '2026-10-05')).toBe('lun 5 oct')
+  })
+
+  describe('number formatting', () => {
+    it('formats grouped values using the selected language', () => {
+      expect(formatNumber('en', 2720)).toBe('2,720')
+      expect(formatNumber('es', 2720)).toBe('2.720')
+      expect(formatNumber('es', 50.7)).toBe('50,7')
+    })
   })
 
   it('formats short dates in both languages', () => {
