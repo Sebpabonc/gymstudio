@@ -8,10 +8,8 @@ import {
   fetchTrainingBlocks,
   getCachedTrainingBlocks,
   cacheActiveUserPlan,
-  dismissBlockIntro,
   dismissWelcome,
   getExerciseDisplayName,
-  getDismissedBlockIntros,
   getAskExerciseAiConsent,
   getSessionStorageValue,
   hasDismissedWelcome,
@@ -122,30 +120,6 @@ describe('language preference', () => {
     } finally {
       sessionStorage.removeItem('gym-studio.demo-mode')
     }
-  })
-})
-
-describe('dismissed block intros', () => {
-  afterEach(() => setStorageNamespace(null))
-
-  it('stores unique dismissed block ids locally across account namespaces', () => {
-    try {
-      setStorageNamespace('user-a')
-      expect(getDismissedBlockIntros()).toEqual([])
-      dismissBlockIntro('block-6')
-      dismissBlockIntro('block-6')
-      expect(getDismissedBlockIntros()).toEqual(['block-6'])
-
-      setStorageNamespace('user-b')
-      expect(getDismissedBlockIntros()).toEqual(['block-6'])
-    } finally {
-      setStorageNamespace(null)
-    }
-  })
-
-  it('ignores malformed persisted values', () => {
-    localStorage.setItem('gym-studio.block-intro-dismissed', '{')
-    expect(getDismissedBlockIntros()).toEqual([])
   })
 })
 
