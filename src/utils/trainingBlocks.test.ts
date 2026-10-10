@@ -9,6 +9,7 @@ import {
   formatBlockMethod,
   nextUnloggedDay,
   todayTrainingDay,
+  trainingBlockDayDate,
   trainingBlockDateStatus,
 } from './trainingBlocks'
 
@@ -86,6 +87,20 @@ describe('training block dates', () => {
   it('formats an inclusive six-week date range in English', () => {
     expect(blockDateRange(blocks[1])).toBe('5 Oct – 15 Nov 2026')
     expect(blockDateRange(blocks[1], 'es')).toBe('5 oct – 15 nov 2026')
+  })
+
+  it('computes training day dates from the block start, week, and day position', () => {
+    const block = {
+      ...blocks[1],
+      days: [
+        { key: 'day-1', position: 1, name: 'Day 1', exercises: [] },
+        { key: 'day-3', position: 3, name: 'Day 3', exercises: [] },
+      ],
+    }
+
+    expect(trainingBlockDayDate(block, 1, block.days[0])).toBe('2026-10-05')
+    expect(trainingBlockDayDate(block, 2, block.days[1])).toBe('2026-10-14')
+    expect(trainingBlockDayDate(block, 6, block.days[0])).toBe('2026-11-09')
   })
 })
 
