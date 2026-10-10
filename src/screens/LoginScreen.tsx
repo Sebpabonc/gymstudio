@@ -85,6 +85,7 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
         <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
         <h2>{t('login.account')}</h2>
         <p className="account-message">{t('login.offline')}</p>
+        <a className="secondary-button login-demo-button" href="?demo=1">{t('login.tryDemo')}</a>
       </section>
     )
   }

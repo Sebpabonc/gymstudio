@@ -29,5 +29,6 @@ export function formatLongDate(language: Language, value: string | Date) {
 }
 
 export function formatNumber(language: Language, value: number, options?: Intl.NumberFormatOptions) {
-  return value.toLocaleString(localeFor(language), options)
+  const locale = language === 'es' ? 'es-ES' : localeFor(language)
+  return new Intl.NumberFormat(locale, { useGrouping: true, ...options }).format(value)
 }
