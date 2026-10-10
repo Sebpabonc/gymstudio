@@ -4,3 +4,10 @@ export function nextWorkoutGroupIndex(completed: readonly boolean[], currentInde
   }
   return -1
 }
+
+export type WorkoutChipState = 'current' | 'done' | 'upcoming'
+
+export function workoutChipState(isComplete: boolean, isCurrent: boolean): WorkoutChipState {
+  if (isCurrent) return 'current'
+  return isComplete ? 'done' : 'upcoming'
+}

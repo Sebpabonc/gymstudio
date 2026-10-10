@@ -82,9 +82,11 @@ import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
-import { nextWorkoutGroupIndex } from '../utils/workoutMode'
+import { nextWorkoutGroupIndex, workoutChipState } from '../utils/workoutMode'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
+import RestTimer from './RestTimer'
+import type { RestTimerState } from '../utils/restTimer'
 import {
   captureUndoSnapshots,
   createSessionSummary,
@@ -556,6 +558,9 @@ export default function WorkoutPlan({
   onSignIn,
   onCreatePlan,
   onStartRest,
+  onWorkoutModeChange,
+  restTimer,
+  onRestTimerChange,
 }: {
   mode?: PlanMode
   lockMode?: boolean
@@ -564,8 +569,11 @@ export default function WorkoutPlan({
   onSignIn: () => void
   onCreatePlan?: () => void
   onStartRest: (durationSeconds: number, label?: string) => void
+  onWorkoutModeChange?: (active: boolean) => void
+  restTimer?: RestTimerState | null
+  onRestTimerChange?: (timer: RestTimerState | null) => void
 }) {
-  const { t, language, locale } = useT()
+  const { t, language, locale, setLanguage } = useT()
   const demoMode = isDemoMode()
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
@@ -1659,19 +1667,37 @@ export default function WorkoutPlan({
 
   const workoutGroups = groupSupersets(activeExercises)
   const isWorkoutMode = planMode === 'preset' && workoutGroupIndex !== null && workoutGroupIndex < workoutGroups.length
+  const workoutGroupCompletion = workoutGroups.map((group) =>
+    group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, history))
+  )
+  const nextWorkoutGroup = workoutGroupIndex === null
+    ? -1
+    : nextWorkoutGroupIndex(workoutGroupCompletion, workoutGroupIndex)
+  const nextWorkoutExercise = nextWorkoutGroup >= 0
+    ? workoutGroups[nextWorkoutGroup]?.items[0]?.exercise
+    : undefined
+  useEffect(() => {
+    onWorkoutModeChange?.(isWorkoutMode)
+    return () => {
+      if (isWorkoutMode) onWorkoutModeChange?.(false)
+    }
+  }, [isWorkoutMode, onWorkoutModeChange])
   const groupExerciseKeys = (index: number) =>
     (workoutGroups[index]?.items ?? []).map(({ exercise }) => normalizeExerciseName(exercise.name))
   const goToWorkoutGroup = (index: number) => {
     if (index < 0 || index >= workoutGroups.length) return
+    if (workoutGroupIndex === null) onWorkoutModeChange?.(true)
     setWorkoutGroupIndex(index)
     setCollapsedExercises((current) => ({
       ...current,
       ...Object.fromEntries(groupExerciseKeys(index).map((key) => [key, false] as const)),
     }))
     window.requestAnimationFrame(() => {
-      const target = document.querySelector<HTMLElement>(`[data-workout-group="${index}"]`)
-      target?.focus({ preventScroll: true })
-      target?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      window.requestAnimationFrame(() => {
+        const target = document.querySelector<HTMLElement>(`[data-workout-group="${index}"]`)
+        target?.focus({ preventScroll: true })
+        target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
     })
   }
   const startWorkout = () => {
@@ -1690,6 +1716,7 @@ export default function WorkoutPlan({
   }
   const exitWorkout = () => {
     setWorkoutGroupIndex(null)
+    onWorkoutModeChange?.(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   const finishWorkout = () => {
@@ -2186,7 +2213,7 @@ export default function WorkoutPlan({
   }
 
   return (
-    <div className="card plan-card">
+    <div className={`card plan-card${isWorkoutMode ? ' workout-mode-active' : ''}`}>
       <div className="section-title-row">
         {planMode === 'custom' && <h3>{text.customTitle}</h3>}
         <div className="plan-header-actions">
@@ -2931,12 +2958,62 @@ export default function WorkoutPlan({
             <button type="button" className="secondary-button small-button" onClick={exitWorkout}>
               {t('workout.run.exit')}
             </button>
-            <span className="workout-mode-progress">
-              {t('workout.run.progress', {
-                current: formatNumber(language, workoutGroupIndex + 1),
-                total: formatNumber(language, workoutGroups.length),
-              })}
+            <strong className="workout-mode-progress">
+              {activeDay?.name} · {formatNumber(language, (workoutGroups[workoutGroupIndex]?.items[0]?.exerciseIndex ?? 0) + 1)}/{formatNumber(language, activeExercises.length)}
+            </strong>
+            <span className="layout-toggle language-toggle workout-mode-language-toggle" role="group" aria-label={t('lang.label')}>
+              <button
+                type="button"
+                aria-label={t('lang.en')}
+                aria-pressed={language === 'en'}
+                onClick={() => setLanguage('en')}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                aria-label={t('lang.es')}
+                aria-pressed={language === 'es'}
+                onClick={() => setLanguage('es')}
+              >
+                ES
+              </button>
             </span>
+          </div>
+        )}
+        {isWorkoutMode && (
+          <div className="workout-mode-overview">
+            <nav className="workout-mode-chips" aria-label={t('workout.run.modeAria')}>
+              {activeExercises.map((exercise, exerciseIndex) => {
+                const groupIndex = workoutGroups.findIndex((group) =>
+                  group.items.some((item) => item.exerciseIndex === exerciseIndex)
+                )
+                const group = workoutGroups[groupIndex]
+                const state = workoutChipState(
+                  !!findExerciseCompletion(exercise, history),
+                  groupIndex === workoutGroupIndex
+                )
+                const isSupersetContinuation = !!group?.isSuperset &&
+                  group.items.findIndex((item) => item.exerciseIndex === exerciseIndex) > 0
+                const number = formatNumber(language, exerciseIndex + 1)
+                const name = displayExerciseName(exercise.name)
+                return (
+                  <button
+                    key={`${group?.key ?? exercise.name}-${exerciseIndex}`}
+                    type="button"
+                    className={`workout-mode-chip ${state}${group?.isSuperset ? ' superset-chip' : ''}${isSupersetContinuation ? ' superset-chip-continuation' : ''}`}
+                    aria-label={`${number} · ${name}`}
+                    aria-current={state === 'current' ? 'step' : undefined}
+                    aria-pressed={state === 'current'}
+                    onClick={() => goToWorkoutGroup(groupIndex)}
+                  >
+                    <span>{number}</span>
+                    {state === 'done' && <span aria-hidden="true">✓</span>}
+                  </button>
+                )
+              })}
+            </nav>
+            <small className="workout-mode-chips-hint">{t('workout.run.chipsHint')}</small>
           </div>
         )}
         <div className="day-exercises">
@@ -3248,6 +3325,80 @@ export default function WorkoutPlan({
                     <p className="planned-meta-line">
                       {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
                     </p>
+                    {isWorkoutMode && (
+                      <>
+                        <div className="workout-mode-tools" role="group" aria-label={t('workout.run.exerciseActions')}>
+                          <button
+                            type="button"
+                            className="secondary-button small-button"
+                            onClick={() => void openExternal(exerciseImageSearchUrl(
+                              exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
+                            ))}
+                          >
+                            {t('workout.run.searchGoogle')}
+                          </button>
+                          {libraryMatch && completedEntry?.date !== today && (
+                            <button
+                              type="button"
+                              className="secondary-button small-button"
+                              onClick={() => setSwapTarget({
+                                exercise: libraryMatch,
+                                fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
+                              })}
+                            >
+                              {t('workout.run.swap')}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="secondary-button small-button"
+                            onClick={(event) => {
+                              if (!group.isSuperset) {
+                                const notes = event.currentTarget.closest('.planned-exercise-card')
+                                  ?.querySelector<HTMLTextAreaElement>('.planned-notes-field textarea')
+                                notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                notes?.focus()
+                                return
+                              }
+                              const groupElement = event.currentTarget.closest('.superset-group')
+                              const noteIndex = group.items.findIndex(({ exercise: item }) => item.name === exercise.name)
+                              setSupersetLogOpen((current) => ({ ...current, [group.key]: true }))
+                              window.requestAnimationFrame(() => {
+                                const details = groupElement?.querySelector<HTMLDetailsElement>('.superset-notes')
+                                const notes = details?.querySelectorAll<HTMLTextAreaElement>('textarea')[noteIndex]
+                                if (details) details.open = true
+                                notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                notes?.focus()
+                              })
+                            }}
+                          >
+                            {t('workout.label.notes')}
+                          </button>
+                          <button
+                            type="button"
+                            className="secondary-button small-button"
+                            aria-expanded={isProgressSectionVisible}
+                            onClick={() => toggleProgressSection(exercise.name)}
+                          >
+                            {t('workout.run.history')}
+                          </button>
+                          <button
+                            type="button"
+                            className="secondary-button small-button"
+                            aria-expanded={isTipsVisible}
+                            onClick={() => togglePostureTips(exercise.name)}
+                          >
+                            ⓘ {t('workout.run.technique')}
+                          </button>
+                        </div>
+                        <p className="workout-mode-target">
+                          {t('workout.run.todayTarget', {
+                            weight: formatNumber(language, trainer?.recommendation.weight ?? Number(setWeights[0] ?? draft.weight)),
+                            reps: trainerRangeLabel(trainer?.recommendation.reps ?? hintTarget),
+                          })}
+                        </p>
+                      </>
+                    )}
                     {/* TODO(i18n): PT will provide approved translations */}
                     {exercise.weekNote && (
                       <p className="planned-exercise-notes">
@@ -3290,15 +3441,16 @@ export default function WorkoutPlan({
                           </div>
                         </div>
 
-                        <div className="planned-set-grid">
-                          <div className="planned-set-column-headers" aria-hidden="true">
+                        <div className={`planned-set-grid${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`}>
+                          <div className={`planned-set-column-headers${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`} aria-hidden="true">
                             <span>{t('workout.label.set')}</span>
                             <span>
-                              {t('workout.label.previous')}
+                              {t(isWorkoutMode ? 'workout.run.lastTime' : 'workout.label.previous')}
                               {previousDayType && (
                                 <small className="previous-day-label">{t('workout.previous.day', { day: previousDayType })}</small>
                               )}
                             </span>
+                            {isWorkoutMode && <span>{t('workout.run.target')}</span>}
                             <span>kg</span>
                             <span>{text.repsShort}</span>
                             <span>✓</span>
@@ -3308,7 +3460,7 @@ export default function WorkoutPlan({
                             return (
                               <div
                                 key={`${exercise.name}-set-${index + 1}`}
-                                className={`planned-set-row${completedRows[index] ? ' completed' : ''}`}
+                                className={`planned-set-row${completedRows[index] ? ' completed' : ''}${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`}
                               >
                                 <span className="planned-set-label">{index + 1}</span>
                                 {previousSet ? (
@@ -3329,6 +3481,11 @@ export default function WorkoutPlan({
                                   </button>
                                 ) : (
                                   <span className="previous-set-value">—</span>
+                                )}
+                                {isWorkoutMode && (
+                                  <span className="workout-mode-set-target">
+                                    {`${formatNumber(language, trainer?.recommendation.weight ?? Number(setWeights[index] ?? draft.weight))} × ${trainerRangeLabel(trainer?.recommendation.reps ?? hintTarget)}`}
+                                  </span>
                                 )}
                                 <SteppedNumberInput
                                   value={setWeights[index] ?? 0}
@@ -3616,9 +3773,10 @@ export default function WorkoutPlan({
                       >
                         {t('workout.superset.copyRoundOne')}
                       </button>
-                      <div className="superset-round-columns" aria-hidden="true">
+                      <div className={`superset-round-columns${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`} aria-hidden="true">
                         <span />
-                        <span>{t('workout.label.previous')}</span>
+                        <span>{t(isWorkoutMode ? 'workout.run.lastTime' : 'workout.label.previous')}</span>
+                        {isWorkoutMode && <span>{t('workout.run.target')}</span>}
                         <span>kg</span>
                         <span>{text.repsShort}</span>
                       </div>
@@ -3666,6 +3824,7 @@ export default function WorkoutPlan({
                           </div>
                           {supersetExercises.map((exercise, exerciseIndex) => {
                             const draft = getDraftForExercise(exercise.name, exercise)
+                            const exerciseTrainer = getTrainerRecommendation(exercise)
                             const code = exercise.code ?? exercise.name
                             const previousSet = getPreviousWorkoutSetRow(supersetPreviousSets, setIndex)[exerciseIndex]
                             const prescribedReps = exercise.repsPerSet?.[setIndex] ?? exercise.reps ?? ''
@@ -3675,7 +3834,7 @@ export default function WorkoutPlan({
                               getDefaultRepTarget(exercise)
                             const weight = draft.setWeights[setIndex] ?? draft.weight ?? 0
                             return (
-                              <div className="superset-round-row" key={`${group.key}-${code}`}>
+                              <div className={`superset-round-row${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`} key={`${group.key}-${code}`}>
                                 <span className="superset-round-code" title={displayExerciseName(exercise.name)}>{code}</span>
                                 {previousSet ? (
                                   <button
@@ -3696,6 +3855,14 @@ export default function WorkoutPlan({
                                   </button>
                                 ) : (
                                   <span className="previous-set-value">—</span>
+                                )}
+                                {isWorkoutMode && (
+                                  <span className="workout-mode-set-target">
+                                    {`${formatNumber(language, exerciseTrainer?.recommendation.weight ?? Number(weight))} × ${trainerRangeLabel(exerciseTrainer?.recommendation.reps ?? {
+                                      min: parseRepPrescription(prescribedReps)[0] ?? 8,
+                                      max: parseRepPrescription(prescribedReps)[0] ?? 8,
+                                    })}`}
+                                  </span>
                                 )}
                                 <SteppedNumberInput
                                   value={weight}
@@ -3759,31 +3926,26 @@ export default function WorkoutPlan({
             )
           })}
         </div>
-        {isWorkoutMode && workoutGroupIndex !== null && (
-          <div className="workout-mode-nav">
-            <button
-              type="button"
-              className="secondary-button"
-              disabled={workoutGroupIndex === 0}
-              onClick={() => goToWorkoutGroup(workoutGroupIndex - 1)}
-            >
-              {t('workout.run.previous')}
-            </button>
-            {workoutGroupIndex < workoutGroups.length - 1 ? (
-              <button type="button" className="primary-button" onClick={() => goToWorkoutGroup(workoutGroupIndex + 1)}>
-                {t('workout.run.next')}
-              </button>
-            ) : (
-              <button type="button" className="primary-button" onClick={finishWorkout}>
+        {isWorkoutMode && (
+          <div className="workout-mode-footer">
+            {restTimer && onRestTimerChange && (
+              <RestTimer timer={restTimer} hidden={false} onChange={onRestTimerChange} />
+            )}
+            <div className="workout-mode-nav">
+              {nextWorkoutExercise && (
+                <button type="button" className="primary-button workout-mode-next" onClick={() => goToWorkoutGroup(nextWorkoutGroup)}>
+                  {t('workout.run.nextExercise', { name: displayExerciseName(nextWorkoutExercise.name) })}
+                </button>
+              )}
+              <button
+                type="button"
+                className={`${nextWorkoutExercise ? 'secondary-button' : 'primary-button'} workout-mode-finish`}
+                onClick={finishWorkout}
+              >
                 {t('workout.run.finish')}
               </button>
-            )}
+            </div>
           </div>
-        )}
-        {isWorkoutMode && workoutGroupIndex !== null && workoutGroupIndex < workoutGroups.length - 1 && (
-          <button type="button" className="secondary-button workout-mode-finish" onClick={finishWorkout}>
-            {t('workout.run.finish')}
-          </button>
         )}
       </section>
       )}
