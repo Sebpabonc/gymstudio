@@ -99,7 +99,7 @@ export function workingSets(sets: ProgressSet[]) {
 }
 
 export function bestSetIndex(sets: ProgressSet[]) {
-  const eligibleSets = workingSets(sets)
+  const eligibleSets = workingSets(sets.filter((set) => set.weight > 0 && set.reps >= 1 && set.reps <= 12))
   let bestIndex: number | null = null
   let bestEstimate = 0
 

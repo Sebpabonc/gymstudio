@@ -64,4 +64,11 @@ describe('approved per-exercise weekly volume', () => {
     expect(twoWeeks.trendAvailable).toBe(false)
     expect(threeWeeks.trendAvailable).toBe(true)
   })
+
+  it('labels an empty block week-six deload', () => {
+    const result = exerciseVolumeTrend([
+      entry('2026-02-02', rdl, [{ id: 'set', weight: 60, reps: 10 }]),
+    ], [block], rdl, '2026-02-16')
+    expect(result.weeks.find((week) => week.weekStart === '2026-02-09')?.deload).toBe(true)
+  })
 })

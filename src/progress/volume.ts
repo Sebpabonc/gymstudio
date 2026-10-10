@@ -1,7 +1,7 @@
 import type { Exercise, TrainingBlock } from '../types'
 import { PROGRESS_THRESHOLDS } from './thresholds'
 import type { ProgressEntry } from './types'
-import { dateValue, startOfWeek, workingSets } from './utils'
+import { dateValue, findBlockForDate, isDeloadWeek, startOfWeek, workingSets } from './utils'
 import { progressLiftSessions } from './trends'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -38,6 +38,10 @@ export function exerciseVolumeTrend(
     const weekStart = new Date(cursor).toISOString().slice(0, 10)
     const weekEnd = new Date(cursor + 7 * DAY_MS).toISOString().slice(0, 10)
     const weekSessions = sessions.filter((session) => session.date >= weekStart && session.date < weekEnd)
+    const weekBlock = findBlockForDate(blocks, weekStart) ?? blocks.find((block) =>
+      dateValue(weekStart) < dateValue(block.startDate) + block.weeks * 7 * DAY_MS
+      && dateValue(weekEnd) > dateValue(block.startDate)
+    ) ?? null
     const volume = unloadedBodyweight ? null : weekSessions.reduce((total, session) => total
       + workingSets(session.sets).reduce((sessionTotal, set) =>
         sessionTotal + set.weight * set.reps + (set.drop ? set.drop.weight * set.drop.reps : 0)
@@ -45,7 +49,9 @@ export function exerciseVolumeTrend(
     weeks.push({
       weekStart,
       complete: weekStart < startOfWeek(today),
-      deload: weekSessions.length > 0 && weekSessions.every((session) => session.deload),
+      deload: weekSessions.length > 0
+        ? weekSessions.every((session) => session.deload)
+        : Boolean(weekBlock && isDeloadWeek(weekBlock, weekStart < weekBlock.startDate ? weekBlock.startDate : weekStart)),
       volume,
     })
   }

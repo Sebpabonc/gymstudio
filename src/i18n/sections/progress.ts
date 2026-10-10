@@ -1,3 +1,5 @@
+import { progressV3 } from './progressV3'
+
 export const progress = {
   en: {
     'progress.unit.kg': 'kg',
@@ -188,6 +190,7 @@ export const progress = {
     'progress.habits.mostFrequentDays': 'Most frequent: {days}',
     'progress.consistency.grid': '12-week training consistency',
     'progress.section.sessionLog': 'Session log',
+    ...progressV3.en,
   },
   es: {
     'progress.unit.kg': 'kg',
@@ -378,5 +381,6 @@ export const progress = {
     'progress.habits.mostFrequentDays': 'Días más frecuentes: {days}',
     'progress.consistency.grid': 'Constancia en 12 semanas',
     'progress.section.sessionLog': 'Registro de sesiones',
+    ...progressV3.es,
   },
 }
