@@ -3360,16 +3360,28 @@ export default function WorkoutPlan({
                 {barWeekOffset > 0 && !isWorkoutMode && (() => {
                   const projected = trainerNext?.next ?? trainer?.recommendation
                   if (!projected) return null
-                  const weights = projected.setWeights && new Set(projected.setWeights).size > 1
-                    ? projected.setWeights.map((weight) => formatNumber(language, weight)).join(' / ')
-                    : formatNumber(language, projected.weight ?? trainerNext?.actual.weight ?? 0)
-                  const reps = projected.setReps
-                    ? projected.setReps.map((value) => formatNumber(language, value)).join(' · ')
-                    : trainerRangeLabel(projected.reps)
+                  // PO 2026-10-11: list every set (kg × reps) for the upcoming session.
+                  const count = projected.sets ?? setCount
+                  const planReps = exercise.repsPerSet ?? []
+                  const rows = Array.from({ length: count }, (_, index) => {
+                    const weight = projected.setWeights?.[index] ?? projected.weight ?? trainerNext?.actual.weight ?? 0
+                    const reps = projected.setReps?.[index] !== undefined
+                      ? formatNumber(language, projected.setReps[index])
+                      : trainerRangeLabel(projected.reps) || planReps[index]
+                    return { weight, reps }
+                  })
                   return (
-                    <p className="preview-projected-load">
-                      {t('workout.week.projected', { weight: weights, reps, sets: formatNumber(language, projected.sets ?? setCount) })}
-                    </p>
+                    <div className="preview-projected-load">
+                      <span className="preview-projected-title">{t('workout.week.projectedTitle')}</span>
+                      <ol className="preview-projected-sets">
+                        {rows.map((row, index) => (
+                          <li key={index}>
+                            <span>{t('workout.week.projectedSet', { set: formatNumber(language, index + 1) })}</span>
+                            <strong>{`${formatNumber(language, row.weight)} kg × ${row.reps}`}</strong>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
                   )
                 })()}
                 {/* PO 2026-10-10: the Next box lives inside the expanded card. */}

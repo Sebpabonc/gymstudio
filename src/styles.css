@@ -8572,3 +8572,24 @@ button.superset-last-time {
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
+
+.preview-projected-title {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.preview-projected-sets {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.preview-projected-sets li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
