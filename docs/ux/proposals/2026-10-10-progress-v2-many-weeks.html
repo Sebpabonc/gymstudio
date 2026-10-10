@@ -1,0 +1,189 @@
+<title>Progress v2 prototype</title>
+<style>
+:root{--bg:#0f0f10;--line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#c8c7c4;--brand:#8d5e63;--brand-soft:rgba(141,94,99,.18);--nav:#c99ca1;--ok:#dfe7df;--fs:.65rem;--fb:.76rem}
+*{box-sizing:border-box}
+body{margin:0;background:#1a1a1c;color:var(--text);font:500 var(--fb)/1.4 -apple-system,system-ui,sans-serif}
+.phone{width:375px;max-width:100%;margin:16px auto;background:var(--bg);padding:12px 16px 32px;position:relative;min-height:700px;overflow:hidden}
+h2{font-size:1.4rem;margin:4px 0 2px}h3{font-size:var(--fs);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 6px}
+h4{font-size:var(--fb);margin:10px 0 4px}
+p{margin:4px 0}
+.card{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:22px;padding:14px 12px;margin:10px 0}
+.muted{color:var(--muted)}.num{font-variant-numeric:tabular-nums}.expl{color:var(--muted);font-size:var(--fs);margin-top:6px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--muted);font:inherit;font-size:var(--fs);padding:6px 8px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--brand);color:var(--text)}
+.sample{background:#3a2a10;color:#ffd79a;border:1px solid #8a6420;border-radius:10px;padding:6px 8px;font-weight:700;margin:8px 0;text-align:center;letter-spacing:.05em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}
+.stat{background:rgba(255,255,255,.04);border-radius:14px;padding:8px;text-align:center}.stat strong{display:block;font-size:1.05rem}
+.st-imp{color:var(--ok)}.st-watch{color:var(--nav)}
+.grid{display:grid;grid-template-columns:34px repeat(6,1fr) 42px;gap:3px;align-items:center}
+.cell{height:16px;border-radius:4px;border:1px solid var(--line)}
+.cell.on{background:var(--brand)}.cell.dl{background:var(--brand-soft)}.cell.miss{border:1px dashed var(--nav)}
+.row{border-top:1px solid var(--line);padding:8px 0;cursor:pointer;display:block;width:100%;background:none;color:inherit;text-align:left;font:inherit;border-left:0;border-right:0;border-bottom:0}
+.row:first-of-type{border-top:0}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin:3px 0}.chips span{background:var(--brand-soft);border-radius:8px;padding:1px 6px}
+.chips span.prev{background:none;border:1px solid var(--line);color:var(--muted)}
+.badge{font-size:var(--fs);border-radius:8px;padding:1px 6px;border:1px solid var(--line);margin-left:4px}
+.b-imp{border-color:#7f957f;color:var(--ok)}.b-watch{border-color:var(--nav);color:var(--nav)}
+.bar{display:grid;grid-template-columns:78px 1fr 56px;align-items:center;gap:6px;margin:4px 0}
+.track{position:relative;height:10px;background:rgba(255,255,255,.06);border-radius:4px}
+.band{position:absolute;top:0;height:10px;background:rgba(223,231,223,.12);border-left:1px dashed #7f957f;border-right:1px dashed #7f957f}
+.fill{position:relative;height:10px;background:var(--brand);border-radius:4px}.tick{position:absolute;top:-3px;width:2px;height:16px;background:var(--text)}
+select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;font:inherit;padding:4px 6px}
+.sheet{position:absolute;inset:0;background:var(--bg);padding:12px 16px;overflow:auto;display:none}
+.sheet.open{display:block}
+.back{background:none;border:0;color:var(--nav);font:inherit;padding:8px 0;cursor:pointer}
+table{width:100%;border-collapse:collapse}td,th{padding:4px 2px;border-top:1px solid var(--line);text-align:left;font-weight:500}th{color:var(--muted);font-size:var(--fs)}
+svg text{fill:var(--muted);font-size:9px}
+details summary{cursor:pointer;color:var(--muted)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--nav);outline-offset:2px}
+</style>
+<div class="phone" id="app"></div>
+<script>
+(function(){
+const T={en:{title:'Progress',real:'1 week (real)',sample:'8 weeks (sample)',sampleBanner:'SAMPLE DATA — generated for this prototype, not your logs',block:'Hypertrophy flat pyramid II',week:'Week {w}',summary:'Last 7 days',improved:'Improved',held:'Held',watch:'Watch',baseline:'Baseline',
+sumExpl:'Each exercise vs the last time you did the same day. Load up with ≤1 rep fewer counts as improved.',firstWeek:'First week: these are your baselines. Comparisons start when you repeat a day.',
+cons:'Consistency',consLine:'{d} of {p} planned days · {s} of {ps} sets this week',adh:'Hit target reps on {r}% of sets (last 4 weeks)',consExpl:'Filled = trained · faint = deload week · dashed = planned, not logged.',missing:'Not logged yet: {d}.',
+perEx:'Per exercise',perExpl:'Your sets vs the last same plan day (same block, not deload). Tap for history.',vsPrev:'vs {d}',noPrev:'Baseline — first comparison next time.',
+best:'Best marks',bestExpl:'A record needs a previous session to beat. First sessions are baselines, never records.',bestEmpty:'Records start once you repeat a day and beat it.',heaviest:'Heaviest',moreReps:'More reps at {w} kg',
+sets:'Hard sets per muscle',setsUnit:'sets / week',setsExpl:'Working sets of exercises where it is the main muscle (drop set = 1 set). Shaded = common 10–20 range; line = average of previous 3 weeks. More is not automatically better — the plan sets the target.',
+ton:'Weekly tonnage',tonUnit:'kg lifted (kg × reps)',tonExpl:'Secondary. Changes with exercise choice and rep scheme, so a lower week is not worse. Deload week is lower by design.',
+trend:'Trend',improving:'Improving',flat:'Flat (±2%)',lower:'Lower',notEnough:'Not enough data yet (needs 4 sessions over 14+ days)',e1rm:'Estimated 1-rep max (kg), best set ≤12 reps',kgxreps:'Best set kg × reps (high-rep exercise)',
+detailExpl:'Same day only ({d}). Rings = best mark. Deload weeks excluded.',back:'‹ Progress',last4:'Last sessions',date:'Date',setsH:'Sets',st:'Result',
+day:{'chest-back-a':'Chest & Back A','arms-a':'Arms A','lower-body-a':'Lower body A','chest-back-b':'Chest & Back B','arms-b':'Arms B','lower-body-b':'Lower body B'},
+W1:'Last time: last set was {r} reps (target {t}).',W2:'Last time: all sets reached {t} reps at {w} kg.',W3:'Same load ({w} kg) in the last 2 sessions.',W5:'Tip: log reps in reserve on your last set.',W6:'First comparison next time (baseline {d}).',watchNext:'Watch next session',none:'Nothing flagged.'},
+es:{title:'Progreso',real:'1 semana (real)',sample:'8 semanas (ejemplo)',sampleBanner:'DATOS DE EJEMPLO — generados para este prototipo, no son tus registros',block:'Hipertrofia pirámide plana II',week:'Semana {w}',summary:'Últimos 7 días',improved:'Mejoró',held:'Se mantuvo',watch:'Revisar',baseline:'Marca base',
+sumExpl:'Cada ejercicio vs la última vez que hiciste el mismo día. Subir carga con ≤1 rep menos cuenta como mejora.',firstWeek:'Primera semana: estas son tus marcas base. Las comparaciones empiezan cuando repites un día.',
+cons:'Constancia',consLine:'{d} de {p} días planificados · {s} de {ps} series esta semana',adh:'Reps objetivo cumplidas en el {r}% de series (últimas 4 semanas)',consExpl:'Lleno = entrenado · tenue = semana de descarga · discontinuo = planificado, sin registrar.',missing:'Falta registrar: {d}.',
+perEx:'Por ejercicio',perExpl:'Tus series vs el último mismo día del plan (mismo bloque, sin descarga). Toca para ver historial.',vsPrev:'vs {d}',noPrev:'Marca base — primera comparación la próxima vez.',
+best:'Mejores marcas',bestExpl:'Un récord necesita una sesión previa que superar. Las primeras sesiones son marcas base, nunca récords.',bestEmpty:'Los récords empiezan cuando repites un día y lo superas.',heaviest:'Más peso',moreReps:'Más reps con {w} kg',
+sets:'Series efectivas por músculo',setsUnit:'series / semana',setsExpl:'Series de trabajo de ejercicios donde es el músculo principal (drop set = 1 serie). Sombreado = rango habitual 10–20; línea = media de las 3 semanas previas. Más no es automáticamente mejor — el plan marca el objetivo.',
+ton:'Tonelaje semanal',tonUnit:'kg levantados (kg × reps)',tonExpl:'Secundario. Cambia con el ejercicio y el esquema de reps, así que una semana más baja no es peor. La descarga es más baja a propósito.',
+trend:'Tendencia',improving:'Mejorando',flat:'Estable (±2%)',lower:'Más bajo',notEnough:'Aún faltan datos (4 sesiones en 14+ días)',e1rm:'1RM estimado (kg), mejor serie ≤12 reps',kgxreps:'Mejor serie kg × reps (ejercicio de muchas reps)',
+detailExpl:'Solo el mismo día ({d}). Anillos = mejor marca. Sin semanas de descarga.',back:'‹ Progreso',last4:'Últimas sesiones',date:'Fecha',setsH:'Series',st:'Resultado',
+day:{'chest-back-a':'Pecho y espalda A','arms-a':'Brazos A','lower-body-a':'Pierna A','chest-back-b':'Pecho y espalda B','arms-b':'Brazos B','lower-body-b':'Pierna B'},
+W1:'La última vez: la última serie fue de {r} reps (objetivo {t}).',W2:'La última vez: todas las series llegaron a {t} reps con {w} kg.',W3:'Misma carga ({w} kg) en las 2 últimas sesiones.',W5:'Consejo: registra las reps en reserva de tu última serie.',W6:'Primera comparación la próxima vez (base {d}).',watchNext:'Revisar en la próxima sesión',none:'Nada que revisar.'}};
+const NAMES={en:{'incline-dumbbell-press':'Incline DB press','plate-loaded-t-bar-row-chest-supported':'Chest-supported T-bar row','dumbbell-bench-press':'Dumbbell bench press','barbell-bench-press':'Barbell bench press','cable-lat-pulldown-underhand-grip':'Lat pulldown (underhand)','high-cable-fly':'High cable fly','cable-straight-arms-pull-downs':'Straight-arm pulldown','cable-crunch':'Cable crunch','smith-machine-shoulder-press':'Smith shoulder press','dumbbell-curl-incline':'Incline DB curl','standing-db-lateral-raises':'DB lateral raise','cable-lateral-raise':'Cable lateral raise','rope-low-cable-oh-tricep-extensions':'Overhead rope extension','ez-bb-preacher-curls':'EZ preacher curl','reverse-pec-deck-fly':'Reverse pec deck','cable-rear-delt-fly':'Cable rear delt fly','plate-loaded-pendulum-squat':'Pendulum squat','back-squat':'Back squat','romanian-deadlift':'Romanian deadlift','dumbbell-bulgarian-split-squat':'DB Bulgarian split squat','seated-leg-curl-toes-dorsiflexed-neutral':'Seated leg curl','leg-extensions-toes-dorsiflexed-neutral':'Leg extension','standing-calf-raises-toes-neutral':'Standing calf raise'},
+es:{'incline-dumbbell-press':'Press inclinado mancuernas','plate-loaded-t-bar-row-chest-supported':'Remo T con apoyo','dumbbell-bench-press':'Press banca mancuernas','barbell-bench-press':'Press banca barra','cable-lat-pulldown-underhand-grip':'Jalón supino','high-cable-fly':'Cruce de poleas alto','cable-straight-arms-pull-downs':'Pullover en polea','cable-crunch':'Crunch en polea','smith-machine-shoulder-press':'Press hombro Smith','dumbbell-curl-incline':'Curl inclinado','standing-db-lateral-raises':'Elevación lateral','cable-lateral-raise':'Elevación lateral polea','rope-low-cable-oh-tricep-extensions':'Extensión tríceps cuerda','ez-bb-preacher-curls':'Curl predicador EZ','reverse-pec-deck-fly':'Contractor inverso','cable-rear-delt-fly':'Pájaro en polea','plate-loaded-pendulum-squat':'Sentadilla péndulo','back-squat':'Sentadilla trasera','romanian-deadlift':'Peso muerto rumano','dumbbell-bulgarian-split-squat':'Búlgara mancuernas','seated-leg-curl-toes-dorsiflexed-neutral':'Curl femoral sentado','leg-extensions-toes-dorsiflexed-neutral':'Extensión de cuádriceps','standing-calf-raises-toes-neutral':'Gemelo de pie'}};
+const MUSCLE={'incline-dumbbell-press':'Chest','dumbbell-bench-press':'Chest','barbell-bench-press':'Chest','high-cable-fly':'Chest','plate-loaded-t-bar-row-chest-supported':'Back','cable-lat-pulldown-underhand-grip':'Back','cable-straight-arms-pull-downs':'Back','cable-crunch':'Core','smith-machine-shoulder-press':'Front delts','dumbbell-curl-incline':'Biceps','ez-bb-preacher-curls':'Biceps','standing-db-lateral-raises':'Shoulders','cable-lateral-raise':'Shoulders','reverse-pec-deck-fly':'Shoulders','cable-rear-delt-fly':'Shoulders','rope-low-cable-oh-tricep-extensions':'Triceps','plate-loaded-pendulum-squat':'Quads','back-squat':'Quads','dumbbell-bulgarian-split-squat':'Quads','leg-extensions-toes-dorsiflexed-neutral':'Quads','romanian-deadlift':'Hamstrings','seated-leg-curl-toes-dorsiflexed-neutral':'Hamstrings','standing-calf-raises-toes-neutral':'Calves'};
+const MG={en:{Chest:'Chest',Back:'Back',Shoulders:'Side/rear delts','Front delts':'Front delts',Biceps:'Biceps',Triceps:'Triceps',Quads:'Quads',Hamstrings:'Hamstrings',Calves:'Calves',Core:'Core'},es:{Chest:'Pecho',Back:'Espalda',Shoulders:'Deltoide lat/post','Front delts':'Deltoide frontal',Biceps:'Bíceps',Triceps:'Tríceps',Quads:'Cuádriceps',Hamstrings:'Isquios',Calves:'Gemelos',Core:'Core'}};
+const DAYS=['chest-back-a','arms-a','lower-body-a','chest-back-b','arms-b','lower-body-b'];
+// Approved block plan: [id, sets, first rep target]
+const PLAN={'chest-back-a':[['incline-dumbbell-press',3,8],['plate-loaded-t-bar-row-chest-supported',3,8],['dumbbell-bench-press',3,10],['cable-lat-pulldown-underhand-grip',3,10],['high-cable-fly',3,12],['cable-straight-arms-pull-downs',3,12],['cable-crunch',3,10]],
+'arms-a':[['smith-machine-shoulder-press',3,8],['dumbbell-curl-incline',3,12],['standing-db-lateral-raises',3,15],['cable-lateral-raise',4,15],['rope-low-cable-oh-tricep-extensions',4,12],['ez-bb-preacher-curls',4,12],['reverse-pec-deck-fly',3,12]],
+'lower-body-a':[['plate-loaded-pendulum-squat',3,8],['romanian-deadlift',3,10],['dumbbell-bulgarian-split-squat',3,10],['seated-leg-curl-toes-dorsiflexed-neutral',4,12],['leg-extensions-toes-dorsiflexed-neutral',4,12],['standing-calf-raises-toes-neutral',5,15]],
+'chest-back-b':[['incline-dumbbell-press',3,14],['plate-loaded-t-bar-row-chest-supported',3,10],['dumbbell-bench-press',3,12],['cable-lat-pulldown-underhand-grip',3,12],['high-cable-fly',3,15],['cable-straight-arms-pull-downs',3,15],['cable-crunch',3,15]],
+'arms-b':[['smith-machine-shoulder-press',3,10],['dumbbell-curl-incline',3,15],['standing-db-lateral-raises',3,20],['cable-lateral-raise',4,20],['rope-low-cable-oh-tricep-extensions',4,15],['ez-bb-preacher-curls',4,15],['reverse-pec-deck-fly',4,20]],
+'lower-body-b':[['plate-loaded-pendulum-squat',3,15],['romanian-deadlift',3,12],['dumbbell-bulgarian-split-squat',3,12],['seated-leg-curl-toes-dorsiflexed-neutral',4,15],['leg-extensions-toes-dorsiflexed-neutral',4,15],['standing-calf-raises-toes-neutral',5,20]]};
+const TARGET={};for(const d of DAYS)for(const [id,s,t] of PLAN[d])TARGET[d+'|'+id]=t;
+// Real week 1 (PO export, 5–9 Oct; test entries excluded)
+const R=(d,id,s)=>({date:d,id,sets:s.split(' ').map(x=>x.split('x').map(Number))});
+const REAL=[['2026-10-05','chest-back-a',[R(0,'cable-straight-arms-pull-downs','22.5x12 22.5x12 22.5x12'),R(0,'high-cable-fly','12.5x13 15x12 12.5x12'),R(0,'cable-crunch','25x12 25x12 25x12'),R(0,'dumbbell-bench-press','30x12 30x10 30x10'),R(0,'cable-lat-pulldown-underhand-grip','65x10 60x11 65x11'),R(0,'plate-loaded-t-bar-row-chest-supported','30x12 30x12 30x8'),R(0,'incline-dumbbell-press','26x12 26x12 26x12')]],
+['2026-10-06','arms-a',[R(0,'ez-bb-preacher-curls','6x12 6x12 6x12 6x12'),R(0,'cable-rear-delt-fly','6x12 6x12 6x12'),R(0,'smith-machine-shoulder-press','20x10 22.5x10 22.5x10'),R(0,'standing-db-lateral-raises','12x15 12x14 12x14'),R(0,'dumbbell-curl-incline','10x12 10x12 10x12'),R(0,'rope-low-cable-oh-tricep-extensions','20x12 20x12 20x15 20x15'),R(0,'cable-lateral-raise','5x15 5x14 5x15 5x14'),R(0,'reverse-pec-deck-fly','6.25x15 6.25x15 6.25x15 6.25x15')]],
+['2026-10-07','lower-body-a',[R(0,'seated-leg-curl-toes-dorsiflexed-neutral','25x15 25x12 25x12 25x12'),R(0,'leg-extensions-toes-dorsiflexed-neutral','32.5x12 32.5x12 32.5x12 32.5x12'),R(0,'romanian-deadlift','50x10 50x10 50x10'),R(0,'dumbbell-bulgarian-split-squat','16x10 16x10 16x10'),R(0,'standing-calf-raises-toes-neutral','100x15 100x15 100x15 100x15 100x15'),R(0,'back-squat','80x8 72x10 70x12')]],
+['2026-10-08','chest-back-b',[R(0,'incline-dumbbell-press','28x14 28x12 28x12'),R(0,'barbell-bench-press','35x12 35x12 35x12'),R(0,'cable-crunch','25x15 25x15 25x15'),R(0,'high-cable-fly','12.5x15 12.5x15 12.5x15'),R(0,'plate-loaded-t-bar-row-chest-supported','30x12 30x12 30x12'),R(0,'cable-straight-arms-pull-downs','22.5x15 22.5x15 22.5x15')]],
+['2026-10-09','arms-b',[R(0,'dumbbell-curl-incline','10x15 10x15 10x15'),R(0,'smith-machine-shoulder-press','22.5x12 22.5x12 22.5x12'),R(0,'cable-rear-delt-fly','6x18 4x20 4x20'),R(0,'standing-db-lateral-raises','10x20 10x18 10x18'),R(0,'rope-low-cable-oh-tricep-extensions','20x15 20x15 20x15 20x15'),R(0,'cable-lateral-raise','5x20 5x20 5x18 5x18'),R(0,'ez-bb-preacher-curls','6x15 6x15 6x15 6x15')]],
+['2026-10-09','chest-back-a',[R(0,'cable-lat-pulldown-underhand-grip','65x10 60x11 65x11'),R(0,'barbell-bench-press','30x10 32.5x10 32.5x10')]]];
+function addDays(s,n){const d=new Date(s+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+function realSessions(){const out=[];for(const [date,day,ex] of REAL)for(const e of ex)out.push({date,day,id:e.id,sets:e.sets,week:1,deload:false});return out}
+// Sample generator (deterministic)
+const BASE={'incline-dumbbell-press':26,'plate-loaded-t-bar-row-chest-supported':30,'dumbbell-bench-press':30,'cable-lat-pulldown-underhand-grip':60,'high-cable-fly':12.5,'cable-straight-arms-pull-downs':22.5,'cable-crunch':25,'smith-machine-shoulder-press':22.5,'dumbbell-curl-incline':10,'standing-db-lateral-raises':10,'cable-lateral-raise':5,'rope-low-cable-oh-tricep-extensions':20,'ez-bb-preacher-curls':6,'reverse-pec-deck-fly':6.25,'plate-loaded-pendulum-squat':60,'romanian-deadlift':50,'dumbbell-bulgarian-split-squat':16,'seated-leg-curl-toes-dorsiflexed-neutral':25,'leg-extensions-toes-dorsiflexed-neutral':32.5,'standing-calf-raises-toes-neutral':100};
+const FLAT=new Set(['cable-lateral-raise','smith-machine-shoulder-press','reverse-pec-deck-fly']);
+const step=id=>/dumbbell|db-/.test(id)?2:2.5;
+const MISSED=new Set(['3|lower-body-b','7|arms-a']);
+function rnd(n){const x=Math.sin(n*9301+49297)*233280;return x-Math.floor(x)}
+function sampleSessions(){const out=[];let k=0;
+ for(let w=1;w<=8;w++)for(let di=0;di<6;di++){const day=DAYS[di];if(MISSED.has(w+'|'+day))continue;const date=addDays('2026-10-05',(w-1)*7+di);const deload=w===6;
+  for(const [id,n,t] of PLAN[day]){k++;const st=step(id);const bw=w>6?w-1:w;let load=BASE[id]+(day.endsWith('-b')&&/incline-dumbbell/.test(id)?2:0);
+   const ups=FLAT.has(id)?0:Math.floor((bw-1)/2);load+=ups*st;const upWeek=!FLAT.has(id)&&bw>1&&(bw-1)%2===0;
+   const sets=[];const ns=deload?Math.ceil(n/2):n;
+   for(let s=0;s<ns;s++){let r=upWeek?t+1-(s>0&&rnd(k*7+s)<.3?1:0):t+1+Math.floor(rnd(k*7+s)*2);if(FLAT.has(id))r=t;if(s===ns-1&&rnd(k*13)<.06)r=t-1;if(deload)r=t;sets.push([deload?Math.round(load*.8/st)*st:load,Math.max(1,r)])}
+   out.push({date,day,id,sets,week:w,deload,rir:rnd(k*3)<.5?null:(rnd(k*5)<.1?0:2)})}}
+ return out}
+// ---- pure functions (spec §7) ----
+const top=s=>Math.max(...s.sets.map(x=>x[0]));
+const reps=s=>s.sets.reduce((a,x)=>a+x[1],0);
+function prevEquivalent(all,s){return all.filter(o=>o.id===s.id&&o.day===s.day&&!o.deload&&o.date<s.date).pop()||null}
+function compare(s,p){if(!p)return'baseline';const tn=top(s),tp=top(p);
+ if(tn>tp){const ok=s.sets.every((x,i)=>!p.sets[i]||x[1]>=p.sets[i][1]-1);return ok?'improved':'watch'}
+ if(tn<tp)return'watch';const rn=reps(s),rp=reps(p);return rn>rp?'improved':rn===rp?'held':'watch'}
+function metric(s){const ok=s.sets.filter(x=>x[1]<=12);if(ok.length)return{v:Math.max(...ok.map(x=>x[1]===1?x[0]:x[0]*(1+x[1]/30))),kind:'e1rm'};return{v:Math.max(...s.sets.map(x=>x[0]*x[1])),kind:'kgxreps'}}
+function trend(list){if(list.length<4)return null;const span=(new Date(list.at(-1).date)-new Date(list[0].date))/864e5;if(span<14)return null;
+ const m=a=>a.reduce((x,y)=>x+y,0)/a.length;const f=m(list.slice(0,2).map(x=>metric(x).v)),l=m(list.slice(-2).map(x=>metric(x).v));const pc=(l/f-1)*100;return pc>2?'improving':pc<-2?'lower':'flat'}
+function records(all){const out=[];const seen={};
+ for(const s of all.filter(x=>!x.deload).sort((a,b)=>a.date.localeCompare(b.date))){const key=s.id+'|'+s.day;const h=seen[key];
+  if(h){const t=top(s);if(t>h.top)out.push({s,type:'heaviest',w:t,r:Math.max(...s.sets.filter(x=>x[0]===t).map(x=>x[1]))});
+   else{for(const [w,r] of s.sets){if(h.repsAt[w]!==undefined&&r>h.repsAt[w]){out.push({s,type:'reps',w,r});break}}}}
+  const nh=h||{top:0,repsAt:{}};nh.top=Math.max(nh.top,top(s));for(const [w,r] of s.sets)nh.repsAt[w]=Math.max(nh.repsAt[w]||0,r);seen[key]=nh}
+ return out.reverse()}
+function watchMsg(all,s,L){const t=TARGET[s.day+'|'+s.id];const p=prevEquivalent(all,s);const last=s.sets.at(-1);const tx=(k,o)=>T[L][k].replace(/\{(\w+)\}/g,(_,x)=>o[x]);
+ if(t&&last[1]<t)return tx('W1',{r:last[1],t});
+ if(p&&top(p)===top(s)&&compare(s,p)!=='improved')return tx('W3',{w:fmt(top(s),L)});
+ if(!p)return tx('W6',{d:dfmt(s.date,L)});return null}
+// ---- render ----
+let L='en',MODE='real',OPEN=null;
+const fmt=(n,l)=>n.toLocaleString(l==='es'?'es-ES':'en-GB',{maximumFractionDigits:1});
+const dfmt=(d,l)=>new Date(d+'T12:00:00Z').toLocaleDateString(l==='es'?'es-ES':'en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'});
+const nm=id=>NAMES[L][id]||id;
+function tx(k,o={}){return (T[L][k]||k).replace(/\{(\w+)\}/g,(_,x)=>o[x])}
+function render(){const all=MODE==='real'?realSessions():sampleSessions();const today=MODE==='real'?'2026-10-10':'2026-11-28';const curWeek=MODE==='real'?1:8;
+ const app=document.getElementById('app');const wkSess=all.filter(s=>s.week===curWeek);const last7=all.filter(s=>s.date>addDays(today,-7));
+ const st={improved:0,held:0,watch:0,baseline:0};const rows=last7.map(s=>{const p=prevEquivalent(all,s);const c=compare(s,p);st[c]++;return{s,p,c}});
+ let h=`<div class="top"><h2>${tx('title')}</h2><div class="seg" role="group" aria-label="Language"><button data-l="en" aria-pressed="${L==='en'}">EN</button><button data-l="es" aria-pressed="${L==='es'}">ES</button></div></div>
+ <p class="muted">${tx('block')} · ${tx('week',{w:curWeek})}</p>
+ <div class="seg" role="group" aria-label="Data"><button data-m="real" aria-pressed="${MODE==='real'}">${tx('real')}</button><button data-m="sample" aria-pressed="${MODE==='sample'}">${tx('sample')}</button></div>
+ ${MODE==='sample'?`<div class="sample">${tx('sampleBanner')}</div>`:''}`;
+ // Summary
+ const watchList=rows.map(r=>({r,m:watchMsg(all,r.s,L)})).filter(x=>x.m&&x.r.c!=='baseline').slice(0,3);
+ h+=`<section class="card"><h3>${tx('summary')}</h3>${st.improved+st.held+st.watch===0?`<p>${tx('firstWeek')}</p>`:''}
+ <div class="stats num"><div class="stat"><strong class="st-imp">${st.improved}</strong>${tx('improved')}</div><div class="stat"><strong>${st.held}</strong>${tx('held')}</div><div class="stat"><strong class="st-watch">${st.watch}</strong>${tx('watch')}</div></div>
+ ${st.baseline?`<p class="muted">${tx('baseline')}: ${st.baseline}</p>`:''}
+ <h4>${tx('watchNext')}</h4>${watchList.length?watchList.map(x=>`<p>• <b>${nm(x.r.s.id)}</b> (${T[L].day[x.r.s.day]}): ${x.m}</p>`).join(''):`<p class="muted">${tx('none')}</p>`}
+ ${MODE==='real'?`<p class="muted">• ${tx('W5')}</p>`:''}<p class="expl">${tx('sumExpl')}</p></section>`;
+ // Consistency
+ const weeks=MODE==='real'?[1]:[1,2,3,4,5,6,7,8];const done=new Set(all.map(s=>s.week+'|'+s.day));
+ let g=`<div class="grid num" aria-hidden="true"><span></span>${DAYS.map(d=>`<span class="muted" style="font-size:var(--fs)">${({'chest-back':L==='es'?'PE':'CB','arms':L==='es'?'BR':'AR','lower-body':L==='es'?'PI':'LB'})[d.slice(0,-2)]} ${d.slice(-1).toUpperCase()}</span>`).join('')}<span></span>`;
+ for(const w of weeks){const n=DAYS.filter(d=>done.has(w+'|'+d)).length;g+=`<span class="muted">W${w}</span>${DAYS.map(d=>{const on=done.has(w+'|'+d);const past=MODE==='sample'||DAYS.indexOf(d)<5;return`<i class="cell ${on?(w===6?'dl':'on'):(past?'miss':'')}" title="${T[L].day[d]}"></i>`}).join('')}<span class="muted">${n}/6</span>`}
+ g+='</div>';
+ const pS=DAYS.reduce((a,d)=>a+PLAN[d].reduce((x,e)=>x+e[1],0),0);const doneS=wkSess.reduce((a,s)=>a+s.sets.length,0);const doneD=new Set(wkSess.map(s=>s.day)).size;
+ const miss=DAYS.filter(d=>!done.has(curWeek+'|'+d)).map(d=>T[L].day[d]);
+ let hit=0,tot=0;for(const s of all.filter(s=>s.week>curWeek-4&&!s.deload)){const t=TARGET[s.day+'|'+s.id];if(!t)continue;for(const x of s.sets){tot++;if(x[1]>=t)hit++}}
+ h+=`<section class="card"><h3>${tx('cons')}</h3><p class="num"><b>${tx('consLine',{d:doneD,p:6,s:doneS,ps:pS})}</b></p>${g}
+ ${miss.length?`<p class="muted">${tx('missing',{d:miss.join(', ')})}</p>`:''}<p class="num">${tx('adh',{r:Math.round(hit/tot*100)})}</p><p class="expl">${tx('consExpl')}</p></section>`;
+ // Per exercise
+ const byDay={};for(const r of rows)(byDay[r.s.day]=byDay[r.s.day]||[]).push(r);
+ h+=`<section class="card"><h3>${tx('perEx')}</h3><select aria-label="Day" id="daysel">${Object.keys(byDay).map(d=>`<option value="${d}">${T[L].day[d]} · ${dfmt(byDay[d][0].s.date,L)}</option>`).join('')}</select><div id="exlist"></div><p class="expl">${tx('perExpl')}</p></section>`;
+ // Best marks
+ const rec=records(all).slice(0,6);
+ h+=`<section class="card"><h3>${tx('best')}</h3>${rec.length?rec.map(r=>`<p class="num"><b>${nm(r.s.id)}</b> · ${r.type==='heaviest'?tx('heaviest'):tx('moreReps',{w:fmt(r.w,L)})}: ${fmt(r.w,L)} kg × ${r.r}<br><span class="muted">${dfmt(r.s.date,L)} · ${T[L].day[r.s.day]}</span></p>`).join(''):`<p>${tx('bestEmpty')}</p>`}<p class="expl">${tx('bestExpl')}</p></section>`;
+ // Sets per muscle
+ const lastFull=MODE==='real'?1:7;const ms=w=>{const m={};for(const s of all.filter(s=>s.week===w)){const g=MUSCLE[s.id];if(g)m[g]=(m[g]||0)+s.sets.length}return m};
+ const cur=ms(lastFull);const prevW=[lastFull-1,lastFull-2,lastFull-3].filter(w=>w>=1);const avg={};for(const w of prevW){const m=ms(w);for(const k in m)avg[k]=(avg[k]||0)+m[k]/prevW.length}
+ const max=36;h+=`<section class="card"><h3>${tx('sets')} · ${tx('week',{w:lastFull})}</h3><p class="muted">${tx('setsUnit')}</p>`;
+ for(const k of Object.keys(MG.en)){const v=cur[k]||0;h+=`<div class="bar num"><span>${MG[L][k]}</span><div class="track"><i class="band" style="left:${10/max*100}%;width:${10/max*100}%"></i><div class="fill" style="width:${Math.min(v,max)/max*100}%"></div>${avg[k]!==undefined?`<i class="tick" style="left:${Math.min(avg[k],max)/max*100}%"></i>`:''}</div><span>${v}${avg[k]!==undefined?' / '+fmt(avg[k],L):''}</span></div>`}
+ h+=`<p class="expl">${tx('setsExpl')}</p></section>`;
+ // Tonnage
+ const ton=weeks.map(w=>all.filter(s=>s.week===w).reduce((a,s)=>a+s.sets.reduce((x,y)=>x+y[0]*y[1],0),0));const tm=Math.max(...ton);
+ h+=`<section class="card"><h3>${tx('ton')}</h3><p class="muted">${tx('tonUnit')}</p><svg viewBox="0 0 320 90" width="100%" role="img" aria-label="${tx('ton')}">${ton.map((v,i)=>{const bw=Math.min(30,300/weeks.length-6),x=10+i*(300/weeks.length),hh=v/tm*60;return`<rect x="${x}" y="${70-hh}" width="${bw}" height="${hh}" rx="3" fill="${weeks[i]===6?'rgba(141,94,99,.4)':'#8d5e63'}"/><text x="${x+bw/2}" y="84" text-anchor="middle">W${weeks[i]}</text><text x="${x+bw/2}" y="${66-hh}" text-anchor="middle">${Math.round(v/1000)}k</text>`}).join('')}</svg><p class="expl">${tx('tonExpl')}</p></section>`;
+ h+=`<div class="sheet" id="sheet"></div>`;
+ app.innerHTML=h;
+ const sel=document.getElementById('daysel');const drawList=()=>{document.getElementById('exlist').innerHTML=(byDay[sel.value]||[]).map(r=>`<button class="row" data-ex="${r.s.id}" data-day="${r.s.day}"><b>${nm(r.s.id)}</b><span class="badge ${r.c==='improved'?'b-imp':r.c==='watch'?'b-watch':''}">${tx(r.c)}</span>
+  <div class="chips num">${r.s.sets.map(x=>`<span>${fmt(x[0],L)}×${x[1]}</span>`).join('')}</div>
+  ${r.p?`<div class="chips num"><span class="muted" style="background:none">${tx('vsPrev',{d:dfmt(r.p.date,L)})}</span>${r.p.sets.map(x=>`<span class="prev">${fmt(x[0],L)}×${x[1]}</span>`).join('')}</div>`:`<span class="muted">${tx('noPrev')}</span>`}</button>`).join('')};
+ sel.onchange=drawList;drawList();
+ app.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{L=b.dataset.l;render()});
+ app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{MODE=b.dataset.m;render()});
+ app.onclick=(e=>{const b=e.target.closest('[data-ex]');if(b)openDetail(all,b.dataset.ex,b.dataset.day)});
+}
+function openDetail(all,id,day){const list=all.filter(s=>s.id===id&&s.day===day&&!s.deload);const sh=document.getElementById('sheet');const tr=trend(list);
+ const pts=list.map(s=>metric(s));const kind=pts.some(p=>p.kind==='e1rm')?'e1rm':'kgxreps';const vals=pts.map(p=>p.v);const mn=Math.min(...vals)*.97,mx=Math.max(...vals)*1.03||1;
+ const X=i=>30+i*(280/Math.max(1,list.length-1)),Y=v=>80-(v-mn)/(mx-mn||1)*65;let best=-1;
+ const svg=list.length>1?`<svg viewBox="0 0 320 100" width="100%" role="img" aria-label="${tx(kind)}"><text x="2" y="${Y(mx)+4}">${Math.round(mx)}</text><text x="2" y="${Y(mn)}">${Math.round(mn)}</text><path d="${vals.map((v,i)=>(i?'L':'M')+X(i)+','+Y(v)).join(' ')}" fill="none" stroke="#c99ca1" stroke-width="2"/>${vals.map((v,i)=>{const b=v>best&&i>0;if(v>best)best=v;return`<circle cx="${X(i)}" cy="${Y(v)}" r="${b?5:3}" fill="${b?'none':'#c99ca1'}" stroke="#f3f3f1" stroke-width="${b?1.5:0}"/>`}).join('')}${list.map((s,i)=>`<text x="${X(i)}" y="96" text-anchor="middle">${s.date.slice(8)}/${s.date.slice(5,7)}</text>`).join('')}</svg>`:'';
+ sh.innerHTML=`<button class="back" id="bk">${tx('back')}</button><h2 style="font-size:1.05rem">${nm(id)}</h2><p class="muted">${T[L].day[day]}</p>
+ <section class="card"><h3>${tx('trend')}: ${tr?tx(tr):''}</h3>${tr?'':`<p>${tx('notEnough')}</p>`}<p class="muted">${tx(kind)}</p>${svg}<p class="expl">${tx('detailExpl',{d:T[L].day[day]})}</p></section>
+ <section class="card"><h3>${tx('last4')}</h3><table class="num"><tr><th>${tx('date')}</th><th>${tx('setsH')}</th><th>${tx('st')}</th></tr>${list.slice(-4).reverse().map(s=>`<tr><td>${dfmt(s.date,L)}</td><td>${s.sets.map(x=>fmt(x[0],L)+'×'+x[1]).join(' ')}</td><td>${tx(compare(s,prevEquivalent(all,s)))}</td></tr>`).join('')}</table></section>`;
+ sh.classList.add('open');sh.scrollTop=0;document.getElementById('bk').onclick=()=>sh.classList.remove('open')}
+render();
+})();
+</script>
