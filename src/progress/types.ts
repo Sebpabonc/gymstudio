@@ -154,6 +154,7 @@ export type ProgressLiftSession = {
   dayKey: string | null
   sets: ProgressSet[]
   deload: boolean
+  target?: WorkoutEntry['target']
 }
 
 export type LiftTrendPoint = ProgressLiftSession & {

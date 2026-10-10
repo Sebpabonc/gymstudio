@@ -1,4 +1,4 @@
-import { TrainingBlock, WorkoutEntry, Exercise } from '../types'
+import { TrainingBlock, Exercise } from '../types'
 import { dateValue, findEntryBlock, groupExerciseSessions, isDeloadWeek, sessionE1RM, workingSets } from './utils'
 import { PROGRESS_THRESHOLDS } from './thresholds'
 import type { LiftTrend, LiftTrendPoint, ProgressEntry, ProgressLiftSession, ProgressV3Range } from './types'
@@ -25,8 +25,10 @@ export function progressLiftSessions(entries: ProgressEntry[], blocks: TrainingB
       dayKey,
       sets: [],
       deload: isDeloadWeek(block, date),
+      target: entry.target,
     }
     session.sets.push(...entry.sets)
+    session.target ??= entry.target
     grouped.set(key, session)
   }
   return [...grouped.values()].sort((a, b) => a.date.localeCompare(b.date) || (a.dayKey ?? '').localeCompare(b.dayKey ?? ''))
@@ -160,8 +162,9 @@ export function liftTrend(
   const end = rangeEnd(range, today, activeBlock)
   const sessions = progressLiftSessions(entries, blocks)
     .filter((session) => session.exerciseId === exercise?.id && session.date >= start && session.date <= end)
-  const e1rmCount = sessions.filter((session) => !session.deload && sessionStats(session, exercise).e1rm !== null).length
-  const highRep = sessions.length > 0 && e1rmCount < sessions.length / 2
+  const trainingSessions = sessions.filter((session) => !session.deload)
+  const e1rmCount = trainingSessions.filter((session) => sessionStats(session, exercise).e1rm !== null).length
+  const highRep = trainingSessions.length > 0 && e1rmCount < trainingSessions.length / 2
   let series = sessions
   if (highRep) {
     const equivalenceGroups = new Map<string, ProgressLiftSession[]>()
@@ -231,8 +234,4 @@ export function liftTrend(
     confidence: highRep ? (result.verdict === 'not-enough-data' ? null : 'early') : confidenceFor(points),
     worthLookingAt,
   }
-}
-
-export function asProgressEntries(entries: WorkoutEntry[]) {
-  return entries as ProgressEntry[]
 }
