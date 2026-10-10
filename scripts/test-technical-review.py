@@ -58,7 +58,7 @@ class ReviewGateTests(unittest.TestCase):
             self.assertFalse(ok)
             api.assert_called_once_with('/users/claude-reviewer')
 
-    def test_api_failures_fails_closed(self):
+    def test_api_failures_fail_closed(self):
         pr = {'number': 1, 'user': {'id': 7}, 'head': {'sha': 'head'}}
         reviewer = {'id': 42, 'login': 'claude-reviewer', 'type': 'User'}
         for api, pages in (

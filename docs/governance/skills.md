@@ -1,7 +1,8 @@
 # QAer and UXer skill provenance
 
 Installed from verified official public repositories on 2026-10-10 using the
-skill-installer helper, with exact source commits. Vendor files remain unchanged.
+skill-installer helper, with exact source commits. QAer vendor files remain unchanged;
+the UXer skill has the documented local source override below.
 Claude Code discovers project skills in `.claude/skills/`; agent frontmatter names
 preload the respective skills. They are available to Claude when this branch is
 checked out (or after its approved merge); this does not install them globally.
