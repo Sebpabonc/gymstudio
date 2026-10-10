@@ -10,6 +10,7 @@ checked out (or after its approved merge); this does not install them globally.
 | Agent | Vendored skill source | Official source | Pinned commit |
 |---|---|---|---|
 | QAer | Webapp Testing | https://github.com/anthropics/skills/tree/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/webapp-testing | `dbd4588f9e1033efb41dad4bef2f7947c8993d44` |
+| Tech Lead (DB work) | Supabase Postgres Best Practices (MIT) | https://github.com/supabase/agent-skills/tree/c9be0e931b7930f7d02126d04774d904c381e7d7/skills/supabase-postgres-best-practices | `c9be0e931b7930f7d02126d04774d904c381e7d7` |
 | UXer | Web Design Guidelines | https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278/skills/web-design-guidelines | `063bee94c3f4df8453406c830b0a7df0f2860278` |
 
 The UXer skill retains the vendored skill's original provenance above. Its local
@@ -41,3 +42,8 @@ Do not silently overwrite these copies from a floating branch.
 `skill-checksums.json` records SHA-256 for each vendored file for integrity review.
 Claude discovery/preloading references: https://code.claude.com/docs/en/skills and
 https://code.claude.com/docs/en/sub-agents#preload-skills-into-subagents.
+
+Supabase Postgres Best Practices (v1.1.1, MIT, `LICENSE.txt` from the repo root) is vendored unchanged and
+loaded by Claude Code before any migration, RLS policy, index or SQL change in `supabase/`.
+Its rules are reference material; AGENTS.md database rules (numbered migrations, Tech Lead applies them,
+no service_role in clients) still govern.

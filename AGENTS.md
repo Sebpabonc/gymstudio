@@ -24,7 +24,8 @@ The app UI is **bilingual (English / Spanish)** with an EN | ES toggle in the he
 
 Skills: QAer uses `.claude/skills/webapp-testing/` (Anthropic) and UXer uses
 `.claude/skills/web-design-guidelines/` (Vercel rules), pinned and checksummed in CI;
-provenance in `docs/governance/skills.md`. Skills never override this file.
+provenance in `docs/governance/skills.md`. The Tech Lead loads `.claude/skills/supabase-postgres-best-practices/`
+(Supabase, MIT) before any schema, migration, RLS, index or SQL change. Skills never override this file.
 
 ## How work flows
 
