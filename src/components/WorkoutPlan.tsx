@@ -2421,20 +2421,15 @@ export default function WorkoutPlan({
                   {blockCardExpanded ? '−' : '+'}
                 </span>
               </span>
-              <span className="training-block-badges">
-                <span className="training-block-number">{activeBlock.number === 0 ? t('workout.block.personal') : t('workout.block.number', { number: activeBlock.number })}</span>
-                <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
-                {pinnedBlockId === activeBlock.id && <span className="training-block-number">{t('workout.block.pinned')}</span>}
-              </span>
+              {/* PO 2026-10-10: block number, PT origin and "Full week" chips removed (no value); pinned stays visible. */}
+              {pinnedBlockId === activeBlock.id && (
+                <span className="training-block-badges">
+                  <span className="training-block-number">{t('workout.block.pinned')}</span>
+                </span>
+              )}
             </button>
-            {activeBlockWeek !== null && (
-              <span className="chip subtle training-week-chip">
-                {t(
-                  activeBlockWeek === 6
-                    ? 'workout.block.weekType.deload'
-                    : 'workout.block.weekType.full'
-                )}
-              </span>
+            {activeBlockWeek === 6 && (
+              <span className="chip subtle training-week-chip">{t('workout.block.weekType.deload')}</span>
             )}
             <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
               <button
@@ -2539,47 +2534,64 @@ export default function WorkoutPlan({
 
       {planMode === 'preset' ? (
         <>
-        <div className="day-tabs" aria-label={t('workout.day.tabsAria')}>
-          {activeBlock?.days.map((day) => (
-            <button
-              key={day.key}
-              type="button"
-              className={day.key === (activeDay?.key ?? selectedDay) ? 'day-tab active' : 'day-tab'}
-              aria-label={t('workout.day.aria', {
-                position: formatNumber(language, day.position),
-                name: day.name,
-                today: todayDay?.key === day.key ? ` · ${t('workout.day.today')}` : '',
-              })}
-              aria-pressed={day.key === (activeDay?.key ?? selectedDay)}
-              onClick={() => {
-                setSelectedDay(day.key)
-                setWorkoutGroupIndex(null)
-                collapseAllExerciseSections()
-              }}
-            >
-              <span className="day-tab-label">{t('workout.day.short', { position: formatNumber(language, day.position) })}</span>
-              {(() => {
-                const week = weekBounds(localIsoDate())
-                const done = day.exercises.filter((item) =>
-                  history.some(
-                    (entry) =>
-                      entry.exerciseId === item.exerciseId &&
-                      entry.date >= week.start &&
-                      entry.date <= week.end &&
-                      entry.blockId === activeBlock.id &&
-                      entry.dayKey === day.key
+        {activeBlock && (() => {
+          // PO 2026-10-10: the day tiles become one thin weekly progress bar (one tappable segment per day).
+          const week = weekBounds(localIsoDate())
+          const days = activeBlock.days.map((day) => {
+            const done = day.exercises.filter((item) =>
+              history.some(
+                (entry) =>
+                  entry.exerciseId === item.exerciseId &&
+                  entry.date >= week.start &&
+                  entry.date <= week.end &&
+                  entry.blockId === activeBlock.id &&
+                  entry.dayKey === day.key
+              )
+            ).length
+            return { day, done, total: day.exercises.length }
+          })
+          const completeDays = days.filter(({ done, total }) => total > 0 && done >= total).length
+          return (
+            <div className="week-progress">
+              <div className="week-progress-head">
+                <span>{t('workout.week.progressTitle')}</span>
+                <strong>{t('workout.week.progressDays', { done: formatNumber(language, completeDays), total: formatNumber(language, days.length) })}</strong>
+              </div>
+              <div className="week-progress-bar" aria-label={t('workout.day.tabsAria')}>
+                {days.map(({ day, done, total }) => {
+                  const active = day.key === (activeDay?.key ?? selectedDay)
+                  const isToday = todayDay?.key === day.key
+                  return (
+                    <button
+                      key={day.key}
+                      type="button"
+                      className={['week-progress-segment', active ? 'active' : '', isToday ? 'today' : ''].filter(Boolean).join(' ')}
+                      aria-label={t('workout.day.aria', {
+                        position: formatNumber(language, day.position),
+                        name: day.name,
+                        today: isToday ? ` · ${t('workout.day.today')}` : '',
+                      }) + ` · ${formatNumber(language, done)}/${formatNumber(language, total)}`}
+                      aria-pressed={active}
+                      onClick={() => {
+                        setSelectedDay(day.key)
+                        setWorkoutGroupIndex(null)
+                        collapseAllExerciseSections()
+                      }}
+                    >
+                      <span className="week-progress-track">
+                        <span className="week-progress-fill" style={{ width: `${total ? Math.min(done / total, 1) * 100 : 0}%` }} />
+                      </span>
+                      <span className="week-progress-label">
+                        {t('workout.day.short', { position: formatNumber(language, day.position) })}
+                        {isToday && <span className="week-progress-today" aria-hidden="true" />}
+                      </span>
+                    </button>
                   )
-                ).length
-                return (
-                  <>
-                    <span className="day-tab-progress">{`${formatNumber(language, done)}/${formatNumber(language, day.exercises.length)}`}</span>
-                    {todayDay?.key === day.key && <span className="day-tab-today">{t('workout.day.today')}</span>}
-                  </>
-                )
-              })()}
-            </button>
-          ))}
-        </div>
+                })}
+              </div>
+            </div>
+          )
+        })()}
         {activeDay && (
           <>
             {/* TODO(i18n): PT will provide approved translations */}
