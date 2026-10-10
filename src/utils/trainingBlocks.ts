@@ -95,11 +95,6 @@ export function blockWeek(block: TrainingBlock, today: string | Date = new Date(
   return Math.floor((todayValue - startValue) / (7 * DAY_MS)) + 1
 }
 
-export function trainingBlockDayDate(block: TrainingBlock, week: number, day: Pick<TrainingBlock['days'][number], 'position'>) {
-  const date = dateValue(block.startDate) + ((week - 1) * 7 + day.position - 1) * DAY_MS
-  return new Date(date).toISOString().slice(0, 10)
-}
-
 export function completedTrainingSessions(block: TrainingBlock, history: WorkoutEntry[]) {
   const loggedExercisesBySession = new Map<string, Set<string>>()
   for (const entry of history) {
