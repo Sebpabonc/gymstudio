@@ -885,6 +885,15 @@ export default function WorkoutPlan({
       void removeExerciseSwap(fromExerciseId).catch(() => undefined)
     }
   }
+  // PO 2026-10-10: each logged row says which day it belongs to ("Thu 8 · Chest & Back B"), so the right one gets deleted.
+  const loggedDayLabel = (entry: WorkoutEntry) => {
+    const date = new Date(`${entry.date.slice(0, 10)}T12:00:00`)
+    const weekday = new Intl.DateTimeFormat(language === 'es' ? 'es' : 'en', { weekday: 'short' }).format(date).replace(/[.,]/g, '')
+    const day = `${weekday.charAt(0).toLocaleUpperCase()}${weekday.slice(1)} ${date.getDate()}`
+    const planDay = trainingBlocks.find((block) => block.id === entry.blockId)?.days.find((item) => item.key === entry.dayKey)
+    return planDay ? `${day} · ${planDay.name}` : day
+  }
+
   const findExerciseCompletion = (exercise: PlanExercise, entries: WorkoutEntry[]) => {
     const exerciseKey = normalizeExerciseName(exercise.name)
     const matching = entries.filter((entry) => {
@@ -3417,7 +3426,7 @@ export default function WorkoutPlan({
                                 >
                                   <article className="planned-history-item">
                                     <div className="planned-history-topline">
-                                      <span>{formatHistoryDate(language, item.date)}</span>
+                                      <span>{entry ? loggedDayLabel(entry) : formatHistoryDate(language, item.date)}</span>
                                       <strong>{formatNumber(language, item.maxWeight)} kg</strong>
                                     </div>
                                     <div className="planned-history-meta">
@@ -3433,7 +3442,7 @@ export default function WorkoutPlan({
                                 </SwipeToDelete>
                                 {progressDeleteConfirmId === item.id && entry && (
                                   <div className="planned-history-delete-confirm" role="group" aria-label={t('progress.delete.confirm')}>
-                                    <span>{t('progress.delete.confirm')}</span>
+                                    <span>{t('progress.delete.confirmFor', { day: loggedDayLabel(entry) })}</span>
                                     <button type="button" className="text-button" onClick={() => void deleteProgressEntry(entry)}>
                                       {t('progress.delete.action')}
                                     </button>
