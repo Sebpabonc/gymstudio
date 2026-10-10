@@ -166,9 +166,12 @@ export function watchObservations(
       continue
     }
     const sameTopLoad = sets.length > 0 && sets.every((set) => sameLoad(set.weight, sets[0].weight, equipmentStep(exercises.find((item) => item.id === exerciseId))))
-    const targetMax = targets.length ? Math.max(...targets.filter((value): value is number => value !== null)) : session.target?.reps.max
-    if (sameTopLoad && targetMax && sets.every((set) => set.reps >= targetMax)) {
-      push('W2', { target: targetMax, weight: sets[0].weight })
+    const targetMax = session.target?.reps.max
+    const meetsEveryTarget = sets.length > 0 && sets.every((set, index) =>
+      set.reps >= (targets[index] ?? targetMax ?? Number.POSITIVE_INFINITY)
+    )
+    if (sameTopLoad && meetsEveryTarget) {
+      push('W2', { target: targetMax ?? targets[0] ?? 0, weight: sets[0].weight })
       continue
     }
     if (previous && sets.length && sameLoad(
@@ -183,9 +186,13 @@ export function watchObservations(
       push('W4', {})
       continue
     }
-    if (!sets.some((set) => Number.isFinite(set.rir))) {
-      push(previous ? 'W5' : 'W6', previous ? {} : { date: session.date })
+    if (!previous) {
+      push('W6', { date: session.date })
+      continue
+    }
+    if (!Number.isFinite(lastSet?.rir)) {
+      push('W5', {})
     }
   }
-  return observations.sort((a, b) => b.priority - a.priority).slice(0, Math.min(limit, PROGRESS_THRESHOLDS.noNewBestSessions))
+  return observations.sort((a, b) => b.priority - a.priority).slice(0, Math.min(limit, PROGRESS_THRESHOLDS.watchMessageLimit))
 }

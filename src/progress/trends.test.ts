@@ -116,6 +116,21 @@ describe('Progress v3 lift trends', () => {
     expect(withDeload.changePercent).toBeCloseTo(noDeload.changePercent as number)
   })
 
+  it('marks only strict new bests after the first baseline and reports a factual stale best', () => {
+    const trend = analyze([
+      makeEntry('2026-01-05', 60),
+      makeEntry('2026-01-12', 60),
+      makeEntry('2026-01-19', 62),
+      makeEntry('2026-01-26', 62),
+      makeEntry('2026-02-02', 61),
+      makeEntry('2026-02-09', 60),
+      makeEntry('2026-02-16', 59),
+      makeEntry('2026-02-23', 58),
+    ])
+    expect(trend.points.slice(0, 4).map((point) => point.isBest)).toEqual([false, false, true, false])
+    expect(trend.worthLookingAt).toEqual({ date: '2026-01-19', sessions: 4 })
+  })
+
   it('breaks the moving-average line after a long gap while keeping the slope data', () => {
     const trend = analyze([
       makeEntry('2026-01-05', 60),

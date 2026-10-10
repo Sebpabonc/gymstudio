@@ -175,7 +175,7 @@ export type LiftTrend = {
   kgPerWeek: number | null
   percentPerWeek: number | null
   confidence: 'early' | 'based-on' | 'solid' | null
-  worthLookingAt: string | null
+  worthLookingAt: { date: string; sessions: number } | null
 }
 
 export type SessionComparison = {

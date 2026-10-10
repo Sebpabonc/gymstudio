@@ -29,4 +29,5 @@ export const PROGRESS_THRESHOLDS = {
   muscleChartMaximum: 30,
   volumeTrendMinimumWeeks: 3,
   trendBreakDays: 21,
+  watchMessageLimit: 3,
 } as const

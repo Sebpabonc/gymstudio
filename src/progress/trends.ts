@@ -176,13 +176,42 @@ export function liftTrend(
       b.length - a.length || b[b.length - 1].date.localeCompare(a[a.length - 1].date)
     )[0] ?? []
   }
+  const allSessions = progressLiftSessions(entries, blocks).filter((item) => item.exerciseId === exercise?.id)
   const allBest = new Set<string>()
-  let best = -Infinity
-  for (const session of progressLiftSessions(entries, blocks).filter((item) => item.exerciseId === exercise?.id && !item.deload)) {
-    const value = sessionStats(session, exercise).e1rm
-    if (value !== null && value > best) {
-      allBest.add(`${session.date}:${session.blockId ?? ''}:${session.dayKey ?? ''}`)
-      best = value
+  if (highRep && series[0]) {
+    const groupKey = `${series[0].blockId ?? ''}:${series[0].dayKey ?? ''}`
+    const history = allSessions.filter((item) => `${item.blockId ?? ''}:${item.dayKey ?? ''}` === groupKey && !item.deload)
+    let bestLoad = -Infinity
+    let repsAtBestLoad = 0
+    let hasPrior = false
+    for (const session of history) {
+      const { topLoad, repsAtTop } = sessionStats(session, exercise)
+      if (topLoad === null) continue
+      const loadUp = topLoad - bestLoad >= equipmentStep(exercise)
+      const same = bestLoad !== -Infinity && sameLoad(topLoad, bestLoad, equipmentStep(exercise))
+      if (hasPrior && (loadUp || (same && repsAtTop > repsAtBestLoad))) {
+        allBest.add(`${session.date}:${session.blockId ?? ''}:${session.dayKey ?? ''}`)
+      }
+      if (loadUp) {
+        bestLoad = topLoad
+        repsAtBestLoad = repsAtTop
+      } else if (same) {
+        repsAtBestLoad = Math.max(repsAtBestLoad, repsAtTop)
+      }
+      hasPrior = true
+    }
+  } else {
+    let best = -Infinity
+    let hasPrior = false
+    for (const session of allSessions.filter((item) => !item.deload)) {
+      const value = sessionStats(session, exercise).e1rm
+      if (value !== null) {
+        if (hasPrior && value > best) {
+          allBest.add(`${session.date}:${session.blockId ?? ''}:${session.dayKey ?? ''}`)
+        }
+        best = Math.max(best, value)
+        hasPrior = true
+      }
     }
   }
   const points: LiftTrendPoint[] = series.map((session) => {
@@ -214,7 +243,10 @@ export function liftTrend(
     (result.verdict === 'improving' && (rate.kgPerWeek ?? 0) < 0)
     || (result.verdict === 'lower' && (rate.kgPerWeek ?? 0) > 0)
   ) rate = { kgPerWeek: null, percentPerWeek: null }
-  const valid = points.filter((point) => !point.deload && (highRep ? point.topLoad !== null : point.e1rm !== null))
+  const valid = allSessions
+    .filter((point) => !point.deload)
+    .map((point) => ({ ...point, e1rm: sessionStats(point, exercise).e1rm }))
+    .filter((point) => point.e1rm !== null)
   const bestIndex = valid.reduce((index, point, current) =>
     point.e1rm !== null && (valid[index]?.e1rm ?? -Infinity) < point.e1rm ? current : index
   , 0)
@@ -222,7 +254,7 @@ export function liftTrend(
   const bestPoint = valid[bestIndex]
   const worthLookingAt = !highRep && bestPoint && sessionsSinceBest >= PROGRESS_THRESHOLDS.noNewBestSessions
     && (dateValue(today) - dateValue(bestPoint.date)) / DAY_MS >= PROGRESS_THRESHOLDS.noNewBestDays
-    ? bestPoint.date
+    ? { date: bestPoint.date, sessions: sessionsSinceBest }
     : null
   return {
     exerciseId: exercise?.id ?? '',
