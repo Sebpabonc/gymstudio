@@ -1,0 +1,102 @@
+<title>Superset Logger</title>
+<style>
+:root{--bg:#0f0d10;--card:#1b171c;--card2:#241e25;--line:#352b36;--text:#f4eef3;--muted:#a99aa6;--rose:#e8557f;--rose-soft:rgba(232,85,127,.16);--ok:#5ccf9a}
+body{background:var(--bg);color:var(--text);font:16px/1.4 -apple-system,system-ui,sans-serif;margin:0}
+.wrap{max-width:375px;margin:0 auto;padding:12px 16px 120px}
+.bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--muted);padding:8px 14px;font:inherit;font-size:14px;min-height:40px}
+.seg button[aria-pressed=true]{background:var(--rose);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.hdr{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chip{background:var(--rose-soft);color:var(--rose);border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+.small{font-size:13px;color:var(--muted)}
+.ex{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.ex b{font-size:15px}
+.more{background:none;border:1px solid var(--line);color:var(--muted);border-radius:10px;min-width:44px;min-height:36px;font:inherit}
+.menu{display:flex;gap:6px;flex-wrap:wrap;padding:6px 0}
+.menu span{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;color:var(--muted)}
+.round{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px}
+.round.cur{border-color:var(--rose);background:var(--rose-soft)}
+.round.done{padding:8px 10px;color:var(--muted);font-size:14px;cursor:pointer}
+.row{display:grid;grid-template-columns:34px 1fr 1fr 44px;gap:6px;align-items:center;margin-top:6px}
+.row input{width:100%;box-sizing:border-box;background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px;font:inherit;text-align:center;min-height:44px}
+.row.focus input{border-color:var(--rose)}
+.tick{min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:18px}
+.tick.on{background:var(--ok);color:#06210f;border-color:var(--ok)}
+.code{font-weight:700;color:var(--rose)}
+.last{grid-column:2/4;font-size:12px;color:var(--muted);margin-top:-2px}
+.mini{margin:6px 0 0 40px;font-size:13px;color:var(--rose);font-variant-numeric:tabular-nums}
+.rest{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:343px;background:var(--rose);color:#fff;border-radius:14px;padding:12px 16px;display:none;justify-content:space-between;font-variant-numeric:tabular-nums}
+/* before */
+.old .full{background:var(--card2);border-radius:12px;padding:12px;margin:10px 0}
+.old .btns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.old .btns span{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+.old .cue{background:#2a2129;border-radius:10px;padding:10px;font-size:14px;margin:8px 0}
+.old table{width:100%;font-size:14px;border-collapse:collapse}.old td{padding:6px 2px;border-top:1px solid var(--line)}
+</style>
+<div class="wrap">
+ <div class="bar">
+  <div class="seg"><button id="bBefore" aria-pressed="false">Before</button><button id="bAfter" aria-pressed="true">After</button></div>
+  <div class="seg"><button id="lEN" aria-pressed="true">EN</button><button id="lES" aria-pressed="false">ES</button></div>
+  <div class="seg"><button id="p2" aria-pressed="true">2 ex</button><button id="p3" aria-pressed="false">3 ex</button></div>
+ </div>
+ <div id="view"></div>
+ <p class="small" id="note"></p>
+</div>
+<div class="rest" id="rest" role="status" aria-live="polite"><span id="restLbl"></span><span id="restT"></span></div>
+<script>
+const T={en:{ss:'Superset',round:'Round',of:'of',today:'Today',last:'Last',more:'More',rest:'Rest',gap:'Go to',done:'done',
+ menu:['Google','Swap','Notes','History','Technique'],instr:'Do C1, rest ~10 s, then C2; rest at the end of the pair',
+ log:'Log rounds',next:'Next',note:'Prototype. Loads are illustrative; real values come from the trainer engine and history. Tick C1 → C2 focus + 10 s timer; tick last → round done + full rest. Tap a done round to edit.',hecho:'Done'},
+ es:{ss:'Superserie',round:'Ronda',of:'de',today:'Hoy',last:'Última',more:'Más',rest:'Descanso',gap:'Ahora',done:'hecha',
+ menu:['Google','Cambiar','Notas','Historial','Técnica'],instr:'Haz C1, descansa ~10 s, luego C2; descansa al final del par',
+ log:'Registrar rondas',next:'Siguiente',note:'Prototipo. Cargas ilustrativas; los valores reales vienen del motor del entrenador y el historial. Marca C1 → foco en C2 + 10 s; marca el último → ronda hecha + descanso completo. Toca una ronda hecha para editar.',hecho:'Hecho'}};
+const P2=[{c:'C1',n:{en:'Flat dumbbell bench press',es:'Press banca con mancuernas'},kg:[24,24,24],reps:[10,10,10],last:[[22,10],[22,10],[22,9]],rest:10},
+ {c:'C2',n:{en:'Underhand lat pulldown',es:'Jalón al pecho supino'},kg:[50,50,50],reps:[10,10,10],last:[[45,10],[45,10],[45,10]],rest:120}];
+const P3=[{c:'C1',n:{en:'Cable lateral raise',es:'Elevación lateral en polea'},kg:[5,5,6,6],reps:[15,15,12,12],last:[[5,15],[5,14],[5,13],[5,12]],rest:10},
+ {c:'C2',n:{en:'Rope overhead triceps extension',es:'Extensión de tríceps sobre cabeza'},kg:[20,20,22.5,22.5],reps:[12,12,10,10],last:[[17.5,12],[17.5,12],[20,10],[20,9]],rest:10},
+ {c:'C3',n:{en:'Incline dumbbell curl',es:'Curl inclinado con mancuernas'},kg:[10,10,12,12],reps:[12,12,10,10],last:[[10,11],[10,10],[10,10],[10,9]],rest:90}];
+let L='en',mode='after',set=P2,st,timer,menuOpen={};
+function reset(){st={done:set[0].kg.map(()=>set.map(()=>false)),cur:0,focus:0,edit:-1};menuOpen={};stopRest()}
+function stopRest(){clearInterval(timer);document.getElementById('rest').style.display='none';mini=null}
+let mini=null;
+function startRest(sec,label,isMini){clearInterval(timer);let s=sec;const el=document.getElementById('rest');
+ if(isMini){mini=s}else{el.style.display='flex';document.getElementById('restLbl').textContent=label}
+ const tick=()=>{if(isMini){mini=s;const m=document.getElementById('mini');if(m)m.textContent=`${T[L].gap} ${set[st.focus]?.c} · ${s}s`}else document.getElementById('restT').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  if(s--<=0){clearInterval(timer);if(isMini){mini=null;render()}else el.style.display='none'}};tick();timer=setInterval(tick,1000)}
+const fmt=n=>L==='es'?String(n).replace('.',','):String(n);
+function after(){const t=T[L],R=set[0].kg.length,codes=set.map(e=>e.c).join(' + ');
+ const doneR=st.done.filter(r=>r.every(Boolean)).length,allDone=doneR===R;
+ let h=`<div class="card"><div class="hdr"><span class="chip">${t.ss} · ${codes}</span><span class="small">${allDone?'✓ '+t.hecho:`${t.round} ${Math.min(st.cur+1,R)} ${t.of} ${R}`}</span></div>`;
+ set.forEach((e,i)=>{h+=`<div class="ex"><div><b>${e.c} · ${e.n[L]}</b><div class="small">${t.today}: ${fmt(e.kg[Math.min(st.cur,R-1)])} kg × ${e.reps[Math.min(st.cur,R-1)]}</div></div><button class="more" aria-expanded="${!!menuOpen[i]}" aria-label="${t.more} ${e.c}" data-m="${i}">⋯</button></div>`;
+  if(menuOpen[i])h+=`<div class="menu">${t.menu.map(m=>`<span>${m}</span>`).join('')}</div>`});
+ h+=`<p class="small" style="margin:8px 0 0">${t.instr.replace('C1',set[0].c).replace('C2',set.slice(1).map(e=>e.c).join(' → '))}</p>`;
+ for(let r=0;r<R;r++){const d=st.done[r].every(Boolean);
+  if(d&&st.edit!==r){h+=`<button class="round done" style="width:100%;text-align:left;background:none" data-e="${r}">R${r+1} ✓ ${set.map(e=>fmt(e.kg[r])+'×'+e.reps[r]).join(' · ')}</button>`;continue}
+  const cur=r===st.cur||st.edit===r;
+  h+=`<div class="round ${cur?'cur':''}" ${cur?'':'style="opacity:.55"'}><div class="small"><b style="color:var(--text)">${t.round} ${r+1}</b></div>`;
+  set.forEach((e,i)=>{const f=cur&&st.focus===i&&st.edit!==r;
+   h+=`<div class="row ${f?'focus':''}"><span class="code">${e.c}</span><input inputmode="decimal" aria-label="${e.c} kg ${t.round} ${r+1}" value="${fmt(e.kg[r])}" data-k="${r},${i}"><input inputmode="numeric" aria-label="${e.c} reps ${t.round} ${r+1}" value="${e.reps[r]}" data-r="${r},${i}"><button class="tick ${st.done[r][i]?'on':''}" aria-pressed="${st.done[r][i]}" aria-label="${e.c} ${t.round} ${r+1}" data-t="${r},${i}" ${cur?'':'disabled'}>✓</button><span></span><span class="last">${t.last}: ${fmt(e.last[r][0])}×${e.last[r][1]}</span></div>`;
+   if(cur&&mini!==null&&st.focus===i+1&&i<set.length-1)h+=`<div class="mini" id="mini">${t.gap} ${set[i+1].c} · ${mini}s</div>`});
+  h+=`</div>`}
+ return h+`</div>`}
+function before(){const t=T[L];let h=`<div class="card old"><span class="chip">${t.ss}</span> <span class="small">${t.instr}</span>`;
+ set.forEach(e=>{h+=`<div class="full"><b>${e.c} · ${e.n[L]}</b> <span class="small">· ${t.hecho}?</span><div class="cue"><b>${t.next}</b><br>${fmt(e.kg[0])} kg × ${e.reps[0]}</div><div class="small">${e.kg.length} × ${e.reps[0]} · ${t.rest} ${e.rest}s</div><div class="btns">${t.menu.map(m=>`<span>${m}</span>`).join('')}</div><div class="small">${t.today}: ${fmt(e.kg[0])} kg</div><div class="cue">Squeeze / técnica cue…</div><table>${e.kg.map((k,r)=>`<tr><td>${r+1}</td><td>${fmt(e.last[r][0])}×${e.last[r][1]}</td><td>${fmt(k)} kg</td><td>${e.reps[r]}</td><td>☐</td></tr>`).join('')}</table></div>`});
+ return h+`<div class="full"><b>${t.log} 0/${set[0].kg.length}</b> +</div></div>`}
+function render(){document.getElementById('view').innerHTML=mode==='after'?after():before();document.getElementById('note').textContent=T[L].note;
+ document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{menuOpen[b.dataset.m]=!menuOpen[b.dataset.m];render()});
+ document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{st.edit=st.edit===+b.dataset.e?-1:+b.dataset.e;render()});
+ document.querySelectorAll('[data-k],[data-r]').forEach(inp=>inp.onchange=()=>{const [r,i]=(inp.dataset.k||inp.dataset.r).split(',').map(Number);const v=+inp.value.replace(',','.');if(inp.dataset.k)set[i].kg[r]=v;else set[i].reps[r]=v});
+ document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const [r,i]=b.dataset.t.split(',').map(Number);st.done[r][i]=!st.done[r][i];
+  if(st.edit===r){render();return}
+  if(st.done[r][i]){if(i<set.length-1){st.focus=i+1;mini=set[i].rest;render();startRest(set[i].rest,"",true);setTimeout(()=>document.querySelector(`[data-k="${r},${i+1}"]`)?.focus(),0);return}
+   if(st.done[r].every(Boolean)){stopRest();st.cur=Math.min(r+1,set[0].kg.length);st.focus=0;render();if(st.cur<set[0].kg.length)startRest(set[set.length-1].rest,`${T[L].rest} · ${T[L].round} ${r+2}`,false);return}}
+  else st.focus=i;render()});
+ document.getElementById('bBefore').setAttribute('aria-pressed',mode==='before');document.getElementById('bAfter').setAttribute('aria-pressed',mode==='after');
+ document.getElementById('lEN').setAttribute('aria-pressed',L==='en');document.getElementById('lES').setAttribute('aria-pressed',L==='es');
+ document.getElementById('p2').setAttribute('aria-pressed',set===P2);document.getElementById('p3').setAttribute('aria-pressed',set===P3)}
+bBefore.onclick=()=>{mode='before';render()};bAfter.onclick=()=>{mode='after';render()};
+lEN.onclick=()=>{L='en';render()};lES.onclick=()=>{L='es';render()};
+p2.onclick=()=>{set=P2;reset();render()};p3.onclick=()=>{set=P3;reset();render()};
+reset();render();
+</script>
