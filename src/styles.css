@@ -8562,3 +8562,13 @@ button.superset-last-time {
 .day-plan-card.viewing-other-week .swipe-hint {
   display: none;
 }
+
+.preview-projected-load {
+  margin: 0 0 4px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--brand-soft);
+  color: var(--muted-strong);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}

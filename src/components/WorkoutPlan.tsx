@@ -3356,8 +3356,24 @@ export default function WorkoutPlan({
                   </button>
                 </div>
 
+                {/* PO 2026-10-11: previewing another week shows each exercise's projected load from current performance. */}
+                {barWeekOffset > 0 && !isWorkoutMode && (() => {
+                  const projected = trainerNext?.next ?? trainer?.recommendation
+                  if (!projected) return null
+                  const weights = projected.setWeights && new Set(projected.setWeights).size > 1
+                    ? projected.setWeights.map((weight) => formatNumber(language, weight)).join(' / ')
+                    : formatNumber(language, projected.weight ?? trainerNext?.actual.weight ?? 0)
+                  const reps = projected.setReps
+                    ? projected.setReps.map((value) => formatNumber(language, value)).join(' · ')
+                    : trainerRangeLabel(projected.reps)
+                  return (
+                    <p className="preview-projected-load">
+                      {t('workout.week.projected', { weight: weights, reps, sets: formatNumber(language, projected.sets ?? setCount) })}
+                    </p>
+                  )
+                })()}
                 {/* PO 2026-10-10: the Next box lives inside the expanded card. */}
-                {trainerNext && !isCollapsed && (
+                {trainerNext && !isCollapsed && barWeekOffset === 0 && (
                   <aside className="next-target-card">
                     <strong>{t('workout.session.performanceNext', {
                       day: trainerNext.nextDate ? formatWeekdayDate(language, `${trainerNext.nextDate}T00:00:00Z`).split(' ')[0] : '',
