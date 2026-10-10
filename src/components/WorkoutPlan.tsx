@@ -2674,9 +2674,13 @@ export default function WorkoutPlan({
             <p className="day-focus-label">{activeDay.focus}</p>
           </>
         )}
-        {activeDay && activeExercises.length > 0 && !isWorkoutMode && (
+        {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset !== 0 && (
+          <p className="week-progress-preview-note">{t('workout.week.previewNote')}</p>
+        )}
+        {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset === 0 && (
           <button type="button" className="primary-button start-workout-button" onClick={startWorkout}>
-            {activeExercises.some((exercise) => findExerciseCompletion(exercise, history))
+            {/* PO 2026-10-11: "Resume" only when this day was logged today, otherwise "Start". */}
+            {activeExercises.some((exercise) => findExerciseCompletion(exercise, history)?.date.slice(0, 10) === today)
               ? t('workout.run.resume')
               : t('workout.run.start')}
           </button>

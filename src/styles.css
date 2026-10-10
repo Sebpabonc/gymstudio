@@ -8541,3 +8541,12 @@ button.superset-last-time {
   padding: 8px 0;
   color: var(--muted);
 }
+
+.week-progress-preview-note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
