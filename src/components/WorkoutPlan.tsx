@@ -569,6 +569,9 @@ export default function WorkoutPlan({
   const demoMode = isDemoMode()
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
+  // Weekly progress bar: 0 = this week, -1 = last week, +1 = next week (PO 2026-10-10: swipe between weeks).
+  const [barWeekOffset, setBarWeekOffset] = useState(0)
+  const barTouchX = useRef<number | null>(null)
   const [customPlan, setCustomPlan] = useState<CustomPlan>(() => loadCustomPlan())
   const [selectedCustomDayId, setSelectedCustomDayId] = useState('')
   const [customPlanSheetDraft, setCustomPlanSheetDraft] = useState<CustomPlanSheetDraft | null>(null)
@@ -2419,20 +2422,15 @@ export default function WorkoutPlan({
                   {blockCardExpanded ? '−' : '+'}
                 </span>
               </span>
-              <span className="training-block-badges">
-                <span className="training-block-number">{activeBlock.number === 0 ? t('workout.block.personal') : t('workout.block.number', { number: activeBlock.number })}</span>
-                <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
-                {pinnedBlockId === activeBlock.id && <span className="training-block-number">{t('workout.block.pinned')}</span>}
-              </span>
+              {/* PO 2026-10-10: block number, PT origin and "Full week" chips removed (no value); pinned stays visible. */}
+              {pinnedBlockId === activeBlock.id && (
+                <span className="training-block-badges">
+                  <span className="training-block-number">{t('workout.block.pinned')}</span>
+                </span>
+              )}
             </button>
-            {activeBlockWeek !== null && (
-              <span className="chip subtle training-week-chip">
-                {t(
-                  activeBlockWeek === 6
-                    ? 'workout.block.weekType.deload'
-                    : 'workout.block.weekType.full'
-                )}
-              </span>
+            {activeBlockWeek === 6 && (
+              <span className="chip subtle training-week-chip">{t('workout.block.weekType.deload')}</span>
             )}
             <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
               <button
@@ -2537,47 +2535,104 @@ export default function WorkoutPlan({
 
       {planMode === 'preset' ? (
         <>
-        <div className="day-tabs" aria-label={t('workout.day.tabsAria')}>
-          {activeBlock?.days.map((day) => (
-            <button
-              key={day.key}
-              type="button"
-              className={day.key === (activeDay?.key ?? selectedDay) ? 'day-tab active' : 'day-tab'}
-              aria-label={t('workout.day.aria', {
-                position: formatNumber(language, day.position),
-                name: day.name,
-                today: todayDay?.key === day.key ? ` · ${t('workout.day.today')}` : '',
-              })}
-              aria-pressed={day.key === (activeDay?.key ?? selectedDay)}
-              onClick={() => {
-                setSelectedDay(day.key)
-                setWorkoutGroupIndex(null)
-                collapseAllExerciseSections()
+        {activeBlock && (() => {
+          // PO 2026-10-10: the day tiles become one thin weekly progress bar (one tappable segment per day).
+          const currentWeek = weekBounds(localIsoDate())
+          const shiftDate = (date: string, days: number) => new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10)
+          const blockStartWeek = weekBounds(activeBlock.startDate.slice(0, 10)).start
+          const minOffset = Math.round((Date.parse(blockStartWeek) - Date.parse(currentWeek.start)) / (7 * 86_400_000))
+          const maxOffset = minOffset + activeBlock.weeks - 1
+          const offset = Math.min(Math.max(barWeekOffset, minOffset), maxOffset)
+          const week = { start: shiftDate(currentWeek.start, offset * 7), end: shiftDate(currentWeek.end, offset * 7) }
+          const weekNumber = offset - minOffset + 1
+          const dayDate = (dayKey: string, position: number) => {
+            const logged = history
+              .filter((entry) => entry.dayKey === dayKey && entry.blockId === activeBlock.id && entry.date >= week.start && entry.date <= week.end)
+              .map((entry) => entry.date.slice(0, 10))
+              .sort()[0]
+            return logged ?? (activeBlock.days.length <= 7 ? shiftDate(week.start, position - 1) : undefined)
+          }
+          const weekdayLabel = (date: string) => {
+            const value = new Date(`${date}T12:00:00`)
+            const weekday = new Intl.DateTimeFormat(language === 'es' ? 'es' : 'en', { weekday: 'short' }).format(value).replace(/[.,]/g, '')
+            return `${weekday.charAt(0).toLocaleUpperCase()}${weekday.slice(1)} ${value.getDate()}`
+          }
+          const goWeek = (delta: number) => setBarWeekOffset(Math.min(Math.max(offset + delta, minOffset), maxOffset))
+          const days = activeBlock.days.map((day) => {
+            const done = day.exercises.filter((item) =>
+              history.some(
+                (entry) =>
+                  entry.exerciseId === item.exerciseId &&
+                  entry.date >= week.start &&
+                  entry.date <= week.end &&
+                  entry.blockId === activeBlock.id &&
+                  entry.dayKey === day.key
+              )
+            ).length
+            return { day, done, total: day.exercises.length }
+          })
+          const completeDays = days.filter(({ done, total }) => total > 0 && done >= total).length
+          return (
+            <div
+              className="week-progress"
+              onTouchStart={(event) => { barTouchX.current = event.touches[0]?.clientX ?? null }}
+              onTouchEnd={(event) => {
+                const startX = barTouchX.current
+                barTouchX.current = null
+                const endX = event.changedTouches[0]?.clientX
+                if (startX === null || endX === undefined || Math.abs(endX - startX) < 40) return
+                goWeek(endX < startX ? 1 : -1)
               }}
             >
-              <span className="day-tab-label">{t('workout.day.short', { position: formatNumber(language, day.position) })}</span>
-              {(() => {
-                const week = weekBounds(localIsoDate())
-                const done = day.exercises.filter((item) =>
-                  history.some(
-                    (entry) =>
-                      entry.exerciseId === item.exerciseId &&
-                      entry.date >= week.start &&
-                      entry.date <= week.end &&
-                      entry.blockId === activeBlock.id &&
-                      entry.dayKey === day.key
+              <div className="week-progress-head">
+                <button type="button" className="week-progress-nav" onClick={() => goWeek(-1)} disabled={offset <= minOffset} aria-label={t('workout.week.previous')}>‹</button>
+                <span>
+                  {offset === 0 ? t('workout.week.progressTitle') : t('workout.week.numbered', { week: formatNumber(language, weekNumber) })}
+                  {offset !== 0 && (
+                    <button type="button" className="text-button week-progress-back" onClick={() => setBarWeekOffset(0)}>{t('workout.week.backToThis')}</button>
+                  )}
+                </span>
+                <strong>{offset === 0
+                  ? t('workout.week.progressDays', { done: formatNumber(language, completeDays), total: formatNumber(language, days.length) })
+                  : `${formatNumber(language, completeDays)}/${formatNumber(language, days.length)}`}</strong>
+                <button type="button" className="week-progress-nav" onClick={() => goWeek(1)} disabled={offset >= maxOffset} aria-label={t('workout.week.next')}>›</button>
+              </div>
+              <div className="week-progress-bar" aria-label={t('workout.day.tabsAria')}>
+                {days.map(({ day, done, total }) => {
+                  const active = day.key === (activeDay?.key ?? selectedDay)
+                  const isToday = offset === 0 && todayDay?.key === day.key
+                  const date = dayDate(day.key, day.position)
+                  return (
+                    <button
+                      key={day.key}
+                      type="button"
+                      className={['week-progress-segment', active ? 'active' : '', isToday ? 'today' : ''].filter(Boolean).join(' ')}
+                      aria-label={t('workout.day.aria', {
+                        position: formatNumber(language, day.position),
+                        name: day.name,
+                        today: isToday ? ` · ${t('workout.day.today')}` : '',
+                      }) + ` · ${formatNumber(language, done)}/${formatNumber(language, total)}`}
+                      aria-pressed={active}
+                      onClick={() => {
+                        setSelectedDay(day.key)
+                        setWorkoutGroupIndex(null)
+                        collapseAllExerciseSections()
+                      }}
+                    >
+                      <span className="week-progress-track">
+                        <span className="week-progress-fill" style={{ width: `${total ? Math.min(done / total, 1) * 100 : 0}%` }} />
+                      </span>
+                      <span className="week-progress-label">
+                        {date ? weekdayLabel(date) : t('workout.day.short', { position: formatNumber(language, day.position) })}
+                        {isToday && <span className="week-progress-today" aria-hidden="true" />}
+                      </span>
+                    </button>
                   )
-                ).length
-                return (
-                  <>
-                    <span className="day-tab-progress">{`${formatNumber(language, done)}/${formatNumber(language, day.exercises.length)}`}</span>
-                    {todayDay?.key === day.key && <span className="day-tab-today">{t('workout.day.today')}</span>}
-                  </>
-                )
-              })()}
-            </button>
-          ))}
-        </div>
+                })}
+              </div>
+            </div>
+          )
+        })()}
         {activeDay && (
           <>
             {/* TODO(i18n): PT will provide approved translations */}

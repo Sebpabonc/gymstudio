@@ -7943,4 +7943,126 @@ summary:focus-visible,
     max-width: 42%;
     white-space: normal;
   }
+/* Weekly progress bar (replaces the D1–Dn tiles, PO 2026-10-10). */
+.week-progress {
+  display: grid;
+  gap: 6px;
+}
+
+.week-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.week-progress-head strong {
+  color: var(--muted-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.week-progress-bar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+
+.week-progress-segment {
+  display: grid;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.week-progress-track {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.week-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+}
+
+.week-progress-segment.active .week-progress-track {
+  outline: 2px solid #c9a0a6;
+  outline-offset: 2px;
+}
+
+.week-progress-label {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+}
+
+.week-progress-segment.active .week-progress-label {
+  color: var(--muted-strong);
+  font-weight: 700;
+}
+
+.week-progress-today {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c9a0a6;
+}
+
+.week-progress-head {
+  gap: 8px;
+}
+
+.week-progress-head > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+}
+
+.week-progress-nav {
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-strong);
+  font-size: 1rem;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+.week-progress-nav:disabled {
+  opacity: 0.3;
+}
+
+.week-progress-back {
+  font-size: 0.75rem;
+}
+
+.week-progress-label {
+  white-space: nowrap;
+}
+
+.week-progress-head > span,
+.week-progress-head strong,
+.week-progress-back {
+  white-space: nowrap;
+}
+
+.week-progress-back {
+  min-height: 0;
+  padding: 2px 8px;
 }
