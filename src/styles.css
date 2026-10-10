@@ -6987,6 +6987,225 @@ a.planned-exercise-main-name {
   margin-top: 8px;
 }
 
+.app-shell.workout-mode-active .brand-bar,
+.app-shell.workout-mode-active .brand-header,
+.app-shell.workout-mode-active .bottom-tab-bar,
+.app-shell.workout-mode-active .help-ai-button {
+  display: none;
+}
+
+.app-shell.workout-mode-active .app-content {
+  padding-bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
+}
+
+.plan-card.workout-mode-active {
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.plan-card.workout-mode-active > :not(.day-plan-card) {
+  display: none;
+}
+
+.plan-card.workout-mode-active .day-plan-card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.plan-card.workout-mode-active .workout-mode-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  margin: 0;
+  background: var(--bg);
+}
+
+.workout-mode-bar > .secondary-button {
+  justify-self: start;
+  min-height: 40px;
+  padding: 6px 10px;
+}
+
+.workout-mode-progress {
+  overflow: hidden;
+  color: var(--text);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workout-mode-language-toggle {
+  justify-self: end;
+}
+
+.workout-mode-overview {
+  min-width: 0;
+  margin: 4px 0 12px;
+}
+
+.workout-mode-chips {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 4px 1px 6px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.workout-mode-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.workout-mode-chip {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.workout-mode-chip.current {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.workout-mode-chip.done {
+  border-color: #9fd6a6;
+  background: #9fd6a6;
+  color: #111;
+}
+
+.workout-mode-chip.superset-chip-continuation {
+  margin-left: 6px;
+}
+
+.workout-mode-chip.superset-chip-continuation::before {
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 7px;
+  height: 2px;
+  background: var(--brand);
+  content: '';
+}
+
+.workout-mode-chips-hint {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.plan-card.workout-mode-active .day-exercises {
+  gap: 10px;
+}
+
+.plan-card.workout-mode-active .day-exercises > [data-workout-group]:not(.workout-mode-current):not(.workout-mode-completed-card):not(.workout-mode-finished-superset) {
+  display: none;
+}
+
+.plan-card.workout-mode-active .planned-exercise-card {
+  scroll-margin-top: 60px;
+}
+
+.plan-card.workout-mode-active .planned-exercise-header {
+  align-items: flex-start;
+}
+
+.workout-mode-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.workout-mode-tools button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 6px 9px;
+}
+
+.workout-mode-target {
+  padding: 8px 10px;
+  margin: 8px 0;
+  border-left: 3px solid var(--brand);
+  border-radius: 0 10px 10px 0;
+  background: var(--brand-soft);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.planned-set-section .workout-mode-focused-grid.planned-set-column-headers,
+.planned-set-section .workout-mode-focused-grid.planned-set-row {
+  grid-template-columns: 24px minmax(34px, 0.8fr) minmax(42px, 0.95fr) minmax(86px, 1.8fr) 36px 34px;
+  gap: 2px;
+}
+
+.workout-mode-set-target {
+  min-width: 0;
+  color: var(--muted-strong);
+  font-size: 0.62rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.superset-round-columns.workout-mode-focused-grid,
+.superset-round-row.workout-mode-focused-grid {
+  grid-template-columns: 24px minmax(34px, 0.8fr) minmax(42px, 0.95fr) minmax(86px, 1.8fr) 36px;
+  gap: 2px;
+}
+
+.workout-mode-footer {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.plan-card.workout-mode-active .workout-mode-footer .rest-timer-pill {
+  position: static;
+  left: auto;
+  bottom: auto;
+  z-index: auto;
+  width: 100%;
+  max-width: 100%;
+  transform: none;
+}
+
+.workout-mode-nav {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 0;
+}
+
+.workout-mode-nav button {
+  width: 100%;
+  min-height: 48px;
+}
+
+.workout-mode-finish {
+  margin-top: 0;
+}
+
 .volume-trend {
   display: grid;
   gap: 6px;
