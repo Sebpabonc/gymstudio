@@ -4,9 +4,16 @@ import os
 import urllib.request
 
 
+DOMAIN_LEAD_GITHUB_ID = 329340881
+
+
 def decision(pr, reviews, login, user_id, permission):
     if not login or not user_id.isdecimal():
         return False, 'Verified Claude reviewer identity is not configured'
+    if login.casefold().endswith('[bot]'):
+        return False, 'Only verified GitHub user reviewers are supported'
+    if int(user_id) == DOMAIN_LEAD_GITHUB_ID:
+        return False, 'Domain Lead is not an independent technical reviewer'
     if permission not in ('write', 'maintain', 'admin'):
         return False, 'Reviewer lacks verified repository write permission'
     if pr['user']['id'] == int(user_id):
@@ -34,7 +41,8 @@ def verify_pr(api, pages, pr, login, user_id):
     try:
         from urllib.parse import quote
         reviewer = api('/users/' + quote(login, safe=''))
-        if (reviewer.get('type') != 'User' or reviewer.get('id') != int(user_id)
+        if (reviewer.get('type') != 'User' or reviewer.get('login', '').casefold().endswith('[bot]')
+                or reviewer.get('id') != int(user_id)
                 or reviewer.get('login', '').casefold() != login.casefold()):
             return False, 'Configured reviewer identity is not a verified GitHub user'
         permission = api('/collaborators/' + quote(login, safe='') + '/permission')['permission']

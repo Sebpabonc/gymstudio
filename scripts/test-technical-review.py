@@ -29,10 +29,16 @@ class ReviewGateTests(unittest.TestCase):
         review = self.review()
         review['user']['type'] = 'Bot'
         self.assertFalse(self.check([review]))
+        bot_login_review = self.review(login='claude-reviewer[bot]')
+        self.assertFalse(self.check([bot_login_review], login='claude-reviewer[bot]'))
 
     def test_wrong_identity_stale_or_empty(self):
         for values in ({'uid': 9}, {'login': 'Sebpabonc'}, {'sha': 'old'}, {'body': ''}):
             self.assertFalse(self.check([self.review(**values)]))
+
+    def test_domain_lead_identity_is_rejected(self):
+        review = self.review(uid=329340881, login='Sebpabonc')
+        self.assertFalse(self.check([review], uid='329340881', login='Sebpabonc', author=7))
 
     def test_missing_approval(self):
         self.assertFalse(self.check())
@@ -49,6 +55,7 @@ class ReviewGateTests(unittest.TestCase):
     def test_api_rejects_bot_or_mismatched_configured_identity(self):
         for reviewer in (
             {'id': 42, 'login': 'claude-reviewer[bot]', 'type': 'Bot'},
+            {'id': 42, 'login': 'claude-reviewer[bot]', 'type': 'User'},
             {'id': 43, 'login': 'claude-reviewer', 'type': 'User'},
             {'id': 42, 'login': 'renamed-user', 'type': 'User'},
         ):
@@ -57,6 +64,18 @@ class ReviewGateTests(unittest.TestCase):
                                    'claude-reviewer', '42')
             self.assertFalse(ok)
             api.assert_called_once_with('/users/claude-reviewer')
+
+    def test_permission_lookup_404_fails_closed(self):
+        from urllib.error import HTTPError
+        api = Mock(side_effect=[
+            {'id': 42, 'login': 'claude-reviewer', 'type': 'User'},
+            HTTPError('https://api.github.com/permission', 404, 'Not Found', {}, None),
+        ])
+        ok, reason = gate.verify_pr(api, Mock(), {'number': 1, 'user': {'id': 7}, 'head': {'sha': 'head'}},
+                                    'claude-reviewer', '42')
+        self.assertFalse(ok)
+        self.assertIn('verification failed', reason)
+        api.assert_called_with('/collaborators/claude-reviewer/permission')
 
     def test_api_failures_fail_closed(self):
         pr = {'number': 1, 'user': {'id': 7}, 'head': {'sha': 'head'}}

@@ -34,14 +34,16 @@ the supplied single-reviewer gate intentionally blocks until that arrangement ex
 
 ## Supplemental review status
 
-`scripts/technical-review.py` validates configured login AND numeric user ID,
-GitHub user account type, repository write/maintain/admin permission, author
-independence, latest effective review decision, nonempty review evidence and exact
-head SHA. App/bot accounts, missing settings, API failures, stale approvals,
-dismissals or changes requested fail closed. The configured login and ID must be
-verified outside this workflow; matching a user profile does not prove that Claude
-performed the review. Nonempty evidence is only a minimum: the actual diff and
-validation evidence must be independently assessed.
+`scripts/technical-review.py` currently supports only a verified GitHub `User`
+account (not an App/bot account or a `[bot]` login), and validates configured login
+AND numeric user ID, repository write/maintain/admin permission, independence from
+the PR author and Domain Lead, latest effective review decision, nonempty review
+evidence and exact head SHA. Missing settings, API failures (including permission
+lookup 404), stale approvals, dismissals or changes requested fail closed. The
+configured login and ID must be verified outside this workflow; matching a user
+profile does not prove that Claude performed the review. Nonempty evidence is only
+a minimum: the actual diff and validation evidence must be independently assessed.
+No separate GitHub App reviewer route is implemented or presumed eligible.
 
 The workflow executes only trusted default-branch code, never PR code, using a
 read token plus status-write permission. It publishes the
@@ -68,13 +70,15 @@ do not expand workflow permissions just to make this advisory status pass.
 
 ## Activation by an authorized GitHub administrator / Claude operator
 
-1. Use a dedicated GitHub machine-user account (GitHub `User`, not an App bot) as
-   reviewer only after an authorized operator independently verifies its ownership,
-   account login and numeric ID, repository membership and write access. It must be
-   independent of each PR author and use its own authenticated GitHub session to
-   submit an actual APPROVED review. The Claude runtime must be explicitly authorized
-   to act as that account; a Claude role assignment or GitHub App installation alone
-   does not supply that identity or make an App bot an eligible approver.
+1. A dedicated GitHub machine-user account is only a proposed prerequisite, not an
+   account-creation authorization or evidence that Claude Cloud can switch to or
+   authenticate as that account. No account or access change is authorized here.
+   If an independently verified GitHub `User` reviewer becomes available through
+   separately authorized setup, verify its ownership, login, numeric ID, repository
+   membership and write access. It must be independent of each PR author and use its
+   own authenticated GitHub session to submit an actual APPROVED review. A role
+   assignment or GitHub App installation alone does not supply that identity or make
+   an App bot an eligible approver.
 2. Verify the account through GitHub's user API (`id`, `login`, `type: User`) and
    collaborator permission endpoint. Configure `CLAUDE_REVIEWER_LOGIN` and
    `CLAUDE_REVIEWER_ID` only after both checks and the independent account/runtime
@@ -82,13 +86,14 @@ do not expand workflow permissions just to make this advisory status pass.
    any API error fails closed. The workflow token currently lacks an explicitly
    granted Administration permission; the gate may therefore remain failing on
    collaborator-permission lookup. Do not add permissions or secrets in this change.
-3. Add a real CODEOWNERS entry `* @<verified-machine-user>` only after verification;
-   do not commit a placeholder. Enable required code-owner review so another
-   account's approval cannot substitute for the designated technical reviewer.
-4. Inspect existing rules before activation. Require PRs, at least one approval,
-   dismiss stale reviews, require approval of the most recent reviewable push by
-   someone other than its pusher, resolve conversations, require up-to-date CI, and
-   apply protections to admins without bypass, force-push or deletion. Do not require
+3. Add a real CODEOWNERS entry `* @<verified-user>` only after verification; do not
+   commit a placeholder. Enable native required code-owner review for that eventual
+   verified independent reviewer.
+4. Inspect existing rules before activation. Native protection must require PRs,
+   dismiss stale approvals, and require approval of the most recent reviewable push
+   by someone other than its pusher. Also require code-owner review for the verified
+   CODEOWNERS reviewer, at least one approval, resolved conversations and up-to-date
+   CI; apply protections to admins without bypass, force-push or deletion. Do not require
    `tech-lead/approval` unless GitHub can be shown to bind the required check to the
    trusted producer; status-name matching alone is not sufficient.
 5. Test unsupported bot, same-author, revoked/stale approval, latest push and API
