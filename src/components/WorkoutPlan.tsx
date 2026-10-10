@@ -2958,7 +2958,7 @@ export default function WorkoutPlan({
       )}
 
       {activeExercises.length > 0 && (
-      <section className="day-plan-card">
+      <section className={`day-plan-card${barWeekOffset !== 0 && !isWorkoutMode ? ' viewing-other-week' : ''}`}>
         {isWorkoutMode && workoutGroupIndex !== null && (
           <div className="workout-mode-bar" role="navigation" aria-label={t('workout.run.modeAria')}>
             <button type="button" className="secondary-button small-button" onClick={exitWorkout}>
