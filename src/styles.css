@@ -8347,3 +8347,30 @@ summary:focus-visible,
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
 }
+
+/* Workout mode set table fits 375 px: target lives in the "Today: … " line, so the per-set target column is hidden. */
+.planned-set-section .workout-mode-focused-grid .workout-mode-set-target,
+.planned-set-section .workout-mode-focused-grid.planned-set-column-headers > :nth-child(3) {
+  display: none;
+}
+
+.planned-set-section .workout-mode-focused-grid.planned-set-column-headers,
+.planned-set-section .workout-mode-focused-grid.planned-set-row {
+  grid-template-columns: 22px minmax(44px, 0.9fr) minmax(118px, 2.2fr) minmax(46px, 0.8fr) 40px;
+  gap: 4px;
+}
+
+.workout-mode-focused-grid .set-stepper {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
+  width: 100%;
+  min-width: 0;
+}
+
+.workout-mode-focused-grid .set-stepper input,
+.workout-mode-focused-grid input {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 2px;
+  text-align: center;
+}
