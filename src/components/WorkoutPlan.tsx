@@ -64,8 +64,6 @@ import {
   workoutMaxWeight,
   workoutVolume,
 } from '../utils/workoutSets'
-import { VolumeTrend } from './VolumeTrend'
-import { volumeTrendPoints } from '../utils/volumeTrend'
 import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from '../utils/supersets'
 import { recommendNextTarget, type NextTarget, type ProgressionType } from '../progress/nextTarget'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
@@ -3457,14 +3455,6 @@ export default function WorkoutPlan({
                       >
                         {text.progress}<span aria-hidden="true">{isProgressSectionVisible ? '−' : '+'}</span>
                       </button>
-                      {isProgressSectionVisible && (
-                        <VolumeTrend
-                          points={volumeTrendPoints(exerciseHistory)}
-                          title={t('workout.progress.volumeTrend')}
-                          changeLabel={(change) => t('workout.progress.volumeChange', { change: `${change > 0 ? '+' : ''}${formatNumber(language, change)}` })}
-                          formatValue={(value) => t('workout.volume.value', { value: formatNumber(language, value) })}
-                        />
-                      )}
                       {isProgressSectionVisible && (progressItems.length > 0 ? (
                         <div className="planned-history-list">
                           {progressItems.map((item) => {

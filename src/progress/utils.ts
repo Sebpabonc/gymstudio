@@ -95,11 +95,11 @@ export function groupExerciseSessions(entries: ProgressEntry[]): ExerciseSession
 export function workingSets(sets: ProgressSet[]) {
   const maxWeight = sets.reduce((maximum, set) => Math.max(maximum, set.weight), 0)
   if (maxWeight <= 0) return sets
-  return sets.filter((set) => set.weight >= maxWeight * 0.5)
+  return sets.filter((set) => set.weight > maxWeight * 0.5)
 }
 
 export function bestSetIndex(sets: ProgressSet[]) {
-  const eligibleSets = workingSets(sets)
+  const eligibleSets = workingSets(sets.filter((set) => set.weight > 0 && set.reps >= 1 && set.reps <= 12))
   let bestIndex: number | null = null
   let bestEstimate = 0
 

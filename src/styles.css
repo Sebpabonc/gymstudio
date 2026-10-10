@@ -7203,6 +7203,765 @@ summary:focus-visible,
   box-shadow: 0 0 0 1px var(--brand);
 }
 
+.progress-v3 {
+  width: 100%;
+  max-width: 760px;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 10px 12px 28px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.pv3-page-heading,
+.pv3-detail-title,
+.pv3-history-heading,
+.pv3-lift-row,
+.pv3-trend-heading,
+.pv3-all-exercises button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pv3-page-heading h2,
+.pv3-detail-title h2 {
+  min-width: 0;
+  margin: 4px 0 2px;
+  font-size: var(--font-display);
+}
+
+.pv3-page-heading > span,
+.pv3-caption,
+.pv3-trend-detail,
+.pv3-table-note,
+.pv3-history-previous {
+  color: var(--muted);
+}
+
+.pv3-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: 8px 0;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.pv3-tabs button,
+.pv3-range button {
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px 3px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pv3-tabs button {
+  font-size: var(--font-body);
+}
+
+.pv3-tabs button.active,
+.pv3-range button.active {
+  background: var(--brand);
+  color: var(--text);
+}
+
+.pv3-panel,
+.pv3-detail {
+  min-width: 0;
+}
+
+.pv3-card,
+.pv3-status {
+  min-width: 0;
+  margin: 10px 0;
+  padding: 14px 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--panel);
+}
+
+.pv3-card h3 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: var(--font-section);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.pv3-card h4 {
+  margin: 10px 0 4px;
+  font-size: var(--font-body);
+}
+
+.pv3-status {
+  border-color: rgba(201, 156, 161, .35);
+  background: var(--brand-soft);
+}
+
+.pv3-status-word {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.pv3-status p,
+.pv3-status small,
+.pv3-card p {
+  margin: 5px 0;
+}
+
+.pv3-status small,
+.pv3-caption,
+.pv3-card small {
+  font-size: var(--font-caption);
+}
+
+.pv3-lift-list,
+.pv3-watch-list,
+.pv3-all-exercises,
+.pv3-history-sets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pv3-lift-list > li + li,
+.pv3-all-exercises > li + li {
+  border-top: 1px solid var(--line);
+}
+
+.pv3-lift-row {
+  width: 100%;
+  padding: 9px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pv3-lift-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.pv3-lift-copy > * {
+  overflow-wrap: anywhere;
+}
+
+.pv3-lift-copy > span,
+.pv3-lift-copy small {
+  color: var(--muted);
+}
+
+.pv3-worth-tag {
+  color: #e6c07b;
+  font-size: var(--font-caption);
+  font-style: normal;
+}
+
+.pv3-sparkline {
+  flex: 0 0 92px;
+  width: 92px;
+  height: 28px;
+  overflow: visible;
+}
+
+.pv3-sparkline line {
+  stroke: var(--line);
+  stroke-dasharray: 2 3;
+}
+
+.pv3-sparkline path {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+.pv3-sparkline circle {
+  fill: var(--nav-active);
+}
+
+.pv3-summary-counts,
+.pv3-consistency-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.pv3-summary-counts > div,
+.pv3-consistency-summary > div,
+.pv3-chip {
+  min-width: 0;
+  padding: 8px 5px;
+  border-radius: 12px;
+  background: var(--panel);
+  text-align: center;
+}
+
+.pv3-summary-counts strong,
+.pv3-consistency-summary strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.pv3-summary-counts span,
+.pv3-consistency-summary span {
+  display: block;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.pv3-watch-list {
+  margin-top: 8px;
+}
+
+.pv3-watch-list li {
+  padding: 4px 0;
+}
+
+.pv3-range {
+  display: flex;
+  gap: 4px;
+  margin: 6px 0;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.pv3-range button {
+  flex: 1;
+}
+
+.pv3-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.pv3-chip strong,
+.pv3-chip span,
+.pv3-chip small {
+  display: block;
+}
+
+.pv3-chip strong {
+  font-size: 1rem;
+}
+
+.pv3-chip span,
+.pv3-chip small {
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.pv3-trend-lift {
+  display: block;
+  width: 100%;
+  margin: 7px 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pv3-trend-heading > span {
+  color: var(--muted);
+  text-align: right;
+}
+
+.pv3-trend-detail {
+  display: block;
+  margin-top: 3px;
+  font-size: var(--font-caption);
+}
+
+.pv3-mini-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 5px;
+}
+
+.pv3-point {
+  fill: var(--muted);
+  opacity: .5;
+}
+
+.pv3-deload {
+  fill: transparent;
+  stroke: var(--nav-active);
+  stroke-width: 1.5;
+}
+
+.pv3-moving-average {
+  fill: none;
+  stroke: var(--nav-active);
+  stroke-width: 2;
+}
+
+.pv3-chart-empty {
+  height: 72px;
+}
+
+.pv3-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.pv3-table {
+  width: 100%;
+  min-width: 360px;
+  border-collapse: collapse;
+}
+
+.pv3-table th,
+.pv3-table td {
+  padding: 6px 3px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pv3-table thead th {
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.pv3-table-change,
+.pv3-table-note {
+  display: block;
+}
+
+.pv3-all-exercises button {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pv3-all-exercises button span {
+  overflow-wrap: anywhere;
+}
+
+.pv3-muscle-row {
+  min-width: 0;
+  margin: 12px 0 16px;
+}
+
+.pv3-gauge {
+  display: grid;
+  grid-template-rows: auto 34px auto;
+  gap: 2px;
+  margin: 6px 4px 10px;
+}
+
+.pv3-gauge-plot {
+  position: relative;
+  min-width: 0;
+}
+
+.pv3-gauge-track,
+.pv3-gauge-band,
+.pv3-gauge-marker,
+.pv3-gauge-value {
+  position: absolute;
+}
+
+.pv3-gauge-track {
+  top: 15px;
+  right: 0;
+  left: 0;
+  height: 6px;
+  border-radius: 8px;
+  background: var(--panel-strong);
+}
+
+.pv3-gauge-band {
+  top: 15px;
+  height: 6px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+}
+
+.pv3-gauge-marker {
+  top: 8px;
+  width: 2px;
+  height: 20px;
+  background: var(--nav-active);
+}
+
+.pv3-gauge-value {
+  top: -5px;
+  padding: 0 3px;
+  background: var(--bg-soft);
+  color: var(--text);
+  font-size: var(--font-caption);
+  transform: translateX(-50%);
+}
+
+.pv3-gauge-axis {
+  position: absolute;
+  inset: 25px 0 auto;
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.pv3-gauge-band-label {
+  display: block;
+  color: var(--muted);
+  font-size: var(--font-caption);
+  white-space: nowrap;
+}
+
+.pv3-gauge-average-label {
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.pv3-gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.pv3-week-bars {
+  display: grid;
+  gap: 3px;
+  align-items: stretch;
+  min-width: 0;
+  margin-top: 6px;
+  overflow-x: auto;
+}
+
+.pv3-week-column {
+  display: grid;
+  grid-template-rows: 1.2em 70px 1.2em 2.4em 2.4em;
+  min-width: 22px;
+  justify-items: center;
+  gap: 2px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+  text-align: center;
+}
+
+.pv3-week-block {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pv3-week-track {
+  position: relative;
+  width: 100%;
+  height: 70px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.pv3-week-band {
+  position: absolute;
+  right: 0;
+  bottom: 33.333%;
+  left: 0;
+  height: 33.333%;
+  background: var(--brand-soft);
+}
+
+.pv3-week-fill {
+  z-index: 1;
+  width: 60%;
+  min-height: 1px;
+  background: var(--brand);
+}
+
+.pv3-week-deload {
+  background: transparent;
+  border: 1px solid var(--nav-active);
+}
+
+.pv3-consistency-weeks {
+  display: grid;
+  gap: 8px;
+}
+
+.pv3-consistency-week {
+  display: grid;
+  grid-template-columns: minmax(64px, .8fr) minmax(40px, 1fr) minmax(90px, 1.4fr);
+  align-items: center;
+  gap: 7px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.pv3-consistency-week-label,
+.pv3-consistency-week-label small {
+  display: block;
+}
+
+.pv3-consistency-week-label small,
+.pv3-consistency-value,
+.pv3-consistency-week > small {
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.pv3-consistency-week-label small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pv3-day-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.pv3-day-dots span {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+
+.pv3-day-dots span.done {
+  border-color: var(--brand);
+  background: var(--brand);
+}
+
+.pv3-consistency-value {
+  text-align: right;
+}
+
+.pv3-back {
+  min-height: 34px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--nav-active);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pv3-detail-title {
+  margin-bottom: 6px;
+}
+
+.pv3-detail-title h2 {
+  overflow-wrap: anywhere;
+}
+
+.pv3-detail-takeaway {
+  font-weight: 700;
+}
+
+.pv3-detail-rate {
+  color: var(--muted);
+}
+
+.pv3-detail-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pv3-detail-chart .pv3-grid-line {
+  stroke: var(--line);
+  stroke-dasharray: 2 3;
+}
+
+.pv3-detail-chart .pv3-block-marker {
+  stroke: var(--nav-active);
+  stroke-dasharray: 3 3;
+}
+
+.pv3-detail-chart .pv3-point {
+  fill: var(--muted);
+}
+
+.pv3-detail-chart .pv3-day-b {
+  fill: var(--nav-active);
+}
+
+.pv3-detail-chart .pv3-rep-band {
+  fill: var(--brand-soft);
+}
+
+.pv3-detail-chart .pv3-rep-bar {
+  fill: var(--brand);
+}
+
+.pv3-detail-chart .pv3-chart-date,
+.pv3-detail-chart .pv3-chart-value,
+.pv3-detail-chart .pv3-swap-marker {
+  fill: var(--muted);
+  font-size: 8px;
+}
+
+.pv3-detail-chart .pv3-best-star {
+  fill: #e6c07b;
+  font-size: 12px;
+}
+
+.pv3-detail-chart .pv3-detail-average {
+  stroke: var(--nav-active);
+}
+
+.pv3-volume-chart {
+  display: flex;
+  min-height: 120px;
+  gap: 5px;
+  align-items: end;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.pv3-volume-column {
+  display: flex;
+  min-width: 34px;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  gap: 3px;
+  font-size: var(--font-caption);
+  text-align: center;
+}
+
+.pv3-volume-bar {
+  width: 60%;
+  min-height: 2px;
+  background: var(--brand);
+}
+
+.pv3-volume-bar.pv3-deload {
+  background: transparent;
+  border: 1px solid var(--nav-active);
+}
+
+.pv3-history-list {
+  display: grid;
+  gap: 8px;
+}
+
+.pv3-history-session {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.pv3-history-heading {
+  flex-wrap: wrap;
+}
+
+.pv3-comparison {
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.pv3-comparison-improved {
+  color: var(--nav-active);
+}
+
+.pv3-history-sets li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.pv3-history-sets small {
+  color: var(--muted);
+}
+
+.pv3-toast {
+  position: sticky;
+  z-index: 2;
+  top: 4px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-soft);
+}
+
+.pv3-session-log > summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pv3-session-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pv3-session-list > li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+
+.pv3-session-list > li > span:first-child {
+  display: grid;
+}
+
+.pv3-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+@media (max-width: 420px) {
+  .progress-v3 {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .pv3-consistency-week {
+    grid-template-columns: minmax(52px, .7fr) minmax(38px, .6fr) minmax(82px, 1fr);
+    gap: 5px;
+  }
+
+  .pv3-detail-title {
+    align-items: flex-start;
+  }
+
+  .pv3-detail-title .secondary-button {
+    flex: none;
+    max-width: 42%;
+    white-space: normal;
+  }
+}
+
 /* Weekly progress bar (replaces the D1–Dn tiles, PO 2026-10-10). */
 .week-progress {
   display: grid;

@@ -144,6 +144,60 @@ export type ProgressOptions = {
   today: string
 }
 
+export type ProgressV3Range = '4w' | '8w' | 'block' | 'all'
+export type LiftVerdict = 'improving' | 'held' | 'lower' | 'not-enough-data'
+
+export type ProgressLiftSession = {
+  exerciseId: string
+  date: string
+  blockId: string | null
+  dayKey: string | null
+  sets: ProgressSet[]
+  deload: boolean
+  target?: WorkoutEntry['target']
+}
+
+export type LiftTrendPoint = ProgressLiftSession & {
+  e1rm: number | null
+  topLoad: number | null
+  repsAtTop: number
+  movingAverage: number | null
+  isBest: boolean
+  breakDays: number | null
+}
+
+export type LiftTrend = {
+  exerciseId: string
+  highRep: boolean
+  points: LiftTrendPoint[]
+  verdict: LiftVerdict
+  changePercent: number | null
+  kgPerWeek: number | null
+  percentPerWeek: number | null
+  confidence: 'early' | 'based-on' | 'solid' | null
+  worthLookingAt: { date: string; sessions: number } | null
+}
+
+export type LiftTrendIndexPoint = {
+  date: string
+  value: number
+  latest: boolean
+  breakBefore: boolean
+}
+
+export type SessionComparison = {
+  verdict: 'improved' | 'held' | 'dropped' | 'mixed' | 'traded' | 'target-changed' | 'baseline'
+  improvedSets: number
+  heldSets: number
+  droppedSets: number
+  tradedSets: number
+  workingSetCount: number
+  previousWorkingSetCount: number
+  messages: string[]
+}
+
+export type ProgressV3Tab = 'overview' | 'trends' | 'muscles' | 'consistency'
+
 export type ProgressExercise = Exercise
 
 export type ProgressBlock = TrainingBlock
