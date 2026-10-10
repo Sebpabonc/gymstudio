@@ -8550,3 +8550,15 @@ button.superset-last-time {
   color: var(--muted);
   font-size: 0.85rem;
 }
+
+/* Browsing another week: the cards become a read-only preview (PO 2026-10-11).
+   This week's logs, set table, notes and progress belong to the current week, so they are hidden;
+   the "Next" recommendation stays visible. */
+.day-plan-card.viewing-other-week .done-badge,
+.day-plan-card.viewing-other-week .planned-set-section,
+.day-plan-card.viewing-other-week .planned-notes-field,
+.day-plan-card.viewing-other-week .superset-log,
+.day-plan-card.viewing-other-week .planned-history-list,
+.day-plan-card.viewing-other-week .swipe-hint {
+  display: none;
+}
