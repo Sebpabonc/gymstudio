@@ -547,15 +547,13 @@ function sanitizeLoggedComment(rawNote: string | undefined, fragments: Array<str
   return text.replace(/\s+/g, ' ').trim()
 }
 
+// Always "weekday day [month]" ("Mon 5", "Lun 5 oct"), whatever the locale's default order.
 function formatTrainingDate(locale: string, date: string, includeMonth = false) {
-  return new Intl.DateTimeFormat(locale, {
-    weekday: 'short',
-    day: 'numeric',
-    ...(includeMonth ? { month: 'short' as const } : {}),
-  })
-    .format(new Date(`${date.slice(0, 10)}T12:00:00`))
-    .replace(/[.,]/g, '')
-    .replace(/^\p{L}/u, (letter) => letter.toLocaleUpperCase(locale))
+  const value = new Date(`${date.slice(0, 10)}T12:00:00`)
+  const part = (options: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat(locale, options).format(value).replace(/[.,]/g, '')
+  const weekday = part({ weekday: 'short' }).replace(/^\p{L}/u, (letter) => letter.toLocaleUpperCase(locale))
+  return [weekday, part({ day: 'numeric' }), ...(includeMonth ? [part({ month: 'short' })] : [])].join(' ')
 }
 
 export default function WorkoutPlan({
