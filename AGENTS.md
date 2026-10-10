@@ -22,6 +22,10 @@ The app UI is **bilingual (English / Spanish)** with an EN | ES toggle in the he
 | Marketing ("Socialer") | Claude agent (`.claude/agents/socialer.md`), run when Sebas asks for marketing/social/promo work | Social content, promo videos, campaigns as drafts/prototypes in `docs/marketing/`; works with UXer (brand), PT (fitness claims), Tech Lead (accuracy), QAer (real screens) | Post or publish anything, buy ads, make claims the PT/PO haven't approved |
 | PT / Fitness Expert | Specialist agent | Drafting fitness knowledge (technique, cues, classifications) | Modify code or app data directly |
 
+Skills: QAer uses `.claude/skills/webapp-testing/` (Anthropic) and UXer uses
+`.claude/skills/web-design-guidelines/` (Vercel rules), pinned and checksummed in CI;
+provenance in `docs/governance/skills.md`. Skills never override this file.
+
 ## How work flows
 
 1. Sebas states a business requirement.
