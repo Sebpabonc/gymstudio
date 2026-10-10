@@ -97,7 +97,7 @@ export function SupersetLogger({
     const focus = nextSupersetFocus(next, counts, { round, exercise })
     if (rounds[round]) {
       setOpenRounds((previous) => ({ ...previous, [round]: false }))
-      const last = exercises.filter((item) => round < item.sets.length).slice(-1)[0]
+      const last = exercises[exercises.length - 1]
       onStartRest(last.restSeconds, exercises.map((item) => item.name).join(' + '))
     } else if (focus?.round === round) {
       setNow(timestamp)
@@ -219,7 +219,7 @@ export function SupersetLogger({
         </div>
       ))}
       {(error || saveFailed) && <p role="alert" className="account-error log-error">{error || t('workout.superset.saveError')}</p>}
-      {(firstIncomplete >= 0 || error || saveFailed) && (
+      {((firstIncomplete >= 0 && completed.some(Boolean)) || error || saveFailed) && (
         <button type="button" className="primary-button small-button" disabled={saving || !completed.some(Boolean)} onClick={() => void save(completed, times)}>
           {t('workout.superset.finish')}
         </button>

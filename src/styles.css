@@ -8375,7 +8375,8 @@ summary:focus-visible,
   text-align: center;
 }
 
-.superset-workout-card {
+.day-plan-card .superset-workout-card {
+  display: block;
   min-width: 0;
   padding: 12px;
 }
@@ -8409,6 +8410,11 @@ summary:focus-visible,
 
 .superset-compact-exercise .workout-mode-target {
   margin: 3px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
 }
 
 .superset-exercise-actions > summary {
