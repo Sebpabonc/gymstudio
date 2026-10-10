@@ -8085,3 +8085,11 @@ summary:focus-visible,
   min-height: 0;
   padding: 2px 8px;
 }
+
+/* Weekly bar sits in a card like the block card above (PO 2026-10-10). */
+.week-progress {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
