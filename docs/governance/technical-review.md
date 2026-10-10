@@ -4,7 +4,8 @@
 
 Sebas is Domain Lead (product/domain acceptance); Mate is Crew Lead (coordination,
 evidence and blockers); Claude Code is Tech Lead (design and independent technical
-review); Copilot is Developer. Existing PT, UX and marketing product approvals remain.
+review, approval and PR merges); Copilot is Developer. Mate does not submit technical
+approvals or merge PRs. No separate account is required for Mate. Existing PT, UX and marketing product approvals remain.
 The Domain Lead must not be the routine technical PR reviewer.
 
 Technical approval is an actual GitHub APPROVED review of the current head SHA,
@@ -44,8 +45,8 @@ validation evidence must be independently assessed.
 
 The workflow executes only trusted default-branch code, never PR code, using a
 read token plus status-write permission. It publishes the
-`tech-lead/approval` commit status on PR target events, manual request and a
-five-minute schedule; schedules can be delayed. This status is **advisory only**.
+`tech-lead/approval` commit status on PR target events and manual request only.
+There is no scheduled review polling; review decisions remain Claude's responsibility. This status is **advisory only**.
 A status name does not bind its producer to the verified Tech Lead identity, and
 this repository has not demonstrated a protection rule that does so. Do not make
 this context a required check or treat it as approval unless an administrator
