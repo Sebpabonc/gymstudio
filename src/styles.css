@@ -6995,7 +6995,15 @@ a.planned-exercise-main-name {
 }
 
 .app-shell.workout-mode-active .app-content {
-  padding-bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
+  padding-bottom: calc(196px + env(safe-area-inset-bottom, 0px));
+}
+
+.app-shell.workout-mode-active .phone-frame {
+  padding-top: 0;
+}
+
+.app-shell.workout-mode-active .screen-surface > :not(.plan-card) {
+  display: none;
 }
 
 .plan-card.workout-mode-active {
@@ -7025,9 +7033,9 @@ a.planned-exercise-main-name {
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
   align-items: center;
   gap: 6px;
-  padding: 8px 0;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 0 8px;
   margin: 0;
-  background: var(--bg);
+  background: var(--bg-dark);
 }
 
 .workout-mode-bar > .secondary-button {
@@ -7050,12 +7058,12 @@ a.planned-exercise-main-name {
 
 .workout-mode-overview {
   position: sticky;
-  top: 56px;
+  top: calc(56px + env(safe-area-inset-top, 0px));
   z-index: 4;
   min-width: 0;
   padding: 4px 0 6px;
   margin: 0 0 6px;
-  background: var(--bg);
+  background: var(--bg-dark);
 }
 
 .workout-mode-chips {
@@ -7129,8 +7137,8 @@ a.planned-exercise-main-name {
   display: none;
 }
 
-.plan-card.workout-mode-active .planned-exercise-card {
-  scroll-margin-top: 60px;
+.plan-card.workout-mode-active [data-workout-group] {
+  scroll-margin-top: calc(136px + env(safe-area-inset-top, 0px));
 }
 
 .plan-card.workout-mode-active .planned-exercise-header {
@@ -7162,8 +7170,19 @@ a.planned-exercise-main-name {
 
 .planned-set-section .workout-mode-focused-grid.planned-set-column-headers,
 .planned-set-section .workout-mode-focused-grid.planned-set-row {
-  grid-template-columns: 24px minmax(34px, 0.8fr) minmax(42px, 0.95fr) minmax(86px, 1.8fr) 36px 34px;
+  grid-template-columns: 24px minmax(34px, 0.8fr) minmax(42px, 0.95fr) minmax(104px, 1.8fr) 36px 34px;
   gap: 2px;
+}
+
+.workout-mode-focused-grid .set-stepper {
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
+  gap: 2px;
+}
+
+.workout-mode-focused-grid .set-stepper .stepper-button {
+  width: 30px;
+  min-width: 30px;
+  height: 40px;
 }
 
 .workout-mode-set-target {
@@ -7176,14 +7195,25 @@ a.planned-exercise-main-name {
 
 .superset-round-columns.workout-mode-focused-grid,
 .superset-round-row.workout-mode-focused-grid {
-  grid-template-columns: 24px minmax(34px, 0.8fr) minmax(42px, 0.95fr) minmax(86px, 1.8fr) 36px;
+  grid-template-columns: 24px minmax(34px, 0.8fr) minmax(42px, 0.95fr) minmax(104px, 1.8fr) 36px;
   gap: 2px;
 }
 
 .workout-mode-footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 8;
   display: grid;
   gap: 8px;
+  width: 100%;
+  max-width: 640px;
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px));
   margin-top: 12px;
+  margin-right: auto;
+  margin-left: auto;
+  background: var(--bg-dark);
 }
 
 .plan-card.workout-mode-active .workout-mode-footer .rest-timer-pill {

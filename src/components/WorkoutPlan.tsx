@@ -1686,15 +1686,18 @@ export default function WorkoutPlan({
     (workoutGroups[index]?.items ?? []).map(({ exercise }) => normalizeExerciseName(exercise.name))
   const goToWorkoutGroup = (index: number) => {
     if (index < 0 || index >= workoutGroups.length) return
+    if (workoutGroupIndex === null) onWorkoutModeChange?.(true)
     setWorkoutGroupIndex(index)
     setCollapsedExercises((current) => ({
       ...current,
       ...Object.fromEntries(groupExerciseKeys(index).map((key) => [key, false] as const)),
     }))
     window.requestAnimationFrame(() => {
-      const target = document.querySelector<HTMLElement>(`[data-workout-group="${index}"]`)
-      target?.focus({ preventScroll: true })
-      target?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      window.requestAnimationFrame(() => {
+        const target = document.querySelector<HTMLElement>(`[data-workout-group="${index}"]`)
+        target?.focus({ preventScroll: true })
+        target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
     })
   }
   const startWorkout = () => {
@@ -1713,6 +1716,7 @@ export default function WorkoutPlan({
   }
   const exitWorkout = () => {
     setWorkoutGroupIndex(null)
+    onWorkoutModeChange?.(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   const finishWorkout = () => {
