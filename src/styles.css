@@ -7280,3 +7280,49 @@ summary:focus-visible,
   border-radius: 50%;
   background: #c9a0a6;
 }
+
+.week-progress-head {
+  gap: 8px;
+}
+
+.week-progress-head > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+}
+
+.week-progress-nav {
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-strong);
+  font-size: 1rem;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+.week-progress-nav:disabled {
+  opacity: 0.3;
+}
+
+.week-progress-back {
+  font-size: 0.75rem;
+}
+
+.week-progress-label {
+  white-space: nowrap;
+}
+
+.week-progress-head > span,
+.week-progress-head strong,
+.week-progress-back {
+  white-space: nowrap;
+}
+
+.week-progress-back {
+  min-height: 0;
+  padding: 2px 8px;
+}

@@ -571,6 +571,9 @@ export default function WorkoutPlan({
   const demoMode = isDemoMode()
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
+  // Weekly progress bar: 0 = this week, -1 = last week, +1 = next week (PO 2026-10-10: swipe between weeks).
+  const [barWeekOffset, setBarWeekOffset] = useState(0)
+  const barTouchX = useRef<number | null>(null)
   const [customPlan, setCustomPlan] = useState<CustomPlan>(() => loadCustomPlan())
   const [selectedCustomDayId, setSelectedCustomDayId] = useState('')
   const [customPlanSheetDraft, setCustomPlanSheetDraft] = useState<CustomPlanSheetDraft | null>(null)
@@ -2536,7 +2539,27 @@ export default function WorkoutPlan({
         <>
         {activeBlock && (() => {
           // PO 2026-10-10: the day tiles become one thin weekly progress bar (one tappable segment per day).
-          const week = weekBounds(localIsoDate())
+          const currentWeek = weekBounds(localIsoDate())
+          const shiftDate = (date: string, days: number) => new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10)
+          const blockStartWeek = weekBounds(activeBlock.startDate.slice(0, 10)).start
+          const minOffset = Math.round((Date.parse(blockStartWeek) - Date.parse(currentWeek.start)) / (7 * 86_400_000))
+          const maxOffset = minOffset + activeBlock.weeks - 1
+          const offset = Math.min(Math.max(barWeekOffset, minOffset), maxOffset)
+          const week = { start: shiftDate(currentWeek.start, offset * 7), end: shiftDate(currentWeek.end, offset * 7) }
+          const weekNumber = offset - minOffset + 1
+          const dayDate = (dayKey: string, position: number) => {
+            const logged = history
+              .filter((entry) => entry.dayKey === dayKey && entry.blockId === activeBlock.id && entry.date >= week.start && entry.date <= week.end)
+              .map((entry) => entry.date.slice(0, 10))
+              .sort()[0]
+            return logged ?? (activeBlock.days.length <= 7 ? shiftDate(week.start, position - 1) : undefined)
+          }
+          const weekdayLabel = (date: string) => {
+            const value = new Date(`${date}T12:00:00`)
+            const weekday = new Intl.DateTimeFormat(language === 'es' ? 'es' : 'en', { weekday: 'short' }).format(value).replace(/[.,]/g, '')
+            return `${weekday.charAt(0).toLocaleUpperCase()}${weekday.slice(1)} ${value.getDate()}`
+          }
+          const goWeek = (delta: number) => setBarWeekOffset(Math.min(Math.max(offset + delta, minOffset), maxOffset))
           const days = activeBlock.days.map((day) => {
             const done = day.exercises.filter((item) =>
               history.some(
@@ -2552,15 +2575,35 @@ export default function WorkoutPlan({
           })
           const completeDays = days.filter(({ done, total }) => total > 0 && done >= total).length
           return (
-            <div className="week-progress">
+            <div
+              className="week-progress"
+              onTouchStart={(event) => { barTouchX.current = event.touches[0]?.clientX ?? null }}
+              onTouchEnd={(event) => {
+                const startX = barTouchX.current
+                barTouchX.current = null
+                const endX = event.changedTouches[0]?.clientX
+                if (startX === null || endX === undefined || Math.abs(endX - startX) < 40) return
+                goWeek(endX < startX ? 1 : -1)
+              }}
+            >
               <div className="week-progress-head">
-                <span>{t('workout.week.progressTitle')}</span>
-                <strong>{t('workout.week.progressDays', { done: formatNumber(language, completeDays), total: formatNumber(language, days.length) })}</strong>
+                <button type="button" className="week-progress-nav" onClick={() => goWeek(-1)} disabled={offset <= minOffset} aria-label={t('workout.week.previous')}>‹</button>
+                <span>
+                  {offset === 0 ? t('workout.week.progressTitle') : t('workout.week.numbered', { week: formatNumber(language, weekNumber) })}
+                  {offset !== 0 && (
+                    <button type="button" className="text-button week-progress-back" onClick={() => setBarWeekOffset(0)}>{t('workout.week.backToThis')}</button>
+                  )}
+                </span>
+                <strong>{offset === 0
+                  ? t('workout.week.progressDays', { done: formatNumber(language, completeDays), total: formatNumber(language, days.length) })
+                  : `${formatNumber(language, completeDays)}/${formatNumber(language, days.length)}`}</strong>
+                <button type="button" className="week-progress-nav" onClick={() => goWeek(1)} disabled={offset >= maxOffset} aria-label={t('workout.week.next')}>›</button>
               </div>
               <div className="week-progress-bar" aria-label={t('workout.day.tabsAria')}>
                 {days.map(({ day, done, total }) => {
                   const active = day.key === (activeDay?.key ?? selectedDay)
-                  const isToday = todayDay?.key === day.key
+                  const isToday = offset === 0 && todayDay?.key === day.key
+                  const date = dayDate(day.key, day.position)
                   return (
                     <button
                       key={day.key}
@@ -2582,7 +2625,7 @@ export default function WorkoutPlan({
                         <span className="week-progress-fill" style={{ width: `${total ? Math.min(done / total, 1) * 100 : 0}%` }} />
                       </span>
                       <span className="week-progress-label">
-                        {t('workout.day.short', { position: formatNumber(language, day.position) })}
+                        {date ? weekdayLabel(date) : t('workout.day.short', { position: formatNumber(language, day.position) })}
                         {isToday && <span className="week-progress-today" aria-hidden="true" />}
                       </span>
                     </button>
