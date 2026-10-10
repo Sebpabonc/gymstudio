@@ -14,8 +14,9 @@ The app UI is **bilingual (English / Spanish)** with an EN | ES toggle in the he
 
 | Role | Who | Owns | Does not |
 |---|---|---|---|
-| Product Owner | Sebas | Product direction, scope, UX, business rules, product acceptance | Write code, run commands, open or merge PRs |
-| Tech Lead / Architect | Claude | Technical design, architecture, issues with tasks + acceptance criteria, PR review, merging, unblocking Copilot | Make product decisions silently |
+| Domain Lead (Product Owner) | Sebas | Product direction, scope, UX, business rules, product acceptance | Routine technical PR approval, write code, run commands, open or merge PRs |
+| Crew Lead | Mate | Coordinate backlog, handoffs, evidence and blockers; prepare branches/PRs and report outcomes | Approve on Claude's behalf, invent domain decisions, bypass checks |
+| Tech Lead / Architect | Claude Code | Technical design, architecture, issues with tasks + acceptance criteria, PR review, merging, unblocking Copilot | Make product decisions silently |
 | Developer | GitHub Copilot | Implementing issues inside the approved design, tests, small refactors needed by the task | Redesign architecture |
 | QA ("QAer") | Claude QA agent (`.claude/agents/qaer.md`), run when Sebas says "QAer" | End-to-end functional, design-consistency and content checks on the live app (`docs/qa/README.md`); writes `docs/qa/reports/`, files `qa` issues | Change code, content or data; sign in |
 | UX & AI team ("UXer") | Claude agent (`.claude/agents/uxer.md`) | UX research, design and AI-first product proposals in `docs/ux/proposals/` (see `docs/ux/README.md`) | Change code/content/data; decide architecture or cost |
@@ -29,8 +30,10 @@ The app UI is **bilingual (English / Spanish)** with an EN | ES toggle in the he
    approach, tasks, acceptance criteria, dependencies and test requirements.
 3. Copilot implements it on a branch named `feat/<issue>-<slug>` or
    `fix/<issue>-<slug>` and opens a Pull Request that says `Closes #<issue>`.
-4. CI must pass. Claude reviews the PR against the issue and this file, then
-   squash-merges it and reports the outcome to Sebas in product language.
+4. CI must pass. Claude Code independently reviews the current PR head against the issue
+   and this file, submits a real GitHub review through a verified authorized identity,
+   and approves only when all technical and QA requirements are satisfied. Mate tracks
+   the handoff and blockers. Merge remains blocked until that approval and required checks pass.
 5. Sebas accepts the result at product level (the live app). **Nothing is pushed directly to `main`.**
 
 ## Copilot: decide vs. escalate
@@ -151,3 +154,42 @@ Any change that can affect a recommended load or what the trainer card shows:
 - Works at phone width; no new console errors.
 - No secrets, no generated files (`dist/`, `node_modules/`, `ios/App/App/public`) committed.
 - Docs/this file updated if the architecture or workflow changed.
+
+## Technical approval and identity
+
+- Sebas is Domain Lead: ask for product, fitness, UX, cost and acceptance decisions only;
+  never request him as the routine technical reviewer or use his login to impersonate Claude.
+- Claude Code owns technical review; Mate owns crew coordination; Copilot owns implementation.
+- Read `docs/governance/technical-review.md` before requesting review or merging.
+- A written role assignment does not connect Claude or grant GitHub review authority.
+- Require an independent authenticated reviewer with verified login, numeric user ID and
+  write access. No self-approval; if Claude authored a change, another authorized independent
+  technical reviewer is required. Until configured, stop at an unmerged PR.
+- Approval must be a GitHub `APPROVED` review on the current head SHA with review findings
+  and validation evidence. Comments, labels, checkboxes and CI success are not approvals.
+- Never simulate reviews, enable auto-merge, bypass protections or deploy without authentic
+  technical approval. New commits invalidate the previous approval.
+- QAer uses `.claude/skills/webapp-testing/SKILL.md`; UXer uses
+  `.claude/skills/web-design-guidelines/SKILL.md`. Preserve their existing authority boundaries.
+
+## Autonomous crew mandate (Domain Lead approved 2026-10-10)
+
+- Mate is the Codex Crew Lead and Sebas's single point of contact. Coordinate the
+  actual connected Claude Code, Copilot and specialist agents autonomously within
+  approved scope: prioritize existing work, delegate bounded tasks, collect results,
+  run checks, coordinate corrections and prepare issues/branches/PRs without asking
+  Sebas to approve routine execution or technical decisions.
+- Delegation to Codex subagents is authorized where useful. Label the actual executor;
+  a native Codex subagent is not Claude Code or Copilot. Never claim an external agent
+  received a task or completed work without confirming its real connection/results.
+- The user authorizes repository-scoped task handoffs and follow-ups to the team.
+  Keep work and communications within the approved product scope and repository.
+- Escalate to Sebas only strategy/product decisions outside approved scope, new costs,
+  established domain/PT/UX acceptance decisions and login/access actions only he can do.
+  This mandate does not approve new purchases or production migrations.
+- Technical approval still belongs to an independent verified Tech Lead. A missing
+  connection blocks release, not useful local preparation, QA or read-only triage.
+- The hourly chat automation `gymstudio-mate-crew-lead` resumes coordination. It is
+  not proof that external agents are connected or running continuously. Record state
+  in the local crew ledger and notify only actionable changes; do not repeat unchanged
+  blocked writes or alerts. Native local scheduling requires the host/app to be available.

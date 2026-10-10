@@ -12,3 +12,8 @@ Essentials:
 - Fill in the pull request template, including `Closes #<issue>`.
 - If the task requires an architectural, data-model, security or product decision
   not covered by the issue, stop and comment with the `needs-tech-lead` label instead of improvising.
+
+- Request technical review from the verified Claude Code identity through Mate (Crew Lead),
+  never from Sebas as a routine reviewer. Do not invent a reviewer login.
+- Attach validation evidence and the head SHA; changes after approval require a new review.
+- Do not approve, merge, enable auto-merge or bypass branch protection.

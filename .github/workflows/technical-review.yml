@@ -1,0 +1,29 @@
+name: Technical review gate
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+concurrency:
+  group: technical-review-gate
+  cancel-in-progress: false
+jobs:
+  approval:
+    runs-on: ubuntu-latest
+    steps:
+      # Always execute trusted default-branch code, never PR-head code.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Verify current-head independent technical approval
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CLAUDE_REVIEWER_LOGIN: ${{ vars.CLAUDE_REVIEWER_LOGIN }}
+          CLAUDE_REVIEWER_ID: ${{ vars.CLAUDE_REVIEWER_ID }}
+        run: python3 scripts/technical-review.py
