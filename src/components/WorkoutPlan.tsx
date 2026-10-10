@@ -20,8 +20,9 @@ import {
   getCachedActiveUserPlan,
   getCachedTrainingBlocks,
   getActiveBlockId,
+  dismissBlockIntro,
+  getDismissedBlockIntros,
   getExerciseDisplayName,
-  getSessionStorageValue,
   loadExercises,
   loadLocalExerciseSwaps,
   loadTrainerExplanation,
@@ -34,7 +35,6 @@ import {
   saveWorkoutHistory,
   loadCustomPlan,
   saveCustomPlan,
-  setSessionStorageValue,
   setActiveBlockId,
   upsertExerciseRecord,
 } from '../utils/storage'
@@ -48,9 +48,10 @@ import {
   formatBlockMethod,
   nextUnloggedDay,
   todayTrainingDay,
+  trainingBlockDayDate,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
-import { findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
+import { findNextPendingIndex, findWeekCompletion, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
@@ -217,8 +218,6 @@ function SteppedNumberInput({
     </div>
   )
 }
-
-const BLOCK_CARD_EXPANDED_KEY = 'gym-studio.block-card-expanded'
 
 function createRecommendationId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
@@ -548,6 +547,17 @@ function sanitizeLoggedComment(rawNote: string | undefined, fragments: Array<str
   return text.replace(/\s+/g, ' ').trim()
 }
 
+function formatTrainingDate(locale: string, date: string, includeMonth = false) {
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'short',
+    day: 'numeric',
+    ...(includeMonth ? { month: 'short' as const } : {}),
+  })
+    .format(new Date(`${date.slice(0, 10)}T12:00:00`))
+    .replace(/[.,]/g, '')
+    .replace(/^\p{L}/u, (letter) => letter.toLocaleUpperCase(locale))
+}
+
 export default function WorkoutPlan({
   mode,
   lockMode = false,
@@ -592,14 +602,14 @@ export default function WorkoutPlan({
   ), [rawTrainingBlocks, exerciseSwaps, today, rawExerciseCatalog, language, spanishReady])
   const [selectedBlockId, setSelectedBlockId] = useState(() => getActiveBlockId() ?? '')
   const [pinnedBlockId, setPinnedBlockId] = useState(() => getActiveBlockId() ?? '')
-  const [blockCardExpanded, setBlockCardExpanded] = useState(
-    () => getSessionStorageValue(BLOCK_CARD_EXPANDED_KEY) === 'true'
-  )
+  const [dismissedBlockIntros, setDismissedBlockIntrosState] = useState(() => getDismissedBlockIntros())
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
   const [blockSelectorOpen, setBlockSelectorOpen] = useState(false)
   const [blockInsightsOpen, setBlockInsightsOpen] = useState(false)
   const [swapTarget, setSwapTarget] = useState<{ exercise: Exercise; fromExerciseId: string } | null>(null)
   const [history, setHistory] = useState<WorkoutEntry[]>([])
-  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [blockSheetOpen, setBlockSheetOpen] = useState(false)
+  const dayTabsRef = useRef<HTMLDivElement>(null)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayIsoDate)
   const [selectedCalendarBlockId, setSelectedCalendarBlockId] = useState('')
   const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
@@ -676,6 +686,15 @@ export default function WorkoutPlan({
   }, [blockSelectorOpen])
 
   useEffect(() => {
+    if (!blockSheetOpen) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setBlockSheetOpen(false)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [blockSheetOpen])
+
+  useEffect(() => {
     if (!swapTarget) return
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setSwapTarget(null)
@@ -748,12 +767,57 @@ export default function WorkoutPlan({
     [selectedBlockId, today, trainingBlocks]
   )
   const activeBlockWeek = activeBlock ? blockWeek(activeBlock, today) : null
+  const currentBlockWeek = activeBlock
+    ? activeBlockWeek ?? (trainingBlockDateStatus(activeBlock, today) === 'Upcoming' ? 1 : activeBlock.weeks)
+    : 1
+  const displayedBlockWeek = activeBlock
+    ? Math.min(activeBlock.weeks, Math.max(1, selectedWeek ?? currentBlockWeek))
+    : 1
   const selectedCalendarBlock = trainingBlocks.find((block) => block.id === selectedCalendarBlockId)
   const calendarBlockSessions = useMemo(
     () => selectedCalendarBlock ? completedTrainingSessions(selectedCalendarBlock, history) : [],
     [history, selectedCalendarBlock]
   )
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
+  const activeDayDate = activeBlock && activeDay
+    ? trainingBlockDayDate(activeBlock, displayedBlockWeek, activeDay)
+    : today
+  const isFutureDayPreview = planMode === 'preset' && activeDayDate > today
+  const orderedBlockDays = activeBlock ? [...activeBlock.days].sort((a, b) => a.position - b.position) : []
+  const nextTrainingDay = activeBlock
+    ? Array.from({ length: activeBlock.weeks }, (_, index) => index + 1)
+        .flatMap((week) => orderedBlockDays.map((day) => ({
+          day,
+          week,
+          date: trainingBlockDayDate(activeBlock, week, day),
+        })))
+        .filter(({ date }) => date > today)
+        .sort((a, b) => a.date.localeCompare(b.date))[0]
+    : undefined
+  const selectedDayEntries = activeBlock && activeDay
+    ? history.filter((entry) =>
+        entry.blockId === activeBlock.id &&
+        entry.dayKey === activeDay.key &&
+        entry.date.slice(0, 10) === activeDayDate
+      )
+    : []
+  const completedExerciseCount = activeDay?.exercises.filter((exercise) =>
+    selectedDayEntries.some((entry) => entry.exerciseId === exercise.exerciseId && entry.sets.length > 0)
+  ).length ?? 0
+  const selectedDayComplete = !!activeDay &&
+    activeDay.exercises.length > 0 &&
+    completedExerciseCount === activeDay.exercises.length
+  const showBlockIntro = !!activeBlock &&
+    trainingBlockDateStatus(activeBlock, today) === 'Current' &&
+    activeBlockWeek === 1 &&
+    !dismissedBlockIntros.includes(activeBlock.id) &&
+    !history.some((entry) => entry.blockId === activeBlock.id && entry.date.slice(0, 10) >= activeBlock.startDate)
+  useEffect(() => {
+    if (planMode !== 'preset') return
+    dayTabsRef.current
+      ?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')
+      ?.scrollIntoView?.({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
+  }, [activeDay?.key, displayedBlockWeek, planMode])
   const activeCustomDay = customPlan.days.find((day) => day.id === selectedCustomDayId) ?? customPlan.days[0]
   const activeCustomExercises: PlanExercise[] = (activeCustomDay?.exercises ?? []).map((exercise) => ({
     name: exercise.name,
@@ -770,7 +834,7 @@ export default function WorkoutPlan({
   const activeBlockExercises = useMemo(
     () =>
       activeDay?.exercises.map((exercise) => {
-        const prescription = prescriptionForWeek(exercise, activeBlockWeek ?? 1)
+        const prescription = prescriptionForWeek(exercise, displayedBlockWeek)
         return {
           name: getBlockExerciseName(prescription, exerciseCatalog),
           sets: String(prescription.sets),
@@ -790,7 +854,7 @@ export default function WorkoutPlan({
           swappedFrom: prescription.swappedFrom,
         }
       }) ?? [],
-    [activeBlockWeek, activeDay, exerciseCatalog]
+    [displayedBlockWeek, activeDay, exerciseCatalog]
   )
   const activeExercises = planMode === 'preset' ? activeBlockExercises : activeCustomExercises
   const recentLibraryExerciseIds = new Map<string, number>()
@@ -921,7 +985,15 @@ export default function WorkoutPlan({
       if (savedBlockId && !pinnedBlock) setActiveBlockId(null)
       setPinnedBlockId(pinnedBlock?.id ?? '')
       setSelectedBlockId(nextBlock?.id ?? '')
-      setSelectedDay(nextBlock ? todayTrainingDay(nextBlock, entries)?.key ?? '' : '')
+      const week = nextBlock ? blockWeek(nextBlock, getTodayIsoDate()) ?? (
+        trainingBlockDateStatus(nextBlock, getTodayIsoDate()) === 'Upcoming' ? 1 : nextBlock.weeks
+      ) : 1
+      setSelectedWeek(null)
+      setSelectedDay(nextBlock
+        ? nextBlock.days.find((day) => trainingBlockDayDate(nextBlock, week, day) === getTodayIsoDate())?.key ??
+          todayTrainingDay(nextBlock, entries)?.key ??
+          ''
+        : '')
     }
     void Promise.all([loadExercises(), loadWorkoutHistory()]).then(([exercises, entries]) => {
       if (cachedBlocks.length) apply(exercises, entries, cachedBlocks, true, !!cachedPlan)
@@ -1303,7 +1375,7 @@ export default function WorkoutPlan({
   const getTrainerRecommendation = (exercise: PlanExercise): ReturnType<typeof buildTrainerRecommendation> => buildTrainerRecommendation(exercise)
 
   const buildTrainerRecommendation = (exercise: PlanExercise) => {
-    if (planMode !== 'preset' || !activeBlock || !activeDay || !exercise.exerciseId) return null
+    if (planMode !== 'preset' || isFutureDayPreview || !activeBlock || !activeDay || !exercise.exerciseId) return null
     const original = getOriginalDraftForExercise(exercise.name, exercise)
     // First number of each set ("12+12" drop-set → 12): the main-set reps the PT spec progresses on.
     const reps = (exercise.repsPerSet ?? [exercise.reps ?? '8']).map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0)
@@ -1509,12 +1581,12 @@ export default function WorkoutPlan({
     }))
   }
 
-  const toggleBlockCard = () => {
-    setBlockCardExpanded((current) => {
-      const next = !current
-      setSessionStorageValue(BLOCK_CARD_EXPANDED_KEY, String(next))
-      return next
-    })
+  const dismissCurrentBlockIntro = () => {
+    if (!activeBlock) return
+    dismissBlockIntro(activeBlock.id)
+    setDismissedBlockIntrosState((current) =>
+      current.includes(activeBlock.id) ? current : [...current, activeBlock.id]
+    )
   }
 
   const useDateBasedBlock = () => {
@@ -1522,6 +1594,7 @@ export default function WorkoutPlan({
     setActiveBlockId(null)
     setPinnedBlockId('')
     setSelectedBlockId(block?.id ?? '')
+    setSelectedWeek(null)
     setSelectedDay(block ? todayTrainingDay(block, history, today)?.key ?? '' : '')
     setCollapsedExercises({})
     setPlannedDrafts({})
@@ -1642,6 +1715,7 @@ export default function WorkoutPlan({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   const startWorkout = () => {
+    if (isFutureDayPreview) return
     const firstOpen = workoutGroups.findIndex((group) =>
       group.items.some(({ exercise }) => !findExerciseCompletion(exercise, history))
     )
@@ -2105,9 +2179,10 @@ export default function WorkoutPlan({
           <button
             type="button"
             className="calendar-icon-button"
-            onClick={() => setCalendarOpen((current) => !current)}
-            aria-label={text.calendar}
-            aria-expanded={calendarOpen}
+            onClick={() => setBlockSheetOpen(true)}
+            aria-label={t('workout.block.sheetTitle')}
+            aria-expanded={blockSheetOpen}
+            aria-haspopup="dialog"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
               <path
@@ -2120,27 +2195,184 @@ export default function WorkoutPlan({
               />
             </svg>
           </button>
-          <span className="plan-badge">{planMode === 'preset'
-            ? t('workout.badge.block', { weeks: activeBlock?.weeks ?? 6, days: activeBlock?.days.length ?? 6 })
-            : text.customBadge}</span>
         </div>
       </div>
 
-      {calendarOpen && (
-        <div className="calendar-popover" role="presentation" onClick={() => setCalendarOpen(false)}>
+      {planMode === 'preset' && activeBlock && (
+        <section className="training-block-card" aria-label={t('workout.block.activeAria')}>
+          {showBlockIntro ? (
+            <div className="block-intro-card">
+              <button
+                type="button"
+                className="block-intro-dismiss"
+                aria-label={t('workout.block.intro.close')}
+                onClick={dismissCurrentBlockIntro}
+              >
+                ×
+              </button>
+              <span className="training-block-number">
+                {activeBlock.number === 0 ? t('workout.block.personal') : t('workout.block.number', { number: activeBlock.number })}
+              </span>
+              <strong className="block-intro-name">{activeBlock.name}</strong>
+              <span className="block-intro-meta">
+                {formatBlockMethod(activeBlock.method, language)} · {t('workout.block.weekOf', {
+                  week: activeBlockWeek ?? 1,
+                  total: activeBlock.weeks,
+                })}
+              </span>
+              <span className="block-intro-meta">{blockDateRange(activeBlock, language)}</span>
+              <p>{activeBlock.summary}</p>
+              <button type="button" className="secondary-button" onClick={dismissCurrentBlockIntro}>
+                {t('workout.block.intro.gotIt')}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="training-block-compact"
+              onClick={() => setBlockSheetOpen(true)}
+              aria-label={`${activeBlock.name} · ${activeBlock.number === 0
+                ? t('workout.block.weekOf', { week: displayedBlockWeek, total: activeBlock.weeks })
+                : t('workout.block.compactTitle', {
+                    number: activeBlock.number,
+                    week: displayedBlockWeek,
+                    total: activeBlock.weeks,
+                  })}`}
+              aria-expanded={blockSheetOpen}
+              aria-haspopup="dialog"
+            >
+              <span className="training-block-compact-heading">
+                <strong>
+                  {activeBlock.number === 0
+                    ? `${t('workout.block.personal')} · ${t('workout.block.weekOf', { week: displayedBlockWeek, total: activeBlock.weeks })}`
+                    : t('workout.block.compactTitle', { number: activeBlock.number, week: displayedBlockWeek, total: activeBlock.weeks })}
+                </strong>
+                {trainingBlockDateStatus(activeBlock, today) !== 'Current' && (
+                  <small>
+                    {trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
+                      ? t('workout.block.starts', { date: formatBlockStartDate(language, activeBlock.startDate) })
+                      : t('workout.block.completed')}
+                  </small>
+                )}
+              </span>
+              <span className="training-block-compact-name">{activeBlock.name}</span>
+              <span className="training-week-bar" aria-label={t('workout.block.weekOf', {
+                week: displayedBlockWeek,
+                total: activeBlock.weeks,
+              })}>
+                {Array.from({ length: activeBlock.weeks }, (_, index) => {
+                  const week = index + 1
+                  return (
+                    <span
+                      key={week}
+                      className={[
+                        'training-week-segment',
+                        week < displayedBlockWeek ? 'complete' : '',
+                        week === displayedBlockWeek ? 'current' : '',
+                        week === activeBlock.weeks ? 'deload' : '',
+                      ].filter(Boolean).join(' ')}
+                    />
+                  )
+                })}
+              </span>
+            </button>
+          )}
+        </section>
+      )}
+
+      {blockSheetOpen && (
+        <div className="calendar-popover block-sheet-backdrop" role="presentation" onClick={() => setBlockSheetOpen(false)}>
           <section
-            className="calendar-popover-card"
-            aria-label={text.calendar}
+            className="calendar-popover-card block-sheet"
+            aria-label={t('workout.block.sheetTitle')}
             role="dialog"
             aria-modal="true"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="calendar-popover-header">
-              <strong>{text.calendar}</strong>
-              <button type="button" className="toggle-button" onClick={() => setCalendarOpen(false)}>
+              <strong>{t('workout.block.sheetTitle')}</strong>
+              <button type="button" className="toggle-button" onClick={() => setBlockSheetOpen(false)}>
                 {text.close}
               </button>
             </div>
+
+            {(!lockMode || mode === 'preset') && (
+              <div className="plan-mode-tabs" aria-label={t('workout.mode.aria')}>
+                <button
+                  type="button"
+                  className={planMode === 'preset' ? 'tab-button active' : 'tab-button'}
+                  onClick={() => { setPlanMode('preset'); setBlockSheetOpen(false) }}
+                >
+                  {t('workout.mode.preset', { weeks: activeBlock?.weeks ?? 6 })}
+                </button>
+                <button
+                  type="button"
+                  className={planMode === 'custom' ? 'tab-button active' : 'tab-button'}
+                  onClick={() => { setPlanMode('custom'); setBlockSheetOpen(false) }}
+                >
+                  {text.modeCustom}
+                </button>
+              </div>
+            )}
+
+            {planMode === 'preset' && activeBlock && (
+              <section className="block-sheet-about">
+                <div className="block-sheet-heading">
+                  <strong>
+                    {activeBlock.number === 0
+                      ? activeBlock.name
+                      : t('workout.block.optionTitle', { number: activeBlock.number, name: activeBlock.name })}
+                  </strong>
+                  <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
+                </div>
+                <div className="chip-row block-sheet-chips">
+                  <span className="chip subtle">{t('workout.block.weekOf', { week: displayedBlockWeek, total: activeBlock.weeks })}</span>
+                  <span className="chip subtle">
+                    {t(displayedBlockWeek === 6 ? 'workout.block.weekType.deload' : 'workout.block.weekType.full')}
+                  </span>
+                  {pinnedBlockId === activeBlock.id && <span className="chip subtle">{t('workout.block.pinned')}</span>}
+                </div>
+                <div className="training-block-meta">
+                  <span>{blockDateRange(activeBlock, language)}</span>
+                  <span>{formatBlockMethod(activeBlock.method, language)}</span>
+                </div>
+                <p>{activeBlock.summary}</p>
+                <button
+                  type="button"
+                  className="about-block-toggle"
+                  onClick={() => setBlockInsightsOpen((current) => !current)}
+                  aria-expanded={blockInsightsOpen}
+                  aria-controls="training-block-insights"
+                >
+                  {t('workout.block.about')}
+                  <span className="toggle-button expand-toggle" aria-hidden="true">
+                    {blockInsightsOpen ? '−' : '+'}
+                  </span>
+                </button>
+                <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
+                  {activeBlock.insights.map((insight) => (
+                    <section key={insight.title}>
+                      <h5>{insight.title}</h5>
+                      <p>{insight.body}</p>
+                    </section>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="secondary-button block-change-button"
+                  onClick={() => setBlockSelectorOpen(true)}
+                  aria-haspopup="dialog"
+                  aria-expanded={blockSelectorOpen}
+                >
+                  {text.changeBlock}
+                </button>
+                {pinnedBlockId === activeBlock.id && (
+                  <button type="button" className="secondary-button block-change-button" onClick={useDateBasedBlock}>
+                    {t('workout.block.useDateBased')}
+                  </button>
+                )}
+              </section>
+            )}
 
             <section className="calendar-program" aria-labelledby="calendar-program-title">
               <strong id="calendar-program-title">{t('workout.calendar.program')}</strong>
@@ -2291,108 +2523,8 @@ export default function WorkoutPlan({
         </div>
       )}
 
-      {!lockMode && (
-        <div className="plan-mode-tabs" aria-label={t('workout.mode.aria')}>
-          <button
-            type="button"
-            className={planMode === 'preset' ? 'tab-button active' : 'tab-button'}
-            onClick={() => setPlanMode('preset')}
-          >
-            {t('workout.mode.preset', { weeks: activeBlock?.weeks ?? 6 })}
-          </button>
-          <button
-            type="button"
-            className={planMode === 'custom' ? 'tab-button active' : 'tab-button'}
-            onClick={() => setPlanMode('custom')}
-          >
-            {text.modeCustom}
-          </button>
-        </div>
-      )}
-
       {planMode === 'preset' && activeBlock && (
         <>
-          <section className="training-block-card" aria-label={t('workout.block.activeAria')}>
-            <button
-              type="button"
-              className="training-block-header"
-              onClick={toggleBlockCard}
-              aria-expanded={blockCardExpanded}
-              aria-controls="training-block-content"
-            >
-              <span className="training-block-primary">
-                {/* TODO(i18n): PT will provide approved translations */}
-                <span className="training-block-name">{activeBlock.name}</span>
-                <strong className="training-block-status">
-                  {trainingBlockDateStatus(activeBlock, today) === 'Current'
-                    ? t('workout.block.weekOf', { week: activeBlockWeek ?? 1, total: activeBlock.weeks })
-                    : trainingBlockDateStatus(activeBlock, today) === 'Upcoming'
-                      ? t('workout.block.starts', { date: formatBlockStartDate(language, activeBlock.startDate) })
-                      : t('workout.block.completed')}
-                </strong>
-                <span className="toggle-button expand-toggle" aria-hidden="true">
-                  {blockCardExpanded ? '−' : '+'}
-                </span>
-              </span>
-              <span className="training-block-badges">
-                <span className="training-block-number">{activeBlock.number === 0 ? t('workout.block.personal') : t('workout.block.number', { number: activeBlock.number })}</span>
-                <span className="origin-badge">{activeBlock.origin === 'pt' ? text.pt : text.coach}</span>
-                {pinnedBlockId === activeBlock.id && <span className="training-block-number">{t('workout.block.pinned')}</span>}
-              </span>
-            </button>
-            {activeBlockWeek !== null && (
-              <span className="chip subtle training-week-chip">
-                {t(
-                  activeBlockWeek === 6
-                    ? 'workout.block.weekType.deload'
-                    : 'workout.block.weekType.full'
-                )}
-              </span>
-            )}
-            <div id="training-block-content" className="training-block-content" hidden={!blockCardExpanded}>
-              <button
-                type="button"
-                className="secondary-button block-change-button"
-                onClick={() => setBlockSelectorOpen(true)}
-                aria-haspopup="dialog"
-                aria-expanded={blockSelectorOpen}
-              >
-                {text.changeBlock}
-              </button>
-              <div className="training-block-meta">
-                <span>{blockDateRange(activeBlock, language)}</span>
-                <span>{formatBlockMethod(activeBlock.method, language)}</span>
-              </div>
-              {/* TODO(i18n): PT will provide approved translations */}
-              <p>{activeBlock.summary}</p>
-              <button
-                type="button"
-                className="about-block-toggle"
-                onClick={() => setBlockInsightsOpen((current) => !current)}
-                aria-expanded={blockInsightsOpen}
-                aria-controls="training-block-insights"
-              >
-                {t('workout.block.about')}
-                <span className="toggle-button expand-toggle" aria-hidden="true">
-                  {blockInsightsOpen ? '−' : '+'}
-                </span>
-              </button>
-              <div id="training-block-insights" className="training-block-insights" hidden={!blockInsightsOpen}>
-                {activeBlock.insights.map((insight) => (
-                  <section key={insight.title}>
-                    {/* TODO(i18n): PT will provide approved translations */}
-                    <h5>{insight.title}</h5>
-                    <p>{insight.body}</p>
-                  </section>
-                ))}
-              </div>
-              {pinnedBlockId === activeBlock.id && (
-                <button type="button" className="secondary-button block-change-button" onClick={useDateBasedBlock}>
-                  {t('workout.block.useDateBased')}
-                </button>
-              )}
-            </div>
-          </section>
           {blockSelectorOpen && (
             <div className="block-selector-backdrop" role="presentation" onClick={() => setBlockSelectorOpen(false)}>
               <section
@@ -2424,7 +2556,16 @@ export default function WorkoutPlan({
                         setActiveBlockId(block.id)
                         setPinnedBlockId(block.id)
                         setSelectedBlockId(block.id)
-                        setSelectedDay(todayTrainingDay(block, history, today)?.key ?? block.days[0]?.key ?? '')
+                        setSelectedWeek(null)
+                        const currentWeek = blockWeek(block, today) ?? (
+                          trainingBlockDateStatus(block, today) === 'Upcoming' ? 1 : block.weeks
+                        )
+                        setSelectedDay(
+                          block.days.find((day) => trainingBlockDayDate(block, currentWeek, day) === today)?.key ??
+                            todayTrainingDay(block, history, today)?.key ??
+                            block.days[0]?.key ??
+                            ''
+                        )
                         setCollapsedExercises({})
                         setPlannedDrafts({})
                         setBlockSelectorOpen(false)
@@ -2452,66 +2593,194 @@ export default function WorkoutPlan({
 
       {planMode === 'preset' ? (
         <>
-        <div className="day-tabs" aria-label={t('workout.day.tabsAria')}>
-          {activeBlock?.days.map((day) => (
-            <button
-              key={day.key}
-              type="button"
-              className={day.key === (activeDay?.key ?? selectedDay) ? 'day-tab active' : 'day-tab'}
-              aria-label={t('workout.day.aria', {
-                position: day.position,
-                name: day.name,
-                today: todayDay?.key === day.key ? ` · ${t('workout.day.today')}` : '',
-              })}
-              aria-pressed={day.key === (activeDay?.key ?? selectedDay)}
-              onClick={() => {
-                setSelectedDay(day.key)
-                setWorkoutGroupIndex(null)
-                collapseAllExerciseSections()
-              }}
-            >
-              <span className="day-tab-label">{t('workout.day.short', { position: day.position })}</span>
-              {(() => {
-                const week = weekBounds(localIsoDate())
-                const done = day.exercises.filter((item) =>
-                  history.some(
-                    (entry) =>
-                      entry.exerciseId === item.exerciseId &&
-                      entry.date >= week.start &&
-                      entry.date <= week.end &&
-                      entry.blockId === activeBlock.id &&
-                      entry.dayKey === day.key
+          {activeBlock && (
+            <>
+              <section className="week-switcher" aria-label={t('workout.week.navigationAria')}>
+                <div className="week-switcher-row">
+                  <button
+                    type="button"
+                    className="week-switcher-arrow"
+                    aria-label={t('workout.week.label', {
+                      week: Math.max(1, displayedBlockWeek - 1),
+                      period: t('workout.week.label.previous'),
+                    })}
+                    disabled={displayedBlockWeek <= 1}
+                    onClick={() => {
+                      setSelectedWeek(displayedBlockWeek - 1)
+                      setSelectedDay(orderedBlockDays[0]?.key ?? '')
+                      setWorkoutGroupIndex(null)
+                    }}
+                  >
+                    ‹
+                  </button>
+                  <strong>
+                    {t('workout.week.label', {
+                      week: displayedBlockWeek,
+                      period: displayedBlockWeek === currentBlockWeek
+                        ? t('workout.week.label.current')
+                        : displayedBlockWeek === currentBlockWeek + 1
+                          ? t('workout.week.label.next')
+                          : displayedBlockWeek > currentBlockWeek
+                            ? t('workout.week.label.future')
+                            : displayedBlockWeek === currentBlockWeek - 1
+                              ? t('workout.week.label.previous')
+                              : t('workout.week.label.past'),
+                    })}
+                  </strong>
+                  <button
+                    type="button"
+                    className="week-switcher-arrow"
+                    aria-label={t('workout.week.label', {
+                      week: Math.min(activeBlock.weeks, displayedBlockWeek + 1),
+                      period: t('workout.week.label.next'),
+                    })}
+                    disabled={displayedBlockWeek >= activeBlock.weeks}
+                    onClick={() => {
+                      setSelectedWeek(displayedBlockWeek + 1)
+                      setSelectedDay(orderedBlockDays[0]?.key ?? '')
+                      setWorkoutGroupIndex(null)
+                    }}
+                  >
+                    ›
+                  </button>
+                </div>
+                <small>
+                  {formatShortDate(language, trainingBlockDayDate(activeBlock, displayedBlockWeek, { position: 1 }))} –{' '}
+                  {formatShortDate(language, trainingBlockDayDate(activeBlock, displayedBlockWeek, { position: 7 }))}
+                  {displayedBlockWeek === 6 ? ` · ${t('workout.block.weekType.deload')}` : ''}
+                </small>
+                {displayedBlockWeek !== currentBlockWeek && (
+                  <button
+                    type="button"
+                    className="week-switcher-back"
+                    onClick={() => {
+                      setSelectedWeek(currentBlockWeek)
+                      setSelectedDay(
+                        activeBlock.days.find((day) => trainingBlockDayDate(activeBlock, currentBlockWeek, day) === today)?.key ??
+                          orderedBlockDays[0]?.key ??
+                          ''
+                      )
+                    }}
+                  >
+                    {t('workout.week.back')}
+                  </button>
+                )}
+              </section>
+
+              <div className="day-tabs" ref={dayTabsRef} aria-label={t('workout.day.chipsAria')}>
+                {orderedBlockDays.map((day) => {
+                  const date = trainingBlockDayDate(activeBlock, displayedBlockWeek, day)
+                  const entries = history.filter((entry) =>
+                    entry.blockId === activeBlock.id &&
+                    entry.dayKey === day.key &&
+                    entry.date.slice(0, 10) === date
                   )
-                ).length
-                return (
-                  <>
-                    <span className="day-tab-progress">{`${done}/${day.exercises.length}`}</span>
-                    {todayDay?.key === day.key && <span className="day-tab-today">{t('workout.day.today')}</span>}
-                  </>
-                )
-              })()}
+                  const done = day.exercises.length > 0 && day.exercises.every((exercise) =>
+                    entries.some((entry) => entry.exerciseId === exercise.exerciseId && entry.sets.length > 0)
+                  )
+                  const status = done
+                    ? 'done'
+                    : date === today
+                      ? 'today'
+                      : date === nextTrainingDay?.date
+                        ? 'next'
+                        : date < today
+                          ? 'unlogged'
+                          : 'upcoming'
+                  const statusKey = {
+                    done: 'workout.day.status.done',
+                    today: 'workout.day.status.today',
+                    next: 'workout.day.status.next',
+                    unlogged: 'workout.day.status.unlogged',
+                    upcoming: 'workout.day.status.upcoming',
+                  } as const
+                  return (
+                    <button
+                      key={day.key}
+                      type="button"
+                      className={`day-tab${day.key === activeDay?.key ? ' active' : ''}${status === 'next' ? ' day-tab-next' : ''}`}
+                      aria-label={`${formatTrainingDate(locale, date, true)} · ${day.name} · ${t(statusKey[status])}`}
+                      aria-pressed={day.key === activeDay?.key}
+                      onClick={() => {
+                        setSelectedDay(day.key)
+                        setWorkoutGroupIndex(null)
+                        collapseAllExerciseSections()
+                      }}
+                    >
+                      <span className="day-tab-label">{formatTrainingDate(locale, date)}</span>
+                      <span className={`day-tab-status day-tab-status-${status}`} aria-hidden="true">
+                        {status === 'done' ? '✓' : status === 'today' ? '•' : ''}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {activeDay && (
+                <div className="selected-day-caption" aria-label={t('workout.day.captionAria')}>
+                  <div className="selected-day-caption-title">
+                    <span className={`selected-day-status${activeDayDate < today && !selectedDayComplete ? ' neutral' : ''}`}>
+                      {selectedDayComplete
+                        ? t('workout.day.caption.done')
+                        : activeDayDate === today
+                          ? t('workout.day.caption.today')
+                          : activeDayDate < today
+                            ? t('workout.day.status.unlogged')
+                            : activeDayDate === nextTrainingDay?.date
+                              ? t('workout.day.caption.next')
+                              : t('workout.day.caption.upcoming')}
+                      {' · '}
+                      {formatTrainingDate(locale, activeDayDate, true)}
+                    </span>
+                    <strong>{activeDay.name}</strong>
+                  </div>
+                  {activeDay.focus && <span className="selected-day-focus">{activeDay.focus}</span>}
+                  <small>{t('workout.day.progress', { done: completedExerciseCount, total: activeDay.exercises.length })}</small>
+                </div>
+              )}
+
+              {nextTrainingDay && (
+                <button
+                  type="button"
+                  className="next-training-day"
+                  onClick={() => {
+                    setSelectedWeek(nextTrainingDay.week)
+                    setSelectedDay(nextTrainingDay.day.key)
+                    setWorkoutGroupIndex(null)
+                  }}
+                >
+                  <span aria-hidden="true">○</span>
+                  {t('workout.day.next', {
+                    date: formatTrainingDate(locale, nextTrainingDay.date),
+                    name: nextTrainingDay.day.name,
+                  })}
+                </button>
+              )}
+
+              {isFutureDayPreview && activeDay && (
+                <section className="future-day-preview" aria-label={t('workout.future.title', { day: activeDay.name })}>
+                  <h3>{t('workout.future.title', { day: activeDay.name })}</h3>
+                  <ul>
+                    {activeBlockExercises.map((exercise, index) => (
+                      <li key={`${exercise.code ?? index}-${exercise.exerciseId}`}>
+                        <strong>{displayExerciseName(exercise.name)}</strong>
+                        <span>{exercise.sets} × {exercise.reps}</span>
+                        {exercise.technique && <small>{formatTechniqueLabel(exercise.technique, t)}</small>}
+                      </li>
+                    ))}
+                  </ul>
+                  <p>{t('workout.future.note')}</p>
+                </section>
+              )}
+            </>
+          )}
+          {activeDay && activeExercises.length > 0 && !isFutureDayPreview && !isWorkoutMode && (
+            <button type="button" className="primary-button start-workout-button" onClick={startWorkout}>
+              {activeExercises.some((exercise) => findExerciseCompletion(exercise, history))
+                ? t('workout.run.resume')
+                : t('workout.run.start')}
             </button>
-          ))}
-        </div>
-        {activeDay && (
-          <>
-            {/* TODO(i18n): PT will provide approved translations */}
-            <h2 className="selected-day-name">{t('workout.day.title', { position: activeDay.position, name: activeDay.name })}</h2>
-          </>
-        )}
-        {activeDay?.focus && (
-          <>
-            {/* TODO(i18n): PT will provide approved translations */}
-            <p className="day-focus-label">{activeDay.focus}</p>
-          </>
-        )}
-        {activeDay && activeExercises.length > 0 && !isWorkoutMode && (
-          <button type="button" className="primary-button start-workout-button" onClick={startWorkout}>
-            {activeExercises.some((exercise) => findExerciseCompletion(exercise, history))
-              ? t('workout.run.resume')
-              : t('workout.run.start')}
-          </button>
-        )}
+          )}
         </>
       ) : (
         <section className="custom-plan-builder">
@@ -2786,7 +3055,7 @@ export default function WorkoutPlan({
         </div>
       )}
 
-      {activeExercises.length > 0 && (
+      {activeExercises.length > 0 && !isFutureDayPreview && (
       <section className="day-plan-card">
         {isWorkoutMode && workoutGroupIndex !== null && (
           <div className="workout-mode-bar" role="navigation" aria-label={t('workout.run.modeAria')}>

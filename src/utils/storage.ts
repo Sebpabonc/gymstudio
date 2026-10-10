@@ -22,6 +22,7 @@ const REST_TIMER_KEY = 'gym-studio.rest-timer'
 const EXERCISE_SWAPS_KEY = 'gym-studio.exercise-swaps'
 const TRAINER_EXPLANATIONS_KEY = 'gym-studio.trainer-explanations'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
+const DISMISSED_BLOCK_INTROS_KEY = 'gym-studio.block-intro-dismissed'
 let helpAiAppOpensThisLoad: number | null = null
 
 export type CustomPlanExercise = {
@@ -80,7 +81,7 @@ function signalWorkoutHistorySaved() {
 
 const GUEST_CLAIMED_KEY = 'gym-studio.guest-claimed'
 const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
-const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY, LANGUAGE_KEY])
+const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY, LANGUAGE_KEY, DISMISSED_BLOCK_INTROS_KEY])
 
 let storageNamespace: string | null = null
 
@@ -274,6 +275,27 @@ export function setSessionStorageValue(key: string, value: string) {
     if (typeof sessionStorage !== 'undefined') sessionStorage.setItem(storageKey(key), value)
   } catch {
     // Session storage is optional when browser storage is unavailable.
+  }
+}
+
+export function getDismissedBlockIntros() {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(storageKey(DISMISSED_BLOCK_INTROS_KEY)) ?? '[]')
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+export function dismissBlockIntro(blockId: string) {
+  if (!blockId) return
+  try {
+    const dismissed = getDismissedBlockIntros()
+    if (!dismissed.includes(blockId)) {
+      localStorage.setItem(storageKey(DISMISSED_BLOCK_INTROS_KEY), JSON.stringify([...dismissed, blockId]))
+    }
+  } catch {
+    // The intro can still be dismissed for the current render if browser storage is unavailable.
   }
 }
 
