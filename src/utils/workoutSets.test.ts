@@ -8,6 +8,7 @@ import {
   getPreviousWorkoutSets,
   getPreviousWorkoutSetRow,
   parseRepPrescription,
+  prefillStraightSetWeights,
   scaleWeightForOtherDay,
   selectCompletedSets,
   stepWorkoutValue,
@@ -31,6 +32,11 @@ describe('workout sets', () => {
   it('copies set 1 weight to every set when explicitly requested', () => {
     expect(copySetOneWeight([24, 20, 22])).toEqual([24, 24, 24])
     expect(copySetOneWeight([])).toEqual([])
+  })
+
+  it('prefills straight sets with the highest previous set load', () => {
+    expect(prefillStraightSetWeights([35.5, 33, 30.5], 3)).toEqual([35.5, 35.5, 35.5])
+    expect(prefillStraightSetWeights([], 2)).toEqual([0, 0])
   })
 
   it('gets the most recent sets for the requested exercise without mutating history', () => {

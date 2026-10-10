@@ -60,6 +60,21 @@ describe('buildWorkoutSummary', () => {
     })
   })
 
+  it('retains per-set loads for the session performance summary', () => {
+    const today = {
+      ...entry('today', '2026-10-05', 'day-a', 10),
+      sets: [
+        { id: 'set-1', weight: 35.5, reps: 10 },
+        { id: 'set-2', weight: 33, reps: 10 },
+        { id: 'set-3', weight: 30.5, reps: 10 },
+      ],
+    }
+    const [row] = buildWorkoutSummary([today], [], [block], catalogue, today.date)
+
+    expect(row.actual.setWeights).toEqual([35.5, 33, 30.5])
+    expect(row.actual.reps).toEqual([10, 10, 10])
+  })
+
   it('marks a maintained recommendation as the same trend', () => {
     const today = entry('today', '2026-10-05', 'day-a', 9)
     const sameRangeBlock = {

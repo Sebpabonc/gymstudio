@@ -35,13 +35,30 @@ describe('completed exercises', () => {
   })
 
   it('summarizes sets and top weight', () => {
-    expect(summarizeCompletedEntry(entry())).toBe('2 sets · top 26 kg')
+    expect(summarizeCompletedEntry(entry())).toBe('2 sets · 20 kg × 10 · 26 kg × 8')
     expect(summarizeCompletedEntry(entry({ sets: [{ id: 'a', reps: 10, weight: 22.5 }] })))
       .toBe('1 set · top 22.5 kg')
     expect(summarizeCompletedEntry(entry({ sets: [{ id: 'a', reps: 12, weight: 0 }] }))).toBe('1 set')
-    expect(summarizeCompletedEntry(entry(), 'es')).toBe('2 series · mejor 26 kg')
+    expect(summarizeCompletedEntry(entry(), 'es')).toBe('2 series · 20 kg × 10 · 26 kg × 8')
     expect(summarizeCompletedEntry(entry({ sets: [{ id: 'a', reps: 10, weight: 12.5 }, { id: 'b', reps: 10, weight: 12.5 }] }), 'es'))
       .toBe('2 series · mejor 12.5 kg')
+  })
+
+  it('shows each set load and reps when set loads differ', () => {
+    const varied = entry({
+      sets: [
+        { id: 'a', reps: 10, weight: 35.5 },
+        { id: 'b', reps: 10, weight: 33 },
+        { id: 'c', reps: 10, weight: 30.5 },
+      ],
+    })
+
+    expect(summarizeCompletedEntry(varied)).toBe(
+      '3 sets · 35.5 kg × 10 · 33 kg × 10 · 30.5 kg × 10'
+    )
+    expect(summarizeCompletedEntry(varied, 'es')).toBe(
+      '3 series · 35.5 kg × 10 · 33 kg × 10 · 30.5 kg × 10'
+    )
   })
 
   it('picks the next pending exercise after the current one', () => {

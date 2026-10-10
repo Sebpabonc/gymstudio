@@ -19,6 +19,11 @@ export function workoutMaxWeight(sets: WorkoutSet[]) {
   return Math.max(...sets.map((set) => set.weight), 0)
 }
 
+export function prefillStraightSetWeights(weights: number[], setCount: number) {
+  const topWeight = Math.max(...weights, 0)
+  return Array.from({ length: setCount }, () => topWeight)
+}
+
 /**
  * Starting weight for the first session of the other A/B day. Without rep data: the other day's weight − 10%.
  * With the reps done there and this day's target reps: estimate strength (Epley e1RM) and pick the load for the

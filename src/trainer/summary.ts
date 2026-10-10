@@ -8,7 +8,7 @@ import { recommend, workingWeight, type Recommendation, type RepRange } from './
 export type WorkoutSummaryRow = {
   exerciseId: string
   trend: 'up' | 'same' | 'down'
-  actual: { weight: number; reps: number[] }
+  actual: { weight: number; reps: number[]; setWeights: number[] }
   target: { weight?: number; reps: RepRange }
   next: Recommendation
   nextDate?: string
@@ -117,7 +117,11 @@ export function buildWorkoutSummary(
     return [{
       exerciseId,
       trend: actionTrend(recommendation),
-      actual: { weight: workingWeight(actualSets), reps: actualSets.map((set) => set.reps) },
+      actual: {
+        weight: workingWeight(actualSets),
+        reps: actualSets.map((set) => set.reps),
+        setWeights: actualSets.map((set) => set.weight),
+      },
       target: { ...(targetWeight !== undefined ? { weight: targetWeight } : {}), reps: targetReps },
       next: recommendation,
       nextDate: nextOccurrence.date,
