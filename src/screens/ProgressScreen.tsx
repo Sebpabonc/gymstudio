@@ -774,7 +774,7 @@ export default function ProgressScreen({
               count: formatNumber(language, Math.min(unlockedMuscleWeeks, 4)),
             })}</p>}
         {overload?.rate !== null && overload?.rate !== undefined
-          ? <p>{t('progress.v3.overview.overload', { rate: formatNumber(language, overload.rate * 100) })}</p>
+          ? <p>{t('progress.v3.overview.overload', { rate: formatNumber(language, Math.round(overload.rate * 100)) })}</p>
           : <p className="pv3-caption">{t('progress.v3.unlock.equivalent', { count: formatNumber(language, overload?.comparable ?? 0) })}</p>}
       </section>
     </>
@@ -784,8 +784,8 @@ export default function ProgressScreen({
     const currentAdherenceText = currentAdherence === null ? '—' : `${formatNumber(language, currentAdherence * 100, { maximumFractionDigits: 0 })}%`
     const previousAdherenceText = previousAdherence === null ? '—' : `${formatNumber(language, previousAdherence * 100, { maximumFractionDigits: 0 })}%`
     const mainChangeText = averageMainChange === null ? '—' : `${averageMainChange > 0 ? '+' : ''}${formatNumber(language, averageMainChange, { maximumFractionDigits: 1 })}%`
-    const currentOverloadText = overload?.rate === null || overload?.rate === undefined ? '—' : `${formatNumber(language, overload.rate * 100)}%`
-    const previousOverloadText = previousOverload.rate === null ? '—' : `${formatNumber(language, previousOverload.rate * 100)}%`
+    const currentOverloadText = overload?.rate === null || overload?.rate === undefined ? '—' : `${formatNumber(language, Math.round(overload.rate * 100))}%`
+    const previousOverloadText = previousOverload.rate === null ? '—' : `${formatNumber(language, Math.round(previousOverload.rate * 100))}%`
     const windowStart = rangeStart(range, today, activeBlock, progressEntries)
     const windowEnd = rangeEnd(range, today, activeBlock)
     const rangeLiftIds = [...new Set([...mainLiftIds, ...allLiftIds])]
