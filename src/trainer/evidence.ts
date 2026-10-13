@@ -2,7 +2,36 @@ import type { TrainingBlock, WorkoutEntry } from '../types'
 import { blockWeek, findEntryBlock, plannedExerciseForEntry } from '../progress/utils'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { parseRepPrescription } from '../utils/workoutSets'
-import type { SessionEvidence } from './engine'
+import { recommend, type RecommendInput, type Recommendation, type SessionEvidence } from './engine'
+
+type SharedRecommendationInput = Omit<RecommendInput, 'history' | 'today' | 'dayKey'>
+
+export function recommendForExercise(options: {
+  history: WorkoutEntry[]
+  exerciseId: string
+  blocks: TrainingBlock[]
+  today: string
+  dayKey: string
+  blockId?: string
+  todayDayKey?: string
+  input: SharedRecommendationInput
+}): { evidence: SessionEvidence[]; recommendation: Recommendation } {
+  const evidence = buildEvidence(
+    options.history,
+    options.exerciseId,
+    options.blocks,
+    options.today,
+    options.todayDayKey
+  )
+  const recommendation = recommend({
+    ...options.input,
+    history: evidence,
+    today: options.today,
+    dayKey: options.dayKey,
+    blockId: options.blockId,
+  })
+  return { evidence, recommendation }
+}
 
 export function buildEvidence(
   history: WorkoutEntry[],
@@ -30,6 +59,8 @@ export function buildEvidence(
 
       return {
         date: entry.date.slice(0, 10),
+        ...(entry.dayKey ? { dayKey: entry.dayKey } : {}),
+        ...(entry.blockId ? { blockId: entry.blockId } : {}),
         // Keep the PT spec inputs: set tags (R3/R10), reps in reserve (R1) and the nested drop (R3).
         sets: entry.sets.map(({ weight, reps, tag, rir, drop }) => ({
           weight,

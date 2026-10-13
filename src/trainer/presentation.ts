@@ -21,6 +21,8 @@ const reasonTranslations: Record<ReasonCode, TranslationKey> = {
   bodyweight_add_reps: 'workout.trainer.reason.bodyweight_add_reps',
   double_angle: 'workout.trainer.reason.double_angle',
   consolidate_load: 'workout.trainer.reason.consolidate_load',
+  achieved_floor: 'workout.trainer.reason.achieved_floor',
+  same_day_boost: 'workout.trainer.reason.same_day_boost',
 }
 
 export function trainerRangeLabel(range: RepRange, language: Language) {
