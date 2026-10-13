@@ -3056,18 +3056,21 @@ export default function WorkoutPlan({
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             // "Previous" is the session before this week's logged one, never the entry being edited.
             const editingEntry = findExerciseCompletion(exercise, history)
+            // PO 2026-10-13: "Previous" = the last time this exercise was done, any day (A or B).
+            // Only this day's own logs from today are excluded (they are what is being edited).
             const previousSelection = exercise.exerciseId
               ? findPrefillSelection(
-                  // Never today's own logs (any day slot): "Previous" is the last session before today.
-                  history.filter((entry) => entry.id !== editingEntry?.id && entry.date.slice(0, 10) !== today),
-                  exercise.exerciseId,
-                  planMode === 'preset' ? activeDay?.key : undefined
+                  history.filter((entry) =>
+                    entry.id !== editingEntry?.id &&
+                    !(entry.date.slice(0, 10) === today && (planMode !== 'preset' || entry.dayKey === activeDay?.key))
+                  ),
+                  exercise.exerciseId
                 )
               : undefined
             const previousEntry = previousSelection?.entry ?? (exercise.exerciseId ? undefined : exerciseHistory[0])
             const previousSets = previousEntry?.sets ?? []
-            const previousDayType = previousSelection?.basis === 'other-day'
-              ? getDayKeyType(previousEntry?.dayKey)
+            const previousDayType = planMode === 'preset' && previousEntry?.dayKey && previousEntry.dayKey !== activeDay?.key
+              ? getDayKeyType(previousEntry.dayKey)
               : undefined
             previousSetsByExercise.set(exercise.code ?? exercise.name, previousSets)
             const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
