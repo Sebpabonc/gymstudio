@@ -1,3 +1,4 @@
+import { isRepTargetAdjustment } from './presentation'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { blockWeek, dateWeekday, findBlockForDate } from '../progress/utils'
 import { prescriptionForWeek } from '../plans/weekPrescription'
@@ -29,6 +30,8 @@ function repRange(repetitions: string[]) {
 }
 
 function actionTrend(recommendation: Recommendation): WorkoutSummaryRow['trend'] {
+  // R24: a load change caused only by a new rep target is not "up"/"down".
+  if (isRepTargetAdjustment(recommendation, recommendation.reps)) return 'same'
   if (recommendation.action === 'increase_weight' || recommendation.action === 'increase_reps') return 'up'
   if (recommendation.action === 'decrease_weight' || recommendation.action === 'regress') return 'down'
   return 'same'
