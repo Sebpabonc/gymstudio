@@ -75,8 +75,8 @@ import { fetchExerciseSwaps, removeExerciseSwap, saveExerciseSwap } from '../uti
 import { fetchCalibrationRecommendations, saveTrainerRecommendation } from '../utils/profileData'
 import type { TrainerRecommendationRow } from '../utils/profileData'
 import { prescriptionForWeek } from '../plans/weekPrescription'
-import { equipmentStep, recommend } from '../trainer/engine'
-import { buildEvidence, isDoubleAngleFollower } from '../trainer/evidence'
+import { equipmentStep } from '../trainer/engine'
+import { isDoubleAngleFollower, recommendForExercise } from '../trainer/evidence'
 import { bucketFor, computeCalibration } from '../trainer/calibration'
 import { buildExposures } from '../trainer/exposures'
 import { nextSetHint } from '../trainer/setSignal'
@@ -1350,30 +1350,36 @@ export default function WorkoutPlan({
     const planned = activeDay.exercises.find((item) => item.exerciseId === exercise.exerciseId)
     const plannedSets = planned?.sets ?? getDefaultSetCount(exercise)
     const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
-    const evidence = buildEvidence(history, exercise.exerciseId, trainingBlocks, today, activeDay.key)
-    const recommendation = recommend({
-      history: evidence,
-      today,
-      target,
-      sets: plannedSets,
-      equipment,
-      plannedWeight: original.weight > 0 ? original.weight : undefined,
-      deload: activeBlockWeek === 6,
-      technique: exercise.technique,
-      setReps: reps,
+    const { evidence, recommendation } = recommendForExercise({
+      history,
       exerciseId: exercise.exerciseId,
-      tempo: /\btempo\b/i.test(exercise.notes ?? ''),
-      followLoad: followLoadFor(exercise),
-      calibrationOffset: computeCalibration(
-        calibrationExposures,
-        today,
-        {
-          exerciseId: exercise.exerciseId,
-          pattern: exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.movementPattern,
-          bucket: bucketFor(exercise.technique),
-        },
-        history.map((entry) => entry.date.slice(0, 10)).filter((date) => date < today)
-      ).offset,
+      blocks: trainingBlocks,
+      today,
+      dayKey: activeDay.key,
+      blockId: activeBlock.id,
+      todayDayKey: activeDay.key,
+      input: {
+        target,
+        sets: plannedSets,
+        equipment,
+        plannedWeight: original.weight > 0 ? original.weight : undefined,
+        deload: activeBlockWeek === 6,
+        technique: exercise.technique,
+        setReps: reps,
+        exerciseId: exercise.exerciseId,
+        tempo: /\btempo\b/i.test(exercise.notes ?? ''),
+        followLoad: followLoadFor(exercise),
+        calibrationOffset: computeCalibration(
+          calibrationExposures,
+          today,
+          {
+            exerciseId: exercise.exerciseId,
+            pattern: exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.movementPattern,
+            bucket: bucketFor(exercise.technique),
+          },
+          history.map((entry) => entry.date.slice(0, 10)).filter((date) => date < today)
+        ).offset,
+      },
     })
     return {
       recommendation,
@@ -3069,6 +3075,10 @@ export default function WorkoutPlan({
               : undefined
             const previousEntry = previousSelection?.entry ?? (exercise.exerciseId ? undefined : exerciseHistory[0])
             const previousSets = previousEntry?.sets ?? []
+            const previousLoads = new Set(previousSets.map((set) => set.weight))
+            const previousSummary = previousSets.length && previousLoads.size === 1
+              ? `${formatNumber(language, previousSets[0].weight)}×${previousSets.map((set) => formatNumber(language, set.reps)).join('·')}`
+              : previousSets.map((set) => `${formatNumber(language, set.weight)}×${formatNumber(language, set.reps)}`).join('·')
             const previousDayType = planMode === 'preset' && previousEntry?.dayKey && previousEntry.dayKey !== activeDay?.key
               ? getDayKeyType(previousEntry.dayKey)
               : undefined
@@ -3563,6 +3573,11 @@ export default function WorkoutPlan({
                             <span>{t('workout.label.set')}</span>
                             <span>
                               {t(isWorkoutMode ? 'workout.run.lastTime' : 'workout.label.previous')}
+                              {previousEntry?.date && previousSummary && (
+                                <small className="previous-day-label">
+                                  {formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`)}: {previousSummary}
+                                </small>
+                              )}
                               {previousDayType && (
                                 <small className="previous-day-label">{t('workout.previous.day', { day: previousDayType })}</small>
                               )}
