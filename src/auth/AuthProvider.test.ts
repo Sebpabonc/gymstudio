@@ -1,6 +1,6 @@
 import type { AuthChangeEvent, Session, SupabaseClient } from '@supabase/supabase-js'
 import { describe, expect, it, vi } from 'vitest'
-import { authStateReducer, subscribeToAuthChanges } from './AuthProvider'
+import { authStateReducer, needsSignInAfterAuthChange, subscribeToAuthChanges } from './AuthProvider'
 
 describe('AuthProvider state transitions', () => {
   it('tracks mocked Supabase sign-in and sign-out events and unsubscribes', () => {
@@ -35,5 +35,14 @@ describe('AuthProvider state transitions', () => {
       { session: null, status: 'loading', available: false },
       { type: 'unavailable' }
     )).toEqual({ session: null, status: 'signed-out', available: false })
+  })
+
+  it('retains a generic reauth notice after an automatic signout but not a deliberate one', () => {
+    expect(needsSignInAfterAuthChange('SIGNED_OUT', null, 'previous-account', false)).toBe(true)
+    expect(needsSignInAfterAuthChange('SIGNED_OUT', null, 'previous-account', true)).toBe(false)
+    expect(needsSignInAfterAuthChange('SIGNED_OUT', null, null, false)).toBe(false)
+    expect(needsSignInAfterAuthChange('INITIAL_SESSION', null, null, false)).toBe(false)
+    const nextSession = { user: { id: 'next-account' } } as Session
+    expect(needsSignInAfterAuthChange('SIGNED_IN', nextSession, 'previous-account', false)).toBe(false)
   })
 })

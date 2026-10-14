@@ -82,9 +82,12 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
             <ul>
               {quarantinedEntries.map(entry => {
                 const exercise = exercises.find(item => item.id === entry.exerciseId)
-                const name = (language === 'es' ? exercise?.nameEs : undefined) || exercise?.name || entry.exerciseId
-                const parsedDate = new Date(`${entry.date.slice(0, 10)}T12:00:00`)
-                const date = Number.isNaN(parsedDate.getTime()) ? entry.date : parsedDate.toLocaleDateString(locale)
+                const name = (language === 'es' ? exercise?.nameEs : undefined) || exercise?.name || String(entry.exerciseId)
+                const rawDate = String(entry.date)
+                const parsedDate = new Date(`${rawDate}T12:00:00Z`)
+                const validDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) && Number.isFinite(parsedDate.getTime()) &&
+                  parsedDate.toISOString().slice(0, 10) === rawDate
+                const date = validDate ? new Date(`${rawDate}T12:00:00`).toLocaleDateString(locale) : rawDate
                 return (
                   <li key={entry.id}>
                     <strong>{name}</strong>

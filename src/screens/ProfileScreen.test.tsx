@@ -31,6 +31,8 @@ describe('profile sync feedback', () => {
   beforeEach(() => {
     language = 'en'
     auth.syncSignInRequired = false
+    auth.quarantinedEntries[0].date = '2026-10-14'
+    auth.quarantinedEntries[0].exerciseId = 'Bench press'
   })
 
   it('shows the pending count, quarantine reason and retry controls even after a successful pull', () => {
@@ -53,5 +55,22 @@ describe('profile sync feedback', () => {
     expect(html).toContain('Reintentar ahora')
     expect(html).toContain('Registros que necesitan atención')
     expect(html).toContain('Último error de sincronización: Unknown exercise')
+  })
+
+  it('renders invalid runtime dates and exercise IDs safely instead of crashing', () => {
+    auth.quarantinedEntries[0].date = 123 as unknown as string
+    auth.quarantinedEntries[0].exerciseId = { invalid: true } as unknown as string
+    const html = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
+    expect(html).toContain('123')
+    expect(html).toContain('[object Object]')
+    expect(html).toContain('Retry now')
+  })
+
+  it('preserves impossible calendar dates instead of normalizing them', () => {
+    auth.quarantinedEntries[0].date = '2026-02-30'
+    const html = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
+    expect(html).toContain('2026-02-30')
+    expect(html).not.toContain('3/2/2026')
+    expect(html).toContain('Retry Bench press logged on 2026-02-30')
   })
 })

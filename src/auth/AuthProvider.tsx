@@ -53,6 +53,12 @@ export function subscribeToAuthChanges(client: SupabaseClient, onSession: (sessi
   return () => subscription.unsubscribe()
 }
 
+export function needsSignInAfterAuthChange(
+  event: AuthChangeEvent | undefined, session: Session | null, previousAccountId: string | null, intentionalSignOut: boolean,
+) {
+  return event === 'SIGNED_OUT' && !session && previousAccountId !== null && !intentionalSignOut
+}
+
 type ActionResult = { error: string | null; needsConfirmation?: boolean }
 
 type AuthContextValue = {
@@ -104,9 +110,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
   const [syncErrorDetail, setSyncErrorDetail] = useState<string | null>(null)
   const [syncSignInRequired, setSyncSignInRequired] = useState(false)
+  const [signInAgainRequired, setSignInAgainRequired] = useState(false)
   const [pendingEntries, setPendingEntries] = useState<SyncWorkoutEntry[]>([])
   const [syncAccountId, setSyncAccountId] = useState<string | null>(null)
   const retrySyncRef = useRef<{ accountId: string; retry: () => void } | null>(null)
+  const intentionalSignOut = useRef(false)
+  const authAccountRef = useRef<string | null>(null)
   const [resolvedGuestPromptFor, setResolvedGuestPromptFor] = useState<string | null>(null)
 
   const accountId = demoMode ? null : state.session?.user.id ?? null
@@ -132,6 +141,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       unsubscribe = subscribeToAuthChanges(supabase, (session, event) => {
         if (!active) return
+        if (event === 'SIGNED_OUT' || session) {
+          setSignInAgainRequired(needsSignInAfterAuthChange(event, session, authAccountRef.current, intentionalSignOut.current))
+        }
+        if (event === 'SIGNED_OUT') intentionalSignOut.current = false
+        authAccountRef.current = session?.user.id ?? null
         dispatch({ type: 'session', session })
         if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') &&
             retrySyncRef.current?.accountId === session.user.id) {
@@ -147,7 +161,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       const { data, error } = await supabase.auth.getSession()
-      if (active) dispatch({ type: 'session', session: error ? null : data.session })
+      if (active) {
+        authAccountRef.current = error ? null : data.session?.user.id ?? null
+        dispatch({ type: 'session', session: error ? null : data.session })
+      }
     })().catch(() => {
       if (active) dispatch({ type: 'unavailable' })
     })
@@ -279,8 +296,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(async () => {
     const client = await getClient()
     if (!client) return { error: 'Sign-in unavailable offline.' }
-    const { error } = await client.auth.signOut()
-    return resultError(error)
+    intentionalSignOut.current = true
+    try {
+      const { error } = await client.auth.signOut()
+      return resultError(error)
+    } finally {
+      intentionalSignOut.current = false
+    }
   }, [])
 
   const resolveGuestPrompt = (move: boolean) => {
@@ -296,7 +318,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     syncStatus: syncAccountId === accountId ? syncStatus : 'syncing',
     lastSyncedAt: accountId && syncAccountId === accountId ? lastSyncedAt : null,
     syncErrorDetail: accountId && syncAccountId === accountId ? syncErrorDetail : null,
-    syncSignInRequired: !!accountId && syncAccountId === accountId && syncSignInRequired,
+    syncSignInRequired: signInAgainRequired || (!!accountId && syncAccountId === accountId && syncSignInRequired),
     pendingSyncCount: accountId && syncAccountId === accountId ? pendingEntries.length : 0,
     quarantinedEntries: accountId && syncAccountId === accountId ? pendingEntries.filter(entry => entry.syncError) : [],
     retrySyncNow,
@@ -314,6 +336,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     syncAccountId,
     accountId,
     syncSignInRequired,
+    signInAgainRequired,
     pendingEntries,
     retrySyncNow,
     retryQuarantinedEntry,
