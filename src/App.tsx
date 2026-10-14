@@ -79,7 +79,7 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 
 export default function App() {
   const demoMode = isDemoMode()
-  const { status, syncStatus, user } = useAuth()
+  const { status, syncStatus, user, pendingSyncCount, syncSignInRequired } = useAuth()
   const [rawExercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
@@ -386,8 +386,13 @@ export default function App() {
             <span
               className={`sync-indicator ${status === 'signed-in' ? syncStatus : demoMode ? 'demo' : 'local'}`}
               role="status"
-              aria-label={status === 'signed-in' ? t('sync.aria.signedIn', { status: t(`sync.${syncStatus}`) }) : demoMode ? t('sync.aria.demo') : t('sync.aria.local')}
+              aria-label={status === 'signed-in' ? t('sync.aria.signedIn', { status: syncSignInRequired ? t('profile.syncSignInRequired') : t(`sync.${syncStatus}`) }) : demoMode ? t('sync.aria.demo') : t('sync.aria.local')}
             />
+            {status === 'signed-in' && pendingSyncCount > 0 && (
+              <span className="sync-pending-count" role="status" aria-label={t('profile.pendingLogs', { count: pendingSyncCount })}>
+                {pendingSyncCount}
+              </span>
+            )}
             </span>
           </div>
           <header className={`brand-header${headerCollapsed ? ' collapsed' : ''}`}>

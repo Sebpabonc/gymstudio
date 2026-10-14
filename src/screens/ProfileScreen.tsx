@@ -4,13 +4,23 @@ import { useAuth } from '../auth/AuthProvider'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { useT } from '../i18n'
 import ProfileDataSections from './ProfileDataSections'
+import { loadExercises } from '../utils/storage'
+import type { Exercise } from '../types'
 
 export default function ProfileScreen({ onClose }: { onClose: () => void }) {
-  const { t, locale } = useT()
-  const { user, signOut, syncStatus, lastSyncedAt, syncErrorDetail } = useAuth()
+  const { t, locale, language } = useT()
+  const { user, signOut, syncStatus, lastSyncedAt, syncErrorDetail, syncSignInRequired,
+    pendingSyncCount, quarantinedEntries, retrySyncNow, retryQuarantinedEntry } = useAuth()
+  const [exercises, setExercises] = useState<Exercise[]>([])
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    void loadExercises().then(library => { if (active) setExercises(library) }).catch(() => undefined)
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -27,7 +37,9 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
 
   const metadata = user?.user_metadata as { full_name?: string; name?: string } | undefined
   const name = fullName || metadata?.full_name || metadata?.name
-  const syncMessage = syncStatus === 'syncing'
+  const syncMessage = syncSignInRequired
+    ? t('profile.syncSignInRequired')
+    : syncStatus === 'syncing'
     ? t('profile.syncing')
     : syncStatus === 'offline'
       ? t('profile.offline')
@@ -56,8 +68,38 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
         <p className="profile-email">{user?.email}</p>
         <p className="account-message" role="status" aria-live="polite">
           {syncMessage}
-          {syncStatus === 'error' && syncErrorDetail && <small className="sync-error-detail"> ({syncErrorDetail})</small>}
         </p>
+        <p className="sync-pending-summary" role="status">{t('profile.pendingLogs', { count: pendingSyncCount })}</p>
+        {syncErrorDetail && (
+          <p className="sync-error-detail">{t('profile.lastSyncError', { reason: syncErrorDetail })}</p>
+        )}
+        <button type="button" className="secondary-button" onClick={retrySyncNow} disabled={syncStatus === 'syncing'}>
+          {t('profile.retryNow')}
+        </button>
+        {quarantinedEntries.length > 0 && (
+          <section className="sync-quarantine" aria-labelledby="sync-quarantine-title">
+            <h3 id="sync-quarantine-title">{t('profile.quarantinedLogs')}</h3>
+            <ul>
+              {quarantinedEntries.map(entry => {
+                const exercise = exercises.find(item => item.id === entry.exerciseId)
+                const name = (language === 'es' ? exercise?.nameEs : undefined) || exercise?.name || entry.exerciseId
+                const parsedDate = new Date(`${entry.date.slice(0, 10)}T12:00:00`)
+                const date = Number.isNaN(parsedDate.getTime()) ? entry.date : parsedDate.toLocaleDateString(locale)
+                return (
+                  <li key={entry.id}>
+                    <strong>{name}</strong>
+                    <span>{date}</span>
+                    <p>{entry.syncError?.message}</p>
+                    <button type="button" className="secondary-button" disabled={syncStatus === 'syncing'}
+                      aria-label={t('profile.retryLog', { name, date })} onClick={() => retryQuarantinedEntry(entry.id)}>
+                      {t('profile.retry')}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+        )}
         <button type="button" className="secondary-button profile-signout" onClick={leaveAccount} disabled={busy}>
           {busy ? t('profile.signingOut') : t('profile.signOut')}
         </button>

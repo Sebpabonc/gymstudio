@@ -1,9 +1,10 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
-import type { Session, SupabaseClient, User } from '@supabase/supabase-js'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import type { AuthChangeEvent, Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabaseClient, isGoogleProviderEnabled } from '../lib/supabaseClient'
 import GuestDataPrompt from '../components/GuestDataPrompt'
 import { isDemoMode } from '../utils/demoMode'
-import { syncWorkoutHistory } from '../utils/sync'
+import { SyncSignInRequiredError, syncWorkoutHistory } from '../utils/sync'
+import { createSyncScheduler } from './syncScheduler'
 import { isNativeApp, listenForNativeAuthCallback, startNativeGoogleOAuth } from './nativeOAuth'
 import {
   hasGuestWorkoutData,
@@ -11,6 +12,9 @@ import {
   markGuestDataClaimed,
   moveGuestDataToAccount,
   setStorageNamespace,
+  loadWorkoutHistoryForSync,
+  retryQuarantinedWorkoutEntry,
+  type SyncWorkoutEntry,
 } from '../utils/storage'
 
 export type AuthStatus = 'loading' | 'signed-out' | 'signed-in'
@@ -44,8 +48,8 @@ export function authStateReducer(state: AuthState, action: AuthAction): AuthStat
   }
 }
 
-export function subscribeToAuthChanges(client: SupabaseClient, onSession: (session: Session | null) => void) {
-  const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => onSession(session))
+export function subscribeToAuthChanges(client: SupabaseClient, onSession: (session: Session | null, event?: AuthChangeEvent) => void) {
+  const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => onSession(session, event))
   return () => subscription.unsubscribe()
 }
 
@@ -59,6 +63,11 @@ type AuthContextValue = {
   syncStatus: WorkoutSyncStatus
   lastSyncedAt: string | null
   syncErrorDetail: string | null
+  syncSignInRequired: boolean
+  pendingSyncCount: number
+  quarantinedEntries: SyncWorkoutEntry[]
+  retrySyncNow: () => void
+  retryQuarantinedEntry: (id: string) => void
   signInWithPassword: (email: string, password: string) => Promise<ActionResult>
   signUp: (email: string, password: string) => Promise<ActionResult>
   resetPassword: (email: string) => Promise<ActionResult>
@@ -94,6 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [syncStatus, setSyncStatus] = useState<WorkoutSyncStatus>('syncing')
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
   const [syncErrorDetail, setSyncErrorDetail] = useState<string | null>(null)
+  const [syncSignInRequired, setSyncSignInRequired] = useState(false)
+  const [pendingEntries, setPendingEntries] = useState<SyncWorkoutEntry[]>([])
+  const [syncAccountId, setSyncAccountId] = useState<string | null>(null)
+  const retrySyncRef = useRef<{ accountId: string; retry: () => void } | null>(null)
   const [resolvedGuestPromptFor, setResolvedGuestPromptFor] = useState<string | null>(null)
 
   const accountId = demoMode ? null : state.session?.user.id ?? null
@@ -117,8 +130,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      unsubscribe = subscribeToAuthChanges(supabase, (session) => {
-        if (active) dispatch({ type: 'session', session })
+      unsubscribe = subscribeToAuthChanges(supabase, (session, event) => {
+        if (!active) return
+        dispatch({ type: 'session', session })
+        if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') &&
+            retrySyncRef.current?.accountId === session.user.id) {
+          retrySyncRef.current.retry()
+        }
       })
       if (isNativeApp()) {
         const removeNativeListener = await listenForNativeAuthCallback(supabase)
@@ -142,78 +160,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const userId = state.session?.user.id
+    setPendingEntries([])
+    setSyncErrorDetail(null)
+    setSyncSignInRequired(false)
+    setLastSyncedAt(null)
+    setSyncAccountId(userId ?? null)
     if (demoMode || !userId || guestPromptPending) {
       return
     }
 
     let active = true
-    let running = false
-    let rerun = false
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined
-    let retryTimer: ReturnType<typeof setTimeout> | undefined
-
-    const sync = async () => {
-      if (!active) return
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        setSyncStatus('offline')
-        return
+    let readVersion = 0
+    const readPending = async () => {
+      if (!active) return []
+      const version = ++readVersion
+      const entries = await loadWorkoutHistoryForSync(() => active)
+      if (active && version === readVersion) {
+        setPendingEntries(entries.filter(entry => entry.dirty))
+        return entries
       }
-      if (running) {
-        rerun = true
-        return
-      }
-
-      running = true
-      setSyncStatus('syncing')
-      try {
-        await syncWorkoutHistory(userId)
-        if (active) {
-          if (retryTimer) clearTimeout(retryTimer)
-          setLastSyncedAt(new Date().toISOString())
-          setSyncStatus('synced')
-          setSyncErrorDetail(null)
-        }
-      } catch (error) {
-        if (active) {
-          // Short technical reason so a sync failure can be diagnosed from the phone (no personal data).
-          const detail = error && typeof error === 'object'
-            ? [ (error as { code?: string }).code, (error as { message?: string }).message ].filter(Boolean).join(' · ')
-            : String(error)
-          console.error('Workout sync failed', error)
-          setSyncErrorDetail(detail.slice(0, 160) || null)
-          setSyncStatus('error')
-          retryTimer = setTimeout(() => void sync(), 10_000)
-        }
-      } finally {
-        running = false
-        if (rerun && active) {
-          rerun = false
-          void sync()
-        }
-      }
+      return []
     }
-
+    const scheduler = createSyncScheduler({
+      isOnline: () => typeof navigator === 'undefined' || navigator.onLine,
+      onOffline: () => { if (active) setSyncStatus('offline') },
+      onError: (error) => {
+        if (!active) return
+        const detail = error && typeof error === 'object'
+          ? [(error as { code?: string }).code, (error as { message?: string }).message].filter(Boolean).join(' · ')
+          : String(error)
+        setSyncErrorDetail(detail.slice(0, 160) || null)
+        setSyncSignInRequired(error instanceof SyncSignInRequiredError)
+        setSyncStatus('error')
+      },
+      sync: async () => {
+        setSyncStatus('syncing')
+        try {
+          await syncWorkoutHistory(userId, () => active)
+          const entries = await readPending()
+          if (active) {
+            setLastSyncedAt(new Date().toISOString())
+            setSyncStatus(typeof navigator !== 'undefined' && !navigator.onLine ? 'offline' : 'synced')
+            setSyncSignInRequired(false)
+            setSyncErrorDetail(entries.find(entry => entry.dirty && entry.syncError)?.syncError?.message ?? null)
+          }
+        } finally {
+          await readPending()
+        }
+      },
+    })
+    const refreshPending = () => void readPending().catch(() => undefined)
     const scheduleSync = () => {
-      if (debounceTimer) clearTimeout(debounceTimer)
-      debounceTimer = setTimeout(() => void sync(), 2_000)
+      refreshPending()
+      scheduler.historySaved()
     }
-    const syncWhenOnline = () => void sync()
-    const syncWhenOffline = () => setSyncStatus('offline')
+    const syncWhenOnline = scheduler.online
+    const syncWhenOffline = scheduler.offline
 
-    void sync()
+    retrySyncRef.current = { accountId: userId, retry: scheduler.retryNow }
+    refreshPending()
+    scheduler.retryNow()
     window.addEventListener('gym-studio:history-saved', scheduleSync)
     window.addEventListener('online', syncWhenOnline)
     window.addEventListener('offline', syncWhenOffline)
 
     return () => {
       active = false
-      if (debounceTimer) clearTimeout(debounceTimer)
-      if (retryTimer) clearTimeout(retryTimer)
+      scheduler.dispose()
+      retrySyncRef.current = null
       window.removeEventListener('gym-studio:history-saved', scheduleSync)
       window.removeEventListener('online', syncWhenOnline)
       window.removeEventListener('offline', syncWhenOffline)
     }
   }, [demoMode, state.session?.user.id, guestPromptPending])
+
+  const retrySyncNow = useCallback(() => {
+    if (accountId && retrySyncRef.current?.accountId === accountId) retrySyncRef.current.retry()
+  }, [accountId])
+  const retryQuarantinedEntry = useCallback((id: string) => {
+    if (!accountId || syncAccountId !== accountId || !pendingEntries.some(entry => entry.id === id && entry.syncError)) return
+    retryQuarantinedWorkoutEntry(id)
+    retrySyncNow()
+  }, [accountId, syncAccountId, pendingEntries, retrySyncNow])
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const client = await getClient()
@@ -265,9 +293,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthContextValue>(() => ({
     ...state,
     user: state.session?.user ?? null,
-    syncStatus,
-    lastSyncedAt,
-    syncErrorDetail,
+    syncStatus: syncAccountId === accountId ? syncStatus : 'syncing',
+    lastSyncedAt: accountId && syncAccountId === accountId ? lastSyncedAt : null,
+    syncErrorDetail: accountId && syncAccountId === accountId ? syncErrorDetail : null,
+    syncSignInRequired: !!accountId && syncAccountId === accountId && syncSignInRequired,
+    pendingSyncCount: accountId && syncAccountId === accountId ? pendingEntries.length : 0,
+    quarantinedEntries: accountId && syncAccountId === accountId ? pendingEntries.filter(entry => entry.syncError) : [],
+    retrySyncNow,
+    retryQuarantinedEntry,
     signInWithPassword,
     signUp,
     resetPassword,
@@ -278,6 +311,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     syncStatus,
     lastSyncedAt,
     syncErrorDetail,
+    syncAccountId,
+    accountId,
+    syncSignInRequired,
+    pendingEntries,
+    retrySyncNow,
+    retryQuarantinedEntry,
     signInWithPassword,
     signUp,
     resetPassword,

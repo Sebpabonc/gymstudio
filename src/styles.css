@@ -337,6 +337,38 @@ button {
   background: #e27e72;
 }
 
+.sync-pending-count {
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.sync-error-detail,
+.sync-quarantine {
+  overflow-wrap: anywhere;
+}
+
+.sync-quarantine ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sync-quarantine li {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.sync-quarantine h3,
+.sync-quarantine p {
+  margin: 0;
+}
+
 .app-content {
   display: grid;
   align-content: start;

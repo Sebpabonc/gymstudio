@@ -45,14 +45,17 @@ export type CustomPlan = {
   days: CustomPlanDay[]
 }
 
+export type WorkoutSyncError = { code: string; message: string; at: string }
+
 export type SyncWorkoutEntry = WorkoutEntry & {
   updatedAt: string
   dirty: boolean
   deletedAt?: string
+  syncError?: WorkoutSyncError
 }
 
 type SyncMetadata = {
-  entries: Record<string, { updatedAt: string; dirty: boolean; deletedAt?: string }>
+  entries: Record<string, Pick<SyncWorkoutEntry, 'updatedAt' | 'dirty' | 'deletedAt' | 'syncError'>>
   lastPulledAt: Record<string, string>
 }
 
@@ -934,7 +937,7 @@ export async function upsertExerciseRecord(exercise: Partial<Exercise> & { name:
   return nextExercise
 }
 
-async function loadWorkoutHistoryEntries(): Promise<WorkoutEntry[]> {
+async function loadWorkoutHistoryEntries(isActive: () => boolean = () => true): Promise<WorkoutEntry[]> {
   const raw = localStorage.getItem(storageKey(HISTORY_KEY))
   if (!raw) return []
 
@@ -945,6 +948,7 @@ async function loadWorkoutHistoryEntries(): Promise<WorkoutEntry[]> {
     let changed = false
     const catalogue = loadCatalogueCache()
     const bundledAliases = catalogue ? {} : (await getBundledCatalogue()).aliases
+    if (!isActive()) return []
     const aliasMap = {
       ...legacyExerciseIdAliases,
       ...bundledAliases,
@@ -1008,8 +1012,9 @@ export function saveWorkoutHistory(history: WorkoutEntry[]) {
   signalWorkoutHistorySaved()
 }
 
-export async function loadWorkoutHistoryForSync(): Promise<SyncWorkoutEntry[]> {
-  const history = await loadWorkoutHistoryEntries()
+export async function loadWorkoutHistoryForSync(isActive: () => boolean = () => true): Promise<SyncWorkoutEntry[]> {
+  const history = await loadWorkoutHistoryEntries(isActive)
+  if (!isActive()) return []
   const metadata = loadSyncMetadata()
   let changed = false
   const entries = history.map((entry) => {
@@ -1067,11 +1072,12 @@ export function saveMergedWorkoutHistory(history: SyncWorkoutEntry[]) {
       updatedAt: entry.updatedAt,
       dirty: entry.dirty,
       ...(entry.deletedAt ? { deletedAt: entry.deletedAt } : {}),
+      ...(entry.syncError ? { syncError: entry.syncError } : {}),
     }
   }
   localStorage.setItem(
     storageKey(HISTORY_KEY),
-    JSON.stringify(history.map(({ updatedAt: _updatedAt, dirty: _dirty, deletedAt: _deletedAt, ...entry }) => entry))
+    JSON.stringify(history.map(({ updatedAt: _updatedAt, dirty: _dirty, deletedAt: _deletedAt, syncError: _syncError, ...entry }) => entry))
   )
   saveSyncMetadata({ ...metadata, entries })
 }
@@ -1088,14 +1094,33 @@ export function markWorkoutEntriesSynced(
       ...current,
       updatedAt: entry.updatedAt ?? current.updatedAt,
       dirty: false,
+      syncError: undefined,
     }
     changed = true
   }
   if (changed) saveSyncMetadata(metadata)
 }
 
-export async function markAllWorkoutEntriesDirty() {
-  const entries = await loadWorkoutHistoryForSync()
+export function quarantineWorkoutEntry(entry: SyncWorkoutEntry, error: WorkoutSyncError) {
+  const metadata = loadSyncMetadata()
+  const current = metadata.entries[entry.id]
+  if (!current || current.updatedAt !== entry.updatedAt) return
+  metadata.entries[entry.id] = { ...current, dirty: true, syncError: error }
+  saveSyncMetadata(metadata)
+}
+
+export function retryQuarantinedWorkoutEntry(id: string) {
+  const metadata = loadSyncMetadata()
+  const current = metadata.entries[id]
+  if (!current?.syncError) return
+  metadata.entries[id] = { ...current, dirty: true, syncError: undefined }
+  saveSyncMetadata(metadata)
+  signalWorkoutHistorySaved()
+}
+
+export async function markAllWorkoutEntriesDirty(isActive: () => boolean = () => true) {
+  const entries = await loadWorkoutHistoryForSync(isActive)
+  if (!isActive()) return
   const metadata = loadSyncMetadata()
   for (const entry of entries) {
     metadata.entries[entry.id] = { ...metadata.entries[entry.id], dirty: true }
