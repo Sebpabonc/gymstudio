@@ -58,6 +58,7 @@ type AuthContextValue = {
   available: boolean
   syncStatus: WorkoutSyncStatus
   lastSyncedAt: string | null
+  syncErrorDetail: string | null
   signInWithPassword: (email: string, password: string) => Promise<ActionResult>
   signUp: (email: string, password: string) => Promise<ActionResult>
   resetPassword: (email: string) => Promise<ActionResult>
@@ -92,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authStateReducer, startingState)
   const [syncStatus, setSyncStatus] = useState<WorkoutSyncStatus>('syncing')
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
+  const [syncErrorDetail, setSyncErrorDetail] = useState<string | null>(null)
   const [resolvedGuestPromptFor, setResolvedGuestPromptFor] = useState<string | null>(null)
 
   const accountId = demoMode ? null : state.session?.user.id ?? null
@@ -169,9 +171,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (retryTimer) clearTimeout(retryTimer)
           setLastSyncedAt(new Date().toISOString())
           setSyncStatus('synced')
+          setSyncErrorDetail(null)
         }
-      } catch {
+      } catch (error) {
         if (active) {
+          // Short technical reason so a sync failure can be diagnosed from the phone (no personal data).
+          const detail = error && typeof error === 'object'
+            ? [ (error as { code?: string }).code, (error as { message?: string }).message ].filter(Boolean).join(' · ')
+            : String(error)
+          console.error('Workout sync failed', error)
+          setSyncErrorDetail(detail.slice(0, 160) || null)
           setSyncStatus('error')
           retryTimer = setTimeout(() => void sync(), 10_000)
         }
@@ -258,6 +267,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: state.session?.user ?? null,
     syncStatus,
     lastSyncedAt,
+    syncErrorDetail,
     signInWithPassword,
     signUp,
     resetPassword,
@@ -267,6 +277,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     state,
     syncStatus,
     lastSyncedAt,
+    syncErrorDetail,
     signInWithPassword,
     signUp,
     resetPassword,
