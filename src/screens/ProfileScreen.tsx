@@ -7,7 +7,7 @@ import ProfileDataSections from './ProfileDataSections'
 
 export default function ProfileScreen({ onClose }: { onClose: () => void }) {
   const { t, locale } = useT()
-  const { user, signOut, syncStatus, lastSyncedAt } = useAuth()
+  const { user, signOut, syncStatus, lastSyncedAt, syncErrorDetail } = useAuth()
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -56,6 +56,7 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
         <p className="profile-email">{user?.email}</p>
         <p className="account-message" role="status" aria-live="polite">
           {syncMessage}
+          {syncStatus === 'error' && syncErrorDetail && <small className="sync-error-detail"> ({syncErrorDetail})</small>}
         </p>
         <button type="button" className="secondary-button profile-signout" onClick={leaveAccount} disabled={busy}>
           {busy ? t('profile.signingOut') : t('profile.signOut')}
