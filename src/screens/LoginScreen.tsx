@@ -27,8 +27,8 @@ function friendlyError(message: string, t: Translate) {
 
 export default function LoginScreen({ onClose }: { onClose: () => void }) {
   const { t } = useT()
-  const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle } = useAuth()
-  const [mode, setMode] = useState<LoginMode>(() => hasGuestWorkoutData() ? 'sign-in' : 'sign-up')
+  const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle, syncSignInRequired } = useAuth()
+  const [mode, setMode] = useState<LoginMode>(() => syncSignInRequired || hasGuestWorkoutData() ? 'sign-in' : 'sign-up')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -94,6 +94,7 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
     <section className="card account-screen">
       <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
       <h2>{mode === 'sign-in' ? t('login.welcomeBack') : t('login.createTitle')}</h2>
+      {syncSignInRequired && <p className="account-message" role="status" aria-live="polite">{t('profile.syncSignInRequired')}</p>}
       <ul className="account-benefits">
         <li>{t('login.benefit1')}</li>
         <li>{t('login.benefit2')}</li>
