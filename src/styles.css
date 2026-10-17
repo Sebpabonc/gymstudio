@@ -8625,3 +8625,88 @@ button.superset-last-time {
   justify-content: space-between;
   gap: 8px;
 }
+
+/* Squeeze cue → insights sheet (PO 2026-10-18). */
+.squeeze-cue-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.squeeze-cue-more {
+  color: #c9a0a6;
+  font-weight: 700;
+}
+
+.cue-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.55);
+  overscroll-behavior: contain;
+}
+
+.cue-sheet {
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 16px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-radius: 18px 18px 0 0;
+  border: 1px solid var(--line);
+  background: #1b1a1c;
+  display: grid;
+  gap: 14px;
+  overscroll-behavior: contain;
+}
+
+.cue-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.cue-sheet-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.cue-sheet-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-strong);
+  font-size: 1.3rem;
+}
+
+.cue-sheet-section h4 {
+  margin: 0 0 4px;
+  color: #c9a0a6;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cue-sheet-section p,
+.cue-sheet-section ul {
+  margin: 0;
+  color: var(--muted-strong);
+  line-height: 1.45;
+}
+
+.cue-sheet-section ul {
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
