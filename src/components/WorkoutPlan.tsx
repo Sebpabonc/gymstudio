@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
 import type { AuthStatus } from '../auth/AuthProvider'
-import SqueezeCue from './SqueezeCue'
+import SqueezeCue, { type SqueezeCueDetails } from './SqueezeCue'
 import { SupersetLogger } from './SupersetLogger'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
@@ -3107,6 +3107,39 @@ export default function WorkoutPlan({
             const isProgressSectionVisible = progressSectionsVisible[exerciseKey] ?? false
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
             const postureTips = getPostureTips(exercise, libraryMatch)
+            // PO 2026-10-18: tapping the squeeze cue opens a sheet with today's recommendation, last time,
+            // the full approved cue, technique tips and plan notes (approved content only; no new fitness rules).
+            const cueDetails: SqueezeCueDetails = {
+              title: displayName,
+              closeLabel: t('workout.cueSheet.close'),
+              openLabel: t('workout.cueSheet.open', { name: displayName }),
+              sections: [
+                {
+                  heading: t('workout.cueSheet.today'),
+                  lines: trainer
+                    ? [
+                        t('workout.cueSheet.todayTarget', {
+                          weight: trainer.recommendation.setWeights && new Set(trainer.recommendation.setWeights).size > 1
+                            ? trainer.recommendation.setWeights.map((weight) => formatNumber(language, weight)).join(' / ')
+                            : formatNumber(language, trainer.recommendation.weight ?? trainer.original.weight),
+                          reps: trainerRangeLabel(trainer.recommendation.reps),
+                          sets: formatNumber(language, trainer.recommendation.sets),
+                        }),
+                        trainerReason(t, language, trainer.recommendation, trainer.target),
+                      ]
+                    : [],
+                },
+                {
+                  heading: t('workout.cueSheet.lastTime'),
+                  lines: previousEntry
+                    ? [`${formatHistoryDate(language, previousEntry.date)} · ${previousEntry.sets.map((set) => `${formatNumber(language, set.weight)}×${formatNumber(language, set.reps)}`).join(' · ')}`]
+                    : [t('workout.cueSheet.firstTime')],
+                },
+                { heading: t('workout.squeezeCue'), lines: libraryMatch?.squeezeCue ? [libraryMatch.squeezeCue] : [] },
+                { heading: text.posture, lines: postureTips },
+                { heading: t('workout.cueSheet.planNotes'), lines: [exercise.notes ?? ''].filter((note) => note.trim()) },
+              ],
+            }
             const completedEntry = findExerciseCompletion(exercise, history)
             const recordBadges =
               completedEntry?.date === today
@@ -3210,7 +3243,7 @@ export default function WorkoutPlan({
                   {isTipsVisible && (
                     <SqueezeCue cue={libraryMatch?.squeezeCue} cueLabel={t('workout.squeezeCue')}
                       tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
-                      expanded={isTipsVisible} onToggle={() => togglePostureTips(exercise.name)} />
+                      expanded={isTipsVisible} onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />
                   )}
                   {isProgressSectionVisible && (
                     <div className="planned-history-list">
@@ -3544,6 +3577,7 @@ export default function WorkoutPlan({
                       tipsId={`posture-tips-${exerciseKey}`}
                       expanded={isTipsVisible}
                       onToggle={() => togglePostureTips(exercise.name)}
+                      details={cueDetails}
                     />
 
                     {!group.isSuperset && (
