@@ -47,3 +47,12 @@ Supabase Postgres Best Practices (v1.1.1, MIT, `LICENSE.txt` from the repo root)
 loaded by Claude Code before any migration, RLS policy, index or SQL change in `supabase/`.
 Its rules are reference material; AGENTS.md database rules (numbered migrations, Tech Lead applies them,
 no service_role in clients) still govern.
+
+## Added 2026-10-18 (PO: most-used skills for similar projects)
+| Used by | Skill | Source | Pinned commit |
+|---|---|---|---|
+| UXer / Tech Lead | frontend-design (Anthropic, see LICENSE.txt) | https://github.com/anthropics/skills/tree/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/frontend-design | `dbd4588f9e1033efb41dad4bef2f7947c8993d44` |
+| Tech Lead / Copilot | react-best-practices (Vercel, MIT) | https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278/skills/react-best-practices | `063bee94c3f4df8453406c830b0a7df0f2860278` |
+| Tech Lead / Copilot | composition-patterns (Vercel, MIT) | https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278/skills/composition-patterns | `063bee94c3f4df8453406c830b0a7df0f2860278` |
+
+Vendored unchanged; scanned for prompt-injection patterns before adding. Next.js/server rules in react-best-practices do not apply to this Vite SPA. The app's existing design system (dark/rose tokens, current font sizes) overrides frontend-design's aesthetic guidance.
