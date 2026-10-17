@@ -56,3 +56,4 @@ no service_role in clients) still govern.
 | Tech Lead / Copilot | composition-patterns (Vercel, MIT) | https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278/skills/composition-patterns | `063bee94c3f4df8453406c830b0a7df0f2860278` |
 
 Vendored unchanged; scanned for prompt-injection patterns before adding. Next.js/server rules in react-best-practices do not apply to this Vite SPA. The app's existing design system (dark/rose tokens, current font sizes) overrides frontend-design's aesthetic guidance.
+| Tech Lead | supabase (Supabase, MIT; LICENSE from repo root) | https://github.com/supabase/agent-skills/tree/c9be0e931b7930f7d02126d04774d904c381e7d7/skills/supabase | `c9be0e931b7930f7d02126d04774d904c381e7d7` |
