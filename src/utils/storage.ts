@@ -19,6 +19,7 @@ const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
+const REST_BETWEEN_SETS_KEY = 'gym-studio.rest-between-sets'
 const EXERCISE_SWAPS_KEY = 'gym-studio.exercise-swaps'
 const TRAINER_EXPLANATIONS_KEY = 'gym-studio.trainer-explanations'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
@@ -314,6 +315,28 @@ export function saveRestTimerState(timer: RestTimerState | null) {
     }
   } catch {
     // The timer still works when browser storage is unavailable.
+  }
+}
+
+const REST_BETWEEN_SETS_OPTIONS = [60, 90, 120, 150, 180] as const
+
+export function loadRestBetweenSets(): number {
+  try {
+    const value = Number(localStorage.getItem(storageKey(REST_BETWEEN_SETS_KEY)))
+    return REST_BETWEEN_SETS_OPTIONS.includes(value as typeof REST_BETWEEN_SETS_OPTIONS[number])
+      ? value
+      : 120
+  } catch {
+    return 120
+  }
+}
+
+export function saveRestBetweenSets(seconds: number) {
+  if (!REST_BETWEEN_SETS_OPTIONS.includes(seconds as typeof REST_BETWEEN_SETS_OPTIONS[number])) return
+  try {
+    localStorage.setItem(storageKey(REST_BETWEEN_SETS_KEY), String(seconds))
+  } catch {
+    // The preference remains usable when browser storage is unavailable.
   }
 }
 
