@@ -20,6 +20,7 @@ const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
 const REST_BETWEEN_SETS_KEY = 'gym-studio.rest-between-sets'
+const WORKOUT_TREND_OPEN_KEY = 'gym-studio.workout-trend-open'
 const EXERCISE_SWAPS_KEY = 'gym-studio.exercise-swaps'
 const TRAINER_EXPLANATIONS_KEY = 'gym-studio.trainer-explanations'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
@@ -335,6 +336,22 @@ export function saveRestBetweenSets(seconds: number) {
   if (!REST_BETWEEN_SETS_OPTIONS.includes(seconds as typeof REST_BETWEEN_SETS_OPTIONS[number])) return
   try {
     localStorage.setItem(storageKey(REST_BETWEEN_SETS_KEY), String(seconds))
+  } catch {
+    // The preference remains usable when browser storage is unavailable.
+  }
+}
+
+export function loadWorkoutTrendOpen(): boolean {
+  try {
+    return localStorage.getItem(storageKey(WORKOUT_TREND_OPEN_KEY)) !== 'false'
+  } catch {
+    return true
+  }
+}
+
+export function saveWorkoutTrendOpen(open: boolean) {
+  try {
+    localStorage.setItem(storageKey(WORKOUT_TREND_OPEN_KEY), String(open))
   } catch {
     // The preference remains usable when browser storage is unavailable.
   }

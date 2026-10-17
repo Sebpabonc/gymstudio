@@ -16,6 +16,7 @@ import {
   loadExercises,
   loadRestTimerState,
   loadRestBetweenSets,
+  loadWorkoutTrendOpen,
   loadWorkoutHistory,
   loadWorkoutHistoryForSync,
   mapTrainingBlockRows,
@@ -27,6 +28,7 @@ import {
   setSessionStorageValue,
   saveRestTimerState,
   saveRestBetweenSets,
+  saveWorkoutTrendOpen,
   saveWorkoutHistory,
   getActiveBlockId,
   getCachedActiveUserPlan,
@@ -683,6 +685,29 @@ describe('training blocks', () => {
 })
 
 describe('demo storage namespace', () => {
+  it('persists the workout trend chart preference locally and defaults to open', () => {
+    expect(loadWorkoutTrendOpen()).toBe(true)
+    saveWorkoutTrendOpen(false)
+    expect(loadWorkoutTrendOpen()).toBe(false)
+    expect(localStorage.getItem('gym-studio.workout-trend-open')).toBe('false')
+    saveWorkoutTrendOpen(true)
+    expect(loadWorkoutTrendOpen()).toBe(true)
+  })
+
+  it('isolates the workout trend preference by user and in demo mode', () => {
+    saveWorkoutTrendOpen(false)
+    setStorageNamespace('user-1')
+    expect(loadWorkoutTrendOpen()).toBe(true)
+    saveWorkoutTrendOpen(false)
+    setStorageNamespace(null)
+
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+    expect(loadWorkoutTrendOpen()).toBe(true)
+    saveWorkoutTrendOpen(false)
+    expect(localStorage.getItem('gym-studio.demo.workout-trend-open')).toBe('false')
+    expect(localStorage.getItem('gym-studio.workout-trend-open')).toBe('false')
+  })
+
   it('stores the rest-between-sets preference locally with a 120-second default', () => {
     expect(loadRestBetweenSets()).toBe(120)
 

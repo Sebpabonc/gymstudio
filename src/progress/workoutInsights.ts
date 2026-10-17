@@ -76,10 +76,11 @@ export function workoutInsightTally(insights: WorkoutExerciseInsight[]): Workout
 export function workoutCompletionCounts(
   entries: WorkoutEntry[],
   plannedExercises: number,
-  plannedSets: number
+  plannedSets: number,
+  completedExerciseCount?: number
 ) {
   const sets = entries.reduce((total, entry) => total + workingSets(entry.sets).length, 0)
-  const exercises = entries.filter((entry) => entry.sets.length > 0).length
+  const exercises = completedExerciseCount ?? entries.filter((entry) => entry.sets.length > 0).length
   return {
     sets,
     plannedSets,
@@ -96,9 +97,7 @@ export function workoutMuscleSetTotals(entries: WorkoutEntry[], exercises: Exerc
     if (!exercise) continue
     const setCount = workingSets(entry.sets).length
     const primary = exercise.primaryMuscles?.length ? exercise.primaryMuscles : [exercise.primaryMuscle]
-    const secondary = exercise.secondaryMuscles ?? (exercise.secondaryMuscle ? [exercise.secondaryMuscle] : [])
     for (const muscle of primary) totals.set(muscle, (totals.get(muscle) ?? 0) + setCount)
-    for (const muscle of secondary) totals.set(muscle, (totals.get(muscle) ?? 0) + setCount * 0.5)
   }
   return [...totals].map(([muscle, sets]) => ({ muscle, sets })).sort((a, b) => b.sets - a.sets || a.muscle.localeCompare(b.muscle))
 }

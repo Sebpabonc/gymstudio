@@ -59,20 +59,19 @@ describe('workout exercise insights', () => {
 
   it('counts partial workouts for the early-finish screen without changing entry data', () => {
     const entries = [entry('2026-10-12', [[30, 10], [30, 9]])]
-    expect(workoutCompletionCounts(entries, 3, 8)).toEqual({
+    expect(workoutCompletionCounts(entries, 3, 8, 0)).toEqual({
       sets: 2,
       plannedSets: 8,
-      exercises: 1,
+      exercises: 0,
       plannedExercises: 3,
       complete: false,
     })
     expect(entries[0]).not.toHaveProperty('workoutMode')
   })
 
-  it('counts hard sets per primary and half sets per secondary muscle', () => {
+  it('counts hard sets per primary muscle only', () => {
     expect(workoutMuscleSetTotals([entry('2026-10-12', [[30, 10], [30, 10]])], [exercise])).toEqual([
       { muscle: 'Chest', sets: 2 },
-      { muscle: 'Triceps', sets: 1 },
     ])
   })
 })
