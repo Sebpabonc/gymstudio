@@ -3291,7 +3291,7 @@ export default function WorkoutPlan({
                   onClick={() => toggleExerciseCollapse(exercise.name)}
                 >
                   <span className="planned-exercise-title-block">
-                    {exercise.code && <span className="plan-exercise-code">{exercise.code}</span>}
+                    {/* PO 2026-10-18: plan codes (A1, B1…) stay in the data for ordering/supersets but are not shown. */}
                     <span className="planned-exercise-name-row">
                       <span className="planned-exercise-name-wrap">
                         <a
@@ -4059,7 +4059,7 @@ export default function WorkoutPlan({
                           const draft = getDraftForExercise(exercise.name, exercise)
                           return (
                             <label className="planned-notes-field" key={`${group.key}-${exercise.code}-notes`}>
-                              <span>{exercise.code ?? exercise.name} · {displayExerciseName(exercise.name)}</span>
+                              <span>{displayExerciseName(exercise.name)}</span>
                               <textarea
                                 rows={2}
                                 value={draft.notes}
