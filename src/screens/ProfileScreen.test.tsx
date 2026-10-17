@@ -35,6 +35,19 @@ describe('profile sync feedback', () => {
     auth.quarantinedEntries[0].exerciseId = 'Bench press'
   })
 
+  it('shows the local rest-between-sets setting in both languages', () => {
+    const english = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
+    expect(english).toContain('Rest between sets')
+    expect(english).toContain('60 seconds')
+    expect(english).toContain('120 seconds')
+    expect(english).toContain('aria-pressed="true"')
+
+    language = 'es'
+    const spanish = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
+    expect(spanish).toContain('Descanso entre series')
+    expect(spanish).toContain('120 segundos')
+  })
+
   it('shows the pending count, quarantine reason and retry controls even after a successful pull', () => {
     const html = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
     expect(html).toContain('2 logs not uploaded')

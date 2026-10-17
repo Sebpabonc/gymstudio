@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { useT } from '../i18n'
 import ProfileDataSections from './ProfileDataSections'
-import { loadExercises } from '../utils/storage'
+import { loadExercises, loadRestBetweenSets, saveRestBetweenSets } from '../utils/storage'
 import type { Exercise } from '../types'
 
 export default function ProfileScreen({ onClose }: { onClose: () => void }) {
@@ -15,6 +15,7 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [restBetweenSets, setRestBetweenSets] = useState(loadRestBetweenSets)
 
   useEffect(() => {
     let active = true
@@ -66,6 +67,26 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
         <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
         {name && <p className="profile-name">{name}</p>}
         <p className="profile-email">{user?.email}</p>
+        <fieldset className="profile-rest-setting">
+          <legend>{t('profile.restBetweenSets')}</legend>
+          <p>{t('profile.restBetweenSetsHelp')}</p>
+          <div className="profile-rest-options">
+            {[60, 90, 120, 150, 180].map((seconds) => (
+              <button
+                key={seconds}
+                type="button"
+                className={restBetweenSets === seconds ? 'chip active' : 'chip'}
+                aria-pressed={restBetweenSets === seconds}
+                onClick={() => {
+                  setRestBetweenSets(seconds)
+                  saveRestBetweenSets(seconds)
+                }}
+              >
+                {t('workout.custom.restChoice', { seconds })}
+              </button>
+            ))}
+          </div>
+        </fieldset>
         <p className="account-message" role="status" aria-live="polite">
           {syncMessage}
         </p>
