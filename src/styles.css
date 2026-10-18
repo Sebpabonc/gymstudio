@@ -8715,7 +8715,8 @@ summary:focus-visible,
   height: 64px;
   padding: 0 2px;
   border-radius: 10px;
-  font-size: 1.75rem;
+  /* fits "82,5" / "102,5" between two 44 px buttons at 375–390 px */
+  font-size: clamp(1.3rem, 5.6vw, 1.75rem);
   font-weight: 800;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -9567,4 +9568,48 @@ button.superset-last-time {
     grid-template-columns: minmax(30px, 0.55fr) minmax(60px, 0.9fr) minmax(0, 2fr);
     gap: 4px;
   }
+}
+
+/* PO 2026-10-18: the Log set area was cramped (three nested boxes, tiny value boxes).
+   In Workout mode the set section is flat and kg / reps are two equal, full-width rows. */
+.planned-exercise-card.workout-mode-current .planned-set-section,
+.superset-workout-card .planned-set-section {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.planned-exercise-card .workout-mode-big-logger {
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+}
+.planned-exercise-card .workout-mode-big-inputs {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.planned-exercise-card .workout-mode-big-field {
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.planned-exercise-card .workout-mode-big-field .set-stepper {
+  grid-template-columns: 56px minmax(0, 1fr) 56px;
+  gap: 6px;
+}
+.planned-exercise-card .workout-mode-big-field .set-stepper .stepper-button {
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  border-radius: 12px;
+}
+.planned-exercise-card .workout-mode-big-field .set-stepper input {
+  height: 56px;
+  border-radius: 12px;
+  font-size: 1.75rem;
+}
+.planned-exercise-card .workout-mode-log-set {
+  min-height: 56px;
 }

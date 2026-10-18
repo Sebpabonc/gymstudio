@@ -530,8 +530,8 @@ export function formatEstMaxInsightLine(
         : 'workout.insight.estMax.sameLessWeight'
       : 'workout.insight.estMax.same'
     line = t(sameKey, { day: previousDay, date, now, before })
-  } else if (comparison.currentDayType && comparison.previousDayType
-    && comparison.currentDayType !== comparison.previousDayType) {
+  } else if (comparison.currentDayType === 'B' && comparison.previousDayType === 'A') {
+    // Approved C3: only B days are lighter by design; a lower A day after a B day is a plain "below" (C4).
     line = t('workout.insight.estMax.crossDayLower', {
       day: previousDay,
       date,
@@ -1861,6 +1861,8 @@ export default function WorkoutPlan({
 
   const openSessionSummary = (nextHistory: WorkoutEntry[], loggedAt: number, early = false) => {
     if (planMode !== 'preset' || !activeBlock || !activeDay) return
+    // The workout is over: no rest timer floating over the Completed screen.
+    onRestTimerChange?.(null)
     const entries = nextHistory.filter(
       (entry) =>
         entry.date.slice(0, 10) === activeCompletionScope.date.slice(0, 10) &&
