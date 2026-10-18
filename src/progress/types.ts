@@ -159,6 +159,7 @@ export type ProgressLiftSession = {
 
 export type LiftTrendPoint = ProgressLiftSession & {
   e1rm: number | null
+  bestSet: Pick<ProgressSet, 'weight' | 'reps'> | null
   topLoad: number | null
   repsAtTop: number
   movingAverage: number | null
