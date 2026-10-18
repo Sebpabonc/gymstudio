@@ -290,7 +290,7 @@ export function ExerciseDetails({ exercise, previous }: { exercise: Exercise; pr
       {cue && <p className="workout-short-cue"><strong>{t('workout.squeezeCue')} · </strong>{cue}</p>}
       <p className="find-last-time"><span>{t('exercises.lastTime')}</span>
         {best && previous
-          ? <strong>{formatNumber(language, best.weight)} × {best.reps} kg · {formatWeekdayDate(language, `${previous.date.slice(0, 10)}T12:00:00`)}</strong>
+          ? <strong>{formatNumber(language, best.weight)} kg × {formatNumber(language, best.reps)} · {formatWeekdayDate(language, `${previous.date.slice(0, 10)}T12:00:00`)}</strong>
           : <span>{t('exercises.never')}</span>}
       </p>
     </>
