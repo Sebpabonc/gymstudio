@@ -3656,7 +3656,9 @@ export default function WorkoutPlan({
               return (
                 <React.Fragment key={exercise.code ?? exercise.name}>
                   <WorkoutExerciseActions
-                    label={t('workout.run.exerciseActions')}
+                    title={displayName}
+                    closeLabel={t('workout.cueSheet.close')}
+                    label={t('workout.run.more')}
                     googleLabel={t('workout.run.searchGoogle')}
                     swapLabel={t('workout.run.swap')}
                     notesLabel={t('workout.label.notes')}
@@ -3668,8 +3670,8 @@ export default function WorkoutPlan({
                     onSwap={libraryMatch && completedEntry?.date !== today ? () => setSwapTarget({
                       exercise: libraryMatch, fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
                     }) : undefined}
-                    onNotes={(event) => {
-                      const groupElement = event.currentTarget.closest('.day-exercises')
+                    onNotes={(anchor) => {
+                      const groupElement = anchor.closest('.day-exercises')
                         ?.querySelector<HTMLElement>(`.superset-workout-card[data-workout-group="${groupIndex}"]`)
                       const noteIndex = group.items.findIndex(({ exercise: item }) => item.name === exercise.name)
                       const notes = groupElement?.querySelectorAll<HTMLDetailsElement>('.superset-notes')[noteIndex]
@@ -3775,7 +3777,9 @@ export default function WorkoutPlan({
                   </span>
                   {isWorkoutMode && !group.isSuperset && (
                     <WorkoutExerciseActions
-                      label={t('workout.run.exerciseActions')}
+                      title={displayName}
+                      closeLabel={t('workout.cueSheet.close')}
+                      label={t('workout.run.more')}
                       googleLabel={t('workout.run.searchGoogle')}
                       swapLabel={t('workout.run.swap')}
                       notesLabel={t('workout.label.notes')}
@@ -3788,8 +3792,8 @@ export default function WorkoutPlan({
                         exercise: libraryMatch,
                         fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
                       }) : undefined}
-                      onNotes={(event) => {
-                        const notes = event.currentTarget.closest('.planned-exercise-card')
+                      onNotes={(anchor) => {
+                        const notes = anchor.closest('.planned-exercise-card')
                           ?.querySelector<HTMLTextAreaElement>('.planned-notes-field textarea')
                         notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                         notes?.focus()

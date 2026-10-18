@@ -9267,54 +9267,52 @@ button.superset-last-time {
   gap: 4px;
 }
 
-/* Workout mode: exercise actions as icons next to the name (replaces "Más") */
-.workout-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+/* Workout mode: one ⋯ button next to the exercise name opens the exercise tools sheet (PO 2026-10-18). */
+.workout-more-button {
   flex-shrink: 0;
+  width: 44px;
+  height: 44px;
   margin-left: auto;
-}
-.workout-icon-button {
-  width: 40px;
-  height: 40px;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--line);
   background: transparent;
   color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
   cursor: pointer;
-  padding: 0;
 }
-.workout-icon-button:hover,
-.workout-icon-button[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.08);
+.workout-more-list {
+  display: grid;
+  gap: 6px;
 }
-.workout-icon-button svg {
-  width: 20px;
-  height: 20px;
+.workout-more-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.workout-more-row[aria-pressed="true"] {
+  border-color: var(--brand);
+}
+.workout-more-row svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-/* At phone width there is no room for the name and four icons on one line:
-   the name keeps the full first line and the icons sit right-aligned just below it. */
-.planned-exercise-header:has(> .workout-header-actions) {
-  flex-wrap: wrap;
-}
-.planned-exercise-header > .planned-exercise-title-block {
-  min-width: 0;
-}
-.planned-exercise-header:has(> .workout-header-actions) > .planned-exercise-title-block {
-  flex: 1 1 0;
-}
-.planned-exercise-header > .workout-header-actions {
-  order: 3;
-  flex-basis: 100%;
-  justify-content: flex-end;
-  margin-left: 0;
 }
