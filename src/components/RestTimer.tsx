@@ -21,6 +21,7 @@ export default function RestTimer({
   hidden,
   onChange,
   workoutMode = false,
+  inPlace = false,
   label,
   onUndo,
 }: {
@@ -28,6 +29,7 @@ export default function RestTimer({
   hidden: boolean
   onChange: (timer: RestTimerState | null) => void
   workoutMode?: boolean
+  inPlace?: boolean
   label?: string
   onUndo?: () => void
 }) {
@@ -64,7 +66,7 @@ export default function RestTimer({
   const isPaused = isRestTimerPaused(timer)
 
   return (
-    <div className={`rest-timer-pill${workoutMode ? ' workout-rest-timer' : ''}`}>
+    <div className={`rest-timer-pill${workoutMode ? ' workout-rest-timer' : ''}${inPlace ? ' in-place' : ''}`}>
       {workoutMode && label && <strong className="workout-rest-label">{label}</strong>}
       {isDone ? (
         <span className="rest-timer-done" role="status">{t('rest.done')}</span>
@@ -93,9 +95,9 @@ export default function RestTimer({
           <button
             type="button"
             className="rest-timer-action"
-            onClick={() => onChange(addRestTime(timer, Date.now(), workoutMode ? 30 : 15))}
+            onClick={() => onChange(addRestTime(timer, Date.now(), 15))}
           >
-            {t(workoutMode ? 'rest.add30' : 'rest.add15')}
+            {t('rest.add15')}
           </button>
           <button
             type="button"
