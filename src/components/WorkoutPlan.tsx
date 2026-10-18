@@ -8,11 +8,13 @@ import { explanationKey, explanationPayload, validateExplanation } from '../trai
 import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue, { CueSheet, ShortCue, type SqueezeCueDetails } from './SqueezeCue'
 import WorkoutExerciseActions from './WorkoutExerciseActions'
+import WorkoutSetInputs from './WorkoutSetInputs'
 import { SupersetLogger } from './SupersetLogger'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
 import type { TranslationKey } from '../i18n'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
+import { filterExercises } from '../utils/exerciseFilters'
 import { openExternal } from '../native/openExternal'
 import { localIsoDate } from '../lib/dates'
 import { isDemoMode } from '../utils/demoMode'
@@ -283,6 +285,23 @@ function customPlanMuscleMatches(exercise: Exercise, muscle: CustomPlanMuscle) {
     Core: /core|abdom|oblique/,
   }
   return patterns[muscle].test(exerciseMuscles)
+}
+
+export function filterCustomPlanExercises(
+  exercises: Exercise[],
+  query: string,
+  muscle: CustomPlanMuscle | 'All',
+  recentExerciseIds: Map<string, number>,
+  displayName: (exercise: Exercise) => string,
+  locale: string,
+) {
+  return filterExercises(exercises, query)
+    .filter((exercise) => muscle === 'All' || customPlanMuscleMatches(exercise, muscle))
+    .sort((a, b) => {
+      const recentDifference = (recentExerciseIds.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+        (recentExerciseIds.get(b.id) ?? Number.MAX_SAFE_INTEGER)
+      return recentDifference || displayName(a).localeCompare(displayName(b), locale)
+    })
 }
 
 function customPlanRepRange(reps: string) {
@@ -1000,18 +1019,9 @@ export default function WorkoutPlan({
   recentEntries.forEach((entry, index) => {
     if (!recentLibraryExerciseIds.has(entry.exerciseId)) recentLibraryExerciseIds.set(entry.exerciseId, index)
   })
-  const customPlanSearchResults = exerciseCatalog
-    .filter((exercise) => {
-      const query = customPlanSearch.trim().toLocaleLowerCase(locale)
-      const names = [exercise.name, exercise.nameEs ?? '', displayExerciseName(exercise)].join(' ').toLocaleLowerCase(locale)
-      return (!query || names.includes(query)) &&
-        (customPlanMuscleFilter === 'All' || customPlanMuscleMatches(exercise, customPlanMuscleFilter))
-    })
-    .sort((a, b) => {
-      const recentDifference = (recentLibraryExerciseIds.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
-        (recentLibraryExerciseIds.get(b.id) ?? Number.MAX_SAFE_INTEGER)
-      return recentDifference || displayExerciseName(a).localeCompare(displayExerciseName(b), locale)
-    })
+  const customPlanSearchResults = filterCustomPlanExercises(
+    exerciseCatalog, customPlanSearch, customPlanMuscleFilter, recentLibraryExerciseIds, displayExerciseName, locale
+  )
   const swapSuggestions = swapTarget
     ? suggestAlternatives(
         swapTarget.exercise,
@@ -3215,6 +3225,8 @@ export default function WorkoutPlan({
                 <input
                   className="search-input"
                   type="search"
+                  autoComplete="off"
+                  enterKeyHint="search"
                   placeholder={t('workout.custom.searchPlaceholder')}
                   aria-label={t('workout.custom.searchPlaceholder')}
                   value={customPlanSearch}
@@ -3261,7 +3273,8 @@ export default function WorkoutPlan({
                         onChange={(event) => setCustomPlanSheetDraft({ ...customPlanSheetDraft, name: event.target.value })}
                       />
                     </label>
-                    <div className="custom-plan-custom-muscles" role="group" aria-label={t('workout.custom.selectMuscle')}>
+                    <p id="custom-plan-muscle-label">{t('workout.custom.selectMuscle')} *</p>
+                    <div className="custom-plan-custom-muscles" role="group" aria-labelledby="custom-plan-muscle-label">
                       {customPlanMuscles.map((muscle) => (
                         <button
                           type="button"
@@ -4038,75 +4051,20 @@ export default function WorkoutPlan({
                                 reps: formatNumber(language, currentWorkoutReps),
                               })}
                             </p>
-                            <div className="workout-mode-big-inputs">
-                              <div className="workout-mode-big-field">
-                                <span>kg</span>
-                                <div className="set-stepper">
-                                  <button
-                                    type="button"
-                                    className="stepper-button"
-                                    aria-label={t('workout.set.weightDecrease', { set: currentWorkoutSetIndex + 1 })}
-                                    onClick={() => {
-                                      const value = stepWorkoutValue(currentWorkoutWeight, -1, equipmentStep(libraryMatch?.equipment), 0)
-                                      updatePlanSetValue(exercise, currentWorkoutSetIndex, 'weight', String(value), setCount)
-                                      setWorkoutWeightInputs((current) => ({ ...current, [workoutWeightInputKey]: formatNumber(language, value) }))
-                                    }}
-                                  >−</button>
-                                  <input
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={workoutWeightValue}
-                                    data-log-weight
-                                    aria-label={t('workout.set.weightLabel', { set: currentWorkoutSetIndex + 1 })}
-                                    onFocus={selectOnFocus}
-                                    onChange={(event) => {
-                                      const raw = event.target.value
-                                      setWorkoutWeightInputs((current) => ({ ...current, [workoutWeightInputKey]: raw }))
-                                      const numeric = Number(raw.replace(',', '.'))
-                                      if (raw.trim() && Number.isFinite(numeric)) {
-                                        updatePlanSetValue(exercise, currentWorkoutSetIndex, 'weight', String(numeric), setCount)
-                                      }
-                                    }}
-                                  />
-                                  <button
-                                    type="button"
-                                    className="stepper-button"
-                                    aria-label={t('workout.set.weightIncrease', { set: currentWorkoutSetIndex + 1 })}
-                                    onClick={() => {
-                                      const value = stepWorkoutValue(currentWorkoutWeight, 1, equipmentStep(libraryMatch?.equipment), 0)
-                                      updatePlanSetValue(exercise, currentWorkoutSetIndex, 'weight', String(value), setCount)
-                                      setWorkoutWeightInputs((current) => ({ ...current, [workoutWeightInputKey]: formatNumber(language, value) }))
-                                    }}
-                                  >+</button>
-                                </div>
-                              </div>
-                              <div className="workout-mode-big-field">
-                                <span>{text.repsShort}</span>
-                                <div className="set-stepper">
-                                  <button
-                                    type="button"
-                                    className="stepper-button"
-                                    aria-label={t('workout.set.repsDecrease', { set: currentWorkoutSetIndex + 1 })}
-                                    onClick={() => updatePlanSetValue(exercise, currentWorkoutSetIndex, 'reps', String(stepWorkoutValue(currentWorkoutReps, -1, 1, 1)), setCount)}
-                                  >−</button>
-                                  <input
-                                    type="number"
-                                    inputMode="numeric"
-                                    min="1"
-                                    value={currentWorkoutReps}
-                                    aria-label={t('workout.set.repsLabel', { set: currentWorkoutSetIndex + 1 })}
-                                    onFocus={selectOnFocus}
-                                    onChange={(event) => updatePlanSetValue(exercise, currentWorkoutSetIndex, 'reps', cleanNumberInput(event), setCount)}
-                                  />
-                                  <button
-                                    type="button"
-                                    className="stepper-button"
-                                    aria-label={t('workout.set.repsIncrease', { set: currentWorkoutSetIndex + 1 })}
-                                    onClick={() => updatePlanSetValue(exercise, currentWorkoutSetIndex, 'reps', String(stepWorkoutValue(currentWorkoutReps, 1, 1, 1)), setCount)}
-                                  >+</button>
-                                </div>
-                              </div>
-                            </div>
+                            <WorkoutSetInputs
+                              setIndex={currentWorkoutSetIndex}
+                              weight={currentWorkoutWeight}
+                              weightInput={workoutWeightValue}
+                              reps={currentWorkoutReps}
+                              equipment={libraryMatch?.equipment}
+                              language={language}
+                              t={t}
+                              repsLabel={text.repsShort}
+                              onWeightInputChange={(raw) => setWorkoutWeightInputs((current) => ({
+                                ...current, [workoutWeightInputKey]: raw,
+                              }))}
+                              onValueChange={(field, value) => updatePlanSetValue(exercise, currentWorkoutSetIndex, field, value, setCount)}
+                            />
                             <button type="button" className="primary-button workout-mode-log-set"
                               onClick={() => logWorkoutSet(exercise, currentWorkoutSetIndex, setCount)}>
                               {t('workout.run.logSet', { set: formatNumber(language, currentWorkoutSetIndex + 1) })}

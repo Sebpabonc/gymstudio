@@ -1058,9 +1058,10 @@ button {
 .result-item {
   width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 60px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -1076,6 +1077,142 @@ button {
 
 .result-name {
   font-weight: 700;
+}
+
+.result-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-text .result-name,
+.result-text .result-meta {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.result-equipment {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--brand-soft);
+}
+
+.result-chevron {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.exercise-finder {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.find-search-shell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.find-search-shell .search-input {
+  min-width: 0;
+  min-height: 52px;
+  font-size: 16px;
+}
+
+.exercise-finder .region-chips {
+  scrollbar-width: thin;
+  padding-bottom: 6px;
+}
+
+.exercise-finder .region-chips::-webkit-scrollbar {
+  display: block;
+  height: 4px;
+}
+
+.exercise-finder .region-chips::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+.exercise-finder .region-chip {
+  min-width: 44px;
+}
+
+.find-list-heading {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--muted-strong);
+}
+
+.exercise-finder .search-dropdown,
+.find-exercise-content .search-dropdown {
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.find-exercise-content {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.find-exercise-content p {
+  margin: 0;
+}
+
+.find-last-time {
+  display: grid;
+  gap: 6px;
+  padding: 14px 0;
+  border-block: 1px solid var(--line);
+}
+
+.find-secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.find-secondary-actions button {
+  min-width: 0;
+  min-height: 44px;
+}
+
+.find-secondary-actions [aria-disabled="true"] {
+  opacity: 0.6;
+}
+
+.find-more,
+.find-more-actions > button,
+.find-more-actions summary {
+  min-height: 44px;
+}
+
+.find-more-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.find-exercise-content .workout-mode-big-field .set-stepper {
+  grid-template-columns: 44px minmax(56px, 1fr) 44px;
+}
+
+.find-exercise-content .workout-mode-big-field .stepper-button {
+  min-width: 44px;
+  width: 44px;
+}
+
+.find-exercise-content .workout-mode-big-field input {
+  font-size: 1.4rem;
 }
 
 .result-meta {

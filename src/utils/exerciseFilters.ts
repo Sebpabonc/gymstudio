@@ -5,7 +5,27 @@ import type { Language, TranslationKey } from '../i18n/translate'
 
 export const ALL_BODY_REGIONS = 'All'
 
-const bodyRegionOrder = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core', 'Full Body']
+const bodyRegionOrder = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core']
+
+const equipmentTranslationKeys: Record<string, TranslationKey> = {
+  band: 'workout.swap.equipment.band',
+  barbell: 'workout.swap.equipment.barbell',
+  bodyweight: 'workout.swap.equipment.bodyweight',
+  cable: 'exercises.equipment.cable',
+  dumbbell: 'exercises.equipment.dumbbell',
+  'ez-bar': 'exercises.equipment.ezBar',
+  'hex-bar': 'workout.swap.equipment.hexBar',
+  kettlebell: 'workout.swap.equipment.kettlebell',
+  machine: 'workout.swap.equipment.machine',
+  'plate-loaded': 'workout.swap.equipment.plateLoaded',
+  'smith-machine': 'workout.swap.equipment.smithMachine',
+  other: 'exercises.equipment.other',
+}
+
+export function equipmentLabel(equipment: string | undefined, language: Language = 'en') {
+  const key = equipmentTranslationKeys[equipment ?? 'other']
+  return key ? dictionaries[language][key] : equipment ?? dictionaries[language]['exercises.equipment.other']
+}
 
 const exerciseSearchAbbreviations: Record<string, string[]> = {
   rdl: ['romanian', 'deadlift'],
@@ -60,7 +80,12 @@ export function filterExercises(exercises: Exercise[], query: string, bodyRegion
 
     const primary = exercise.primaryMuscles ?? [exercise.primaryMuscle]
     const secondary = exercise.secondaryMuscles ?? (exercise.secondaryMuscle ? [exercise.secondaryMuscle] : [])
-    const nameValues = [exercise.name, exercise.nameEs, exercise.equipment]
+    const nameValues = [
+      exercise.name,
+      exercise.nameEs,
+      exercise.equipment,
+      ...(exercise.equipment ? [equipmentLabel(exercise.equipment, 'en'), equipmentLabel(exercise.equipment, 'es')] : []),
+    ]
     const primaryValues = [
       ...nameValues,
       ...primary,
@@ -92,6 +117,14 @@ export function getExerciseSubtitle(exercise: Exercise, language: Language = 'en
   ]
     .filter(Boolean)
     .join(' · ')
+}
+
+export function getExerciseResultSubtitle(exercise: Exercise, language: Language = 'en') {
+  const primaryMuscle = exercise.primaryMuscles?.[0] || exercise.primaryMuscle
+  return [
+    localizeBodyRegion(localizeMuscle(primaryMuscle, language), language),
+    equipmentLabel(exercise.equipment, language),
+  ].filter(Boolean).join(' · ')
 }
 
 export function getExerciseTips(exercise: Exercise): Array<string | ExerciseTip> {
