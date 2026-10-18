@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import ExerciseFinder, { ExerciseDetails, recentExercises, todayPlanExercises } from './ExerciseFinder'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import * as i18n from '../i18n'
+import * as storage from '../utils/storage'
 import { createTranslator } from '../i18n/translate'
 
 vi.mock('react-dom', () => ({ createPortal: (children: React.ReactNode) => children }))
@@ -84,6 +85,19 @@ describe('Find exercises', () => {
     expect(html).not.toContain('google.com')
     expect(html).not.toContain('Full technique tips')
     expect(html).not.toContain('<textarea')
+  })
+
+  it('does not offer a duplicate replacement when the selected exercise is already planned today', () => {
+    vi.stubGlobal('document', { body: {} })
+    vi.spyOn(storage, 'getCachedTrainingBlocks').mockReturnValue([{
+      ...block, days: [{ ...block.days[0], exercises: [
+        block.days[0].exercises[0],
+        { ...block.days[0].exercises[0], exerciseId: 'row', position: 2 },
+      ] }],
+    }])
+    const html = renderToString(<ExerciseFinder exercises={exercises} history={[]} authStatus="signed-out"
+      initialExerciseId={exercises[0].id} onHistoryChange={vi.fn()} onProgress={vi.fn()} />)
+    expect(html).toContain('class="secondary-button" disabled="">Swap into plan</button>')
   })
 })
 

@@ -113,6 +113,7 @@ export default function ExerciseFinder({
   const plan = useMemo(() => todayPlanExercises(
     blocks, history, exercises, swaps, today, personal ? null : getActiveBlockId(),
   ), [blocks, history, exercises, swaps, today, personal])
+  const swapTargets = plan.some((item) => item.exercise.id === selectedId) ? [] : plan
   const recent = useMemo(() => recentExercises(exercises, history), [exercises, history])
   const searching = !!search.trim() || region !== ALL_BODY_REGIONS
   const results = useMemo(() => filterExercises(exercises, search, region), [exercises, search, region])
@@ -208,7 +209,7 @@ export default function ExerciseFinder({
             {view === 'swap' ? (
               <>
                 <p>{t('exercises.swapHint')}</p>
-                <ExerciseSearchSuggestions exercises={plan.filter((item) => item.exercise.id !== selected.id).map((item) => item.exercise)}
+                <ExerciseSearchSuggestions exercises={swapTargets.map((item) => item.exercise)}
                   onSelect={(id) => {
                     const target = plan.find((item) => item.exercise.id === id)
                     if (target) swapIntoPlan(target.fromExerciseId)
@@ -239,7 +240,7 @@ export default function ExerciseFinder({
                 <div className="find-secondary-actions">
                   <button type="button" className="secondary-button" aria-disabled="true"
                     onClick={() => setMessage(t('exercises.addTodayUnavailable'))}>{t('exercises.addToday')}</button>
-                  <button type="button" className="secondary-button" disabled={!plan.some((item) => item.exercise.id !== selected.id)}
+                  <button type="button" className="secondary-button" disabled={!swapTargets.length}
                     onClick={() => setView('swap')}>{t('exercises.swap')}</button>
                 </div>
                 {message && <p role="status">{message}</p>}
