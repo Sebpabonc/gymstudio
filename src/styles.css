@@ -7014,6 +7014,23 @@ a.planned-exercise-main-name {
   margin-top: 4px;
 }
 
+.day-done-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 48px;
+  margin-top: 4px;
+  padding: 8px 8px 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--text);
+}
+
+.day-done-status strong {
+  min-width: 0;
+}
+
 .workout-mode-bar {
   display: flex;
   align-items: center;
