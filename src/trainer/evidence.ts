@@ -1,6 +1,7 @@
 import type { TrainingBlock, WorkoutEntry } from '../types'
 import { blockWeek, findEntryBlock, plannedExerciseForEntry } from '../progress/utils'
 import { prescriptionForWeek } from '../plans/weekPrescription'
+import { latestPerExerciseDate } from '../utils/completedExercises'
 import { parseRepPrescription } from '../utils/workoutSets'
 import { recommend, type RecommendInput, type Recommendation, type SessionEvidence } from './engine'
 
@@ -41,8 +42,7 @@ export function buildEvidence(
   /** Only today's entry for this day slot is the one being edited; other days done today are evidence. */
   todayDayKey?: string
 ): SessionEvidence[] {
-  return history
-    .filter((entry) => entry.exerciseId === exerciseId && entry.sets.length > 0)
+  return latestPerExerciseDate(history.filter((entry) => entry.exerciseId === exerciseId && entry.sets.length > 0))
     .filter((entry) => entry.date.slice(0, 10) !== today || (todayDayKey !== undefined && entry.dayKey !== todayDayKey))
     .map((entry) => {
       let target = entry.target?.reps

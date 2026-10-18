@@ -56,7 +56,7 @@ import {
   todayTrainingDay,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
-import { findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
+import { findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelection, findSameDayDuplicate, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import {
   copySetOneWeight,
   copyWeightToUntouchedSets,
@@ -717,6 +717,11 @@ export default function WorkoutPlan({
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
+  const [duplicatePrompt, setDuplicatePrompt] = useState<{
+    names: string[]
+    dayName: string
+    run: (decision: 'move' | 'keep') => void
+  } | null>(null)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
   // Workout mode: focus one exercise (or superset) at a time, same cards as the full Today list.
   const [workoutGroupIndex, setWorkoutGroupIndex] = useState<number | null>(null)
@@ -1968,10 +1973,27 @@ export default function WorkoutPlan({
     setSwipeUndo(null)
   }
 
+  const askDuplicateDecision = (
+    duplicates: WorkoutEntry[],
+    run: (decision: 'move' | 'keep') => void
+  ) => {
+    const dayKey = duplicates[0]?.dayKey
+    const day = activeBlock?.days.find((item) => item.key === dayKey)
+    setDuplicatePrompt({
+      names: duplicates.map((entry) => {
+        const match = exerciseCatalog.find((item) => item.id === entry.exerciseId)
+        return match ? displayExerciseName(match) : entry.exerciseId
+      }),
+      dayName: day ? t('workout.day.title', { position: day.position, name: day.name }) : dayKey ?? '',
+      run,
+    })
+  }
+
   const logPlannedExercise = async (
     exercise: PlanExercise,
     completedRows?: boolean[],
-    completedAt?: Array<number | undefined>
+    completedAt?: Array<number | undefined>,
+    duplicateDecision?: 'move' | 'keep'
   ) => {
     const exerciseKey = getPlanDraftKey(exercise.name)
     const sectionKey = normalizeExerciseName(exercise.name)
@@ -2040,7 +2062,13 @@ export default function WorkoutPlan({
       notes: draft.notes?.trim() ?? '',
     }
 
-    const storedHistory = await loadWorkoutHistory()
+    let storedHistory = await loadWorkoutHistory()
+    const duplicate = planMode === 'preset' ? findSameDayDuplicate(storedHistory, canonicalId, activeCompletionScope) : undefined
+    if (duplicate && !duplicateDecision) {
+      askDuplicateDecision([duplicate], (decision) => void logPlannedExercise(exercise, completedRows, completedAt, decision))
+      return
+    }
+    if (duplicate && duplicateDecision === 'move') storedHistory = await deleteWorkoutEntry(duplicate.id)
     const { history: nextHistory, entry: entryToSave } = upsertScopedEntry(storedHistory, nextEntry, activeCompletionScope)
     if (trainer) saveTrainerResult(exercise, draft, trainer, entryToSave.id)
     const loggedAt = Date.now()
@@ -2132,7 +2160,8 @@ export default function WorkoutPlan({
     groupKey: string,
     completedRows: boolean[],
     completedAt?: Array<number | undefined>,
-    startRest = true
+    startRest = true,
+    duplicateDecision?: 'move' | 'keep'
   ) => {
     const setCount = Math.max(...exercises.map(getDefaultSetCount))
     const entryInputs = await Promise.all(exercises.map(async (exercise) => {
@@ -2194,7 +2223,21 @@ export default function WorkoutPlan({
       return
     }
 
-    const storedHistory = await loadWorkoutHistory()
+    let storedHistory = await loadWorkoutHistory()
+    const duplicates = planMode === 'preset'
+      ? nextEntries.flatMap((entry) => {
+          const duplicate = findSameDayDuplicate(storedHistory, entry.exerciseId, { ...activeCompletionScope, date })
+          return duplicate ? [duplicate] : []
+        })
+      : []
+    if (duplicates.length > 0 && !duplicateDecision) {
+      askDuplicateDecision(duplicates, (decision) =>
+        void logSuperset(exercises, groupKey, completedRows, completedAt, startRest, decision))
+      return
+    }
+    if (duplicateDecision === 'move') {
+      for (const duplicate of duplicates) storedHistory = await deleteWorkoutEntry(duplicate.id)
+    }
     let nextHistory = storedHistory
     const entriesToSave = nextEntries.map((entry) => {
       const result = upsertScopedEntry(nextHistory, entry, { ...activeCompletionScope, date })
@@ -4764,6 +4807,48 @@ export default function WorkoutPlan({
             <button type="button" className="secondary-button" onClick={confirmFinishWorkout}>
               {t('workout.run.finishNow')}
             </button>
+          </section>
+        </div>
+      )}
+      {duplicatePrompt && (
+        <div className="session-summary-backdrop" onClick={() => setDuplicatePrompt(null)}>
+          <section
+            className="session-summary-sheet duplicate-prompt"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="duplicate-prompt-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="duplicate-prompt-title">
+              {t('workout.duplicate.title', { exercise: duplicatePrompt.names.join(', '), day: duplicatePrompt.dayName })}
+            </h2>
+            <div className="duplicate-prompt-actions">
+              <button
+                type="button"
+                className="primary-button small-button"
+                onClick={() => {
+                  const { run } = duplicatePrompt
+                  setDuplicatePrompt(null)
+                  run('move')
+                }}
+              >
+                {t('workout.duplicate.move')}
+              </button>
+              <button
+                type="button"
+                className="secondary-button small-button"
+                onClick={() => {
+                  const { run } = duplicatePrompt
+                  setDuplicatePrompt(null)
+                  run('keep')
+                }}
+              >
+                {t('workout.duplicate.keep')}
+              </button>
+              <button type="button" className="secondary-button small-button" onClick={() => setDuplicatePrompt(null)}>
+                {t('workout.duplicate.cancel')}
+              </button>
+            </div>
           </section>
         </div>
       )}

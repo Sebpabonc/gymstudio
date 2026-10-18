@@ -54,6 +54,8 @@ export type WorkoutEntry = {
   dayKey?: string
   notes?: string
   target?: EntryTarget
+  /** Epoch ms when this entry was saved on this device; the latest entry of a day wins when an exercise has several. */
+  loggedAt?: number
 }
 
 export type TrainingTechnique = 'straight' | 'superset' | 'drop-set' | 'pyramid' | 'reverse-pyramid'

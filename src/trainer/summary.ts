@@ -2,6 +2,7 @@ import { isRepTargetAdjustment } from './presentation'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { blockWeek, dateWeekday, findBlockForDate } from '../progress/utils'
 import { prescriptionForWeek } from '../plans/weekPrescription'
+import { latestPerExerciseDate } from '../utils/completedExercises'
 import { parseRepPrescription } from '../utils/workoutSets'
 import { recommendForExercise } from './evidence'
 import { workingWeight, type Recommendation, type RepRange } from './engine'
@@ -58,7 +59,7 @@ export function buildWorkoutSummary(
   )
   const days = [...block.days].sort((a, b) => a.position - b.position)
   const byExercise = new Map<string, WorkoutEntry[]>()
-  for (const entry of todaysEntries) {
+  for (const entry of latestPerExerciseDate(todaysEntries)) {
     if (entry.sets.length === 0) continue
     const group = byExercise.get(entry.exerciseId) ?? []
     group.push(entry)

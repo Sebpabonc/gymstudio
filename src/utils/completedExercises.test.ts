@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { WorkoutEntry } from '../types'
-import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, findPrefillSelection, findWeekCompletion, summarizeCompletedEntry, upsertScopedEntry } from './completedExercises'
+import { findCompletedEntry, findNextPendingIndex, findPrefillEntry, findPrefillSelection, findSameDayDuplicate, latestPerExerciseDate, findWeekCompletion, summarizeCompletedEntry, upsertScopedEntry } from './completedExercises'
 
 const entry = (overrides: Partial<WorkoutEntry> = {}): WorkoutEntry => ({
   id: 'e1',
@@ -140,5 +140,24 @@ describe('findWeekCompletion (active Monday–Sunday week)', () => {
   it('ignores other day slots and returns the latest log of the week', () => {
     const list = [e('mon', '2026-10-05'), e('wed', '2026-10-07'), e('other', '2026-10-08', 'arms-a')]
     expect(findWeekCompletion(list, scope)?.id).toBe('wed')
+  })
+})
+
+describe('same-day duplicates', () => {
+  const base = { exerciseId: 'squat', date: '2026-10-07', sets: [{ id: 's', reps: 5, weight: 100 }] }
+
+  it('keeps only the latest entry of an exercise per date', () => {
+    const older = { ...base, id: 'a', loggedAt: 1 }
+    const newer = { ...base, id: 'b', loggedAt: 2 }
+    const other = { ...base, id: 'c', date: '2026-10-06' }
+    expect(latestPerExerciseDate([older, newer, other]).map((entry) => entry.id)).toEqual(['b', 'c'])
+  })
+
+  it('finds a same-day log under another day of the same block', () => {
+    const entry = { ...base, id: 'a', blockId: 'b1', dayKey: 'lower-body-b' }
+    const scope = { date: '2026-10-07', blockId: 'b1', dayKey: 'lower-body-a' }
+    expect(findSameDayDuplicate([entry], 'squat', scope)?.id).toBe('a')
+    expect(findSameDayDuplicate([entry], 'squat', { ...scope, dayKey: 'lower-body-b' })).toBeUndefined()
+    expect(findSameDayDuplicate([entry], 'squat', { ...scope, date: '2026-10-08' })).toBeUndefined()
   })
 })
