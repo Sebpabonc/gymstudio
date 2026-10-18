@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0b0c">
+<title>GymStudio Declutter Audit</title>
+<style>
+:root{--bg:#0b0b0c;--phone:#101012;--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);--line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#b9b8b5;--brand:#8d5e63;--brand-soft:rgba(141,94,99,.2);--rose:#c99ca1;--green:#a7e3a1;--cut:#ff6b6b;--cut-soft:rgba(255,107,107,.13);--move:#f2c66d;--move-soft:rgba(242,198,109,.12);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,'Segoe UI',sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.bar{position:sticky;top:0;z-index:20;background:#141415;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar h1{font-size:15px;margin:0 8px 0 0;font-weight:800;letter-spacing:.02em}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:none;border:0;color:var(--muted);padding:0 12px;min-height:40px;cursor:pointer;font-size:13px}
+.seg button[aria-pressed=true]{background:var(--brand);color:#fff}
+.legend{flex-basis:100%;font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.stage{display:flex;gap:24px;justify-content:center;padding:16px;flex-wrap:wrap;align-items:flex-start}
+.col{width:375px;max-width:100%}
+.col>.lbl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);margin:0 0 6px 4px;font-weight:700}
+.phone{background:var(--phone);border:1px solid var(--line);border-radius:26px;overflow:hidden;position:relative;min-height:640px}
+.stage[data-mode=before] .col.after,.stage[data-mode=after] .col.before{display:none}
+@media(max-width:799px){.stage[data-mode=both] .col.after{display:none}body.mboth .both-note{display:block}}
+.both-note{display:none;flex-basis:100%;font-size:12px;color:var(--move)}
+.scr{padding:10px 12px 90px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.row{display:flex;align-items:center;gap:8px;min-width:0}
+.grow{flex:1;min-width:0}
+.mut{color:var(--muted)}.sm{font-size:12px}.xs{font-size:11px}
+.tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.wm{font-size:30px;font-weight:900;letter-spacing:-.01em;line-height:1}
+.ttl{font-size:16px;font-weight:800}
+.hdr1{display:flex;align-items:center;gap:8px;padding:6px 0 8px}
+.hdr1 .wm{font-size:15px;letter-spacing:.06em}
+.pill{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;background:var(--panel)}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:11px;background:var(--panel2);margin:2px 4px 2px 0}
+.ibtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--panel);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.btn{width:100%;min-height:52px;border:0;border-radius:14px;background:linear-gradient(135deg,#7a5d60,#2f2f31);font-weight:800;letter-spacing:.04em;cursor:pointer}
+.ghost{background:none;border:1px solid var(--line);border-radius:10px;min-height:40px;padding:0 12px;cursor:pointer;font-size:13px}
+.link{background:none;border:0;color:var(--rose);padding:0;cursor:pointer;font-size:12px;min-height:32px}
+.week{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
+.week span{height:6px;border-radius:4px;background:var(--brand)}
+.week+.days{display:grid;grid-template-columns:repeat(4,1fr);font-size:11px;text-align:center;margin-top:4px;color:var(--muted)}
+.ex{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
+.exn{font-size:16px;font-weight:800}
+.ss{border:1px solid rgba(201,156,161,.35);border-radius:14px;padding:8px;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td,th{padding:6px 4px;text-align:left;font-size:13px;border-bottom:1px solid var(--line)}
+th{font-size:11px;color:var(--muted);font-weight:600}
+.logger{background:var(--panel2);border-radius:14px;padding:10px;margin:8px 0}
+.step{display:grid;grid-template-columns:44px 1fr 44px;gap:4px;align-items:center}
+.step b{font-size:26px;text-align:center;font-variant-numeric:tabular-nums}
+.step button{height:52px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:20px}
+.chips{display:flex;gap:6px;overflow:hidden;padding:4px 0}
+.chips span{min-width:38px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:var(--green);color:#163016}
+.chips span.cur{background:var(--brand-soft);color:var(--text);border:1px solid var(--brand)}
+.wbar{display:flex;align-items:center;gap:8px;padding:4px 0}
+.cue{border-left:3px solid var(--rose);background:var(--panel2);padding:8px 10px;font-weight:700;font-size:14px;margin:8px 0}
+.nav{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;padding:10px 12px 14px;background:linear-gradient(0deg,#0b0b0c 70%,transparent)}
+.nav span{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);border:1px solid var(--line)}
+.nav span.on{color:var(--text);background:var(--brand-soft)}
+.spark{width:70px;height:22px;flex:none}
+.bars{display:flex;gap:6px;align-items:flex-end;height:60px;margin:6px 0}
+.bars i{flex:1;background:var(--brand);border-radius:4px 4px 0 0}
+.band{position:relative}
+/* markers */
+.mk{position:relative}
+body.show .mk{outline:2px dashed var(--cut);outline-offset:2px;background:var(--cut-soft);border-radius:8px}
+body.show .mk.mv{outline-color:var(--move);background:var(--move-soft)}
+.badge{display:none}
+body.show .mk>.badge{display:inline-block;position:absolute;top:-9px;right:-4px;z-index:3;background:var(--cut);color:#200;font-size:10px;font-weight:900;border-radius:6px;padding:1px 5px;line-height:1.4;letter-spacing:.02em}
+body.show .mk.mv>.badge{background:var(--move)}
+.new{outline:2px solid rgba(167,227,161,.55);outline-offset:2px;border-radius:8px}
+body:not(.show) .new{outline:none}
+.hide{display:none!important}
+.sheet{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+.notes{max-width:800px;margin:0 auto;padding:0 16px 40px;font-size:14px;color:var(--muted);line-height:1.5}
+.notes h2{color:var(--text);font-size:15px}
+.notes li{margin:4px 0}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:fade .18s ease-out}@keyframes fade{from{opacity:0}to{opacity:1}}}
+</style>
+</head>
+<body class="show mboth">
+<div class="bar" role="toolbar" aria-label="Prototype controls">
+  <h1 id="ptitle">Declutter audit</h1>
+  <div class="seg" id="scr" role="group" aria-label="Screen"></div>
+  <div class="seg" id="mode" role="group" aria-label="View">
+    <button data-v="both" aria-pressed="true">Before | After</button><button data-v="before" aria-pressed="false">Before</button><button data-v="after" aria-pressed="false">After</button>
+  </div>
+  <div class="seg" id="lang" role="group" aria-label="Language">
+    <button data-v="en" aria-pressed="true">EN</button><button data-v="es" aria-pressed="false">ES</button>
+  </div>
+  <div class="seg" role="group" aria-label="Markers"><button id="mkbtn" aria-pressed="true">Mark items</button></div>
+  <div class="legend" id="legend"></div>
+  <div class="both-note" id="bothnote"></div>
+</div>
+<div class="stage" id="stage" data-mode="both">
+  <div class="col before"><p class="lbl" id="lb">Before · live build b6708f7</p><div class="phone" id="before"></div></div>
+  <div class="col after"><p class="lbl" id="la">After · proposal</p><div class="phone" id="after"></div></div>
+</div>
+<div class="notes" id="notes"></div>
+
+<script>
+const S={screen:'today',lang:'en',open:{}};
+const x=(en,es)=>S.lang==='es'?es:en;
+const kg=n=>S.lang==='es'?String(n).replace('.',','):String(n);
+// mk(id, html, kind) kind: 'cut' (remove) | 'mv' (move/merge)
+const mk=(id,html,kind='cut',tag='div')=>`<${tag} class="mk ${kind==='mv'?'mv':''}"><span class="badge">${id}</span>${html}</${tag}>`;
+const tog=k=>`data-tog="${k}"`;
+const isOpen=k=>!!S.open[k];
+const nav=a=>`<div class="nav" aria-hidden="true">${(S.lang==='es'?['Hoy','Ejer','Prog','Tú','✦']:['Today','Ex','Prog','You','✦']).map((n,i)=>`<span class="${i===a?'on':''}">${n}</span>`).join('')}</div>`;
+
+const SCREENS={
+ today:{n:['Today','Hoy']},
+ workout:{n:['Workout','Entreno']},
+ exercise:{n:['Exercise','Ejercicio']},
+ progress:{n:['Progress','Progreso']},
+ signin:{n:['Sign-in / You','Acceso / Tú']},
+};
+
+/* ---------------- BEFORE ---------------- */
+function beforeHeader(title){return `
+ <div class="row" style="justify-content:flex-end;gap:6px;padding:2px 0 6px">
+  ${mk('G3','<span class="pill">EN | ES</span>','mv','span')}
+  ${mk('G2','<span class="pill" title="Boxes / Sheet">▤ | ⌓</span>','cut','span')}
+  ${mk('G4','<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e6b34a"></span>','mv','span')}
+ </div>
+ ${mk('G1',`<div class="tag">${x('Train with intent','Entrena con intención')}</div><div class="wm">GYM STUDIO</div>`)}
+ <div class="ttl" style="margin:2px 0 10px">${title}</div>`}
+
+function beforeToday(){return `<div class="scr">${beforeHeader(x('Today','Hoy'))}
+ <div class="row" style="margin-bottom:8px"><span class="ibtn" aria-hidden="true">▦</span>${mk('T1',`<span class="pill">${x('6-WEEK PLAN · 4 DAYS/WEEK','PLAN DE 6 SEMANAS · 4 DÍAS/SEMANA')}</span>`,'cut','span')}</div>
+ <div class="card"><div class="row"><b class="grow">${x('Upper / Lower · 4 Days','Superior / Inferior · 4 días')}</b><span class="xs">${x('Week 4 of 6','Semana 4 de 6')}</span><button class="ibtn" ${tog('bblock')} aria-expanded="${isOpen('bblock')}">${isOpen('bblock')?'−':'+'}</button></div>
+  ${isOpen('bblock')?mk('T2',`<div class="sheet"><button class="ghost">${x('Change block','Cambiar bloque')}</button><div class="row xs mut" style="margin-top:6px"><span class="grow">21 Sep – 1 Nov 2026</span><span>${x('Flat Pyramid','Pirámide plana')}</span></div><p class="sm">${x('Six weeks, four sessions: upper and lower body, each twice a week…','Seis semanas, cuatro sesiones: tren superior e inferior, dos veces por semana…')}</p><div class="card row"><b class="grow sm">${x('About this block','Sobre este bloque')}</b><span class="ibtn">+</span></div></div>`,'mv'):''}
+ </div>
+ <div class="card"><div class="row sm"><span>‹</span><span class="grow">${x('This week','Esta semana')}</span><b>${x('4 of 4 days done','4 de 4 días hechos')}</b><span>›</span></div><div class="week"><span></span><span></span><span></span><span></span></div><div class="days"><b>${x('Mon 12','Lun 12')}</b><span>${x('Tue 13','Mar 13')}</span><span>${x('Wed 14','Mié 14')}</span><span>${x('Thu 15','Jue 15')}</span></div></div>
+ <div class="ttl">${x('Day 1 · Upper A','Día 1 · Tren superior A')}</div>
+ ${mk('T3',`<div class="xs mut">${x('Upper body · heavy','Tren superior · pesado')}</div>`,'mv')}
+ <div style="height:8px"></div><button class="btn">▶ ${x('Start workout','Empezar entrenamiento')}</button>
+ <div class="ex"><div class="row">${mk('T4',`<span class="exn" style="text-decoration:underline">${x('Barbell Bench Press','Press de banca con barra')} ↗</span>`,'mv','span')}<span class="grow"></span>${mk('T4',`<span class="ibtn">⇄</span>`,'mv','span')}<button class="ibtn" ${tog('bcard')} aria-expanded="${isOpen('bcard')}">${isOpen('bcard')?'−':'+'}</button></div>
+  ${mk('T5',`<span class="pill">✓ ${x('Done','Hecho')} · ${x('3 sets · top','3 series · mejor')} ${kg(82.5)} kg</span>`,'mv','span')}
+  ${isOpen('bcard')?`
+   ${mk('T8',`<div class="card" style="margin-top:8px"><b class="sm">${x('Next (Mon): 85 kg × 6–8','Siguiente (lun): 85 kg × 6–8')}</b><p class="xs mut" style="margin:4px 0 0">${x('Last time you did 10 · 10 · 10 reps at 82.5 kg; today’s target is 6–8. I have moved the load up.','La última vez hiciste 10 · 10 · 10 reps con 82,5 kg; el objetivo de hoy es 6–8. He subido la carga.')}</p></div>`,'mv')}
+   ${mk('T9',`<div><span class="chip">${x('Straight Sets','Series rectas')}</span><span class="chip">${x('Flat bench','Banco plano')}</span><span class="chip">${x('Chest','Pecho')}</span></div>`,'mv')}
+   ${mk('T8',`<div class="xs mut">${x('3 sets · 8·8·8 reps · 150 s rest','3 series · 8·8·8 reps · 150 s descanso')}</div>`)}
+   <div class="cue sm">${x('Squeeze — Squeeze your chest as if trying to bend the bar into a U…','Aprieta — Aprieta el pecho como si quisieras doblar la barra en U…')}</div>
+   ${mk('T7',`<div class="row"><button class="ghost">${x('Same as set 1','Igual que la serie 1')}</button><button class="ghost">${x('Start rest','Iniciar descanso')}</button></div>`)}
+   <table><tr><th>${x('Set','Serie')}</th><th>${x('Previous','Anterior')}</th><th>kg</th><th>Reps</th><th>✓</th></tr>${[1,2,3].map(i=>`<tr><td>${i}</td><td>${kg(82.5)} × 10</td><td>${kg(82.5)}</td><td>8</td><td>✓</td></tr>`).join('')}</table>
+   <div class="card row" style="margin-top:8px"><b class="grow sm">${x('Progress','Progreso')}</b>+</div><div class="xs mut">${x('Notes','Notas')}</div>`:''}
+ </div>
+ <div class="ss"><div class="row"><span class="chip">${x('Superset','Superserie')}</span>${mk('T5',`<span class="pill">✓ ${x('Done','Hecho')}</span>`,'cut','span')}</div>
+  ${mk('T6',`<p class="xs mut" style="margin:6px 0">${x('Do C1, rest ~10 s, then C2; rest after the pair.','Haz C1, descansa ~10 s, luego C2; descansa al final del par.')}</p>`,'mv')}
+  <div class="ex"><span class="exn">${x('Dumbbell Shoulder Press','Press de hombros con mancuernas')} ↗</span><br><span class="pill">✓ ${x('Done','Hecho')} · 3 · 24 kg</span></div>
+  <div class="ex"><span class="exn">${x('Cable Lat Pulldown','Jalón al pecho en polea')} ↗</span><br><span class="pill">✓ ${x('Done','Hecho')} · 3 · ${kg(33.5)} kg</span></div>
+  <div class="ex">${mk('T7',`<span class="link">${x('Start rest','Iniciar descanso')}</span>`,'cut','span')}<div class="row"><b class="grow sm">${x('Log rounds','Registrar rondas')}</b><span class="xs">3/3</span></div></div>
+ </div>
+ </div>${nav(0)}`}
+
+function afterToday(){return `<div class="scr">
+ <div class="hdr1 new"><span class="wm">GYM STUDIO</span><span class="mut">·</span><span class="ttl">${x('Today','Hoy')}</span></div>
+ <div class="card"><div class="row"><span class="ibtn" aria-hidden="true">▦</span><b class="grow">${x('Upper / Lower · 4 Days','Superior / Inferior · 4 días')}</b><span class="xs">${x('Week 4 of 6','Semana 4 de 6')}</span><button class="ibtn" ${tog('ablock')} aria-expanded="${isOpen('ablock')}" aria-label="${x('About this block','Sobre este bloque')}">${isOpen('ablock')?'−':'ⓘ'}</button></div>
+  ${isOpen('ablock')?`<div class="sheet new"><div class="row xs mut"><span class="grow">21 Sep – 1 Nov 2026</span><span>${x('Flat Pyramid','Pirámide plana')}</span></div><p class="sm">${x('Six weeks, four sessions: upper and lower body, each twice a week…','Seis semanas, cuatro sesiones: tren superior e inferior, dos veces por semana…')}</p><button class="link">${x('Change block','Cambiar bloque')}</button></div>`:''}
+ </div>
+ <div class="card"><div class="row sm"><span>‹</span><span class="grow"></span><b>${x('4 of 4 days done','4 de 4 días hechos')}</b><span>›</span></div><div class="week"><span></span><span></span><span></span><span></span></div><div class="days"><b>${x('Mon 12','Lun 12')}</b><span>${x('Tue 13','Mar 13')}</span><span>${x('Wed 14','Mié 14')}</span><span>${x('Thu 15','Jue 15')}</span></div></div>
+ <div class="ttl new" style="margin-bottom:8px">${x('Day 1 · Upper A · heavy','Día 1 · Tren superior A · pesado')}</div>
+ <button class="btn">▶ ${x('Start workout','Empezar entrenamiento')}</button>
+ <div class="ex"><button class="row" style="width:100%;background:none;border:0;padding:0;text-align:left;cursor:pointer" ${tog('acard')} aria-expanded="${isOpen('acard')}"><span class="exn grow">${x('Barbell Bench Press','Press de banca con barra')}</span><span class="ibtn">${isOpen('acard')?'−':'+'}</span></button>
+  <div class="xs mut new" style="margin-top:2px">✓ 3 × ${kg(82.5)} kg</div>
+  ${isOpen('acard')?`<div class="sheet">
+   <div class="row new"><b class="grow sm">${x('Next: 3 × 6–8 · 85 kg · rest 2:30','Siguiente: 3 × 6–8 · 85 kg · descanso 2:30')}</b><button class="link" ${tog('awhy')}>${x('Why?','¿Por qué?')}</button></div>
+   ${isOpen('awhy')?`<p class="xs mut">${x('Last time you did 10 · 10 · 10 reps at 82.5 kg; today’s target is 6–8. I have moved the load up.','La última vez hiciste 10 · 10 · 10 reps con 82,5 kg; el objetivo de hoy es 6–8. He subido la carga.')}</p>`:''}
+   <div class="cue sm">${x('Squeeze — Squeeze your chest as if trying to bend the bar into a U…','Aprieta — Aprieta el pecho como si quisieras doblar la barra en U…')}</div>
+   <table><tr><th>${x('Set','Serie')}</th><th>${x('Last time','Última vez')}</th><th>${x('Done','Hecho')}</th></tr>${[1,2,3].map(i=>`<tr><td>${i}</td><td>${kg(82.5)} × 10</td><td>${kg(82.5)} × 8 ✓</td></tr>`).join('')}</table>
+   <div class="row" style="margin-top:6px"><button class="link">${x('See on Google','Ver en Google')} ↗</button><span class="grow"></span><button class="link">${x('Swap','Cambiar')}</button></div>
+  </div>`:''}
+ </div>
+ <div class="ss"><div class="row"><span class="chip">${x('Superset','Superserie')}</span><button class="link" ${tog('assi')} aria-label="${x('How supersets work','Cómo funcionan las superseries')}">ⓘ</button><span class="grow"></span><span class="pill">✓ ${x('Done','Hecho')}</span></div>
+  ${isOpen('assi')?`<p class="xs mut" style="margin:6px 0">${x('Do C1, rest ~10 s, then C2; rest after the pair.','Haz C1, descansa ~10 s, luego C2; descansa al final del par.')}</p>`:''}
+  <div class="ex"><span class="exn">${x('Dumbbell Shoulder Press','Press de hombros con mancuernas')}</span><div class="xs mut">✓ 3 × 24 kg</div></div>
+  <div class="ex"><span class="exn">${x('Cable Lat Pulldown','Jalón al pecho en polea')}</span><div class="xs mut">✓ 3 × ${kg(33.5)} kg</div></div>
+ </div>
+ </div>${nav(0)}`}
+
+function beforeWorkout(){const more=isOpen('bmore');return `<div class="scr">
+ <div class="wbar"><button class="ghost">‹ ${x('Exit','Salir')}</button><b class="grow sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${x('Day 1 · Upper A · 1/8','Día 1 · Tren superior A · 1/8')}</b><span class="xs">0:04</span><button class="ghost">${x('Finish','Terminar')}</button></div>
+ <div class="chips"><span class="cur">1</span><span>2✓</span><span>3✓</span><span>4✓</span><span>5✓</span><span>6✓</span><span>7✓</span></div>
+ <div class="row">${mk('W1',`<span class="xs mut">${x('Tap an exercise to jump · rose line = superset','Toca un ejercicio para ir · línea rosa = superserie')}</span>`,'cut','span')}<span class="grow"></span>${mk('W2','<span class="pill">EN | ES</span>','mv','span')}</div>
+ <div class="card" style="margin-top:8px"><div class="row"><span class="exn grow">${x('Barbell Bench Press','Press de banca con barra')} ↗</span><span class="ibtn">⇄</span></div>
+  ${mk('W3',`<span class="pill">✓ ${x('Done','Hecho')} · ${x('3 sets · top','3 series · mejor')} ${kg(82.5)} kg</span>`,'cut','span')}
+  <div class="cue">${x('SQUEEZE · Bend the bar, squeeze chest ›','APRIETA · Dobla la barra en U, aprieta el pecho ›')}</div>
+  ${mk('W4',`<div><span class="chip">${x('Straight Sets','Series rectas')}</span><span class="chip">${x('Flat bench','Banco plano')}</span><span class="chip">${x('Chest','Pecho')}</span></div>`,'mv')}
+  <button class="ghost" ${tog('bmore')} aria-expanded="${more}" style="margin-top:6px">${more?'▼':'▶'} ⋯ ${x('More','Más')}</button>
+  ${more?`<div class="sheet"><div><button class="ghost">${x('Search on Google','Buscar en Google')}</button> <button class="ghost">${x('Swap','Cambiar')}</button> ${mk('W7',`<button class="ghost">${x('Notes','Notas')}</button>`,'mv','span')} ${mk('W8',`<button class="ghost">${x('History','Historial')}</button>`,'cut','span')} ${mk('W6',`<button class="ghost">ⓘ ${x('Technique','Técnica')}</button>`,'mv','span')}</div>
+   ${mk('W5',`<div class="card" style="margin-top:8px"><b class="sm">${x('Today: 85 kg × 6–8','Hoy: 85 kg × 6–8')}</b></div>`)}
+   ${mk('W6',`<div class="cue sm">${x('Squeeze — Squeeze your chest as if trying to bend the bar into a U and bring your biceps toward each other… ›','Aprieta — Aprieta el pecho como si quisieras doblar la barra en U y junta los bíceps… ›')}</div>`,'mv')}</div>`:''}
+  <div class="logger"><b class="sm">${x('SET 3 OF 3 · Target','SERIE 3 DE 3 · Objetivo')} ${kg(82.5)}×8</b>
+   <div class="row" style="margin:6px 0"><div class="step grow"><button>−</button><b>${kg(82.5)}</b><button>+</button></div><div class="step grow"><button>−</button><b>8</b><button>+</button></div></div>
+   <button class="btn">${x('Log set 3','Registrar serie 3')}</button></div>
+  <table><tr><th>#</th><th>${x('Last time Wed 14 Oct','Última vez mié 14 oct')}</th><th>${x('Target','Objetivo')}</th><th>${x('Done','Hecho')}</th></tr>${[1,2,3].map(i=>`<tr><td>${i}</td><td>${kg(82.5)}×10</td><td>${kg(82.5)}×8</td><td>${kg(82.5)}×8 ✓</td></tr>`).join('')}</table>
+  <p class="sm"><b>▼ ${x('Trend by set','Tendencia por serie')}</b></p><div class="bars"><i style="height:70%"></i><i style="height:70%"></i><i style="height:70%"></i><i style="height:70%;opacity:.6"></i><i style="height:70%;opacity:.6"></i><i style="height:70%;opacity:.6"></i></div>
+  ${mk('W9',`<span class="xs mut">${x('Bars from 0 kg','Barras desde 0 kg')}</span>`,'cut','span')}
+  ${mk('W8',`<div class="card row" style="margin-top:8px"><b class="grow sm">${x('Progress','Progreso')}</b>+</div>`)}
+  ${mk('W7',`<div class="xs mut">${x('Notes','Notas')}</div><div style="height:60px;border:1px solid var(--line);border-radius:10px;margin-top:4px" class="xs mut">&nbsp;${x('Add notes for this exercise','Añade notas para este ejercicio')}</div>`,'mv')}
+ </div></div>`}
+
+function afterWorkout(){const more=isOpen('amore');return `<div class="scr">
+ <div class="wbar"><button class="ghost">‹ ${x('Exit','Salir')}</button><b class="grow sm new">${x('Upper A · 1/8','Tren sup. A · 1/8')}</b><span class="xs">0:04</span><button class="ghost">${x('Finish','Terminar')}</button></div>
+ <div class="chips"><span class="cur">1</span><span>2✓</span><span>3✓</span><span>4✓</span><span>5✓</span><span>6✓</span><span>7✓</span></div>
+ <div class="card" style="margin-top:8px"><div class="row"><span class="exn grow">${x('Barbell Bench Press','Press de banca con barra')}</span><button class="ghost" ${tog('amore')} aria-expanded="${more}" aria-label="${x('More','Más')}">⋯</button></div>
+  <div class="cue">${x('SQUEEZE · Bend the bar, squeeze chest ›','APRIETA · Dobla la barra en U, aprieta el pecho ›')}</div>
+  ${more?`<div class="sheet new"><button class="ghost">ⓘ ${x('Technique','Técnica')}</button> <button class="ghost">${x('Notes','Notas')}</button> <button class="ghost">${x('Swap','Cambiar')}</button> <button class="ghost">${x('See on Google','Ver en Google')} ↗</button><div class="xs mut" style="margin-top:6px">${x('Flat bench · Chest','Banco plano · Pecho')}</div></div>`:''}
+  <div class="logger"><b class="sm">${x('SET 3 OF 3 · Target','SERIE 3 DE 3 · Objetivo')} ${kg(82.5)}×8</b>
+   <div class="row" style="margin:6px 0"><div class="step grow"><button>−</button><b>${kg(82.5)}</b><button>+</button></div><div class="step grow"><button>−</button><b>8</b><button>+</button></div></div>
+   <button class="btn">${x('Log set 3','Registrar serie 3')}</button></div>
+  <table><tr><th>#</th><th>${x('Last · Wed 14','Última · mié 14')}</th><th>${x('Target','Objetivo')}</th><th>${x('Done','Hecho')}</th></tr>${[1,2,3].map(i=>`<tr><td>${i}</td><td>${kg(82.5)}×10</td><td>${kg(82.5)}×8</td><td>${kg(82.5)}×8 ✓</td></tr>`).join('')}</table>
+  <button class="link" ${tog('atrend')} aria-expanded="${isOpen('atrend')}">${isOpen('atrend')?'▼':'▶'} ${x('Trend by set','Tendencia por serie')}</button>
+  ${isOpen('atrend')?`<div class="bars"><i style="height:70%"></i><i style="height:70%"></i><i style="height:70%"></i><i style="height:70%;opacity:.6"></i><i style="height:70%;opacity:.6"></i><i style="height:70%;opacity:.6"></i></div>`:''}
+ </div>
+ <div class="card row sm"><span class="grow">✓ ${x('Plate-Loaded T-Bar Row','Remo en T en máquina')}</span><span>→ 3×8 · 73 kg</span></div>
+ <p class="xs mut new">${x('Log set stays on screen with ⋯ open: More holds only rare tools.','Registrar sigue a la vista con ⋯ abierto: Más solo tiene herramientas poco usadas.')}</p>
+ </div>`}
+
+function beforeExercise(){return `<div class="scr">${beforeHeader(x('Exercises','Ejercicios'))}
+ <div class="row"><button class="btn" style="min-height:44px;font-size:13px">${x('Find an exercise','Buscar ejercicio')}</button><button class="ghost" style="min-height:44px;flex:1">${x('Build a custom day','Crear día personalizado')}</button></div>
+ <div class="card" style="margin-top:8px">${mk('E1',`<div class="xs mut">${x('Exercise','Ejercicio')}</div>`,'cut')}
+  <div class="exn" style="font-size:22px">${x('Barbell Bench Press','Press de banca con barra')} ↗</div>
+  ${mk('E2',`<div class="xs mut">${x('Primary muscles','Músculos principales')}</div><span class="chip">${x('Chest','Pecho')}</span><div class="xs mut">${x('Secondary muscles','Músculos secundarios')}</div><span class="chip">${x('Triceps','Tríceps')}</span><span class="chip">${x('Front Delts','Deltoides frontal')}</span>`,'mv')}
+  <div class="cue sm">${x('Squeeze — Squeeze your chest as if trying to bend the bar into a U…','Aprieta — Aprieta el pecho como si quisieras doblar la barra en U…')}</div>
+  <div class="row"><div class="card grow"><div class="xs mut">${x('LAST MAX','MÁX. ANTERIOR')}</div><b>${kg(82.5)} kg</b></div>${mk('E3',`<div class="card"><div class="xs mut">${x('LAST VOLUME','VOLUMEN ANTERIOR')}</div><b>2475 kg</b></div>`,'mv')}</div></div>
+ ${mk('E3',`<div class="card"><b class="sm">${x('Previous performance','Rendimiento anterior')}</b><div class="row sm"><span class="grow">${x('Oct 14','14 oct')}</span><b>${x('3 sets','3 series')}</b></div><span class="chip">10 × ${kg(82.5)} kg</span><span class="chip">10 × ${kg(82.5)} kg</span><span class="chip">10 × ${kg(82.5)} kg</span></div>`)}
+ <div class="card"><b class="sm">${x('Track it as you go','Regístralo sobre la marcha')}</b><table><tr><th>${x('Set','Serie')}</th><th>${x('Previous','Anterior')}</th><th>kg</th><th>Reps</th></tr><tr><td>1</td><td>${kg(82.5)} × 10</td><td>—</td><td>8</td></tr></table><div style="height:8px"></div><button class="btn">${x('Log workout','Registrar entrenamiento')}</button></div>
+ ${mk('E3',`<div class="card"><b class="sm">${x('Progress','Progreso')}</b>${['Oct 14|2475','Oct 12|1980','Oct 7|2475'].map(r=>{const [d,v]=r.split('|');return `<div class="row sm"><span class="grow">${d}</span><span>${kg(82.5)} kg</span><span class="mut">&nbsp;${v} kg ${x('volume','volumen')}</span></div>`}).join('')}<button class="link">${x('See full progress','Ver progreso completo')}</button></div>`,'mv')}
+ </div>${nav(1)}`}
+
+function afterExercise(){return `<div class="scr">
+ <div class="hdr1"><span class="wm">GYM STUDIO</span><span class="mut">·</span><span class="ttl">${x('Exercises','Ejercicios')}</span></div>
+ <div class="row"><button class="btn" style="min-height:44px;font-size:13px">${x('Find an exercise','Buscar ejercicio')}</button><button class="ghost" style="min-height:44px;flex:1">${x('Build a custom day','Crear día personalizado')}</button></div>
+ <div class="card" style="margin-top:8px">
+  <div class="exn" style="font-size:22px">${x('Barbell Bench Press','Press de banca con barra')}</div>
+  <div class="sm new"><span class="chip">${x('Chest','Pecho')}</span><span class="mut">${x('also Triceps, Front delts','también Tríceps, Deltoides frontal')}</span></div>
+  <div class="cue sm">${x('Squeeze — Squeeze your chest as if trying to bend the bar into a U…','Aprieta — Aprieta el pecho como si quisieras doblar la barra en U…')}</div>
+  <div class="row"><div class="card grow"><div class="xs mut">${x('LAST MAX','MÁX. ANTERIOR')}</div><b>${kg(82.5)} kg</b></div><button class="link">${x('See on Google','Ver en Google')} ↗</button></div></div>
+ <div class="card"><b class="sm">${x('Track it as you go','Regístralo sobre la marcha')}</b><table><tr><th>${x('Set','Serie')}</th><th>${x('Previous','Anterior')}</th><th>kg</th><th>Reps</th></tr><tr><td>1</td><td>${kg(82.5)} × 10</td><td>${kg(82.5)}</td><td>8</td></tr></table><div style="height:8px"></div><button class="btn">${x('Log workout','Registrar entrenamiento')}</button></div>
+ <button class="ghost new" style="width:100%">${x('See full progress ›','Ver progreso completo ›')}</button>
+ </div>${nav(1)}`}
+
+const lifts=[['Barbell Bench Press','Press de banca con barra','91.8','110.0','4.5'],['Plate-Loaded T-Bar Row','Remo en T en máquina','81.7','97.3','3.7'],['Dumbbell Shoulder Press','Press de hombros con mancuernas','28.0','33.6','1.3']];
+const spark='<svg class="spark" viewBox="0 0 70 22" aria-hidden="true"><polyline points="0,18 14,14 28,11 42,9 56,7 70,4" fill="none" stroke="#c99ca1" stroke-width="2"/></svg>';
+function beforeProgress(){return `<div class="scr">${beforeHeader(x('Progress','Progreso'))}
+ <div class="row">${mk('P1',`<div class="ttl" style="font-size:22px">${x('Progress','Progreso')}</div>`,'cut','span')}<span class="grow"></span><span class="xs mut">${x('Upper / Lower · 4 Days','Superior / Inferior · 4 días')}</span></div>
+ <div class="row sm" style="margin:8px 0"><span class="chip">${x('Overview','Resumen')}</span><span>${x('Trends','Tendencias')}</span><span>${x('Muscles','Músculos')}</span><span>${x('Consistency','Constancia')}</span></div>
+ <div class="card"><b>${x('Progressing','Progresando')}</b><div class="sm">${x('8 of 8 main lifts improving · 0 about the same · 0 lower','8 de 8 ejercicios principales mejorando · 0 igual · 0 más bajos')}</div>${mk('P2',`<div class="xs mut">${x('Status reflects the majority of eligible main-lift verdicts, not a recommendation.','El estado refleja la mayoría de los veredictos de ejercicios principales; no es una recomendación.')}</div>`,'mv')}</div>
+ <div class="card"><div class="tag">${x('Main lifts · this block','Ejercicios principales · este bloque')}</div>
+ ${lifts.map(l=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b class="sm">${x(l[0],l[1])}</b><div class="row"><div class="grow"><div class="sm mut">${x('Improving','Mejorando')}</div>${mk('P3',`<div class="xs mut">${x('Est. max','Máx. est.')}: ${kg(l[2])} → ${kg(l[3])} kg</div><div class="xs mut">${x(`This week's best Est. max: ${l[3]} kg (last week ${l[3]} kg, about the same)`,`Mejor Máx. est. de esta semana: ${kg(l[3])} kg (semana pasada ${kg(l[3])} kg, más o menos igual)`)}</div><div class="xs mut">+${kg(l[4])} kg/${x('week','semana')}</div>`,'mv')}</div>${spark}</div></div>`).join('')}
+ ${mk('P4',`<p class="xs mut">${x('High-rep lifts show reps at the top load; the line restarts when the load changes.','Los ejercicios de muchas reps muestran reps con la carga máxima; la línea se reinicia al cambiar la carga.')}</p>`,'mv')}</div>
+ <div class="card">${mk('P5',`<div class="tag">${x('Since the last equivalent session','Desde la última sesión equivalente')}</div>`,'mv')}<div class="row" style="text-align:center"><div class="card grow"><b>1</b><div class="xs">${x('Improved','Mejoró')}</div></div><div class="card grow"><b>14</b><div class="xs">${x('Held','Igual')}</div></div><div class="card grow"><b>3</b><div class="xs">${x('Worth a look','A revisar')}</div></div></div>${mk('P5',`<div class="xs"><b>${x('Barbell Bench Press','Press de banca')}:</b> ${x('Last time: all sets reached 10 reps at 82.5 kg.','Última vez: todas las series llegaron a 10 reps con 82,5 kg.')}</div>`,'mv')}</div>
+ ${mk('P6',`<div class="card"><div class="tag">${x('Consistency · weekly sets by muscle','Constancia · series semanales por músculo')}</div><div class="sm">${x('Last 4 weeks: 100% plan adherence · 3-week streak','Últimas 4 semanas: 100% de adherencia · racha de 3 semanas')}</div><div class="xs mut">${x('3 of 4 complete non-deload weeks','3 de 4 semanas completas sin descarga')}</div><div class="sm">${x('Last 4 weeks: 57% of comparable exercises beat last time.','Últimas 4 semanas: 57% de los ejercicios comparables superaron la vez anterior.')}</div></div>`,'mv')}
+ <div class="card"><div class="tag">${x('Muscles tab (×10 muscles)','Pestaña Músculos (×10 músculos)')}</div><b class="sm">${x('Chest','Pecho')}</b>${mk('P9',`<div class="xs mut">↑ 10–20 ${x('Common range','Rango habitual')} · ${x('3 of 4 complete non-deload weeks','3 de 4 semanas completas sin descarga')} · W1 ${x('Upper / Lower · 4 Days','Superior / Inferior · 4 días')}</div>`)}<div class="bars" style="height:40px"><i style="height:30%"></i><i style="height:30%"></i><i style="height:30%"></i><i style="height:30%"></i></div></div>
+ </div>${nav(2)}`}
+
+function afterProgress(){return `<div class="scr">
+ <div class="hdr1"><span class="wm">GYM STUDIO</span><span class="mut">·</span><span class="ttl">${x('Progress','Progreso')}</span><span class="grow"></span><span class="xs mut">${x('Upper / Lower','Superior / Inferior')}</span></div>
+ <div class="row sm" style="margin:0 0 8px"><span class="chip">${x('Overview','Resumen')}</span><span>${x('Trends','Tendencias')}</span><span>${x('Muscles','Músculos')}</span><span>${x('Consistency','Constancia')}</span></div>
+ <div class="card"><div class="row"><b class="grow">${x('Progressing','Progresando')}</b><button class="link" ${tog('pinfo')} aria-label="${x('About this status','Sobre este estado')}">ⓘ</button></div><div class="sm">${x('8 of 8 main lifts improving','8 de 8 ejercicios principales mejorando')}</div>${isOpen('pinfo')?`<div class="xs mut sheet">${x('Status reflects the majority of eligible main-lift verdicts, not a recommendation.','El estado refleja la mayoría de los veredictos de ejercicios principales; no es una recomendación.')}</div>`:''}</div>
+ <div class="card"><div class="tag">${x('Main lifts · this block','Ejercicios principales · este bloque')}</div>
+ ${lifts.map(l=>`<div class="row new" style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="grow"><b class="sm">${x(l[0],l[1])}</b><div class="xs mut">${kg(l[3])} kg ${x('est. max','máx. est.')} · +${kg(l[4])} kg/${x('wk','sem')}</div></div>${spark}</div>`).join('')}</div>
+ <div class="card"><div class="tag new">${x('vs last time','vs la vez anterior')} <span class="mut">(${x('PT wording','texto del PT')})</span></div><div class="row" style="text-align:center"><button class="card grow" style="cursor:pointer"><b>1</b><div class="xs">${x('Improved','Mejoró')}</div></button><button class="card grow" style="cursor:pointer"><b>14</b><div class="xs">${x('Held','Igual')}</div></button><button class="card grow" style="cursor:pointer"><b>3</b><div class="xs">${x('Worth a look','A revisar')}</div></button></div></div>
+ <div class="card new sm">${x('100% of planned days · 3-week streak','100% de los días planeados · racha de 3 semanas')}</div>
+ <div class="card"><div class="tag">${x('Muscles tab','Pestaña Músculos')}</div><div class="xs mut new">${x('Shaded band = common range 10–20 hard sets/week (said once)','Banda = rango habitual 10–20 series/semana (una sola vez)')}</div><b class="sm">${x('Chest','Pecho')}</b><div class="bars" style="height:40px"><i style="height:30%"></i><i style="height:30%"></i><i style="height:30%"></i><i style="height:30%"></i></div></div>
+ </div>${nav(2)}`}
+
+function beforeSignin(){return `<div class="scr">${beforeHeader(x('You','Tú'))}
+ <div class="card">${mk('Y3',`<button class="link">← ${x('Back to Today','Volver a Hoy')}</button>`,'cut')}
+ <b style="font-size:18px">${x('Create your account','Crea tu cuenta')}</b>
+ <ul class="sm" style="padding-left:18px;margin:6px 0"><li>${x('Back up your workouts.','Haz copia de tus entrenamientos.')}</li>${mk('Y3',`<li>${x('Use GymStudio on any device.','Usa GymStudio en cualquier dispositivo.')}</li><li>${x('Your synced data is private to your account.','Tus datos sincronizados son privados.')}</li>`,'mv')}</ul>
+ ${mk('Y3',`<p class="xs mut">${x('After sign-in, choose whether to move your local workouts to your account or keep them on this device. They won\'t be discarded without your choice.','Después de entrar, elige si mover tus entrenamientos locales a tu cuenta o dejarlos en este dispositivo. No se borrarán sin tu elección.')}</p><b class="sm">${x('Privacy note','Nota de privacidad')}</b>`,'mv')}
+ <div class="row" style="margin:8px 0"><button class="ghost grow">${x('Sign in','Entrar')}</button><button class="ghost grow" style="background:var(--brand-soft)">${x('Create account','Crear cuenta')}</button></div>
+ <div class="xs mut">Email</div><div style="height:40px;border:1px solid var(--line);border-radius:10px"></div>
+ <div class="xs mut" style="margin-top:6px">${x('Password','Contraseña')}</div><div style="height:40px;border:1px solid var(--line);border-radius:10px"></div>
+ <div style="height:8px"></div><button class="btn">${x('Create account','Crear cuenta')}</button></div>
+ <p class="tag" style="margin-top:12px">${x('Demo · You tab','Demo · pestaña Tú')}</p>
+ <div class="card"><b>${x('My goal','Mi objetivo')} +</b>${mk('Y1',`<div class="xs mut">${x('Your PT plan is built from this.','Tu plan del PT se basa en esto.')}</div><div class="xs mut">${x('Sign in to save your goal','Inicia sesión para guardar tu objetivo')}</div>`,'mv')}<div><span class="chip">${x('Gain muscle','Ganar músculo')}</span><span class="chip">${x('Lose fat','Perder grasa')}</span>…</div></div>
+ <div class="card"><b>${x('My plan','Mi plan')} +</b>${mk('Y1',`<div class="xs mut">${x('Sign in to create your personal plan','Inicia sesión para crear tu plan personal')}</div>`,'mv')}</div>
+ <div class="card"><b>${x('Measurements','Medidas')} +</b>${mk('Y1',`<div class="xs mut">${x('Sign in to save your measurements','Inicia sesión para guardar tus medidas')}</div>`,'mv')}</div>
+ </div>${nav(3)}`}
+
+function afterSignin(){return `<div class="scr">
+ <div class="hdr1"><span class="wm">GYM STUDIO</span><span class="mut">·</span><span class="ttl">${x('You','Tú')}</span><span class="grow"></span><span class="pill new">EN | ES</span></div>
+ <div class="card"><b style="font-size:18px">${x('Create your account','Crea tu cuenta')}</b>
+ <p class="sm mut new" style="margin:4px 0 8px">${x('Back up your workouts and use any device.','Guarda tus entrenamientos y úsalos en cualquier dispositivo.')}</p>
+ <div class="row" style="margin:8px 0"><button class="ghost grow">${x('Sign in','Entrar')}</button><button class="ghost grow" style="background:var(--brand-soft)">${x('Create account','Crear cuenta')}</button></div>
+ <div class="xs mut">Email</div><div style="height:40px;border:1px solid var(--line);border-radius:10px"></div>
+ <div class="xs mut" style="margin-top:6px">${x('Password','Contraseña')}</div><div style="height:40px;border:1px solid var(--line);border-radius:10px"></div>
+ <div style="height:8px"></div><button class="btn">${x('Create account','Crear cuenta')}</button>
+ <button class="link new">${x('Privacy','Privacidad')}</button></div>
+ <p class="tag" style="margin-top:12px">${x('Demo · You tab','Demo · pestaña Tú')}</p>
+ <div class="card new"><b>${x('Sign in to save your goal, plan and measurements','Inicia sesión para guardar tu objetivo, plan y medidas')}</b><div style="height:8px"></div><button class="btn" style="min-height:44px">${x('Sign in','Entrar')}</button></div>
+ <div class="card row"><b class="grow">${x('My goal','Mi objetivo')}</b>+</div><div class="card row"><b class="grow">${x('My plan','Mi plan')}</b>+</div><div class="card row"><b class="grow">${x('Measurements','Medidas')}</b>+</div>
+ <div class="card row"><b class="grow">${x('Settings · Language','Ajustes · Idioma')}</b><span class="pill">EN | ES</span></div>
+ </div>${nav(3)}`}
+
+const R={today:[beforeToday,afterToday],workout:[beforeWorkout,afterWorkout],exercise:[beforeExercise,afterExercise],progress:[beforeProgress,afterProgress],signin:[beforeSignin,afterSignin]};
+
+const NOTES={
+ today:[['T1','Remove “6-WEEK PLAN” badge (duplicates the block card)'],['T2','Merge two “about” levels; Change block goes last'],['T3','Merge “Upper body · heavy” into the day title (PT)'],['T4','Name is no longer a Google link; Google + Swap inside the card'],['T5','One quiet “✓ 3 × 82.5 kg” line; no double Done'],['T6','Superset sentence behind ⓘ (PT)'],['T7','No rest timer on the plan view'],['T8','One target line; reason behind “Why?”']],
+ workout:[['W1','Remove permanent chip hint'],['W2','No language toggle mid-workout'],['W3','Remove Done pill (table shows it)'],['W4','Chips into ⋯ (PT FYI)'],['W5','Remove second, conflicting target'],['W6','One way to the cue (PT)'],['W7','Notes only on tap'],['W8','Remove Progress + / History (Progress tab has it)'],['W9','Remove “Bars from 0 kg”']],
+ exercise:[['E1','Remove “Exercise” label'],['E2','One muscle line'],['E3','One history view: Last max + Previous column + link']],
+ progress:[['P1','Remove the second “Progress” title'],['P2','Disclaimer behind ⓘ (PT)'],['P3','One line per lift (PT wording)'],['P4','Footnote behind ⓘ'],['P5','Shorter title; list on tap (PT)'],['P6','One consistency line'],['P9','Muscles captions said once (PT)']],
+ signin:[['Y1','One sign-in card in demo You'],['Y3','No back link; one benefit line; migration text after sign-in; privacy as link'],['G3','Language lives in Settings and on sign-in']],
+};
+
+function render(){
+ document.documentElement.lang=S.lang;
+ document.getElementById('scr').innerHTML=Object.entries(SCREENS).map(([k,v])=>`<button data-v="${k}" aria-pressed="${S.screen===k}">${x(v.n[0],v.n[1])}</button>`).join('');
+ const [b,a]=R[S.screen];
+ document.getElementById('before').innerHTML=b();
+ document.getElementById('after').innerHTML=a();
+ document.getElementById('lb').textContent=x('Before · live build b6708f7','Antes · versión actual b6708f7');
+ document.getElementById('la').textContent=x('After · proposal','Después · propuesta');
+ document.getElementById('mkbtn').textContent=x('Mark items','Marcar elementos');
+ document.getElementById('ptitle').textContent=x('Declutter audit','Auditoría de limpieza');
+ document.getElementById('bothnote').textContent=x('Narrow screen: showing Before. Tap “After” to compare.','Pantalla estrecha: se ve Antes. Toca “Después” para comparar.');
+ document.querySelector('#mode [data-v=both]').textContent=x('Before | After','Antes | Después');
+ document.querySelector('#mode [data-v=before]').textContent=x('Before','Antes');
+ document.querySelector('#mode [data-v=after]').textContent=x('After','Después');
+ document.getElementById('legend').innerHTML=`<span><i style="background:var(--cut)"></i>${x('Remove from this screen','Quitar de esta pantalla')}</span><span><i style="background:var(--move)"></i>${x('Move behind More / ⓘ / Settings, or merge','Mover a Más / ⓘ / Ajustes, o fusionar')}</span><span><i style="background:var(--green)"></i>${x('New merged element (After)','Elemento fusionado (Después)')}</span><span>${x('Tap + / ⋯ / ⓘ / Why? to open. Engine data is never deleted, only hidden.','Toca + / ⋯ / ⓘ / ¿Por qué? para abrir. Los datos del motor nunca se borran, solo se ocultan.')}</span>`;
+ document.getElementById('notes').innerHTML=`<h2>${x('Items on this screen','Elementos en esta pantalla')}</h2><ul>${NOTES[S.screen].map(([id,t])=>`<li><b>${id}</b> · ${t}</li>`).join('')}</ul><p class="xs">${x('Full inventory, priorities and PT flags: 2026-10-18-declutter-audit.md. Item notes are in English (repo docs language).','Inventario, prioridades y marcas del PT: 2026-10-18-declutter-audit.md. Las notas están en inglés (idioma de la documentación).')}</p>`;
+}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button');if(!t)return;
+ if(t.closest('#scr')){S.screen=t.dataset.v;S.open={};render();return}
+ if(t.closest('#lang')){S.lang=t.dataset.v;document.querySelectorAll('#lang button').forEach(b=>b.setAttribute('aria-pressed',b===t));render();return}
+ if(t.closest('#mode')){document.getElementById('stage').dataset.mode=t.dataset.v;document.body.classList.toggle('mboth',t.dataset.v==='both');document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b===t));return}
+ if(t.id==='mkbtn'){const on=document.body.classList.toggle('show');t.setAttribute('aria-pressed',on);return}
+ const k=t.getAttribute('data-tog');if(k){S.open[k]=!S.open[k];render()}
+});
+render();
+</script>
+</body>
+</html>
