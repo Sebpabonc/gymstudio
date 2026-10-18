@@ -3327,7 +3327,13 @@ export default function WorkoutPlan({
                 )
               })}
             </nav>
-            <small className="workout-mode-chips-hint">{t('workout.run.chipsHint')}</small>
+            <div className="workout-mode-hint-row">
+              <small className="workout-mode-chips-hint">{t('workout.run.chipsHint')}</small>
+              <span className="layout-toggle language-toggle" role="group" aria-label={t('lang.label')}>
+                <button type="button" aria-label={t('lang.en')} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
+                <button type="button" aria-label={t('lang.es')} aria-pressed={language === 'es'} onClick={() => setLanguage('es')}>ES</button>
+              </span>
+            </div>
           </div>
         )}
         <div className="day-exercises">
@@ -3581,10 +3587,6 @@ export default function WorkoutPlan({
                   <details className="workout-mode-more">
                     <summary>⋯ {t('workout.run.more')}</summary>
                     <div className="workout-mode-more-panel">
-                      <span className="layout-toggle language-toggle" role="group" aria-label={t('lang.label')}>
-                        <button type="button" aria-label={t('lang.en')} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
-                        <button type="button" aria-label={t('lang.es')} aria-pressed={language === 'es'} onClick={() => setLanguage('es')}>ES</button>
-                      </span>
                       <div className="workout-mode-tools">
                     <button type="button" className="secondary-button small-button" onClick={() => void openExternal(exerciseImageSearchUrl(
                       exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
@@ -3919,10 +3921,6 @@ export default function WorkoutPlan({
                       <details className="workout-mode-more">
                         <summary>⋯ {t('workout.run.more')}</summary>
                         <div className="workout-mode-more-panel">
-                          <span className="layout-toggle language-toggle" role="group" aria-label={t('lang.label')}>
-                            <button type="button" aria-label={t('lang.en')} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
-                            <button type="button" aria-label={t('lang.es')} aria-pressed={language === 'es'} onClick={() => setLanguage('es')}>ES</button>
-                          </span>
                         <div className="workout-mode-tools" role="group" aria-label={t('workout.run.exerciseActions')}>
                           <button
                             type="button"

@@ -7181,8 +7181,16 @@ a.planned-exercise-main-name {
   content: '';
 }
 
+.workout-mode-hint-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .workout-mode-chips-hint {
   display: block;
+  min-width: 0;
   color: var(--muted);
   font-size: 0.72rem;
 }
