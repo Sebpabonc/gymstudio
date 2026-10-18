@@ -89,3 +89,13 @@ describe('same-day evidence across day slots', () => {
     expect(buildEvidence([doneToday], 'press', blocks, '2026-10-08', 'day-a')).toHaveLength(0)
   })
 })
+
+describe('same-day duplicates', () => {
+  it('counts only the latest entry of an exercise on one date as a session', () => {
+    const older = { ...entry('old', '2026-10-05', 'day-a'), loggedAt: 1 }
+    const newer = { ...entry('new', '2026-10-05', 'day-b'), loggedAt: 2, sets: [{ id: 'n', weight: 20, reps: 12 }] }
+    const evidence = buildEvidence([older, newer], 'press', blocks, '2026-10-07')
+    expect(evidence).toHaveLength(1)
+    expect(evidence[0].sets[0].weight).toBe(20)
+  })
+})

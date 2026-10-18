@@ -8,6 +8,40 @@ export type CompletionScope = {
   dayKey?: string
 }
 
+type DatedEntry = Pick<WorkoutEntry, 'exerciseId' | 'date' | 'loggedAt'>
+
+/**
+ * PO 2026-10-07: when an exercise has several logs on one date, the latest saved one counts.
+ * Entries without `loggedAt` rank oldest; ties keep the first one seen (history is newest-first).
+ */
+export function latestPerExerciseDate<T extends DatedEntry>(entries: T[]): T[] {
+  const latest = new Map<string, T>()
+  for (const entry of entries) {
+    const key = `${entry.exerciseId}:${entry.date.slice(0, 10)}`
+    const current = latest.get(key)
+    if (!current || (entry.loggedAt ?? 0) > (current.loggedAt ?? 0)) latest.set(key, entry)
+  }
+  return entries.filter((entry) => latest.get(`${entry.exerciseId}:${entry.date.slice(0, 10)}`) === entry)
+}
+
+/** Another day slot of the same block already holding a log of this exercise on this date. */
+export function findSameDayDuplicate(
+  history: WorkoutEntry[],
+  exerciseId: string,
+  scope: CompletionScope
+): WorkoutEntry | undefined {
+  if (!scope.blockId) return undefined
+  return history.find(
+    (entry) =>
+      entry.exerciseId === exerciseId &&
+      entry.sets.length > 0 &&
+      entry.date === scope.date &&
+      entry.blockId === scope.blockId &&
+      !!entry.dayKey &&
+      entry.dayKey !== scope.dayKey
+  )
+}
+
 export function findCompletedEntry(entries: WorkoutEntry[], scope: CompletionScope): WorkoutEntry | undefined {
   return entries.find(
     (entry) =>
@@ -37,7 +71,7 @@ export function findWeekCompletion(entries: WorkoutEntry[], scope: CompletionSco
       entry.date >= start && entry.date <= end &&
       (entry.blockId ?? undefined) === (scope.blockId ?? undefined) &&
       (entry.dayKey ?? undefined) === (scope.dayKey ?? undefined))
-    .sort((a, b) => b.date.localeCompare(a.date))[0]
+    .sort((a, b) => b.date.localeCompare(a.date) || (b.loggedAt ?? 0) - (a.loggedAt ?? 0))[0]
 }
 
 export function summarizeCompletedEntry(entry: WorkoutEntry, language: Language = 'en') {
@@ -113,7 +147,7 @@ export function upsertScopedEntry(
   const sameSlot = (item: WorkoutEntry) =>
     item.exerciseId === entry.exerciseId && findCompletedEntry([item], scope) !== undefined
   const existing = history.find(sameSlot)
-  const saved = existing ? { ...entry, id: existing.id } : entry
+  const saved = { ...entry, ...(existing ? { id: existing.id } : {}), loggedAt: Date.now() }
   const nextHistory = [saved, ...history.filter((item) => !sameSlot(item))].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
