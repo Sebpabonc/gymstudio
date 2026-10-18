@@ -80,6 +80,7 @@ import {
   workoutMuscleSetTotals,
 } from '../progress/workoutInsights'
 import type { WorkoutExerciseInsight } from '../progress/workoutInsights'
+import { roundEstMax } from '../progress/estMax'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
 import { loadDemoBlocks } from '../plans/demoBlock'
 import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
@@ -468,6 +469,59 @@ function formatWorkoutInsightLine(insight: WorkoutExerciseInsight, dayName: stri
     }
   }
   return changeText[0] ?? t('workout.insight.sameLine', { sets: '' })
+}
+
+function formatEstMaxInsightLine(
+  comparison: WorkoutExerciseInsight['estMaxComparison'],
+  blocks: TrainingBlock[],
+  language: Language,
+  t: Translate
+) {
+  if (!comparison) return ''
+  if (comparison.kind === 'different-rep-range') {
+    return t('workout.insight.estMax.differentRepRange', { type: comparison.previousDayType })
+  }
+
+  const previousDay = blocks.find((block) => block.id === comparison.previous.blockId)
+    ?.days.find((day) => day.key === comparison.previous.dayKey)?.name
+    ?? (comparison.previousDayType
+      ? t('workout.insight.dayType', { type: comparison.previousDayType })
+      : '')
+  const date = formatWeekdayDate(language, `${comparison.previous.date}T00:00:00Z`)
+  const before = formatNumber(language, roundEstMax(comparison.previousValue), {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
+  const now = formatNumber(language, roundEstMax(comparison.currentValue), {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
+  const percent = formatNumber(language, Math.round(Math.abs(comparison.changePercent)))
+  let line: string
+  if (comparison.change === 'up') {
+    line = t('workout.insight.estMax.up', { day: previousDay, date, before, now, percent })
+  } else if (comparison.change === 'same') {
+    line = t('workout.insight.estMax.same', { day: previousDay, date, now })
+  } else if (comparison.currentDayType && comparison.previousDayType
+    && comparison.currentDayType !== comparison.previousDayType) {
+    line = t('workout.insight.estMax.crossDayLower', {
+      day: previousDay,
+      date,
+      before,
+      now,
+      type: comparison.currentDayType,
+    })
+  } else {
+    line = t('workout.insight.estMax.lower', { day: previousDay, date, before, now, percent })
+  }
+
+  if (comparison.effort) {
+    line += ` ${t('workout.insight.estMax.effort', {
+      now: formatNumber(language, comparison.effort.now),
+      before: formatNumber(language, comparison.effort.before),
+    })}`
+  }
+  return line
 }
 
 function workoutInsightIcon(verdict: WorkoutExerciseInsight['comparison']['verdict']) {
@@ -3506,6 +3560,12 @@ export default function WorkoutPlan({
                   day: insightPreviousDay,
                 }) + (exercise.technique === 'drop-set' ? t('workout.insight.mainPart') : '')
               : ''
+            const estMaxInsightLine = formatEstMaxInsightLine(
+              currentInsight?.estMaxComparison ?? null,
+              trainingBlocks,
+              language,
+              t
+            )
             const insightWatch = currentInsight?.watch
               ? t(`workout.insight.watch.${currentInsight.watch.code}` as TranslationKey,
                   Object.fromEntries(Object.entries(currentInsight.watch.params).map(([key, value]) => [
@@ -3742,6 +3802,7 @@ export default function WorkoutPlan({
                       <strong><span aria-hidden="true">{insightIcon}</span> {t(insightVerdictKey as TranslationKey)}</strong>
                       <span>{formatWorkoutInsightLine(currentInsight, activeDay?.name ?? '', language, t)}</span>
                       {insightBasis && <small>{insightBasis}</small>}
+                      {estMaxInsightLine && <small>{estMaxInsightLine}</small>}
                       {insightWatch && <small className="workout-insight-watch">{insightWatch}</small>}
                     </button>
                     {!workoutInsightPinned ? (
@@ -4481,6 +4542,12 @@ export default function WorkoutPlan({
                                   : typeof value === 'number' ? formatNumber(language, value) : value,
                               ])))
                           : ''
+                        const estMaxInsightLine = formatEstMaxInsightLine(
+                          insight.estMaxComparison,
+                          trainingBlocks,
+                          language,
+                          t
+                        )
                         return (
                           <button key={exercise.id} type="button" className="workout-exercise-insight-body"
                             onClick={() => {
@@ -4491,6 +4558,7 @@ export default function WorkoutPlan({
                             <strong><span aria-hidden="true">{workoutInsightIcon(verdict)}</span> {displayExerciseName(exercise)} · {t(verdictKey as TranslationKey)}</strong>
                             <span>{formatWorkoutInsightLine(insight, activeDay?.name ?? '', language, t)}</span>
                             {basis && <small>{basis}</small>}
+                            {estMaxInsightLine && <small>{estMaxInsightLine}</small>}
                             {watch && <small className="workout-insight-watch">{watch}</small>}
                           </button>
                         )
@@ -4867,6 +4935,12 @@ export default function WorkoutPlan({
                             : typeof value === 'number' ? formatNumber(language, value) : value,
                         ])))
                     : ''
+                  const estMaxInsightLine = formatEstMaxInsightLine(
+                    insight.estMaxComparison,
+                    trainingBlocks,
+                    language,
+                    t
+                  )
                   return (
                     <li key={exercise.id} className={index === sessionSummary.insights.length - 1 ? 'just-now' : ''}>
                       <strong>
@@ -4875,6 +4949,7 @@ export default function WorkoutPlan({
                       </strong>
                       <p>{formatWorkoutInsightLine(insight, sessionSummary.dayName, language, t)}</p>
                       {basis && <small>{basis}</small>}
+                      {estMaxInsightLine && <small>{estMaxInsightLine}</small>}
                       {watch && <small className="workout-insight-watch">{watch}</small>}
                     </li>
                   )

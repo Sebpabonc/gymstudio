@@ -8051,7 +8051,7 @@ summary:focus-visible,
 
 .pv3-week-column {
   display: grid;
-  grid-template-rows: 1.2em 70px 1.2em 2.4em 2.4em;
+  grid-template-rows: 1.2em 70px 1.2em minmax(2.4em, auto) 2.4em;
   min-width: 22px;
   justify-items: center;
   gap: 2px;
@@ -8062,9 +8062,8 @@ summary:focus-visible,
 
 .pv3-week-block {
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .pv3-week-track {

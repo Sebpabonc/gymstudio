@@ -39,6 +39,13 @@ describe('workout exercise insights', () => {
 
     expect(insight.previous?.date).toBe('2026-10-05')
     expect(insight.comparison.verdict).toBe('mixed')
+    expect(insight.estMaxComparison).toMatchObject({
+      kind: 'comparison',
+      previous: { date: '2026-10-08' },
+      previousDayType: 'B',
+      currentDayType: 'A',
+      change: 'lower',
+    })
     expect(insight.changes).toHaveLength(2)
     expect(workoutInsightTally([insight])).toMatchObject({ mixed: 1 })
   })
