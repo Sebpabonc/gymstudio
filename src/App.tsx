@@ -1,24 +1,19 @@
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import WorkoutPlan from './components/WorkoutPlan'
-import ExerciseSearchSuggestions from './components/ExerciseSearchSuggestions'
+import ExerciseFinder from './components/ExerciseFinder'
 import RestTimer from './components/RestTimer'
 import { syncRestTimerActivity } from './native/restTimerActivity'
-import { openExternal } from './native/openExternal'
 import { localizeCatalogue, useSpanishContentReady } from './i18n/content'
-import { exerciseImageQuery, exerciseImageSearchUrl } from './utils/exerciseImages'
-import ExerciseSetTable from './components/ExerciseSetTable'
-import SqueezeCue from './components/SqueezeCue'
 import HelpAndAi from './components/HelpAndAi'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
-import { Exercise, ExerciseTip, WorkoutEntry, WorkoutSet } from './types'
+import { Exercise, WorkoutEntry } from './types'
 import { useAuth } from './auth/AuthProvider'
 import { useTextEntryFocused } from './utils/textEntryFocus'
 import { loadDemoBlocks } from './plans/demoBlock'
 import { exitDemoMode, isDemoMode } from './utils/demoMode'
 import {
   dismissWelcome,
-  getExerciseDisplayName,
   hasDismissedWelcome,
   loadExercises,
   loadRestTimerState,
@@ -30,48 +25,13 @@ import {
   saveRestTimerState,
   recordHelpAiAppOpen,
 } from './utils/storage'
-import { localizeMuscle, TranslationKey, useT } from './i18n'
+import { useT } from './i18n'
 import { RestTimerState, startRestTimer } from './utils/restTimer'
-import { summarizeCompletedEntry } from './utils/completedExercises'
-import {
-  ALL_BODY_REGIONS,
-  filterExercises,
-  getAvailableBodyRegions,
-  getExerciseTips,
-} from './utils/exerciseFilters'
-import {
-  copyWeightToUntouchedSets,
-  filterLoggableSets,
-  getPreviousWorkoutSets,
-  workoutMaxWeight,
-} from './utils/workoutSets'
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
 const ProfileDataSections = lazy(() => import('./screens/ProfileDataSections'))
 const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
-
-function createSet(reps = 8, weight = 0): WorkoutSet {
-  return {
-    id:
-      typeof crypto !== 'undefined' && 'randomUUID' in crypto
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    reps,
-    weight,
-  }
-}
-
-function normalizeExerciseTip(tip: string | ExerciseTip) {
-  if (typeof tip === 'string') {
-    return { text: tip, image: undefined }
-  }
-
-  return {
-    text: tip.text ?? '',
-    image: tip.image ?? tip.imageUrl,
-  }
-}
 
 export default function App() {
   const demoMode = isDemoMode()
@@ -79,14 +39,7 @@ export default function App() {
   const [rawExercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
-  const [search, setSearch] = useState('')
-  const [bodyRegion, setBodyRegion] = useState(ALL_BODY_REGIONS)
-  const [selectedId, setSelectedId] = useState<string>('')
-  const [draftSets, setDraftSets] = useState<WorkoutSet[]>([createSet(8, 0), createSet(8, 0)])
-  const [completedSets, setCompletedSets] = useState<boolean[]>([false, false])
-  const [setWeightTouched, setSetWeightTouched] = useState<boolean[]>([false, false])
-  const [draftNotes, setDraftNotes] = useState('')
-  const [tipsExpanded, setTipsExpanded] = useState(false)
+  const [findExerciseId, setFindExerciseId] = useState('')
   const [activeTab, setActiveTab] = useState<AppTab>('today')
   const [workoutModeActive, setWorkoutModeActive] = useState(false)
   const [showHelpPulse] = useState(() => recordHelpAiAppOpen() <= 3)
@@ -195,127 +148,13 @@ export default function App() {
       cancelled = true
     }
   }, [])
-
-  const selectedExercise = useMemo(
-    () =>
-      exercises.find((exercise) => exercise.id === selectedId) ??
-      exercises.find((exercise) => exercise.id === 'barbell-bench-press') ??
-      exercises[0],
-    [exercises, selectedId]
-  )
-  const selectedExerciseTips = selectedExercise ? getExerciseTips(selectedExercise) : []
-
   useEffect(() => {
-    if (!selectedId && exercises.length) {
-      setSelectedId(exercises.find((exercise) => exercise.id === 'barbell-bench-press')?.id ?? exercises[0].id)
+    if (activeTab !== 'exercises') {
+      setFindExerciseId('')
     }
-  }, [exercises, selectedId])
+  }, [activeTab])
 
-  useEffect(() => {
-    if (!selectedExercise) return
-    setDraftSets([createSet(8, 0), createSet(8, 0)])
-    setCompletedSets([false, false])
-    setSetWeightTouched([false, false])
-    setDraftNotes('')
-    setTipsExpanded(false)
-  }, [selectedExercise])
 
-  const availableBodyRegions = useMemo(() => getAvailableBodyRegions(exercises), [exercises])
-  const filteredExercises = useMemo(
-    () => filterExercises(exercises, search, bodyRegion),
-    [exercises, search, bodyRegion]
-  )
-
-  const exerciseHistory = useMemo(
-    () =>
-      history
-        .filter((entry) => entry.exerciseId === selectedExercise?.id)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [history, selectedExercise]
-  )
-
-  const previousWorkout = exerciseHistory[0]
-  const previousSets = selectedExercise ? getPreviousWorkoutSets(history, selectedExercise.id) : []
-  const previousMax = previousWorkout
-    ? workoutMaxWeight(previousWorkout.sets)
-    : 0
-
-  const updateSet = (index: number, field: 'reps' | 'weight', value: string) => {
-    if (field === 'weight') {
-      const nextTouched = setWeightTouched.map((touched, setIndex) => touched || setIndex === index)
-      setSetWeightTouched(nextTouched)
-      setDraftSets((current) => {
-        const nextWeights = copyWeightToUntouchedSets(
-          current.map((set) => set.weight),
-          nextTouched,
-          index,
-          Number(value) || 0
-        )
-        return current.map((set, setIndex) => ({ ...set, weight: nextWeights[setIndex] }))
-      })
-      return
-    }
-
-    setDraftSets((current) =>
-      current.map((set, setIndex) => setIndex === index ? { ...set, reps: Number(value) || 0 } : set)
-    )
-  }
-
-  const addSet = () => {
-    setDraftSets((current) => [...current, createSet(8, Number(current[0]?.weight) || 0)])
-    setCompletedSets((current) => [...current, false])
-    setSetWeightTouched((current) => [...current, false])
-  }
-
-  const removeSet = (setId: string) => {
-    const index = draftSets.findIndex((set) => set.id === setId)
-    if (index < 0 || draftSets.length <= 1) return
-    setDraftSets((current) => (current.length > 1 ? current.filter((set) => set.id !== setId) : current))
-    setCompletedSets((current) => current.filter((_, setIndex) => setIndex !== index))
-    setSetWeightTouched((current) => current.filter((_, setIndex) => setIndex !== index))
-  }
-
-  const [saveError, setSaveError] = useState('')
-  const [saveConfirmation, setSaveConfirmation] = useState('')
-
-  useEffect(() => {
-    if (!saveConfirmation) return undefined
-    const timer = window.setTimeout(() => setSaveConfirmation(''), 5000)
-    return () => window.clearTimeout(timer)
-  }, [saveConfirmation])
-
-  const saveWorkout = () => {
-    if (!selectedExercise) return
-
-    const validSets = filterLoggableSets(draftSets, selectedExercise.equipment)
-
-    if (validSets.length === 0) {
-      setSaveError(t('exercises.enterOneSet'))
-      return
-    }
-
-    setSaveError('')
-
-    const nextEntry: WorkoutEntry = {
-      id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}`,
-      exerciseId: selectedExercise.id,
-      date: localIsoDate(),
-      sets: validSets,
-      notes: draftNotes.trim() || undefined,
-    }
-
-    const nextHistory = [nextEntry, ...history].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    )
-
-    setHistory(nextHistory)
-    saveWorkoutHistory(nextHistory)
-    setSaveConfirmation(t('exercises.logged', { summary: summarizeCompletedEntry(nextEntry, language) }))
-    setDraftSets([createSet(8, 0), createSet(8, 0)])
-    setCompletedSets([false, false])
-    setSetWeightTouched([false, false])
-    setDraftNotes('')
-  }
 
   return (
     <div className={`app-shell layout-sheet${workoutModeActive ? ' workout-mode-active' : ''}`}>
@@ -420,7 +259,7 @@ export default function App() {
                   onDeleteEntry={async (entryId) => setHistory(await deleteWorkoutEntry(entryId))}
                   onRestoreEntry={async (entry) => setHistory(restoreWorkoutEntry(entry))}
                   onOpenExercise={(exerciseId) => {
-                    setSelectedId(exerciseId)
+                    setFindExerciseId(exerciseId)
                     setExerciseMode('lookup')
                     setActiveTab('exercises')
                   }}
@@ -475,177 +314,17 @@ export default function App() {
           ) : exerciseMode === 'custom' ? (
             <WorkoutPlan mode="custom" lockMode authStatus={status} authUserId={user?.id ?? null} onSignIn={() => setActiveTab('you')} onStartRest={startRest} />
           ) : (
-            <>
-              <section className="card search-panel">
-                <label className="field-label" htmlFor="exercise-search">{t('exercises.searchLabel')}</label>
-                <div className="region-chips" role="group" aria-label={t('exercises.bodyRegion')}>
-                  {availableBodyRegions.map((region) => (
-                    <button
-                      key={region}
-                      type="button"
-                      className={bodyRegion === region ? 'region-chip active' : 'region-chip'}
-                      aria-pressed={bodyRegion === region}
-                      onClick={() => setBodyRegion(region)}
-                    >
-                      {t(`region.${region}` as TranslationKey)}
-                    </button>
-                  ))}
-                </div>
-                <div className="search-shell">
-                  <input
-                    id="exercise-search"
-                    className="search-input"
-                    type="search"
-                    placeholder={t('exercises.searchPlaceholder')}
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                  />
-
-                  {(search.trim() || bodyRegion !== ALL_BODY_REGIONS) && (
-                    <ExerciseSearchSuggestions
-                      exercises={filteredExercises}
-                      selectedExerciseId={selectedExercise?.id}
-                      onSelect={(exerciseId) => {
-                        setSelectedId(exerciseId)
-                        setSearch('')
-                      }}
-                    />
-                  )}
-                </div>
-              </section>
-
-              {selectedExercise ? (
-                <>
-                  <section className="card exercise-card">
-                    <div className="exercise-header">
-                      <div>
-                        <p className="field-label">{t('exercises.exercise')}</p>
-                        <h2>
-                          <a
-                            className="exercise-image-link"
-                            href={exerciseImageSearchUrl(exerciseImageQuery(selectedExercise.id, getExerciseDisplayName(selectedExercise), selectedExercise.equipment))}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={t('exercises.seeImages', { name: getExerciseDisplayName(selectedExercise, language) })}
-                            onClick={(event) => {
-                              event.preventDefault()
-                              void openExternal(event.currentTarget.href)
-                            }}
-                          >
-                            {getExerciseDisplayName(selectedExercise, language)}
-                            <svg className="exercise-image-link-icon" viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M8 16L16 8" />
-                              <path d="M9.5 8H16v6.5" />
-                            </svg>
-                          </a>
-                        </h2>
-                      </div>
-                    </div>
-
-                    {selectedExercise.primaryMuscles !== undefined || selectedExercise.secondaryMuscles !== undefined ? (
-                      <div className="muscle-groups">
-                        <div className="muscle-group">
-                          <span className="field-label">{t('exercises.primaryMuscles')}</span>
-                          <div className="chip-row muscle-chip-row">
-                            {(selectedExercise.primaryMuscles ?? [selectedExercise.primaryMuscle]).map((muscle) => (
-                              <span key={muscle} className="chip">{localizeMuscle(muscle, language)}</span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="muscle-group">
-                          <span className="field-label">{t('exercises.secondaryMuscles')}</span>
-                          <div className="chip-row muscle-chip-row">
-                            {(selectedExercise.secondaryMuscles ??
-                              (selectedExercise.secondaryMuscle ? [selectedExercise.secondaryMuscle] : [])
-                            ).map((muscle) => (
-                              <span key={muscle} className="chip subtle">{localizeMuscle(muscle, language)}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="chip-row">
-                        <span className="chip">{localizeMuscle(selectedExercise.primaryMuscle, language)}</span>
-                        {selectedExercise.secondaryMuscle && <span className="chip subtle">{localizeMuscle(selectedExercise.secondaryMuscle, language)}</span>}
-                      </div>
-                    )}
-
-                    {selectedExercise.notes && <p className="exercise-notes">{selectedExercise.notes}</p>}
-
-                    <SqueezeCue
-                      cue={selectedExercise.squeezeCue}
-                      cueLabel={t('workout.squeezeCue')}
-                      tips={selectedExerciseTips.map((tip) => (typeof tip === 'string' ? tip : tip.text))}
-                      tipsLabel={t('exercises.postureTips')}
-                      tipsId={`track-posture-tips-${selectedExercise.id}`}
-                      expanded={tipsExpanded}
-                      onToggle={() => setTipsExpanded((current) => !current)}
-                    />
-
-                    <div className="summary-grid summary-grid-single">
-                      <div className="metric-card">
-                        <span>{t('exercises.lastMax')}</span>
-                        <strong>{previousMax ? `${previousMax} kg` : '—'}</strong>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="card log-card">
-                    <div className="section-title-row">
-                      <h3>{t('exercises.trackTitle')}</h3>
-                    </div>
-
-                    <ExerciseSetTable
-                      sets={draftSets}
-                      previousSets={previousSets}
-                      completedSets={completedSets}
-                      onUpdateSet={updateSet}
-                      onToggleComplete={(index) =>
-                        setCompletedSets((current) => current.map((complete, setIndex) => setIndex === index ? !complete : complete))
-                      }
-                      onRemoveSet={removeSet}
-                    />
-
-                    <div className="action-row">
-                      <button type="button" className="secondary-button" onClick={addSet}>
-                        {t('exercises.addSet')}
-                      </button>
-                    </div>
-
-                    <label className="field-label" htmlFor="workout-notes">{t('exercises.notes')}</label>
-                    <textarea
-                      id="workout-notes"
-                      className="notes-input"
-                      rows={3}
-                      value={draftNotes}
-                      onChange={(event) => setDraftNotes(event.target.value)}
-                      placeholder={t('exercises.notesPlaceholder')}
-                    />
-
-                    {saveError && <p role="alert" className="account-error">{saveError}</p>}
-
-                    <button type="button" className="primary-button" onClick={saveWorkout}>
-                      {t('exercises.logWorkout')}
-                    </button>
-                  </section>
-
-                  <button
-                    type="button"
-                    className="text-button exercise-progress-link"
-                    onClick={() => {
-                      setProgressExerciseId(selectedExercise.id)
-                      setActiveTab('progress')
-                    }}
-                  >
-                    {t('exercises.seeFullProgress')} <span aria-hidden="true">›</span>
-                  </button>
-                </>
-              ) : (
-                <section className="card">
-                  <p className="empty-state">{t('exercises.empty')}</p>
-                </section>
-              )}
-            </>
+            <ExerciseFinder
+              exercises={exercises}
+              history={history}
+              onHistoryChange={setHistory}
+              onProgress={(id) => {
+                setProgressExerciseId(id)
+                setActiveTab('progress')
+              }}
+              authStatus={status}
+              initialExerciseId={findExerciseId}
+            />
           )}
           </div>
         </main>
@@ -659,6 +338,7 @@ export default function App() {
               onClick={() => {
                 setActiveTab(tab.id)
                 if (tab.id === 'exercises') {
+                  setFindExerciseId('')
                   setExerciseMode('lookup')
                   void loadWorkoutHistory().then(setHistory)
                 }
@@ -680,11 +360,6 @@ export default function App() {
           showPulse={showHelpPulse}
           onSignIn={() => setActiveTab('you')}
         />
-        {saveConfirmation && (
-          <div className="log-toast" role="status" aria-live="polite">
-            <span>{saveConfirmation}</span>
-          </div>
-        )}
       </div>
     </div>
   )

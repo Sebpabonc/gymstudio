@@ -1,7 +1,7 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import WorkoutPlan, { ExerciseSwapSheet, formatEstMaxInsightLine } from './WorkoutPlan'
+import WorkoutPlan, { ExerciseSwapSheet, filterCustomPlanExercises, formatEstMaxInsightLine } from './WorkoutPlan'
 import { createTranslator } from '../i18n/translate'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { anyDayEstMaxComparison } from '../progress/estMax'
@@ -24,6 +24,50 @@ function findButton(element: React.ReactNode, label: string): React.ReactElement
   visit(element)
   return match
 }
+
+describe('custom-plan catalogue search', () => {
+  const exercises: Exercise[] = [
+    { id: 'press', name: 'Dumbbell Bench Press', nameEs: 'Press de banca', primaryMuscle: 'Chest', equipment: 'dumbbell' },
+    { id: 'row', name: 'Cable Row', nameEs: 'Remo en polea', primaryMuscle: 'Lats', secondaryMuscles: ['Biceps'], equipment: 'cable' },
+    { id: 'rdl', name: 'Barbell Romanian Deadlift', primaryMuscle: 'Hamstrings', equipment: 'barbell' },
+    { id: 'pulldown', name: 'Cable Lat Pulldown', primaryMuscle: 'Lats', equipment: 'cable' },
+  ]
+  const displayName = (exercise: Exercise) => exercise.name
+  const search = (query: string, muscle: Parameters<typeof filterCustomPlanExercises>[2] = 'All') =>
+    filterCustomPlanExercises(exercises, query, muscle, new Map(), displayName, 'en').map((exercise) => exercise.id)
+
+  it('uses shared abbreviations, reordered words, punctuation, equipment and bilingual muscle matching', () => {
+    expect(search('press db')).toEqual(['press'])
+    expect(search('RDL')).toEqual(['rdl'])
+    expect(search('lat-pull down')).toEqual(['pulldown'])
+    expect(search('bíceps cable')).toEqual(['row'])
+    expect(search('remo polea')).toEqual(['row'])
+    expect(search('hamstrings')).toEqual(['rdl'])
+    expect(search('not found')).toEqual([])
+  })
+
+  it('retains builder muscle matching for secondary muscles and groups rather than body regions', () => {
+    expect(search('cable', 'Arms')).toEqual(['row'])
+    expect(search('RDL', 'Legs')).toEqual(['rdl'])
+    expect(search('dorsales', 'Back')).toEqual(['pulldown', 'row'])
+    expect(search('press', 'Back')).toEqual([])
+  })
+
+  it('keeps recent-first ordering ahead of alphabetical display names', () => {
+    const recentIds = new Map([['rdl', 0], ['press', 1]])
+    const results = filterCustomPlanExercises(exercises, ' ', 'All', recentIds, displayName, 'en')
+    expect(results.map((exercise) => exercise.id)).toEqual(['rdl', 'press', 'pulldown', 'row'])
+    expect(exercises.map((exercise) => exercise.id)).toEqual(['press', 'row', 'rdl', 'pulldown'])
+  })
+
+  it('uses localized display names for the alphabetical fallback', () => {
+    const results = filterCustomPlanExercises(
+      exercises, 'cable', 'All', new Map(),
+      (exercise) => exercise.nameEs ?? exercise.name, 'es',
+    )
+    expect(results.map((exercise) => exercise.id)).toEqual(['pulldown', 'row'])
+  })
+})
 
 describe('WorkoutPlan', () => {
   beforeEach(() => {
