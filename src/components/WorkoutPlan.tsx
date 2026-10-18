@@ -3656,8 +3656,6 @@ export default function WorkoutPlan({
               return (
                 <React.Fragment key={exercise.code ?? exercise.name}>
                   <WorkoutExerciseActions
-                    title={displayName}
-                    closeLabel={t('workout.cueSheet.close')}
                     label={t('workout.run.more')}
                     googleLabel={t('workout.run.searchGoogle')}
                     swapLabel={t('workout.run.swap')}
@@ -3761,7 +3759,31 @@ export default function WorkoutPlan({
                         </button>
                       </small>
                     )}
-                      {completedEntry && (
+                    {isWorkoutMode && !group.isSuperset && (
+                      <WorkoutExerciseActions
+                        label={t('workout.run.more')}
+                        googleLabel={t('workout.run.searchGoogle')}
+                        swapLabel={t('workout.run.swap')}
+                        notesLabel={t('workout.label.notes')}
+                        techniqueLabel={t('workout.run.technique')}
+                        techniqueOpen={isTipsVisible}
+                        onGoogle={() => void openExternal(exerciseImageSearchUrl(
+                          exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
+                        ))}
+                        onSwap={libraryMatch && completedEntry?.date !== today ? () => setSwapTarget({
+                          exercise: libraryMatch,
+                          fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
+                        }) : undefined}
+                        onNotes={(anchor) => {
+                          const notes = anchor.closest('.planned-exercise-card')
+                            ?.querySelector<HTMLTextAreaElement>('.planned-notes-field textarea')
+                          notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                          notes?.focus()
+                        }}
+                        onTechnique={() => togglePostureTips(exercise.name)}
+                      />
+                    )}
+                      {completedEntry && !isWorkoutMode && (
                         <span className="done-badge" role="status">
                           <span aria-hidden="true">✓ </span>
                           {t('workout.status.done')}
@@ -3775,32 +3797,6 @@ export default function WorkoutPlan({
                         </span>
                       ))}
                   </span>
-                  {isWorkoutMode && !group.isSuperset && (
-                    <WorkoutExerciseActions
-                      title={displayName}
-                      closeLabel={t('workout.cueSheet.close')}
-                      label={t('workout.run.more')}
-                      googleLabel={t('workout.run.searchGoogle')}
-                      swapLabel={t('workout.run.swap')}
-                      notesLabel={t('workout.label.notes')}
-                      techniqueLabel={t('workout.run.technique')}
-                      techniqueOpen={isTipsVisible}
-                      onGoogle={() => void openExternal(exerciseImageSearchUrl(
-                        exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
-                      ))}
-                      onSwap={libraryMatch && completedEntry?.date !== today ? () => setSwapTarget({
-                        exercise: libraryMatch,
-                        fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
-                      }) : undefined}
-                      onNotes={(anchor) => {
-                        const notes = anchor.closest('.planned-exercise-card')
-                          ?.querySelector<HTMLTextAreaElement>('.planned-notes-field textarea')
-                        notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                        notes?.focus()
-                      }}
-                      onTechnique={() => togglePostureTips(exercise.name)}
-                    />
-                  )}
                   <button
                     type="button"
                     className="toggle-button expand-toggle"

@@ -9267,48 +9267,32 @@ button.superset-last-time {
   gap: 4px;
 }
 
-/* Workout mode: one ⋯ button next to the exercise name opens the exercise tools sheet (PO 2026-10-18). */
-.workout-more-button {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  margin-left: auto;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: inherit;
-  font-size: 1.25rem;
-  line-height: 1;
-  cursor: pointer;
-}
-.workout-more-list {
-  display: grid;
-  gap: 6px;
-}
-.workout-more-row {
+/* Workout mode: exercise tools as a row of icon buttons under the exercise name (PO 2026-10-18). */
+.workout-exercise-tools {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  min-height: 52px;
-  padding: 0 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.workout-tool {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
-  color: inherit;
-  font: inherit;
-  font-weight: 600;
-  text-align: left;
+  color: var(--text);
   cursor: pointer;
 }
-.workout-more-row[aria-pressed="true"] {
+.workout-tool[aria-pressed="true"] {
   border-color: var(--brand);
+  color: var(--text);
 }
-.workout-more-row svg {
-  width: 22px;
-  height: 22px;
+.workout-tool svg {
+  width: 19px;
+  height: 19px;
   flex-shrink: 0;
   fill: none;
   stroke: currentColor;
