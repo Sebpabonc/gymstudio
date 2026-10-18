@@ -4867,6 +4867,16 @@ button[class] {
   font-size: 0.75rem;
 }
 
+.trainer-rir-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.trainer-rir-copy small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
 .trainer-rir-options {
   display: flex;
   flex-wrap: wrap;
@@ -4884,7 +4894,6 @@ button[class] {
   font: inherit;
 }
 
-.trainer-rir-options .trainer-rir-skip,
 .trainer-set-hint .trainer-set-hint-dismiss {
   color: var(--muted);
 }

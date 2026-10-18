@@ -65,6 +65,38 @@ describe('per-user calibration', () => {
   it('C8 logged RIR counts: 60 × 10 @ RIR 4 vs target 10 @ 2 → +2', () => {
     expect(exposureResidual({ ...exp(0, 0), weightRecommended: 60, repsTarget: 10, sets: [{ weight: 60, reps: 10, rir: 4 }] })).toBe(2)
   })
+  it('E5: 60 × 10 without RIR against target 10 @ 2 RIR → d = 0', () => {
+    expect(exposureResidual({
+      ...exp(0, 0),
+      weightRecommended: 60,
+      repsTarget: 10,
+      sets: [{ weight: 60, reps: 10 }],
+    })).toBe(0)
+  })
+  it('E6: 60 × 10 @ RIR 2 against target 10 @ 2 RIR → d = 0', () => {
+    expect(exposureResidual({
+      ...exp(0, 0),
+      weightRecommended: 60,
+      repsTarget: 10,
+      sets: [{ weight: 60, reps: 10, rir: 2 }],
+    })).toBe(0)
+  })
+  it('E7: 60 × 10 @ RIR 0 against target 10 @ 2 RIR → d = -2', () => {
+    expect(exposureResidual({
+      ...exp(0, 0),
+      weightRecommended: 60,
+      repsTarget: 10,
+      sets: [{ weight: 60, reps: 10, rir: 0 }],
+    })).toBe(-2)
+  })
+  it('E8: 60 × 10 @ RIR 3 against target 10 @ 2 RIR → d = +1', () => {
+    expect(exposureResidual({
+      ...exp(0, 0),
+      weightRecommended: 60,
+      repsTarget: 10,
+      sets: [{ weight: 60, reps: 10, rir: 3 }],
+    })).toBe(1)
+  })
   it('C9 kept original heavier: 65 × 8 vs 60 × 8 target → +3.17', () => {
     expect(exposureResidual({ ...exp(0, 0), weightRecommended: 60, sets: [{ weight: 65, reps: 8 }] })).toBeCloseTo(3.17, 2)
   })

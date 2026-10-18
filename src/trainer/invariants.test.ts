@@ -59,7 +59,7 @@ function histories(load: number, setReps: number[], target: { min: number; max: 
 
 const multipleOf = (value: number, step: number) => Math.abs(value / step - Math.round(value / step)) < 1e-6
 
-describe('trainer invariants across every planned exercise in blocks 6–9', () => {
+describe('E9: trainer invariants with every historical RIR omitted across blocks 6–9', () => {
   let checked = 0
   for (const { block, day, row } of slots) {
     const equipment = equipmentOf.get(row.exercise_id) ?? 'machine'
@@ -70,6 +70,7 @@ describe('trainer invariants across every planned exercise in blocks 6–9', () 
     it(`block ${block} ${day} ${row.exercise_id} (${equipment}, ${row.technique})`, () => {
       for (const load of loadsFor(equipment)) {
         for (const history of histories(load, setReps, target, row.technique, equipment === 'bodyweight' ? 2.5 : equipmentStep(equipment))) {
+          expect(history.every((session) => session.sets.every((set) => set.rir === undefined))).toBe(true)
           for (const deload of [false, true]) {
             const result = recommend({
               history, today: TODAY, target, sets: row.sets, equipment,
