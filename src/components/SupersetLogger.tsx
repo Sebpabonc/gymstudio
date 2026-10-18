@@ -7,6 +7,7 @@ import { stepWorkoutValue } from '../utils/workoutSets'
 type LoggerExercise = {
   code: string
   name: string
+  shortCue?: string
   sets: { weight: number; reps: number }[]
   targets: { weight: number; reps: number }[]
   previousSets: WorkoutSet[]
@@ -15,7 +16,7 @@ type LoggerExercise = {
 }
 
 export function SupersetLogger({
-  exercises, loggedRounds, groupIndex, current, t, language, error, onChange, onStartRest, onSave,
+  exercises, loggedRounds, groupIndex, current, t, language, error, onChange, onStartRest, restBetweenSets, onSave, onRestContext, nextExerciseName, insightActive,
 }: {
   exercises: LoggerExercise[]
   loggedRounds: boolean[]
@@ -26,7 +27,14 @@ export function SupersetLogger({
   error?: string
   onChange: (exercise: number, round: number, field: 'weight' | 'reps', value: string) => void
   onStartRest: (seconds: number, label: string) => void
+  restBetweenSets: number
   onSave: (rounds: boolean[], times: Array<number | undefined>) => Promise<void>
+  onRestContext?: (
+    context: { set: number; next: string },
+    undo: (() => void) | null
+  ) => void
+  nextExerciseName?: string
+  insightActive?: boolean
 }) {
   const counts = exercises.map((exercise) => exercise.sets.length)
   const [ticks, setTicks] = useState(() => createSupersetTicks(counts, loggedRounds))
@@ -97,8 +105,21 @@ export function SupersetLogger({
     const focus = nextSupersetFocus(next, counts, { round, exercise })
     if (rounds[round]) {
       setOpenRounds((previous) => ({ ...previous, [round]: false }))
-      const last = exercises[exercises.length - 1]
-      onStartRest(last.restSeconds, exercises.map((item) => item.name).join(' + '))
+      const nextRound = rounds.findIndex((done) => !done)
+      const nextLabel = nextRound >= 0
+        ? t('workout.superset.roundOf', { round: nextRound + 1, total: roundCount })
+        : nextExerciseName ?? t('workout.run.finished')
+      onRestContext?.(
+        { set: round + 1, next: nextLabel },
+        rounds.every(Boolean)
+          ? null
+          : () => {
+              setTicks(toggleSupersetTick(next, counts, { round, exercise }))
+              setTimes((previous) => previous.map((time, index) => index === round ? undefined : time))
+              setHandoff(null)
+            }
+      )
+      onStartRest(restBetweenSets, exercises.map((item) => item.name).join(' + '))
     } else if (focus?.round === round) {
       setNow(timestamp)
       setHandoff({ round, exercise, code: exercises[focus.exercise].code, endAt: timestamp + exercises[exercise].restSeconds * 1000 })
@@ -112,7 +133,7 @@ export function SupersetLogger({
 
   return (
     <section
-      className={`superset-group superset-workout-card${current ? ' workout-mode-current' : ''}`}
+      className={`superset-group superset-workout-card${current ? ' workout-mode-current' : ''}${insightActive ? ' has-active-insight' : ''}`}
       data-workout-group={groupIndex}
       tabIndex={-1}
       aria-busy={saving}
@@ -127,6 +148,9 @@ export function SupersetLogger({
           <div className="superset-compact-exercise" key={exercise.code}>
             <div>
               <strong>{exercise.code} · {exercise.name}</strong>
+              {exercise.shortCue && (
+                <p className="workout-short-cue"><strong>{t('workout.run.squeezeLabel')} · </strong>{exercise.shortCue}</p>
+              )}
               <p className="workout-mode-target">{t('workout.run.todayTarget', {
                 weight: formatNumber(language, target.weight), reps: formatNumber(language, target.reps),
               })}</p>

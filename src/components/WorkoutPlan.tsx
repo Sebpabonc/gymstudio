@@ -1,6 +1,8 @@
 import { cleanNumberInput, selectOnFocus } from '../utils/numberInput'
 import SwipeToDelete from './SwipeToDelete'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import SetTrendChart from './SetTrendChart'
+import { shortSqueezeCues } from '../data/shortSqueezeCues'
 import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
 import type { AuthStatus } from '../auth/AuthProvider'
@@ -23,6 +25,8 @@ import {
   getActiveBlockId,
   getExerciseDisplayName,
   getSessionStorageValue,
+  loadRestBetweenSets,
+  loadWorkoutTrendOpen,
   loadExercises,
   loadLocalExerciseSwaps,
   loadTrainerExplanation,
@@ -36,6 +40,7 @@ import {
   loadCustomPlan,
   saveCustomPlan,
   setSessionStorageValue,
+  saveWorkoutTrendOpen,
   setActiveBlockId,
   upsertExerciseRecord,
 } from '../utils/storage'
@@ -67,6 +72,14 @@ import {
 } from '../utils/workoutSets'
 import { createSupersetEntries, getLoggedSupersetRounds, groupSupersets } from '../utils/supersets'
 import { recommendNextTarget, type NextTarget, type ProgressionType } from '../progress/nextTarget'
+import {
+  buildWorkoutExerciseInsight,
+  buildWorkoutSetTrend,
+  workoutCompletionCounts,
+  workoutInsightTally,
+  workoutMuscleSetTotals,
+} from '../progress/workoutInsights'
+import type { WorkoutExerciseInsight } from '../progress/workoutInsights'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
 import { loadDemoBlocks } from '../plans/demoBlock'
 import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
@@ -159,6 +172,13 @@ type DaySessionSummary = SessionSummary & {
   date: string
   blockId?: string
   dayKey?: string
+  dayName: string
+  dayPosition: number
+  early: boolean
+  counts: ReturnType<typeof workoutCompletionCounts>
+  tally: ReturnType<typeof workoutInsightTally>
+  muscleTotals: ReturnType<typeof workoutMuscleSetTotals>
+  insights: Array<{ exercise: Exercise; insight: WorkoutExerciseInsight }>
 }
 
 function SteppedNumberInput({
@@ -385,6 +405,78 @@ function createSet(reps = 8, weight = 0): WorkoutSet {
 
 function formatHistoryDate(language: ReturnType<typeof useT>['language'], value: string) {
   return formatShortDate(language, value)
+}
+
+function formatWorkoutInsightLine(insight: WorkoutExerciseInsight, dayName: string, language: Language, t: Translate) {
+  const comparison = insight.comparison
+  if (comparison.verdict === 'baseline') return t('workout.insight.baselineLine', { day: dayName })
+  if (comparison.verdict === 'target-changed') return t('workout.insight.targetChangedLine')
+  if (
+    comparison.verdict === 'held' &&
+    comparison.workingSetCount !== comparison.previousWorkingSetCount
+  ) {
+    return t('workout.insight.setCount', {
+      current: comparison.workingSetCount,
+      previous: comparison.previousWorkingSetCount,
+    })
+  }
+  const changeText = insight.changes.slice(0, 2).map((change) => {
+    const weightDelta = change.weight - change.previousWeight
+    const repsDelta = change.reps - change.previousReps
+    if (weightDelta !== 0) {
+      const signed = `${weightDelta > 0 ? '+' : '−'}${formatNumber(language, Math.abs(weightDelta))}`
+      return t('workout.insight.changeLoad', { set: change.set, delta: signed })
+    }
+    const signed = `${repsDelta > 0 ? '+' : '−'}${formatNumber(language, Math.abs(repsDelta))}`
+    return t('workout.insight.changeReps', {
+      set: change.set,
+      delta: signed,
+      weight: formatNumber(language, change.weight),
+    })
+  })
+  if (comparison.verdict === 'held') {
+    const sets = insight.current.sets
+      .map((set) => `${formatNumber(language, set.weight)}×${formatNumber(language, set.reps)}`)
+      .join(' · ')
+    return t('workout.insight.sameLine', { sets })
+  }
+  if (comparison.verdict === 'traded' || comparison.verdict === 'mixed') {
+    if (changeText.length) return t('workout.insight.mixedLine', { changes: changeText.join(' · ') })
+    const extraSet = insight.current.sets[insight.previous?.sets.length ?? 0]
+    return extraSet
+      ? t('workout.insight.extraSet', { weight: formatNumber(language, extraSet.weight) })
+      : t('workout.insight.setCount', {
+          current: comparison.workingSetCount,
+          previous: comparison.previousWorkingSetCount,
+        })
+  }
+  if (comparison.verdict === 'improved' && changeText.length === 0) {
+    const extraSet = insight.current.sets[insight.previous?.sets.length ?? 0]
+    return extraSet
+      ? t('workout.insight.extraSet', { weight: formatNumber(language, extraSet.weight) })
+      : t('workout.insight.sameLine', { sets: '' })
+  }
+  if (comparison.verdict === 'improved' && insight.changes.length > 0) {
+    const changes = insight.changes
+    const uniformLoadIncrease = changes.every((change) =>
+      change.weight > change.previousWeight && change.reps === change.previousReps
+    ) && new Set(changes.map((change) => change.weight - change.previousWeight)).size === 1
+    if (uniformLoadIncrease) {
+      return t('workout.insight.improvedLoad', {
+        delta: formatNumber(language, changes[0].weight - changes[0].previousWeight),
+      })
+    }
+  }
+  return changeText[0] ?? t('workout.insight.sameLine', { sets: '' })
+}
+
+function workoutInsightIcon(verdict: WorkoutExerciseInsight['comparison']['verdict']) {
+  if (verdict === 'improved') return '↑'
+  if (verdict === 'held') return '→'
+  if (verdict === 'dropped') return '↓'
+  if (verdict === 'baseline') return '●'
+  if (verdict === 'target-changed') return '—'
+  return '↕'
 }
 
 function formatBlockWeekRange(block: TrainingBlock, week: number, language: ReturnType<typeof useT>['language']) {
@@ -628,6 +720,18 @@ export default function WorkoutPlan({
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
   // Workout mode: focus one exercise (or superset) at a time, same cards as the full Today list.
   const [workoutGroupIndex, setWorkoutGroupIndex] = useState<number | null>(null)
+  const [workoutSetIndex, setWorkoutSetIndex] = useState<Record<string, number>>({})
+  const [workoutWeightInputs, setWorkoutWeightInputs] = useState<Record<string, string>>({})
+  const [workoutRestContext, setWorkoutRestContext] = useState<{ set: number; next: string } | null>(null)
+  const [workoutInsight, setWorkoutInsight] = useState<WorkoutExerciseInsight | null>(null)
+  const [workoutGroupInsights, setWorkoutGroupInsights] = useState<Array<{ exercise: Exercise; insight: WorkoutExerciseInsight }>>([])
+  const [workoutGroupInsightNext, setWorkoutGroupInsightNext] = useState<number | null>(null)
+  const [workoutInsightPinned, setWorkoutInsightPinned] = useState(false)
+  const [finishConfirmOpen, setFinishConfirmOpen] = useState(false)
+  const [elapsedNow, setElapsedNow] = useState(Date.now)
+  const [trendOpen, setTrendOpen] = useState(loadWorkoutTrendOpen)
+  const workoutInsightTimer = useRef<number | null>(null)
+  const supersetRestUndo = useRef<(() => void) | null>(null)
   const sessionStartedAt = useRef<SessionStart | null>(null)
   const trainerRecommendationIds = useRef(new Map<string, string>())
   const [swipeUndo, setSwipeUndo] = useState<WorkoutEntry | null>(null)
@@ -904,7 +1008,7 @@ export default function WorkoutPlan({
     return planDay ? `${day} · ${planDay.name}` : day
   }
 
-  const findExerciseCompletion = (exercise: PlanExercise, entries: WorkoutEntry[]) => {
+  const findExerciseEntry = (exercise: PlanExercise, entries: WorkoutEntry[]) => {
     const exerciseKey = normalizeExerciseName(exercise.name)
     const matching = entries.filter((entry) => {
       if (exercise.exerciseId) return entry.exerciseId === exercise.exerciseId
@@ -913,12 +1017,23 @@ export default function WorkoutPlan({
     })
     return findWeekCompletion(matching, activeCompletionScope)
   }
+  const findExerciseCompletion = (
+    exercise: PlanExercise,
+    entries: WorkoutEntry[],
+    requireAllSets = isWorkoutMode
+  ) => {
+    const entry = findExerciseEntry(exercise, entries)
+    return requireAllSets && entry && entry.sets.length < getDefaultSetCount(exercise)
+      ? undefined
+      : entry
+  }
 
   useEffect(() => {
     if (!toast) return undefined
+    if (workoutGroupIndex !== null) return undefined
     const timer = window.setTimeout(() => setToast(null), 5000)
     return () => window.clearTimeout(timer)
-  }, [toast])
+  }, [toast, workoutGroupIndex])
 
   useEffect(() => {
     if (mode) {
@@ -1301,7 +1416,7 @@ export default function WorkoutPlan({
     const original = getOriginalDraftForExercise(exerciseName, exercise)
     // PO 2026-10-07: reopening an exercise already done this week shows what was logged, so it can be edited
     // (re-logging the same day updates that entry) instead of the plan's defaults.
-    const done = exercise ? findExerciseCompletion(exercise, history) : undefined
+    const done = exercise ? findExerciseEntry(exercise, history) : undefined
     if (done?.sets.length) {
       const count = Math.max(original.setWeights.length, done.sets.length)
       const pick = <T,>(values: T[], fallback: T[], index: number) => values[index] ?? fallback[index] ?? fallback[fallback.length - 1]
@@ -1644,18 +1759,33 @@ export default function WorkoutPlan({
     openSessionSummary(nextHistory, loggedAt)
   }
 
-  const openSessionSummary = (nextHistory: WorkoutEntry[], loggedAt: number) => {
+  const openSessionSummary = (nextHistory: WorkoutEntry[], loggedAt: number, early = false) => {
     if (planMode !== 'preset' || !activeBlock || !activeDay) return
     const entries = nextHistory.filter(
       (entry) =>
-        entry.date === activeCompletionScope.date &&
+        entry.date.slice(0, 10) === activeCompletionScope.date.slice(0, 10) &&
         entry.blockId === activeCompletionScope.blockId &&
         entry.dayKey === activeCompletionScope.dayKey
     )
-    if (entries.length === 0) return
     const performance = buildWorkoutSummary(entries, nextHistory, trainingBlocks, exerciseCatalog, today)
     const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
     const scopeKey = getSessionScopeKey(activeCompletionScope, planMode)
+    const plannedSets = activeExercises.reduce((total, exercise) => total + getDefaultSetCount(exercise), 0)
+    const completedExercises = activeExercises.filter((exercise) => {
+      const entry = findExerciseEntry(exercise, entries)
+      return !!entry && entry.sets.length >= getDefaultSetCount(exercise)
+    }).length
+    const counts = workoutCompletionCounts(entries, activeExercises.length, plannedSets, completedExercises)
+    const insights = activeExercises.flatMap((planned) => {
+      const entry = entries.find((item) => item.exerciseId === planned.exerciseId)
+      if (!entry) return []
+      const exercise = exerciseCatalog.find((item) => item.id === entry.exerciseId) ?? {
+        id: entry.exerciseId,
+        name: planned.name,
+        primaryMuscle: planned.focus,
+      }
+      return [{ exercise, insight: buildWorkoutExerciseInsight(entry, nextHistory, trainingBlocks, exercise) }]
+    })
     setSessionSummary({
       ...createSessionSummary(
         entries,
@@ -1669,6 +1799,13 @@ export default function WorkoutPlan({
       date: activeCompletionScope.date,
       blockId: activeCompletionScope.blockId,
       dayKey: activeCompletionScope.dayKey,
+      dayName: activeDay.name,
+      dayPosition: activeDay.position,
+      early: early || !counts.complete,
+      counts,
+      tally: workoutInsightTally(insights.map(({ insight }) => insight)),
+      muscleTotals: workoutMuscleSetTotals(entries, exerciseCatalog),
+      insights,
     })
   }
 
@@ -1677,6 +1814,26 @@ export default function WorkoutPlan({
   const workoutGroupCompletion = workoutGroups.map((group) =>
     group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, history))
   )
+  const workoutSessionEntries = history.filter((entry) =>
+    entry.date.slice(0, 10) === activeCompletionScope.date.slice(0, 10) &&
+    entry.blockId === activeCompletionScope.blockId &&
+    entry.dayKey === activeCompletionScope.dayKey
+  )
+  const workoutDoneExerciseCount = activeExercises.filter((exercise) => {
+    const entry = findExerciseEntry(exercise, workoutSessionEntries)
+    return !!entry && entry.sets.length >= getDefaultSetCount(exercise)
+  }).length
+  const workoutGroupsForRender = isWorkoutMode && workoutGroupIndex !== null
+    ? [workoutGroups[workoutGroupIndex], ...workoutGroups.filter((_, index) => index !== workoutGroupIndex)]
+    : workoutGroups
+  const elapsedSeconds = Math.max(0, Math.floor((elapsedNow - (sessionStartedAt.current?.timestamp ?? elapsedNow)) / 1000))
+  const elapsedLabel = `${formatNumber(language, Math.floor(elapsedSeconds / 60))}:${String(elapsedSeconds % 60).padStart(2, '0')}`
+  useEffect(() => {
+    if (!isWorkoutMode) return undefined
+    setElapsedNow(Date.now())
+    const interval = window.setInterval(() => setElapsedNow(Date.now()), 1000)
+    return () => window.clearInterval(interval)
+  }, [isWorkoutMode])
   const nextWorkoutGroup = workoutGroupIndex === null
     ? -1
     : nextWorkoutGroupIndex(workoutGroupCompletion, workoutGroupIndex)
@@ -1693,6 +1850,13 @@ export default function WorkoutPlan({
     (workoutGroups[index]?.items ?? []).map(({ exercise }) => normalizeExerciseName(exercise.name))
   const goToWorkoutGroup = (index: number) => {
     if (index < 0 || index >= workoutGroups.length) return
+    supersetRestUndo.current = null
+    if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
+    workoutInsightTimer.current = null
+    setWorkoutInsight(null)
+    setWorkoutGroupInsights([])
+    setWorkoutGroupInsightNext(null)
+    setWorkoutInsightPinned(false)
     if (workoutGroupIndex === null) onWorkoutModeChange?.(true)
     setWorkoutGroupIndex(index)
     setCollapsedExercises((current) => ({
@@ -1719,16 +1883,34 @@ export default function WorkoutPlan({
       ])
     ))
     startSession(Date.now(), activeCompletionScope)
+    setFinishConfirmOpen(false)
+    setWorkoutInsight(null)
+    setWorkoutGroupInsights([])
+    setWorkoutGroupInsightNext(null)
     goToWorkoutGroup(firstOpen >= 0 ? firstOpen : 0)
   }
   const exitWorkout = () => {
+    if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
+    workoutInsightTimer.current = null
+    setFinishConfirmOpen(false)
+    setWorkoutInsight(null)
+    setWorkoutGroupInsights([])
+    setWorkoutGroupInsightNext(null)
     setWorkoutGroupIndex(null)
     onWorkoutModeChange?.(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-  const finishWorkout = () => {
-    exitWorkout()
-    openSessionSummary(history, Date.now())
+  const finishWorkout = () => setFinishConfirmOpen(true)
+  const confirmFinishWorkout = () => {
+    if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
+    workoutInsightTimer.current = null
+    setFinishConfirmOpen(false)
+    setWorkoutInsight(null)
+    setWorkoutGroupInsights([])
+    setWorkoutGroupInsightNext(null)
+    setWorkoutGroupIndex(null)
+    onWorkoutModeChange?.(false)
+    openSessionSummary(history, Date.now(), true)
   }
 
   const undoLastLog = () => {
@@ -1737,7 +1919,40 @@ export default function WorkoutPlan({
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
     setToast(null)
+    setPlannedDrafts({})
+    setWorkoutSetIndex({})
+    setWorkoutInsight(null)
+    onRestTimerChange?.(null)
     dismissSessionSummary()
+  }
+
+  const logWorkoutSet = (exercise: PlanExercise, setIndex: number, setCount: number) => {
+    supersetRestUndo.current = null
+    const key = getPlanDraftKey(exercise.name)
+    const draft = getDraftForExercise(exercise.name, exercise)
+    const completed = Array.from({ length: setCount }, (_, index) => draft.setDone[index] ?? false)
+    const times = Array.from({ length: setCount }, (_, index) => draft.setAt?.[index])
+    if (!completed[setIndex]) {
+      completed[setIndex] = true
+      times[setIndex] = Date.now()
+    }
+    setPlannedDrafts((current) => ({
+      ...current,
+      [key]: { ...(current[key] ?? draft), setDone: completed, setAt: times },
+    }))
+    const nextSet = completed.findIndex((done) => !done)
+    const groupIndex = workoutGroups.findIndex((group) =>
+      group.items.some(({ exercise: item }) => normalizeExerciseName(item.name) === normalizeExerciseName(exercise.name))
+    )
+    const nextGroupIndex = nextWorkoutGroupIndex(workoutGroupCompletion, groupIndex)
+    const nextExercise = nextGroupIndex >= 0 ? workoutGroups[nextGroupIndex]?.items[0]?.exercise : undefined
+    const next = nextSet >= 0
+      ? t('workout.run.setNumber', { set: formatNumber(language, nextSet + 1) })
+      : nextExercise ? displayExerciseName(nextExercise.name) : t('workout.run.finished')
+    setWorkoutRestContext({ set: setIndex + 1, next })
+    setWorkoutSetIndex((current) => ({ ...current, [normalizeExerciseName(exercise.name)]: nextSet >= 0 ? nextSet : setIndex }))
+    onStartRest(loadRestBetweenSets(), displayExerciseName(exercise.name))
+    void logPlannedExercise(exercise, completed, times)
   }
 
   const deleteProgressEntry = async (entry: WorkoutEntry) => {
@@ -1830,15 +2045,16 @@ export default function WorkoutPlan({
     if (trainer) saveTrainerResult(exercise, draft, trainer, entryToSave.id)
     const loggedAt = Date.now()
     startSession(loggedAt, activeCompletionScope)
+    const exerciseCompleted = validSets.length >= setCount
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
+    if (!isWorkoutMode) onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
     showLogToast([entryToSave], storedHistory, activeCompletionScope, [exercise])
-    maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
+    if (!isWorkoutMode) maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
     setExerciseCatalog(await loadExercises())
 
-    setPlannedDrafts((current) => {
+    if (!isWorkoutMode) setPlannedDrafts((current) => {
       const currentDraft = current[exerciseKey]
 
       if (!currentDraft) return current
@@ -1860,6 +2076,7 @@ export default function WorkoutPlan({
     }))
 
     setLoggedAtByExercise((current) => ({ ...current, [entryToSave.id]: Date.now() }))
+    if (isWorkoutMode && !exerciseCompleted) return
 
     setCollapsedExercises((current) => ({
       ...current,
@@ -1875,7 +2092,25 @@ export default function WorkoutPlan({
         ),
         currentGroup
       )
-      if (nextGroup >= 0) goToWorkoutGroup(nextGroup)
+      if (nextGroup < 0) {
+        setWorkoutGroupIndex(null)
+        onWorkoutModeChange?.(false)
+        openSessionSummary(nextHistory, loggedAt)
+      } else {
+        const insightExercise = exerciseCatalog.find((item) => item.id === entryToSave.exerciseId) ?? {
+          id: entryToSave.exerciseId,
+          name: exercise.name,
+          primaryMuscle: exercise.focus,
+        }
+        const insight = buildWorkoutExerciseInsight(entryToSave, storedHistory, trainingBlocks, insightExercise)
+        setWorkoutInsight(insight)
+        setWorkoutInsightPinned(false)
+        workoutInsightTimer.current = window.setTimeout(() => {
+          setWorkoutInsight(null)
+          setWorkoutInsightPinned(false)
+          goToWorkoutGroup(nextGroup)
+        }, 3000)
+      }
     } else {
       const currentIndex = activeExercises.findIndex((item) => normalizeExerciseName(item.name) === sectionKey)
       const nextIndex = findNextPendingIndex(
@@ -1976,7 +2211,7 @@ export default function WorkoutPlan({
     const scope = { ...activeCompletionScope, date }
     startSession(loggedAt, scope)
     showLogToast(entriesToSave, storedHistory, scope, exercises)
-    maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
+    if (!isWorkoutMode) maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
 
     setLogError((current) => ({
       ...current,
@@ -2027,7 +2262,32 @@ export default function WorkoutPlan({
         ),
         currentGroup
       )
-      if (nextGroup >= 0) goToWorkoutGroup(nextGroup)
+      if (nextGroup >= 0) {
+        const insights = entriesToSave.flatMap((entry) => {
+          const planned = exercises.find((exercise) => exercise.exerciseId === entry.exerciseId)
+          if (!planned) return []
+          const catalogExercise = exerciseCatalog.find((exercise) => exercise.id === entry.exerciseId) ?? {
+            id: entry.exerciseId,
+            name: planned.name,
+            primaryMuscle: planned.focus,
+          }
+          return [{ exercise: catalogExercise, insight: buildWorkoutExerciseInsight(entry, storedHistory, trainingBlocks, catalogExercise) }]
+        })
+        setWorkoutInsight(null)
+        setWorkoutGroupInsights(insights)
+        setWorkoutGroupInsightNext(nextGroup)
+        setWorkoutInsightPinned(false)
+        workoutInsightTimer.current = window.setTimeout(() => {
+          setWorkoutGroupInsights([])
+          setWorkoutGroupInsightNext(null)
+          setWorkoutInsightPinned(false)
+          goToWorkoutGroup(nextGroup)
+        }, 3000)
+      } else {
+        setWorkoutGroupIndex(null)
+        onWorkoutModeChange?.(false)
+        openSessionSummary(nextHistory, loggedAt)
+      }
     } else {
       const currentIndex = Math.max(...exercises.map((exercise) =>
         activeExercises.findIndex((item) => item.name === exercise.name)
@@ -2971,26 +3231,12 @@ export default function WorkoutPlan({
               {t('workout.run.exit')}
             </button>
             <strong className="workout-mode-progress">
-              {activeDay?.name} · {formatNumber(language, (workoutGroups[workoutGroupIndex]?.items[0]?.exerciseIndex ?? 0) + 1)}/{formatNumber(language, activeExercises.length)}
+              {t('workout.day.title', { position: activeDay?.position ?? 1, name: activeDay?.name ?? '' })} · {formatNumber(language, (workoutGroups[workoutGroupIndex]?.items[0]?.exerciseIndex ?? 0) + 1)}/{formatNumber(language, activeExercises.length)}
             </strong>
-            <span className="layout-toggle language-toggle workout-mode-language-toggle" role="group" aria-label={t('lang.label')}>
-              <button
-                type="button"
-                aria-label={t('lang.en')}
-                aria-pressed={language === 'en'}
-                onClick={() => setLanguage('en')}
-              >
-                EN
-              </button>
-              <button
-                type="button"
-                aria-label={t('lang.es')}
-                aria-pressed={language === 'es'}
-                onClick={() => setLanguage('es')}
-              >
-                ES
-              </button>
-            </span>
+            <time className="workout-mode-elapsed" aria-label={t('workout.run.elapsed')}>{elapsedLabel}</time>
+            <button type="button" className="secondary-button small-button workout-mode-finish-top" onClick={finishWorkout}>
+              {t('workout.run.finishShort')}
+            </button>
           </div>
         )}
         {isWorkoutMode && (
@@ -3029,7 +3275,8 @@ export default function WorkoutPlan({
           </div>
         )}
         <div className="day-exercises">
-          {workoutGroups.map((group, groupIndex) => {
+          {workoutGroupsForRender.map((group) => {
+            const groupIndex = workoutGroups.indexOf(group)
             const previousSetsByExercise = new Map<string, ReturnType<typeof getPreviousWorkoutSets>>()
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
@@ -3103,7 +3350,8 @@ export default function WorkoutPlan({
               (libraryMatch?.primaryMuscle ? [libraryMatch.primaryMuscle] : [])
             ).slice(0, 2)
             const benchAngleLabel = formatBenchAngle(exercise.angleDegrees, language)
-            const isCollapsed = !!collapsedExercises[exerciseKey]
+            const hasActiveInsight = isWorkoutMode && workoutInsight?.exerciseId === exercise.exerciseId
+            const isCollapsed = !!collapsedExercises[exerciseKey] && !hasActiveInsight
             const isProgressSectionVisible = progressSectionsVisible[exerciseKey] ?? false
             const isTipsVisible = postureTipsVisible[exerciseKey] ?? false
             const postureTips = getPostureTips(exercise, libraryMatch)
@@ -3179,6 +3427,22 @@ export default function WorkoutPlan({
               ? draft.trainerChoice === 'accepted' ? trainer.recommendation.reps : trainer.target
               : fallbackHintTarget
             const nextUncheckedIndex = completedRows.findIndex((complete) => !complete)
+            const currentWorkoutSetIndex = Math.min(
+              setCount - 1,
+              workoutSetIndex[exerciseKey] ?? (nextUncheckedIndex >= 0 ? nextUncheckedIndex : setCount - 1)
+            )
+            const currentWorkoutWeight = setWeights[currentWorkoutSetIndex] ?? draft.weight
+            const currentWorkoutReps = setReps[currentWorkoutSetIndex] ?? draft.reps
+            const workoutWeightInputKey = `${exerciseKey}:${currentWorkoutSetIndex}`
+            const workoutWeightValue = workoutWeightInputs[workoutWeightInputKey] ?? formatNumber(language, currentWorkoutWeight)
+            const shortCue = libraryMatch ? shortSqueezeCues[libraryMatch.id as keyof typeof shortSqueezeCues]?.[language] : undefined
+            const trendTargets = Array.from({ length: setCount }, (_, index) => ({
+              weight: trainer?.recommendation.setWeights?.[index] ?? setWeights[index] ?? draft.weight,
+              reps: trainer?.recommendation.setReps?.[index] ?? setReps[index] ?? draft.reps,
+            }))
+            const trendSessions = isWorkoutMode && exercise.exerciseId
+              ? buildWorkoutSetTrend(history, trainingBlocks, exercise.exerciseId, today, trendTargets)
+              : []
             const setHint = !group.isSuperset && exercise.technique === 'straight' && nextUncheckedIndex >= 0
               ? nextSetHint({
                   target: hintTarget,
@@ -3198,6 +3462,7 @@ export default function WorkoutPlan({
               isCollapsed ? 'collapsed' : '',
               completedEntry ? 'completed' : '',
               isWorkoutMode && groupIndex === workoutGroupIndex ? 'workout-mode-current' : '',
+              hasActiveInsight ? 'has-active-insight' : '',
             ].filter(Boolean).join(' ')
 
             const checkedSummarySets = completedRows.flatMap((done, index) => done
@@ -3208,10 +3473,51 @@ export default function WorkoutPlan({
               .map((reps) => formatNumber(language, reps))
               .join('/')
             const workoutFinished = !!completedEntry || completedRows.every(Boolean)
+            const currentInsight = hasActiveInsight ? workoutInsight : null
+            const finishedInsight = isWorkoutMode && workoutFinished && completedEntry && libraryMatch
+              ? buildWorkoutExerciseInsight(completedEntry, history, trainingBlocks, libraryMatch)
+              : null
+            const insightVerdictKey = currentInsight?.comparison.verdict === 'improved' ? 'workout.insight.improved'
+              : currentInsight?.comparison.verdict === 'held' ? 'workout.insight.same'
+                : currentInsight?.comparison.verdict === 'dropped' ? 'workout.insight.lower'
+                  : currentInsight?.comparison.verdict === 'baseline' ? 'workout.insight.baseline'
+                    : currentInsight?.comparison.verdict === 'target-changed' ? 'workout.insight.targetChanged'
+                      : 'workout.insight.mixed'
+            const insightIcon = currentInsight?.comparison.verdict === 'improved' ? '↑'
+              : currentInsight?.comparison.verdict === 'held' ? '→'
+                : currentInsight?.comparison.verdict === 'dropped' ? '↓'
+                  : currentInsight?.comparison.verdict === 'baseline' ? '●'
+                    : currentInsight?.comparison.verdict === 'target-changed' ? '—' : '↕'
+            const insightPreviousDay = currentInsight?.previous
+              ? trainingBlocks.find((block) => block.id === currentInsight.previous?.blockId)
+                ?.days.find((day) => day.key === currentInsight.previous?.dayKey)?.name ?? activeDay?.name ?? ''
+              : ''
+            const insightBasis = currentInsight?.previous
+              ? t('workout.insight.workingBasis', {
+                  date: formatWeekdayDate(language, `${currentInsight.previous.date}T00:00:00Z`),
+                  day: insightPreviousDay,
+                }) + (exercise.technique === 'drop-set' ? t('workout.insight.mainPart') : '')
+              : ''
+            const insightWatch = currentInsight?.watch
+              ? t(`workout.insight.watch.${currentInsight.watch.code}` as TranslationKey,
+                  Object.fromEntries(Object.entries(currentInsight.watch.params).map(([key, value]) => [
+                    key,
+                    key === 'date' && typeof value === 'string'
+                      ? formatWeekdayDate(language, `${value}T00:00:00Z`)
+                      : typeof value === 'number' ? formatNumber(language, value) : value,
+                  ])))
+              : ''
             if (isWorkoutMode && group.isSuperset) {
               return (
                 <React.Fragment key={exercise.code ?? exercise.name}>
-                  <div className="workout-mode-tools">
+                  <details className="workout-mode-more">
+                    <summary>⋯ {t('workout.run.more')}</summary>
+                    <div className="workout-mode-more-panel">
+                      <span className="layout-toggle language-toggle" role="group" aria-label={t('lang.label')}>
+                        <button type="button" aria-label={t('lang.en')} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
+                        <button type="button" aria-label={t('lang.es')} aria-pressed={language === 'es'} onClick={() => setLanguage('es')}>ES</button>
+                      </span>
+                      <div className="workout-mode-tools">
                     <button type="button" className="secondary-button small-button" onClick={() => void openExternal(exerciseImageSearchUrl(
                       exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
                     ))}>{t('workout.run.searchGoogle')}</button>
@@ -3221,17 +3527,21 @@ export default function WorkoutPlan({
                       })}>{t('workout.run.swap')}</button>
                     )}
                     <button type="button" className="secondary-button small-button" onClick={(event) => {
-                      const notes = event.currentTarget.closest('.superset-actions-panel')?.querySelector<HTMLDetailsElement>('.superset-notes')
-                      if (notes) {
-                        notes.open = !notes.open
-                        if (notes.open) notes.querySelector('textarea')?.focus()
-                      }
+                      const groupElement = event.currentTarget.closest('.day-exercises')
+                        ?.querySelector<HTMLElement>(`.superset-workout-card[data-workout-group="${groupIndex}"]`)
+                      const noteIndex = group.items.findIndex(({ exercise: item }) => item.name === exercise.name)
+                      const notes = groupElement?.querySelectorAll<HTMLDetailsElement>('.superset-notes')[noteIndex]
+                      if (!notes) return
+                      notes.open = !notes.open
+                      if (notes.open) notes.querySelector('textarea')?.focus()
                     }}>{t('workout.label.notes')}</button>
                     <button type="button" className="secondary-button small-button" aria-expanded={isProgressSectionVisible}
                       onClick={() => toggleProgressSection(exercise.name)}>{t('workout.run.history')}</button>
                     <button type="button" className="secondary-button small-button" aria-expanded={isTipsVisible}
                       onClick={() => togglePostureTips(exercise.name)}>{t('workout.run.technique')}</button>
-                  </div>
+                      </div>
+                    </div>
+                  </details>
                   <details className="superset-notes">
                     <summary>{t('workout.label.notes')}</summary>
                     <label className="planned-notes-field">
@@ -3288,7 +3598,7 @@ export default function WorkoutPlan({
                 </React.Fragment>
               )
             }
-            if (isWorkoutMode && isCollapsed && workoutFinished) {
+            if (isWorkoutMode && isCollapsed && workoutFinished && !hasActiveInsight) {
               return (
                 <article
                   key={`${planMode}-${activeDay?.key ?? 'custom'}-${exercise.code ?? exercise.name}`}
@@ -3303,6 +3613,9 @@ export default function WorkoutPlan({
                     onClick={() => goToWorkoutGroup(groupIndex)}
                   >
                     <span className="workout-mode-completed-name">✓ {displayName}</span>
+                    {finishedInsight && <strong aria-label={t(`workout.insight.${finishedInsight.comparison.verdict === 'traded' ? 'mixed' : finishedInsight.comparison.verdict === 'held' ? 'same' : finishedInsight.comparison.verdict}` as TranslationKey)}>
+                      {workoutInsightIcon(finishedInsight.comparison.verdict)}
+                    </strong>}
                     <span className="workout-mode-completed-details">
                       {formatNumber(language, summarySets.length)}×{summaryReps} · {formatNumber(language, Math.max(...summarySets.map((set) => set.weight), 0))} kg
                     </span>
@@ -3402,6 +3715,54 @@ export default function WorkoutPlan({
                   </button>
                 </div>
 
+                {isWorkoutMode && shortCue && (
+                  <p className="workout-short-cue">
+                    <strong>{t('workout.run.squeezeLabel')} · </strong>{shortCue}
+                  </p>
+                )}
+                {currentInsight && (
+                  <section className="workout-exercise-insight" role="status" aria-live="polite">
+                    <button
+                      type="button"
+                      className="workout-exercise-insight-body"
+                      onClick={() => {
+                        setWorkoutInsightPinned(true)
+                        if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
+                        workoutInsightTimer.current = null
+                      }}
+                    >
+                      <strong><span aria-hidden="true">{insightIcon}</span> {t(insightVerdictKey as TranslationKey)}</strong>
+                      <span>{formatWorkoutInsightLine(currentInsight, activeDay?.name ?? '', language, t)}</span>
+                      {insightBasis && <small>{insightBasis}</small>}
+                      {insightWatch && <small className="workout-insight-watch">{insightWatch}</small>}
+                    </button>
+                    {!workoutInsightPinned ? (
+                      <button
+                        type="button"
+                        className="workout-insight-keep-open"
+                        onClick={() => {
+                          setWorkoutInsightPinned(true)
+                          if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
+                          workoutInsightTimer.current = null
+                        }}
+                      >
+                        {t('workout.run.keepOpen')}
+                      </button>
+                    ) : (
+                      <button type="button" className="workout-insight-continue" onClick={() => {
+                        if (nextWorkoutGroup >= 0) goToWorkoutGroup(nextWorkoutGroup)
+                        else {
+                          setWorkoutInsight(null)
+                          openSessionSummary(history, Date.now())
+                        }
+                      }}>
+                        {t('workout.run.continue')}
+                      </button>
+                    )}
+                    {!workoutInsightPinned && <span className="workout-insight-countdown" aria-hidden="true" />}
+                  </section>
+                )}
+
                 {/* PO 2026-10-11: previewing another week shows each exercise's projected load from current performance. */}
                 {barWeekOffset > 0 && !isWorkoutMode && (() => {
                   const projected = trainerNext?.next ?? trainer?.recommendation
@@ -3486,7 +3847,13 @@ export default function WorkoutPlan({
                       {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
                     </p>
                     {isWorkoutMode && (
-                      <>
+                      <details className="workout-mode-more">
+                        <summary>⋯ {t('workout.run.more')}</summary>
+                        <div className="workout-mode-more-panel">
+                          <span className="layout-toggle language-toggle" role="group" aria-label={t('lang.label')}>
+                            <button type="button" aria-label={t('lang.en')} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
+                            <button type="button" aria-label={t('lang.es')} aria-pressed={language === 'es'} onClick={() => setLanguage('es')}>ES</button>
+                          </span>
                         <div className="workout-mode-tools" role="group" aria-label={t('workout.run.exerciseActions')}>
                           <button
                             type="button"
@@ -3557,7 +3924,18 @@ export default function WorkoutPlan({
                             reps: trainerRangeLabel(trainer?.recommendation.reps ?? hintTarget),
                           })}
                         </p>
-                      </>
+                        <SqueezeCue
+                          cue={libraryMatch?.squeezeCue}
+                          cueLabel={t('workout.squeezeCue')}
+                          tips={postureTips}
+                          tipsLabel={text.posture}
+                          tipsId={`posture-tips-${exerciseKey}`}
+                          expanded={isTipsVisible}
+                          onToggle={() => togglePostureTips(exercise.name)}
+                          details={cueDetails}
+                        />
+                        </div>
+                      </details>
                     )}
                     {/* TODO(i18n): PT will provide approved translations */}
                     {exercise.weekNote && (
@@ -3569,16 +3947,18 @@ export default function WorkoutPlan({
                       <p className="planned-exercise-notes">{exercise.notes}</p>
                     )}
 
-                    <SqueezeCue
-                      cue={libraryMatch?.squeezeCue}
-                      cueLabel={t('workout.squeezeCue')}
-                      tips={postureTips}
-                      tipsLabel={text.posture}
-                      tipsId={`posture-tips-${exerciseKey}`}
-                      expanded={isTipsVisible}
-                      onToggle={() => togglePostureTips(exercise.name)}
-                      details={cueDetails}
-                    />
+                    {!isWorkoutMode && (
+                      <SqueezeCue
+                        cue={libraryMatch?.squeezeCue}
+                        cueLabel={t('workout.squeezeCue')}
+                        tips={postureTips}
+                        tipsLabel={text.posture}
+                        tipsId={`posture-tips-${exerciseKey}`}
+                        expanded={isTipsVisible}
+                        onToggle={() => togglePostureTips(exercise.name)}
+                        details={cueDetails}
+                      />
+                    )}
 
                     {!group.isSuperset && (
                       <div className="planned-set-section">
@@ -3602,24 +3982,110 @@ export default function WorkoutPlan({
                           </div>
                         </div>
 
+                        {isWorkoutMode && !hasActiveInsight && (
+                          <div className="workout-mode-big-logger">
+                            <p className="workout-mode-current-set">
+                              {t('workout.run.currentSet', {
+                                set: formatNumber(language, currentWorkoutSetIndex + 1),
+                                total: formatNumber(language, setCount),
+                                weight: formatNumber(language, currentWorkoutWeight),
+                                reps: formatNumber(language, currentWorkoutReps),
+                              })}
+                            </p>
+                            <div className="workout-mode-big-inputs">
+                              <div className="workout-mode-big-field">
+                                <span>kg</span>
+                                <div className="set-stepper">
+                                  <button
+                                    type="button"
+                                    className="stepper-button"
+                                    aria-label={t('workout.set.weightDecrease', { set: currentWorkoutSetIndex + 1 })}
+                                    onClick={() => {
+                                      const value = stepWorkoutValue(currentWorkoutWeight, -1, equipmentStep(libraryMatch?.equipment), 0)
+                                      updatePlanSetValue(exercise, currentWorkoutSetIndex, 'weight', String(value), setCount)
+                                      setWorkoutWeightInputs((current) => ({ ...current, [workoutWeightInputKey]: formatNumber(language, value) }))
+                                    }}
+                                  >−</button>
+                                  <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={workoutWeightValue}
+                                    data-log-weight
+                                    aria-label={t('workout.set.weightLabel', { set: currentWorkoutSetIndex + 1 })}
+                                    onFocus={selectOnFocus}
+                                    onChange={(event) => {
+                                      const raw = event.target.value
+                                      setWorkoutWeightInputs((current) => ({ ...current, [workoutWeightInputKey]: raw }))
+                                      const numeric = Number(raw.replace(',', '.'))
+                                      if (raw.trim() && Number.isFinite(numeric)) {
+                                        updatePlanSetValue(exercise, currentWorkoutSetIndex, 'weight', String(numeric), setCount)
+                                      }
+                                    }}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="stepper-button"
+                                    aria-label={t('workout.set.weightIncrease', { set: currentWorkoutSetIndex + 1 })}
+                                    onClick={() => {
+                                      const value = stepWorkoutValue(currentWorkoutWeight, 1, equipmentStep(libraryMatch?.equipment), 0)
+                                      updatePlanSetValue(exercise, currentWorkoutSetIndex, 'weight', String(value), setCount)
+                                      setWorkoutWeightInputs((current) => ({ ...current, [workoutWeightInputKey]: formatNumber(language, value) }))
+                                    }}
+                                  >+</button>
+                                </div>
+                              </div>
+                              <div className="workout-mode-big-field">
+                                <span>{text.repsShort}</span>
+                                <div className="set-stepper">
+                                  <button
+                                    type="button"
+                                    className="stepper-button"
+                                    aria-label={t('workout.set.repsDecrease', { set: currentWorkoutSetIndex + 1 })}
+                                    onClick={() => updatePlanSetValue(exercise, currentWorkoutSetIndex, 'reps', String(stepWorkoutValue(currentWorkoutReps, -1, 1, 1)), setCount)}
+                                  >−</button>
+                                  <input
+                                    type="number"
+                                    inputMode="numeric"
+                                    min="1"
+                                    value={currentWorkoutReps}
+                                    aria-label={t('workout.set.repsLabel', { set: currentWorkoutSetIndex + 1 })}
+                                    onFocus={selectOnFocus}
+                                    onChange={(event) => updatePlanSetValue(exercise, currentWorkoutSetIndex, 'reps', cleanNumberInput(event), setCount)}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="stepper-button"
+                                    aria-label={t('workout.set.repsIncrease', { set: currentWorkoutSetIndex + 1 })}
+                                    onClick={() => updatePlanSetValue(exercise, currentWorkoutSetIndex, 'reps', String(stepWorkoutValue(currentWorkoutReps, 1, 1, 1)), setCount)}
+                                  >+</button>
+                                </div>
+                              </div>
+                            </div>
+                            <button type="button" className="primary-button workout-mode-log-set"
+                              onClick={() => logWorkoutSet(exercise, currentWorkoutSetIndex, setCount)}>
+                              {t('workout.run.logSet', { set: formatNumber(language, currentWorkoutSetIndex + 1) })}
+                            </button>
+                          </div>
+                        )}
+
                         <div className={`planned-set-grid${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`}>
                           <div className={`planned-set-column-headers${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`} aria-hidden="true">
-                            <span>{t('workout.label.set')}</span>
-                            <span>
-                              {t(isWorkoutMode ? 'workout.run.lastTime' : 'workout.label.previous')}
-                              {previousEntry?.date && previousSummary && (
-                                <small className="previous-day-label">
-                                  {formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`)}: {previousSummary}
-                                </small>
-                              )}
-                              {previousDayType && (
-                                <small className="previous-day-label">{t('workout.previous.day', { day: previousDayType })}</small>
-                              )}
-                            </span>
-                            {isWorkoutMode && <span>{t('workout.run.target')}</span>}
-                            <span>kg</span>
-                            <span>{text.repsShort}</span>
-                            <span>✓</span>
+                            {isWorkoutMode ? (
+                              <>
+                                <span>#</span>
+                                <span>{t('workout.run.lastTime')} {previousEntry?.date ? formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`) : ''}</span>
+                                <span>{t('workout.run.target')}</span>
+                                <span>{t('workout.status.done')}</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>{t('workout.label.set')}</span>
+                                <span>{t('workout.label.previous')}</span>
+                                <span>kg</span>
+                                <span>{text.repsShort}</span>
+                                <span>✓</span>
+                              </>
+                            )}
                           </div>
                           {Array.from({ length: setCount }, (_, index) => {
                             const previousSet = previousSets[index]
@@ -3628,6 +4094,22 @@ export default function WorkoutPlan({
                                 key={`${exercise.name}-set-${index + 1}`}
                                 className={`planned-set-row${completedRows[index] ? ' completed' : ''}${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`}
                               >
+                                {isWorkoutMode ? (
+                                  <button
+                                    type="button"
+                                    className={`workout-mode-compact-row${index === currentWorkoutSetIndex ? ' current' : ''}`}
+                                    aria-label={`${t('workout.label.set')} ${index + 1} · ${completedRows[index] ? t('workout.status.done') : t('workout.run.target')}`}
+                                    onClick={() => setWorkoutSetIndex((current) => ({ ...current, [exerciseKey]: index }))}
+                                  >
+                                    <span>{formatNumber(language, index + 1)}</span>
+                                    <span>{previousSet ? `${formatNumber(language, previousSet.weight)}×${formatNumber(language, previousSet.reps)}` : '—'}</span>
+                                    <span>{`${formatNumber(language, setWeights[index] ?? draft.weight)}×${formatNumber(language, setReps[index] ?? draft.reps)}`}</span>
+                                    <span>{completedRows[index]
+                                      ? `${formatNumber(language, setWeights[index] ?? draft.weight)}×${formatNumber(language, setReps[index] ?? draft.reps)} ✓`
+                                      : '—'}</span>
+                                  </button>
+                                ) : (
+                                  <>
                                 <span className="planned-set-label">{index + 1}</span>
                                 {previousSet ? (
                                   <button
@@ -3685,7 +4167,7 @@ export default function WorkoutPlan({
                                   )}
                                   aria-pressed={completedRows[index]}
                                   onClick={() => {
-                                    if (!completedRows[index]) onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
+                                    if (!completedRows[index]) onStartRest(isWorkoutMode ? loadRestBetweenSets() : exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
                                     togglePlanSetDone(exercise, index, setCount)
                                   }}
                                 >
@@ -3748,10 +4230,27 @@ export default function WorkoutPlan({
                                     <span aria-hidden="true" />
                                   </div>
                                 )}
+                                  </>
+                                )}
                               </div>
                             )
                           })}
                         </div>
+
+                        {isWorkoutMode && (
+                          <details
+                            className="workout-trend-details"
+                            open={trendOpen}
+                            onToggle={(event) => {
+                              const next = event.currentTarget.open
+                              setTrendOpen(next)
+                              saveWorkoutTrendOpen(next)
+                            }}
+                          >
+                            <summary>{t('workout.trend.title')} ▾</summary>
+                            <SetTrendChart sessions={trendSessions} language={language} t={t} />
+                          </details>
+                        )}
 
                         {logError[getPlanDraftKey(exercise.name)] && (
                           <p role="alert" aria-live="assertive" className="account-error log-error">{logError[getPlanDraftKey(exercise.name)]}</p>
@@ -3853,6 +4352,31 @@ export default function WorkoutPlan({
 
             if (!group.isSuperset) return <React.Fragment key={group.key}>{cards}</React.Fragment>
             const groupDone = group.items.every(({ exercise }) => findExerciseCompletion(exercise, history))
+            if (isWorkoutMode && groupDone && groupIndex !== workoutGroupIndex) {
+              return (
+                <article className="workout-mode-finished-superset" data-workout-group={groupIndex} tabIndex={-1} key={group.key}>
+                  {group.items.map(({ exercise }) => {
+                    const entry = findExerciseCompletion(exercise, history)
+                    const catalogExercise = exerciseCatalog.find((item) => item.id === exercise.exerciseId) ?? {
+                      id: exercise.exerciseId ?? exercise.name,
+                      name: exercise.name,
+                      primaryMuscle: exercise.focus,
+                    }
+                    const insight = entry
+                      ? buildWorkoutExerciseInsight(entry, history, trainingBlocks, catalogExercise)
+                      : null
+                    return (
+                      <button type="button" key={exercise.code ?? exercise.name} onClick={() => goToWorkoutGroup(groupIndex)}>
+                        <span>✓ {displayExerciseName(exercise.name)}</span>
+                        {insight && <strong aria-label={t(`workout.insight.${insight.comparison.verdict === 'traded' ? 'mixed' : insight.comparison.verdict === 'held' ? 'same' : insight.comparison.verdict}` as TranslationKey)}>
+                          {workoutInsightIcon(insight.comparison.verdict)}
+                        </strong>}
+                      </button>
+                    )
+                  })}
+                </article>
+              )
+            }
             const codes = group.items.map(({ exercise }) => exercise.code ?? exercise.name)
             const supersetExercises = group.items.map(({ exercise }) => exercise)
             const supersetPreviousSets = supersetExercises.map(
@@ -3875,6 +4399,7 @@ export default function WorkoutPlan({
                 return {
                   code: codes[index],
                   name: language === 'es' && libraryMatch?.nameEs?.trim() ? libraryMatch.nameEs : displayExerciseName(exercise.name),
+                  shortCue: libraryMatch ? shortSqueezeCues[libraryMatch.id as keyof typeof shortSqueezeCues]?.[language] : undefined,
                   sets,
                   targets: sets.map((_, round) => ({
                     weight: target.setWeights[round] ?? target.weight,
@@ -3892,15 +4417,79 @@ export default function WorkoutPlan({
               }), supersetSetCount)
               const error = supersetExercises.map((exercise) => logError[getPlanDraftKey(exercise.name)]).find(Boolean)
               return (
-                <SupersetLogger
-                  key={`${getPlanDraftKey(group.key)}:${supersetExercises.map((exercise) => `${exercise.exerciseId}:${getDefaultSetCount(exercise)}`).join(',')}`}
-                  exercises={loggerExercises} loggedRounds={loggedRounds} groupIndex={groupIndex}
-                  current={groupIndex === workoutGroupIndex} t={t} language={language} error={error}
-                  onChange={(exerciseIndex, round, field, value) =>
-                    updatePlanSetValue(supersetExercises[exerciseIndex], round, field, value, getDefaultSetCount(supersetExercises[exerciseIndex]))}
-                  onStartRest={onStartRest}
-                  onSave={(rounds, times) => logSuperset(supersetExercises, group.key, rounds, times, false)}
-                />
+                <React.Fragment key={`${getPlanDraftKey(group.key)}:${supersetExercises.map((exercise) => `${exercise.exerciseId}:${getDefaultSetCount(exercise)}`).join(',')}`}>
+                  <SupersetLogger
+                    exercises={loggerExercises} loggedRounds={loggedRounds} groupIndex={groupIndex}
+                    current={groupIndex === workoutGroupIndex} t={t} language={language} error={error}
+                    restBetweenSets={loadRestBetweenSets()}
+                    nextExerciseName={nextWorkoutExercise ? displayExerciseName(nextWorkoutExercise.name) : undefined}
+                    insightActive={groupIndex === workoutGroupIndex && workoutGroupInsights.length > 0}
+                    onRestContext={(context, undo) => {
+                      setWorkoutRestContext(context)
+                      supersetRestUndo.current = undo
+                    }}
+                    onChange={(exerciseIndex, round, field, value) =>
+                      updatePlanSetValue(supersetExercises[exerciseIndex], round, field, value, getDefaultSetCount(supersetExercises[exerciseIndex]))}
+                    onStartRest={onStartRest}
+                    onSave={(rounds, times) => logSuperset(supersetExercises, group.key, rounds, times, false)}
+                  />
+                  {groupIndex === workoutGroupIndex && workoutGroupInsights.length > 0 && (
+                    <section className="workout-exercise-insight workout-group-insights" role="status" aria-live="polite">
+                      {workoutGroupInsights.map(({ exercise, insight }) => {
+                        const verdict = insight.comparison.verdict
+                        const verdictKey = verdict === 'improved' ? 'workout.insight.improved'
+                          : verdict === 'held' ? 'workout.insight.same'
+                            : verdict === 'dropped' ? 'workout.insight.lower'
+                              : verdict === 'baseline' ? 'workout.insight.baseline'
+                                : verdict === 'target-changed' ? 'workout.insight.targetChanged' : 'workout.insight.mixed'
+                        const previousDay = insight.previous
+                          ? trainingBlocks.find((block) => block.id === insight.previous?.blockId)
+                            ?.days.find((day) => day.key === insight.previous?.dayKey)?.name ?? activeDay?.name ?? ''
+                          : ''
+                        const basis = insight.previous
+                          ? t('workout.insight.workingBasis', {
+                              date: formatWeekdayDate(language, `${insight.previous.date}T00:00:00Z`),
+                              day: previousDay,
+                            })
+                          : ''
+                        const watch = insight.watch
+                          ? t(`workout.insight.watch.${insight.watch.code}` as TranslationKey,
+                              Object.fromEntries(Object.entries(insight.watch.params).map(([key, value]) => [
+                                key,
+                                key === 'date' && typeof value === 'string'
+                                  ? formatWeekdayDate(language, `${value}T00:00:00Z`)
+                                  : typeof value === 'number' ? formatNumber(language, value) : value,
+                              ])))
+                          : ''
+                        return (
+                          <button key={exercise.id} type="button" className="workout-exercise-insight-body"
+                            onClick={() => {
+                              setWorkoutInsightPinned(true)
+                              if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
+                              workoutInsightTimer.current = null
+                            }}>
+                            <strong><span aria-hidden="true">{workoutInsightIcon(verdict)}</span> {displayExerciseName(exercise)} · {t(verdictKey as TranslationKey)}</strong>
+                            <span>{formatWorkoutInsightLine(insight, activeDay?.name ?? '', language, t)}</span>
+                            {basis && <small>{basis}</small>}
+                            {watch && <small className="workout-insight-watch">{watch}</small>}
+                          </button>
+                        )
+                      })}
+                      {!workoutInsightPinned ? (
+                        <button type="button" className="workout-insight-keep-open" onClick={() => {
+                          setWorkoutInsightPinned(true)
+                          if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
+                          workoutInsightTimer.current = null
+                        }}>{t('workout.run.keepOpen')}</button>
+                      ) : (
+                        <button type="button" className="workout-insight-continue" onClick={() => {
+                          if (workoutGroupInsightNext !== null) goToWorkoutGroup(workoutGroupInsightNext)
+                        }}>{t('workout.run.continue')}</button>
+                      )}
+                      {!workoutInsightPinned && <span className="workout-insight-countdown" aria-hidden="true" />}
+                    </section>
+                  )}
+                </React.Fragment>
               )
             }
             const loggedSupersetRows = getLoggedSupersetRounds(
@@ -4124,22 +4713,29 @@ export default function WorkoutPlan({
         {isWorkoutMode && (
           <div className="workout-mode-footer">
             {restTimer && onRestTimerChange && (
-              <RestTimer timer={restTimer} hidden={false} onChange={onRestTimerChange} />
+              <RestTimer
+                timer={restTimer}
+                hidden={false}
+                onChange={onRestTimerChange}
+                workoutMode
+                label={workoutRestContext
+                  ? t('workout.restBar.label', {
+                      set: formatNumber(language, workoutRestContext.set),
+                      next: workoutRestContext.next,
+                    })
+                  : undefined}
+                onUndo={toast || supersetRestUndo.current ? () => {
+                  if (supersetRestUndo.current) {
+                    supersetRestUndo.current()
+                    supersetRestUndo.current = null
+                    setWorkoutRestContext(null)
+                    onRestTimerChange?.(null)
+                  } else {
+                    undoLastLog()
+                  }
+                } : undefined}
+              />
             )}
-            <div className="workout-mode-nav">
-              {nextWorkoutExercise && (
-                <button type="button" className="primary-button workout-mode-next" onClick={() => goToWorkoutGroup(nextWorkoutGroup)}>
-                  {t('workout.run.nextExercise', { name: displayExerciseName(nextWorkoutExercise.name) })}
-                </button>
-              )}
-              <button
-                type="button"
-                className={`${nextWorkoutExercise ? 'secondary-button' : 'primary-button'} workout-mode-finish`}
-                onClick={finishWorkout}
-              >
-                {t('workout.run.finish')}
-              </button>
-            </div>
           </div>
         )}
       </section>
@@ -4155,93 +4751,119 @@ export default function WorkoutPlan({
           />
         </div>
       )}
+      {finishConfirmOpen && isWorkoutMode && (
+        <div className="workout-finish-backdrop" role="presentation">
+          <section className="workout-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-finish-title">
+            <h2 id="workout-finish-title">{t('workout.run.finishConfirm', {
+              done: formatNumber(language, workoutDoneExerciseCount),
+              total: formatNumber(language, activeExercises.length),
+            })}</h2>
+            <button type="button" className="primary-button" onClick={() => setFinishConfirmOpen(false)}>
+              {t('workout.run.keepTraining')}
+            </button>
+            <button type="button" className="secondary-button" onClick={confirmFinishWorkout}>
+              {t('workout.run.finishNow')}
+            </button>
+          </section>
+        </div>
+      )}
       {sessionSummary && (
-        <div className="session-summary-backdrop" role="presentation" onClick={dismissSessionSummary}>
-          <section
-            className="session-summary-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="session-summary-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <header className="session-summary-header">
-              <h2 id="session-summary-title">{t('workout.session.performance')}</h2>
-              <button
-                type="button"
-                className="session-summary-close"
-                onClick={dismissSessionSummary}
-                aria-label={t('workout.session.close')}
-              >
-                ×
-              </button>
+        <div className="workout-completed-screen">
+          <section className="workout-completed-content" aria-labelledby="session-summary-title">
+            <header className="workout-completed-header">
+              <span className="workout-completed-check" aria-hidden="true">✓</span>
+              <h2 id="session-summary-title">
+                {sessionSummary.early
+                  ? t('workout.completed.early', {
+                      done: formatNumber(language, sessionSummary.counts.exercises),
+                      total: formatNumber(language, sessionSummary.counts.plannedExercises),
+                    })
+                  : t('workout.completed.title')}
+              </h2>
+              <p>{t('workout.completed.date', {
+                day: t('workout.day.title', { position: sessionSummary.dayPosition, name: sessionSummary.dayName }),
+                date: formatWeekdayDate(language, `${sessionSummary.date}T00:00:00Z`),
+              })}</p>
             </header>
-            <div className="session-summary-metrics">
-              <div><strong>{sessionSummary.duration}</strong><span>{t('workout.session.duration')}</span></div>
-              <div><strong>{formatNumber(language, sessionSummary.sets)}</strong><span>{text.sets}</span></div>
-              <div><strong>{formatNumber(language, sessionSummary.volume)} kg</strong><span>{t('workout.session.volume')}</span></div>
-            </div>
-            <section className="session-summary-records" aria-label={t('workout.session.records')}>
-              <h3>{t('workout.session.records')}</h3>
-              {sessionSummary.prs.length > 0 ? (
-                <ul>
-                  {sessionSummary.prs.map(({ exerciseId, badges }) => {
-                    const exercise = exerciseCatalog.find((item) => item.id === exerciseId)
-                    const exerciseName = exercise ? displayExerciseName(exercise) : exerciseId
-                    const labels = badges.map((badge) =>
-                      badge === 'e1rm' ? t('workout.pr.e1rm') : badge === 'weight' ? t('workout.pr.weight') : t('workout.pr.reps')
-                    )
-                    return <li key={exerciseId}>{exerciseName} · {labels.join(', ')}</li>
-                  })}
-                </ul>
-              ) : (
-                <p>{t('workout.session.noRecords')}</p>
-              )}
-            </section>
-            {sessionSummary.performance.length > 0 && (
-              <section className="session-summary-targets" aria-label={t('workout.session.performance')}>
-                <h3>{t('workout.session.performance')}</h3>
-                <ul>
-                  {sessionSummary.performance.map((row) => {
-                    const { exerciseId, trend, actual, target, next, nextDate } = row
-                    const exercise = exerciseCatalog.find((item) => item.id === exerciseId)
-                    const template = trainerReason(t, language, next, next.reps)
-                    const why = trainerWhy(
-                      exerciseId,
-                      next,
-                      { weight: target.weight ?? actual.weight, target: target.reps },
-                      template
-                    )
-                    return (
-                      <li key={exerciseId}>
-                        <strong>
-                          {exercise ? displayExerciseName(exercise) : exerciseId}{' '}
-                          <span aria-label={t(`workout.session.trend.${trend}` as TranslationKey)}>
-                            {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
-                          </span>
-                        </strong>
-                        <p>{t('workout.session.performanceActual', {
-                          weight: formatNumber(language, actual.weight),
-                          reps: actual.reps.map((reps) => formatNumber(language, reps)).join(' · '),
-                          target: trainerRangeLabel(target.reps),
-                        })}</p>
-                        <p>{t('workout.session.performanceNext', {
-                          day: nextDate ? formatWeekdayDate(language, `${nextDate}T00:00:00Z`).split(' ')[0] : '',
-                          weight: formatNumber(language, next.weight ?? actual.weight),
-                          reps: trainerRangeLabel(next.reps),
-                        })}</p>
-                        <p>{t('workout.session.performanceWhy', { reason: why })}</p>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </section>
-            )}
-            {sessionSummary.nextSession && <p className="session-summary-next">{t('workout.session.next', { session: sessionSummary.nextSession })}</p>}
-            {toast && (
-              <div className="log-toast in-summary" role="status" aria-live="polite">
-                <button type="button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
+            <div className="workout-completed-metrics">
+              <div><strong>{sessionSummary.duration}</strong><span>{t('workout.completed.duration')}</span></div>
+              <div>
+                <strong>{formatNumber(language, sessionSummary.counts.sets)}/{formatNumber(language, sessionSummary.counts.plannedSets)}</strong>
+                <span>{t('workout.completed.sets')}</span>
               </div>
-            )}
+              <div>
+                <strong>{formatNumber(language, sessionSummary.counts.exercises)}/{formatNumber(language, sessionSummary.counts.plannedExercises)}</strong>
+                <span>{t('workout.completed.exercises')}</span>
+              </div>
+            </div>
+            <div className="workout-completed-tally" aria-label={t('workout.completed.insights')}>
+              {([
+                ['improved', '↑', sessionSummary.tally.improved],
+                ['same', '→', sessionSummary.tally.same],
+                ['lower', '↓', sessionSummary.tally.lower],
+                ['mixed', '↕', sessionSummary.tally.mixed],
+                ['baseline', '●', sessionSummary.tally.baseline],
+              ] as const).map(([key, icon, count]) => (
+                <span key={key}><strong aria-hidden="true">{icon}</strong>{formatNumber(language, count)} {t(`workout.insight.${key}` as TranslationKey)}</span>
+              ))}
+            </div>
+            <section className="workout-completed-muscles">
+              <h3>{t('workout.completed.muscles')}</h3>
+              <p>{sessionSummary.muscleTotals.map(({ muscle, sets }) =>
+                `${localizeMuscle(muscle, language)} ${formatNumber(language, sets)}`
+              ).join(' · ') || '—'}</p>
+            </section>
+            <section className="workout-completed-insights">
+              <h3>{t('workout.completed.insights')}</h3>
+              <ul>
+                {sessionSummary.insights.map(({ exercise, insight }, index) => {
+                  const plannedExercise = activeExercises.find((item) => item.exerciseId === exercise.id)
+                  const verdict = insight.comparison.verdict
+                  const icon = verdict === 'improved' ? '↑'
+                    : verdict === 'held' ? '→'
+                      : verdict === 'dropped' ? '↓'
+                        : verdict === 'baseline' ? '●' : verdict === 'target-changed' ? '—' : '↕'
+                  const verdictKey = verdict === 'improved' ? 'workout.insight.improved'
+                    : verdict === 'held' ? 'workout.insight.same'
+                      : verdict === 'dropped' ? 'workout.insight.lower'
+                        : verdict === 'baseline' ? 'workout.insight.baseline'
+                          : verdict === 'target-changed' ? 'workout.insight.targetChanged' : 'workout.insight.mixed'
+                  const previousDay = insight.previous
+                    ? trainingBlocks.find((block) => block.id === insight.previous?.blockId)
+                      ?.days.find((day) => day.key === insight.previous?.dayKey)?.name ?? sessionSummary.dayName
+                    : ''
+                  const basis = insight.previous
+                    ? t('workout.insight.workingBasis', {
+                        date: formatWeekdayDate(language, `${insight.previous.date}T00:00:00Z`),
+                        day: previousDay,
+                      }) + (plannedExercise?.technique === 'drop-set' ? t('workout.insight.mainPart') : '')
+                    : ''
+                  const watch = insight.watch
+                    ? t(`workout.insight.watch.${insight.watch.code}` as TranslationKey,
+                        Object.fromEntries(Object.entries(insight.watch.params).map(([key, value]) => [
+                          key,
+                          key === 'date' && typeof value === 'string'
+                            ? formatWeekdayDate(language, `${value}T00:00:00Z`)
+                            : typeof value === 'number' ? formatNumber(language, value) : value,
+                        ])))
+                    : ''
+                  return (
+                    <li key={exercise.id} className={index === sessionSummary.insights.length - 1 ? 'just-now' : ''}>
+                      <strong>
+                        <span aria-hidden="true">{icon}</span> {displayExerciseName(exercise)} · {t(verdictKey as TranslationKey)}
+                        {index === sessionSummary.insights.length - 1 && <small>{t('workout.completed.justNow')}</small>}
+                      </strong>
+                      <p>{formatWorkoutInsightLine(insight, sessionSummary.dayName, language, t)}</p>
+                      {basis && <small>{basis}</small>}
+                      {watch && <small className="workout-insight-watch">{watch}</small>}
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+            <button type="button" className="primary-button workout-completed-back" onClick={dismissSessionSummary}>
+              {t('workout.completed.back')}
+            </button>
           </section>
         </div>
       )}

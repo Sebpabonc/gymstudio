@@ -2,8 +2,6 @@ export type RestTimerState =
   | { endAt: number; pausedRemainingMs?: never }
   | { endAt?: never; pausedRemainingMs: number }
 
-const REST_INCREMENT_MS = 15_000
-
 export function isRestTimerPaused(
   timer: RestTimerState
 ): timer is { endAt?: never; pausedRemainingMs: number } {
@@ -15,11 +13,12 @@ export function startRestTimer(durationSeconds = 90, now = Date.now()): RestTime
   return { endAt: now + Math.ceil(duration * 1000) }
 }
 
-export function addRestTime(timer: RestTimerState, now = Date.now()): RestTimerState {
+export function addRestTime(timer: RestTimerState, now = Date.now(), seconds = 15): RestTimerState {
+  const increment = Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 15_000
   if (isRestTimerPaused(timer)) {
-    return { pausedRemainingMs: timer.pausedRemainingMs + REST_INCREMENT_MS }
+    return { pausedRemainingMs: timer.pausedRemainingMs + increment }
   }
-  return { endAt: Math.max(timer.endAt, now) + REST_INCREMENT_MS }
+  return { endAt: Math.max(timer.endAt, now) + increment }
 }
 
 export function skipRestTimer(): null {
