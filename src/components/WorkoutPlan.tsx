@@ -96,7 +96,7 @@ import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
-import { nextWorkoutGroupIndex, shouldCollapseCompletedLogger } from '../utils/workoutMode'
+import { nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState } from '../utils/workoutMode'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
 import RestTimer from './RestTimer'
@@ -3239,6 +3239,41 @@ export default function WorkoutPlan({
             <button type="button" className="secondary-button small-button workout-mode-finish-top" onClick={finishWorkout}>
               {t('workout.run.finishShort')}
             </button>
+          </div>
+        )}
+        {isWorkoutMode && (
+          <div className="workout-mode-overview">
+            <nav className="workout-mode-chips" aria-label={t('workout.run.modeAria')}>
+              {activeExercises.map((exercise, exerciseIndex) => {
+                const groupIndex = workoutGroups.findIndex((group) =>
+                  group.items.some((item) => item.exerciseIndex === exerciseIndex)
+                )
+                const group = workoutGroups[groupIndex]
+                const state = workoutChipState(
+                  !!findExerciseCompletion(exercise, history),
+                  groupIndex === workoutGroupIndex
+                )
+                const isSupersetContinuation = !!group?.isSuperset &&
+                  group.items.findIndex((item) => item.exerciseIndex === exerciseIndex) > 0
+                const number = formatNumber(language, exerciseIndex + 1)
+                const name = displayExerciseName(exercise.name)
+                return (
+                  <button
+                    key={`${group?.key ?? exercise.name}-${exerciseIndex}`}
+                    type="button"
+                    className={`workout-mode-chip ${state}${group?.isSuperset ? ' superset-chip' : ''}${isSupersetContinuation ? ' superset-chip-continuation' : ''}`}
+                    aria-label={`${number} · ${name}`}
+                    aria-current={state === 'current' ? 'step' : undefined}
+                    aria-pressed={state === 'current'}
+                    onClick={() => goToWorkoutGroup(groupIndex)}
+                  >
+                    <span>{number}</span>
+                    {state === 'done' && <span aria-hidden="true">✓</span>}
+                  </button>
+                )
+              })}
+            </nav>
+            <small className="workout-mode-chips-hint">{t('workout.run.chipsHint')}</small>
           </div>
         )}
         <div className="day-exercises">
