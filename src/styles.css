@@ -8560,6 +8560,10 @@ summary:focus-visible,
   background: var(--panel);
 }
 
+.workout-mode-big-logger.collapsed > :not(.workout-mode-log-edit) {
+  display: none;
+}
+
 .workout-mode-current-set {
   margin: 0;
   color: var(--text);
@@ -8613,6 +8617,11 @@ summary:focus-visible,
   width: 100%;
   min-height: 64px;
   font-size: 1.05rem;
+}
+
+.workout-mode-log-edit {
+  width: 100%;
+  min-height: 44px;
 }
 
 .planned-set-section .workout-mode-focused-grid.planned-set-column-headers {

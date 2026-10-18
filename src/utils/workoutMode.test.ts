@@ -1,9 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { nextWorkoutGroupIndex, workoutChipState } from './workoutMode'
+import { nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState } from './workoutMode'
 
 describe('nextWorkoutGroupIndex', () => {
   it('selects the next incomplete group after the current one', () => {
     expect(nextWorkoutGroupIndex([true, true, false, false], 1)).toBe(2)
+  })
+
+  describe('shouldCollapseCompletedLogger', () => {
+    it('collapses a completed exercise from today until explicitly edited', () => {
+      expect(shouldCollapseCompletedLogger(true, '2026-10-18T09:30:00.000Z', '2026-10-18', false)).toBe(true)
+      expect(shouldCollapseCompletedLogger(true, '2026-10-18', '2026-10-18', true)).toBe(false)
+      expect(shouldCollapseCompletedLogger(true, '2026-10-17', '2026-10-18', false)).toBe(false)
+      expect(shouldCollapseCompletedLogger(false, '2026-10-18', '2026-10-18', false)).toBe(false)
+      expect(shouldCollapseCompletedLogger(true, undefined, '2026-10-18', false)).toBe(false)
+    })
   })
 
   describe('workoutChipState', () => {
