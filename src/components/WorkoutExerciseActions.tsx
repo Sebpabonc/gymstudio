@@ -3,6 +3,7 @@ import React from 'react'
 type Props = {
   label: string
   googleLabel: string
+  googleActionLabel: string
   swapLabel: string
   notesLabel: string
   techniqueLabel: string
@@ -21,24 +22,25 @@ const ICONS = {
   technique: <><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5v.5" /></>,
 }
 
-/** PO 2026-10-18: Workout mode shows the exercise tools as a row of icon buttons under the exercise name. */
+/** Workout mode shows the exercise tools as labelled buttons under the exercise name. */
 export default function WorkoutExerciseActions({
-  label, googleLabel, swapLabel, notesLabel, techniqueLabel, techniqueOpen, onGoogle, onSwap, onNotes, onTechnique,
+  label, googleLabel, googleActionLabel, swapLabel, notesLabel, techniqueLabel, techniqueOpen, onGoogle, onSwap, onNotes, onTechnique,
 }: Props) {
-  const items: Array<{ key: keyof typeof ICONS; text: string; onClick: (event: React.MouseEvent<HTMLButtonElement>) => void; pressed?: boolean }> = [
-    { key: 'google', text: googleLabel, onClick: onGoogle },
+  const items: Array<{ key: keyof typeof ICONS; text: string; ariaLabel?: string; onClick: (event: React.MouseEvent<HTMLButtonElement>) => void; pressed?: boolean }> = [
+    { key: 'technique', text: techniqueLabel, onClick: onTechnique, pressed: techniqueOpen },
     ...(onSwap ? [{ key: 'swap' as const, text: swapLabel, onClick: onSwap }] : []),
     { key: 'notes', text: notesLabel, onClick: (event) => onNotes(event.currentTarget) },
-    { key: 'technique', text: techniqueLabel, onClick: onTechnique, pressed: techniqueOpen },
+    { key: 'google', text: googleLabel, ariaLabel: googleActionLabel, onClick: onGoogle },
   ]
   return (
-    <span className="workout-exercise-tools" role="group" aria-label={label} onClick={(event) => event.stopPropagation()}>
+    <div className={`workout-exercise-tools${onSwap ? ' has-swap' : ''}`} role="group" aria-label={label}>
       {items.map((item) => (
-        <button key={item.key} type="button" className="workout-tool" aria-label={item.text} title={item.text} aria-pressed={item.pressed}
+        <button key={item.key} type="button" className="workout-tool" aria-label={item.ariaLabel ?? item.text} title={item.ariaLabel ?? item.text} aria-pressed={item.pressed}
           onClick={(event) => { event.stopPropagation(); item.onClick(event) }}>
           <svg viewBox="0 0 24 24" aria-hidden="true">{ICONS[item.key]}</svg>
+          <span>{item.text}</span>
         </button>
       ))}
-    </span>
+    </div>
   )
 }

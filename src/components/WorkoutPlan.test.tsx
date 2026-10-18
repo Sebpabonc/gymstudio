@@ -164,6 +164,15 @@ describe('WorkoutPlan', () => {
       )).toContain('Lighter on purpose: B days use less weight and more reps.')
     })
 
+    it('never calls a lower A day "lighter on purpose" (A is the heavy day)', () => {
+      const line = strengthLine(
+        strengthEntry('2026-10-12', 'chest-back-a', 82.5, 8),
+        [strengthEntry('2026-10-08', 'chest-back-b', 82.5, 10)]
+      )
+      expect(line).not.toContain('Lighter on purpose')
+      expect(line).toContain('Below last time')
+    })
+
     it('V-T16: keeps the workout strength insight free of a total-weight-moved comparison', () => {
       const line = strengthLine(
         strengthEntry('2026-10-16', 'chest-back-b', 25, 10),
