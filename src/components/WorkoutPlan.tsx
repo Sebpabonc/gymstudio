@@ -6,7 +6,7 @@ import { shortSqueezeCues } from '../data/shortSqueezeCues'
 import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
 import type { AuthStatus } from '../auth/AuthProvider'
-import SqueezeCue, { type SqueezeCueDetails } from './SqueezeCue'
+import SqueezeCue, { ShortCue, type SqueezeCueDetails } from './SqueezeCue'
 import { SupersetLogger } from './SupersetLogger'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
@@ -3340,6 +3340,7 @@ export default function WorkoutPlan({
           {workoutGroupsForRender.map((group) => {
             const groupIndex = workoutGroups.indexOf(group)
             const previousSetsByExercise = new Map<string, ReturnType<typeof getPreviousWorkoutSets>>()
+            const cueDetailsByExercise = new Map<string, SqueezeCueDetails>()
             const cards = group.items.map(({ exercise, exerciseIndex }) => {
             const draft = getDraftForExercise(exercise.name, exercise)
             const trainer = getTrainerRecommendation(exercise)
@@ -3450,6 +3451,7 @@ export default function WorkoutPlan({
                 { heading: t('workout.cueSheet.planNotes'), lines: [exercise.notes ?? ''].filter((note) => note.trim()) },
               ],
             }
+            cueDetailsByExercise.set(exercise.code ?? exercise.name, cueDetails)
             const completedEntry = findExerciseCompletion(exercise, history)
             const recordBadges =
               completedEntry?.date === today
@@ -3786,9 +3788,7 @@ export default function WorkoutPlan({
                 </div>
 
                 {isWorkoutMode && shortCue && (
-                  <p className="workout-short-cue">
-                    <strong>{t('workout.run.squeezeLabel')} · </strong>{shortCue}
-                  </p>
+                  <ShortCue label={t('workout.run.squeezeLabel')} cue={shortCue} details={cueDetails} id={`${exerciseKey}-short-cue`} />
                 )}
                 {currentInsight && (
                   <section className="workout-exercise-insight" role="status" aria-live="polite">
@@ -4479,6 +4479,7 @@ export default function WorkoutPlan({
                   code: codes[index],
                   name: language === 'es' && libraryMatch?.nameEs?.trim() ? libraryMatch.nameEs : displayExerciseName(exercise.name),
                   shortCue: libraryMatch ? shortSqueezeCues[libraryMatch.id as keyof typeof shortSqueezeCues]?.[language] : undefined,
+                  cueDetails: cueDetailsByExercise.get(exercise.code ?? exercise.name),
                   sets,
                   targets: sets.map((_, round) => ({
                     weight: target.setWeights[round] ?? target.weight,

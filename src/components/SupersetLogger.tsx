@@ -3,11 +3,13 @@ import { formatNumber, Language, Translate } from '../i18n'
 import { WorkoutSet } from '../types'
 import { completedSupersetRounds, createSupersetTicks, nextSupersetFocus, toggleSupersetTick } from '../utils/supersetRounds'
 import { stepWorkoutValue } from '../utils/workoutSets'
+import { ShortCue, type SqueezeCueDetails } from './SqueezeCue'
 
 type LoggerExercise = {
   code: string
   name: string
   shortCue?: string
+  cueDetails?: SqueezeCueDetails
   sets: { weight: number; reps: number }[]
   targets: { weight: number; reps: number }[]
   previousSets: WorkoutSet[]
@@ -149,7 +151,7 @@ export function SupersetLogger({
             <div>
               <strong>{exercise.code} · {exercise.name}</strong>
               {exercise.shortCue && (
-                <p className="workout-short-cue"><strong>{t('workout.run.squeezeLabel')} · </strong>{exercise.shortCue}</p>
+                <ShortCue label={t('workout.run.squeezeLabel')} cue={exercise.shortCue} details={exercise.cueDetails} id={`superset-${groupIndex}-${exercise.code}-cue`} />
               )}
               <p className="workout-mode-target">{t('workout.run.todayTarget', {
                 weight: formatNumber(language, target.weight), reps: formatNumber(language, target.reps),
