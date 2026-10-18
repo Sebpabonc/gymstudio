@@ -7,6 +7,7 @@ import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
 import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue, { ShortCue, type SqueezeCueDetails } from './SqueezeCue'
+import WorkoutExerciseActions from './WorkoutExerciseActions'
 import { SupersetLogger } from './SupersetLogger'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
@@ -3617,19 +3618,20 @@ export default function WorkoutPlan({
             if (isWorkoutMode && group.isSuperset) {
               return (
                 <React.Fragment key={exercise.code ?? exercise.name}>
-                  <details className="workout-mode-more">
-                    <summary>⋯ {t('workout.run.more')}</summary>
-                    <div className="workout-mode-more-panel">
-                      <div className="workout-mode-tools">
-                    <button type="button" className="secondary-button small-button" onClick={() => void openExternal(exerciseImageSearchUrl(
+                  <WorkoutExerciseActions
+                    label={t('workout.run.exerciseActions')}
+                    googleLabel={t('workout.run.searchGoogle')}
+                    swapLabel={t('workout.run.swap')}
+                    notesLabel={t('workout.label.notes')}
+                    techniqueLabel={t('workout.run.technique')}
+                    techniqueOpen={isTipsVisible}
+                    onGoogle={() => void openExternal(exerciseImageSearchUrl(
                       exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
-                    ))}>{t('workout.run.searchGoogle')}</button>
-                    {libraryMatch && completedEntry?.date !== today && (
-                      <button type="button" className="secondary-button small-button" onClick={() => setSwapTarget({
-                        exercise: libraryMatch, fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
-                      })}>{t('workout.run.swap')}</button>
-                    )}
-                    <button type="button" className="secondary-button small-button" onClick={(event) => {
+                    ))}
+                    onSwap={libraryMatch && completedEntry?.date !== today ? () => setSwapTarget({
+                      exercise: libraryMatch, fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
+                    }) : undefined}
+                    onNotes={(event) => {
                       const groupElement = event.currentTarget.closest('.day-exercises')
                         ?.querySelector<HTMLElement>(`.superset-workout-card[data-workout-group="${groupIndex}"]`)
                       const noteIndex = group.items.findIndex(({ exercise: item }) => item.name === exercise.name)
@@ -3637,12 +3639,9 @@ export default function WorkoutPlan({
                       if (!notes) return
                       notes.open = !notes.open
                       if (notes.open) notes.querySelector('textarea')?.focus()
-                    }}>{t('workout.label.notes')}</button>
-                    <button type="button" className="secondary-button small-button" aria-expanded={isTipsVisible}
-                      onClick={() => togglePostureTips(exercise.name)}>{t('workout.run.technique')}</button>
-                      </div>
-                    </div>
-                  </details>
+                    }}
+                    onTechnique={() => togglePostureTips(exercise.name)}
+                  />
                   <details className="superset-notes">
                     <summary>{t('workout.label.notes')}</summary>
                     <label className="planned-notes-field">
@@ -3737,6 +3736,30 @@ export default function WorkoutPlan({
                         </span>
                       ))}
                   </span>
+                  {isWorkoutMode && !group.isSuperset && (
+                    <WorkoutExerciseActions
+                      label={t('workout.run.exerciseActions')}
+                      googleLabel={t('workout.run.searchGoogle')}
+                      swapLabel={t('workout.run.swap')}
+                      notesLabel={t('workout.label.notes')}
+                      techniqueLabel={t('workout.run.technique')}
+                      techniqueOpen={isTipsVisible}
+                      onGoogle={() => void openExternal(exerciseImageSearchUrl(
+                        exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
+                      ))}
+                      onSwap={libraryMatch && completedEntry?.date !== today ? () => setSwapTarget({
+                        exercise: libraryMatch,
+                        fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
+                      }) : undefined}
+                      onNotes={(event) => {
+                        const notes = event.currentTarget.closest('.planned-exercise-card')
+                          ?.querySelector<HTMLTextAreaElement>('.planned-notes-field textarea')
+                        notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        notes?.focus()
+                      }}
+                      onTechnique={() => togglePostureTips(exercise.name)}
+                    />
+                  )}
                   <button
                     type="button"
                     className="toggle-button expand-toggle"
@@ -3891,66 +3914,8 @@ export default function WorkoutPlan({
                     {!isWorkoutMode && <p className="planned-meta-line">
                       {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
                     </p>}
-                    {isWorkoutMode && (
-                      <details className="workout-mode-more">
-                        <summary>⋯ {t('workout.run.more')}</summary>
-                        <div className="workout-mode-more-panel">
-                        <div className="workout-mode-tools" role="group" aria-label={t('workout.run.exerciseActions')}>
-                          <button
-                            type="button"
-                            className="secondary-button small-button"
-                            onClick={() => void openExternal(exerciseImageSearchUrl(
-                              exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
-                            ))}
-                          >
-                            {t('workout.run.searchGoogle')}
-                          </button>
-                          {libraryMatch && completedEntry?.date !== today && (
-                            <button
-                              type="button"
-                              className="secondary-button small-button"
-                              onClick={() => setSwapTarget({
-                                exercise: libraryMatch,
-                                fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
-                              })}
-                            >
-                              {t('workout.run.swap')}
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="secondary-button small-button"
-                            onClick={(event) => {
-                              if (!group.isSuperset) {
-                                const notes = event.currentTarget.closest('.planned-exercise-card')
-                                  ?.querySelector<HTMLTextAreaElement>('.planned-notes-field textarea')
-                                notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                                notes?.focus()
-                                return
-                              }
-                              const groupElement = event.currentTarget.closest('.superset-group')
-                              const noteIndex = group.items.findIndex(({ exercise: item }) => item.name === exercise.name)
-                              setSupersetLogOpen((current) => ({ ...current, [group.key]: true }))
-                              window.requestAnimationFrame(() => {
-                                const details = groupElement?.querySelector<HTMLDetailsElement>('.superset-notes')
-                                const notes = details?.querySelectorAll<HTMLTextAreaElement>('textarea')[noteIndex]
-                                if (details) details.open = true
-                                notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                                notes?.focus()
-                              })
-                            }}
-                          >
-                            {t('workout.label.notes')}
-                          </button>
-                          <button
-                            type="button"
-                            className="secondary-button small-button"
-                            aria-expanded={isTipsVisible}
-                            onClick={() => togglePostureTips(exercise.name)}
-                          >
-                            ⓘ {t('workout.run.technique')}
-                          </button>
-                        </div>
+                    {isWorkoutMode && isTipsVisible && (
+                      <div className="workout-mode-more-panel">
                         <p className="workout-mode-target">
                           {t('workout.run.todayTarget', {
                             weight: formatNumber(language, trainer?.recommendation.weight ?? Number(setWeights[0] ?? draft.weight)),
@@ -3967,8 +3932,7 @@ export default function WorkoutPlan({
                           onToggle={() => togglePostureTips(exercise.name)}
                           details={cueDetails}
                         />
-                        </div>
-                      </details>
+                      </div>
                     )}
                     {/* TODO(i18n): PT will provide approved translations */}
                     {exercise.weekNote && (
