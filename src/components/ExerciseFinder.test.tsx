@@ -109,7 +109,7 @@ describe('exercise sheet details', () => {
     expect(html).toContain('Chest · also Triceps, Front Delts · Barbell')
     expect(html).toContain('Bend the bar, squeeze chest')
     expect(html).not.toContain('Long catalogue cue')
-    expect(html).toContain('82.5 × 10 kg')
+    expect(html).toContain('82.5 kg × 10')
     expect(html).toContain('12 Oct')
     expect(html).not.toContain('Primary muscles')
     expect(html).not.toContain('Secondary muscles')
