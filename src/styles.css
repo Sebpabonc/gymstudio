@@ -9613,3 +9613,77 @@ button.superset-last-time {
 .planned-exercise-card .workout-mode-log-set {
   min-height: 56px;
 }
+
+/* PO 2026-10-18: Workout mode set table aligned with the card design —
+   header and rows share one grid, values sit under their headers, compact rows. */
+.planned-exercise-card .planned-set-section .workout-mode-focused-grid.planned-set-column-headers,
+.planned-exercise-card .workout-mode-compact-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  padding: 0 12px;
+  text-align: left;
+}
+.planned-exercise-card .planned-set-section .workout-mode-focused-grid.planned-set-column-headers {
+  min-height: 0;
+  padding-bottom: 8px;
+  margin-top: 4px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.planned-exercise-card .planned-set-column-headers small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.planned-exercise-card .planned-set-row.workout-mode-focused-grid {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.planned-exercise-card .workout-mode-compact-row {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.planned-exercise-card .workout-mode-compact-row.current {
+  background: rgba(141, 94, 99, 0.16);
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+.planned-exercise-card .set-table-number {
+  color: var(--muted);
+  font-weight: 700;
+}
+.planned-exercise-card .set-table-last {
+  color: var(--muted);
+}
+.planned-exercise-card .set-table-today {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+.planned-exercise-card .set-table-check {
+  color: #a8d5a8;
+  font-size: 0.95rem;
+}
+.planned-exercise-card .planned-set-section .workout-mode-focused-grid.planned-set-column-headers {
+  align-items: start;
+}

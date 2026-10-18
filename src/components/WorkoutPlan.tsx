@@ -4149,7 +4149,10 @@ export default function WorkoutPlan({
                             {isWorkoutMode ? (
                               <>
                                 <span role="columnheader">#</span>
-                                <span role="columnheader">{t('workout.run.lastTime')} {previousEntry?.date ? formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`) : ''}</span>
+                                <span role="columnheader">
+                                  {t('workout.run.lastTime')}
+                                  {previousEntry?.date && <small>{formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`)}</small>}
+                                </span>
                                 <span role="columnheader">{t('workout.run.today')}</span>
                               </>
                             ) : (
@@ -4190,9 +4193,12 @@ export default function WorkoutPlan({
                                     aria-label={`${t('workout.label.set')} ${visibleSetNumber} · ${t('workout.run.lastTime')}: ${visiblePrevious} · ${t('workout.run.today')}: ${visibleToday}`}
                                     onClick={() => setWorkoutSetIndex((current) => ({ ...current, [exerciseKey]: index }))}
                                   >
-                                    <span role="cell">{visibleSetNumber}</span>
-                                    <span role="cell">{visiblePrevious}</span>
-                                    <span role="cell">{visibleToday}</span>
+                                    <span role="cell" className="set-table-number">{visibleSetNumber}</span>
+                                    <span role="cell" className="set-table-last">{visiblePrevious}</span>
+                                    <span role="cell" className={`set-table-today${isSetLogged ? ' logged' : ''}`}>
+                                      {`${formatNumber(language, todaySet.weight)}×${formatNumber(language, todaySet.reps)}`}
+                                      {isSetLogged && <span className="set-table-check" aria-hidden="true">✓</span>}
+                                    </span>
                                   </button>
                                 ) : (
                                   <>
