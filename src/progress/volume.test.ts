@@ -91,6 +91,43 @@ describe('approved per-exercise weekly volume', () => {
     const loaded = exerciseVolumeTrend([entry('2026-01-05', bodyweight, [{ id: 'set', weight: 10, reps: 12 }])], [block], bodyweight, '2026-01-10')
     expect(loaded.weeks[0].volume).toBe(120)
     expect(loaded.bodyweightUnloaded).toBe(false)
+    const loadedDrop = exerciseVolumeTrend([entry('2026-01-05', bodyweight, [{
+      id: 'set',
+      weight: 0,
+      reps: 12,
+      drop: { weight: 5, reps: 8 },
+    }])], [block], bodyweight, '2026-01-10')
+    expect(loadedDrop.weeks[0].volume).toBe(40)
+    expect(loadedDrop.bodyweightUnloaded).toBe(false)
+  })
+
+  it('V-T14: omits bodyweight session totals unless both sessions use added load', () => {
+    const bodyweight: Exercise = { ...rdl, id: 'dip', equipment: 'bodyweight' }
+    const bodyweightSession = (date: string, weight: number): ProgressLiftSession => ({
+      ...session(date, 'chest-back-a', weight, [12]),
+      exerciseId: bodyweight.id,
+    })
+    expect(sessionVolumeComparison(
+      bodyweightSession('2026-01-12', 0),
+      bodyweightSession('2026-01-05', 0),
+      bodyweight
+    )).toBeNull()
+    expect(sessionVolumeComparison(
+      bodyweightSession('2026-01-12', 10),
+      bodyweightSession('2026-01-05', 5),
+      bodyweight
+    )).toMatchObject({ current: 120, previous: 60 })
+  })
+
+  it('excludes sets and drop parts with implausible repetition counts', () => {
+    const result = exerciseVolumeTrend([
+      entry('2026-01-05', rdl, [
+        { id: 'valid', weight: 50, reps: 10, drop: { weight: 25, reps: 60 } },
+        { id: 'too-many', weight: 50, reps: 60 },
+        { id: 'none', weight: 50, reps: 0 },
+      ]),
+    ], [block], rdl, '2026-01-10')
+    expect(result.weeks[0].volume).toBe(500)
   })
 
   it('requires three completed non-deload weeks before drawing a trend', () => {
