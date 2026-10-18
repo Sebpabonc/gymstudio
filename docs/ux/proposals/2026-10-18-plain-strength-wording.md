@@ -1,5 +1,7 @@
 # Plain strength wording: replacing "Est. max" / "e1RM" with words any lifter understands
 
+> **PO decision 2026-10-18 ("sí a todo, implementa"):** Option A "Show the sets"; one word everywhere, "strength / fuerza" (PR badge "Strongest set / Serie más fuerte"); the estimated 1-rep max is not shown on main screens, only one line inside "How we compare"; Spanish drafts approved. Tech Lead: the different-rep-range line (C5) uses **today's** day type. Same maths as the approved spec (Epley, ≤12 reps, ±3%).
+
 - **Date:** 2026-10-18
 - **Author:** UXer
 - **Status:** Proposal only. Nothing changes until the PO approves. Then the Tech Lead writes the issue(s).
