@@ -1,12 +1,17 @@
 ---
 title: Review of the post-exercise "Reps left in the tank?" (RIR) prompt
-status: draft            # draft | approved | rejected
+status: approved
 author: pt-fitness-expert
 created: 2026-10-18
-approved_by:
-approved_on:
+approved_by: Sebas (PO) — "ok ok, sí a todo, implementa" (all PT recommendations)
+approved_on: 2026-10-18
 exercises: []            # applies to every planned exercise; no catalogue content changes
 ---
+
+
+> **PO decision 2026-10-18:** every ⚠️ REVISAR item is resolved with the PT's recommended option. Spanish
+> wording in this doc is approved as written. Tech Lead notes: drop-set work counts in total weight moved
+> (Trends §4.4 and current `volumeForSets()`); cross-exercise totals stay hidden.
 
 ## Summary
 The PO asked whether the prompt ("Reps left in the tank?" / "¿Cuántas te quedaban?", buttons
