@@ -34,11 +34,11 @@ export type AnyDayEstMaxComparison =
       previousDayType: DayType
     }
 
-    function sessionDayType(session: ProgressLiftSession, blocks: TrainingBlock[]) {
-      return getDayType({ date: session.date, dayKey: session.dayKey ?? undefined }, blocks)
-    }
+function sessionDayType(session: ProgressLiftSession, blocks: TrainingBlock[]) {
+  return getDayType({ date: session.date, dayKey: session.dayKey ?? undefined }, blocks)
+}
 
-    function estimateSession(session: ProgressLiftSession): SessionEstimate | null {
+function estimateSession(session: ProgressLiftSession): SessionEstimate | null {
   const eligibleSets = workingSets(session.sets.filter((set) =>
     Number.isFinite(set.weight) && Number.isFinite(set.reps)
     && set.weight > 0 && set.reps >= 1 && set.reps <= 12

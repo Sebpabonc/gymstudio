@@ -39,8 +39,7 @@ import {
   rangeStart,
   watchObservations,
 } from '../progress'
-import { workingSets, dateValue } from '../progress/utils'
-import { startOfWeek } from '../progress/utils'
+import { dateValue, startOfWeek, workingSets } from '../progress/utils'
 import { roundEstMax, weeklyBestEstMax } from '../progress/estMax'
 import { MUSCLE_CHART_MAXIMUM, MUSCLE_COMMON_RANGE } from '../progress/muscles'
 import type { WatchObservation } from '../progress/comparison'
