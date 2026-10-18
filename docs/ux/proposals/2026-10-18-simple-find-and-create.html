@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simple Find and Create</title>
+<meta name="description" content="UXer prototype (2026-10-18): simplified Find an exercise and Create your own exercise, before and after, EN/ES, 375 px. Prototype only.">
+<style>
+:root{color-scheme:dark;--bg:#0f0f10;--soft:#171719;--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);--line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#c8c7c4;--dim:rgba(243,243,241,.62);--brand:#8d5e63;--rose:#c99ca1;--brandsoft:rgba(141,94,99,.22);--btn:linear-gradient(135deg,#8d5e63,#5d3f43);--ok:#8fc79a;--amber:#e3b466;--danger:#e08a8a}
+:root[data-theme="light"]{color-scheme:light;--bg:#f6f4f2;--soft:#ffffff;--panel:rgba(0,0,0,.04);--panel2:rgba(0,0,0,.07);--line:rgba(0,0,0,.12);--text:#18181a;--muted:#3d3c3a;--dim:rgba(24,24,26,.62);--rose:#8d5e63;--brandsoft:rgba(141,94,99,.14);--ok:#2f7a40;--amber:#9a6a12}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:#050506;color:var(--text);font-family:Inter,'Segoe UI',-apple-system,sans-serif;font-size:14px;line-height:1.4;min-height:100vh;-webkit-font-smoothing:antialiased}
+:root[data-theme="light"] body{background:#e9e6e3}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:none;border:0}
+button:focus-visible,input:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.hide{display:none!important}
+/* control bar (prototype chrome, not app UI) */
+.ctl{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;padding:10px 16px;background:#050506;border-bottom:1px solid var(--line)}
+:root[data-theme="light"] .ctl{background:#e9e6e3}
+.seg{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.seg button{min-height:40px;padding:0 14px;font-weight:700;font-size:13px;color:var(--dim)}
+.seg button[aria-pressed="true"]{background:var(--brandsoft);color:var(--rose)}
+.ctl .lbl{font-size:11px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.stage{display:flex;justify-content:center;gap:24px;padding:16px 0 40px}
+.phone{width:100%;max-width:375px;height:760px;max-height:max(560px,calc(100dvh - 116px));background:var(--bg);position:relative;overflow:hidden;border:1px solid var(--line);border-radius:28px}
+.scr{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain}
+@media(max-width:420px){.phone{border-radius:0;border-left:0;border-right:0}}
+.notes{width:300px;color:var(--dim);font-size:12.5px;line-height:1.55;display:none}
+.notes h3{color:var(--text);font-size:13px;margin:0 0 6px}
+.notes li{margin:0 0 6px 16px}
+.notes b{color:var(--rose)}
+@media(min-width:760px){.notes{display:block}}
+.mnotes{padding:12px 16px 24px;color:var(--dim);font-size:12.5px;line-height:1.55}
+.mnotes li{margin:0 0 6px 16px}
+@media(min-width:760px){.mnotes{display:none}}
+.steps{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:8px 16px}
+@media(max-width:600px){.steps{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}.steps::-webkit-scrollbar{display:none}.steps button{flex:none}.ctl .lbl{display:none}.ctl{gap:6px;padding:8px}.seg button{padding:0 10px}.stage{padding-top:0}}
+.steps button{min-height:36px;padding:0 12px;border-radius:99px;border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--dim)}
+.steps button[aria-current="step"]{border-color:var(--rose);color:var(--rose);background:var(--brandsoft)}
+/* app header */
+.hdr{padding:18px 16px 6px}
+.brand{font-size:10px;letter-spacing:.18em;color:var(--dim);font-weight:700}
+.brand b{display:block;font-size:24px;color:var(--text);font-weight:800;letter-spacing:.01em}
+.hdr h1{font-size:15px;font-weight:700;color:var(--muted);margin-top:2px}
+.wrap{padding:0 16px 120px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;margin-top:12px}
+.eyebrow{font-size:10.5px;letter-spacing:.14em;color:var(--dim);font-weight:700;text-transform:uppercase}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.modes button{min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--panel);font-weight:700;font-size:13px}
+.modes button.on{background:var(--btn);color:#fff;border-color:transparent}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;padding:2px 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;min-width:44px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font-size:12.5px;font-weight:600;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--brandsoft);border-color:var(--rose);color:var(--rose)}
+.search{position:relative;margin-top:10px}
+.search input{width:100%;min-height:52px;border-radius:16px;border:1px solid var(--line);background:var(--panel);padding:0 44px 0 44px;font-size:16px}
+.search .ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--dim);fill:none;stroke-width:2}
+.search .clr{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;height:44px;color:var(--dim);font-size:18px}
+.sec{margin-top:16px}
+.sec .eyebrow{margin-bottom:4px}
+.row{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 4px;border-top:1px solid var(--line);text-align:left}
+.row:first-of-type{border-top:0}
+.row .eq{flex:none;width:36px;height:36px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center}
+.row .eq svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:14.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t small{display:block;color:var(--dim);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .badge{flex:none;font-size:10.5px;font-weight:700;color:var(--rose);border:1px solid rgba(201,156,161,.4);border-radius:6px;padding:2px 6px}
+.row .chev{flex:none;color:var(--dim)}
+.create{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;margin-top:8px;padding:8px 12px;border-radius:16px;border:1px dashed rgba(201,156,161,.5);color:var(--rose);font-weight:700;text-align:left}
+.create span{font-size:22px;line-height:1}
+.empty{color:var(--dim);font-size:13px;padding:12px 4px}
+.big{width:100%;min-height:54px;border-radius:16px;background:var(--btn);color:#fff;font-weight:700;font-size:15px;letter-spacing:.02em}
+.big[disabled]{opacity:.45;cursor:not-allowed}
+.ghost{width:100%;min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--panel);font-weight:650;font-size:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.link{min-height:44px;color:var(--rose);font-weight:650;font-size:13px;padding:0 4px}
+/* bottom nav mock */
+.nav{position:absolute;left:16px;right:16px;bottom:14px;height:58px;border-radius:30px;background:rgba(30,30,32,.92);border:1px solid var(--line);display:flex;justify-content:space-around;align-items:center}
+:root[data-theme="light"] .nav{background:rgba(255,255,255,.95)}
+.nav i{width:22px;height:22px;border-radius:6px;background:var(--panel2);display:block}
+.nav i.on{background:var(--rose)}
+/* sheet */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:20;display:flex;align-items:flex-end}
+.sheet{width:100%;max-height:92%;overflow-y:auto;overscroll-behavior:contain;background:var(--soft);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:8px 16px 22px}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.shead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.shead h2{font-size:20px;font-weight:800;line-height:1.2;text-wrap:balance}
+.shead h2 small{display:block;font-size:12.5px;color:var(--muted);font-weight:500;margin-top:3px}
+.icbtn{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:18px}
+.cue{margin-top:12px;border-left:3px solid var(--amber);background:rgba(227,180,102,.1);border-radius:0 12px 12px 0;padding:10px 12px;font-size:14px}
+.cue b{color:var(--amber)}
+.last{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--panel);font-size:13.5px}
+.last b{font-size:15px}
+.last small{color:var(--dim);font-size:12px}
+.menu{margin-top:10px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.menu button{display:flex;justify-content:space-between;width:100%;min-height:48px;padding:0 14px;border-top:1px solid var(--line);text-align:left;font-size:14px}
+.menu button:first-child{border-top:0}
+.field{margin-top:14px}
+.field label,.field .fl{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.field input{width:100%;min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--panel);padding:0 14px;font-size:16px}
+.wrapchips{display:flex;flex-wrap:wrap;gap:6px}
+.eqchip{display:flex;align-items:center;gap:6px}
+.eqchip svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hint{font-size:12px;color:var(--dim);margin-top:6px}
+.summ{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:14px;padding:12px;border-radius:14px;background:var(--panel);font-size:13.5px}
+.toast{position:absolute;left:16px;right:16px;bottom:86px;z-index:30;background:#24352a;color:#dff3e3;border-radius:14px;padding:12px 14px;font-size:13.5px;font-weight:600}
+:root[data-theme="light"] .toast{background:#dcefe0;color:#173d22}
+/* logger */
+.logger{margin-top:12px;border:1px solid var(--line);border-radius:18px;padding:12px}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.step{display:flex;align-items:center;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.step button{width:52px;height:56px;font-size:22px;background:var(--panel)}
+.step .v{flex:1;text-align:center;font-size:24px;font-weight:800}
+.step-l{font-size:11px;color:var(--dim);font-weight:700;letter-spacing:.1em;margin-bottom:4px}
+.done{margin-top:10px;font-size:13px;color:var(--muted)}
+.done li{list-style:none;padding:6px 0;border-top:1px solid var(--line)}
+/* before (faithful to current app) */
+.b-label{font-size:11px;color:var(--dim);font-weight:700;margin:12px 0 6px}
+.b-name{font-size:24px;font-weight:800;margin-top:2px}
+.b-name span{color:var(--rose);font-size:18px}
+.b-group{margin-top:10px}
+.b-chip{display:inline-block;padding:7px 10px;border-radius:99px;border:1px solid var(--line);font-size:11px;font-weight:700;margin:4px 4px 0 0}
+.b-cue{margin-top:12px;border:1px solid rgba(227,180,102,.5);background:rgba(227,180,102,.08);border-radius:14px;padding:12px;font-size:13px;display:flex;gap:10px;align-items:center}
+.b-cue b{color:var(--amber)}
+.b-cue i{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-style:normal}
+.b-tile{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:12px}
+.b-tile span{font-size:11px;color:var(--dim);letter-spacing:.08em}
+.b-tile strong{display:block;font-size:18px}
+.b-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+.b-table th{color:var(--dim);font-weight:600;text-align:left;padding:4px 2px}
+.b-table td{padding:6px 2px;border-top:1px solid var(--line)}
+.b-mini{display:inline-flex;align-items:center;gap:2px}
+.b-mini em{font-style:normal;display:inline-block;width:22px;height:30px;border:1px solid var(--line);border-radius:6px;text-align:center;line-height:28px}
+.b-mini b{display:inline-block;width:26px;text-align:center}
+.flag{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;color:var(--danger);border:1px solid rgba(224,138,138,.45);border-radius:6px;padding:2px 6px}
+.b-step{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:12px;padding:4px;margin-top:6px}
+.b-step i{font-style:normal;width:36px;height:36px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.b-text{width:100%;min-height:80px;border:1px solid var(--line);border-radius:12px;margin-top:6px;padding:8px;color:var(--dim);font-size:12px}
+.b-res{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:6px;background:var(--panel)}
+.b-res small{display:block;color:var(--dim);font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="ctl" role="toolbar" aria-label="Prototype controls">
+  <span class="lbl" id="v-lbl">View</span>
+  <div class="seg" role="group" aria-labelledby="v-lbl">
+    <button type="button" data-view="before" aria-pressed="false">Before</button>
+    <button type="button" data-view="after" aria-pressed="true">After</button>
+  </div>
+  <span class="lbl" id="l-lbl">Language</span>
+  <div class="seg" role="group" aria-labelledby="l-lbl">
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="es" aria-pressed="false">ES</button>
+  </div>
+  <div class="seg" role="group" aria-label="Theme">
+    <button type="button" data-theme-btn="dark" aria-pressed="true">Dark</button>
+    <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
+  </div>
+</div>
+<nav class="steps" id="steps" aria-label="Screens"></nav>
+<div class="stage">
+  <div>
+    <div class="phone" id="phone" aria-live="polite"></div>
+    <div class="mnotes" id="mnotes"></div>
+  </div>
+  <aside class="notes" id="notes"></aside>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ---- Data: names, muscles, equipment from docs/fitness/approved/catalogue-v2; cues from
+   docs/fitness/approved/2026-10-18-short-squeeze-cues.md. "Last time" values are SAMPLE data. ---- */
+var EX=[
+ {id:'barbell-bench-press',en:'Barbell Bench Press',es:'Press de banca con barra',reg:'Chest',mus:'Chest',also:['Triceps','Front Delts'],eq:'barbell',cue:{en:'Bend the bar, squeeze chest',es:'Dobla la barra en U, aprieta el pecho'},last:'82.5 × 10',lastD:{en:'Mon 12 Oct',es:'lun 12 oct'},plan:true},
+ {id:'dumbbell-bench-press',en:'Dumbbell Bench Press',es:'Press de banca con mancuernas',reg:'Chest',mus:'Chest',also:['Triceps','Front Delts'],eq:'dumbbell',cue:{en:'Squeeze chest, make your biceps touch',es:'Aprieta el pecho, junta los bíceps'},last:'30 × 10',lastD:{en:'Thu 15 Oct',es:'jue 15 oct'},recent:true},
+ {id:'barbell-bent-over-row',en:'Barbell Bent-Over Row',es:'Remo inclinado con barra',reg:'Back',mus:'Upper Back',also:['Lats','Rear Delts','Biceps'],eq:'barbell',cue:{en:'Elbows back, pinch shoulder blades together',es:'Codos atrás, aprieta los omóplatos juntos'},last:'60 × 8',lastD:{en:'Mon 12 Oct',es:'lun 12 oct'},plan:true},
+ {id:'neutral-grip-lat-pulldown',en:'Cable Lat Pulldown (Neutral Grip)',es:'Jalón al pecho en polea (agarre neutro)',reg:'Back',mus:'Lats',also:[],eq:'cable',cue:{en:'Pin elbows to ribs, squeeze lats',es:'Codos pegados a las costillas, aprieta dorsales'},last:'55 × 12',lastD:{en:'Mon 12 Oct',es:'lun 12 oct'},plan:true},
+ {id:'cable-lateral-raise',en:'Cable Lateral Raise (Single Arm)',es:'Elevaciones laterales en polea (a una mano)',reg:'Shoulders',mus:'Side Delts',also:[],eq:'cable',cue:{en:'Elbow out to wall, squeeze side delt',es:'Codo hacia la pared, aprieta deltoide lateral'},last:'7.5 × 15',lastD:{en:'Thu 15 Oct',es:'jue 15 oct'},recent:true},
+ {id:'barbell-curl',en:'Barbell Curl',es:'Curl con barra',reg:'Arms',mus:'Biceps',also:[],eq:'barbell',cue:{en:'Bend bar toward face, squeeze biceps',es:'Dobla la barra hacia ti, aprieta bíceps'},last:'30 × 10',lastD:{en:'Thu 15 Oct',es:'jue 15 oct'},recent:true},
+ {id:'back-squat',en:'Barbell Back Squat',es:'Sentadilla trasera con barra',reg:'Legs',mus:'Quads',also:[],eq:'barbell',cue:{en:'Spread the floor, squeeze quads and glutes',es:'Abre el piso, aprieta cuádriceps y glúteos'},last:'100 × 6',lastD:{en:'Tue 13 Oct',es:'mar 13 oct'}},
+ {id:'romanian-deadlift',en:'Barbell Romanian Deadlift',es:'Peso muerto rumano con barra',reg:'Legs',mus:'Hamstrings',also:[],eq:'barbell',cue:{en:'Snap hips forward, squeeze glutes',es:'Cadera al frente, aprieta los glúteos'},last:'90 × 8',lastD:{en:'Tue 13 Oct',es:'mar 13 oct'}},
+ {id:'machine-hip-thrust',en:'Machine Hip Thrust',es:'Hip thrust en máquina',reg:'Glutes',mus:'Glutes',also:[],eq:'machine',cue:{en:'At the top, squeeze glutes and hold',es:'Arriba, aprieta los glúteos y sostén'},last:'—'},
+ {id:'barbell-t-bar-row',en:'Barbell T-Bar Row',es:'Remo en T con barra',reg:'Back',mus:'Upper Back',also:[],eq:'barbell',cue:null,last:'—'},
+ {id:'dumbbell-bent-over-row',en:'Dumbbell Bent-Over Row',es:'Remo inclinado con mancuernas',reg:'Back',mus:'Upper Back',also:[],eq:'dumbbell',cue:null,last:'—'},
+ {id:'pull-up-wide-grip',en:'Pull-Up (Wide Grip)',es:'Dominadas (agarre ancho)',reg:'Back',mus:'Lats',also:[],eq:'bodyweight',cue:null,last:'—'},
+ {id:'cable-crunch',en:'Cable Crunch (Kneeling)',es:'Crunch en polea (de rodillas)',reg:'Core',mus:'Abs',also:[],eq:'cable',cue:null,last:'—'},
+ {id:'dip',en:'Dip',es:'Fondos en paralelas',reg:'Chest',mus:'Chest',also:[],eq:'bodyweight',cue:null,last:'—'},
+ {id:'ez-bar-curl',en:'EZ-Bar Curl',es:'Curl con barra Z',reg:'Arms',mus:'Biceps',also:[],eq:'ez-bar',cue:null,last:'—'}
+];
+var MUS_ES={'Chest':'Pecho','Upper Back':'Espalda alta','Lats':'Dorsales','Side Delts':'Deltoide lateral','Biceps':'Bíceps','Quads':'Cuádriceps','Hamstrings':'Isquiotibiales','Glutes':'Glúteos','Abs':'Abdominales','Triceps':'Tríceps','Front Delts':'Deltoide frontal','Rear Delts':'Deltoide posterior'};
+var REG=['Chest','Back','Shoulders','Arms','Legs','Glutes','Core'];
+var REG_ES={All:'Todo',Chest:'Pecho',Back:'Espalda',Shoulders:'Hombros',Arms:'Brazos',Legs:'Piernas',Glutes:'Glúteos',Core:'Core','Full Body':'Cuerpo completo'};
+var EQ=['barbell','dumbbell','machine','cable','bodyweight','other'];
+var EQ_T={en:{barbell:'Barbell',dumbbell:'Dumbbell',machine:'Machine',cable:'Cable',bodyweight:'Bodyweight','ez-bar':'EZ bar',other:'Other'},es:{barbell:'Barra',dumbbell:'Mancuernas',machine:'Máquina',cable:'Polea',bodyweight:'Peso corporal','ez-bar':'Barra Z',other:'Otro'}};
+var ICON={
+ barbell:'<path d="M2 12h20M5 8v8M8 6v12M16 6v12M19 8v8"/>',
+ 'ez-bar':'<path d="M2 12h4l2-2 2 4 2-4 2 4 2-2h6M5 9v6M19 9v6"/>',
+ dumbbell:'<path d="M7 12h10M4 9v6M7 7v10M17 7v10M20 9v6"/>',
+ machine:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h6"/>',
+ cable:'<path d="M12 2v9M8 15a4 4 0 1 0 8 0 4 4 0 1 0-8 0M5 2h14"/>',
+ bodyweight:'<circle cx="12" cy="5" r="2"/><path d="M12 7v7M8 10h8M9 21l3-7 3 7"/>',
+ other:'<circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>'
+};
+function svg(eq){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(ICON[eq]||ICON.other)+'</svg>'}
+
+var T={
+ en:{title:'Exercises',find:'Find an exercise',custom:'Build a custom day',searchLabel:'Search exercise',ph:'Bench press, squat, row…',phAfter:'Search 227 exercises…',clear:'Clear search',
+  inPlan:"In today's plan",recent:'Recent',results:'Results',none:'No match for “{q}”.',create:'Create “{q}”',createBlank:'Create your own exercise',yours:'Yours',
+  also:'also',lastTime:'Last time',never:'Not logged yet',logIt:'Log it',addToday:'Add to today',swap:'Swap into plan',more:'More',close:'Close',
+  moreTech:'Full technique tips',moreGoogle:'See on Google ↗',moreProg:'Full progress',moreNotes:'Add a note',
+  swapTitle:'Swap into today’s plan',swapHint:'Pick the exercise it replaces today. Your plan for other days stays the same.',swapFor:'Replace',
+  addedToday:'Added to today’s workout as an extra.',swapped:'Swapped for today.',
+  logTitle:'Log it',setN:'Set {n}',kg:'KG',reps:'REPS',logSet:'✓ Log set {n}',finish:'Done',logged:'Logged {n} sets.',logged1:'Logged 1 set.',
+  cTitle:'Create your exercise',cName:'Name',cNamePh:'e.g. Hack squat',cMus:'Main muscle group',cEq:'Equipment',cMore:'More options (optional)',cMoreNotes:'Note (optional)',cHint:'You can change this later.',
+  cBtn:'Create exercise',cDone:'“{n}” created. It now shows up in search.',cDupe:'Already in the list: {n}',cDupeUse:'Use it',
+  bMax:'LAST MAX',bTrack:'Track it as you go',bSet:'Set',bPrev:'Previous',bAdd:'+ Add set',bNotes:'Notes',bNotesPh:'How did it feel? Any adjustments?',bLog:'Log workout',bProg:'See full progress ›',bExercise:'Exercise',bPrim:'Primary muscles',bSec:'Secondary muscles',
+  bHint:'Organize your plan into days and add exercises.',bRename:'Rename day',bDelete:'Delete day',bEmpty:'No exercises added yet.',bAddEx:'+ Add exercise',bAddTitle:'Add exercise',bSearch:'Search exercises',bAll:'All',bCant:"Can't find it? Create custom",bCreateTitle:'Create custom exercise',bName:'Exercise name',bSets:'Sets',bMin:'Minimum reps',bMax2:'Maximum reps',bRest:'Rest',bRestS:'{s} seconds',bAddTo:'Add to Day A',
+  dayAdd:'Add to Day A',dayDefaults:'3 sets · 8–10 reps · 90 s rest',change:'Change',
+  sBefore:['Find (today)','Search results','Build a custom day','Add exercise sheet','Create custom (today)'],
+  sAfter:['Find','Typing','No match → create','Exercise sheet','⋯ More','Log it','Swap into plan','Create sheet','Created','Custom day: add']},
+ es:{title:'Ejercicios',find:'Buscar un ejercicio',custom:'Crear un día propio',searchLabel:'Buscar ejercicio',ph:'Press de banca, sentadilla, remo...',phAfter:'Busca entre 227 ejercicios…',clear:'Borrar búsqueda',
+  inPlan:'En el plan de hoy',recent:'Recientes',results:'Resultados',none:'Nada coincide con “{q}”.',create:'Crear “{q}”',createBlank:'Crear tu propio ejercicio',yours:'Tuyo',
+  also:'también',lastTime:'Última vez',never:'Aún sin registrar',logIt:'Registrar',addToday:'Agregar a hoy',swap:'Cambiar en el plan',more:'Más',close:'Cerrar',
+  moreTech:'Consejos de técnica completos',moreGoogle:'Ver en Google ↗',moreProg:'Progreso completo',moreNotes:'Agregar una nota',
+  swapTitle:'Cambiar en el plan de hoy',swapHint:'Elige el ejercicio que reemplaza hoy. Tu plan de otros días no cambia.',swapFor:'Reemplazar',
+  addedToday:'Agregado al entrenamiento de hoy como extra.',swapped:'Cambiado para hoy.',
+  logTitle:'Registrar',setN:'Serie {n}',kg:'KG',reps:'REPS',logSet:'✓ Registrar serie {n}',finish:'Listo',logged:'{n} series registradas.',logged1:'1 serie registrada.',
+  cTitle:'Crea tu ejercicio',cName:'Nombre',cNamePh:'p. ej. Sentadilla hack',cMus:'Grupo muscular principal',cEq:'Equipo',cMore:'Más opciones (opcional)',cMoreNotes:'Nota (opcional)',cHint:'Puedes cambiarlo después.',
+  cBtn:'Crear ejercicio',cDone:'“{n}” creado. Ya aparece en la búsqueda.',cDupe:'Ya está en la lista: {n}',cDupeUse:'Usarlo',
+  bMax:'ÚLTIMO MÁX.',bTrack:'Regístralo sobre la marcha',bSet:'Serie',bPrev:'Anterior',bAdd:'+ Agregar serie',bNotes:'Notas',bNotesPh:'¿Cómo te sentiste? ¿Algún ajuste?',bLog:'Registrar ejercicio',bProg:'Ver progreso completo ›',bExercise:'Ejercicio',bPrim:'Músculos principales',bSec:'Músculos secundarios',
+  bHint:'Organiza tu plan por días y agrega ejercicios.',bRename:'Renombrar día',bDelete:'Eliminar día',bEmpty:'Aún no has agregado ejercicios.',bAddEx:'+ Agregar ejercicio',bAddTitle:'Agregar ejercicio',bSearch:'Buscar ejercicios',bAll:'Todos',bCant:'¿No lo encuentras? Crea uno',bCreateTitle:'Crear ejercicio personalizado',bName:'Nombre del ejercicio',bSets:'Series',bMin:'Reps mínimas',bMax2:'Reps máximas',bRest:'Descanso',bRestS:'{s} segundos',bAddTo:'Agregar a Día A',
+  dayAdd:'Agregar a Día A',dayDefaults:'3 series · 8–10 reps · 90 s de descanso',change:'Cambiar',
+  sBefore:['Buscar (hoy)','Resultados','Crear un día propio','Hoja Agregar','Crear propio (hoy)'],
+  sAfter:['Buscar','Escribiendo','Sin resultado → crear','Hoja del ejercicio','⋯ Más','Registrar','Cambiar en el plan','Hoja Crear','Creado','Día propio: agregar']}
+};
+var NOTES={
+ before:{en:['<h3>Today (live app, 375 px, ?demo=1)</h3>','<b>Find</b>: 32 tap targets on one screen. A default exercise (Bench Press) and a full logger show before you search.','The 9 region chips overflow (489 px wide in a 311 px row).','“Exercise” label, Primary/Secondary groups, Last max tile, set table, Notes and Log workout all stack up.','The exercise name is a link that leaves the app (Google).','Weight input in the set table is 26 px wide.','<b>Create</b> is only reachable via Build a custom day › + Add exercise › “Can’t find it?” (4 taps).','The create sheet has 11 controls; the muscle chips have no visible label; there is no equipment field; the button stays disabled with no reason given.','A created exercise only joins the Find list after you log it, and it doesn’t match the region chips.'],
+  es:['<h3>Hoy (app en vivo, 375 px, ?demo=1)</h3>','<b>Buscar</b>: 32 controles en una pantalla. Antes de buscar ya aparece un ejercicio (Press de banca) con el registro completo.','Los 9 chips de zona no caben (489 px en 311 px).','Etiqueta “Ejercicio”, grupos Principales/Secundarios, Último máx., tabla, Notas y Registrar se apilan.','El nombre es un enlace que sale de la app (Google).','El campo de peso mide 26 px de ancho.','<b>Crear</b> solo está en Crear un día propio › + Agregar › “¿No lo encuentras?” (4 toques).','La hoja tiene 11 controles; los chips de músculo no tienen título; no hay campo de equipo; el botón se desactiva sin explicar por qué.','El ejercicio creado no aparece en Buscar hasta registrarlo y no coincide con los chips de zona.']},
+ after:{en:['<h3>After (proposal)</h3>','<b>Search first</b>: one box, then “In today’s plan” and “Recent” before you type.','<b>One row</b> of 8 muscle chips (Full Body is found by search).','<b>Rows</b>: name + main muscle + equipment icon. Tap opens a sheet; nothing logs by accident.','<b>Sheet</b>: approved short squeeze cue, last time, one primary action (Log it), two secondary ones, the rest behind ⋯.','<b>No match</b> → “Create ‘hack squat’” with the name already typed in.','<b>Create</b>: 3 fields (name, muscle group, equipment). Sets, reps and rest are only asked when you add it to a custom day, and they come pre-filled.','<b>Data</b>: the id is created once and never changes. Cloud sync for custom exercises needs Tech Lead work first (see the proposal, §6).','“Last time” values are sample data.'],
+  es:['<h3>Después (propuesta)</h3>','<b>Primero buscar</b>: una sola caja; antes de escribir, “En el plan de hoy” y “Recientes”.','<b>Una fila</b> de 8 chips de músculo (Cuerpo completo se encuentra buscando).','<b>Filas</b>: nombre + músculo principal + ícono de equipo. Tocar abre una hoja; nada se registra por error.','<b>Hoja</b>: indicación corta aprobada, última vez, una acción principal (Registrar), dos secundarias, el resto en ⋯.','<b>Sin resultado</b> → “Crear ‘sentadilla hack’” con el nombre ya escrito.','<b>Crear</b>: 3 campos (nombre, grupo muscular, equipo). Series, reps y descanso solo al agregarlo a un día propio, ya rellenos.','<b>Datos</b>: el id se crea una vez y no cambia. Sincronizar ejercicios propios requiere trabajo del Tech Lead (ver propuesta, §6).','Los valores de “Última vez” son de ejemplo.']}
+};
+
+var S={view:'after',lang:'en',screen:0,q:'',reg:'All',sel:'barbell-bench-press',more:false,setN:1,kg:82.5,reps:10,logged:[],
+  cName:'',cMus:'',cEq:'',cMoreOpen:false,custom:[],toast:'',swapDone:''};
+function t(k,vars){var s=T[S.lang][k];if(vars)for(var v in vars)s=s.replace('{'+v+'}',vars[v]);return s}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nm(e){return S.lang==='es'&&e.es?e.es:e.en}
+function mus(m){return S.lang==='es'?(MUS_ES[m]||REG_ES[m]||m):m}
+function reg(r){return S.lang==='es'?(REG_ES[r]||r):r}
+function eqT(e){return EQ_T[S.lang][e]||e}
+function norm(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+function all(){return EX.concat(S.custom)}
+function byId(id){return all().find(function(e){return e.id===id})}
+function matches(e){
+  if(S.reg!=='All'&&e.reg!==S.reg)return false;
+  if(!S.q.trim())return true;
+  var hay=norm([e.en,e.es,e.mus,mus(e.mus),e.reg,reg(e.reg),eqT(e.eq)].join(' '));
+  return norm(S.q).split(/\s+/).filter(Boolean).every(function(w){return hay.indexOf(w)>=0});
+}
+function rowHTML(e){
+  var sub=mus(e.mus)+' · '+eqT(e.eq);
+  return '<button type="button" class="row" data-open="'+e.id+'"><span class="eq">'+svg(e.eq)+'</span><span class="t"><b>'+esc(nm(e))+'</b><small>'+esc(sub)+'</small></span>'+(e.custom?'<span class="badge">'+t('yours')+'</span>':'')+'<span class="chev" aria-hidden="true">›</span></button>';
+}
+function header(){return '<div class="hdr"><div class="brand">TRAIN WITH INTENT<b>GYM STUDIO</b></div><h1>'+t('title')+'</h1></div>'}
+function nav(){return '<div class="nav" aria-hidden="true"><i></i><i class="on"></i><i></i><i></i></div>'}
+
+/* ---------------- AFTER ---------------- */
+function aFind(){
+  var h=header()+'<div class="wrap">';
+  h+='<div class="modes" role="group"><button type="button" class="on" aria-pressed="true">'+t('find')+'</button><button type="button" data-go="9" aria-pressed="false">'+t('custom')+'</button></div>';
+  h+='<div class="search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg><input id="q" type="search" name="exercise-search" autocomplete="off" enterkeyhint="search" spellcheck="false" aria-label="'+t('searchLabel')+'" placeholder="'+t('phAfter')+'" value="'+esc(S.q)+'">'+(S.q?'<button type="button" class="clr" data-clear aria-label="'+t('clear')+'">×</button>':'')+'</div>';
+  h+='<div class="chips" role="group" aria-label="'+t('cMus')+'" style="margin-top:10px">';
+  ['All'].concat(REG).forEach(function(r){h+='<button type="button" class="chip" data-reg="'+r+'" aria-pressed="'+(S.reg===r)+'">'+reg(r)+'</button>'});
+  h+='</div>';
+  var typing=S.q.trim()||S.reg!=='All';
+  if(!typing){
+    h+='<div class="sec"><div class="eyebrow">'+t('inPlan')+'</div>'+all().filter(function(e){return e.plan}).map(rowHTML).join('')+'</div>';
+    var rec=all().filter(function(e){return e.recent||e.custom});
+    h+='<div class="sec"><div class="eyebrow">'+t('recent')+'</div>'+rec.map(rowHTML).join('')+'</div>';
+    h+='<button type="button" class="create" data-create><span aria-hidden="true">+</span>'+t('createBlank')+'</button>';
+  }else{
+    var res=all().filter(matches);
+    h+='<div class="sec"><div class="eyebrow">'+t('results')+' · <span class="num">'+res.length+'</span></div>';
+    h+=res.length?res.map(rowHTML).join(''):'<p class="empty">'+esc(t('none',{q:S.q.trim()}))+'</p>';
+    h+='</div>';
+    if(S.q.trim())h+='<button type="button" class="create" data-create><span aria-hidden="true">+</span>'+esc(t('create',{q:S.q.trim()}))+'</button>';
+  }
+  return h+'</div>';
+}
+function aSheet(){
+  var e=byId(S.sel)||EX[0];
+  var also=e.also&&e.also.length?' · '+t('also')+' '+e.also.map(mus).join(', '):'';
+  var h='<div class="scrim" data-close><section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t"><div class="grab"></div>';
+  h+='<div class="shead"><h2 id="sh-t">'+esc(nm(e))+'<small>'+esc(mus(e.mus)+also)+' · '+eqT(e.eq)+'</small></h2><button type="button" class="icbtn" data-more aria-expanded="'+S.more+'" aria-label="'+t('more')+'">⋯</button></div>';
+  if(e.cue)h+='<div class="cue"><b>'+(S.lang==='es'?'Aprieta':'Squeeze')+' —</b> '+esc(e.cue[S.lang])+'</div>';
+  h+='<div class="last"><span>'+t('lastTime')+'</span>'+(e.last&&e.last!=='—'?'<span><b class="num">'+e.last+' kg</b> <small>'+e.lastD[S.lang]+'</small></span>':'<small>'+t('never')+'</small>')+'</div>';
+  if(S.more){h+='<div class="menu">'+(e.cue?'<button type="button">'+t('moreTech')+'<span>›</span></button>':'')+(e.custom?'':'<button type="button">'+t('moreGoogle')+'<span></span></button>')+'<button type="button">'+t('moreProg')+'<span>›</span></button><button type="button">'+t('moreNotes')+'<span>›</span></button></div>'}
+  h+='<button type="button" class="big" style="margin-top:14px" data-go="5">'+t('logIt')+'</button>';
+  h+='<div class="two"><button type="button" class="ghost" data-addtoday>'+t('addToday')+'</button><button type="button" class="ghost" data-go="6">'+t('swap')+'</button></div>';
+  return h+'</section></div>';
+}
+function aLog(){
+  var e=byId(S.sel)||EX[0];
+  var h='<div class="scrim" data-close><section class="sheet" role="dialog" aria-modal="true" aria-labelledby="lg-t"><div class="grab"></div>';
+  h+='<div class="shead"><h2 id="lg-t">'+esc(nm(e))+'<small>'+t('lastTime')+': '+(e.last||'—')+' kg</small></h2><button type="button" class="icbtn" data-back aria-label="'+t('close')+'">×</button></div>';
+  h+='<div class="logger"><div class="eyebrow">'+t('setN',{n:S.setN})+'</div><div class="lg">';
+  h+='<div><div class="step-l">'+t('kg')+'</div><div class="step"><button type="button" data-kg="-2.5" aria-label="−2.5 kg">−</button><span class="v num">'+S.kg+'</span><button type="button" data-kg="2.5" aria-label="+2.5 kg">+</button></div></div>';
+  h+='<div><div class="step-l">'+t('reps')+'</div><div class="step"><button type="button" data-reps="-1" aria-label="−1">−</button><span class="v num">'+S.reps+'</span><button type="button" data-reps="1" aria-label="+1">+</button></div></div>';
+  h+='</div><button type="button" class="big" data-logset>'+t('logSet',{n:S.setN})+'</button></div>';
+  if(S.logged.length)h+='<ul class="done">'+S.logged.map(function(s,i){return '<li class="num">'+t('setN',{n:i+1})+' · '+s+' ✓</li>'}).join('')+'</ul>';
+  h+='<button type="button" class="ghost" style="margin-top:12px" data-finish>'+t('finish')+'</button>';
+  return h+'</section></div>';
+}
+function aSwap(){
+  var e=byId(S.sel)||EX[0];
+  var h='<div class="scrim" data-close><section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sw-t"><div class="grab"></div>';
+  h+='<div class="shead"><h2 id="sw-t">'+t('swapTitle')+'<small>'+esc(nm(e))+'</small></h2><button type="button" class="icbtn" data-back aria-label="'+t('close')+'">×</button></div><p class="hint">'+t('swapHint')+'</p><div style="margin-top:8px">';
+  EX.filter(function(x){return x.plan&&x.id!==e.id}).forEach(function(x){h+='<button type="button" class="row" data-swapfor><span class="eq">'+svg(x.eq)+'</span><span class="t"><b>'+t('swapFor')+': '+esc(nm(x))+'</b><small>'+mus(x.mus)+'</small></span></button>'});
+  return h+'</div></section></div>';
+}
+function aCreate(){
+  var dupe=S.cName.trim()&&all().find(function(x){return norm(x.en)===norm(S.cName.trim())||norm(x.es)===norm(S.cName.trim())});
+  var ok=S.cName.trim()&&S.cMus&&S.cEq&&!dupe;
+  var h='<div class="scrim" data-close><section class="sheet" role="dialog" aria-modal="true" aria-labelledby="cr-t"><div class="grab"></div>';
+  h+='<div class="shead"><h2 id="cr-t">'+t('cTitle')+'</h2><button type="button" class="icbtn" data-back aria-label="'+t('close')+'">×</button></div>';
+  h+='<div class="field"><label for="cn">'+t('cName')+'</label><input id="cn" name="custom-exercise-name" autocomplete="off" spellcheck="false" maxlength="60" placeholder="'+t('cNamePh')+'" value="'+esc(S.cName)+'">';
+  if(dupe)h+='<p class="hint" role="status">'+esc(t('cDupe',{n:nm(dupe)}))+' — <button type="button" class="link" data-open="'+dupe.id+'">'+t('cDupeUse')+'</button></p>';
+  h+='</div>';
+  h+='<div class="field"><span class="fl" id="cm-l">'+t('cMus')+'</span><div class="wrapchips" role="group" aria-labelledby="cm-l">';
+  REG.forEach(function(r){h+='<button type="button" class="chip" data-cmus="'+r+'" aria-pressed="'+(S.cMus===r)+'">'+reg(r)+'</button>'});
+  h+='</div></div>';
+  h+='<div class="field"><span class="fl" id="ce-l">'+t('cEq')+'</span><div class="wrapchips" role="group" aria-labelledby="ce-l">';
+  EQ.forEach(function(q){h+='<button type="button" class="chip eqchip" data-ceq="'+q+'" aria-pressed="'+(S.cEq===q)+'">'+svg(q)+eqT(q)+'</button>'});
+  h+='</div><p class="hint">'+t('cHint')+'</p></div>';
+  h+='<button type="button" class="link" style="margin-top:6px" data-cmore aria-expanded="'+S.cMoreOpen+'">'+(S.cMoreOpen?'▾ ':'▸ ')+t('cMore')+'</button>';
+  if(S.cMoreOpen)h+='<div class="field"><label for="cnote">'+t('cMoreNotes')+'</label><input id="cnote" name="custom-exercise-note" autocomplete="off"></div>';
+  h+='<button type="button" class="big" style="margin-top:14px" data-cdo'+(ok?'':' disabled aria-disabled="true"')+'>'+t('cBtn')+'</button>';
+  return h+'</section></div>';
+}
+function aDay(){
+  var h=header()+'<div class="wrap"><div class="modes" role="group"><button type="button" data-go="0" aria-pressed="false">'+t('find')+'</button><button type="button" class="on" aria-pressed="true">'+t('custom')+'</button></div>';
+  h+='<div class="card"><div class="eyebrow">Day A</div>';
+  var e=byId(S.sel)||EX[0];
+  h+='<div class="row" style="border:0"><span class="eq">'+svg(e.eq)+'</span><span class="t"><b>'+esc(nm(e))+'</b><small>'+mus(e.mus)+'</small></span></div>';
+  h+='<div class="summ"><span>'+t('dayDefaults')+'</span><button type="button" class="link">'+t('change')+'</button></div>';
+  h+='<button type="button" class="big" style="margin-top:12px">'+t('dayAdd')+'</button></div>';
+  h+='<p class="hint" style="margin-top:10px">'+(S.lang==='es'?'Elegiste el ejercicio con la misma búsqueda de “Buscar”. Series/reps/descanso: valores actuales de la app, ya rellenos; el PT debe aprobar los valores por defecto.':'You picked the exercise with the same search as Find. Sets/reps/rest: the app’s current defaults, pre-filled; the PT must approve the defaults.')+'</p>';
+  return h+'</div>';
+}
+
+/* ---------------- BEFORE (faithful to live app) ---------------- */
+function bFind(showResults){
+  var h=header()+'<div class="wrap"><div class="modes"><button type="button" class="on">'+t('find')+'</button><button type="button" data-go="2">'+t('custom')+'</button></div>';
+  h+='<div class="b-label">'+t('searchLabel')+'</div><div class="chips">';
+  ['All'].concat(REG).concat(['Full Body']).forEach(function(r,i){h+='<span class="chip" style="display:flex;align-items:center'+(i===0?';border-color:var(--rose);color:var(--rose)':'')+'">'+reg(r)+'</span>'});
+  h+='</div><div class="flag">9 chips · 489 px in 311 px</div>';
+  h+='<div class="search"><input type="search" aria-label="'+t('searchLabel')+'" placeholder="'+t('ph')+'" value="'+(showResults?'row':'')+'" style="padding-left:14px" readonly></div>';
+  if(showResults){
+    h+='<div class="card" style="max-height:260px;overflow:auto">';
+    EX.filter(function(e){return /row/i.test(e.en)}).concat(EX.slice(0,3)).slice(0,6).forEach(function(e){h+='<span class="b-res"><b>'+esc(nm(e))+'</b><small>'+reg(e.reg)+' · '+e.also.concat([e.mus]).slice(0,2).map(mus).join(' · ')+'</small></span>'});
+    h+='</div><div class="flag">24 results for “row”; no equipment shown; no create option</div>';
+  }
+  h+='<div class="b-label">'+t('bExercise')+'</div><div class="b-name">'+esc(nm(EX[0]))+' <span>↗</span></div><div class="flag">'+(S.lang==='es'?'el nombre abre Google':'name opens Google')+'</div>';
+  h+='<div class="b-group"><div class="b-label">'+t('bPrim')+'</div><span class="b-chip">'+mus('Chest')+'</span></div><div class="b-group"><div class="b-label">'+t('bSec')+'</div><span class="b-chip">'+mus('Triceps')+'</span><span class="b-chip">'+mus('Front Delts')+'</span></div>';
+  h+='<div class="b-cue"><span><b>'+(S.lang==='es'?'Aprieta':'Squeeze')+' —</b> '+(S.lang==='es'?'Aprieta el pecho como si quisieras doblar la barra en forma de U y acerca los bíceps entre sí al empujar.':'Squeeze your chest as if trying to bend the bar into a U and bring your biceps toward each other as you press up.')+'</span><i>+</i></div>';
+  h+='<div class="b-tile"><span>'+t('bMax')+'</span><strong class="num">82.5 kg</strong></div>';
+  h+='<div class="card"><b>'+t('bTrack')+'</b><table class="b-table"><tr><th>'+t('bSet')+'</th><th>'+t('bPrev')+'</th><th>kg</th><th>Reps</th><th>✓</th><th></th></tr>';
+  [1,2].forEach(function(n){h+='<tr><td>'+n+'</td><td class="num">82.5 × 10</td><td><span class="b-mini"><em>−</em><b>80</b><em>+</em></span></td><td>10</td><td>✓</td><td>×</td></tr>'});
+  h+='</table><div class="flag">'+(S.lang==='es'?'campo de peso: 26 px':'weight field: 26 px wide')+'</div><div style="margin-top:8px"><span class="b-chip">'+t('bAdd')+'</span></div><div class="b-label">'+t('bNotes')+'</div><div class="b-text">'+t('bNotesPh')+'</div><div class="big" style="display:flex;align-items:center;justify-content:center;margin-top:10px">'+t('bLog')+'</div></div>';
+  h+='<p class="link" style="margin-top:8px">'+t('bProg')+'</p><div class="flag">32 '+(S.lang==='es'?'controles en esta pantalla':'tap targets on this screen')+'</div>';
+  return h+'</div>';
+}
+function bDay(){
+  var h=header()+'<div class="wrap"><div class="modes"><button type="button" data-go="0">'+t('find')+'</button><button type="button" class="on">'+t('custom')+'</button></div>';
+  h+='<div class="card"><div class="eyebrow">'+(S.lang==='es'?'Haz tu plan · MANUAL':'Make your plan · MANUAL')+'</div><p class="hint">'+t('bHint')+'</p><div class="chips" style="margin-top:8px"><span class="chip" style="display:flex;align-items:center;border-color:var(--rose);color:var(--rose)">'+(S.lang==='es'?'Día A':'Day A')+'</span><span class="chip" style="display:flex;align-items:center">+</span></div>';
+  h+='<div class="two"><span class="ghost" style="display:flex;align-items:center;justify-content:center">'+t('bRename')+'</span><span class="ghost" style="display:flex;align-items:center;justify-content:center;opacity:.5">'+t('bDelete')+'</span></div><p class="empty">'+t('bEmpty')+'</p><button type="button" class="big" data-go="3">'+t('bAddEx')+'</button></div>';
+  return h+'</div>';
+}
+function bAddSheet(){
+  var h='<div class="scrim"><section class="sheet" role="dialog" aria-modal="true" aria-label="'+t('bAddTitle')+'"><div class="shead"><h2>'+t('bAddTitle')+'</h2><span class="ghost" style="width:auto;padding:0 14px;display:flex;align-items:center">'+t('close')+'</span></div>';
+  h+='<div class="search"><input type="search" placeholder="'+t('bSearch')+'" style="padding-left:14px" readonly aria-label="'+t('bSearch')+'"></div><div class="chips" style="margin-top:8px">';
+  ['All'].concat(['Glutes','Legs','Back','Chest','Shoulders','Arms','Core']).forEach(function(r){h+='<span class="chip" style="display:flex;align-items:center">'+(r==='All'?t('bAll'):reg(r))+'</span>'});
+  h+='</div>';
+  EX.slice(0,5).forEach(function(e){h+='<span class="b-res"><b>'+esc(nm(e))+'</b><small>'+mus(e.mus)+'</small></span>'});
+  h+='<div class="flag">'+(S.lang==='es'?'227 filas · otro buscador (sin “rdl”, sin acentos, sin músculos)':'227 rows · a different search engine (no “rdl”, no accent-insensitive, no muscles)')+'</div>';
+  h+='<button type="button" class="link" data-go="4" style="display:block;margin-top:8px">'+t('bCant')+'</button></section></div>';
+  return h;
+}
+function bCreateSheet(){
+  var h='<div class="scrim"><section class="sheet" role="dialog" aria-modal="true" aria-label="'+t('bCreateTitle')+'"><div class="shead"><h2>'+t('bCreateTitle')+'</h2><span class="ghost" style="width:auto;padding:0 14px;display:flex;align-items:center">'+t('close')+'</span></div>';
+  h+='<div class="b-label">'+t('bName')+'</div><div class="search" style="margin-top:0"><input style="padding-left:14px" readonly aria-label="'+t('bName')+'"></div><div class="wrapchips" style="margin-top:10px">';
+  ['Glutes','Legs','Back','Chest','Shoulders','Arms','Core'].forEach(function(r){h+='<span class="chip" style="display:flex;align-items:center">'+reg(r)+'</span>'});
+  h+='</div><div class="flag">'+(S.lang==='es'?'chips sin título · obligatorio · sin equipo':'chips have no label · required · no equipment')+'</div>';
+  [['bSets',3],['bMin',8],['bMax2',10]].forEach(function(p){h+='<div class="b-label">'+t(p[0])+'</div><div class="b-step"><i>−</i><b class="num">'+p[1]+'</b><i>+</i></div>'});
+  h+='<div class="b-label">'+t('bRest')+'</div><div class="wrapchips">'+[60,90,120].map(function(s){return '<span class="chip" style="display:flex;align-items:center'+(s===90?';border-color:var(--rose);color:var(--rose)':'')+'">'+t('bRestS',{s:s})+'</span>'}).join('')+'</div>';
+  h+='<div class="big" style="display:flex;align-items:center;justify-content:center;margin-top:12px;opacity:.5">'+t('bAddTo')+'</div><div class="flag">'+(S.lang==='es'?'11 controles · desactivado sin explicar':'11 controls · disabled with no reason given')+'</div></section></div>';
+  return h;
+}
+
+/* ---------------- render ---------------- */
+function screens(){return S.view==='before'?T[S.lang].sBefore:T[S.lang].sAfter}
+function render(){
+  document.documentElement.lang=S.lang;
+  var ph=document.getElementById('phone'),h='';
+  if(S.view==='before'){var bs=S.screen;h='<div class="scr">'+(bs<=1?bFind(bs===1):bDay())+'</div>'+nav()+(bs===3?bAddSheet():bs===4?bCreateSheet():'')}
+  else{
+    var base=(S.screen===9)?aDay():aFind();
+    var over={3:aSheet,4:aSheet,5:aLog,6:aSwap,7:aCreate}[S.screen];
+    h='<div class="scr">'+base+'</div>'+nav()+(over?over():'');
+  }
+  if(S.toast)h+='<div class="toast" role="status">'+esc(S.toast)+'</div>';
+  ph.innerHTML=h;
+  var st=document.getElementById('steps');
+  st.innerHTML=screens().map(function(s,i){return '<button type="button" data-step="'+i+'"'+(i===S.screen?' aria-current="step"':'')+'>'+(i+1)+'. '+esc(s)+'</button>'}).join('');
+  var cur=st.querySelector('[aria-current]');if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}
+  var n=NOTES[S.view][S.lang];
+  document.getElementById('notes').innerHTML=n[0]+'<ul>'+n.slice(1).map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>';
+  document.getElementById('mnotes').innerHTML=n[0]+'<ul>'+n.slice(1).map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>';
+  document.querySelectorAll('[data-view]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===S.view))});
+  document.querySelectorAll('[data-lang]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.lang===S.lang))});
+}
+function go(i){
+  S.screen=i;S.toast='';
+  if(S.view==='after'){
+    if(i===0){S.q='';S.reg='All';S.more=false}
+    if(i===1){S.q='row';S.reg='All'}
+    if(i===2){S.q=S.lang==='es'?'sentadilla hack':'hack squat';S.reg='All'}
+    if(i===3){S.more=false;S.q='';S.reg='All'}
+    if(i===4){S.more=true;S.q='';S.reg='All'}
+    if(i===5){var e=byId(S.sel);S.setN=1;S.logged=[];S.kg=e&&e.last&&e.last!=='—'?parseFloat(e.last):20;S.reps=e&&e.last&&e.last!=='—'?parseInt(e.last.split('×')[1],10):10}
+    if(i===7){S.cName=S.q.trim()||(S.lang==='es'?'Sentadilla hack':'Hack squat');S.cName=S.cName.charAt(0).toUpperCase()+S.cName.slice(1);S.cMus='';S.cEq='';S.cMoreOpen=false}
+    if(i===8){if(!S.custom.length)addCustom(S.lang==='es'?'Sentadilla hack':'Hack squat','Legs','machine');S.q='';S.reg='All';S.screen=0;S.toast=t('cDone',{n:S.custom[S.custom.length-1].en})}
+  }
+  render();
+}
+function addCustom(name,m,eq){
+  var id='custom-'+Math.random().toString(16).slice(2,10);
+  S.custom.push({id:id,en:name,es:name,reg:m,mus:m,also:[],eq:eq,cue:null,last:'—',custom:true});
+  S.sel=id;
+}
+document.addEventListener('click',function(ev){
+  var b=ev.target.closest('button,[data-close]');if(!b)return;
+  var d=b.dataset;
+  if(d.view){S.view=d.view;go(0);return}
+  if(d.lang){S.lang=d.lang;render();return}
+  if(d.themeBtn){document.documentElement.dataset.theme=d.themeBtn;document.querySelectorAll('[data-theme-btn]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});return}
+  if(d.step!==undefined){go(+d.step);return}
+  if(d.close!==undefined&&ev.target===b){S.screen=S.screen===9?9:0;S.more=false;render();return}
+  if(d.close!==undefined)return;
+  if(d.go!==undefined){go(+d.go);return}
+  if(d.reg){S.reg=d.reg;S.screen=(S.reg==='All'&&!S.q)?0:1;render();return}
+  if(d.clear!==undefined){S.q='';S.screen=0;render();var q=document.getElementById('q');if(q)q.focus();return}
+  if(d.open){S.sel=d.open;S.more=false;S.screen=3;render();return}
+  if(d.more!==undefined){S.more=!S.more;S.screen=S.more?4:3;render();return}
+  if(d.back!==undefined){S.screen=S.screen===7?0:3;render();return}
+  if(d.addtoday!==undefined){S.screen=0;S.toast=t('addedToday');render();return}
+  if(d.swapfor!==undefined){S.screen=0;S.toast=t('swapped');render();return}
+  if(d.kg){S.kg=Math.max(0,S.kg+parseFloat(d.kg));render();return}
+  if(d.reps){S.reps=Math.max(0,S.reps+parseInt(d.reps,10));render();return}
+  if(d.logset!==undefined){S.logged.push(S.kg+' × '+S.reps);S.setN++;render();return}
+  if(d.finish!==undefined){var n=S.logged.length;S.screen=0;S.toast=n?(n===1?t('logged1'):t('logged',{n:n})):'';render();return}
+  if(d.create!==undefined){go(7);return}
+  if(d.cmus){S.cMus=d.cmus;render();return}
+  if(d.ceq){S.cEq=d.ceq;render();return}
+  if(d.cmore!==undefined){S.cMoreOpen=!S.cMoreOpen;render();return}
+  if(d.cdo!==undefined){if(b.disabled)return;addCustom(S.cName.trim(),S.cMus,S.cEq);S.q='';S.reg='All';S.screen=0;S.toast=t('cDone',{n:S.cName.trim()});render();return}
+});
+document.addEventListener('input',function(ev){
+  if(ev.target.id==='q'){S.q=ev.target.value;var pos=ev.target.selectionStart;S.screen=S.q.trim()?1:0;render();var q=document.getElementById('q');if(q){q.focus();try{q.setSelectionRange(pos,pos)}catch(e){}}}
+  if(ev.target.id==='cn'){S.cName=ev.target.value;var p2=ev.target.selectionStart;render();var c=document.getElementById('cn');if(c){c.focus();try{c.setSelectionRange(p2,p2)}catch(e){}}}
+});
+document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&S.view==='after'&&S.screen>=3&&S.screen<=7){S.screen=0;render()}});
+render();
+})();
+</script>
+</body>
+</html>
