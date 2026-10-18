@@ -1,0 +1,266 @@
+<title>GymStudio Promo 15s</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0f0f10;--soft:#171719;--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#c8c7c4;--dim:rgba(243,243,241,.55);
+  --brand:#8d5e63;--brand2:#5a474b;--brandsoft:rgba(141,94,99,.18);--accent:#c99ca1;
+  --ok:#dfe7df;--done:#a9d6a6;--amber:#e2b45c;--ambersoft:rgba(226,180,92,.10);
+  --btn:linear-gradient(135deg,#7a5d60 0%,#2f2f31 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#08080a;color:var(--text);font-family:Inter,-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;-webkit-font-smoothing:antialiased}
+.controls{display:flex;gap:8px;align-items:center;justify-content:space-between;width:100%;max-width:420px;flex-wrap:wrap}
+.controls .grp{display:flex;gap:6px}
+.controls button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:600 13px/1 inherit;cursor:pointer;min-height:36px}
+.controls button.on{background:var(--brand);border-color:var(--brand)}
+.controls button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note{font-size:11px;line-height:1.45;color:var(--muted);max-width:420px;text-align:center}
+body.rec .controls,body.rec .note{visibility:hidden}
+/* frame: 9:16, design canvas 360x640 scaled to fit */
+.frame{position:relative;width:var(--fw,360px);height:calc(var(--fw,360px)*16/9);border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#0f0f10}
+.stage{position:absolute;left:0;top:0;width:360px;height:640px;transform-origin:0 0;overflow:hidden;
+  background:radial-gradient(120% 60% at 50% 0%,#2a1f21 0%,#121113 55%,#0b0b0c 100%)}
+.prog{position:absolute;left:0;top:0;height:3px;width:0;background:var(--accent);z-index:40}
+.on-t{opacity:0;transition:opacity .35s ease,transform .45s cubic-bezier(.2,.8,.2,1)}
+.on-t.on{opacity:1}
+/* captions (safe area: below top 83px, right 40px) */
+.cap{position:absolute;left:24px;right:44px;top:96px;font-weight:800;font-size:27px;line-height:1.12;letter-spacing:-.025em;transform:translateY(12px);z-index:30;text-shadow:0 2px 18px rgba(0,0,0,.7)}
+.cap.on{transform:none}
+.cap em{font-style:normal;color:var(--accent)}
+.qk{position:absolute;inset:150px 0 auto 0;text-align:center;font-size:118px;font-weight:800;letter-spacing:-.04em;color:rgba(201,156,161,.18)}
+.qk.on{animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{color:rgba(201,156,161,.45)}}
+.plates{position:absolute;left:0;right:0;top:330px;display:flex;justify-content:center;gap:10px}
+.plates i{display:block;width:16px;border-radius:4px;background:var(--brand2);border:1px solid var(--line)}
+.plates i:nth-child(1),.plates i:nth-child(6){height:70px;margin-top:20px}
+.plates i:nth-child(2),.plates i:nth-child(5){height:90px;margin-top:10px}
+.plates i:nth-child(3),.plates i:nth-child(4){height:110px;background:var(--brand)}
+/* phone */
+.phone{position:absolute;left:22px;width:296px;top:186px;height:520px;border-radius:38px;background:#050506;border:1px solid rgba(255,255,255,.16);padding:7px;box-shadow:0 30px 90px rgba(0,0,0,.65);transform:translateY(480px);transition:transform .7s cubic-bezier(.2,.8,.2,1);z-index:10}
+.phone.on{transform:none}
+.screen{position:relative;width:100%;height:100%;border-radius:31px;overflow:hidden;background:linear-gradient(180deg,#141415,#0b0b0c)}
+.island{position:absolute;top:7px;left:50%;width:78px;height:20px;margin-left:-39px;background:#000;border-radius:12px;z-index:9}
+.status{height:30px;display:flex;justify-content:space-between;align-items:center;padding:4px 22px 0;font-size:10px;font-weight:700}
+.vp{position:absolute;left:0;right:0;top:30px;bottom:0;overflow:hidden}
+.scroll{position:absolute;left:0;right:0;top:0;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+/* workout mode, faithful to the live app (#304, #308, #327) */
+.wbar{display:flex;align-items:center;justify-content:space-between;padding:4px 10px 6px;gap:6px}
+.pill{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 9px;font-size:9px;color:var(--muted);font-weight:600;white-space:nowrap}
+.wtitle{font-size:11.5px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:8.5px;font-weight:800;background:var(--panel)}
+.lang span{padding:5px 8px;color:var(--dim);transition:.25s}
+.lang span.act{background:var(--brandsoft);color:var(--accent)}
+.chips{display:flex;align-items:center;gap:4px;padding:2px 10px 0}
+.chip{width:24px;height:24px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;font-size:9.5px;font-weight:700;color:var(--muted);background:var(--panel);flex:none}
+.chip.dn{background:#9fd39b;color:#0d1a0d;border-color:transparent}
+.chip.cur{border-color:var(--accent);color:var(--accent);background:var(--brandsoft)}
+.chip.ss{border-color:rgba(201,156,161,.5);color:var(--accent)}
+.dash{width:6px;height:2px;background:var(--accent);flex:none;margin:0 -2px}
+.jump{font-size:7.5px;color:var(--dim);padding:5px 10px 8px;border-bottom:1px solid var(--line)}
+.ex{padding:10px 12px 0}
+.exn{font-size:16px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.exn sup{font-size:10px;color:var(--accent);margin-left:3px}
+.exs{font-size:10px;color:var(--muted);margin-top:2px}
+.tags{display:flex;gap:4px;margin-top:7px}
+.tag{font-size:7.5px;font-weight:700;padding:4px 7px;border-radius:999px;background:var(--panel2);border:1px solid var(--line)}
+.tag.l{background:transparent;color:var(--muted)}
+.meta{font-size:8.5px;color:var(--muted);margin-top:6px}
+.today{margin:9px 12px 0;border-left:3px solid var(--accent);background:var(--brandsoft);border-radius:4px 10px 10px 4px;padding:8px 10px;font-size:12px;font-weight:800;letter-spacing:-.01em;display:flex;justify-content:space-between;align-items:center}
+.today small{font-size:7.5px;font-weight:800;color:var(--accent);letter-spacing:.08em}
+.today.pop{animation:pop .5s}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+.squeeze{position:relative;margin:8px 12px 0;background:var(--ambersoft);border:1px solid rgba(226,180,92,.22);border-radius:12px;padding:9px 34px 9px 10px;font-size:9.5px;line-height:1.4;color:var(--text)}
+.squeeze b{color:var(--amber)}
+.squeeze .plus{position:absolute;right:8px;top:50%;margin-top:-11px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--muted)}
+.tools{display:flex;align-items:center;gap:8px;margin:9px 12px 0;font-size:9px}
+.tools .pill{font-size:8.5px;color:var(--text)}
+.tools .rest{color:var(--accent);font-weight:700}
+.tbl{margin:8px 12px 0;font-size:9px}
+.th,.tr{display:grid;grid-template-columns:18px 50px 1fr 46px 26px;gap:5px;align-items:center}
+.th{color:var(--dim);font-size:7.5px;font-weight:700;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.th .lt{line-height:1.25}
+.tr{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.tr .n{font-weight:800;color:var(--muted);text-align:center}
+.tr .lt{color:var(--muted);font-size:8.5px}
+.kg{display:grid;grid-template-columns:18px 1fr 18px;align-items:center;gap:2px}
+.kg i{font-style:normal;height:24px;border-radius:7px;background:var(--panel2);display:grid;place-items:center;font-weight:800;color:var(--muted)}
+.val{height:26px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;font-weight:800;font-size:11.5px;color:var(--dim);transition:.25s}
+.val.f{color:var(--text);border-color:rgba(201,156,161,.55)}
+.ck{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--dim);transition:.25s;position:relative}
+.ck.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.hint{margin:8px 12px 0;border:1px solid rgba(201,156,161,.5);background:linear-gradient(180deg,rgba(141,94,99,.22),rgba(141,94,99,.08));border-radius:12px;padding:9px 10px;font-size:9.5px;line-height:1.4;transform:translateY(8px)}
+.hint.on{transform:none}
+.hint .use{display:inline-block;margin-top:7px;background:var(--btn);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:6px 12px;font-weight:800;font-size:9.5px;position:relative;overflow:hidden}
+.foot{position:absolute;left:10px;right:10px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.foot .nx{background:var(--btn);border-radius:12px;padding:10px;text-align:center;font-size:9.5px;font-weight:800;letter-spacing:.04em;border:1px solid rgba(255,255,255,.12)}
+/* cue sheet (#327) */
+.sheet{position:absolute;left:0;right:0;bottom:0;top:96px;background:#141416;border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:14px 14px 0;transform:translateY(105%);transition:transform .5s cubic-bezier(.2,.8,.2,1);z-index:8;box-shadow:0 -20px 50px rgba(0,0,0,.5)}
+.sheet.on{transform:none}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:.4s;z-index:7}
+.scrim.on{opacity:1}
+.sh-t{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:13.5px;font-weight:800;line-height:1.2;letter-spacing:-.015em}
+.sh-x{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;flex:none;color:var(--muted)}
+.sh-h{font-size:8.5px;font-weight:800;letter-spacing:.09em;color:var(--accent);margin:11px 0 4px;text-transform:uppercase}
+.sh ul{padding-left:13px;font-size:9.5px;line-height:1.45;color:var(--text)}
+.sh li{margin:2px 0}
+.sh p{font-size:9.5px;line-height:1.45}
+.why{border-radius:6px;transition:background .4s}
+.why.hl{background:rgba(201,156,161,.2);box-shadow:0 0 0 3px rgba(201,156,161,.2)}
+/* tap ripple */
+.tap::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:rgba(255,255,255,.5);animation:rip .6s forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(18);opacity:0}}
+.finger{position:absolute;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.28);border:2px solid rgba(255,255,255,.65);z-index:12;opacity:0;transition:opacity .2s,left .5s ease,top .5s ease;pointer-events:none}
+.finger.on{opacity:1}
+/* end card */
+.end{position:absolute;inset:0;z-index:35;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:0 44px 60px 28px;background:radial-gradient(90% 55% at 50% 42%,#2c2023 0%,#0f0f10 72%)}
+.eyebrow{font-size:10px;letter-spacing:.24em;color:var(--muted);font-weight:600}
+.word{font-size:46px;font-weight:800;letter-spacing:-.04em;line-height:.95}
+.tagl{font-size:16px;line-height:1.35;color:var(--muted);max-width:270px}
+.tagl em{font-style:normal;color:var(--accent)}
+.cta{background:var(--btn);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:12px 24px;font-weight:800;font-size:15px}
+.url{font-size:10.5px;color:var(--dim)}
+.badge{font-size:9.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 10px}
+/* play overlay */
+.play{position:absolute;inset:0;z-index:50;display:grid;place-items:center;background:rgba(8,8,10,.55);border:0;cursor:pointer;color:var(--text)}
+.play span{display:flex;align-items:center;gap:10px;background:var(--btn);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:14px 26px;font:800 16px/1 Inter,system-ui,sans-serif}
+.play[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+
+<div class="controls" role="toolbar" aria-label="Promo controls">
+  <div class="grp"><button id="bEN" class="on" aria-pressed="true">EN</button><button id="bES" aria-pressed="false">ES</button></div>
+  <div class="grp"><button id="bPlay">Play</button><button id="bRec" title="Hide controls for screen recording">Record mode</button></div>
+</div>
+
+<div class="frame" id="frame" aria-label="15 second promo, 9:16">
+ <div class="stage" id="stage">
+  <div class="prog" id="prog"></div>
+
+  <!-- hook -->
+  <div class="qk on-t" data-t="0,1.6">? kg</div>
+  <div class="plates on-t" data-t="0,1.6" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+  <!-- captions: viewer language -->
+  <div class="cap on-t" data-t="0,1.6" data-c="c1"></div>
+  <div class="cap on-t" data-t="1.6,3.6" data-c="c2"></div>
+  <div class="cap on-t" data-t="3.6,7.1" data-c="c3"></div>
+  <div class="cap on-t" data-t="7.1,10.6" data-c="c4"></div>
+  <div class="cap on-t" data-t="10.6,12.6" data-c="c5"></div>
+
+  <div class="phone" data-t="1.4,12.6" id="phone">
+   <div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+    <div class="vp"><div class="scroll" id="scroll">
+     <div class="wbar"><span class="pill" data-a="exit"></span><span class="wtitle" data-a="day"></span>
+      <span class="lang"><span id="lEN" class="act">EN</span><span id="lES">ES</span></span></div>
+     <div class="chips"><span class="chip dn">1✓</span><span class="chip cur">2</span><span class="chip ss">3</span><span class="dash"></span><span class="chip ss">4</span><span class="chip ss">5</span><span class="dash"></span><span class="chip ss">6</span><span class="chip">7</span><span class="chip">8</span></div>
+     <div class="jump" data-a="jump"></div>
+     <div class="ex">
+      <div class="exn"><span data-a="exName"></span><sup>↗</sup></div>
+      <div class="exs" data-a="exSub"></div>
+      <div class="tags"><span class="tag" data-a="tag1"></span><span class="tag" data-a="tag2"></span><span class="tag l" data-a="tag3"></span></div>
+      <div class="meta" data-a="meta"></div>
+     </div>
+     <div class="today on-t" data-t="2.1,99" id="today"><span data-a="today"></span></div>
+     <div class="squeeze" id="squeeze"><b data-a="sqT"></b> <span data-a="sq"></span><span class="plus">+</span></div>
+     <div class="tools"><span class="pill" data-a="same"></span><span class="rest" data-a="rest"></span></div>
+     <div class="tbl">
+      <div class="th"><span data-a="set"></span><span class="lt"><span data-a="last"></span><br><span data-a="lastD"></span></span><span>kg</span><span>Reps</span><span>✓</span></div>
+      <div class="tr"><span class="n">1</span><span class="lt">40 × 11</span><span class="kg"><i>−</i><span class="val" id="w1">42.5</span><i>+</i></span><span class="val" id="r1">8</span><span class="ck" id="c1">✓</span></div>
+      <div class="hint on-t" data-t="9.0,99" id="hint"><span data-a="hint"></span><br><span class="use" id="use" data-a="use"></span></div>
+      <div class="tr"><span class="n">2</span><span class="lt">40 × 8</span><span class="kg"><i>−</i><span class="val" id="w2">42.5</span><i>+</i></span><span class="val">8</span><span class="ck">✓</span></div>
+      <div class="tr"><span class="n">3</span><span class="lt">40 × 8</span><span class="kg"><i>−</i><span class="val">42.5</span><i>+</i></span><span class="val">8</span><span class="ck">✓</span></div>
+     </div>
+    </div></div>
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet sh" id="sheet">
+     <div class="sh-t"><span data-a="shTitle"></span><span class="sh-x">✕</span></div>
+     <div class="sh-h" data-a="hToday"></div>
+     <ul><li data-a="tTarget"></li><li class="why" id="why" data-a="tWhy"></li></ul>
+     <div class="sh-h" data-a="hLast"></div>
+     <p data-a="lastLine"></p>
+     <div class="sh-h" data-a="hSq"></div>
+     <p data-a="sqFull"></p>
+     <div class="sh-h" data-a="hTips"></div>
+     <ul><li data-a="tip1"></li><li data-a="tip2"></li></ul>
+    </div>
+    <div class="finger" id="finger"></div>
+   </div>
+  </div>
+
+  <div class="end on-t" data-t="12.6,99">
+   <div class="eyebrow" data-c="eyebrow"></div>
+   <div class="word">GYM STUDIO</div>
+   <div class="tagl" data-c="tagline"></div>
+   <div class="cta" data-c="cta"></div>
+   <div class="url">sebpabonc.github.io/gymstudio</div>
+   <div class="badge" data-c="badge"></div>
+  </div>
+
+  <button class="play" id="overlay" aria-label="Play promo"><span>▶ <b id="ovTxt">Play</b></span></button>
+ </div>
+</div>
+<p class="note">Draft prototype, not published. Faithful recreation of the live app (Workout mode, cue sheet, set hint) with values taken from the demo (T-bar row 40×11·8·8 → 42.5 kg × 8); all numbers pending PT approval. No music embedded: add a licensed 120 BPM track in the editor. To export: Record mode, then screen-record the frame and crop to 9:16.</p>
+
+<script>
+const DUR=15;
+const C={
+ en:{c1:'Guessing your <em>weights?</em>',c2:'GymStudio knows <em>what to lift today.</em>',c3:'And tells you <em>why.</em>',c4:'It learns from <em>every set.</em>',c5:'English <em>or Spanish.</em>',
+  eyebrow:'TRAIN WITH INTENT',tagline:'Train with an <em>AI Personal Trainer</em> that learns from every set.',cta:'Try the demo',badge:'Free beta · Web · iPhone app coming'},
+ es:{c1:'¿Adivinas tus <em>pesos?</em>',c2:'GymStudio sabe <em>qué te toca hoy.</em>',c3:'Y te dice <em>por qué.</em>',c4:'Aprende de <em>cada serie.</em>',c5:'En español <em>o inglés.</em>',
+  eyebrow:'ENTRENA CON INTENCIÓN',tagline:'Entrena con un <em>entrenador personal con IA</em> que aprende de cada serie.',cta:'Prueba la demo',badge:'Beta gratis · Web · App de iPhone pronto'}};
+const A={
+ en:{exit:'‹ Exit',day:'Upper A · 2/8',jump:'Tap an exercise to jump · rose line = superset',exName:'Plate-Loaded T-Bar Row',exSub:'Chest-Supported',tag1:'Straight Sets',tag2:'Upper Back',tag3:'Lats',meta:'3 sets · 8·8·8 reps · 150 s rest',
+  today:'Today: 42.5 kg × 8',sqT:'Squeeze —',sq:'Drive your elbows behind your body and squeeze your shoulder blades together hard…',same:'Same as set 1',rest:'Start rest',set:'Set',last:'Last time',lastD:'Tue 6 Oct',
+  hint:'11 reps at 42.5 kg — consider 45 kg for the next set',use:'Use 45 kg',
+  shTitle:'Plate-Loaded T-Bar Row (Chest-Supported)',hToday:'Today',tTarget:'3 sets × 8 reps at 42.5 kg',tWhy:'Last time you reached the top of the 8-rep target at 40 kg, so I moved the load up.',
+  hLast:'Last time',lastLine:'Oct 6 · 40×11 · 40×8 · 40×8',hSq:'Squeeze',sqFull:'Drive your elbows behind your body and squeeze your shoulder blades together hard while your chest stays glued to the pad.',
+  hTips:'Posture tips',tip1:'Step onto the platform, rest your chest on the pad and grab the handles with straight arms.',tip2:'Keep your chest on the pad and your neck neutral without lifting your head.'},
+ es:{exit:'‹ Salir',day:'Tren superior A · 2/8',jump:'Toca un ejercicio para saltar · línea rosa = superserie',exName:'Remo en T en máquina de discos',exSub:'con apoyo de pecho',tag1:'Series rectas',tag2:'Espalda alta',tag3:'Dorsales',meta:'3 series · 8·8·8 reps · 150 s descanso',
+  today:'Hoy: 42.5 kg × 8',sqT:'Aprieta —',sq:'Lleva los codos detrás del cuerpo y junta fuerte las escápulas…',same:'Igual que la serie 1',rest:'Iniciar descanso',set:'Serie',last:'Última vez',lastD:'mar 6 oct',
+  hint:'11 reps con 42.5 kg — considera 45 kg para la siguiente serie',use:'Usar 45 kg',
+  shTitle:'Remo en T en máquina de discos (con apoyo de pecho)',hToday:'Hoy',tTarget:'3 series × 8 reps con 42.5 kg',tWhy:'La última vez alcanzaste el máximo del objetivo de 8 repeticiones con 40 kg, así que subí el peso.',
+  hLast:'Última vez',lastLine:'6 oct · 40×11 · 40×8 · 40×8',hSq:'Aprieta',sqFull:'Lleva los codos detrás del cuerpo y junta fuerte las escápulas mientras el pecho sigue pegado a la almohadilla.',
+  hTips:'Consejos de postura',tip1:'Súbete a la plataforma, apoya el pecho en la almohadilla y agarra las asas con los brazos rectos.',tip2:'Mantén el pecho en la almohadilla y el cuello neutro, sin levantar la cabeza.'}};
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let lang='en',appLang=null,playing=false,t0=0,tNow=0;
+function paintCaps(){$$('[data-c]').forEach(e=>e.innerHTML=C[lang][e.dataset.c])}
+function paintApp(l){if(l===appLang)return;appLang=l;$$('[data-a]').forEach(e=>e.textContent=A[l][e.dataset.a]);$('#lEN').classList.toggle('act',l==='en');$('#lES').classList.toggle('act',l==='es')}
+function setLang(l){lang=l;['EN','ES'].forEach(x=>{const b=$('#b'+x),on=x.toLowerCase()===l;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});paintCaps();appLang=null;render(tNow)}
+$('#bEN').onclick=()=>setLang('en');$('#bES').onclick=()=>setLang('es');
+$('#bRec').onclick=()=>document.body.classList.toggle('rec');
+function between(t,a,b){return t>=a&&t<b}
+function finger(x,y,show){const f=$('#finger');f.style.left=x+'px';f.style.top=y+'px';f.classList.toggle('on',show)}
+function render(t){
+  tNow=t;$('#prog').style.width=Math.min(t/DUR*100,100)+'%';
+  $$('[data-t]').forEach(e=>{const[a,b]=e.dataset.t.split(',').map(Number);e.classList.toggle('on',between(t,a,b))});
+  // app language: viewer's language, flipped to the other one for the EN/ES beat
+  paintApp(between(t,11.2,12.6)?(lang==='en'?'es':'en'):lang);
+  $('#today').classList.toggle('pop',between(t,2.1,2.7));
+  // cue sheet 3.9 → 7.0
+  const sheetOn=between(t,4.2,7.0);$('#sheet').classList.toggle('on',sheetOn);$('#scrim').classList.toggle('on',sheetOn);
+  $('#squeeze').classList.toggle('tap',between(t,3.9,4.4));
+  $('#why').classList.toggle('hl',between(t,5.0,7.0));
+  // logging: scroll the table up into the safe area, fill reps 8→11, tick, hint, Use 45 kg
+  $('#scroll').style.transform=between(t,7.1,11.0)?'translateY(-150px)':'none';
+  const reps=t<7.8?8:t<8.1?9:t<8.4?10:11;$('#r1').textContent=reps;
+  $('#w1').classList.toggle('f',t>=7.6);$('#r1').classList.toggle('f',t>=7.8);
+  $('#c1').classList.toggle('on',t>=8.6);$('#c1').classList.toggle('tap',between(t,8.6,9.1));
+  $('#use').classList.toggle('tap',between(t,9.9,10.4));
+  $('#w2').textContent=t>=10.1?'45':'42.5';$('#w2').classList.toggle('f',t>=10.1);
+  // finger
+  if(between(t,3.6,4.4))finger(150,282,true);
+  else if(between(t,8.3,8.9))finger(250,237,true);
+  else if(between(t,9.6,10.4))finger(60,306,true);
+  else finger(150,300,false);
+}
+function loop(now){if(!playing)return;const t=(now-t0)/1000;if(t>=DUR){render(DUR-0.001);stop();return}render(t);requestAnimationFrame(loop)}
+function play(){t0=performance.now();playing=true;$('#overlay').hidden=true;$('#bPlay').textContent='Replay';requestAnimationFrame(loop)}
+function stop(){playing=false;$('#ovTxt').textContent='Replay';$('#overlay').hidden=false;$('#overlay').setAttribute('aria-label','Replay promo')}
+$('#bPlay').onclick=play;$('#overlay').onclick=play;
+function fit(){const w=Math.min(document.documentElement.clientWidth-32,420,(window.innerHeight-130)*9/16);const fw=Math.max(w,240);$('#frame').style.setProperty('--fw',fw+'px');$('#stage').style.transform='scale('+(fw/360)+')'}
+addEventListener('resize',fit);fit();paintCaps();render(0.8);
+</script>

@@ -1,0 +1,376 @@
+<title>App Store Screenshots</title>
+<style>
+
+:root{
+  color-scheme:dark;
+  --bg:#0f0f10;--soft:#171719;--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#c8c7c4;--dim:rgba(243,243,241,.55);
+  --brand:#8d5e63;--brand2:#5a474b;--brandsoft:rgba(141,94,99,.18);--accent:#c99ca1;
+  --ok:#dfe7df;--done:#a9d6a6;--amber:#e2b45c;--ambersoft:rgba(226,180,92,.10);
+  --btn:linear-gradient(135deg,#7a5d60 0%,#2f2f31 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#08080a;color:var(--text);font-family:Inter,-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;-webkit-font-smoothing:antialiased}
+.controls{display:flex;gap:8px;align-items:center;justify-content:space-between;width:100%;max-width:420px;flex-wrap:wrap}
+.controls .grp{display:flex;gap:6px}
+.controls button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:600 13px/1 inherit;cursor:pointer;min-height:36px}
+.controls button.on{background:var(--brand);border-color:var(--brand)}
+.controls button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note{font-size:11px;line-height:1.45;color:var(--muted);max-width:420px;text-align:center}
+body.rec .controls,body.rec .note{visibility:hidden}
+/* frame: 9:16, design canvas 360x640 scaled to fit */
+.frame{position:relative;width:var(--fw,360px);height:calc(var(--fw,360px)*16/9);border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#0f0f10}
+.stage{position:absolute;left:0;top:0;width:360px;height:640px;transform-origin:0 0;overflow:hidden;
+  background:radial-gradient(120% 60% at 50% 0%,#2a1f21 0%,#121113 55%,#0b0b0c 100%)}
+.prog{position:absolute;left:0;top:0;height:3px;width:0;background:var(--accent);z-index:40}
+.on-t{opacity:0;transition:opacity .35s ease,transform .45s cubic-bezier(.2,.8,.2,1)}
+.on-t.on{opacity:1}
+/* captions (safe area: below top 83px, right 40px) */
+.cap{position:absolute;left:24px;right:44px;top:96px;font-weight:800;font-size:27px;line-height:1.12;letter-spacing:-.025em;transform:translateY(12px);z-index:30;text-shadow:0 2px 18px rgba(0,0,0,.7)}
+.cap.on{transform:none}
+.cap em{font-style:normal;color:var(--accent)}
+.qk{position:absolute;inset:150px 0 auto 0;text-align:center;font-size:118px;font-weight:800;letter-spacing:-.04em;color:rgba(201,156,161,.18)}
+.qk.on{animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{color:rgba(201,156,161,.45)}}
+.plates{position:absolute;left:0;right:0;top:330px;display:flex;justify-content:center;gap:10px}
+.plates i{display:block;width:16px;border-radius:4px;background:var(--brand2);border:1px solid var(--line)}
+.plates i:nth-child(1),.plates i:nth-child(6){height:70px;margin-top:20px}
+.plates i:nth-child(2),.plates i:nth-child(5){height:90px;margin-top:10px}
+.plates i:nth-child(3),.plates i:nth-child(4){height:110px;background:var(--brand)}
+/* phone */
+.phone{position:absolute;left:22px;width:296px;top:186px;height:520px;border-radius:38px;background:#050506;border:1px solid rgba(255,255,255,.16);padding:7px;box-shadow:0 30px 90px rgba(0,0,0,.65);transform:translateY(480px);transition:transform .7s cubic-bezier(.2,.8,.2,1);z-index:10}
+.phone.on{transform:none}
+.screen{position:relative;width:100%;height:100%;border-radius:31px;overflow:hidden;background:linear-gradient(180deg,#141415,#0b0b0c)}
+.island{position:absolute;top:7px;left:50%;width:78px;height:20px;margin-left:-39px;background:#000;border-radius:12px;z-index:9}
+.status{height:30px;display:flex;justify-content:space-between;align-items:center;padding:4px 22px 0;font-size:10px;font-weight:700}
+.vp{position:absolute;left:0;right:0;top:30px;bottom:0;overflow:hidden}
+.scroll{position:absolute;left:0;right:0;top:0;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+/* workout mode, faithful to the live app (#304, #308, #327) */
+.wbar{display:flex;align-items:center;justify-content:space-between;padding:4px 10px 6px;gap:6px}
+.pill{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 9px;font-size:9px;color:var(--muted);font-weight:600;white-space:nowrap}
+.wtitle{font-size:11.5px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:8.5px;font-weight:800;background:var(--panel)}
+.lang span{padding:5px 8px;color:var(--dim);transition:.25s}
+.lang span.act{background:var(--brandsoft);color:var(--accent)}
+.chips{display:flex;align-items:center;gap:4px;padding:2px 10px 0}
+.chip{width:24px;height:24px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;font-size:9.5px;font-weight:700;color:var(--muted);background:var(--panel);flex:none}
+.chip.dn{background:#9fd39b;color:#0d1a0d;border-color:transparent}
+.chip.cur{border-color:var(--accent);color:var(--accent);background:var(--brandsoft)}
+.chip.ss{border-color:rgba(201,156,161,.5);color:var(--accent)}
+.dash{width:6px;height:2px;background:var(--accent);flex:none;margin:0 -2px}
+.jump{font-size:7.5px;color:var(--dim);padding:5px 10px 8px;border-bottom:1px solid var(--line)}
+.ex{padding:10px 12px 0}
+.exn{font-size:16px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.exn sup{font-size:10px;color:var(--accent);margin-left:3px}
+.exs{font-size:10px;color:var(--muted);margin-top:2px}
+.tags{display:flex;gap:4px;margin-top:7px}
+.tag{font-size:7.5px;font-weight:700;padding:4px 7px;border-radius:999px;background:var(--panel2);border:1px solid var(--line)}
+.tag.l{background:transparent;color:var(--muted)}
+.meta{font-size:8.5px;color:var(--muted);margin-top:6px}
+.today{margin:9px 12px 0;border-left:3px solid var(--accent);background:var(--brandsoft);border-radius:4px 10px 10px 4px;padding:8px 10px;font-size:12px;font-weight:800;letter-spacing:-.01em;display:flex;justify-content:space-between;align-items:center}
+.today small{font-size:7.5px;font-weight:800;color:var(--accent);letter-spacing:.08em}
+.today.pop{animation:pop .5s}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+.squeeze{position:relative;margin:8px 12px 0;background:var(--ambersoft);border:1px solid rgba(226,180,92,.22);border-radius:12px;padding:9px 34px 9px 10px;font-size:9.5px;line-height:1.4;color:var(--text)}
+.squeeze b{color:var(--amber)}
+.squeeze .plus{position:absolute;right:8px;top:50%;margin-top:-11px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--muted)}
+.tools{display:flex;align-items:center;gap:8px;margin:9px 12px 0;font-size:9px}
+.tools .pill{font-size:8.5px;color:var(--text)}
+.tools .rest{color:var(--accent);font-weight:700}
+.tbl{margin:8px 12px 0;font-size:9px}
+.th,.tr{display:grid;grid-template-columns:18px 50px 1fr 46px 26px;gap:5px;align-items:center}
+.th{color:var(--dim);font-size:7.5px;font-weight:700;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.th .lt{line-height:1.25}
+.tr{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.tr .n{font-weight:800;color:var(--muted);text-align:center}
+.tr .lt{color:var(--muted);font-size:8.5px}
+.kg{display:grid;grid-template-columns:18px 1fr 18px;align-items:center;gap:2px}
+.kg i{font-style:normal;height:24px;border-radius:7px;background:var(--panel2);display:grid;place-items:center;font-weight:800;color:var(--muted)}
+.val{height:26px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;font-weight:800;font-size:11.5px;color:var(--dim);transition:.25s}
+.val.f{color:var(--text);border-color:rgba(201,156,161,.55)}
+.ck{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--dim);transition:.25s;position:relative}
+.ck.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.hint{margin:8px 12px 0;border:1px solid rgba(201,156,161,.5);background:linear-gradient(180deg,rgba(141,94,99,.22),rgba(141,94,99,.08));border-radius:12px;padding:9px 10px;font-size:9.5px;line-height:1.4;transform:translateY(8px)}
+.hint.on{transform:none}
+.hint .use{display:inline-block;margin-top:7px;background:var(--btn);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:6px 12px;font-weight:800;font-size:9.5px;position:relative;overflow:hidden}
+.foot{position:absolute;left:10px;right:10px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.foot .nx{background:var(--btn);border-radius:12px;padding:10px;text-align:center;font-size:9.5px;font-weight:800;letter-spacing:.04em;border:1px solid rgba(255,255,255,.12)}
+/* cue sheet (#327) */
+.sheet{position:absolute;left:0;right:0;bottom:0;top:96px;background:#141416;border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:14px 14px 0;transform:translateY(105%);transition:transform .5s cubic-bezier(.2,.8,.2,1);z-index:8;box-shadow:0 -20px 50px rgba(0,0,0,.5)}
+.sheet.on{transform:none}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:.4s;z-index:7}
+.scrim.on{opacity:1}
+.sh-t{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:13.5px;font-weight:800;line-height:1.2;letter-spacing:-.015em}
+.sh-x{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;flex:none;color:var(--muted)}
+.sh-h{font-size:8.5px;font-weight:800;letter-spacing:.09em;color:var(--accent);margin:11px 0 4px;text-transform:uppercase}
+.sh ul{padding-left:13px;font-size:9.5px;line-height:1.45;color:var(--text)}
+.sh li{margin:2px 0}
+.sh p{font-size:9.5px;line-height:1.45}
+.why{border-radius:6px;transition:background .4s}
+.why.hl{background:rgba(201,156,161,.2);box-shadow:0 0 0 3px rgba(201,156,161,.2)}
+/* tap ripple */
+.tap::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:rgba(255,255,255,.5);animation:rip .6s forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(18);opacity:0}}
+.finger{position:absolute;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.28);border:2px solid rgba(255,255,255,.65);z-index:12;opacity:0;transition:opacity .2s,left .5s ease,top .5s ease;pointer-events:none}
+.finger.on{opacity:1}
+/* end card */
+.end{position:absolute;inset:0;z-index:35;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:0 44px 60px 28px;background:radial-gradient(90% 55% at 50% 42%,#2c2023 0%,#0f0f10 72%)}
+.eyebrow{font-size:10px;letter-spacing:.24em;color:var(--muted);font-weight:600}
+.word{font-size:46px;font-weight:800;letter-spacing:-.04em;line-height:.95}
+.tagl{font-size:16px;line-height:1.35;color:var(--muted);max-width:270px}
+.tagl em{font-style:normal;color:var(--accent)}
+.cta{background:var(--btn);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:12px 24px;font-weight:800;font-size:15px}
+.url{font-size:10.5px;color:var(--dim)}
+.badge{font-size:9.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 10px}
+/* play overlay */
+.play{position:absolute;inset:0;z-index:50;display:grid;place-items:center;background:rgba(8,8,10,.55);border:0;cursor:pointer;color:var(--text)}
+.play span{display:flex;align-items:center;gap:10px;background:var(--btn);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:14px 26px;font:800 16px/1 Inter,system-ui,sans-serif}
+.play[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+
+/* 30 s additions */
+.view{position:absolute;inset:0;opacity:0;transition:opacity .35s ease,transform .45s cubic-bezier(.2,.8,.2,1);transform:translateX(16px)}
+.view.on{opacity:1;transform:none}
+/* Today screen (#300, #301, #302) */
+.th-eyebrow{font-size:7.5px;letter-spacing:.2em;color:var(--muted);padding:6px 14px 0}
+.th-word{font-size:25px;font-weight:800;letter-spacing:-.04em;padding:0 14px;line-height:1.05}
+.th-sub{font-size:11px;font-weight:700;color:var(--muted);padding:0 14px 8px}
+.tcard{margin:0 10px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025);padding:10px}
+.chipline{display:flex;gap:6px;align-items:center}
+.cal{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:11px}
+.bchip{font-size:7px;font-weight:800;letter-spacing:.09em;border:1px solid var(--line);border-radius:999px;padding:7px 9px;background:var(--panel)}
+.brow{display:flex;justify-content:space-between;align-items:center;margin:10px 0 8px;font-size:11px;font-weight:800}
+.brow small{font-size:8.5px;font-weight:700;color:var(--text)}
+.wk{border:1px solid var(--line);border-radius:14px;padding:8px}
+.wk-h{display:flex;align-items:center;justify-content:space-between;font-size:9.5px}
+.wk-h .arr{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}
+.wk-h b{font-weight:800}
+.wk-h span.m{color:var(--muted)}
+.segs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
+.seg{height:6px;border-radius:4px;background:rgba(255,255,255,.09);position:relative;overflow:hidden}
+.seg i{position:absolute;inset:0;width:0;background:var(--accent);border-radius:4px;transition:width .6s ease}
+.seg.cur{outline:1.5px solid var(--accent);outline-offset:1.5px}
+.seglab{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:6px;font-size:8px;text-align:center;color:var(--muted)}
+.seglab b{color:var(--text)}
+.dayt{font-size:12px;font-weight:800;margin:12px 2px 2px}
+.days{font-size:8.5px;color:var(--muted);margin:0 2px 9px}
+.start{background:var(--btn);border-radius:12px;padding:11px;text-align:center;font-size:10.5px;font-weight:800;letter-spacing:.06em;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+/* rest pill */
+.restc{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(201,156,161,.5);background:var(--brandsoft);border-radius:999px;padding:4px 9px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.restc .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.lastrow{margin:7px 12px 0;font-size:9px;color:var(--muted);border-radius:6px;padding:3px 4px;transition:background .4s}
+.lastrow b{color:var(--text)}
+.lastrow.hl{background:rgba(201,156,161,.2)}
+/* superset (#308) */
+.ssbox{margin:8px 8px 0;border-left:2px solid var(--accent);padding:0 0 0 8px}
+.ss-h{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800}
+.ss-h small{font-size:7.5px;color:var(--muted);font-weight:600}
+.ss-ex{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.ss-ex b{display:block;font-size:9.5px}
+.ss-ex span{font-size:9px;color:var(--muted);font-weight:700}
+.ss-ex .more{width:24px;height:24px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;font-size:10px;color:var(--muted)}
+.ss-ins{font-size:7.5px;color:var(--muted);margin:6px 0}
+.round{border:1px solid var(--line);border-radius:12px;padding:7px;margin-top:6px;background:rgba(255,255,255,.02);transition:.35s}
+.round.act{border-color:rgba(201,156,161,.55);background:linear-gradient(180deg,rgba(141,94,99,.2),rgba(141,94,99,.06))}
+.round h5{font-size:9.5px;font-weight:800;margin-bottom:4px}
+.rr{display:grid;grid-template-columns:16px 1fr 1fr 24px;gap:4px;align-items:center;margin-top:3px}
+.rr .lb{font-size:8.5px;color:var(--muted);font-weight:700}
+.rr .ck{width:22px;height:22px}
+.rl{font-size:7px;color:var(--dim);margin:1px 0 3px 20px}
+/* session summary */
+.sum{position:absolute;left:0;right:0;bottom:0;top:40px;background:#141416;border-radius:20px 20px 0 0;border-top:1px solid var(--line);padding:14px;transform:translateY(105%);transition:transform .5s cubic-bezier(.2,.8,.2,1);z-index:8}
+.sum.on{transform:none}
+.sum h4{font-size:15px;font-weight:800;letter-spacing:-.02em}
+.sum .dur{font-size:9px;color:var(--muted);margin-top:2px}
+.srow{display:grid;grid-template-columns:18px 1fr;gap:7px;padding:7px 0;border-bottom:1px solid var(--line);font-size:9px;opacity:0;transform:translateX(10px);transition:.35s}
+.srow.on{opacity:1;transform:none}
+.srow .ar{font-size:14px;font-weight:800;text-align:center}
+.srow b{font-size:10px}
+.srow .nx{color:var(--muted);margin-top:1px}
+.up{color:#bfe3c2}.eq{color:var(--muted)}
+.pr{margin-top:10px;border:1px solid rgba(201,156,161,.45);border-radius:12px;padding:8px 10px;font-size:9.5px;background:var(--brandsoft);opacity:0;transform:scale(.95);transition:.4s}
+.pr.on{opacity:1;transform:none}
+.pr small{display:block;font-size:7.5px;letter-spacing:.09em;color:var(--accent);font-weight:800;margin-bottom:2px}
+/* progress (Progress v3) */
+.pg-h{display:flex;justify-content:space-between;align-items:baseline;padding:8px 14px 6px}
+.pg-h b{font-size:20px;font-weight:800;letter-spacing:-.03em}
+.pg-h span{font-size:8.5px;color:var(--muted)}
+.tabs{display:flex;margin:0 12px;background:var(--panel);border-radius:10px;padding:3px;font-size:8.5px}
+.tabs span{flex:1;text-align:center;padding:5px 0;border-radius:8px;color:var(--muted)}
+.tabs span.act{background:var(--brand);color:#fff}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:9px 12px 0}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px;text-align:center}
+.tile b{display:block;font-size:14px;font-weight:800}
+.tile span{font-size:7px;color:var(--muted)}
+.sec{font-size:7.5px;letter-spacing:.1em;font-weight:800;color:var(--muted);margin:11px 12px 2px}
+.mus{margin:6px 12px 0;font-size:9px}
+.mus .mh{display:flex;justify-content:space-between;font-weight:800}
+.mus .mh span{color:var(--muted);font-weight:600}
+.track{position:relative;height:8px;border-radius:5px;background:rgba(255,255,255,.07);margin-top:4px}
+.band{position:absolute;top:0;bottom:0;left:33.3%;width:33.3%;background:rgba(201,156,161,.22);border-radius:3px}
+.mark{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--accent);left:0;transition:left .8s cubic-bezier(.2,.8,.2,1)}
+.axis{display:flex;justify-content:space-between;font-size:6.5px;color:var(--dim);margin-top:2px}
+.demo{display:inline-block;margin:0 12px;font-size:7px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 6px;z-index:3}
+.both{font-size:11px;color:var(--muted);letter-spacing:.04em}
+
+/* screenshot sheet */
+body{display:block;padding:16px;max-width:1240px;margin:0 auto}
+header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:6px}
+header.top h1{font-size:20px;font-weight:800;letter-spacing:-.02em}
+header.top p{font-size:12px;color:var(--muted);max-width:640px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;margin-top:16px}
+figure{display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:11.5px;color:var(--muted);line-height:1.45}
+figcaption b{color:var(--text)}
+.shot{position:relative;width:100%;aspect-ratio:1290/2796;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.canvas{position:absolute;left:0;top:0;width:360px;height:780px;transform-origin:0 0;overflow:hidden;background:radial-gradient(130% 55% at 50% 0%,#33242a 0%,#141214 55%,#0b0b0c 100%)}
+.canvas.alt{background:radial-gradient(130% 55% at 50% 0%,#2a2023 0%,#111013 60%,#0b0b0c 100%)}
+.hl1{position:absolute;left:28px;right:28px;top:62px;text-align:center}
+.hl1 h2{font-size:31px;font-weight:800;letter-spacing:-.035em;line-height:1.08}
+.hl1 h2 em{font-style:normal;color:var(--accent)}
+.hl1 p{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.4}
+.canvas .phone{transform:none;top:210px;left:32px;height:640px;transition:none}
+.canvas .view{transition:none}
+.canvas *{transition:none!important;animation:none!important}
+.num{position:absolute;left:12px;top:10px;font-size:9px;color:var(--dim);letter-spacing:.1em}
+.checklist{margin-top:22px;font-size:12px;color:var(--muted);line-height:1.6;border-top:1px solid var(--line);padding-top:12px}
+.checklist b{color:var(--text)}
+</style>
+
+<header class="top">
+ <div>
+  <h1>App Store screenshots (draft)</h1>
+  <p>6 mockups for the 6.7"/6.9" iPhone slot (1290 × 2796 px, shown scaled). Faithful recreations of the live app with demo values; final files should be real captures from the iOS build with the same captions. Every number pending PT approval; brand spelling pending PO/UXer.</p>
+ </div>
+ <div class="controls" style="width:auto"><div class="grp"><button id="bEN" class="on" aria-pressed="true">EN</button><button id="bES" aria-pressed="false">ES</button></div></div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="checklist">
+ <b>Export:</b> each canvas is 360 × 780 design px; capture at device-pixel-ratio 3.583 (or scale in an editor) to get 1290 × 2796. Apple accepts 1–10 screenshots per size; the first 3 show in search results, so 1–3 carry the core value.<br>
+ <b>Rules followed:</b> real UI states only (no features that are not built), no ratings, user counts, awards or testimonials, captions inside the top band, same order in EN and ES.
+</div>
+
+<template id="tpl-phone">
+ <div class="phone"><div class="screen"><div class="island"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div><div class="vp"></div></div></div>
+</template>
+
+<script>
+const CAP={
+ en:[
+  ['Know what to lift <em>today</em>','Every exercise shows today’s weight, from your last sets.'],
+  ['Every weight comes <em>with a why</em>','Tap the cue: the reason, last time, technique tips.'],
+  ['Learns from <em>every set</em>','Beat your target and it suggests the next step up.'],
+  ['Supersets, <em>round by round</em>','Log both exercises per round. Rest timer built in.'],
+  ['Your 6-week plan, <em>week by week</em>','A plan built from a personal trainer’s templates.'],
+  ['See every <em>muscle’s week</em>','Weekly sets by muscle, trends and records.']],
+ es:[
+  ['Sabe qué levantar <em>hoy</em>','Cada ejercicio muestra el peso de hoy, según tus últimas series.'],
+  ['Cada peso viene <em>con su porqué</em>','Toca la técnica: el motivo, tu última vez y consejos.'],
+  ['Aprende de <em>cada serie</em>','Si superas el objetivo, te sugiere subir un paso.'],
+  ['Superseries, <em>ronda a ronda</em>','Registra los dos ejercicios por ronda. Con temporizador.'],
+  ['Tu plan de 6 semanas, <em>semana a semana</em>','Un plan creado con plantillas de un entrenador personal.'],
+  ['Mira la semana <em>de cada músculo</em>','Series semanales por músculo, tendencias y récords.']]};
+const NOTE=[
+ '<b>1 · Workout mode.</b> "Today: 42.5 kg × 8" from the live demo (last time 40×11·8·8). PT to approve.',
+ '<b>2 · Cue sheet (#327).</b> Real reason string <code>reached_top_of_range</code>, last time, PT-approved squeeze cue and posture tips.',
+ '<b>3 · Set hint.</b> 42.5 kg × 11 vs target 8 (+3 over top) → "consider 45 kg" (2.5 kg plate-loaded step). Rest pill styling to confirm with Tech Lead.',
+ '<b>4 · Superset rounds (#308).</b> C1 14 kg × 11, C2 35.5 kg × 10 from the demo.',
+ '<b>5 · Today + weekly bar (#300–#302).</b> "PT templates" claim needs PT/PO wording approval.',
+ '<b>6 · Progress v3 Muscles.</b> Demo-style values; common range 10–20 is the approved PT display band, not a prescription.'];
+
+const A={
+ en:{eyebrow:'TRAIN WITH INTENT',todayT:'Today',planChip:'6-WEEK PLAN · 4 DAYS/WEEK',split:'Upper / Lower · 4 days',weekOf:'Week 4 of 6',thisWeek:'This week',done1:'1 of 4 days done',d1:'Mon 19',d2:'Tue 20',d3:'Thu 22',d4:'Fri 23',day2:'Day 2 · Lower A',day2s:'Lower body · heavy',startW:'▶  START WORKOUT',
+  exit:'‹ Exit',day:'Upper A · 2/8',day3:'Upper A · 3/8',jump:'Tap an exercise to jump · rose line = superset',exName:'Plate-Loaded T-Bar Row',exSub:'Chest-Supported',tag1:'Straight Sets',tag2:'Upper Back',tag3:'Lats',meta:'3 sets · 8·8·8 reps · 150 s rest',
+  today:'Today: 42.5 kg × 8',lastFull:'Tue 6 Oct: 40×11·8·8',sqT:'Squeeze —',sq:'Drive your elbows behind your body and squeeze your shoulder blades together hard…',same:'Same as set 1',rest:'Start rest',restW:'Rest',set:'Set',last:'Last time',lastD:'Tue 6 Oct',
+  hint:'11 reps at 42.5 kg — consider 45 kg for the next set',use:'Use 45 kg',
+  shTitle:'Plate-Loaded T-Bar Row (Chest-Supported)',hToday:'Today',tTarget:'3 sets × 8 reps at 42.5 kg',tWhy:'Last time you reached the top of the 8-rep target at 40 kg, so I moved the load up.',
+  hLast:'Last time',lastLine:'Oct 6 · 40×11 · 40×8 · 40×8',hSq:'Squeeze',sqFull:'Drive your elbows behind your body and squeeze your shoulder blades together hard while your chest stays glued to the pad.',
+  hTips:'Posture tips',tip1:'Step onto the platform, rest your chest on the pad and grab the handles with straight arms.',tip2:'Keep your chest on the pad and your neck neutral without lifting your head.',tip3:'Row the handles toward your torso, pause for a second, then lower over 2-3 seconds to straight arms.',
+  ssT:'Superset · C1 + C2',roundOf:'Round 1 of 3',c1n:'C1 · Dumbbell Shoulder Press (Seated)',c1t:'Today: 14 kg × 11',c2n:'C2 · Cable Lat Pulldown (Wide Grip)',c2t:'Today: 35.5 kg × 10',ssIns:'Do C1, rest ~10 s, then C2; rest after the pair.',r1:'Round 1',r2:'Round 2',c1l:'Last time: 14×10',c2l:'Last time: 35.5×10',
+  demo:'Demo data',prog:'Progress',tOv:'Overview',tTr:'Trends',tMu:'Muscles',tCo:'Consistency',tile1:'Training days',tile2:'Main-lift e1RM',wsm:'WEEKLY SETS BY MUSCLE',mChest:'Chest',mBack:'Back',mShoulders:'Shoulders',mQuads:'Quads',band:'Shaded band = common range 10–20 sets/week (4-week average)'},
+ es:{eyebrow:'ENTRENA CON INTENCIÓN',todayT:'Hoy',planChip:'PLAN DE 6 SEMANAS · 4 DÍAS/SEMANA',split:'Superior / Inferior · 4 días',weekOf:'Semana 4 de 6',thisWeek:'Esta semana',done1:'1 de 4 días hechos',d1:'Lun 19',d2:'Mar 20',d3:'Jue 22',d4:'Vie 23',day2:'Día 2 · Tren inferior A',day2s:'Tren inferior · pesado',startW:'▶  EMPEZAR ENTRENAMIENTO',
+  exit:'‹ Salir',day:'Tren superior A · 2/8',day3:'Tren superior A · 3/8',jump:'Toca un ejercicio para saltar · línea rosa = superserie',exName:'Remo en T en máquina de discos',exSub:'con apoyo de pecho',tag1:'Series rectas',tag2:'Espalda alta',tag3:'Dorsales',meta:'3 series · 8·8·8 reps · 150 s descanso',
+  today:'Hoy: 42.5 kg × 8',lastFull:'mar 6 oct: 40×11·8·8',sqT:'Aprieta —',sq:'Lleva los codos detrás del cuerpo y junta fuerte las escápulas…',same:'Igual que la serie 1',rest:'Iniciar descanso',restW:'Descanso',set:'Serie',last:'Última vez',lastD:'mar 6 oct',
+  hint:'11 reps con 42.5 kg — considera 45 kg para la siguiente serie',use:'Usar 45 kg',
+  shTitle:'Remo en T en máquina de discos (con apoyo de pecho)',hToday:'Hoy',tTarget:'3 series × 8 reps con 42.5 kg',tWhy:'La última vez alcanzaste el máximo del objetivo de 8 repeticiones con 40 kg, así que subí el peso.',
+  hLast:'Última vez',lastLine:'6 oct · 40×11 · 40×8 · 40×8',hSq:'Aprieta',sqFull:'Lleva los codos detrás del cuerpo y junta fuerte las escápulas mientras el pecho sigue pegado a la almohadilla.',
+  hTips:'Consejos de postura',tip1:'Súbete a la plataforma, apoya el pecho en la almohadilla y agarra las asas con los brazos rectos.',tip2:'Mantén el pecho en la almohadilla y el cuello neutro, sin levantar la cabeza.',tip3:'Rema las asas hacia el torso, pausa un segundo y baja en 2-3 segundos hasta estirar los brazos.',
+  ssT:'Superserie · C1 + C2',roundOf:'Ronda 1 de 3',c1n:'C1 · Press de hombros con mancuernas (sentado)',c1t:'Hoy: 14 kg × 11',c2n:'C2 · Jalón al pecho en polea (agarre ancho)',c2t:'Hoy: 35.5 kg × 10',ssIns:'Haz C1, descansa ~10 s, luego C2; descansa al final del par.',r1:'Ronda 1',r2:'Ronda 2',c1l:'Última vez: 14×10',c2l:'Última vez: 35.5×10',
+  demo:'Datos demo',prog:'Progreso',tOv:'Resumen',tTr:'Tendencias',tMu:'Músculos',tCo:'Constancia',tile1:'Días entrenados',tile2:'e1RM levantamientos principales',wsm:'SERIES SEMANALES POR MÚSCULO',mChest:'Pecho',mBack:'Espalda',mShoulders:'Hombros',mQuads:'Cuádriceps',band:'Banda sombreada = rango común de 10–20 series/semana (media de 4 semanas)'}};
+
+const chips='<div class="chips"><span class="chip dn">1✓</span><span class="chip cur">2</span><span class="chip ss">3</span><span class="dash"></span><span class="chip ss">4</span><span class="chip ss">5</span><span class="dash"></span><span class="chip ss">6</span><span class="chip">7</span><span class="chip">8</span></div>';
+const bar=d=>`<div class="wbar"><span class="pill" data-a="exit"></span><span class="wtitle" data-a="${d}"></span><span class="lang"><span class="lEN">EN</span><span class="lES">ES</span></span></div>`;
+const row=(n,lt,w,r,on,id='')=>`<div class="tr"><span class="n">${n}</span><span class="lt">${lt}</span><span class="kg"><i>−</i><span class="val${on?' f':''}"${id}>${w}</span><i>+</i></span><span class="val${on?' f':''}">${r}</span><span class="ck${on?' on':''}">✓</span></div>`;
+function workout({hint=false,set1=false,rest=false,shift=0}){
+ return `<div class="scroll" style="transform:translateY(${shift}px)">${bar('day')}${chips}<div class="jump" data-a="jump"></div>
+ <div class="ex"><div class="exn"><span data-a="exName"></span><sup>↗</sup></div><div class="exs" data-a="exSub"></div>
+ <div class="tags"><span class="tag" data-a="tag1"></span><span class="tag" data-a="tag2"></span><span class="tag l" data-a="tag3"></span></div><div class="meta" data-a="meta"></div></div>
+ <div class="today"><span data-a="today"></span></div>
+ <div class="lastrow"><span data-a="last"></span> · <b data-a="lastFull"></b></div>
+ <div class="squeeze"><b data-a="sqT"></b> <span data-a="sq"></span><span class="plus">+</span></div>
+ <div class="tools"><span class="pill" data-a="same"></span>${rest?'<span class="restc"><span class="dot"></span><span data-a="restW"></span> 2:18</span>':'<span class="rest" data-a="rest"></span>'}</div>
+ <div class="tbl"><div class="th"><span data-a="set"></span><span class="lt"><span data-a="last"></span><br><span data-a="lastD"></span></span><span>kg</span><span>Reps</span><span>✓</span></div>
+ ${row(1,'40 × 11','42.5',set1?11:8,set1)}
+ ${hint?'<div class="hint on-t on"><span data-a="hint"></span><br><span class="use" data-a="use"></span></div>':''}
+ ${row(2,'40 × 8','42.5',8,false)}${row(3,'40 × 8','42.5',8,false)}</div></div>`}
+const sheet=`<div class="scrim on"></div><div class="sheet sh on"><div class="sh-t"><span data-a="shTitle"></span><span class="sh-x">✕</span></div>
+ <div class="sh-h" data-a="hToday"></div><ul><li data-a="tTarget"></li><li class="why hl" data-a="tWhy"></li></ul>
+ <div class="sh-h" data-a="hLast"></div><p data-a="lastLine"></p><div class="sh-h" data-a="hSq"></div><p data-a="sqFull"></p>
+ <div class="sh-h" data-a="hTips"></div><ul><li data-a="tip1"></li><li data-a="tip2"></li><li data-a="tip3"></li></ul></div>`;
+const superset=`${bar('day3')}<div class="chips"><span class="chip dn">1✓</span><span class="chip dn">2✓</span><span class="chip cur">3</span><span class="dash"></span><span class="chip cur">4</span><span class="chip ss">5</span><span class="dash"></span><span class="chip ss">6</span><span class="chip">7</span><span class="chip">8</span></div><div class="jump" data-a="jump"></div>
+ <div class="ssbox"><div class="ss-h"><span data-a="ssT"></span><small data-a="roundOf"></small></div>
+ <div class="ss-ex"><div><b data-a="c1n"></b><span data-a="c1t"></span></div><span class="more">⋯</span></div>
+ <div class="ss-ex"><div><b data-a="c2n"></b><span data-a="c2t"></span></div><span class="more">⋯</span></div>
+ <div class="ss-ins" data-a="ssIns"></div>
+ <div class="round act"><h5 data-a="r1"></h5>
+  <div class="rr"><span class="lb">C1</span><span class="kg"><i>−</i><span class="val f">14</span><i>+</i></span><span class="kg"><i>−</i><span class="val f">11</span><i>+</i></span><span class="ck on">✓</span></div><div class="rl" data-a="c1l"></div>
+  <div class="rr"><span class="lb">C2</span><span class="kg"><i>−</i><span class="val f">35.5</span><i>+</i></span><span class="kg"><i>−</i><span class="val f">10</span><i>+</i></span><span class="ck">✓</span></div><div class="rl" data-a="c2l"></div></div>
+ <div class="round"><h5 data-a="r2"></h5>
+  <div class="rr"><span class="lb">C1</span><span class="kg"><i>−</i><span class="val">14</span><i>+</i></span><span class="kg"><i>−</i><span class="val">11</span><i>+</i></span><span class="ck">✓</span></div><div class="rl" data-a="c1l"></div>
+  <div class="rr"><span class="lb">C2</span><span class="kg"><i>−</i><span class="val">35.5</span><i>+</i></span><span class="kg"><i>−</i><span class="val">10</span><i>+</i></span><span class="ck">✓</span></div></div>
+ <div class="tools" style="margin:10px 0 0"><span class="restc"><span class="dot"></span><span data-a="restW"></span> 1:24</span></div></div>`;
+const today=`<div class="th-eyebrow" data-a="eyebrow"></div><div class="th-word">GYM STUDIO</div><div class="th-sub" data-a="todayT"></div>
+ <div class="tcard"><div class="chipline"><span class="cal">▦</span><span class="bchip" data-a="planChip"></span></div>
+ <div class="brow"><span data-a="split"></span><small data-a="weekOf"></small></div>
+ <div class="wk"><div class="wk-h"><span class="arr">‹</span><span><span class="m" data-a="thisWeek"></span>&nbsp;&nbsp;<b data-a="done1"></b></span><span class="arr">›</span></div>
+ <div class="segs"><span class="seg"><i style="width:100%"></i></span><span class="seg cur"><i></i></span><span class="seg"><i></i></span><span class="seg"><i></i></span></div>
+ <div class="seglab"><span data-a="d1"></span><b data-a="d2"></b><span data-a="d3"></span><span data-a="d4"></span></div></div>
+ <div class="dayt" data-a="day2"></div><div class="days" data-a="day2s"></div><div class="start" data-a="startW"></div></div>`;
+const mus=(k,v)=>`<div class="mus"><div class="mh"><span data-a="${k}"></span><span>${v}</span></div><div class="track"><span class="band"></span><span class="mark" style="left:${v/30*100}%"></span></div></div>`;
+const progress=`<div class="pg-h"><b data-a="prog"></b><span data-a="split"></span></div>
+ <div class="tabs"><span data-a="tOv"></span><span data-a="tTr"></span><span class="act" data-a="tMu"></span><span data-a="tCo"></span></div>
+ <div class="tiles"><div class="tile"><b>9</b><span data-a="tile1"></span></div><div class="tile"><b>+6.6%</b><span data-a="tile2"></span></div></div>
+ <div class="sec" data-a="wsm"></div>${mus('mChest',15.3)}${mus('mBack',13.6)}${mus('mShoulders',11.0)}${mus('mQuads',12.4)}
+ <div class="axis" style="margin:2px 12px 0"><span>0</span><span>10</span><span>20</span><span>30</span></div>
+ <div class="days" style="margin:8px 12px" data-a="band"></div><span class="demo" data-a="demo"></span>`;
+const SCREENS=[
+ {vp:workout({})},
+ {vp:workout({}),over:sheet},
+ {vp:workout({hint:true,set1:true,rest:true,shift:-150})},
+ {vp:superset},
+ {vp:today},
+ {vp:progress}];
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let lang='en';
+function build(){
+ const g=$('#grid');g.innerHTML='';
+ SCREENS.forEach((s,i)=>{
+  const f=document.createElement('figure');
+  f.innerHTML=`<div class="shot"><div class="canvas${i%2?' alt':''}"><span class="num">${i+1}/6</span><div class="hl1"><h2></h2><p></p></div></div></div><figcaption>${NOTE[i]}</figcaption>`;
+  const c=f.querySelector('.canvas');c.appendChild($('#tpl-phone').content.cloneNode(true));
+  c.querySelector('.vp').innerHTML=`<div class="view on">${s.vp}</div>`;
+  if(s.over)c.querySelector('.screen').insertAdjacentHTML('beforeend',s.over);
+  g.appendChild(f)});
+ paint();fit()}
+function paint(){
+ $$('.canvas').forEach((c,i)=>{c.querySelector('h2').innerHTML=CAP[lang][i][0];c.querySelector('p').textContent=CAP[lang][i][1]});
+ $$('[data-a]').forEach(e=>e.textContent=A[lang][e.dataset.a]);
+ $$('.lEN').forEach(e=>e.classList.toggle('act',lang==='en'));$$('.lES').forEach(e=>e.classList.toggle('act',lang==='es'))}
+function fit(){$$('.shot').forEach(s=>{s.querySelector('.canvas').style.transform='scale('+(s.clientWidth/360)+')'})}
+function setLang(l){lang=l;['EN','ES'].forEach(x=>{const b=$('#b'+x),on=x.toLowerCase()===l;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});paint()}
+$('#bEN').onclick=()=>setLang('en');$('#bES').onclick=()=>setLang('es');
+addEventListener('resize',fit);build();
+</script>

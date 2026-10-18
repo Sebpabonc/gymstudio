@@ -97,7 +97,7 @@ import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
-import { nextWorkoutGroupIndex, workoutChipState } from '../utils/workoutMode'
+import { nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState } from '../utils/workoutMode'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
 import RestTimer from './RestTimer'
@@ -775,6 +775,7 @@ export default function WorkoutPlan({
   // Workout mode: focus one exercise (or superset) at a time, same cards as the full Today list.
   const [workoutGroupIndex, setWorkoutGroupIndex] = useState<number | null>(null)
   const [workoutSetIndex, setWorkoutSetIndex] = useState<Record<string, number>>({})
+  const [workoutLoggerExpanded, setWorkoutLoggerExpanded] = useState<Record<string, boolean>>({})
   const [workoutWeightInputs, setWorkoutWeightInputs] = useState<Record<string, string>>({})
   const [workoutRestContext, setWorkoutRestContext] = useState<{ set: number; next: string } | null>(null)
   const [workoutInsight, setWorkoutInsight] = useState<WorkoutExerciseInsight | null>(null)
@@ -2005,6 +2006,7 @@ export default function WorkoutPlan({
       : nextExercise ? displayExerciseName(nextExercise.name) : t('workout.run.finished')
     setWorkoutRestContext({ set: setIndex + 1, next })
     setWorkoutSetIndex((current) => ({ ...current, [normalizeExerciseName(exercise.name)]: nextSet >= 0 ? nextSet : setIndex }))
+    setWorkoutLoggerExpanded((current) => ({ ...current, [normalizeExerciseName(exercise.name)]: false }))
     onStartRest(loadRestBetweenSets(), displayExerciseName(exercise.name))
     void logPlannedExercise(exercise, completed, times)
   }
@@ -3527,6 +3529,12 @@ export default function WorkoutPlan({
               .map((reps) => formatNumber(language, reps))
               .join('/')
             const workoutFinished = !!completedEntry || completedRows.every(Boolean)
+            const workoutLoggerCollapsed = shouldCollapseCompletedLogger(
+              isWorkoutMode,
+              completedEntry?.date,
+              today,
+              !!workoutLoggerExpanded[exerciseKey]
+            )
             const currentInsight = hasActiveInsight ? workoutInsight : null
             const finishedInsight = isWorkoutMode && workoutFinished && completedEntry && libraryMatch
               ? buildWorkoutExerciseInsight(completedEntry, history, trainingBlocks, libraryMatch)
@@ -3853,7 +3861,7 @@ export default function WorkoutPlan({
                   )
                 })()}
                 {/* PO 2026-10-10: the Next box lives inside the expanded card. */}
-                {trainerNext && !isCollapsed && barWeekOffset === 0 && (
+                {trainerNext && !isCollapsed && !isWorkoutMode && barWeekOffset === 0 && (
                   <aside className="next-target-card">
                     <strong>{t('workout.session.performanceNext', {
                       day: trainerNext.nextDate ? formatWeekdayDate(language, `${trainerNext.nextDate}T00:00:00Z`).split(' ')[0] : '',
@@ -3904,9 +3912,9 @@ export default function WorkoutPlan({
                         </span>
                       ))}
                     </div>
-                    <p className="planned-meta-line">
+                    {!isWorkoutMode && <p className="planned-meta-line">
                       {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${exercise.rest} ${t('workout.label.restInline')}`}
-                    </p>
+                    </p>}
                     {isWorkoutMode && (
                       <details className="workout-mode-more">
                         <summary>⋯ {t('workout.run.more')}</summary>
@@ -4044,7 +4052,19 @@ export default function WorkoutPlan({
                         </div>
 
                         {isWorkoutMode && !hasActiveInsight && (
-                          <div className="workout-mode-big-logger">
+                          <div className={`workout-mode-big-logger${workoutLoggerCollapsed ? ' collapsed' : ''}`}>
+                            {workoutLoggerCollapsed && (
+                              <button
+                                type="button"
+                                className="secondary-button workout-mode-log-edit"
+                                onClick={() => setWorkoutLoggerExpanded((current) => ({
+                                  ...current,
+                                  [exerciseKey]: true,
+                                }))}
+                              >
+                                {t('workout.run.edit')}
+                              </button>
+                            )}
                             <p className="workout-mode-current-set">
                               {t('workout.run.currentSet', {
                                 set: formatNumber(language, currentWorkoutSetIndex + 1),
