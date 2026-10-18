@@ -1,0 +1,118 @@
+<title>Workout Type Scale</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: four phone-width cards side by side (Current, A, B, C) with the same real exercise, so only the type sizes differ. Single dark look on purpose: it mirrors the GymStudio app. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0b0c;
+  --card: #18181a;
+  --panel: rgba(255, 255, 255, 0.05);
+  --line: rgba(255, 255, 255, 0.11);
+  --text: #f3f2f0;
+  --muted: #a9a6a4;
+  --rose: #c99ca1;
+  --brand: #8d5e63;
+  --btn: linear-gradient(135deg, #7a5d60, #2f2f31);
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-ui); padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { max-width: 1320px; margin: 0 auto 16px; }
+h1 { margin: 0; font-size: 1.15rem; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 0.85rem; max-width: 70ch; }
+.grid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+.opt { display: grid; gap: 8px; min-width: 0; }
+.opt h2 { margin: 0; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rose); }
+.opt h2 span { color: var(--muted); letter-spacing: 0; text-transform: none; font-weight: 500; margin-left: 6px; }
+.pitch { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
+.scale { margin: 0; color: var(--muted); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
+
+/* The phone card reads every size from variables, set per option below. */
+.phone { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: grid; gap: var(--gap, 12px); }
+.name { font-size: var(--name); font-weight: var(--name-w); line-height: 1.2; text-wrap: balance; }
+.tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.tools span { min-height: var(--tool-h); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: var(--tool-dir, row); align-items: center; justify-content: center; gap: 5px; font-size: var(--tool); font-weight: 600; color: var(--tool-c, var(--text)); }
+.tools svg { width: var(--tool-ic, 16px); height: var(--tool-ic, 16px); }
+.cue { display: grid; grid-template-columns: 36px minmax(0, 1fr) 28px; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(201, 156, 161, 0.3); background: linear-gradient(135deg, rgba(141, 94, 99, 0.3), rgba(141, 94, 99, 0.08)); }
+.cue .ic { width: 36px; height: 36px; border-radius: 10px; background: rgba(201, 156, 161, 0.18); display: grid; place-items: center; color: var(--rose); }
+.cue .ic svg { width: 20px; height: 20px; }
+.cue .txt { font-size: var(--cue); font-weight: var(--cue-w); line-height: 1.3; }
+.cue .chev { width: 28px; height: 28px; border-radius: 999px; border: 1px solid var(--line); display: grid; place-items: center; }
+.note { margin: 0; font-size: var(--note); color: var(--note-c, var(--text)); line-height: 1.4; }
+.logger { border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 8px; background: var(--panel); }
+.lhead { font-size: var(--lhead); font-weight: 800; letter-spacing: 0.04em; }
+.row { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 8px; }
+.row > span { font-size: var(--flabel); font-weight: 700; letter-spacing: 0.06em; color: var(--muted); }
+.step { display: grid; grid-template-columns: var(--btn-w) minmax(0, 1fr) var(--btn-w); gap: 6px; }
+.step b, .step i { height: var(--step-h); border: 1px solid var(--line); border-radius: 12px; display: grid; place-items: center; background: var(--panel); font-style: normal; }
+.step i { font-size: 1.2rem; }
+.step b { font-size: var(--val); font-weight: 800; font-variant-numeric: tabular-nums; }
+.log { min-height: var(--log-h); border-radius: 14px; background: var(--btn); display: grid; place-items: center; font-size: var(--log); font-weight: 700; letter-spacing: var(--log-ls); color: #fff; }
+.tbl { display: grid; }
+.tr { display: grid; grid-template-columns: 24px 1fr 1fr; gap: 12px; align-items: center; padding: 0 10px; min-height: var(--row-h); border-radius: 10px; font-variant-numeric: tabular-nums; font-size: var(--cell); }
+.tr.th { min-height: 0; padding-bottom: 6px; font-size: var(--th); font-weight: 700; letter-spacing: 0.06em; color: var(--muted); border-bottom: 1px solid var(--line); border-radius: 0; text-transform: uppercase; }
+.tr.now { background: rgba(141, 94, 99, 0.16); box-shadow: inset 3px 0 0 var(--brand); }
+.tr .last { color: var(--muted); }
+.tr .today { font-weight: 700; }
+svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Current (live today) */
+.v-cur { --name: 1.15rem; --name-w: 500; --tool: 0.9rem; --tool-h: 48px; --cue: 1rem; --cue-w: 700; --note: 0.95rem; --lhead: 1rem; --flabel: 0.85rem; --btn-w: 52px; --step-h: 54px; --val: 1.85rem; --log: 1.15rem; --log-h: 54px; --log-ls: 0.12em; --th: 0.8rem; --cell: 1.1rem; --row-h: 50px; }
+/* A · The name leads: name is the biggest text, everything else one step down */
+.v-a { --name: 1.5rem; --name-w: 700; --tool: 0.78rem; --tool-h: 42px; --cue: 0.92rem; --cue-w: 600; --note: 0.84rem; --note-c: var(--muted); --lhead: 0.8rem; --flabel: 0.72rem; --btn-w: 48px; --step-h: 50px; --val: 1.45rem; --log: 1rem; --log-h: 50px; --log-ls: 0.04em; --th: 0.7rem; --cell: 0.95rem; --row-h: 42px; }
+/* B · Compact: smaller everywhere, tools as icon over a small word */
+.v-b { --gap: 10px; --name: 1.35rem; --name-w: 700; --tool: 0.68rem; --tool-h: 48px; --tool-dir: column; --tool-ic: 18px; --tool-c: var(--muted); --cue: 0.88rem; --cue-w: 600; --note: 0.8rem; --note-c: var(--muted); --lhead: 0.76rem; --flabel: 0.7rem; --btn-w: 44px; --step-h: 46px; --val: 1.35rem; --log: 0.95rem; --log-h: 48px; --log-ls: 0.02em; --th: 0.68rem; --cell: 0.9rem; --row-h: 40px; }
+/* C · Calm: big name, regular weights, only the name and the numbers are bold */
+.v-c { --name: 1.6rem; --name-w: 700; --tool: 0.8rem; --tool-h: 42px; --tool-c: var(--muted); --cue: 0.95rem; --cue-w: 500; --note: 0.84rem; --note-c: var(--muted); --lhead: 0.78rem; --flabel: 0.72rem; --btn-w: 48px; --step-h: 52px; --val: 1.6rem; --log: 1rem; --log-h: 52px; --log-ls: 0; --th: 0.7rem; --cell: 0.95rem; --row-h: 44px; }
+.v-c .tools span { font-weight: 500; }
+.v-c .lhead { font-weight: 700; color: var(--muted); }
+</style>
+
+<header>
+  <h1>Tamaños de letra · modo entrenamiento</h1>
+  <p>El mismo ejercicio en las cuatro tarjetas; solo cambian los tamaños. En A, B y C el nombre del ejercicio es la letra más grande y las cajas usan letra más pequeña.</p>
+</header>
+
+<main class="grid" id="grid"></main>
+
+<script>
+const ICON = {
+  tech: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  swap: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg>',
+  notes: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  google: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  target: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+};
+const OPTS = [
+  ['v-cur', 'Actual', '', 'Hoy: el nombre es más pequeño que el consejo, los botones y los números. Todo compite.', 'nombre 18 · herramientas 14 · consejo 16 · números 30'],
+  ['v-a', 'A', 'El nombre manda', 'El nombre es lo más grande (24, negrita). Todo lo demás baja un paso y la nota del plan va en gris. (Recomendada)', 'nombre 24 · herramientas 12 · consejo 15 · números 23'],
+  ['v-b', 'B', 'Compacta', 'Más pequeña en todo y las herramientas con el icono arriba y la palabra abajo. Cabe más en la pantalla.', 'nombre 22 · herramientas 11 · consejo 14 · números 22'],
+  ['v-c', 'C', 'Tranquila', 'Nombre grande; el resto en peso normal. Solo el nombre y los números van en negrita.', 'nombre 26 · herramientas 13 · consejo 15 · números 26'],
+];
+const phone = () => `
+  <div class="name">Sentadilla búlgara con mancuernas</div>
+  <div class="tools">
+    <span>${ICON.tech}Técnica</span><span>${ICON.swap}Cambiar</span><span>${ICON.notes}Notas</span><span>${ICON.google}Google</span>
+  </div>
+  <div class="cue"><span class="ic">${ICON.target}</span><span class="txt">Estira el glúteo delantero, apriétalo al subir</span><span class="chev" aria-hidden="true">›</span></div>
+  <p class="note">Reps por pierna; inclinarte un poco al frente suma trabajo de glúteo.</p>
+  <div class="logger">
+    <div class="lhead">SERIE 1 DE 3</div>
+    <div class="row"><span>KG</span><div class="step"><i>−</i><b>16</b><i>+</i></div></div>
+    <div class="row"><span>REPS</span><div class="step"><i>−</i><b>12</b><i>+</i></div></div>
+    <div class="log">Registrar serie 1</div>
+  </div>
+  <div class="tbl">
+    <div class="tr th"><span>#</span><span>Última vez</span><span>Hoy</span></div>
+    <div class="tr now"><span>1</span><span class="last">16×10</span><span class="today">16×12</span></div>
+    <div class="tr"><span>2</span><span class="last">16×10</span><span class="today">16×12</span></div>
+    <div class="tr"><span>3</span><span class="last">16×10</span><span class="today">16×12</span></div>
+  </div>`;
+document.getElementById('grid').innerHTML = OPTS.map(([cls, id, name, pitch, scale]) => `
+  <section class="opt">
+    <h2>${id}${name ? `<span>${name}</span>` : ''}</h2>
+    <div class="phone ${cls}">${phone()}</div>
+    <p class="pitch">${pitch}</p>
+    <p class="scale">${scale} (px)</p>
+  </section>`).join('');
+</script>
