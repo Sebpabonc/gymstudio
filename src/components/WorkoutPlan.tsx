@@ -973,6 +973,20 @@ export default function WorkoutPlan({
     () => selectedCalendarBlock ? completedTrainingSessions(selectedCalendarBlock, history) : [],
     [history, selectedCalendarBlock]
   )
+  // PO 2026-10-18: once every day of this week is logged, Today opens on next week's preview so it shows up.
+  const autoNextWeekShown = useRef(false)
+  const currentWeekComplete = useMemo(() => {
+    if (!activeBlock || activeBlock.days.length === 0) return false
+    const week = weekBounds(today)
+    return activeBlock.days.every((day) => dayWorkoutStatus(day.exercises.map((item) => item.exerciseId), history, {
+      blockId: activeBlock.id, dayKey: day.key, weekStart: week.start, weekEnd: week.end,
+    }).state === 'done')
+  }, [activeBlock, history, today])
+  useEffect(() => {
+    if (autoNextWeekShown.current || !currentWeekComplete || !activeBlockWeek || !activeBlock) return
+    autoNextWeekShown.current = true
+    if (activeBlockWeek < activeBlock.weeks) setBarWeekOffset((current) => (current === 0 ? 1 : current))
+  }, [currentWeekComplete, activeBlockWeek, activeBlock])
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
   const activeCustomDay = customPlan.days.find((day) => day.id === selectedCustomDayId) ?? customPlan.days[0]
   const activeCustomExercises: PlanExercise[] = (activeCustomDay?.exercises ?? []).map((exercise) => ({
