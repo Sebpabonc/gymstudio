@@ -41,10 +41,20 @@ React app ── src/lib/supabaseClient.ts (lazy, anon key only)
     `updated_at >= lastPulledAt` (merge is idempotent), so no row is skipped.
   2. On sign-in, on app start (if signed in), after each save, and when the browser goes back
      online: push dirty entries (upsert by `id`), then pull rows with
-     `updated_at > lastPulledAt`, merge by `id` (newer `updatedAt` wins; `deleted_at` removes
+     `updated_at >= lastPulledAt`, merge by `id` (newer `updatedAt` wins; `deleted_at` removes
      locally), save `lastPulledAt`.
   3. First sign-in on a device: all local entries are dirty → uploaded.
-  4. Failures are silent and retried; the UI shows a small sync status in Profile.
+  4. Validate dates, exercise ids, sets and optional field shapes before upload. Push in
+     batches of at most 25; if a batch fails, retry its rows individually. Invalid rows
+     and Postgres `23xxx`, `22xxx` or `42501` rejections are quarantined without blocking
+     other logs or pulls. Quarantine is an optional `syncError: {code, message, at}` in
+     the existing per-entry sync metadata, not workout history or the database schema;
+     metadata without this field continues to load unchanged. Editing a log clears its
+     quarantine, and its Profile **Retry** action clears it and re-validates.
+  5. Network/server failures remain dirty and retry with exponential backoff (10 seconds
+     up to 5 minutes). A 401/expired JWT refreshes the session once and retries the request;
+     an unsuccessful refresh asks the user to sign in again. Profile shows pending logs,
+     reasons, and **Retry now**; a pending-count badge sits beside the sync dot.
 - **Google OAuth:** needs a Google Cloud OAuth client (owner's Google account). Client ID and
   secret are entered by the owner in the Supabase dashboard; the secret is never committed.
   On iOS (Capacitor) OAuth redirects need a custom URL scheme — tracked separately.

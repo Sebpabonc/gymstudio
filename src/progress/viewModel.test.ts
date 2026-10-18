@@ -8,6 +8,7 @@ import {
   filterExerciseOptions,
   exercisesWithHistory,
   formatBlockMethod,
+  formatProgressBlockLabel,
   limitSuggestions,
   muscleStatus,
   formatWeekLabel,
@@ -60,6 +61,12 @@ const entry = (exerciseId: string, date: string): ProgressEntry => ({
 })
 
 describe('progress view model', () => {
+  it('uses a template block name when it has no numbered block label', () => {
+    expect(formatProgressBlockLabel({ ...block(0, '2026-01-05'), name: 'Upper / Lower · 4 Days' }, en))
+      .toBe('Upper / Lower · 4 Days')
+    expect(formatProgressBlockLabel(block(2, '2026-01-05'), en)).toBe('Block 2')
+  })
+
   it('limits suggestions to five', () => {
     const suggestions: ProgressSuggestion[] = Array.from({ length: 8 }, (_, index) => ({
       type: 'plateau', exerciseId: `e${index}`, dayType: 'A', message: 'x', why: 'y',

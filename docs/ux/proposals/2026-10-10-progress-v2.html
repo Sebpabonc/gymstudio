@@ -1,0 +1,64 @@
+<title>Progress v2 mock</title>
+<style>
+:root{--bg:#0f0f10;--line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#c8c7c4;--brand:#8d5e63;--brand-soft:rgba(141,94,99,.18);--nav:#c99ca1;--fs:.65rem;--fb:.76rem}
+body{margin:0;background:#1a1a1c;color:var(--text);font:500 var(--fb)/1.4 -apple-system,system-ui,sans-serif}
+.phone{width:375px;max-width:100%;margin:16px auto;background:var(--bg);padding:12px 16px 24px;box-sizing:border-box}
+h2{font-size:1.4rem;margin:4px 0 2px}h3{font-size:var(--fs);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+.card{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:22px;padding:14px 12px;margin:10px 0}
+.muted{color:var(--muted)}.num{font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}
+.stat{background:rgba(255,255,255,.04);border-radius:14px;padding:8px;text-align:center}.stat strong{display:block;font-size:1.05rem}
+.dots{display:flex;justify-content:space-between;margin:8px 0}.dot{text-align:center;width:38px}
+.dot i{display:block;width:22px;height:22px;border-radius:50%;margin:0 auto 3px;border:1px solid var(--line)}
+.dot.on i{background:var(--brand)}.dot.miss i{border:1px dashed var(--nav)}
+.row{border-top:1px solid var(--line);padding:8px 0}.row:first-of-type{border-top:0}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin:3px 0}.chips span{background:var(--brand-soft);border-radius:8px;padding:1px 6px}
+.tag{font-size:var(--fs);border-radius:8px;padding:1px 6px;border:1px solid var(--line)}
+.bar{display:grid;grid-template-columns:80px 1fr 52px;align-items:center;gap:6px;margin:4px 0}
+.track{position:relative;height:8px;background:rgba(255,255,255,.06);border-radius:4px}
+.fill{height:8px;background:var(--brand);border-radius:4px}.tick{position:absolute;top:-3px;width:2px;height:14px;background:var(--text)}
+.note{border:1px dashed var(--nav);border-radius:14px;padding:8px;margin-top:6px}
+</style>
+<div class="phone">
+<h2>Progress</h2><p class="muted">Block: Hypertrophy flat pyramid II · Week 1 of 6</p>
+
+<section class="card" aria-label="Summary"><h3>This week</h3>
+<p>First week: these are your <b>baselines</b>. Next time you repeat a day we'll compare set by set.</p>
+<div class="stats num"><div class="stat"><strong>24</strong>baselines</div><div class="stat"><strong>0</strong>same-day repeats</div><div class="stat"><strong>10</strong>vs other day</div></div>
+<p class="muted">Logged effort (RIR) on 0 sets — add it to get "watch next" tips.</p></section>
+
+<section class="card" aria-label="Consistency"><h3>Consistency</h3>
+<div class="dots"><div class="dot on"><i></i>Mon<br>C&amp;B A</div><div class="dot on"><i></i>Tue<br>Arms A</div><div class="dot on"><i></i>Wed<br>Legs A</div><div class="dot on"><i></i>Thu<br>C&amp;B B</div><div class="dot on"><i></i>Fri<br>Arms B</div><div class="dot miss"><i></i>Sat<br>Legs B</div><div class="dot"><i></i>Sun</div></div>
+<p class="num"><b>5 of 6</b> planned days · <b>119 of 135</b> sets</p>
+<p class="muted">Legs B not logged yet.</p></section>
+
+<section class="card" aria-label="Per-exercise progress"><h3>Per exercise · Chest &amp; Back B (Thu)</h3>
+<div class="row"><b>Incline dumbbell press</b><div class="chips num"><span>28×14</span><span>28×12</span><span>28×12</span></div>
+<span class="tag">vs Mon · C&amp;B A (different reps)</span> <span class="num">26→28 kg · reps 36→38</span></div>
+<div class="row"><b>High cable fly</b><div class="chips num"><span>12.5×15</span><span>12.5×15</span><span>12.5×15</span></div>
+<span class="tag">vs Mon · C&amp;B A</span> <span class="num">top 15→12.5 kg · reps 37→45</span></div>
+<div class="row"><b>Barbell bench press</b><div class="chips num"><span>35×12</span><span>35×12</span><span>35×12</span></div>
+<span class="muted">Baseline. Beat it next Chest &amp; Back B.</span></div>
+<p class="muted">Compared with the last time you did the same day. If there isn't one yet, with the paired A/B day — labelled, because rep targets differ.</p></section>
+
+<section class="card" aria-label="Best marks"><h3>Best marks</h3>
+<p>Records start after a few sessions of each exercise, so a first good day doesn't count twice.</p>
+<p class="muted">Baselines (24) ›</p></section>
+
+<section class="card" aria-label="Sets per muscle"><h3>Sets per muscle · this week</h3>
+<p class="muted">Bar = sets logged · line = sets planned this week</p>
+<div class="num">
+<div class="bar"><span>Shoulders</span><div class="track"><div class="fill" style="width:94%"></div><i class="tick" style="left:86%"></i></div><span>33 / 30</span></div>
+<div class="bar"><span>Back</span><div class="track"><div class="fill" style="width:66%"></div><i class="tick" style="left:61%"></i></div><span>23 / 22</span></div>
+<div class="bar"><span>Triceps</span><div class="track"><div class="fill" style="width:61%"></div><i class="tick" style="left:57%"></i></div><span>22 / 20</span></div>
+<div class="bar"><span>Chest</span><div class="track"><div class="fill" style="width:60%"></div><i class="tick" style="left:51%"></i></div><span>21 / 18</span></div>
+<div class="bar"><span>Biceps</span><div class="track"><div class="fill" style="width:57%"></div><i class="tick" style="left:57%"></i></div><span>20 / 20</span></div>
+<div class="bar"><span>Quads</span><div class="track"><div class="fill" style="width:29%"></div><i class="tick" style="left:57%"></i></div><span>10 / 20</span></div>
+<div class="bar"><span>Hamstrings</span><div class="track"><div class="fill" style="width:24%"></div><i class="tick" style="left:49%"></i></div><span>9 / 17</span></div>
+<div class="bar"><span>Glutes</span><div class="track"><div class="fill" style="width:26%"></div><i class="tick" style="left:43%"></i></div><span>9 / 15</span></div>
+<div class="bar"><span>Calves</span><div class="track"><div class="fill" style="width:20%"></div><i class="tick" style="left:40%"></i></div><span>7 / 14</span></div>
+</div>
+<p class="muted">Main muscle = 1 set, helper = ½. Legs are low because Legs B isn't logged yet. More isn't automatically better — the plan sets the target.</p></section>
+
+<div class="note">2 entries on Fri 9 Oct are saved under Chest &amp; Back A. Fix?</div>
+</div>

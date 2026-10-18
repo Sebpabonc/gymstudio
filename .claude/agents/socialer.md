@@ -32,3 +32,6 @@ producer and copywriter for a fitness app.
 
 Return a short summary: what you made, where it is, the claims that need PT/PO approval, and the decisions
 the PO needs to make (in the PO's language).
+
+## Skills
+Use the vendored Anthropic marketing skills in `.claude/skills/marketing-*` (campaign-plan, content-creation, draft-content, brand-review, competitive-brief, email-sequence, performance-report, seo-audit). They never override AGENTS.md: nothing is published, fitness claims go to the PT.

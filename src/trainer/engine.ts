@@ -1,6 +1,7 @@
 // AI Trainer progression engine. Implements the PT-approved spec
 // docs/fitness/approved/2026-10-07-progression-engine-spec.md (R1–R11, T1–T29) and its v2 amendment
-// docs/fitness/approved/2026-10-07-progression-engine-spec-v2.md (R12–R19, T30–T51).
+// docs/fitness/approved/2026-10-07-progression-engine-spec-v2.md (R12–R19, T30–T52c) and
+// docs/fitness/approved/2026-10-13-engine-same-day-evidence.md (R20–R24, T53–T63).
 // The PT owns these rules; change them only through an approved PT spec with test cases.
 // Pure functions: the LLM never chooses numbers — it only explains the structured recommendation returned here.
 
@@ -19,6 +20,8 @@ export type RepRange = { min: number; max: number }
 /** One past session of the exercise (any day of the program) and what the plan asked that day, if known. */
 export type SessionEvidence = {
   date: string
+  dayKey?: string
+  blockId?: string
   sets: LoggedSet[]
   target?: RepRange
   /** Planned technique and per-set reps of that session (pyramids). */
@@ -60,6 +63,8 @@ export type ReasonCode =
   | 'bodyweight_add_reps'
   | 'double_angle'
   | 'consolidate_load'
+  | 'achieved_floor'
+  | 'same_day_boost'
 
 export type Confidence = 'low' | 'medium' | 'high'
 
@@ -92,6 +97,8 @@ export type Recommendation = {
 export type RecommendInput = {
   history: SessionEvidence[]
   today: string
+  dayKey?: string
+  blockId?: string
   target: RepRange
   sets: number
   equipment?: string
@@ -330,14 +337,159 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
     return make('regress', roundToStep(lastWeight * factor, step, 'down'), 'long_break')
   }
 
-  if (pyramid && input.setReps) return recommendPyramid(input, progressing, capacity, confidence, step, make)
-
-  const result = recommendStraight(input, progressing, lastSets, lastWeight, capacity, confidence, step, make)
+  const result = pyramid && input.setReps
+    ? recommendPyramid(input, progressing, capacity, confidence, step, make)
+    : recommendStraight(input, progressing, lastSets, lastWeight, capacity, confidence, step, make)
+  const floored = applyApprovedFloors(input, progressing, last, lastSets, lastWeight, step, result)
   // R3: drop-set — the drop is 75 % of the recommended main load, rounded down.
-  if (input.technique === 'drop-set' && result.weight !== null && result.weight > 0) {
-    return { ...result, dropWeight: roundToStep(result.weight * 0.75, step, 'down') }
+  if (input.technique === 'drop-set' && floored.weight !== null && floored.weight > 0) {
+    return { ...floored, dropWeight: roundToStep(floored.weight * 0.75, step, 'down') }
   }
-  return result
+  return floored
+}
+
+function median(values: number[]) {
+  const sorted = [...values].sort((a, b) => a - b)
+  const middle = Math.floor(sorted.length / 2)
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2
+}
+
+function applyApprovedFloors(
+  input: RecommendInput,
+  progressing: SessionEvidence[],
+  last: SessionEvidence,
+  lastSets: LoggedSet[],
+  lastWeight: number,
+  step: number,
+  recommendation: Recommendation
+): Recommendation {
+  if (recommendation.weight === null) return recommendation
+
+  const pyramid = isPyramid(input.technique, input.setReps)
+  const ascendingPyramid = input.technique === 'pyramid' && pyramid
+  const floorsApply = !pyramid || ascendingPyramid
+  const lastTarget = last.target ?? input.target
+  const repRangeChanged = !sameRange(lastTarget, input.target)
+  const missDrop = recommendation.reason === 'below_target_twice' ||
+    (!pyramid && step / lastWeight > MAX_INCREASE_PCT &&
+      input.target.min > lastTarget.max && lastSets.some((set) => set.reps < lastTarget.min))
+  const targets = ascendingPyramid ? input.setReps! : [input.target.min]
+  let weights = pyramid
+    ? [...(recommendation.setWeights ?? Array.from({ length: targets.length }, () => recommendation.weight!))]
+    : [recommendation.weight]
+  let reason = recommendation.reason
+
+  // R21: convert from the median of all working-load sets, not a best set or a mean.
+  if (floorsApply && repRangeChanged && !missDrop && lastWeight > 0) {
+    const workingReps = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps)
+    if (workingReps.length) {
+      const seriesReps = median(workingReps)
+      const seriesE1rm = lastWeight * (1 + seriesReps / 30)
+      targets.forEach((target, index) => {
+        const floor = seriesReps >= target
+          ? lastWeight
+          : roundToStep(seriesE1rm / (1 + target / 30), step, 'down')
+        weights[index] = Math.max(weights[index], floor)
+      })
+    }
+  }
+
+  // R22: recent completed performances are a floor; deloads and long-break sessions are not evidence here.
+  let achieved = false
+  // An approved negative calibration remains a distinct explicit load decrease (spec 1.2).
+  if (floorsApply && !missDrop && !(recommendation.calibration && recommendation.calibration.offset < 0)) {
+    const recent = progressing.filter((session) => {
+      const days = daysBetween(session.date, input.today)
+      return days >= 0 && days <= 28
+    })
+    targets.forEach((target, index) => {
+      const achievedWeight = recent.reduce((highest, session) => {
+        const logged = progressionSets(session.sets, input.sets)
+        if (ascendingPyramid) {
+          const set = logged.find((candidate) => candidate.reps >= target)
+          return Math.max(highest, set?.weight ?? 0)
+        }
+        if (logged.length < input.sets) return highest
+        const loads = new Set(logged.map((set) => set.weight))
+        const achievedLoad = [...loads].filter((weight) => {
+          const atLoad = logged.filter((set) => set.weight === weight)
+          return atLoad.length >= input.sets && atLoad.every((set) => set.reps >= target)
+        })
+        return Math.max(highest, ...achievedLoad)
+      }, 0)
+      if (achievedWeight > weights[index]) {
+        weights[index] = achievedWeight
+        achieved = true
+      }
+    })
+    if (achieved) reason = 'achieved_floor'
+  }
+
+  // R22b: a pyramid built from straight-set history fills upward within one step of the next set.
+  const hasPriorPyramid = progressing.some((session) =>
+    session.technique === input.technique &&
+    new Set(progressionSets(session.sets, targets.length).map((set) => set.weight)).size > 1)
+  if (ascendingPyramid && !hasPriorPyramid) {
+    for (let index = weights.length - 2; index >= 0; index -= 1) {
+      weights[index] = Math.min(weights[index + 1], Math.max(weights[index], weights[index + 1] - step))
+    }
+  }
+
+  // R23: same-day evidence may add one step, but can never exceed the latest any-day session.
+  const sameDay = floorsApply && input.dayKey
+    ? progressing.find((session) =>
+      session.dayKey === input.dayKey &&
+      (input.blockId === undefined || session.blockId === input.blockId) &&
+      session.date < input.today)
+    : undefined
+  if (sameDay) {
+    const sameDaySets = progressionSets(sameDay.sets, input.sets)
+    const latestSets = progressionSets(last.sets, input.sets)
+    let boosted = false
+    if (ascendingPyramid) {
+      targets.forEach((target, index) => {
+        const performed = sameDaySets[index]
+        const cap = latestSets[index]?.weight ?? lastWeight
+        if (performed && performed.reps >= target + 2) {
+          const boost = Math.min(performed.weight + step, cap)
+          if (boost > weights[index]) {
+            weights[index] = boost
+            boosted = true
+          }
+        }
+      })
+    } else {
+      const complete = sameDaySets.length >= input.sets
+      const reachedTop = complete && sameDaySets.every((set) => set.reps >= input.target.max)
+      const coarseStep = step / Math.max(1, workingWeight(sameDaySets)) > MAX_INCREASE_PCT
+      const earned = reachedTop || (complete && coarseStep && sameDaySets.every((set) => set.reps >= input.target.max + 2))
+      if (earned) {
+        const sameDayWeight = workingWeight(sameDaySets)
+        const boost = Math.min(sameDayWeight + step, lastWeight)
+        if (boost > weights[0]) {
+          weights[0] = boost
+          boosted = true
+        }
+      }
+    }
+    if (boosted) reason = 'same_day_boost'
+  }
+
+  if (!pyramid) {
+    const weight = weights[0]
+    const action = weight === recommendation.weight
+      ? recommendation.action
+      : weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
+    return { ...recommendation, weight, action, reason }
+  }
+
+  const setReps = input.setReps!
+  const topIndex = setReps.indexOf(Math.min(...setReps))
+  const weight = weights[topIndex]
+  const action = weight === recommendation.weight
+    ? recommendation.action
+    : weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
+  return { ...recommendation, weight, setWeights: weights, action, reason }
 }
 
 function recommendPyramid(
@@ -576,10 +728,11 @@ function recommendStraightRules(
       return make(!missed && target.min > lastTarget.max ? 'increase_reps' : 'maintain', lastWeight, missed ? 'below_target_once' : 'light_load_add_reps')
     }
     // R13: never below the load that matches what was already done at those reps.
-    const atWorking = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps).sort((a, b) => a - b)
-    const middle = Math.floor(atWorking.length / 2)
-    const rDone = atWorking.length % 2 ? atWorking[middle] : (atWorking[middle - 1] + atWorking[middle]) / 2
-    const floorLoad = target.min <= rDone ? lastWeight : roundToStep(lastWeight * (1 + rDone / 30) / (1 + target.min / 30), step, 'down')
+    const atWorking = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps)
+    const rSeries = median(atWorking)
+    const floorLoad = rSeries >= target.min
+      ? lastWeight
+      : roundToStep(lastWeight * (1 + rSeries / 30) / (1 + target.min / 30), step, 'down')
     weight = Math.max(weight, floorLoad)
     weight = Math.min(weight, roundToStep(maxWeight, step, 'down'))
     const action: TrainerAction = weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'

@@ -53,6 +53,36 @@ beforeEach(() => {
   supabaseMock.client = null
 })
 
+function mockSyncClient(
+  push: (rows: Record<string, unknown>[]) => { error: unknown; status?: number },
+  remoteRows: RemoteWorkoutEntry[] = []
+) {
+  const query = {
+    eq: vi.fn(),
+    gte: vi.fn(),
+    order: vi.fn(),
+    range: vi.fn(async () => ({ data: remoteRows, error: null, status: 200 })),
+  }
+  query.eq.mockReturnValue(query)
+  query.gte.mockReturnValue(query)
+  query.order.mockReturnValue(query)
+  const upsert = vi.fn((rows: Record<string, unknown>[]) => ({
+    select: vi.fn(async () => ({
+      data: rows.map((row) => ({ id: row.id, updated_at: row.updated_at })),
+      ...push(rows),
+    })),
+  }))
+  const refreshSession = vi.fn(async () => ({
+    data: { session: { user: { id: 'user-1' } } },
+    error: null as unknown,
+  }))
+  supabaseMock.client = {
+    from: vi.fn(() => ({ upsert, select: vi.fn(() => query) })),
+    auth: { refreshSession },
+  }
+  return { upsert, query, refreshSession }
+}
+
 describe('mergeWorkoutEntries', () => {
   it('adds new remote entries and replaces local entries with newer remote versions', async () => {
     const { mergeWorkoutEntries } = await import('./sync')
@@ -94,6 +124,198 @@ describe('mergeWorkoutEntries', () => {
 })
 
 describe('syncWorkoutHistory', () => {
+  it('isolates a rejected row, uploads A/B logs, pulls, and skips quarantine on later syncs', async () => {
+    const { saveWorkoutHistory, setWorkoutHistoryLastPulledAt, loadWorkoutHistoryForSync } = await import('./storage')
+    setWorkoutHistoryLastPulledAt('user-1', '2026-10-01T00:00:00Z')
+    saveWorkoutHistory([
+      { ...localEntry, id: 'bad', exerciseId: 'missing-exercise' },
+      { ...localEntry, id: 'day-a', blockId: 'block-1', dayKey: 'A' },
+      { ...localEntry, id: 'day-b', blockId: 'block-1', dayKey: 'B' },
+    ])
+    const error = { code: '23503', message: 'Exercise is not in the catalogue' }
+    const { upsert, query } = mockSyncClient((rows) => ({
+      error: rows.some((row) => row.id === 'bad') ? error : null,
+      status: 400,
+    }), [remoteEntry('2026-10-02T00:00:00Z', { id: 'remote-log' })])
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+    const entries = await loadWorkoutHistoryForSync()
+    expect(entries.find((entry) => entry.id === 'bad')).toMatchObject({
+      dirty: true, syncError: { ...error, at: expect.any(String) },
+    })
+    expect(entries.filter((entry) => entry.id.startsWith('day-')).every((entry) => !entry.dirty)).toBe(true)
+    expect(entries.some((entry) => entry.id === 'remote-log')).toBe(true)
+    expect(upsert).toHaveBeenCalledTimes(4)
+    expect(upsert.mock.calls[0][0]).toEqual(expect.arrayContaining([
+      expect.objectContaining({ day_key: 'A' }), expect.objectContaining({ day_key: 'B' }),
+    ]))
+    expect(query.range).toHaveBeenCalledTimes(1)
+    expect(JSON.parse(localStorage.getItem('gym-studio.history')!)[0]).not.toHaveProperty('syncError')
+    upsert.mockClear()
+    await syncWorkoutHistory('user-1')
+    expect(upsert).not.toHaveBeenCalled()
+  })
+
+  it('validates without a network upload and revalidates a manually retried row', async () => {
+    const { saveWorkoutHistory, loadWorkoutHistoryForSync, retryQuarantinedWorkoutEntry } = await import('./storage')
+    saveWorkoutHistory([{ ...localEntry, date: '2026-02-30' }])
+    const { upsert, query } = mockSyncClient(() => ({ error: null }))
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+    expect(upsert).not.toHaveBeenCalled()
+    expect(query.range).toHaveBeenCalled()
+    expect((await loadWorkoutHistoryForSync())[0]).toMatchObject({
+      dirty: true, syncError: { code: 'VALIDATION', message: 'date must be a valid YYYY-MM-DD date' },
+    })
+    retryQuarantinedWorkoutEntry(localEntry.id)
+    expect((await loadWorkoutHistoryForSync())[0].syncError).toBeUndefined()
+    await syncWorkoutHistory('user-1')
+    expect(upsert).not.toHaveBeenCalled()
+    saveWorkoutHistory([localEntry])
+    await syncWorkoutHistory('user-1')
+    expect(upsert).toHaveBeenCalledTimes(1)
+    expect((await loadWorkoutHistoryForSync())[0]).toMatchObject({ dirty: false })
+  })
+
+  it('uses batches of at most 25 logs', async () => {
+    const { saveWorkoutHistory } = await import('./storage')
+    saveWorkoutHistory(Array.from({ length: 61 }, (_, index) => ({ ...localEntry, id: `batch-${index}` })))
+    const { upsert } = mockSyncClient(() => ({ error: null }))
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+    expect(upsert.mock.calls.map(([rows]) => rows.length)).toEqual([25, 25, 11])
+  })
+
+  it('leaves network failures dirty, still uploads other rows and pulls before retrying', async () => {
+    const { saveWorkoutHistory, loadWorkoutHistoryForSync } = await import('./storage')
+    saveWorkoutHistory([localEntry, { ...localEntry, id: 'good' }])
+    const error = { code: '', message: 'Failed to fetch' }
+    const { query } = mockSyncClient((rows) => ({
+      error: rows.some((row) => row.id === localEntry.id) ? error : null,
+      status: 503,
+    }))
+    const { syncWorkoutHistory } = await import('./sync')
+    await expect(syncWorkoutHistory('user-1')).rejects.toEqual(error)
+    const entries = await loadWorkoutHistoryForSync()
+    expect(entries.find((entry) => entry.id === localEntry.id)).toMatchObject({ dirty: true })
+    expect(entries.find((entry) => entry.id === localEntry.id)?.syncError).toBeUndefined()
+    expect(entries.find((entry) => entry.id === 'good')).toMatchObject({ dirty: false })
+    expect(query.range).toHaveBeenCalled()
+  })
+
+  it('refreshes once on 401 and retries the upload successfully', async () => {
+    const { saveWorkoutHistory, loadWorkoutHistoryForSync } = await import('./storage')
+    saveWorkoutHistory([localEntry])
+    let attempts = 0
+    const { refreshSession, upsert } = mockSyncClient(() => ++attempts === 1
+      ? { error: { code: 'PGRST301', message: 'JWT expired' }, status: 401 }
+      : { error: null, status: 200 })
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+    expect(refreshSession).toHaveBeenCalledTimes(1)
+    expect(upsert).toHaveBeenCalledTimes(2)
+    expect((await loadWorkoutHistoryForSync())[0]).toMatchObject({ dirty: false })
+  })
+
+  it('refreshes an expired session during pull and retries the page', async () => {
+    const { query, refreshSession } = mockSyncClient(() => ({ error: null }))
+    query.range.mockResolvedValueOnce({
+      data: [], error: { code: 'PGRST301', message: 'JWT expired' } as never, status: 401,
+    })
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+    expect(refreshSession).toHaveBeenCalledTimes(1)
+    expect(query.range).toHaveBeenCalledTimes(2)
+  })
+
+  it.each(['refresh-fails', 'retry-still-expired', 'different-account'])(
+    'requests sign-in without quarantining when %s', async (mode) => {
+      const { saveWorkoutHistory, loadWorkoutHistoryForSync } = await import('./storage')
+      saveWorkoutHistory([localEntry])
+      const { refreshSession } = mockSyncClient(() => ({
+        error: { code: 'PGRST301', message: 'JWT expired' }, status: 401,
+      }))
+      if (mode === 'refresh-fails') refreshSession.mockResolvedValue({
+        data: { session: null as never }, error: { message: 'Refresh expired' },
+      })
+      if (mode === 'different-account') refreshSession.mockResolvedValue({
+        data: { session: { user: { id: 'user-2' } } }, error: null,
+      })
+      const { syncWorkoutHistory } = await import('./sync')
+      await expect(syncWorkoutHistory('user-1')).rejects.toMatchObject({ code: 'SIGN_IN_REQUIRED' })
+      expect(refreshSession).toHaveBeenCalledTimes(1)
+      expect((await loadWorkoutHistoryForSync())[0].syncError).toBeUndefined()
+    }
+  )
+
+  it('keeps quarantine through merges and guards against quarantining a concurrent edit', async () => {
+    const { saveWorkoutHistory, loadWorkoutHistoryForSync, quarantineWorkoutEntry, saveMergedWorkoutHistory } = await import('./storage')
+    saveWorkoutHistory([localEntry])
+    const [original] = await loadWorkoutHistoryForSync()
+    const error = { code: '23514', message: 'Check rejected', at: new Date().toISOString() }
+    quarantineWorkoutEntry(original, error)
+    saveMergedWorkoutHistory(await loadWorkoutHistoryForSync())
+    expect((await loadWorkoutHistoryForSync())[0].syncError).toEqual(error)
+    saveMergedWorkoutHistory([{ ...original, updatedAt: '2099-01-01T00:00:00Z' }])
+    quarantineWorkoutEntry(original, error)
+    expect((await loadWorkoutHistoryForSync())[0].syncError).toBeUndefined()
+  })
+
+  it('loads old sync metadata without losing timestamps or dirty flags', async () => {
+    localStorage.setItem('gym-studio.history', JSON.stringify([localEntry]))
+    localStorage.setItem('gym-studio.sync-metadata', JSON.stringify({
+      entries: { [localEntry.id]: { updatedAt: '2026-10-01T00:00:00Z', dirty: false } },
+      lastPulledAt: { 'user-1': '2026-10-01T00:00:00Z' },
+    }))
+    const { loadWorkoutHistoryForSync } = await import('./storage')
+    expect(await loadWorkoutHistoryForSync()).toEqual([
+      { ...localEntry, updatedAt: '2026-10-01T00:00:00Z', dirty: false },
+    ])
+    const { upsert } = mockSyncClient(() => ({ error: null }))
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+    expect(upsert).not.toHaveBeenCalled()
+  })
+
+  it('cancels pending requests without changing another account’s metadata', async () => {
+    const { saveWorkoutHistory, setStorageNamespace, loadWorkoutHistoryForSync } = await import('./storage')
+    saveWorkoutHistory([localEntry])
+    let active = true
+    mockSyncClient(() => {
+      active = false
+      setStorageNamespace('user-2')
+      saveWorkoutHistory([{ ...localEntry, notes: 'Other account' }])
+      return { error: { code: '23503', message: 'Rejected' } }
+    })
+    const { syncWorkoutHistory } = await import('./sync')
+    try {
+      await expect(syncWorkoutHistory('user-1', () => active)).rejects.toMatchObject({ name: 'AbortError' })
+      expect((await loadWorkoutHistoryForSync())[0]).toMatchObject({ dirty: true, notes: 'Other account' })
+      expect((await loadWorkoutHistoryForSync())[0].syncError).toBeUndefined()
+    } finally {
+      setStorageNamespace(null)
+    }
+  })
+
+  it('uploads soft deletes and restores, and merges remote tombstones', async () => {
+    const { saveWorkoutHistory, deleteWorkoutEntry, restoreWorkoutEntry, loadWorkoutHistory, setWorkoutHistoryLastPulledAt } = await import('./storage')
+    saveWorkoutHistory([localEntry])
+    setWorkoutHistoryLastPulledAt('user-1', '2026-01-01T00:00:00Z')
+    await deleteWorkoutEntry(localEntry.id)
+    const { upsert } = mockSyncClient(() => ({ error: null }))
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+    expect(upsert.mock.calls[0][0][0].deleted_at).toEqual(expect.any(String))
+    expect(await loadWorkoutHistory()).toEqual([])
+    restoreWorkoutEntry(localEntry)
+    await syncWorkoutHistory('user-1')
+    expect(upsert.mock.calls[1][0][0].deleted_at).toBeNull()
+    expect(await loadWorkoutHistory()).toEqual([localEntry])
+    mockSyncClient(() => ({ error: null }), [remoteEntry('2099-01-01T00:00:00Z', { deleted_at: '2099-01-01T00:00:00Z' })])
+    await syncWorkoutHistory('user-1')
+    expect(await loadWorkoutHistory()).toEqual([])
+  })
+
   it('marks existing history dirty for first sync and only dirties entries changed by later saves', async () => {
     localStorage.setItem('gym-studio.history', JSON.stringify([localEntry]))
     const {
@@ -119,6 +341,47 @@ describe('syncWorkoutHistory', () => {
     expect(JSON.parse(localStorage.getItem('gym-studio.history')!)).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ dirty: true })])
     )
+  })
+
+  describe('sync validation and retry policy', () => {
+    it.each([
+      { date: '10/03/2026' }, { date: '2026-13-01' }, { date: 123 },
+      { exerciseId: '  ' }, { sets: null }, { sets: [{}] },
+      { sets: [{ reps: -1, weight: 60 }] }, { sets: [{ reps: 8, weight: Infinity }] },
+      { sets: [{ reps: 8, weight: NaN }] },
+      { sets: [{ reps: 8, weight: 60, drop: { reps: 1, weight: -1 } }] },
+      { sets: [{ reps: 8, weight: 60, rir: -1 }] },
+      { blockId: 12 }, { dayKey: [] }, { target: [] }, { target: 'bad' },
+    ])('rejects malformed fields %j', async (fields) => {
+      const { validateWorkoutEntry } = await import('./sync')
+      expect(validateWorkoutEntry({ ...localEntry, ...fields } as WorkoutEntry)).toEqual(expect.any(String))
+    })
+
+    it('accepts zero/bodyweight, leap-day, optional null fields and A/B day entries', async () => {
+      const { validateWorkoutEntry } = await import('./sync')
+      for (const dayKey of ['A', 'B', null]) {
+        expect(validateWorkoutEntry({
+          ...localEntry, date: '2024-02-29', sets: [{ id: 'set', reps: 0, weight: 0 }],
+          blockId: null, dayKey, target: null,
+        } as unknown as WorkoutEntry)).toBeNull()
+      }
+    })
+
+    it.each([
+      ['23503', 400, true], ['23514', 400, true], ['22007', 400, true],
+      ['22P02', 400, true], ['23P01', 400, true],
+      ['42501', 403, true], ['23514', 500, false], ['42501', 401, false],
+      ['PGRST301', 401, false], ['', 503, false], ['', undefined, false],
+    ])('classifies %s with HTTP %s', async (code, status, expected) => {
+      const { isNonRetryableSyncError } = await import('./sync')
+      expect(isNonRetryableSyncError({ code }, status)).toBe(expected)
+    })
+
+    it('backs off from 10 seconds to a 5-minute cap', async () => {
+      const { getSyncRetryDelay } = await import('./sync')
+      expect([1, 2, 3, 4, 5, 6, 7, 20].map(getSyncRetryDelay))
+        .toEqual([10_000, 20_000, 40_000, 80_000, 160_000, 300_000, 300_000, 300_000])
+    })
   })
 
   it('uploads every existing local entry on first sign-in and stores the merged remote result', async () => {

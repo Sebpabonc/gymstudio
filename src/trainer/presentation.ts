@@ -21,12 +21,26 @@ const reasonTranslations: Record<ReasonCode, TranslationKey> = {
   bodyweight_add_reps: 'workout.trainer.reason.bodyweight_add_reps',
   double_angle: 'workout.trainer.reason.double_angle',
   consolidate_load: 'workout.trainer.reason.consolidate_load',
+  achieved_floor: 'workout.trainer.reason.achieved_floor',
+  same_day_boost: 'workout.trainer.reason.same_day_boost',
 }
 
 export function trainerRangeLabel(range: RepRange, language: Language) {
   return range.min === range.max
     ? formatNumber(language, range.min)
     : `${formatNumber(language, range.min)}–${formatNumber(language, range.max)}`
+}
+
+// R24 (PT 2026-10-13): when the load is not above the last one and only the rep target changed,
+// the user sees "adjusted to N reps", never "increase"/"decrease"/"same-day boost".
+export function isRepTargetAdjustment(recommendation: Recommendation, target: RepRange) {
+  const { lastWeight, lastTarget } = recommendation.evidence
+  if (lastWeight === undefined || !lastTarget) return false
+  const changed = lastTarget.min !== target.min || lastTarget.max !== target.max
+  const top = Math.max(recommendation.weight ?? 0, ...(recommendation.setWeights ?? []))
+  return changed && top <= lastWeight && recommendation.reason !== 'deload_week' &&
+    recommendation.reason !== 'below_target_once' && recommendation.reason !== 'below_target_twice' &&
+    recommendation.reason !== 'slightly_below_target'
 }
 
 export function trainerReason(
@@ -36,7 +50,10 @@ export function trainerReason(
   target: RepRange
 ) {
   const evidence = recommendation.evidence
-  return t(reasonTranslations[recommendation.reason], {
+  const key = isRepTargetAdjustment(recommendation, target)
+    ? reasonTranslations.converted_rep_range
+    : reasonTranslations[recommendation.reason]
+  return t(key, {
     reps: evidence.lastReps?.map((reps) => formatNumber(language, reps)).join(' · ') ?? '',
     weight: formatNumber(language, evidence.lastWeight ?? 0),
     target: trainerRangeLabel(evidence.lastTarget ?? target, language),

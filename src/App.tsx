@@ -79,7 +79,7 @@ function normalizeExerciseTip(tip: string | ExerciseTip) {
 
 export default function App() {
   const demoMode = isDemoMode()
-  const { status, syncStatus, user } = useAuth()
+  const { status, syncStatus, user, pendingSyncCount, syncSignInRequired } = useAuth()
   const [rawExercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
@@ -92,6 +92,7 @@ export default function App() {
   const [draftNotes, setDraftNotes] = useState('')
   const [tipsExpanded, setTipsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<AppTab>('today')
+  const [workoutModeActive, setWorkoutModeActive] = useState(false)
   const [showHelpPulse] = useState(() => recordHelpAiAppOpen() <= 3)
   const [restTimer, setRestTimer] = useState<RestTimerState | null>(() => loadRestTimerState())
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
@@ -336,7 +337,7 @@ export default function App() {
   }
 
   return (
-    <div className={`app-shell layout-${layoutMode}`}>
+    <div className={`app-shell layout-${layoutMode}${workoutModeActive ? ' workout-mode-active' : ''}`}>
       <div className="phone-frame">
         <main className={`app-content${restTimer ? ' with-rest-timer' : ''}`} ref={contentRef}>
           <div className="header-sentinel" ref={headerSentinelRef} aria-hidden="true" />
@@ -385,8 +386,13 @@ export default function App() {
             <span
               className={`sync-indicator ${status === 'signed-in' ? syncStatus : demoMode ? 'demo' : 'local'}`}
               role="status"
-              aria-label={status === 'signed-in' ? t('sync.aria.signedIn', { status: t(`sync.${syncStatus}`) }) : demoMode ? t('sync.aria.demo') : t('sync.aria.local')}
+              aria-label={syncSignInRequired ? t('profile.syncSignInRequired') : status === 'signed-in' ? t('sync.aria.signedIn', { status: t(`sync.${syncStatus}`) }) : demoMode ? t('sync.aria.demo') : t('sync.aria.local')}
             />
+            {status === 'signed-in' && pendingSyncCount > 0 && (
+              <span className="sync-pending-count" role="status" aria-label={t('profile.pendingLogs', { count: pendingSyncCount })}>
+                {pendingSyncCount}
+              </span>
+            )}
             </span>
           </div>
           <header className={`brand-header${headerCollapsed ? ' collapsed' : ''}`}>
@@ -489,7 +495,18 @@ export default function App() {
                     </div>
                   </section>
                 )}
-                <WorkoutPlan mode="preset" lockMode authStatus={status} authUserId={user?.id ?? null} onSignIn={() => setActiveTab('you')} onCreatePlan={openPlanSection} onStartRest={startRest} />
+                <WorkoutPlan
+                  mode="preset"
+                  lockMode
+                  authStatus={status}
+                  authUserId={user?.id ?? null}
+                  onSignIn={() => setActiveTab('you')}
+                  onCreatePlan={openPlanSection}
+                  onStartRest={startRest}
+                  onWorkoutModeChange={setWorkoutModeActive}
+                  restTimer={restTimer}
+                  onRestTimerChange={updateRestTimer}
+                />
               </>
             )
           ) : exerciseMode === 'custom' ? (
@@ -744,7 +761,7 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <RestTimer timer={restTimer} hidden={dockHidden} onChange={updateRestTimer} />
+        {!workoutModeActive && <RestTimer timer={restTimer} hidden={dockHidden} onChange={updateRestTimer} />}
         <HelpAndAi
           activeTab={activeTab}
           hidden={dockHidden}

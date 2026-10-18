@@ -19,19 +19,45 @@ const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
 const REST_TIMER_KEY = 'gym-studio.rest-timer'
+const REST_BETWEEN_SETS_KEY = 'gym-studio.rest-between-sets'
+const WORKOUT_TREND_OPEN_KEY = 'gym-studio.workout-trend-open'
 const EXERCISE_SWAPS_KEY = 'gym-studio.exercise-swaps'
 const TRAINER_EXPLANATIONS_KEY = 'gym-studio.trainer-explanations'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
 let helpAiAppOpensThisLoad: number | null = null
 
+export type CustomPlanExercise = {
+  id: string
+  exerciseId?: string
+  name: string
+  muscle: string
+  sets: string
+  reps: string
+  restSeconds: number
+}
+
+export type CustomPlanDay = {
+  id: string
+  name: string
+  exercises: CustomPlanExercise[]
+}
+
+export type CustomPlan = {
+  version: 2
+  days: CustomPlanDay[]
+}
+
+export type WorkoutSyncError = { code: string; message: string; at: string }
+
 export type SyncWorkoutEntry = WorkoutEntry & {
   updatedAt: string
   dirty: boolean
   deletedAt?: string
+  syncError?: WorkoutSyncError
 }
 
 type SyncMetadata = {
-  entries: Record<string, { updatedAt: string; dirty: boolean; deletedAt?: string }>
+  entries: Record<string, Pick<SyncWorkoutEntry, 'updatedAt' | 'dirty' | 'deletedAt' | 'syncError'>>
   lastPulledAt: Record<string, string>
 }
 
@@ -62,6 +88,104 @@ const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
 const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY, LANGUAGE_KEY])
 
 let storageNamespace: string | null = null
+
+function createCustomPlanId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
+    const random = Math.floor(Math.random() * 16)
+    return (character === 'x' ? random : (random & 0x3) | 0x8).toString(16)
+  })
+}
+
+function emptyCustomPlan(): CustomPlan {
+  return {
+    version: 2,
+    days: [{ id: createCustomPlanId(), name: 'Day A', exercises: [] }],
+  }
+}
+
+function customPlanRestSeconds(item: Record<string, unknown>) {
+  if (typeof item.restSeconds === 'number' && Number.isFinite(item.restSeconds) && item.restSeconds > 0) {
+    return item.restSeconds
+  }
+  if (typeof item.rest !== 'string') return 90
+  const clock = item.rest.match(/^(\d+):(\d{1,2})$/)
+  if (clock) return Number(clock[1]) * 60 + Number(clock[2])
+  const minutes = item.rest.match(/(\d+)\s*(?:'|′|m(?:in(?:ute)?s?)?)/i)
+  const seconds = item.rest.match(/(\d+)\s*(?:"|″|s(?:ec(?:ond)?s?)?)/i)
+  if (minutes || seconds) return Number(minutes?.[1] ?? 0) * 60 + Number(seconds?.[1] ?? 0)
+  const numeric = Number(item.rest)
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 90
+}
+
+function normalizeCustomPlanExercise(value: unknown): CustomPlanExercise | null {
+  if (!value || typeof value !== 'object') return null
+  const item = value as Record<string, unknown>
+  const name = typeof item.name === 'string' ? item.name.trim() : ''
+  if (!name) return null
+  return {
+    id: typeof item.id === 'string' && item.id ? item.id : createCustomPlanId(),
+    ...(typeof item.exerciseId === 'string' && item.exerciseId ? { exerciseId: item.exerciseId } : {}),
+    name,
+    muscle: typeof item.muscle === 'string'
+      ? item.muscle
+      : typeof item.focus === 'string' ? item.focus : 'General',
+    sets: typeof item.sets === 'string' || typeof item.sets === 'number' ? String(item.sets) : '3',
+    reps: typeof item.reps === 'string' || typeof item.reps === 'number' ? String(item.reps) : '8-10',
+    restSeconds: customPlanRestSeconds(item),
+  }
+}
+
+export function loadCustomPlan(): CustomPlan {
+  try {
+    const raw = localStorage.getItem(storageKey(CUSTOM_PLAN_STORAGE_KEY))
+    if (!raw) {
+      const plan = emptyCustomPlan()
+      saveCustomPlan(plan)
+      return plan
+    }
+    const parsed: unknown = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      const migrated = {
+        version: 2 as const,
+        days: [{
+          id: createCustomPlanId(),
+          name: 'Day A',
+          exercises: parsed
+            .map(normalizeCustomPlanExercise)
+            .filter((exercise): exercise is CustomPlanExercise => exercise !== null),
+        }],
+      }
+      saveCustomPlan(migrated)
+      return migrated
+    }
+    if (!parsed || typeof parsed !== 'object' || !('version' in parsed) || parsed.version !== 2 || !('days' in parsed) || !Array.isArray(parsed.days)) {
+      return emptyCustomPlan()
+    }
+    const days = parsed.days
+      .filter((day): day is Record<string, unknown> => !!day && typeof day === 'object')
+      .map((day) => ({
+        id: typeof day.id === 'string' && day.id ? day.id : createCustomPlanId(),
+        name: typeof day.name === 'string' && day.name.trim() ? day.name.trim() : 'Day',
+        exercises: Array.isArray(day.exercises)
+          ? day.exercises
+            .map(normalizeCustomPlanExercise)
+            .filter((exercise): exercise is CustomPlanExercise => exercise !== null)
+          : [],
+      }))
+    return { version: 2, days: days.length ? days : emptyCustomPlan().days }
+  } catch {
+    return emptyCustomPlan()
+  }
+}
+
+export function saveCustomPlan(plan: CustomPlan) {
+  try {
+    localStorage.setItem(storageKey(CUSTOM_PLAN_STORAGE_KEY), JSON.stringify(plan))
+  } catch {
+    // Custom plans remain usable if browser storage is unavailable.
+  }
+}
 
 // Signed-in accounts get their own local namespace; signed-out use is the "guest" namespace
 // (the original, un-prefixed keys). Catalogue caches and device-level state are shared.
@@ -192,6 +316,44 @@ export function saveRestTimerState(timer: RestTimerState | null) {
     }
   } catch {
     // The timer still works when browser storage is unavailable.
+  }
+}
+
+const REST_BETWEEN_SETS_OPTIONS = [60, 90, 120, 150, 180] as const
+
+export function loadRestBetweenSets(): number {
+  try {
+    const value = Number(localStorage.getItem(storageKey(REST_BETWEEN_SETS_KEY)))
+    return REST_BETWEEN_SETS_OPTIONS.includes(value as typeof REST_BETWEEN_SETS_OPTIONS[number])
+      ? value
+      : 120
+  } catch {
+    return 120
+  }
+}
+
+export function saveRestBetweenSets(seconds: number) {
+  if (!REST_BETWEEN_SETS_OPTIONS.includes(seconds as typeof REST_BETWEEN_SETS_OPTIONS[number])) return
+  try {
+    localStorage.setItem(storageKey(REST_BETWEEN_SETS_KEY), String(seconds))
+  } catch {
+    // The preference remains usable when browser storage is unavailable.
+  }
+}
+
+export function loadWorkoutTrendOpen(): boolean {
+  try {
+    return localStorage.getItem(storageKey(WORKOUT_TREND_OPEN_KEY)) !== 'false'
+  } catch {
+    return true
+  }
+}
+
+export function saveWorkoutTrendOpen(open: boolean) {
+  try {
+    localStorage.setItem(storageKey(WORKOUT_TREND_OPEN_KEY), String(open))
+  } catch {
+    // The preference remains usable when browser storage is unavailable.
   }
 }
 
@@ -387,6 +549,7 @@ type CatalogueExercise = Pick<
   | 'secondaryMuscles'
   | 'equipment'
   | 'mechanic'
+  | 'movementPattern'
   | 'postureTips'
   | 'squeezeCue'
 >
@@ -613,6 +776,7 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
       secondaryMuscles: exercise.secondaryMuscles ?? current?.secondaryMuscles,
       equipment: exercise.equipment ?? current?.equipment,
       mechanic: exercise.mechanic ?? current?.mechanic,
+      movementPattern: exercise.movementPattern ?? current?.movementPattern,
       postureTips: exercise.postureTips ?? current?.postureTips,
       squeezeCue: exercise.squeezeCue ?? current?.squeezeCue,
       notes: exercise.notes ?? current?.notes,
@@ -643,6 +807,7 @@ function loadCatalogueCache(): CatalogueCache | null {
         secondaryMuscles: exercise.secondaryMuscles,
         equipment: exercise.equipment,
         mechanic: exercise.mechanic,
+        movementPattern: exercise.movementPattern,
         postureTips: exercise.postureTips,
         squeezeCue: exercise.squeezeCue,
       })),
@@ -720,6 +885,7 @@ export async function refreshCatalogue(): Promise<Exercise[] | null> {
           secondaryMuscles: exercise.secondaryMuscles,
           equipment: exercise.equipment,
           mechanic: exercise.mechanic,
+          movementPattern: exercise.movementPattern,
           postureTips: exercise.postureTips,
           squeezeCue: exercise.squeezeCue,
         })),
@@ -738,8 +904,14 @@ export async function loadExercises(useBundledFallback = true): Promise<Exercise
   const catalogue = loadCatalogueCache()
   if (!catalogue && !useBundledFallback) return []
 
-  const bundled = catalogue ? undefined : await getBundledCatalogue()
-  const baseExercises = catalogue?.exercises ?? bundled?.exerciseLibrary ?? []
+  const bundled = !catalogue || catalogue.exercises.some((exercise) => !exercise.movementPattern)
+    ? await getBundledCatalogue()
+    : undefined
+  const bundledById = new Map(bundled?.exerciseLibrary.map((exercise) => [exercise.id, exercise]))
+  const baseExercises = catalogue?.exercises.map((exercise) => ({
+    ...exercise,
+    movementPattern: exercise.movementPattern ?? bundledById.get(exercise.id)?.movementPattern,
+  })) ?? bundled?.exerciseLibrary ?? []
   let savedExercises: Partial<Exercise>[] = []
   try {
     if (raw) {
@@ -805,7 +977,7 @@ export async function upsertExerciseRecord(exercise: Partial<Exercise> & { name:
   return nextExercise
 }
 
-async function loadWorkoutHistoryEntries(): Promise<WorkoutEntry[]> {
+async function loadWorkoutHistoryEntries(isActive: () => boolean = () => true): Promise<WorkoutEntry[]> {
   const raw = localStorage.getItem(storageKey(HISTORY_KEY))
   if (!raw) return []
 
@@ -816,6 +988,7 @@ async function loadWorkoutHistoryEntries(): Promise<WorkoutEntry[]> {
     let changed = false
     const catalogue = loadCatalogueCache()
     const bundledAliases = catalogue ? {} : (await getBundledCatalogue()).aliases
+    if (!isActive()) return []
     const aliasMap = {
       ...legacyExerciseIdAliases,
       ...bundledAliases,
@@ -879,8 +1052,9 @@ export function saveWorkoutHistory(history: WorkoutEntry[]) {
   signalWorkoutHistorySaved()
 }
 
-export async function loadWorkoutHistoryForSync(): Promise<SyncWorkoutEntry[]> {
-  const history = await loadWorkoutHistoryEntries()
+export async function loadWorkoutHistoryForSync(isActive: () => boolean = () => true): Promise<SyncWorkoutEntry[]> {
+  const history = await loadWorkoutHistoryEntries(isActive)
+  if (!isActive()) return []
   const metadata = loadSyncMetadata()
   let changed = false
   const entries = history.map((entry) => {
@@ -938,11 +1112,12 @@ export function saveMergedWorkoutHistory(history: SyncWorkoutEntry[]) {
       updatedAt: entry.updatedAt,
       dirty: entry.dirty,
       ...(entry.deletedAt ? { deletedAt: entry.deletedAt } : {}),
+      ...(entry.syncError ? { syncError: entry.syncError } : {}),
     }
   }
   localStorage.setItem(
     storageKey(HISTORY_KEY),
-    JSON.stringify(history.map(({ updatedAt: _updatedAt, dirty: _dirty, deletedAt: _deletedAt, ...entry }) => entry))
+    JSON.stringify(history.map(({ updatedAt: _updatedAt, dirty: _dirty, deletedAt: _deletedAt, syncError: _syncError, ...entry }) => entry))
   )
   saveSyncMetadata({ ...metadata, entries })
 }
@@ -959,14 +1134,33 @@ export function markWorkoutEntriesSynced(
       ...current,
       updatedAt: entry.updatedAt ?? current.updatedAt,
       dirty: false,
+      syncError: undefined,
     }
     changed = true
   }
   if (changed) saveSyncMetadata(metadata)
 }
 
-export async function markAllWorkoutEntriesDirty() {
-  const entries = await loadWorkoutHistoryForSync()
+export function quarantineWorkoutEntry(entry: SyncWorkoutEntry, error: WorkoutSyncError) {
+  const metadata = loadSyncMetadata()
+  const current = metadata.entries[entry.id]
+  if (!current || current.updatedAt !== entry.updatedAt) return
+  metadata.entries[entry.id] = { ...current, dirty: true, syncError: error }
+  saveSyncMetadata(metadata)
+}
+
+export function retryQuarantinedWorkoutEntry(id: string) {
+  const metadata = loadSyncMetadata()
+  const current = metadata.entries[id]
+  if (!current?.syncError) return
+  metadata.entries[id] = { ...current, dirty: true, syncError: undefined }
+  saveSyncMetadata(metadata)
+  signalWorkoutHistorySaved()
+}
+
+export async function markAllWorkoutEntriesDirty(isActive: () => boolean = () => true) {
+  const entries = await loadWorkoutHistoryForSync(isActive)
+  if (!isActive()) return
   const metadata = loadSyncMetadata()
   for (const entry of entries) {
     metadata.entries[entry.id] = { ...metadata.entries[entry.id], dirty: true }

@@ -1,0 +1,112 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "wt203",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/sebpabon/wt203",
+        "vite",
+        "/Users/sebpabon/wt203",
+        "--port",
+        "5174",
+        "--strictPort"
+      ],
+      "port": 5174
+    },
+    {
+      "name": "wt230",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/sebpabon/wt230",
+        "vite",
+        "/Users/sebpabon/wt230",
+        "--port",
+        "5175",
+        "--strictPort"
+      ],
+      "port": 5175
+    },
+    {
+      "name": "wt279",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/sebpabon/wt279",
+        "vite",
+        "/Users/sebpabon/wt279",
+        "--port",
+        "5176",
+        "--strictPort"
+      ],
+      "port": 5176
+    },
+    {
+      "name": "wt280",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/sebpabon/wt280",
+        "vite",
+        "/Users/sebpabon/wt280",
+        "--port",
+        "5177",
+        "--strictPort"
+      ],
+      "port": 5177
+    },
+    {
+      "name": "wt285",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/sebpabon/wt285",
+        "vite",
+        "/Users/sebpabon/wt285",
+        "--port",
+        "5178",
+        "--strictPort"
+      ],
+      "port": 5178
+    },
+    {
+      "name": "wt292",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/sebpabon/wt292",
+        "vite",
+        "/Users/sebpabon/wt292",
+        "--port",
+        "5179",
+        "--strictPort"
+      ],
+      "port": 5179
+    },
+    {
+      "name": "wt299",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/sebpabon/wt299",
+        "vite",
+        "/Users/sebpabon/wt299",
+        "--port",
+        "5180",
+        "--strictPort"
+      ],
+      "port": 5180
+    }
+  ]
+}

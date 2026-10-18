@@ -15,6 +15,8 @@ import {
   hasDismissedWelcome,
   loadExercises,
   loadRestTimerState,
+  loadRestBetweenSets,
+  loadWorkoutTrendOpen,
   loadWorkoutHistory,
   loadWorkoutHistoryForSync,
   mapTrainingBlockRows,
@@ -25,6 +27,8 @@ import {
   setAskExerciseAiConsent,
   setSessionStorageValue,
   saveRestTimerState,
+  saveRestBetweenSets,
+  saveWorkoutTrendOpen,
   saveWorkoutHistory,
   getActiveBlockId,
   getCachedActiveUserPlan,
@@ -32,10 +36,12 @@ import {
   setStorageNamespace,
   hasGuestWorkoutData,
   isGuestDataClaimed,
+  loadCustomPlan,
   moveGuestDataToAccount,
   getLanguage,
   recordHelpAiAppOpen,
   setLanguage,
+  saveCustomPlan,
 } from './storage'
 
 const supabaseMock = vi.hoisted(() => {
@@ -150,6 +156,78 @@ describe('active user plan cache', () => {
     } finally {
       setStorageNamespace(null)
     }
+  })
+})
+
+describe('custom plan storage', () => {
+  it('migrates the legacy flat exercise list to one v2 day without losing its values', () => {
+    localStorage.setItem('gym-studio.custom-plan', JSON.stringify([
+      {
+        name: 'Hip thrust',
+        exerciseId: 'history-exercise-id',
+        sets: '4',
+        reps: '8-10',
+        rest: `1'30"`,
+        focus: 'Glutes',
+        goal: 'Old goal',
+        tip: 'Old tip',
+      },
+    ]))
+
+    const plan = loadCustomPlan()
+
+    expect(plan.version).toBe(2)
+    expect(plan.days).toHaveLength(1)
+    expect(plan.days[0].name).toBe('Day A')
+    expect(plan.days[0].id).toBeTruthy()
+    expect(plan.days[0].exercises).toHaveLength(1)
+    expect(plan.days[0].exercises[0]).toMatchObject({
+      exerciseId: 'history-exercise-id',
+      name: 'Hip thrust',
+      muscle: 'Glutes',
+      sets: '4',
+      reps: '8-10',
+      restSeconds: 90,
+    })
+    expect(plan.days[0].exercises[0].id).toBeTruthy()
+    expect(JSON.parse(localStorage.getItem('gym-studio.custom-plan') ?? 'null')).toEqual(plan)
+  })
+
+  it('returns an empty Day A for missing or corrupted data', () => {
+    const missing = loadCustomPlan()
+    expect(missing.version).toBe(2)
+    expect(missing.days).toHaveLength(1)
+    expect(missing.days[0].name).toBe('Day A')
+    expect(missing.days[0].exercises).toEqual([])
+    expect(loadCustomPlan()).toEqual(missing)
+
+    localStorage.setItem('gym-studio.custom-plan', '{')
+    const corrupted = loadCustomPlan()
+    expect(corrupted.version).toBe(2)
+    expect(corrupted.days).toHaveLength(1)
+    expect(corrupted.days[0].exercises).toEqual([])
+  })
+
+  it('preserves ids and day layout when reading a v2 plan', () => {
+    const plan = {
+      version: 2 as const,
+      days: [{
+        id: 'day-stable',
+        name: 'Push',
+        exercises: [{
+          id: 'exercise-stable',
+          exerciseId: 'catalogue-id',
+          name: 'Bench press',
+          muscle: 'Chest',
+          sets: '3',
+          reps: '8',
+          restSeconds: 60,
+        }],
+      }],
+    }
+    saveCustomPlan(plan)
+
+    expect(loadCustomPlan()).toEqual(plan)
   })
 })
 
@@ -286,6 +364,21 @@ describe('loadExercises', () => {
     expect(exercises.some((exercise) => exercise.name === 'Lat Pulldown')).toBe(false)
   })
 
+  it('restores missing movement patterns from the bundled catalogue for older caches', async () => {
+    localStorage.setItem(
+      'gym-studio.catalogue',
+      JSON.stringify({
+        fetchedAt: '2026-10-03T00:00:00Z',
+        exercises: [{ id: 'lat-pulldown', name: 'Lat Pulldown (Wide Grip)', primaryMuscle: 'Lats', mechanic: 'compound' }],
+        aliases: {},
+      })
+    )
+
+    const exercise = (await loadExercises(false)).find((item) => item.id === 'lat-pulldown')
+
+    expect(exercise?.movementPattern).toBe('pull vertical')
+  })
+
   it('uses cached posture tips', async () => {
     const bundled = exerciseLibrary.find((exercise) => exercise.id === 'romanian-deadlift')!
     const cachedTips = ['Cached one', 'Cached two', 'Cached three', 'Cached four', 'Cached five']
@@ -340,6 +433,7 @@ describe('remote catalogue', () => {
       secondary_muscles: ['Glutes', 'Lower Back'],
       equipment: 'barbell',
       mechanic: 'compound',
+      movement_pattern: 'hinge',
       posture_tips: [
         'Tip one',
         'Tip two',
@@ -360,6 +454,7 @@ describe('remote catalogue', () => {
       secondary_muscles: ['Upper Back', 'Biceps'],
       equipment: 'cable',
       mechanic: 'compound',
+      movement_pattern: 'pull vertical',
       posture_tips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
       squeeze_cue: null,
       aliases: [],
@@ -388,6 +483,7 @@ describe('remote catalogue', () => {
       secondaryMuscles: ['Glutes', 'Lower Back'],
       equipment: 'barbell',
       mechanic: 'compound',
+      movementPattern: 'hinge',
       postureTips: ['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'],
       squeezeCue: 'Squeeze the target muscle at lockout.',
     })
@@ -424,6 +520,7 @@ describe('remote catalogue', () => {
     expect(deadlift?.secondaryMuscles).toEqual(['Glutes', 'Lower Back'])
     expect(deadlift?.equipment).toBe('barbell')
     expect(deadlift?.mechanic).toBe('compound')
+    expect(deadlift?.movementPattern).toBe('hinge')
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.postureTips).toEqual(['Tip one', 'Tip two', 'Tip three', 'Tip four', 'Tip five'])
     expect(deadlift?.squeezeCue).toBe('Squeeze the target muscle at lockout.')
@@ -588,6 +685,57 @@ describe('training blocks', () => {
 })
 
 describe('demo storage namespace', () => {
+  it('persists the workout trend chart preference locally and defaults to open', () => {
+    expect(loadWorkoutTrendOpen()).toBe(true)
+    saveWorkoutTrendOpen(false)
+    expect(loadWorkoutTrendOpen()).toBe(false)
+    expect(localStorage.getItem('gym-studio.workout-trend-open')).toBe('false')
+    saveWorkoutTrendOpen(true)
+    expect(loadWorkoutTrendOpen()).toBe(true)
+  })
+
+  it('isolates the workout trend preference by user and in demo mode', () => {
+    saveWorkoutTrendOpen(false)
+    setStorageNamespace('user-1')
+    expect(loadWorkoutTrendOpen()).toBe(true)
+    saveWorkoutTrendOpen(false)
+    setStorageNamespace(null)
+
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+    expect(loadWorkoutTrendOpen()).toBe(true)
+    saveWorkoutTrendOpen(false)
+    expect(localStorage.getItem('gym-studio.demo.workout-trend-open')).toBe('false')
+    expect(localStorage.getItem('gym-studio.workout-trend-open')).toBe('false')
+  })
+
+  it('stores the rest-between-sets preference locally with a 120-second default', () => {
+    expect(loadRestBetweenSets()).toBe(120)
+
+    saveRestBetweenSets(150)
+    expect(loadRestBetweenSets()).toBe(150)
+    expect(localStorage.getItem('gym-studio.rest-between-sets')).toBe('150')
+
+    saveRestBetweenSets(75)
+    expect(loadRestBetweenSets()).toBe(150)
+    localStorage.setItem('gym-studio.rest-between-sets', '75')
+    expect(loadRestBetweenSets()).toBe(120)
+  })
+
+  it('isolates the rest-between-sets preference by user and in demo mode', () => {
+    saveRestBetweenSets(90)
+    setStorageNamespace('user-1')
+    expect(loadRestBetweenSets()).toBe(120)
+    saveRestBetweenSets(180)
+    expect(localStorage.getItem('gym-studio.user.user-1.rest-between-sets')).toBe('180')
+    setStorageNamespace(null)
+
+    sessionStorage.setItem('gym-studio.demo-mode', '1')
+    expect(loadRestBetweenSets()).toBe(120)
+    saveRestBetweenSets(60)
+    expect(localStorage.getItem('gym-studio.demo.rest-between-sets')).toBe('60')
+    expect(localStorage.getItem('gym-studio.rest-between-sets')).toBe('90')
+  })
+
   it('isolates the welcome dismissal from demo mode', () => {
     dismissWelcome()
     expect(hasDismissedWelcome()).toBe(true)

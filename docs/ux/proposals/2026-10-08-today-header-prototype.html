@@ -1,0 +1,91 @@
+<title>Today Header Options</title>
+<style>
+:root{--bg:#0e0e0f;--card:#1b1b1d;--card2:#232326;--line:#38383c;--text:#f2f0ef;--muted:#a19c9d;--accent:#c9a0a6;--accentbg:rgba(201,160,166,.16);--btn:#c9a0a6;--onbtn:#1b1213;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;padding-inline:16px;padding-block:16px}
+.wrap{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.picker{display:flex;flex-wrap:wrap;gap:6px}
+.picker button{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-size:14px;font-weight:600;cursor:pointer}
+.picker button.on{border-color:var(--accent);background:var(--accentbg)}
+.desc{color:var(--muted);font-size:13px;min-height:2.6em}
+.phone{border:1px solid var(--line);border-radius:32px;padding:20px 16px 24px;background:#111113;display:flex;flex-direction:column;gap:14px;min-height:640px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;background:var(--card);color:var(--text);cursor:pointer}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.h1{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.h2{font-size:17px;font-weight:700}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.day{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 4px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)}
+.day b{display:block;color:var(--text);font-size:16px}
+.day.on{border:2px solid var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.bar{height:5px;background:var(--line);border-radius:3px}.bar i{display:block;height:5px;width:58%;background:var(--accent);border-radius:3px}
+.cta{background:var(--btn);color:var(--onbtn);border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;width:100%;cursor:pointer}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg span{flex:1;text-align:center;padding:8px 0;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer}
+.seg span.on{background:var(--accent);color:var(--onbtn)}
+.dots{display:flex;gap:5px;flex-wrap:wrap}.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}.dots i.f{background:var(--accent)}
+.scroller{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+.big{min-width:62%;scroll-snap-align:start;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;cursor:pointer}
+.big.on{border:2px solid var(--accent)}
+.sheet{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.ex{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.exrow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+.exrow small{color:var(--muted);display:block;font-size:12px;margin-top:2px}
+.tagx{font-size:11px;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:2px 6px}
+.note{color:var(--muted);font-size:12px;text-align:center}
+</style>
+<div class="wrap">
+  <div class="picker" id="picker"></div>
+  <div class="desc" id="desc"></div>
+  <div class="phone">
+    <div id="header"></div>
+    <div class="ex" id="ex"></div>
+  </div>
+  <div class="note">Prototype. Exercises, durations and counts are sample values.</div>
+</div>
+<script>
+const DAYS=[{k:'D1',n:'Upper A',t:8},{k:'D2',n:'Lower A',t:7},{k:'D3',n:'Upper B',t:8},{k:'D4',n:'Lower B',t:7}];
+const EX={D1:[['A1','Incline DB press','3 × 8–10','Pyramid'],['A2','Chest-supported row','3 × 10',''],['B1','Seated shoulder press','3 × 10',''],['B2','Lat pulldown','3 × 12','Drop set']],
+D2:[['A1','Back squat','4 × 6–8',''],['A2','Romanian deadlift','3 × 10',''],['B1','Leg press','3 × 12','Drop set'],['B2','Leg curl','3 × 12','']],
+D3:[['A1','Flat DB bench','3 × 10',''],['A2','T-bar row','3 × 8–12','Reverse pyramid'],['B1','Cable fly','3 × 12','Superset'],['B2','Straight-arm pulldown','3 × 12','Superset']],
+D4:[['A1','Hip thrust','4 × 8',''],['A2','Bulgarian split squat','3 × 10',''],['B1','Leg extension','3 × 15','Drop set'],['B2','Cable crunch','3 × 10','Drop set']]};
+let day='D1',opt='A',open=false;
+const O={
+A:['Una línea','Lo mínimo: info del bloque en una línea y dos botones con nombre.'],
+B:['Tarjeta compacta','Tarjeta pequeña con barra de avance del bloque; lo demás en "Detalles".'],
+C:['Solo los días','Solo "Semana 4 de 6" y los días con nombre; todo lo demás en "Plan".'],
+D:['Pestañas','Un control segmentado para los días y el resumen del día debajo.'],
+E:['Siguiente paso','Te dice qué toca hoy y un botón grande para empezar.'],
+F:['Semana con puntos','Avance del bloque en puntos (entrenos hechos) y días como pastillas.'],
+G:['Barra fija','Una sola línea "D1 Upper A ▾"; al tocarla se abre lo demás.'],
+H:['Carrusel','Tarjetas grandes por día que se deslizan.']};
+const d=()=>DAYS.find(x=>x.k===day);
+const daysGrid=()=>`<div class="days">${DAYS.map(x=>`<div class="day ${x.k===day?'on':''}" data-d="${x.k}"><b>${x.k}</b>${x.n}<br>0/${x.t} ej.${x.k==='D1'?'<br><span style="color:var(--text)">Hoy</span>':''}</div>`).join('')}</div>`;
+const sheet=()=>open?`<div class="sheet"><span class="pill">📅 Calendario</span><span class="pill">☰ Plan completo</span><span class="pill">＋ Cambiar / crear plan</span></div>`:'';
+function header(){
+ const x=d();
+ switch(opt){
+ case'A':return `<div class="row between"><div class="h1">Hoy · ${x.k} ${x.n}</div></div><div class="muted">Upper / Lower · Semana 4 de 6 · Plan PT</div><div class="row"><span class="pill">📅 Calendario</span><span class="pill">☰ Plan completo</span></div>${daysGrid()}`;
+ case'B':return `<div class="card"><div class="row between"><div class="h2">Upper / Lower</div><span class="muted">Semana 4 de 6</span></div><div class="bar"><i></i></div><div class="row between muted"><span>Plan PT · 4 días/semana</span><span class="pill" data-t="1">Detalles ›</span></div>${sheet()}</div>${daysGrid()}`;
+ case'C':return `<div class="row between"><div class="h1">Semana 4 de 6</div><span class="pill" data-t="1">⋯ Plan</span></div>${sheet()}${daysGrid()}`;
+ case'D':return `<div class="row between"><div class="h2">Upper / Lower</div><span class="muted">Semana 4/6</span></div><div class="seg">${DAYS.map(y=>`<span class="${y.k===day?'on':''}" data-d="${y.k}">${y.k}</span>`).join('')}</div><div class="muted">${x.k} · ${x.n} · ${x.t} ejercicios · 0 hechos</div>`;
+ case'E':return `<div class="muted">Semana 4 de 6 · Upper / Lower</div><div class="h1">Hoy toca ${x.k} · ${x.n}</div><div class="muted">${x.t} ejercicios · ~60 min</div><button class="cta">Empezar entrenamiento</button><div class="row muted">Otro día: ${DAYS.filter(y=>y.k!==day).map(y=>`<span class="pill" data-d="${y.k}">${y.k}</span>`).join('')}</div>`;
+ case'F':return `<div class="row between"><div class="h2">Semana 4 de 6</div><span class="pill" data-t="1">📅 Plan</span></div>${sheet()}<div class="dots">${Array.from({length:24},(_,i)=>`<i class="${i<12?'f':''}"></i>`).join('')}</div><div class="muted">12 de 24 entrenamientos hechos</div><div class="row">${DAYS.map(y=>`<span class="pill" style="${y.k===day?'border:2px solid var(--accent)':''}" data-d="${y.k}">${y.k} ${y.n.split(' ')[0]}</span>`).join('')}</div>`;
+ case'G':return `<div class="row between" style="border-bottom:1px solid var(--line);padding-bottom:12px"><span class="h2" data-t="1" style="cursor:pointer">${x.k} ${x.n} ${open?'▴':'▾'}</span><span class="muted">Sem 4/6 · 0/${x.t}</span></div>${open?`<div class="sheet">${daysGrid()}<div class="row"><span class="pill">📅 Calendario</span><span class="pill">☰ Plan completo</span></div></div>`:''}`;
+ case'H':return `<div class="row between"><span class="muted">Upper / Lower · Semana 4 de 6</span><span class="pill" data-t="1">⋯</span></div>${sheet()}<div class="scroller">${DAYS.map(y=>`<div class="big ${y.k===day?'on':''}" data-d="${y.k}"><div class="h2">${y.k}${y.k==='D1'?' · Hoy':''}</div><div class="muted">${y.n}</div><div class="muted">0/${y.t} ejercicios</div></div>`).join('')}</div>`;
+ }}
+function render(){
+ document.getElementById('picker').innerHTML=Object.keys(O).map(k=>`<button class="${k===opt?'on':''}" data-o="${k}">${k} · ${O[k][0]}</button>`).join('');
+ document.getElementById('desc').textContent=O[opt][1];
+ document.getElementById('header').innerHTML=`<div style="display:flex;flex-direction:column;gap:12px">${header()}</div>`;
+ document.getElementById('ex').innerHTML=EX[day].map(e=>`<div class="exrow"><div><b>${e[0]}</b> ${e[1]}<small>${e[2]}</small></div>${e[3]?`<span class="tagx">${e[3]}</span>`:''}</div>`).join('');
+}
+document.addEventListener('click',ev=>{
+ const o=ev.target.closest('[data-o]'),dd=ev.target.closest('[data-d]'),t=ev.target.closest('[data-t]');
+ if(o){opt=o.dataset.o;open=false}else if(dd){day=dd.dataset.d}else if(t){open=!open}else return;
+ render();
+});
+render();
+</script>

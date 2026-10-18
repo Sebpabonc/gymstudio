@@ -32,6 +32,10 @@ describe('rest timer', () => {
     expect(addRestTime(paused)).toEqual({ pausedRemainingMs: 41_000 })
   })
 
+  it('supports the workout-mode thirty-second extension', () => {
+    expect(addRestTime(startRestTimer(30, 1_000), 5_000, 30)).toEqual({ endAt: 61_000 })
+  })
+
   it('pauses and resumes without counting down while paused', () => {
     const paused = toggleRestTimerPause(startRestTimer(30, 1_000), 5_000)
 

@@ -1,10 +1,11 @@
+import { isRepTargetAdjustment } from './presentation'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { blockWeek, dateWeekday, findBlockForDate } from '../progress/utils'
 import { prescriptionForWeek } from '../plans/weekPrescription'
 import { latestPerExerciseDate } from '../utils/completedExercises'
 import { parseRepPrescription } from '../utils/workoutSets'
-import { buildEvidence } from './evidence'
-import { recommend, workingWeight, type Recommendation, type RepRange } from './engine'
+import { recommendForExercise } from './evidence'
+import { workingWeight, type Recommendation, type RepRange } from './engine'
 
 export type WorkoutSummaryRow = {
   exerciseId: string
@@ -30,6 +31,8 @@ function repRange(repetitions: string[]) {
 }
 
 function actionTrend(recommendation: Recommendation): WorkoutSummaryRow['trend'] {
+  // R24: a load change caused only by a new rep target is not "up"/"down".
+  if (isRepTargetAdjustment(recommendation, recommendation.reps)) return 'same'
   if (recommendation.action === 'increase_weight' || recommendation.action === 'increase_reps') return 'up'
   if (recommendation.action === 'decrease_weight' || recommendation.action === 'regress') return 'down'
   return 'same'
@@ -99,20 +102,25 @@ export function buildWorkoutSummary(
     const nextTarget = repRange(occurrencePrescription.reps)
     const entryIds = new Set(entries.map((entry) => entry.id))
     const evidenceHistory = [...history.filter((entry) => !entryIds.has(entry.id)), ...entries]
-    const evidence = buildEvidence(evidenceHistory, exerciseId, blocks, nextOccurrence.date)
-    const recommendation = recommend({
-      history: evidence,
-      today: nextOccurrence.date,
-      target: nextTarget,
-      sets: occurrencePrescription.sets,
-      equipment: catalogue.find((exercise) => exercise.id === exerciseId)?.equipment,
-      plannedWeight: targetWeight,
-      deload: blockWeek(block, nextOccurrence.date) === 6,
-      // PT spec inputs: technique, per-set main reps (pyramids), tempo slots (R10).
-      technique: occurrencePrescription.technique,
+    const { recommendation } = recommendForExercise({
+      history: evidenceHistory,
       exerciseId,
-      setReps: occurrencePrescription.reps.map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0),
-      tempo: /\btempo\b/i.test(occurrencePrescription.notes ?? ''),
+      blocks,
+      today: nextOccurrence.date,
+      dayKey: nextOccurrence.day.key,
+      blockId: block.id,
+      input: {
+        target: nextTarget,
+        sets: occurrencePrescription.sets,
+        equipment: catalogue.find((exercise) => exercise.id === exerciseId)?.equipment,
+        plannedWeight: targetWeight,
+        deload: blockWeek(block, nextOccurrence.date) === 6,
+        // PT spec inputs: technique, per-set main reps (pyramids), tempo slots (R10).
+        technique: occurrencePrescription.technique,
+        exerciseId,
+        setReps: occurrencePrescription.reps.map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0),
+        tempo: /\btempo\b/i.test(occurrencePrescription.notes ?? ''),
+      },
     })
 
     return [{

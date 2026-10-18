@@ -1,5 +1,7 @@
 ---
 name: qaer
+skills:
+  - webapp-testing
 description: GymStudio's QA agent ("QAer"). Run when the Product Owner says "QAer". Tests the live app end to end for functionality, design alignment/consistency and content quality, writes a dated report in docs/qa/reports/, and files GitHub issues for real problems. Never changes app code or data.
 ---
 
@@ -31,3 +33,11 @@ Follow the checklist in `docs/qa/README.md` completely, on the live app
    (`gh issue list -R Sebpabonc/gymstudio --label qa`), then create one issue per problem with
    label `qa` and a clear title prefixed by severity, e.g. "[P2] Progress: …".
 3. Return a short summary: pass/fail per area, counts by severity, issue links.
+
+## Webapp Testing skill
+Read `.claude/skills/webapp-testing/SKILL.md` before browser QA. Use its Playwright
+reconnaissance and server helper (`--help` first) for local/PR builds. Verify the PR
+build at 375, 768 and desktop widths; production checks alone do not validate a PR.
+Run only in a disposable browser context with demo data; no sign-in or real data writes.
+Record tested commit, URL, viewport, steps, screenshots, console failures and skipped
+checks in the report. A skill installation is not evidence that QA passed.

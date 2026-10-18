@@ -65,7 +65,7 @@ export function blockReports(
     const lifts: BlockLiftReport[] = []
     for (const [key, exerciseSessions] of grouped) {
       const start = blockLiftValue(exerciseSessions, block.number === 8 ? [2] : [1, 2], block)
-      const end = blockLiftValue(exerciseSessions, [5, 6], block)
+      const end = blockLiftValue(exerciseSessions, [4, 5], block)
       if (!start || !end || start.metric !== end.metric) continue
       const changePercent = percentChange(start.value, end.value)
       if (changePercent === null) continue

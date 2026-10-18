@@ -3,6 +3,7 @@ import { Exercise, PlannedExercise, TrainingBlock } from '../types'
 import { DayType, ProgressEntry, ProgressSet } from './types'
 import { latestPerExerciseDate } from '../utils/completedExercises'
 import { defaultActiveBlock } from '../utils/trainingBlocks'
+import { PROGRESS_THRESHOLDS } from './thresholds'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -95,11 +96,11 @@ export function groupExerciseSessions(entries: ProgressEntry[]): ExerciseSession
 export function workingSets(sets: ProgressSet[]) {
   const maxWeight = sets.reduce((maximum, set) => Math.max(maximum, set.weight), 0)
   if (maxWeight <= 0) return sets
-  return sets.filter((set) => set.weight >= maxWeight * 0.5)
+  return sets.filter((set) => set.weight > maxWeight * 0.5)
 }
 
 export function bestSetIndex(sets: ProgressSet[]) {
-  const eligibleSets = workingSets(sets)
+  const eligibleSets = workingSets(sets.filter((set) => set.weight > 0 && set.reps >= 1 && set.reps <= 12))
   let bestIndex: number | null = null
   let bestEstimate = 0
 
@@ -123,7 +124,11 @@ export function sessionE1RM(sets: ProgressSet[]) {
 }
 
 export function isDeloadWeek(block: TrainingBlock | null, date: string) {
-  return block?.number === 8 && blockWeek(block, date) === 1
+  if (!block) return false
+  const week = blockWeek(block, date)
+  return week === PROGRESS_THRESHOLDS.deloadWeek
+    || (block.number === PROGRESS_THRESHOLDS.legacyDeloadBlockNumber
+      && week === PROGRESS_THRESHOLDS.legacyDeloadWeek)
 }
 
 export function exerciseFor(exercises: Exercise[], exerciseId: string) {
