@@ -1106,6 +1106,34 @@ button {
   color: var(--muted);
 }
 
+.user-exercise-tag {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  padding: 3px 7px;
+}
+
+.exercise-create-link {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.exercise-create-link > span {
+  color: var(--brand);
+  font-size: 1.25rem;
+}
+
 .exercise-finder {
   min-width: 0;
   display: grid;

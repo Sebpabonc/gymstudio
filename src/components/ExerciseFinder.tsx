@@ -14,7 +14,8 @@ import { ALL_BODY_REGIONS, equipmentLabel, filterExercises, getAvailableBodyRegi
 import {
   fetchActiveUserPlan, fetchTrainingBlocks, getActiveBlockId, getCachedActiveUserPlan,
   getCachedTrainingBlocks, getExerciseDisplayName, loadLocalExerciseSwaps,
-  saveLocalExerciseSwaps, saveWorkoutHistory,
+  loadExercises, normalizeExerciseName, saveLocalExerciseSwaps, saveWorkoutHistory,
+  upsertExerciseRecord,
 } from '../utils/storage'
 import { defaultActiveBlock, todayTrainingDay } from '../utils/trainingBlocks'
 import { filterLoggableSets, getPreviousWorkoutSets } from '../utils/workoutSets'
@@ -46,7 +47,7 @@ function createSet(reps = 8, weight = 0): WorkoutSet {
 }
 
 export default function ExerciseFinder({
-  exercises, history, onHistoryChange, onProgress, authStatus, initialExerciseId,
+  exercises, history, onHistoryChange, onProgress, authStatus, initialExerciseId, onExercisesChange,
 }: {
   exercises: Exercise[]
   history: WorkoutEntry[]
@@ -54,6 +55,7 @@ export default function ExerciseFinder({
   onProgress: (id: string) => void
   authStatus: AuthStatus
   initialExerciseId?: string
+  onExercisesChange?: (exercises: Exercise[]) => void
 }) {
   const { t, language } = useT()
   const demo = isDemoMode()
@@ -73,6 +75,11 @@ export default function ExerciseFinder({
   const entryId = useRef('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [createSheetOpen, setCreateSheetOpen] = useState(false)
+  const [createName, setCreateName] = useState('')
+  const [createRegion, setCreateRegion] = useState('')
+  const [createEquipment, setCreateEquipment] = useState('')
+  const [createNotes, setCreateNotes] = useState('')
   const [swaps, setSwaps] = useState(loadLocalExerciseSwaps)
   const [blocks, setBlocks] = useState(() => selectPlanBlocks(
     demo ? [] : getCachedTrainingBlocks() ?? [],
@@ -124,6 +131,37 @@ export default function ExerciseFinder({
   const open = (id: string) => {
     setMessage('')
     setSelectedId(id)
+  }
+  const startCreatingExercise = (name = '') => {
+    setCreateName(name.slice(0, 60))
+    setCreateRegion('')
+    setCreateEquipment('')
+    setCreateNotes('')
+    setError('')
+    setCreateSheetOpen(true)
+  }
+  const duplicate = createName.trim()
+    ? exercises.find((exercise) => normalizeExerciseName(exercise.name) === normalizeExerciseName(createName))
+    : undefined
+  const createExercise = async () => {
+    if (!createName.trim() || !createRegion || duplicate) return
+    try {
+      const created = await upsertExerciseRecord({
+        name: createName.trim(),
+        primaryMuscle: createRegion,
+        bodyRegion: createRegion,
+        equipment: createEquipment || undefined,
+        notes: createNotes.trim() || undefined,
+      })
+      const updated = await loadExercises()
+      onExercisesChange?.(updated)
+      setSearch(created.name)
+      setRegion(ALL_BODY_REGIONS)
+      setCreateSheetOpen(false)
+      setMessage(t('exercises.created', { name: created.name }))
+    } catch {
+      setError(t('exercises.createError'))
+    }
   }
   const logSet = () => {
     if (!selected || !currentSet) return
@@ -183,7 +221,8 @@ export default function ExerciseFinder({
       {searching ? (
         <section>
           <h2 className="find-list-heading">{t('exercises.results')} · {results.length}</h2>
-          <ExerciseSearchSuggestions exercises={results} onSelect={open} query={search} />
+          <ExerciseSearchSuggestions exercises={results} onSelect={open} query={search}
+            onCreate={search.trim() ? startCreatingExercise : undefined} />
         </section>
       ) : (
         <>
@@ -198,10 +237,79 @@ export default function ExerciseFinder({
             {recent.length > 0
               ? <ExerciseSearchSuggestions exercises={recent} onSelect={open} />
               : <p className="empty-state">{t('exercises.never')}</p>}
+            <button type="button" className="exercise-create-link" onClick={() => startCreatingExercise()}>
+              <span aria-hidden="true">⊕</span> {t('exercises.createOwn')}
+            </button>
           </section>
         </>
       )}
       {message && <p role="status">{message}</p>}
+      {createSheetOpen && (
+        <div className="custom-plan-sheet-backdrop" role="presentation" onClick={() => setCreateSheetOpen(false)}>
+          <section className="custom-plan-sheet" role="dialog" aria-modal="true"
+            aria-labelledby="create-exercise-title" onClick={(event) => event.stopPropagation()}>
+            <div className="custom-plan-sheet-header">
+              <h2 id="create-exercise-title">{t('exercises.createTitle')}</h2>
+              <button type="button" className="toggle-button" aria-label={t('exercises.close')}
+                onClick={() => setCreateSheetOpen(false)}>×</button>
+            </div>
+            <label className="custom-plan-custom-name">
+              <span>{t('exercises.createName')}</span>
+              <input autoComplete="off" maxLength={60} value={createName}
+                onChange={(event) => setCreateName(event.target.value)} />
+            </label>
+            {duplicate && (
+              <p role="status" className="exercise-duplicate-warning">
+                {t('exercises.createDuplicate', { name: getExerciseDisplayName(duplicate, language) })}
+                <button type="button" onClick={() => {
+                  setCreateSheetOpen(false)
+                  setRegion(ALL_BODY_REGIONS)
+                  open(duplicate.id)
+                }}>{t('exercises.useIt')}</button>
+              </p>
+            )}
+            <fieldset className="custom-plan-rest-options">
+              <legend>{t('exercises.createMuscle')}</legend>
+              <div className="custom-plan-custom-muscles">
+                {(['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core'] as const).map((item) => (
+                  <button type="button" key={item} className={createRegion === item ? 'chip active' : 'chip'}
+                    aria-pressed={createRegion === item} onClick={() => setCreateRegion(item)}>
+                    {t(`region.${item}`)}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className="custom-plan-rest-options">
+              <legend>{t('exercises.createEquipment')}</legend>
+              <div className="custom-plan-custom-muscles">
+                {(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'other'] as const).map((item) => (
+                  <button type="button" key={item} className={createEquipment === item ? 'chip active' : 'chip'}
+                    aria-pressed={createEquipment === item} onClick={() => setCreateEquipment(item)}>
+                    {equipmentLabel(item, language)}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <details>
+              <summary>{t('exercises.createMore')}</summary>
+              <label className="custom-plan-custom-name">
+                <span>{t('exercises.notes')}</span>
+                <textarea maxLength={500} value={createNotes}
+                  onChange={(event) => setCreateNotes(event.target.value)} />
+              </label>
+            </details>
+            <div className="custom-plan-sheet-actions">
+              <button type="button" className="primary-button"
+                disabled={!createName.trim() || !createRegion || !!duplicate} onClick={() => void createExercise()}>
+                {t('exercises.createButton')}
+              </button>
+            </div>
+            {!createName.trim() && <p className="empty-state">{t('exercises.createNameRequired')}</p>}
+            {createName.trim() && !createRegion && <p className="empty-state">{t('exercises.createMuscleRequired')}</p>}
+            {error && <p role="alert">{error}</p>}
+          </section>
+        </div>
+      )}
       {selected && (
         <CueSheet id="find-exercise" onClose={close} sections={[]}
           details={{ title: view === 'swap' ? t('exercises.swapTitle') : getExerciseDisplayName(selected, language), closeLabel: t('exercises.close'), openLabel: '', sections: [] }}>

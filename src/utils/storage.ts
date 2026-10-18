@@ -59,6 +59,7 @@ export type SyncWorkoutEntry = WorkoutEntry & {
 type SyncMetadata = {
   entries: Record<string, Pick<SyncWorkoutEntry, 'updatedAt' | 'dirty' | 'deletedAt' | 'syncError'>>
   lastPulledAt: Record<string, string>
+  userExercisesLastPulledAt: Record<string, string>
 }
 
 function loadSyncMetadata(): SyncMetadata {
@@ -67,9 +68,10 @@ function loadSyncMetadata(): SyncMetadata {
     return {
       entries: parsed?.entries ?? {},
       lastPulledAt: parsed?.lastPulledAt ?? {},
+      userExercisesLastPulledAt: parsed?.userExercisesLastPulledAt ?? {},
     }
   } catch {
-    return { entries: {}, lastPulledAt: {} }
+    return { entries: {}, lastPulledAt: {}, userExercisesLastPulledAt: {} }
   }
 }
 
@@ -768,6 +770,10 @@ function mergeExercises(base: Exercise[], saved: Partial<Exercise>[]): Exercise[
     normalized.set(key, {
       id: exercise.id || current?.id || key,
       name: exercise.name,
+      isUserCreated: exercise.isUserCreated ?? current?.isUserCreated,
+      createdAt: exercise.createdAt ?? current?.createdAt,
+      updatedAt: exercise.updatedAt ?? current?.updatedAt,
+      deletedAt: exercise.deletedAt ?? current?.deletedAt,
       nameEs: exercise.nameEs ?? current?.nameEs,
       primaryMuscle: exercise.primaryMuscle || current?.primaryMuscle || 'Other',
       secondaryMuscle: exercise.secondaryMuscle ?? current?.secondaryMuscle,
@@ -925,7 +931,7 @@ export async function loadExercises(useBundledFallback = true): Promise<Exercise
             (!catalogue ||
               (!baseIds.has(exercise?.id ?? '') &&
                 !baseNames.has(normalizeExerciseName(exercise?.name ?? ''))))
-        )
+        ).map((exercise) => ({ ...exercise, isUserCreated: true }))
       }
     }
   } catch {
@@ -934,7 +940,7 @@ export async function loadExercises(useBundledFallback = true): Promise<Exercise
 
   const merged = mergeExercises(baseExercises, savedExercises)
   saveExercises(merged, baseExercises)
-  return merged
+  return merged.filter((exercise) => !exercise.deletedAt)
 }
 
 export function saveExercises(exercises: Exercise[], baseExercises: Exercise[] = []) {
@@ -957,13 +963,23 @@ export async function upsertExerciseRecord(exercise: Partial<Exercise> & { name:
   const library = await loadExercises()
   const key = normalizeExerciseName(exercise.name)
   const existing = library.find((item) => normalizeExerciseName(item.name) === key)
-  const generatedId = library.some((item) => item.id === key) ? `${key}-custom` : key
+  const generatedId = `custom-${createCustomPlanId()}`
+  const bodyRegion = exercise.bodyRegion ?? existing?.bodyRegion ??
+    (['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core'].includes(exercise.primaryMuscle ?? '')
+      ? exercise.primaryMuscle
+      : 'Other')
+  const now = new Date().toISOString()
 
   const nextExercise: Exercise = {
     id: existing?.id ?? exercise.id ?? generatedId,
     name: exercise.name.trim(),
+    isUserCreated: true,
+    createdAt: existing?.createdAt ?? exercise.createdAt ?? now,
+    updatedAt: now,
     primaryMuscle: exercise.primaryMuscle || existing?.primaryMuscle || 'Other',
+    bodyRegion,
     secondaryMuscle: exercise.secondaryMuscle ?? existing?.secondaryMuscle,
+    equipment: exercise.equipment ?? existing?.equipment,
     notes: exercise.notes ?? existing?.notes,
     tips: exercise.tips?.length ? exercise.tips : existing?.tips ?? [],
   }
@@ -974,7 +990,37 @@ export async function upsertExerciseRecord(exercise: Partial<Exercise> & { name:
 
   const baseExercises = loadCatalogueCache()?.exercises ?? (await getBundledCatalogue()).exerciseLibrary
   saveExercises(merged, baseExercises)
+  signalWorkoutHistorySaved()
   return nextExercise
+}
+
+export async function loadUserExercisesForSync(): Promise<Exercise[]> {
+  return (await loadExercises()).filter((exercise) => exercise.isUserCreated)
+}
+
+export async function saveSyncedUserExercises(remoteExercises: Exercise[]) {
+  const library = await loadExercises()
+  const byId = new Map(library.map((exercise) => [exercise.id, exercise]))
+  for (const remote of remoteExercises) {
+    const local = byId.get(remote.id)
+    const localUpdatedAt = Date.parse(local?.updatedAt ?? '')
+    const remoteUpdatedAt = Date.parse(remote.updatedAt ?? '')
+    if (!local || !Number.isFinite(localUpdatedAt) || remoteUpdatedAt >= localUpdatedAt) {
+      byId.set(remote.id, { ...remote, isUserCreated: true })
+    }
+  }
+  const baseExercises = loadCatalogueCache()?.exercises ?? (await getBundledCatalogue()).exerciseLibrary
+  saveExercises(Array.from(byId.values()), baseExercises)
+}
+
+export function getUserExercisesLastPulledAt(userId: string) {
+  return loadSyncMetadata().userExercisesLastPulledAt[userId] ?? null
+}
+
+export function setUserExercisesLastPulledAt(userId: string, updatedAt: string) {
+  const metadata = loadSyncMetadata()
+  metadata.userExercisesLastPulledAt[userId] = updatedAt
+  saveSyncMetadata(metadata)
 }
 
 async function loadWorkoutHistoryEntries(isActive: () => boolean = () => true): Promise<WorkoutEntry[]> {

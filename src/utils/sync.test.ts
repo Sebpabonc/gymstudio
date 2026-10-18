@@ -55,32 +55,43 @@ beforeEach(() => {
 
 function mockSyncClient(
   push: (rows: Record<string, unknown>[]) => { error: unknown; status?: number },
-  remoteRows: RemoteWorkoutEntry[] = []
+  remoteRows: RemoteWorkoutEntry[] = [],
+  pushUserExercise: (rows: Record<string, unknown>[]) => { error: unknown; status?: number } = () => ({ error: null }),
+  remoteUserExercises: Record<string, unknown>[] = []
 ) {
-  const query = {
-    eq: vi.fn(),
-    gte: vi.fn(),
-    order: vi.fn(),
-    range: vi.fn(async () => ({ data: remoteRows, error: null, status: 200 })),
+  const makeQuery = (rows: Record<string, unknown>[]) => {
+    const query = {
+      eq: vi.fn(),
+      gte: vi.fn(),
+      order: vi.fn(),
+      range: vi.fn(async () => ({ data: rows, error: null, status: 200 })),
+    }
+    query.eq.mockReturnValue(query)
+    query.gte.mockReturnValue(query)
+    query.order.mockReturnValue(query)
+    return query
   }
-  query.eq.mockReturnValue(query)
-  query.gte.mockReturnValue(query)
-  query.order.mockReturnValue(query)
-  const upsert = vi.fn((rows: Record<string, unknown>[]) => ({
+  const query = makeQuery(remoteRows as unknown as Record<string, unknown>[])
+  const userExerciseQuery = makeQuery(remoteUserExercises)
+  const makeUpsert = (respond: typeof push) => vi.fn((rows: Record<string, unknown>[]) => ({
     select: vi.fn(async () => ({
       data: rows.map((row) => ({ id: row.id, updated_at: row.updated_at })),
-      ...push(rows),
+      ...respond(rows),
     })),
   }))
+  const upsert = makeUpsert(push)
+  const userExerciseUpsert = makeUpsert(pushUserExercise)
   const refreshSession = vi.fn(async () => ({
     data: { session: { user: { id: 'user-1' } } },
     error: null as unknown,
   }))
   supabaseMock.client = {
-    from: vi.fn(() => ({ upsert, select: vi.fn(() => query) })),
+    from: vi.fn((table: string) => table === 'user_exercises'
+      ? { upsert: userExerciseUpsert, select: vi.fn(() => userExerciseQuery) }
+      : { upsert, select: vi.fn(() => query) }),
     auth: { refreshSession },
   }
-  return { upsert, query, refreshSession }
+  return { upsert, userExerciseUpsert, query, userExerciseQuery, refreshSession }
 }
 
 describe('mergeWorkoutEntries', () => {
@@ -123,7 +134,71 @@ describe('mergeWorkoutEntries', () => {
   })
 })
 
+describe('user exercise sync mapping', () => {
+  it('uses the custom foreign key in both directions and leaves catalogue mapping unchanged', async () => {
+    const { fromRemoteEntry, toRemoteWorkoutEntry } = await import('./sync')
+    const custom = { ...localEntry, exerciseId: 'custom-id', updatedAt: '2026-10-03T00:00:00Z', dirty: true }
+    expect(toRemoteWorkoutEntry(custom, 'user-1', new Set(['custom-id']))).toMatchObject({
+      exercise_id: null,
+      user_exercise_id: 'custom-id',
+    })
+    expect(toRemoteWorkoutEntry({
+      ...localEntry, updatedAt: '2026-10-03T00:00:00Z', dirty: true,
+    }, 'user-1', new Set())).toMatchObject({
+      exercise_id: localEntry.exerciseId,
+      user_exercise_id: null,
+    })
+    expect(fromRemoteEntry(remoteEntry('2026-10-04T00:00:00Z', {
+      exercise_id: null,
+      user_exercise_id: 'custom-id',
+    }))).toMatchObject({ exerciseId: 'custom-id' })
+  })
+})
+
 describe('syncWorkoutHistory', () => {
+  it('uploads legacy custom exercises before their entries and restores the user exercise id on pull', async () => {
+    const legacyId = 'old-name-based-custom-id'
+    const entryId = 'custom-exercise-entry'
+    localStorage.setItem('gym-studio.exercises', JSON.stringify([
+      { id: legacyId, name: 'My old exercise', primaryMuscle: 'Back' },
+    ]))
+    const { saveWorkoutHistory, loadWorkoutHistory } = await import('./storage')
+    saveWorkoutHistory([{ ...localEntry, id: entryId, exerciseId: legacyId }])
+    const callOrder: string[] = []
+    const remoteExercise: Record<string, unknown> = {
+      id: legacyId,
+      name: 'My old exercise',
+      body_region: 'Back',
+      equipment: null,
+      notes: null,
+      created_at: '2026-10-01T00:00:00Z',
+      updated_at: '2099-10-01T00:00:00Z',
+      deleted_at: null,
+    }
+    const { userExerciseUpsert, upsert } = mockSyncClient(
+      () => { callOrder.push('entry'); return { error: null } },
+      [remoteEntry('2099-10-02T00:00:00Z', {
+        id: entryId, exercise_id: null, user_exercise_id: legacyId,
+      })],
+      () => { callOrder.push('user exercise'); return { error: null } },
+      [remoteExercise],
+    )
+
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+
+    expect(userExerciseUpsert.mock.calls[0][0]).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: legacyId, user_id: 'user-1', body_region: 'Back' }),
+    ]))
+    expect(upsert.mock.calls[0][0]).toEqual(expect.arrayContaining([
+      expect.objectContaining({ exercise_id: null, user_exercise_id: legacyId }),
+    ]))
+    expect(callOrder).toEqual(['user exercise', 'entry'])
+    expect(await loadWorkoutHistory()).toEqual([
+      expect.objectContaining({ id: entryId, exerciseId: legacyId }),
+    ])
+  })
+
   it('isolates a rejected row, uploads A/B logs, pulls, and skips quarantine on later syncs', async () => {
     const { saveWorkoutHistory, setWorkoutHistoryLastPulledAt, loadWorkoutHistoryForSync } = await import('./storage')
     setWorkoutHistoryLastPulledAt('user-1', '2026-10-01T00:00:00Z')
@@ -449,7 +524,20 @@ describe('syncWorkoutHistory', () => {
     query.eq.mockReturnValue(query)
     query.gte.mockReturnValue(query)
     query.order.mockReturnValue(query)
-    supabaseMock.client = { from: vi.fn(() => ({ select: vi.fn(() => query) })) }
+    const userExerciseQuery = {
+      eq: vi.fn(),
+      gte: vi.fn(),
+      order: vi.fn(),
+      range: vi.fn(async () => ({ data: [], error: null })),
+    }
+    userExerciseQuery.eq.mockReturnValue(userExerciseQuery)
+    userExerciseQuery.gte.mockReturnValue(userExerciseQuery)
+    userExerciseQuery.order.mockReturnValue(userExerciseQuery)
+    supabaseMock.client = {
+      from: vi.fn((table: string) => ({
+        select: vi.fn(() => table === 'user_exercises' ? userExerciseQuery : query),
+      })),
+    }
 
     const { setWorkoutHistoryLastPulledAt, loadWorkoutHistory } = await import('./storage')
     setWorkoutHistoryLastPulledAt('user-1', cursor)

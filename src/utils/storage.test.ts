@@ -14,6 +14,7 @@ import {
   getSessionStorageValue,
   hasDismissedWelcome,
   loadExercises,
+  loadUserExercisesForSync,
   loadRestTimerState,
   loadRestBetweenSets,
   loadWorkoutTrendOpen,
@@ -847,18 +848,32 @@ describe('per-account storage namespaces', () => {
 })
 
 describe('upsertExerciseRecord', () => {
-  it('avoids catalogue id collisions when deriving a custom exercise id', async () => {
+  it('assigns a stable UUID id and marks a newly created custom exercise', async () => {
     const created = await upsertExerciseRecord({ name: 'Cable Crunch', primaryMuscle: 'Core' })
-    expect(created.id).toBe('cable-crunch-custom')
-    expect((await loadExercises()).some((e) => e.id === 'cable-crunch-custom')).toBe(true)
+    expect(created.id).toMatch(/^custom-[0-9a-f-]{36}$/i)
+    expect(created).toMatchObject({ isUserCreated: true, bodyRegion: 'Core' })
+    expect((await loadExercises()).some((e) => e.id === created.id)).toBe(true)
   })
 
   it('updates an existing exercise matched by name instead of duplicating it', async () => {
-    await upsertExerciseRecord({ name: 'Cable Crunch', primaryMuscle: 'Core' })
-    await upsertExerciseRecord({ name: 'cable crunch', primaryMuscle: 'Core', notes: 'Slow negative' })
+    const created = await upsertExerciseRecord({ name: 'Cable Crunch', primaryMuscle: 'Core' })
+    const updated = await upsertExerciseRecord({ name: 'cable crunch', primaryMuscle: 'Core', notes: 'Slow negative' })
     const matches = (await loadExercises()).filter((e) => normalizeExerciseName(e.name) === 'cable-crunch')
     expect(matches).toHaveLength(1)
-    expect(matches[0].notes).toBe('Slow negative')
+    expect(matches[0]).toMatchObject({
+      id: created.id, notes: 'Slow negative', createdAt: created.createdAt,
+    })
+    expect(updated.id).toBe(created.id)
+  })
+
+  it('keeps legacy name-based ids when loading user exercises for their first sync', async () => {
+    localStorage.setItem('gym-studio.exercises', JSON.stringify([
+      { id: 'old-name-custom', name: 'Old name exercise', primaryMuscle: 'Back' },
+    ]))
+
+    expect(await loadUserExercisesForSync()).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'old-name-custom', isUserCreated: true }),
+    ]))
   })
 })
 
