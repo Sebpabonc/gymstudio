@@ -24,6 +24,28 @@ describe('dictionaries', () => {
     }
   })
 
+  it('removes translations for the decluttered layout and history controls', () => {
+    const removedKeys = [
+      'layout.label',
+      'layout.boxes',
+      'layout.sheet',
+      'exercises.lastVolume',
+      'exercises.previousPerformance',
+      'exercises.noPrevious',
+      'exercises.setOne',
+      'exercises.setMany',
+      'exercises.progress',
+      'exercises.volumeSuffix',
+      'exercises.noTrend',
+      'workout.run.history',
+    ]
+
+    for (const key of removedKeys) {
+      expect(en).not.toHaveProperty(key)
+      expect(es).not.toHaveProperty(key)
+    }
+  })
+
   it('uses the approved Spanish gym vocabulary', () => {
     expect(es['nav.today']).toBe('Hoy')
     expect(es['nav.exercises']).toBe('Ejercicios')

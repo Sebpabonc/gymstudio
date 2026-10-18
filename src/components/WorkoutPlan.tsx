@@ -574,36 +574,6 @@ function NameWithArrow({ name }: { name: string }) {
   )
 }
 
-export function ExerciseSwapButton({
-  label,
-  onClick,
-}: {
-  label: string
-  onClick: React.MouseEventHandler<HTMLButtonElement>
-}) {
-  return (
-    <button
-      type="button"
-      className="exercise-swap-button"
-      aria-label={label}
-      onClick={(event) => {
-        event.stopPropagation()
-        onClick(event)
-      }}
-    >
-      {/* Dumbbell with a small swap badge (PO pick 2026-10-06, option B). */}
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M7 9v6M17 9v6M4 10.5v3M20 10.5v3M7 12h10" />
-      </svg>
-      <span className="exercise-swap-badge" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <path d="M5 8h12l-3-3M19 16H7l3 3" />
-        </svg>
-      </span>
-    </button>
-  )
-}
-
 export function ExerciseSwapSheet({
   alternatives,
   language,
@@ -3668,8 +3638,6 @@ export default function WorkoutPlan({
                       notes.open = !notes.open
                       if (notes.open) notes.querySelector('textarea')?.focus()
                     }}>{t('workout.label.notes')}</button>
-                    <button type="button" className="secondary-button small-button" aria-expanded={isProgressSectionVisible}
-                      onClick={() => toggleProgressSection(exercise.name)}>{t('workout.run.history')}</button>
                     <button type="button" className="secondary-button small-button" aria-expanded={isTipsVisible}
                       onClick={() => togglePostureTips(exercise.name)}>{t('workout.run.technique')}</button>
                       </div>
@@ -3687,46 +3655,6 @@ export default function WorkoutPlan({
                     <SqueezeCue cue={libraryMatch?.squeezeCue} cueLabel={t('workout.squeezeCue')}
                       tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
                       expanded={isTipsVisible} onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />
-                  )}
-                  {isProgressSectionVisible && (
-                    <div className="planned-history-list">
-                      {progressItems.length === 0 && <p className="empty-state">{text.noProgressHistory}</p>}
-                      {progressItems.map((item) => {
-                        const entry = history.find((candidate) => candidate.id === item.id)
-                        return (
-                          <React.Fragment key={item.id}>
-                            <SwipeToDelete label={t('progress.delete.action')}
-                              accessibleLabel={t('progress.delete.logFor', { exercise: displayName, date: formatShortDate(language, item.date) })}
-                              onDelete={() => setProgressDeleteConfirmId(item.id)}>
-                              <article className="planned-history-item">
-                                <div className="planned-history-topline">
-                                  <span>{entry ? loggedDayLabel(entry) : formatHistoryDate(language, item.date)}</span>
-                                  <strong>{formatNumber(language, item.maxWeight)} kg</strong>
-                                </div>
-                                <div className="planned-history-meta">
-                                  <small>{t('workout.volume.value', { value: formatNumber(language, item.totalVolume) })}</small>
-                                  <small>{setLabel(item.setsCount)}</small>
-                                </div>
-                                {item.comments && <p className="planned-history-comment"><strong>{text.comments}:</strong> {item.comments}</p>}
-                              </article>
-                            </SwipeToDelete>
-                            {progressDeleteConfirmId === item.id && entry && (
-                              <div className="planned-history-delete-confirm" role="group" aria-label={t('progress.delete.confirm')}>
-                                <span>{t('progress.delete.confirmFor', { day: loggedDayLabel(entry) })}</span>
-                                <button type="button" className="text-button" onClick={() => void deleteProgressEntry(entry)}>{t('progress.delete.action')}</button>
-                                <button type="button" className="text-button" onClick={() => setProgressDeleteConfirmId('')}>{t('progress.delete.cancel')}</button>
-                              </div>
-                            )}
-                          </React.Fragment>
-                        )
-                      })}
-                      {swipeUndo?.exerciseId === exercise.exerciseId && (
-                        <div className="bulk-delete-bar" role="status">
-                          <span>{t('progress.delete.deleted')}</span>
-                          <button type="button" className="text-button" onClick={undoProgressDelete}>{t('progress.delete.undo')}</button>
-                        </div>
-                      )}
-                    </div>
                   )}
                 </React.Fragment>
               )
@@ -3773,33 +3701,11 @@ export default function WorkoutPlan({
                     {/* PO 2026-10-18: plan codes (A1, B1…) stay in the data for ordering/supersets but are not shown. */}
                     <span className="planned-exercise-name-row">
                       <span className="planned-exercise-name-wrap">
-                        <a
-                          className="planned-exercise-main-name exercise-image-link"
-                          href={exerciseImageSearchUrl(exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment))}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={t('workout.exercise.imageSearch', { name: displayName })}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            event.preventDefault()
-                            void openExternal(event.currentTarget.href)
-                          }}
-                        >
-                          <NameWithArrow name={displayTitle.main} />
-                        </a>
+                        <span className="planned-exercise-main-name">
+                          {displayTitle.main}
+                        </span>
                         {displayTitle.details ? <span className="planned-exercise-detail-name">{displayTitle.details}</span> : null}
                       </span>
-                      {planMode === 'preset' && libraryMatch && completedEntry?.date !== today && (
-                        <ExerciseSwapButton
-                          label={t('workout.swap.change')}
-                          onClick={() => {
-                            setSwapTarget({
-                              exercise: libraryMatch,
-                              fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
-                            })
-                          }}
-                        />
-                      )}
                     </span>
                     {exercise.swappedFrom && (
                       <small className="exercise-swap-origin">
@@ -4035,14 +3941,6 @@ export default function WorkoutPlan({
                             }}
                           >
                             {t('workout.label.notes')}
-                          </button>
-                          <button
-                            type="button"
-                            className="secondary-button small-button"
-                            aria-expanded={isProgressSectionVisible}
-                            onClick={() => toggleProgressSection(exercise.name)}
-                          >
-                            {t('workout.run.history')}
                           </button>
                           <button
                             type="button"
@@ -4415,7 +4313,33 @@ export default function WorkoutPlan({
                       </div>
                     )}
 
-                    <div className="exercise-detail-row">
+                    {!isWorkoutMode && (
+                      <div className="action-row exercise-actions">
+                        <button
+                          type="button"
+                          className="secondary-button small-button"
+                          onClick={() => void openExternal(exerciseImageSearchUrl(
+                            exerciseImageQuery(libraryMatch?.id ?? exercise.exerciseId, displayName, libraryMatch?.equipment)
+                          ))}
+                        >
+                          {t('workout.run.searchGoogle')}
+                        </button>
+                        {planMode === 'preset' && libraryMatch && completedEntry?.date !== today && (
+                          <button
+                            type="button"
+                            className="secondary-button small-button"
+                            onClick={() => setSwapTarget({
+                              exercise: libraryMatch,
+                              fromExerciseId: exercise.swappedFrom ?? exercise.exerciseId!,
+                            })}
+                          >
+                            {t('workout.run.swap')}
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {!isWorkoutMode && <div className="exercise-detail-row">
                       <button
                         type="button"
                         className="exercise-detail-toggle"
@@ -4479,7 +4403,7 @@ export default function WorkoutPlan({
                           <button type="button" className="text-button" onClick={undoProgressDelete}>{t('progress.delete.undo')}</button>
                         </div>
                       )}
-                    </div>
+                    </div>}
                     {!group.isSuperset && (
                       <label className="planned-notes-field">
                         <span>{t('workout.label.notes')}</span>

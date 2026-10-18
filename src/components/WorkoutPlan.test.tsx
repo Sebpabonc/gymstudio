@@ -1,7 +1,7 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import WorkoutPlan, { ExerciseSwapButton, ExerciseSwapSheet } from './WorkoutPlan'
+import WorkoutPlan, { ExerciseSwapSheet } from './WorkoutPlan'
 import { createTranslator } from '../i18n/translate'
 import type { Exercise } from '../types'
 
@@ -111,18 +111,6 @@ describe('WorkoutPlan', () => {
     expect(html.indexOf('Start rest')).toBeLessThan(html.indexOf('class="planned-set-grid"'))
     expect(html).not.toContain('Brace before each rep.')
     expect(html).not.toContain('Posture tips')
-  })
-
-  it('renders the change icon as an accessible labeled button', () => {
-    const onClick = vi.fn()
-    const button = ExerciseSwapButton({ label: 'Change exercise', onClick })
-    const html = renderToString(button)
-
-    expect(html).toContain('aria-label="Change exercise"')
-    expect(html).toContain('class="exercise-swap-button"')
-    expect(html).toContain('<svg')
-    button.props.onClick?.({ stopPropagation: vi.fn() } as unknown as React.MouseEvent<HTMLButtonElement>)
-    expect(onClick).toHaveBeenCalledTimes(1)
   })
 
   it('lists three alternatives and routes each choice to its matching scope', () => {
