@@ -76,13 +76,21 @@ function sessionSetCount(sessions: ProgressLiftSession[]) {
   return sessions.reduce((total, session) => total + plausibleWorkingSets(session.sets).length, 0)
 }
 
+function plausibleReps(reps: number) {
+  return reps >= 1 && reps <= MAX_PLAUSIBLE_REPS
+}
+
 function plausibleWorkingSets(sets: ProgressSet[]) {
-  return workingSets(sets).filter((set) => set.reps >= 1 && set.reps <= MAX_PLAUSIBLE_REPS)
+  return workingSets(sets.filter((set) => plausibleReps(set.reps)))
+}
+
+function hasValidDropLoad(set: ProgressSet) {
+  return Boolean(set.drop && plausibleReps(set.drop.reps) && set.drop.weight > 0)
 }
 
 export function sessionVolumeLoad(sets: ProgressSet[]) {
   return plausibleWorkingSets(sets).reduce((total, set) => total + set.weight * set.reps
-    + (set.drop && set.drop.reps >= 1 && set.drop.reps <= MAX_PLAUSIBLE_REPS
+    + (set.drop && plausibleReps(set.drop.reps)
       ? set.drop.weight * set.drop.reps
       : 0), 0)
 }
@@ -93,7 +101,7 @@ function sessionTopLoad(session: ProgressLiftSession) {
 
 function hasAddedLoad(session: ProgressLiftSession) {
   return plausibleWorkingSets(session.sets).some((set) =>
-    set.weight > 0 || (set.drop?.weight ?? 0) > 0
+    set.weight > 0 || hasValidDropLoad(set)
   )
 }
 
@@ -216,7 +224,7 @@ export function exerciseVolumeTrend(
   const lastWeek = startOfWeek(endDate)
   const unloadedBodyweight = exercise?.equipment?.trim().toLowerCase() === 'bodyweight'
     && allSessions.every((session) => plausibleWorkingSets(session.sets).every((set) =>
-      set.weight <= 0 && (set.drop?.weight ?? 0) <= 0
+      set.weight <= 0 && !hasValidDropLoad(set)
     ))
   const weeks: ExerciseVolumeWeek[] = []
   for (let cursor = dateValue(firstWeek); cursor <= dateValue(lastWeek); cursor += 7 * DAY_MS) {
