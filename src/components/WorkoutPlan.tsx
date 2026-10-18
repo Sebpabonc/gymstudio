@@ -763,6 +763,8 @@ export default function WorkoutPlan({
   const [plannedDrafts, setPlannedDrafts] = useState<Record<string, PlanDraft>>({})
   const [dismissedSetHints, setDismissedSetHints] = useState<Record<string, boolean>>({})
   const [dismissedRirEntries, setDismissedRirEntries] = useState<Record<string, boolean>>({})
+  const [confirmedRirEntries, setConfirmedRirEntries] = useState<Record<string, boolean>>({})
+  const rirConfirmationTimers = useRef(new Map<string, number>())
   const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({})
   const [completedSupersetSets, setCompletedSupersetSets] = useState<Record<string, boolean[]>>({})
   const [completedSupersetAt, setCompletedSupersetAt] = useState<Record<string, Array<number | undefined>>>({})
@@ -806,6 +808,10 @@ export default function WorkoutPlan({
     document.addEventListener('keydown', closeOnEscape)
     return () => document.removeEventListener('keydown', closeOnEscape)
   }, [hasOpenSheet, customPlanSheetDraft, swapTarget, blockSelectorOpen, calendarOpen])
+  useEffect(() => () => {
+    rirConfirmationTimers.current.forEach((timer) => window.clearTimeout(timer))
+    rirConfirmationTimers.current.clear()
+  }, [])
   // Continuous learning (PT spec, approved 2026-10-07): the user's past recommendations + results calibrate the engine.
   const [calibrationRows, setCalibrationRows] = useState<Awaited<ReturnType<typeof fetchCalibrationRecommendations>>>([])
   useEffect(() => {
@@ -1687,7 +1693,14 @@ export default function WorkoutPlan({
     })
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    setDismissedRirEntries((current) => ({ ...current, [entry.id]: true }))
+    setConfirmedRirEntries((current) => ({ ...current, [entry.id]: true }))
+    const previousTimer = rirConfirmationTimers.current.get(entry.id)
+    if (previousTimer !== undefined) window.clearTimeout(previousTimer)
+    rirConfirmationTimers.current.set(entry.id, window.setTimeout(() => {
+      rirConfirmationTimers.current.delete(entry.id)
+      setConfirmedRirEntries((current) => ({ ...current, [entry.id]: false }))
+      setDismissedRirEntries((current) => ({ ...current, [entry.id]: true }))
+    }, 1500))
   }
 
   const toggleExerciseCollapse = (exerciseName: string) => {
@@ -1881,6 +1894,26 @@ export default function WorkoutPlan({
   const workoutGroupsForRender = isWorkoutMode && workoutGroupIndex !== null
     ? [workoutGroups[workoutGroupIndex], ...workoutGroups.filter((_, index) => index !== workoutGroupIndex)]
     : workoutGroups
+  const dismissRirEntries = (entries: WorkoutEntry[]) => {
+    const ids = entries
+      .filter((entry) => entry.date.slice(0, 10) === today && entry.sets[entry.sets.length - 1]?.rir === undefined)
+      .map((entry) => entry.id)
+    if (!ids.length) return
+    ids.forEach((id) => {
+      const timer = rirConfirmationTimers.current.get(id)
+      if (timer !== undefined) window.clearTimeout(timer)
+      rirConfirmationTimers.current.delete(id)
+    })
+    setConfirmedRirEntries((current) => ({ ...current, ...Object.fromEntries(ids.map((id) => [id, false])) }))
+    setDismissedRirEntries((current) => ({ ...current, ...Object.fromEntries(ids.map((id) => [id, true])) }))
+  }
+  const dismissRirPromptsForGroup = (groupIndex: number, entries = history) => {
+    const group = workoutGroups[groupIndex]
+    if (!group) return
+    dismissRirEntries(group.items
+      .map(({ exercise }) => findExerciseEntry(exercise, entries))
+      .filter((entry): entry is WorkoutEntry => !!entry))
+  }
   const elapsedSeconds = Math.max(0, Math.floor((elapsedNow - (sessionStartedAt.current?.timestamp ?? elapsedNow)) / 1000))
   const elapsedLabel = `${formatNumber(language, Math.floor(elapsedSeconds / 60))}:${String(elapsedSeconds % 60).padStart(2, '0')}`
   useEffect(() => {
@@ -1905,6 +1938,9 @@ export default function WorkoutPlan({
     (workoutGroups[index]?.items ?? []).map(({ exercise }) => normalizeExerciseName(exercise.name))
   const goToWorkoutGroup = (index: number) => {
     if (index < 0 || index >= workoutGroups.length) return
+    if (workoutGroupIndex !== null && workoutGroupIndex !== index) {
+      dismissRirPromptsForGroup(workoutGroupIndex)
+    }
     supersetRestUndo.current = null
     if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
     workoutInsightTimer.current = null
@@ -1931,6 +1967,7 @@ export default function WorkoutPlan({
       group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, history))
     )
     const firstOpen = nextWorkoutGroupIndex(completed, -1)
+    dismissRirEntries(history)
     setCollapsedExercises(Object.fromEntries(
       activeExercises.map((exercise) => [
         normalizeExerciseName(exercise.name),
@@ -1951,6 +1988,7 @@ export default function WorkoutPlan({
     setWorkoutInsight(null)
     setWorkoutGroupInsights([])
     setWorkoutGroupInsightNext(null)
+    if (workoutGroupIndex !== null) dismissRirPromptsForGroup(workoutGroupIndex)
     setWorkoutGroupIndex(null)
     onWorkoutModeChange?.(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -1963,6 +2001,7 @@ export default function WorkoutPlan({
     setWorkoutInsight(null)
     setWorkoutGroupInsights([])
     setWorkoutGroupInsightNext(null)
+    if (workoutGroupIndex !== null) dismissRirPromptsForGroup(workoutGroupIndex)
     setWorkoutGroupIndex(null)
     onWorkoutModeChange?.(false)
     openSessionSummary(history, Date.now(), true)
@@ -2149,6 +2188,7 @@ export default function WorkoutPlan({
         currentGroup
       )
       if (nextGroup < 0) {
+        dismissRirPromptsForGroup(currentGroup, nextHistory)
         setWorkoutGroupIndex(null)
         onWorkoutModeChange?.(false)
         openSessionSummary(nextHistory, loggedAt)
@@ -2340,6 +2380,7 @@ export default function WorkoutPlan({
           goToWorkoutGroup(nextGroup)
         }, 3000)
       } else {
+        dismissRirPromptsForGroup(currentGroup, nextHistory)
         setWorkoutGroupIndex(null)
         onWorkoutModeChange?.(false)
         openSessionSummary(nextHistory, loggedAt)
@@ -2965,6 +3006,7 @@ export default function WorkoutPlan({
                       }) + ` · ${formatNumber(language, done)}/${formatNumber(language, total)}`}
                       aria-pressed={active}
                       onClick={() => {
+                        if (workoutGroupIndex !== null) dismissRirPromptsForGroup(workoutGroupIndex)
                         setSelectedDay(day.key)
                         setWorkoutGroupIndex(null)
                         collapseAllExerciseSections()
@@ -3536,7 +3578,7 @@ export default function WorkoutPlan({
               : null
             const setHintDismissalKey = `${getPlanDraftKey(exercise.name)}:${nextUncheckedIndex}`
             const finalLoggedSet = completedEntry?.sets[completedEntry.sets.length - 1]
-            const shouldAskRir = completedEntry?.date === today &&
+            const shouldAskRir = completedEntry?.date.slice(0, 10) === today &&
               !!finalLoggedSet &&
               finalLoggedSet.rir === undefined &&
               !dismissedRirEntries[completedEntry.id]
@@ -3898,27 +3940,34 @@ export default function WorkoutPlan({
                     <p>{getNextTargetWhy(insightTarget)}</p>
                   </aside>
                 )}
-                {shouldAskRir && completedEntry && (
-                  <div className="trainer-rir-prompt" role="group" aria-label={t('workout.rir.question')}>
-                    <span>{t('workout.rir.question')}</span>
-                    <div className="trainer-rir-options">
-                      {[
-                        { label: 'workout.rir.zero', value: 0 },
-                        { label: 'workout.rir.oneTwo', value: 2 },
-                        { label: 'workout.rir.threePlus', value: 3 },
-                      ].map(({ label, value }) => (
-                        <button key={value} type="button" onClick={() => saveSetRir(completedEntry, value)}>
-                          {t(label as TranslationKey)}
-                        </button>
-                      ))}
-                      <button
-                        type="button"
-                        className="trainer-rir-skip"
-                        onClick={() => setDismissedRirEntries((current) => ({ ...current, [completedEntry.id]: true }))}
-                      >
-                        {t('workout.rir.skip')}
-                      </button>
-                    </div>
+                {((shouldAskRir && completedEntry) || confirmedRirEntries[completedEntry?.id ?? '']) && completedEntry && (
+                  <div
+                    className="trainer-rir-prompt"
+                    role={confirmedRirEntries[completedEntry.id] ? 'status' : 'group'}
+                    aria-label={confirmedRirEntries[completedEntry.id] ? undefined : t('workout.rir.question')}
+                    aria-live="polite"
+                  >
+                    {confirmedRirEntries[completedEntry.id] ? (
+                      <span>{t('workout.rir.saved')}</span>
+                    ) : (
+                      <>
+                        <div className="trainer-rir-copy">
+                          <span>{t('workout.rir.question')}</span>
+                          <small>{t('workout.rir.hint')}</small>
+                        </div>
+                        <div className="trainer-rir-options">
+                          {[
+                            { label: 'workout.rir.zero', value: 0 },
+                            { label: 'workout.rir.oneTwo', value: 2 },
+                            { label: 'workout.rir.threePlus', value: 3 },
+                          ].map(({ label, value }) => (
+                            <button key={value} type="button" onClick={() => saveSetRir(completedEntry, value)}>
+                              {t(label as TranslationKey)}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 

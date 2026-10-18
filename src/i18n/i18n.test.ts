@@ -40,6 +40,19 @@ describe('dictionaries', () => {
     expect(es['exercises.postureTips']).toBe('Consejos de postura')
   })
 
+  it('uses the approved reps-left prompt wording in both languages without a skip label', () => {
+    expect(en['workout.rir.question']).toBe('Reps left in the tank?')
+    expect(en['workout.rir.hint']).toBe('Last set only. Helps set your next weight.')
+    expect(en['workout.rir.zero']).toBe('0 · max')
+    expect(en['workout.rir.saved']).toBe('Got it, your next target will use this.')
+    expect(es['workout.rir.question']).toBe('¿Cuántas reps más podías hacer?')
+    expect(es['workout.rir.hint']).toBe('Solo la última serie. Ayuda a ajustar tu próximo peso.')
+    expect(es['workout.rir.zero']).toBe('0 · al máximo')
+    expect(es['workout.rir.saved']).toBe('Listo, tu próximo objetivo lo tendrá en cuenta.')
+    expect(en).not.toHaveProperty('workout.rir.skip')
+    expect(es).not.toHaveProperty('workout.rir.skip')
+  })
+
   it('uses separate sign-in hints for saving goals and creating personal plans', () => {
     expect(en['profile.goal.signIn']).toBe('Sign in to save your goal')
     expect(es['profile.goal.signIn']).toBe('Inicia sesión para guardar tu objetivo')

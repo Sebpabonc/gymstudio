@@ -151,3 +151,59 @@ describe('pyramids get a weight per set', () => {
     expect(recommend({ history, today: '2026-10-08', target: range(8), sets: 3, equipment: 'dumbbell', technique: 'straight', setReps: [8, 8, 8] }).setWeights).toBeUndefined()
   })
 })
+
+describe('approved reps-left prompt cases', () => {
+  const recommendPyramid = (rir: number | undefined, technique: 'pyramid' | 'reverse-pyramid') => {
+    const setReps = technique === 'pyramid' ? [12, 10, 8] : [6, 8, 10]
+    const weights = technique === 'pyramid' ? [40, 45, 50] : [50, 45, 40]
+    const reps = setReps
+    const lastSets = weights.map((weight, index) => ({
+      weight,
+      reps: reps[index],
+      ...(index === setReps.length - 1 && rir !== undefined ? { rir } : {}),
+    }))
+    return recommend({
+      history: [{
+        date: '2026-10-05',
+        sets: lastSets,
+        target: range(Math.min(...setReps), Math.max(...setReps)),
+        technique,
+        setReps,
+      }],
+      today: '2026-10-08',
+      target: range(Math.min(...setReps), Math.max(...setReps)),
+      sets: 3,
+      equipment: 'barbell',
+      technique,
+      setReps,
+    })
+  }
+
+  it('E1: an ascending pyramid top set at target without RIR increases one step', () => {
+    expect(recommendPyramid(undefined, 'pyramid')).toMatchObject({
+      weight: 52.5,
+      reason: 'reached_top_of_range',
+    })
+  })
+
+  it('E2: an ascending pyramid top set at zero RIR maintains its load', () => {
+    expect(recommendPyramid(0, 'pyramid')).toMatchObject({
+      weight: 50,
+      reason: 'slightly_below_target',
+    })
+  })
+
+  it('E3: an ascending pyramid top set at three RIR increases one step', () => {
+    expect(recommendPyramid(3, 'pyramid')).toMatchObject({
+      weight: 52.5,
+      reason: 'reached_top_of_range',
+    })
+  })
+
+  it('E4: reverse-pyramid RIR on the final set does not change the top-set increase', () => {
+    expect(recommendPyramid(0, 'reverse-pyramid')).toMatchObject({
+      weight: 52.5,
+      reason: 'reached_top_of_range',
+    })
+  })
+})
