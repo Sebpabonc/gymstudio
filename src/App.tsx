@@ -28,11 +28,9 @@ import {
   restoreWorkoutEntry,
   saveWorkoutHistory,
   saveRestTimerState,
-  getLayoutMode,
   recordHelpAiAppOpen,
-  setLayoutMode,
 } from './utils/storage'
-import { formatShortDate, localizeMuscle, TranslationKey, useT } from './i18n'
+import { localizeMuscle, TranslationKey, useT } from './i18n'
 import { RestTimerState, startRestTimer } from './utils/restTimer'
 import { summarizeCompletedEntry } from './utils/completedExercises'
 import {
@@ -44,10 +42,8 @@ import {
 import {
   copyWeightToUntouchedSets,
   filterLoggableSets,
-  formatWorkoutSet,
   getPreviousWorkoutSets,
   workoutMaxWeight,
-  workoutVolume,
 } from './utils/workoutSets'
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen'))
@@ -100,11 +96,6 @@ export default function App() {
   const contentRef = useRef<HTMLElement>(null)
   const dockHidden = useTextEntryFocused()
   const [showWelcome, setShowWelcome] = useState(() => !hasDismissedWelcome())
-  const [layoutMode, setLayoutModeState] = useState(getLayoutMode)
-  const chooseLayoutMode = (mode: 'boxes' | 'sheet') => {
-    setLayoutMode(mode)
-    setLayoutModeState(mode)
-  }
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const { t, language, setLanguage } = useT()
@@ -245,19 +236,9 @@ export default function App() {
 
   const previousWorkout = exerciseHistory[0]
   const previousSets = selectedExercise ? getPreviousWorkoutSets(history, selectedExercise.id) : []
-  const previousVolume = previousWorkout
-    ? workoutVolume(previousWorkout.sets)
-    : 0
   const previousMax = previousWorkout
     ? workoutMaxWeight(previousWorkout.sets)
     : 0
-
-  const progressItems = exerciseHistory.slice(0, 5).map((entry) => ({
-    id: entry.id,
-    date: entry.date,
-    maxWeight: workoutMaxWeight(entry.sets),
-    totalVolume: workoutVolume(entry.sets),
-  }))
 
   const updateSet = (index: number, field: 'reps' | 'weight', value: string) => {
     if (field === 'weight') {
@@ -337,7 +318,7 @@ export default function App() {
   }
 
   return (
-    <div className={`app-shell layout-${layoutMode}${workoutModeActive ? ' workout-mode-active' : ''}`}>
+    <div className={`app-shell layout-sheet${workoutModeActive ? ' workout-mode-active' : ''}`}>
       <div className="phone-frame">
         <main className={`app-content${restTimer ? ' with-rest-timer' : ''}`} ref={contentRef}>
           <div className="header-sentinel" ref={headerSentinelRef} aria-hidden="true" />
@@ -363,24 +344,6 @@ export default function App() {
                 onClick={() => setLanguage('es')}
               >
                 ES
-              </button>
-            </span>
-            <span className="layout-toggle" role="group" aria-label={t('layout.label')}>
-              <button
-                type="button"
-                aria-label={t('layout.boxes')}
-                aria-pressed={layoutMode === 'boxes'}
-                onClick={() => chooseLayoutMode('boxes')}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="7" rx="2.2" /><rect x="4" y="13" width="16" height="7" rx="2.2" /></svg>
-              </button>
-              <button
-                type="button"
-                aria-label={t('layout.sheet')}
-                aria-pressed={layoutMode === 'sheet'}
-                onClick={() => chooseLayoutMode('sheet')}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5V12a7 7 0 0 1 7-7h3a7 7 0 0 1 7 7v8.5" /><path d="M8 13.5h8M8 17h8" /></svg>
               </button>
             </span>
             <span
@@ -619,42 +582,12 @@ export default function App() {
                       onToggle={() => setTipsExpanded((current) => !current)}
                     />
 
-                    <div className="summary-grid">
+                    <div className="summary-grid summary-grid-single">
                       <div className="metric-card">
                         <span>{t('exercises.lastMax')}</span>
                         <strong>{previousMax ? `${previousMax} kg` : '—'}</strong>
                       </div>
-                      <div className="metric-card">
-                        <span>{t('exercises.lastVolume')}</span>
-                        <strong>{previousVolume ? `${previousVolume} kg` : '—'}</strong>
-                      </div>
                     </div>
-                  </section>
-
-                  <section className="card previous-card">
-                    <div className="section-title-row">
-                      <h3>{t('exercises.previousPerformance')}</h3>
-                    </div>
-
-                    {previousWorkout ? (
-                      <>
-                        <div className="last-session-line">
-                          <span>{formatShortDate(language, previousWorkout.date)}</span>
-                          <strong>
-                            {previousWorkout.sets.length} {previousWorkout.sets.length === 1 ? t('exercises.setOne') : t('exercises.setMany')}
-                          </strong>
-                        </div>
-                        <div className="last-sets">
-                          {previousWorkout.sets.map((set, index) => (
-                            <span key={`${previousWorkout.id}-${index}`}>
-                              <strong>{index + 1}</strong> {formatWorkoutSet(set)}
-                            </span>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
-                      <p className="empty-state">{t('exercises.noPrevious')}</p>
-                    )}
                   </section>
 
                   <section className="card log-card">
@@ -696,37 +629,16 @@ export default function App() {
                     </button>
                   </section>
 
-                  <section className="card progress-card">
-                    <div className="section-title-row">
-                      <h3>{t('exercises.progress')}</h3>
-                      <button
-                        type="button"
-                        className="toggle-button"
-                        onClick={() => {
-                          setProgressExerciseId(selectedExercise.id)
-                          setActiveTab('progress')
-                        }}
-                      >
-                        {t('exercises.seeFullProgress')}
-                      </button>
-                    </div>
-
-                    {progressItems.length > 0 ? (
-                      <div className="progress-list">
-                        {progressItems.map((item) => (
-                          <div className="progress-item" key={item.id}>
-                            <div>
-                              <span>{formatShortDate(language, item.date)}</span>
-                              <strong>{item.maxWeight} kg</strong>
-                            </div>
-                            <small>{t('exercises.volumeSuffix', { value: item.totalVolume })}</small>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="empty-state">{t('exercises.noTrend')}</p>
-                    )}
-                  </section>
+                  <button
+                    type="button"
+                    className="text-button exercise-progress-link"
+                    onClick={() => {
+                      setProgressExerciseId(selectedExercise.id)
+                      setActiveTab('progress')
+                    }}
+                  >
+                    {t('exercises.seeFullProgress')} <span aria-hidden="true">›</span>
+                  </button>
                 </>
               ) : (
                 <section className="card">
