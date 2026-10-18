@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 export type SqueezeCueDetails = {
@@ -33,16 +33,7 @@ export default function SqueezeCue({
   const visibleCue = cue?.trim()
   const hasTips = tips.length > 0
   const [sheetOpen, setSheetOpen] = useState(false)
-  const sections = details?.sections.filter((section) => section.lines.some((line) => line.trim())) ?? []
-
-  useEffect(() => {
-    if (!sheetOpen) return undefined
-    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setSheetOpen(false) }
-    window.addEventListener('keydown', close)
-    const previous = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { window.removeEventListener('keydown', close); document.body.style.overflow = previous }
-  }, [sheetOpen])
+  const sections = details ? visibleSections(details) : []
 
   if (!visibleCue && !hasTips) return null
 
@@ -99,31 +90,82 @@ export default function SqueezeCue({
           {tips.map((tip, index) => <li key={`${tipsId}-${index}`}>{tip}</li>)}
         </ul>
       )}
-      {sheetOpen && details && typeof document !== 'undefined' && createPortal(
-        <div className="cue-sheet-backdrop" role="presentation" onClick={() => setSheetOpen(false)}>
-          <div
-            className="cue-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={`${tipsId}-sheet-title`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <header className="cue-sheet-header">
-              <h3 id={`${tipsId}-sheet-title`}>{details.title}</h3>
-              <button type="button" className="cue-sheet-close" aria-label={details.closeLabel} onClick={() => setSheetOpen(false)}>×</button>
-            </header>
-            {sections.map((section) => (
-              <section key={section.heading} className="cue-sheet-section">
-                <h4>{section.heading}</h4>
-                {section.lines.length > 1
-                  ? <ul>{section.lines.filter((line) => line.trim()).map((line, index) => <li key={index}>{line}</li>)}</ul>
-                  : <p>{section.lines[0]}</p>}
-              </section>
-            ))}
-          </div>
-        </div>,
-        document.body
-      )}
+      {sheetOpen && details && <CueSheet details={details} sections={sections} id={tipsId} onClose={() => setSheetOpen(false)} />}
     </section>
+  )
+}
+
+function visibleSections(details: SqueezeCueDetails) {
+  return details.sections.filter((section) => section.lines.some((line) => line.trim()))
+}
+
+function CueSheet({ details, sections, id, onClose }: {
+  details: SqueezeCueDetails
+  sections: SqueezeCueDetails['sections']
+  id: string
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose() }
+    window.addEventListener('keydown', close)
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', close); document.body.style.overflow = previous }
+  }, [onClose])
+
+  if (typeof document === 'undefined') return null
+  return createPortal(
+    <div className="cue-sheet-backdrop" role="presentation" onClick={onClose}>
+      <div
+        className="cue-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`${id}-sheet-title`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <header className="cue-sheet-header">
+          <h3 id={`${id}-sheet-title`}>{details.title}</h3>
+          <button type="button" className="cue-sheet-close" aria-label={details.closeLabel} onClick={onClose}>×</button>
+        </header>
+        {sections.map((section) => (
+          <section key={section.heading} className="cue-sheet-section">
+            <h4>{section.heading}</h4>
+            {section.lines.length > 1
+              ? <ul>{section.lines.filter((line) => line.trim()).map((line, index) => <li key={index}>{line}</li>)}</ul>
+              : <p>{section.lines[0]}</p>}
+          </section>
+        ))}
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+/** PO 2026-10-18: in Workout mode the short "Squeeze" line also opens the exercise details sheet. */
+export function ShortCue({ label, cue, details, id }: {
+  label: string
+  cue: string
+  details?: SqueezeCueDetails
+  id: string
+}) {
+  const [open, setOpen] = useState(false)
+  const close = useCallback(() => setOpen(false), [])
+  const sections = details ? visibleSections(details) : []
+  if (!details || sections.length === 0) {
+    return <p className="workout-short-cue"><strong>{label} · </strong>{cue}</p>
+  }
+  return (
+    <>
+      <button
+        type="button"
+        className="workout-short-cue workout-short-cue-open"
+        aria-haspopup="dialog"
+        aria-label={details.openLabel}
+        onClick={() => setOpen(true)}
+      >
+        <strong>{label} · </strong>{cue}<span className="squeeze-cue-more" aria-hidden="true"> ›</span>
+      </button>
+      {open && <CueSheet details={details} sections={sections} id={id} onClose={close} />}
+    </>
   )
 }
