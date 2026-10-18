@@ -9300,3 +9300,21 @@ button.superset-last-time {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* At phone width there is no room for the name and four icons on one line:
+   the name keeps the full first line and the icons sit right-aligned just below it. */
+.planned-exercise-header:has(> .workout-header-actions) {
+  flex-wrap: wrap;
+}
+.planned-exercise-header > .planned-exercise-title-block {
+  min-width: 0;
+}
+.planned-exercise-header:has(> .workout-header-actions) > .planned-exercise-title-block {
+  flex: 1 1 0;
+}
+.planned-exercise-header > .workout-header-actions {
+  order: 3;
+  flex-basis: 100%;
+  justify-content: flex-end;
+  margin-left: 0;
+}
