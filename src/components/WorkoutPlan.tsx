@@ -3757,6 +3757,19 @@ export default function WorkoutPlan({
                       tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
                       expanded={isTipsVisible} onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />
                   )}
+                  {/* PO 2026-10-19: supersets show the same per-set trend as single exercises. */}
+                  <details
+                    className="workout-trend-details superset-trend-details"
+                    open={trendOpen}
+                    onToggle={(event) => {
+                      const next = event.currentTarget.open
+                      setTrendOpen(next)
+                      saveWorkoutTrendOpen(next)
+                    }}
+                  >
+                    <summary>{t('workout.trend.title')}{exercise.code ? ` · ${exercise.code}` : ''} ▾</summary>
+                    <SetTrendChart sessions={trendSessions} language={language} t={t} />
+                  </details>
                 </React.Fragment>
               )
             }
