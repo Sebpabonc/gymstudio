@@ -97,7 +97,7 @@ import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
-import { nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState } from '../utils/workoutMode'
+import { dayWorkoutStatus, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState } from '../utils/workoutMode'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
 import RestTimer from './RestTimer'
@@ -2969,14 +2969,33 @@ export default function WorkoutPlan({
         {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset !== 0 && (
           <p className="week-progress-preview-note">{t('workout.week.previewNote')}</p>
         )}
-        {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset === 0 && (
-          <button type="button" className="primary-button start-workout-button" onClick={startWorkout}>
-            {/* PO 2026-10-11: "Resume" only when this day was logged today, otherwise "Start". */}
-            {activeExercises.some((exercise) => findExerciseCompletion(exercise, history)?.date.slice(0, 10) === today)
-              ? t('workout.run.resume')
-              : t('workout.run.start')}
-          </button>
-        )}
+        {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset === 0 && (() => {
+          // PO 2026-10-18: one clear state per day this week - Start / Continue (n of N) / Completed.
+          const week = weekBounds(today)
+          const status = activeBlock
+            ? dayWorkoutStatus(activeExercises.map((exercise) => exercise.exerciseId), history, {
+                blockId: activeBlock.id, dayKey: activeDay.key, weekStart: week.start, weekEnd: week.end,
+              })
+            : null
+          if (status?.state === 'done') {
+            return (
+              <div className="day-done-status" role="status">
+                <strong>✓ {t('workout.run.dayDone', { date: formatWeekdayDate(language, `${status.lastDate ?? today}T00:00:00Z`) })}</strong>
+                <button type="button" className="secondary-button small-button" onClick={startWorkout}>{t('workout.run.reviewDay')}</button>
+              </div>
+            )
+          }
+          const inProgress = status
+            ? status.state === 'in-progress'
+            : activeExercises.some((exercise) => findExerciseCompletion(exercise, history)?.date.slice(0, 10) === today)
+          return (
+            <button type="button" className="primary-button start-workout-button" onClick={startWorkout}>
+              {inProgress && status
+                ? t('workout.run.resumeCount', { done: formatNumber(language, status.done), total: formatNumber(language, status.total) })
+                : inProgress ? t('workout.run.resume') : t('workout.run.start')}
+            </button>
+          )
+        })()}
         </>
       ) : (
         <section className="custom-plan-builder">
