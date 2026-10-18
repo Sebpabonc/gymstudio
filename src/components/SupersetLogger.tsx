@@ -64,11 +64,20 @@ export function SupersetLogger({
   const firstIncomplete = completed.findIndex((done) => !done)
   const roundCount = ticks.length
   const currentRound = firstIncomplete
+  const previousRound = useRef(currentRound)
   const loggedSignature = loggedRounds.map(Number).join(',')
 
   useEffect(() => {
     setTicks(createSupersetTicks(counts, loggedRounds))
   }, [loggedSignature])
+
+  useEffect(() => {
+    if (previousRound.current !== currentRound && currentRound >= 0) {
+      const exercise = ticks[currentRound]?.findIndex((done) => !done) ?? -1
+      if (exercise >= 0) inputs.current.get(`${currentRound}:${exercise}`)?.focus()
+    }
+    previousRound.current = currentRound
+  }, [currentRound])
 
   useEffect(() => {
     if (!handoff) return

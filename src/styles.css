@@ -9832,6 +9832,14 @@ p.workout-short-cue.cue-card {
   padding: 16px;
 }
 
+.layout-boxes .day-plan-card {
+  padding: 16px;
+}
+
+.layout-boxes .day-plan-card .planned-exercise-card {
+  padding: 12px 0;
+}
+
 .day-plan-card .superset-group {
   padding: 16px;
   border: 1px solid var(--line);
@@ -9845,6 +9853,28 @@ p.workout-short-cue.cue-card {
 
 .plan-badge {
   text-transform: none;
+}
+
+.technique-chip {
+  text-transform: none;
+}
+
+.brand-tagline {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.app-shell:not(.active-tab-today) .brand-tagline {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.app-shell:not(.active-tab-today) .brand-header h1 {
+  font-size: var(--type-title-size);
+  line-height: var(--type-title-lh);
+  font-weight: var(--type-title-weight);
+  letter-spacing: var(--type-title-track);
+  text-wrap: balance;
 }
 
 .plan-card.workout-mode-active :is(p, span, strong, small, button, label, time, h2, h3, h4, li) {
@@ -9964,10 +9994,16 @@ p.workout-short-cue.cue-card {
   font-weight: var(--type-title-weight);
 }
 
-.workout-completed-stat strong {
+.workout-completed-metrics strong {
   font-size: var(--type-num-size);
   line-height: var(--type-num-lh);
+  font-weight: var(--type-num-weight);
   font-variant-numeric: tabular-nums;
+}
+
+.workout-completed-screen :is(p, span, small, button, label, li) {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
 }
 
 .workout-exercise-insight,
@@ -10302,6 +10338,7 @@ p.workout-short-cue.cue-card {
 }
 
 .plan-card.workout-mode-active button,
+.workout-completed-screen button,
 .exercise-finder button,
 .progress-v3 button,
 .account-screen button,
