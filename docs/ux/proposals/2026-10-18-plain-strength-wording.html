@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0b0c">
+<title>Plain Strength Wording</title>
+<style>
+:root{--bg:#0b0b0c;--phone:#101012;--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);--line:rgba(255,255,255,.11);--text:#f3f3f1;--muted:#b9b8b5;--brand:#8d5e63;--brand-soft:rgba(141,94,99,.22);--rose:#c99ca1;--green:#a7e3a1;--amber:#f2c66d;--old:rgba(255,107,107,.12);--oldline:rgba(255,107,107,.45);--new:rgba(167,227,161,.10);--newline:rgba(167,227,161,.45);color-scheme:dark}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f4f2ef;--phone:#ffffff;--panel:rgba(0,0,0,.035);--panel2:rgba(0,0,0,.06);--line:rgba(0,0,0,.12);--text:#1b1a19;--muted:#5d5b58;--brand:#8d5e63;--brand-soft:rgba(141,94,99,.14);--rose:#8d5e63;--green:#2f7a2a;--amber:#8a6200;--old:rgba(200,40,40,.07);--oldline:rgba(200,40,40,.4);--new:rgba(47,122,42,.07);--newline:rgba(47,122,42,.45);color-scheme:light}}
+:root[data-theme="dark"]{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,'Segoe UI',sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar h1{font-size:15px;margin:0 8px 0 0;font-weight:800;flex-basis:100%}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex-wrap:wrap;max-width:100%}
+.seg button{background:none;border:0;color:var(--muted);padding:0 12px;min-height:40px;cursor:pointer;font-size:13px}
+.seg button[aria-pressed=true]{background:var(--brand);color:#fff}
+.scen{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%}
+.scen button{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 10px;min-height:40px;font-size:12px;cursor:pointer;color:var(--muted);text-align:left}
+.scen button[aria-pressed=true]{border-color:var(--brand);background:var(--brand-soft);color:var(--text)}
+.stage{display:flex;gap:24px;justify-content:center;padding:16px;flex-wrap:wrap;align-items:flex-start}
+.col{width:375px;max-width:100%}
+.lbl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);margin:0 0 6px 4px;font-weight:700}
+.phone{background:var(--phone);border:1px solid var(--line);border-radius:26px;overflow:hidden;position:relative;min-height:640px}
+.scr{padding:12px 12px 24px}
+.sec{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:14px 2px 6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.exn{font-size:16px;font-weight:800;margin:0 0 6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chips span{height:30px;padding:0 9px;border-radius:9px;display:inline-flex;align-items:center;font-weight:800;font-size:12px;background:var(--green);color:#163016;font-variant-numeric:tabular-nums}
+.ins{border-radius:12px;padding:9px 10px;font-size:13px;line-height:1.4}
+.ins.before{background:var(--old);border:1px dashed var(--oldline)}
+.ins.after{background:var(--new);border:1px solid var(--newline)}
+.ins strong{display:block;font-size:13px;margin-bottom:2px}
+.ins small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.num{font-variant-numeric:tabular-nums}
+.link{background:none;border:0;color:var(--rose);padding:0;cursor:pointer;font-size:12px;min-height:32px;text-decoration:underline;text-underline-offset:2px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.badge{font-size:10px;font-weight:800;letter-spacing:.06em;border:1px solid var(--brand);background:var(--brand-soft);border-radius:999px;padding:3px 8px;white-space:nowrap}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:11px;color:var(--muted)}
+.prog small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.toast{margin-top:8px;font-size:12px;border-radius:10px;padding:8px 10px;background:var(--panel2)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--phone);border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:16px 16px 20px;box-shadow:0 -10px 30px rgba(0,0,0,.4);font-size:13px;line-height:1.5}
+.sheet[hidden]{display:none}
+.sheet h2{font-size:15px;margin:0 0 8px}
+.sheet .close{margin-top:10px;width:100%;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.note{max-width:800px;margin:0 auto;padding:0 16px 32px;font-size:13px;color:var(--muted);line-height:1.5}
+.note b{color:var(--text)}
+@media(max-width:799px){.stage[data-both=yes] .col.after{display:none}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1 id="ttl">Plain strength wording · prototype (375 px)</h1>
+  <div class="seg" role="group" aria-label="Option">
+    <button data-opt="A" aria-pressed="true">A · Show the sets</button>
+    <button data-opt="B" aria-pressed="false">B · Strength score</button>
+    <button data-opt="C" aria-pressed="false">C · Equivalent</button>
+  </div>
+  <div class="seg" role="group" aria-label="Language">
+    <button data-lang="en" aria-pressed="true">EN</button>
+    <button data-lang="es" aria-pressed="false">ES</button>
+  </div>
+  <div class="seg" role="group" aria-label="View">
+    <button data-view="both" aria-pressed="true">Before | After</button>
+    <button data-view="before" aria-pressed="false">Before</button>
+    <button data-view="after" aria-pressed="false">After</button>
+  </div>
+  <div class="scen" role="group" aria-label="Scenario" id="scen"></div>
+</div>
+<div class="stage" id="stage" data-both="yes">
+  <div class="col before"><p class="lbl">Before (live today)</p><div class="phone"><div class="scr" id="before"></div></div></div>
+  <div class="col after"><p class="lbl" id="afterLbl">After · Option A</p><div class="phone"><div class="scr" id="after"></div>
+    <div class="sheet" id="sheet" hidden role="dialog" aria-modal="false" aria-labelledby="sheetTitle"><h2 id="sheetTitle"></h2><p id="sheetBody"></p><button class="close" id="sheetClose"></button></div></div></div>
+</div>
+<p class="note"><b>Notes.</b> The maths is the same in every option: Epley on the best working set with 12 reps or fewer, ±3% counts as "about the same", deload only vs deload (approved spec 2026-10-18, X1–X7). The options only change the wording and which numbers are shown. Option C adds a new derived number ("is like 24 kg × 12") and needs a PT spec. ES text is a draft for the PO. On phones, "Before | After" shows Before only; tap After to switch.</p>
+<script>
+const S=[
+ {id:'s1',tag:{en:'S1 · A vs A, stronger',es:'S1 · A vs A, más fuerte'},ex:'Barbell Bench Press',cur:{w:72.5,r:8,t:'A'},prev:{w:70,r:8,t:'A',day:'Chest & Back A',d:{en:'Mon 5 Oct',es:'lun 5 oct'}},sets:['72.5×8','72.5×7','70×8'],pr:true},
+ {id:'s2',tag:{en:'S2 · A vs B, stronger',es:'S2 · A vs B, más fuerte'},ex:'Smith Machine Shoulder Press',cur:{w:25,r:10,t:'A'},prev:{w:22.5,r:12,t:'B',day:'Shoulders & Arms B',d:{en:'Fri 9 Oct',es:'vie 9 oct'}},sets:['25×10','25×10','25×9'],pr:true},
+ {id:'s3',tag:{en:'S3 · A vs B, same + effort',es:'S3 · A vs B, igual + esfuerzo'},ex:'Dumbbell Bench Press (Incline)',cur:{w:30,r:10,t:'A',rir:3},prev:{w:28,r:12,t:'B',rir:1,day:'Chest & Back B',d:{en:'Thu 8 Oct',es:'jue 8 oct'}},sets:['30×10','30×10','30×9']},
+ {id:'s4',tag:{en:'S4 · B after A, lighter on purpose',es:'S4 · B tras A, más ligero a propósito'},ex:'Dumbbell Bench Press',cur:{w:28,r:12,t:'B'},prev:{w:35,r:6,t:'A',day:'Chest & Back A',d:{en:'Mon 12 Oct',es:'lun 12 oct'}},sets:['28×12','28×12','28×12']},
+ {id:'s5',tag:{en:'S5 · A vs A, below',es:'S5 · A vs A, por debajo'},ex:'Dumbbell Bench Press',cur:{w:30,r:10,t:'A'},prev:{w:35,r:6,t:'A',day:'Chest & Back A',d:{en:'Mon 12 Oct',es:'lun 12 oct'}},sets:['30×10','30×9','30×9']},
+ {id:'s6',tag:{en:'S6 · high reps only',es:'S6 · solo reps altas'},ex:'Standing DB Lateral Raise',cur:{w:6,r:20,t:'B'},prev:{w:6,r:15,t:'A',day:'Shoulders & Arms A',d:{en:'Mon 12 Oct',es:'lun 12 oct'}},sets:['6×20','6×20','6×18'],high:true}
+];
+let st={opt:'A',lang:'en',view:'both',sc:'s1'};
+const e1=(s)=>s.w*(1+s.r/30);
+const r05=(v)=>Math.round(v*2)/2;
+const nf=(v,dec)=>new Intl.NumberFormat(st.lang==='es'?'es-ES':'en-GB',dec?{minimumFractionDigits:1,maximumFractionDigits:1}:{maximumFractionDigits:1}).format(v);
+const set=(s)=>`${nf(s.w)} kg × ${s.r}`;
+const esc=(x)=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function calc(sc){const a=e1(sc.prev),b=e1(sc.cur);const pct=(b-a)/a*100;const ch=pct>=3?'up':pct<=-3?'lower':'same';return{a,b,pct,ch,p:Math.round(Math.abs(pct)),diffType:sc.cur.t!==sc.prev.t,diffReps:sc.cur.r!==sc.prev.r}}
+const T={
+ en:{wm:'WORKOUT MODE · vs last time',done:'COMPLETED SCREEN',prog:'PROGRESS · MAIN LIFTS',trends:'PROGRESS · TRENDS',kTrain:'Training days',
+     how:'How we compare',whatB:'What is a strength score?',close:'Close',high:'High-rep lifts show reps at the top load.',prT:{before:'New e1RM PR',A:'Your strongest set yet',B:'New strength score PR',C:'Your strongest set yet'}},
+ es:{wm:'MODO ENTRENO · vs la última vez',done:'PANTALLA COMPLETADO',prog:'PROGRESO · EJERCICIOS PRINCIPALES',trends:'PROGRESO · TENDENCIAS',kTrain:'Días de entreno',
+     how:'¿Cómo comparamos?',whatB:'¿Qué es la puntuación de fuerza?',close:'Cerrar',high:'Los ejercicios de reps altas muestran reps con el peso máximo.',prT:{before:'Nuevo PR de 1RM',A:'Tu serie más fuerte hasta ahora',B:'Nuevo PR de fuerza',C:'Tu serie más fuerte hasta ahora'}}
+};
+const SHEET={
+ A:{en:['How we compare sets','We take your best set of 12 reps or fewer. If the reps are different, a standard lifting formula (Epley) puts both sets on the same scale, so 25 kg × 10 and 22.5 kg × 12 can be compared fairly. Within 3% counts as the same strength. It is only a comparison, not a target: you never need to test a 1-rep max.'],
+    es:['Cómo comparamos las series','Tomamos tu mejor serie de 12 reps o menos. Si las reps son distintas, una fórmula estándar (Epley) pone las dos series en la misma escala, así 25 kg × 10 y 22,5 kg × 12 se comparan de forma justa. Una diferencia de menos del 3% cuenta como la misma fuerza. Es solo una comparación, no un objetivo: nunca necesitas probar tu máximo a 1 rep.']},
+ B:{en:['Strength score','Strength score turns your best set (12 reps or fewer) into one number, so sets with different reps can be compared. Higher = stronger. Within 3% counts as about the same.'],
+    es:['Puntuación de fuerza','La puntuación de fuerza convierte tu mejor serie (12 reps o menos) en un número, para comparar series con reps distintas. Más alto = más fuerte. Menos del 3% de diferencia cuenta como más o menos igual.']}
+};
+SHEET.C=SHEET.A;
+function beforeLine(sc,L){const c=calc(sc);const b=nf(r05(c.a),1),n=nf(r05(c.b),1),day=sc.prev.day,d=sc.prev.d[L];
+ if(sc.high)return L==='en'?`Different rep range on A and B days — compared with last ${sc.prev.t}.`:`Rango de repeticiones distinto en los días A y B — comparado con el último ${sc.prev.t}.`;
+ let s;if(L==='en'){const h=`Est. max vs last time (${day}, ${d}): `;
+  s=c.ch==='up'?`${h}${b} → ${n} kg (+${c.p}%)`:c.ch==='same'?`${h}${n} kg, about the same`:c.diffType?`${h}${b} → ${n} kg. ${sc.cur.t} days use lighter loads by design — see ${sc.cur.t} vs last ${sc.cur.t} above.`:`${h}${b} → ${n} kg (−${c.p}%)`;
+  if(sc.cur.rir!==undefined)s+=` (effort: RIR ${sc.cur.rir} vs ${sc.prev.rir})`;}
+ else{const h=`Máx. est. vs la última vez (${day}, ${d}): `;
+  s=c.ch==='up'?`${h}${b} → ${n} kg (+${c.p}%)`:c.ch==='same'?`${h}${n} kg, más o menos igual`:c.diffType?`${h}${b} → ${n} kg. Los días ${sc.cur.t} usan menos peso a propósito — consulta ${sc.cur.t} vs la última sesión ${sc.cur.t} arriba.`:`${h}${b} → ${n} kg (−${c.p}%)`;
+  if(sc.cur.rir!==undefined)s+=` (esfuerzo: RIR ${sc.cur.rir} vs ${sc.prev.rir})`;}
+ return s;}
+function equiv(sc){const w=r05(e1(sc.cur)/(1+sc.prev.r/30));return `${nf(w)} kg × ${sc.prev.r}`}
+function afterLine(sc,L,opt){const c=calc(sc);const now=set(sc.cur),bef=set(sc.prev),day=sc.prev.day,d=sc.prev.d[L];const en=L==='en';
+ if(sc.high)return en?`A and B days use different reps, so this is compared with your last ${sc.cur.t} day.`:`Los días A y B usan reps distintas, así que se compara con tu último día ${sc.cur.t}.`;
+ let s;
+ if(opt==='B'){const b=nf(r05(c.a),1),n=nf(r05(c.b),1);const h=en?`Strength score vs last time (${day}, ${d}): `:`Puntuación de fuerza vs la última vez (${day}, ${d}): `;
+  s=c.ch==='up'?`${h}${b} → ${n} (+${c.p}%)`:c.ch==='same'?`${h}${n}, ${en?'about the same':'más o menos igual'}`:c.diffType?`${h}${b} → ${n}. ${en?`${sc.cur.t} days use lighter weights on purpose; compare with last ${sc.cur.t} above.`:`Los días ${sc.cur.t} usan menos peso a propósito; compara con el último ${sc.cur.t} arriba.`}`:`${h}${b} → ${n} (−${c.p}%)`;}
+ else if(opt==='C'&&c.diffReps){const eq=equiv(sc);
+  if(c.ch==='up')s=en?`Stronger than last time (${day}, ${d}): today's ${now} is like ${eq}. Last time: ${bef}.`:`Más fuerte que la última vez (${day}, ${d}): tu ${now} de hoy equivale a ${eq}. Última vez: ${bef}.`;
+  else if(c.ch==='same')s=en?`Same strength as last time (${day}, ${d}): today's ${now} is like ${eq}. Last time: ${bef}.`:`Misma fuerza que la última vez (${day}, ${d}): tu ${now} de hoy equivale a ${eq}. Última vez: ${bef}.`;
+  else if(c.diffType)s=en?`Lighter on purpose: today's ${now} is like ${eq} on an ${sc.prev.t} day. Last time (${day}, ${d}): ${bef}. Compare with last ${sc.cur.t} above.`:`Más ligero a propósito: tu ${now} de hoy equivale a ${eq} en un día ${sc.prev.t}. Última vez (${day}, ${d}): ${bef}. Compara con el último ${sc.cur.t} arriba.`;
+  else s=en?`Below last time (${day}, ${d}): today's ${now} is like ${eq}. Last time: ${bef}.`:`Por debajo de la última vez (${day}, ${d}): tu ${now} de hoy equivale a ${eq}. Última vez: ${bef}.`;}
+ else{
+  if(c.ch==='up'){s=en?`Stronger than last time (${day}, ${d}): ${now} vs ${bef}`:`Más fuerte que la última vez (${day}, ${d}): ${now} vs ${bef}`;if(c.diffReps)s+=en?` (+${c.p}% after adjusting for reps)`:` (+${c.p}% teniendo en cuenta las reps)`;}
+  else if(c.ch==='same'){s=en?`Same strength as last time (${day}, ${d}): ${now} vs ${bef}`:`Misma fuerza que la última vez (${day}, ${d}): ${now} vs ${bef}`;
+   if(sc.cur.w>sc.prev.w&&sc.cur.r<sc.prev.r)s+=en?' (more weight, fewer reps)':' (más peso, menos reps)';else if(sc.cur.w<sc.prev.w&&sc.cur.r>sc.prev.r)s+=en?' (less weight, more reps)':' (menos peso, más reps)';}
+  else if(c.diffType)s=en?`Lighter on purpose: ${sc.cur.t} days use less weight and more reps. Last time (${day}, ${d}): ${bef}; today ${now}. Compare with last ${sc.cur.t} above.`:`Más ligero a propósito: los días ${sc.cur.t} usan menos peso y más reps. Última vez (${day}, ${d}): ${bef}; hoy ${now}. Compara con el último ${sc.cur.t} arriba.`;
+  else s=en?`Below last time (${day}, ${d}): ${now} vs ${bef} (−${c.p}%)`:`Por debajo de la última vez (${day}, ${d}): ${now} vs ${bef} (−${c.p}%)`;}
+ if(sc.cur.rir!==undefined){s+=opt==='B'?(en?` (effort: ${sc.cur.rir} reps left today vs ${sc.prev.rir})`:` (esfuerzo: ${sc.cur.rir} reps en reserva hoy vs ${sc.prev.rir})`):(en?` (reps left in the tank: ${sc.cur.rir} today vs ${sc.prev.rir})`:` (reps en reserva: ${sc.cur.rir} hoy vs ${sc.prev.rir})`);}
+ return s;}
+function progLines(sc,L,mode){const c=calc(sc);const en=L==='en';if(sc.high)return[T[L].high];
+ const b=nf(r05(c.a),1),n=nf(r05(c.b),1),chg=c.ch==='up'?`, +${c.p}%`:c.ch==='same'?(en?', about the same':', más o menos igual'):`, −${c.p}%`;
+ if(mode==='before')return en?[`Est. max: ${b} → ${n} kg`,`This week's best Est. max: ${n} kg (last week ${b} kg${chg})`]:[`Máx. est.: ${b} → ${n} kg`,`Mejor Máx. est. de esta semana: ${n} kg (semana pasada ${b} kg${chg})`];
+ if(mode==='B')return en?[`Strength score: ${b} → ${n}`,`This week's best strength score: ${n} (last week ${b}${chg})`]:[`Puntuación de fuerza: ${b} → ${n}`,`Mejor puntuación de fuerza de la semana: ${n} (semana pasada ${b}${chg})`];
+ const now=set(sc.cur),bef=set(sc.prev);
+ const wk=en?{up:`stronger than last week (${bef})`,same:`same strength as last week (${bef})`,lower:`below last week (${bef})`}:{up:`más fuerte que la semana pasada (${bef})`,same:`misma fuerza que la semana pasada (${bef})`,lower:`por debajo de la semana pasada (${bef})`};
+ if(c.ch==='lower'&&c.diffType)return en?[`Best set: ${bef} → ${now}`,`Best set this week: ${bef} (${sc.prev.t} day)`]:[`Mejor serie: ${bef} → ${now}`,`Mejor serie de la semana: ${bef} (día ${sc.prev.t})`];
+ return en?[`Best set: ${bef} → ${now}`,`Best set this week: ${now}, ${wk[c.ch]}`]:[`Mejor serie: ${bef} → ${now}`,`Mejor serie de la semana: ${now}, ${wk[c.ch]}`];}
+function kpiLabel(L,mode){if(mode==='before')return L==='en'?'Main-lift e1RM':'e1RM principal';if(mode==='B')return L==='en'?'Main-lift strength score':'Puntuación de fuerza (principales)';return L==='en'?'Main-lift strength':'Fuerza en ejercicios principales';}
+function badge(L,mode){if(mode==='before')return L==='en'?'e1RM PR':'PR de 1RM';if(mode==='B')return L==='en'?'Strength score PR':'PR de fuerza';return L==='en'?'Strongest set':'Serie más fuerte';}
+function screen(mode){const sc=S.find(x=>x.id===st.sc),L=st.lang,t=T[L];const isB=mode==='before';
+ const line=isB?beforeLine(sc,L):afterLine(sc,L,mode);
+ const linkTxt=isB?'':(mode==='B'?t.whatB:t.how);
+ const link=isB||sc.high?'':`<button class="link" data-sheet="${mode}">${esc(linkTxt)}</button>`;
+ const cls=isB?'before':'after';
+ const chips=sc.sets.map(x=>`<span>${esc(x.replace('.',L==='es'?',':'.'))}</span>`).join('');
+ const pl=progLines(sc,L,mode);
+ const showBadge=sc.pr&&!sc.high;
+ return `
+ <p class="sec">${t.wm}</p>
+ <div class="card"><div class="row"><p class="exn">${esc(sc.ex)}</p>${showBadge?`<span class="badge">${esc(badge(L,mode))}</span>`:''}</div>
+  <div class="chips num">${chips}</div>
+  <div class="ins ${cls}"><span class="num">${esc(line)}</span>${link?'<br>'+link:''}</div>
+  ${showBadge?`<div class="toast">${esc(t.prT[isB?'before':mode])}</div>`:''}
+ </div>
+ <p class="sec">${t.done}</p>
+ <div class="card"><strong style="font-size:14px">${esc(sc.ex)}</strong><div class="ins ${cls}" style="margin-top:6px"><span class="num">${esc(line)}</span></div></div>
+ <p class="sec">${t.prog}</p>
+ <div class="card prog"><strong style="font-size:14px">${esc(sc.ex)}</strong><div class="ins ${cls}" style="margin-top:6px">${pl.map(x=>`<span class="num" style="display:block">${esc(x)}</span>`).join('')}</div></div>
+ <p class="sec">${t.trends}</p>
+ <div class="kpi"><div><b>9</b><span>${t.kTrain}</span></div><div class="ins ${cls}" style="padding:8px 10px"><b class="num">${L==='es'?'+6,6%':'+6.6%'}</b><span>${esc(kpiLabel(L,mode))}</span></div></div>`;}
+function render(){
+ document.documentElement.lang=st.lang;
+ document.getElementById('scen').innerHTML=S.map(x=>`<button data-sc="${x.id}" aria-pressed="${x.id===st.sc}">${esc(x.tag[st.lang])}</button>`).join('');
+ document.getElementById('before').innerHTML=screen('before');
+ document.getElementById('after').innerHTML=screen(st.opt);
+ document.getElementById('afterLbl').textContent=`After · Option ${st.opt}${st.opt==='A'?' (recommended)':st.opt==='C'?' (needs PT spec)':''}`;
+ const stage=document.getElementById('stage');
+ stage.dataset.both=st.view==='both'?'yes':'no';
+ stage.querySelector('.col.before').style.display=st.view==='after'?'none':'';
+ stage.querySelector('.col.after').style.display=st.view==='before'?'none':'';
+ document.querySelectorAll('[data-opt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.opt===st.opt));
+ document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===st.lang));
+ document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===st.view));
+ document.getElementById('sheet').hidden=true;}
+document.addEventListener('click',(e)=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.opt){st.opt=b.dataset.opt;render();}
+ else if(b.dataset.lang){st.lang=b.dataset.lang;render();}
+ else if(b.dataset.view){st.view=b.dataset.view;render();}
+ else if(b.dataset.sc){st.sc=b.dataset.sc;render();}
+ else if(b.dataset.sheet){const s=SHEET[b.dataset.sheet][st.lang];document.getElementById('sheetTitle').textContent=s[0];document.getElementById('sheetBody').textContent=s[1];document.getElementById('sheetClose').textContent=T[st.lang].close;const sh=document.getElementById('sheet');sh.hidden=false;document.getElementById('sheetClose').focus();}
+ else if(b.id==='sheetClose'){document.getElementById('sheet').hidden=true;}
+});
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape')document.getElementById('sheet').hidden=true;});
+render();
+</script>
+</body>
+</html>
