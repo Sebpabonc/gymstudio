@@ -144,7 +144,7 @@ export default function ExerciseFinder({
     ? exercises.find((exercise) => normalizeExerciseName(exercise.name) === normalizeExerciseName(createName))
     : undefined
   const createExercise = async () => {
-    if (!createName.trim() || !createRegion || duplicate) return
+    if (!createName.trim() || !createRegion || !createEquipment || duplicate) return
     try {
       const created = await upsertExerciseRecord({
         name: createName.trim(),
@@ -300,12 +300,14 @@ export default function ExerciseFinder({
             </details>
             <div className="custom-plan-sheet-actions">
               <button type="button" className="primary-button"
-                disabled={!createName.trim() || !createRegion || !!duplicate} onClick={() => void createExercise()}>
+                disabled={!createName.trim() || !createRegion || !createEquipment || !!duplicate}
+                onClick={() => void createExercise()}>
                 {t('exercises.createButton')}
               </button>
             </div>
             {!createName.trim() && <p className="empty-state">{t('exercises.createNameRequired')}</p>}
             {createName.trim() && !createRegion && <p className="empty-state">{t('exercises.createMuscleRequired')}</p>}
+            {createName.trim() && createRegion && !createEquipment && <p className="empty-state">{t('exercises.createEquipmentRequired')}</p>}
             {error && <p role="alert">{error}</p>}
           </section>
         </div>
