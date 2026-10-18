@@ -20,6 +20,8 @@ export type AnyDayEstMaxComparison =
       previous: ProgressLiftSession
       previousValue: number
       currentValue: number
+      previousBestSet: Pick<ProgressSet, 'weight' | 'reps'>
+      currentBestSet: Pick<ProgressSet, 'weight' | 'reps'>
       changePercent: number
       change: EstMaxChange
       previousDayType: DayType | null
@@ -32,6 +34,7 @@ export type AnyDayEstMaxComparison =
       kind: 'different-rep-range'
       previous: ProgressLiftSession
       previousDayType: DayType
+      currentDayType: DayType
     }
 
 function sessionDayType(session: ProgressLiftSession, blocks: TrainingBlock[]) {
@@ -86,7 +89,7 @@ export function anyDayEstMaxComparison(
   const currentEstimate = estimateSession(current)
   if (!previousEstimate || !currentEstimate) {
     return previousDayType && currentDayType && previousDayType !== currentDayType
-      ? { kind: 'different-rep-range', previous, previousDayType }
+      ? { kind: 'different-rep-range', previous, previousDayType, currentDayType }
       : null
   }
 
@@ -96,6 +99,14 @@ export function anyDayEstMaxComparison(
     previous,
     previousValue: previousEstimate.value,
     currentValue: currentEstimate.value,
+    previousBestSet: {
+      weight: previousEstimate.bestSet.weight,
+      reps: previousEstimate.bestSet.reps,
+    },
+    currentBestSet: {
+      weight: currentEstimate.bestSet.weight,
+      reps: currentEstimate.bestSet.reps,
+    },
     changePercent,
     change: classifyEstMaxChange(previousEstimate.value, currentEstimate.value),
     previousDayType,
@@ -110,8 +121,8 @@ export function anyDayEstMaxComparison(
 }
 
 export type WeeklyEstMax = {
-  current: { value: number; session: ProgressLiftSession } | null
-  previous: { value: number; session: ProgressLiftSession } | null
+  current: { value: number; session: ProgressLiftSession; bestSet: Pick<ProgressSet, 'weight' | 'reps'> } | null
+  previous: { value: number; session: ProgressLiftSession; bestSet: Pick<ProgressSet, 'weight' | 'reps'> } | null
   currentWeekComplete: boolean
   previousWeekComplete: boolean
   change: EstMaxChange | null
@@ -131,7 +142,11 @@ export function weeklyBestEstMax(
   const best = (week: ProgressLiftSession[]) => week.reduce<WeeklyEstMax['current']>((highest, session) => {
     const estimate = estimateSession(session)
     return estimate && (!highest || estimate.value > highest.value)
-      ? { value: estimate.value, session }
+      ? {
+          value: estimate.value,
+          session,
+          bestSet: { weight: estimate.bestSet.weight, reps: estimate.bestSet.reps },
+        }
       : highest
   }, null)
   const currentSessions = sessionsForWeek(weekStartValue)

@@ -52,6 +52,8 @@ describe('any-day Est. max comparison', () => {
     if (result?.kind === 'comparison') {
       expect(result.previousValue).toBeCloseTo(39.2)
       expect(result.currentValue).toBe(40)
+      expect(result.previousBestSet).toEqual({ weight: 28, reps: 12 })
+      expect(result.currentBestSet).toEqual({ weight: 30, reps: 10 })
       expect(result.change).toBe('same')
     }
   })
@@ -106,7 +108,9 @@ describe('any-day Est. max comparison', () => {
     ], [block])
     const result = weeklyBestEstMax(sessions, 'lift', '2026-10-12', [block])
     expect(result.current?.value).toBe(40)
+    expect(result.current?.bestSet).toEqual({ weight: 30, reps: 10 })
     expect(result.previous?.value).toBeCloseTo(39.2)
+    expect(result.previous?.bestSet).toEqual({ weight: 28, reps: 12 })
     expect(result.currentWeekComplete).toBe(true)
   })
 
@@ -136,7 +140,11 @@ describe('any-day Est. max comparison', () => {
       entry('2026-10-12', 15, 15, 'chest-back-a'),
       [entry('2026-10-08', 15, 20, 'chest-back-b')]
     )
-    expect(result).toMatchObject({ kind: 'different-rep-range', previousDayType: 'B' })
+    expect(result).toMatchObject({
+      kind: 'different-rep-range',
+      previousDayType: 'B',
+      currentDayType: 'A',
+    })
   })
 
   it('CD9: ignores sessions older than 28 days', () => {
