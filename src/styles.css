@@ -31,6 +31,34 @@
   --font-display-weight: 800;
   --font-section-weight: 700;
   --font-body-weight: 500;
+
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --type-title-size: 1.75rem;
+  --type-title-lh: 2.125rem;
+  --type-title-weight: 700;
+  --type-title-track: -0.02em;
+  --type-card-size: 1.375rem;
+  --type-card-lh: 1.75rem;
+  --type-card-weight: 700;
+  --type-card-track: -0.01em;
+  --type-headline-size: 1.0625rem;
+  --type-headline-lh: 1.375rem;
+  --type-headline-weight: 600;
+  --type-headline-track: -0.01em;
+  --type-body-size: 0.9375rem;
+  --type-body-lh: 1.25rem;
+  --type-body-weight: 400;
+  --type-body-strong-weight: 600;
+  --type-caption-size: 0.8125rem;
+  --type-caption-lh: 1.125rem;
+  --type-caption-weight: 400;
+  --type-label-size: 0.6875rem;
+  --type-label-lh: 0.875rem;
+  --type-label-weight: 600;
+  --type-label-caps-track: 0.06em;
+  --type-num-size: 1.25rem;
+  --type-num-lh: 1.5rem;
+  --type-num-weight: 700;
 }
 
 * {
@@ -50,7 +78,7 @@ body {
   display: block;
   background: linear-gradient(180deg, #141415, #08080a);
   color: var(--text);
-  font-family: Inter, 'Segoe UI', sans-serif;
+  font-family: var(--font-ui);
   font-size: var(--font-body);
   line-height: 1.45;
   font-weight: var(--font-body-weight);
@@ -9749,4 +9777,599 @@ p.workout-short-cue.cue-card {
   border-radius: 999px;
   color: var(--text);
   font-size: 1.1rem;
+}
+
+.t-title {
+  font: var(--type-title-weight) var(--type-title-size)/var(--type-title-lh) var(--font-ui);
+  letter-spacing: var(--type-title-track);
+  text-wrap: balance;
+}
+
+.t-card {
+  font: var(--type-card-weight) var(--type-card-size)/var(--type-card-lh) var(--font-ui);
+  letter-spacing: var(--type-card-track);
+  text-wrap: balance;
+}
+
+.t-headline {
+  font: var(--type-headline-weight) var(--type-headline-size)/var(--type-headline-lh) var(--font-ui);
+  letter-spacing: var(--type-headline-track);
+  text-wrap: balance;
+}
+
+.t-body {
+  font: var(--type-body-weight) var(--type-body-size)/var(--type-body-lh) var(--font-ui);
+}
+
+.t-body-strong {
+  font-weight: var(--type-body-strong-weight);
+}
+
+.t-caption {
+  font: var(--type-caption-weight) var(--type-caption-size)/var(--type-caption-lh) var(--font-ui);
+  color: var(--muted);
+}
+
+.t-label {
+  font: var(--type-label-weight) var(--type-label-size)/var(--type-label-lh) var(--font-ui);
+}
+
+.t-section {
+  font: var(--type-label-weight) var(--type-label-size)/var(--type-label-lh) var(--font-ui);
+  color: var(--nav-active);
+  letter-spacing: var(--type-label-caps-track);
+  text-transform: uppercase;
+}
+
+.t-num {
+  font: var(--type-num-weight) var(--type-num-size)/var(--type-num-lh) var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Today keeps its existing type sizes; its cards share a single 16 px text edge. */
+.planned-exercise-card,
+.planned-exercise-card.collapsed {
+  padding: 16px;
+}
+
+.layout-boxes .day-plan-card {
+  padding: 16px;
+}
+
+.layout-boxes .day-plan-card .planned-exercise-card {
+  padding: 12px 0;
+}
+
+.day-plan-card .superset-group {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+
+.training-block-primary {
+  align-items: baseline;
+}
+
+.plan-badge {
+  text-transform: none;
+}
+
+.technique-chip {
+  text-transform: none;
+}
+
+.brand-tagline {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.app-shell:not(.active-tab-today) .brand-tagline {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.app-shell:not(.active-tab-today) .brand-header h1 {
+  font-size: var(--type-title-size);
+  line-height: var(--type-title-lh);
+  font-weight: var(--type-title-weight);
+  letter-spacing: var(--type-title-track);
+  text-wrap: balance;
+}
+
+.plan-card.workout-mode-active :is(p, span, strong, small, button, label, time, h2, h3, h4, li) {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.plan-card.workout-mode-active .planned-exercise-main-name {
+  font-size: var(--type-card-size);
+  line-height: var(--type-card-lh);
+  font-weight: var(--type-card-weight);
+  letter-spacing: var(--type-card-track);
+  text-wrap: balance;
+}
+
+.plan-card.workout-mode-active .planned-exercise-detail-name,
+.plan-card.workout-mode-active .workout-mode-elapsed,
+.plan-card.workout-mode-active .planned-set-date {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.plan-card.workout-mode-active .workout-mode-elapsed,
+.rest-timer-time,
+.workout-rest-timer .rest-timer-time {
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-card.workout-mode-active .workout-mode-current-set,
+.plan-card.workout-mode-active .workout-mode-log-set {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: var(--type-body-strong-weight);
+  letter-spacing: 0;
+}
+
+.plan-card.workout-mode-active .workout-mode-big-field,
+.plan-card.workout-mode-active .planned-set-column-headers,
+.plan-card.workout-mode-active .planned-set-date,
+.plan-card.workout-mode-active .workout-mode-plan-note strong {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.plan-card.workout-mode-active .workout-mode-big-field .set-stepper input {
+  font-size: var(--type-num-size);
+  line-height: var(--type-num-lh);
+  font-weight: var(--type-num-weight);
+}
+
+.plan-card.workout-mode-active .planned-set-date {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+}
+
+.plan-card.workout-mode-active .planned-set-column-headers {
+  align-items: end;
+}
+
+.plan-card.workout-mode-active .planned-set-column-headers span,
+.plan-card.workout-mode-active .workout-mode-compact-row {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-card.workout-mode-active .workout-tool {
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+  font-weight: var(--type-label-weight);
+  letter-spacing: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.plan-card.workout-mode-active .workout-tool svg {
+  width: 20px;
+  height: 20px;
+}
+
+.plan-card.workout-mode-active .workout-mode-plan-note {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.plan-card.workout-mode-active .workout-mode-plan-note strong,
+.plan-card.workout-mode-active .planned-set-column-headers {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.plan-card.workout-mode-active .planned-set-column-headers small {
+  display: none;
+}
+
+.planned-exercise-card.workout-mode-current .planned-set-section .workout-mode-focused-grid.planned-set-column-headers {
+  align-items: end;
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.workout-mode-completed-card :is(span, strong, button) {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.workout-completed-header h2 {
+  font-size: var(--type-title-size);
+  line-height: var(--type-title-lh);
+  font-weight: var(--type-title-weight);
+}
+
+.workout-completed-metrics strong {
+  font-size: var(--type-num-size);
+  line-height: var(--type-num-lh);
+  font-weight: var(--type-num-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-completed-screen :is(p, span, small, button, label, li) {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.workout-exercise-insight,
+.workout-group-insights {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.workout-rest-timer .rest-timer-time {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.superset-workout-card {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+
+.day-plan-card .superset-workout-card {
+  padding: 16px;
+}
+
+.superset-compact-header {
+  align-items: baseline;
+  gap: 8px;
+}
+
+.superset-compact-header > strong {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+  font-weight: var(--type-label-weight);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.superset-compact-header > span,
+.superset-compact-instructions,
+.superset-last-time {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  font-weight: var(--type-caption-weight);
+}
+
+.superset-compact-instructions {
+  margin: 8px 0 0;
+}
+
+.superset-workout-round {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.superset-workout-round > strong {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: var(--type-body-strong-weight);
+}
+
+.superset-workout-exercise {
+  min-width: 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.superset-exercise-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.superset-exercise-heading > strong {
+  min-width: 0;
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
+  letter-spacing: var(--type-headline-track);
+  text-wrap: balance;
+}
+
+.superset-round-code {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--brand-soft);
+  color: var(--nav-active);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+  font-weight: var(--type-label-weight);
+}
+
+.superset-workout-exercise .superset-last-time {
+  display: block;
+  margin: 4px 0 8px;
+  overflow: hidden;
+  color: var(--muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.superset-workout-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+  align-items: end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.superset-workout-input {
+  min-width: 0;
+}
+
+.superset-workout-input > span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  text-transform: none;
+}
+
+.superset-workout-input .set-stepper {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 2px;
+  min-width: 0;
+}
+
+.superset-workout-input .set-stepper input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding-inline: 2px;
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.superset-workout-fields .complete-set-button {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  align-self: end;
+}
+
+.superset-workout-exercise .workout-exercise-tools {
+  margin-top: 8px;
+}
+
+.superset-workout-exercise .workout-tool {
+  flex-direction: column;
+  gap: 2px;
+  min-height: 52px;
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+  letter-spacing: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.superset-workout-exercise .workout-tool svg {
+  width: 20px;
+  height: 20px;
+}
+
+.superset-round-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 0;
+  margin-top: 8px;
+  padding: 8px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--muted);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  text-align: left;
+}
+
+.superset-round-summary.future {
+  border-top-style: dashed;
+}
+
+.superset-round-summary > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-align: right;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.superset-handoff {
+  margin: 4px 0;
+  color: var(--nav-active);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  font-variant-numeric: tabular-nums;
+}
+
+.superset-workout-card .workout-mode-plan-note {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.superset-workout-card .workout-mode-plan-note strong {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.superset-workout-card .workout-short-cue,
+.superset-workout-card .cue-card-text {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.exercise-finder :is(input, button, p, span, h2, label, li) {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.exercise-finder .region-chip,
+.exercise-finder .result-meta,
+.exercise-finder .find-last-time,
+.exercise-finder .find-exercise-content .secondary-button {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.exercise-finder .find-list-heading,
+.exercise-finder .result-name {
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
+  letter-spacing: var(--type-headline-track);
+}
+
+.find-exercise-content :is(p, span, button, li, small, strong, label) {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.cue-sheet-header h3 {
+  font-size: var(--type-card-size);
+  line-height: var(--type-card-lh);
+  font-weight: var(--type-card-weight);
+  letter-spacing: var(--type-card-track);
+}
+
+.cue-sheet-section h4 {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-caps-track);
+}
+
+.squeeze-cue-text strong,
+.cue-sheet-section h4 {
+  text-transform: uppercase;
+}
+
+.progress-v3 :is(p, span, small, button, li, label, strong, h2, h3, h4) {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.progress-v3 .pv3-card h3,
+.progress-v3 .pv3-card h4,
+.progress-v3 .pv3-status-word,
+.progress-v3 .pv3-lift-copy > strong {
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
+  letter-spacing: var(--type-headline-track);
+  text-transform: none;
+}
+
+.progress-v3 :is(.pv3-caption, .pv3-card small, .pv3-tabs button, .pv3-range button, .pv3-page-heading > span) {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.progress-v3 .pv3-page-heading {
+  align-items: baseline;
+}
+
+.progress-v3 .pv3-card h3 {
+  color: var(--text);
+}
+
+.progress-v3 .pv3-card :is(strong, .pv3-worth-tag) {
+  font-variant-numeric: tabular-nums;
+}
+
+.account-screen :is(h2, h3, p, span, small, button, label, legend, input, textarea),
+.profile-screen :is(h2, h3, p, span, small, button, label, legend, input, textarea) {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.account-screen .collapsible-card-header h2,
+.profile-screen .collapsible-card-header h2,
+.account-screen > h2,
+.profile-screen > h2 {
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
+}
+
+.account-screen :is(.profile-choice, legend, small),
+.profile-screen :is(.profile-choice, legend, small) {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.plan-card.workout-mode-active :is(.plan-badge, .workout-mode-big-field, .planned-set-column-headers),
+.exercise-finder .find-list-heading,
+.progress-v3 .pv3-card h3 {
+  text-transform: none;
+}
+
+.plan-card.workout-mode-active button,
+.workout-completed-screen button,
+.exercise-finder button,
+.progress-v3 button,
+.account-screen button,
+.profile-screen button {
+  letter-spacing: 0;
+}
+
+@media (max-width: 400px) {
+  .superset-workout-card {
+    padding: 12px;
+  }
+
+  .superset-workout-fields {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+    gap: 6px;
+  }
+
+  .superset-workout-input .set-stepper {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+  }
+
+  .superset-workout-input .stepper-button {
+    min-width: 40px;
+    width: 40px;
+  }
+}
+
+/* Workout mode: the exercise card is the box itself, so it keeps a 16 px inner edge
+   (the 0 side padding above is only for exercise rows inside Today's day card). */
+.plan-card.workout-mode-active .day-plan-card .planned-exercise-card,
+.layout-boxes .day-plan-card .planned-exercise-card.workout-mode-current,
+.layout-boxes .day-plan-card .planned-exercise-card.workout-mode-completed-card {
+  padding: 16px;
 }
