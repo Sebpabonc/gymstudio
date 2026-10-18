@@ -91,15 +91,15 @@ describe('WorkoutPlan', () => {
       )).toContain('Below last time (Chest & Back A, Mon 12 Oct): 30 kg × 10 vs 35 kg × 6 (−5%)')
     })
 
-      it('does not describe an equal-load rep trade as more or less weight', () => {
-        const line = strengthLine(
-          strengthEntry('2026-10-12', 'chest-back-a', 30, 10),
-          [strengthEntry('2026-10-08', 'chest-back-b', 30, 11)]
-        )
-        expect(line).toContain('Same strength as last time')
-        expect(line).not.toContain('more weight')
-        expect(line).not.toContain('less weight')
-      })
+    it('does not describe an equal-load rep trade as more or less weight', () => {
+      const line = strengthLine(
+        strengthEntry('2026-10-12', 'chest-back-a', 30, 10),
+        [strengthEntry('2026-10-08', 'chest-back-b', 30, 11)]
+      )
+      expect(line).toContain('Same strength as last time')
+      expect(line).not.toContain('more weight')
+      expect(line).not.toContain('less weight')
+    })
 
     it('uses today’s day type in the different-rep-range line and preserves effort context', () => {
       expect(strengthLine(
