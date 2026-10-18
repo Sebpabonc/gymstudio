@@ -10365,3 +10365,11 @@ p.workout-short-cue.cue-card {
     width: 40px;
   }
 }
+
+/* Workout mode: the exercise card is the box itself, so it keeps a 16 px inner edge
+   (the 0 side padding above is only for exercise rows inside Today's day card). */
+.plan-card.workout-mode-active .day-plan-card .planned-exercise-card,
+.layout-boxes .day-plan-card .planned-exercise-card.workout-mode-current,
+.layout-boxes .day-plan-card .planned-exercise-card.workout-mode-completed-card {
+  padding: 16px;
+}
