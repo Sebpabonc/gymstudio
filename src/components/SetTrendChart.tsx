@@ -86,6 +86,8 @@ export default function SetTrendChart({
             const groupX = 38 + sessionIndex * groupWidth
             const dataWidth = Math.min(groupWidth - 10, maxSetCount * (barWidth + 3))
             const startX = groupX + (groupWidth - dataWidth) / 2
+            const uniformWeight = session.sets.length > 0 &&
+              session.sets.every((set) => set.weight === session.sets[0].weight)
             return (
               <g key={`${session.date}-${sessionIndex}`}>
                 {session.today && (
@@ -96,6 +98,10 @@ export default function SetTrendChart({
                   const x = startX + setIndex * (barWidth + 3)
                   const y = BASELINE - height
                   const key = `${sessionIndex}:${setIndex}`
+                  const weightLabelX = uniformWeight
+                    ? startX + (session.sets.length - 1) * (barWidth + 3) / 2 + barWidth / 2
+                    : x + barWidth / 2
+                  const weightLabelY = Math.max(14, y - 15)
                   const onSelect = () => setSelected(key)
                   return (
                     <g key={key} onClick={onSelect} onKeyDown={(event) => {
@@ -104,9 +110,17 @@ export default function SetTrendChart({
                         onSelect()
                       }
                     }}>
-                      <text className="set-trend-weight-label" x={x + barWidth / 2} y={Math.max(14, y - 15)} textAnchor="middle">
-                        {formatNumber(language, set.weight)}
-                      </text>
+                      {(!uniformWeight || setIndex === 0) && (
+                        <text
+                          className="set-trend-weight-label"
+                          x={weightLabelX}
+                          y={weightLabelY}
+                          textAnchor={uniformWeight ? 'middle' : 'start'}
+                          transform={uniformWeight ? undefined : `rotate(-45 ${weightLabelX} ${weightLabelY})`}
+                        >
+                          {formatNumber(language, set.weight)}
+                        </text>
+                      )}
                       <text className="set-trend-reps-label" x={x + barWidth / 2} y={Math.max(23, y - 5)} textAnchor="middle">
                         {formatNumber(language, set.reps)}
                       </text>

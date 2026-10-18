@@ -11,3 +11,12 @@ export function workoutChipState(isComplete: boolean, isCurrent: boolean): Worko
   if (isCurrent) return 'current'
   return isComplete ? 'done' : 'upcoming'
 }
+
+export function shouldCollapseCompletedLogger(
+  isWorkoutMode: boolean,
+  completedAt: string | undefined,
+  today: string,
+  isExpanded: boolean
+) {
+  return isWorkoutMode && completedAt?.slice(0, 10) === today && !isExpanded
+}
