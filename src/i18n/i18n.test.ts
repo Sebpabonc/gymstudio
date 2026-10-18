@@ -81,6 +81,25 @@ describe('dictionaries', () => {
     expect(en['profile.plan.signIn']).toBe('Sign in to create your personal plan')
     expect(es['profile.plan.signIn']).toBe('Inicia sesión para crear tu plan personal')
   })
+
+  it('uses the approved plain strength wording and confines one-rep-max language to its explanation', () => {
+    expect(en['workout.insight.estMax.up']).toBe('Stronger than last time ({day}, {date}): {now} vs {before}')
+    expect(es['workout.insight.estMax.up']).toBe('Más fuerte que la última vez ({day}, {date}): {now} vs {before}')
+    expect(en['workout.insight.strengthHelp.link']).toBe('How we compare')
+    expect(es['workout.insight.strengthHelp.link']).toBe('¿Cómo comparamos?')
+    expect(en['progress.v3.detail.volume']).toBe('Total weight moved (kg × reps)')
+    expect(es['progress.v3.detail.volume']).toBe('Peso total movido (kg × reps)')
+
+    const jargon = /est\. max|máx\. est\.|e1rm|1\s*rep max/i
+    for (const [key, value] of Object.entries(en)) {
+      if (key === 'workout.insight.strengthHelp.explanation') continue
+      expect(value, key).not.toMatch(jargon)
+    }
+    for (const [key, value] of Object.entries(es)) {
+      if (key === 'workout.insight.strengthHelp.explanation') continue
+      expect(value, key).not.toMatch(jargon)
+    }
+  })
 })
 
 describe('translate', () => {

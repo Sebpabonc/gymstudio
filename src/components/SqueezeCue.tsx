@@ -99,7 +99,7 @@ function visibleSections(details: SqueezeCueDetails) {
   return details.sections.filter((section) => section.lines.some((line) => line.trim()))
 }
 
-function CueSheet({ details, sections, id, onClose }: {
+export function CueSheet({ details, sections, id, onClose }: {
   details: SqueezeCueDetails
   sections: SqueezeCueDetails['sections']
   id: string
@@ -129,7 +129,7 @@ function CueSheet({ details, sections, id, onClose }: {
         </header>
         {sections.map((section) => (
           <section key={section.heading} className="cue-sheet-section">
-            <h4>{section.heading}</h4>
+            {section.heading && <h4>{section.heading}</h4>}
             {section.lines.length > 1
               ? <ul>{section.lines.filter((line) => line.trim()).map((line, index) => <li key={index}>{line}</li>)}</ul>
               : <p>{section.lines[0]}</p>}

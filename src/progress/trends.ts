@@ -1,5 +1,5 @@
 import { TrainingBlock, Exercise } from '../types'
-import { dateValue, findEntryBlock, groupExerciseSessions, isDeloadWeek, sessionE1RM, workingSets } from './utils'
+import { bestSetIndex, dateValue, findEntryBlock, groupExerciseSessions, isDeloadWeek, sessionE1RM, workingSets } from './utils'
 import { PROGRESS_THRESHOLDS } from './thresholds'
 import type { LiftTrend, LiftTrendIndexPoint, LiftTrendPoint, ProgressEntry, ProgressLiftSession, ProgressV3Range } from './types'
 
@@ -73,7 +73,9 @@ function sessionStats(session: ProgressLiftSession, exercise: Exercise | undefin
     .filter((set) => sameLoad(set.weight, topLoad, equipmentStep(exercise)))
     .reduce((total, set) => total + set.reps, 0)
   const e1rm = sessionE1RM(sets)
-  return { e1rm, topLoad, repsAtTop }
+  const bestIndex = bestSetIndex(sets)
+  const bestSet = bestIndex === null ? null : { weight: sets[bestIndex].weight, reps: sets[bestIndex].reps }
+  return { e1rm, bestSet, topLoad, repsAtTop }
 }
 
 function movingAverages(points: LiftTrendPoint[]) {

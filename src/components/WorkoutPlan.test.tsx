@@ -1,9 +1,10 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import WorkoutPlan, { ExerciseSwapSheet } from './WorkoutPlan'
+import WorkoutPlan, { ExerciseSwapSheet, formatEstMaxInsightLine } from './WorkoutPlan'
 import { createTranslator } from '../i18n/translate'
-import type { Exercise } from '../types'
+import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
+import { anyDayEstMaxComparison } from '../progress/estMax'
 
 function findButton(element: React.ReactNode, label: string): React.ReactElement | undefined {
   let match: React.ReactElement | undefined
@@ -30,6 +31,102 @@ describe('WorkoutPlan', () => {
       getItem: () => null,
       setItem: vi.fn(),
       removeItem: vi.fn(),
+    })
+  })
+
+  const strengthBlock: TrainingBlock = {
+    id: 'strength-block',
+    number: 1,
+    name: 'Strength',
+    method: 'flat',
+    startDate: '2026-10-05',
+    weeks: 6,
+    origin: 'pt',
+    summary: '',
+    insights: [],
+    days: [
+      { key: 'chest-back-a', position: 1, name: 'Chest & Back A', exercises: [] },
+      { key: 'chest-back-b', position: 2, name: 'Chest & Back B', exercises: [] },
+    ],
+  }
+
+  function strengthEntry(date: string, dayKey: string, weight: number, reps: number, rir?: number): WorkoutEntry {
+    return {
+      id: `${date}-${dayKey}`,
+      exerciseId: 'press',
+      date,
+      blockId: strengthBlock.id,
+      dayKey,
+      sets: [{ id: `${date}-set`, weight, reps, rir }],
+    }
+  }
+
+  function strengthLine(current: WorkoutEntry, previous: WorkoutEntry[]) {
+    const comparison = anyDayEstMaxComparison(current, previous, [strengthBlock])
+    return formatEstMaxInsightLine(comparison, [strengthBlock], 'en', createTranslator('en'))
+  }
+
+  describe('plain strength comparison wording', () => {
+    it('shows the actual best sets and adjusts for reps only when they differ', () => {
+      expect(strengthLine(
+        strengthEntry('2026-10-13', 'chest-back-a', 25, 10),
+        [strengthEntry('2026-10-09', 'chest-back-b', 22.5, 12)]
+      )).toContain('Stronger than last time (Chest & Back B, Fri 9 Oct): 25 kg × 10 vs 22.5 kg × 12 (+6% after adjusting for reps)')
+
+      expect(strengthLine(
+        strengthEntry('2026-10-12', 'chest-back-a', 72.5, 8),
+        [strengthEntry('2026-10-05', 'chest-back-a', 70, 8)]
+      )).toContain('Stronger than last time (Chest & Back A, Mon 5 Oct): 72.5 kg × 8 vs 70 kg × 8')
+    })
+
+    it('labels equivalent rep trades and same-day drops using real sets', () => {
+      expect(strengthLine(
+        strengthEntry('2026-10-12', 'chest-back-a', 30, 10),
+        [strengthEntry('2026-10-08', 'chest-back-b', 28, 12)]
+      )).toContain('Same strength as last time (Chest & Back B, Thu 8 Oct): 30 kg × 10 vs 28 kg × 12 (more weight, fewer reps)')
+
+      expect(strengthLine(
+        strengthEntry('2026-10-19', 'chest-back-a', 30, 10),
+        [strengthEntry('2026-10-12', 'chest-back-a', 35, 6)]
+      )).toContain('Below last time (Chest & Back A, Mon 12 Oct): 30 kg × 10 vs 35 kg × 6 (−5%)')
+    })
+
+    it('does not describe an equal-load rep trade as more or less weight', () => {
+      const line = strengthLine(
+        strengthEntry('2026-10-12', 'chest-back-a', 30, 10),
+        [strengthEntry('2026-10-08', 'chest-back-b', 30, 11)]
+      )
+      expect(line).toContain('Same strength as last time')
+      expect(line).not.toContain('more weight')
+      expect(line).not.toContain('less weight')
+    })
+
+    it('uses today’s day type in the different-rep-range line and preserves effort context', () => {
+      expect(strengthLine(
+        strengthEntry('2026-10-12', 'chest-back-a', 15, 15),
+        [strengthEntry('2026-10-08', 'chest-back-b', 15, 20)]
+      )).toContain('compared with your last A day.')
+
+      expect(strengthLine(
+        strengthEntry('2026-10-16', 'chest-back-b', 25, 10, 3),
+        [strengthEntry('2026-10-13', 'chest-back-a', 25, 10, 1)]
+      )).toContain('(reps left in the tank: 3 today vs 1)')
+    })
+
+    it('keeps a lower cross-day result neutral with lighter-on-purpose context', () => {
+      expect(strengthLine(
+        strengthEntry('2026-10-15', 'chest-back-b', 28, 12),
+        [strengthEntry('2026-10-12', 'chest-back-a', 35, 6)]
+      )).toContain('Lighter on purpose: B days use less weight and more reps.')
+    })
+
+    it('V-T16: keeps the workout strength insight free of a total-weight-moved comparison', () => {
+      const line = strengthLine(
+        strengthEntry('2026-10-16', 'chest-back-b', 25, 10),
+        [strengthEntry('2026-10-13', 'chest-back-a', 25, 10)]
+      )
+      expect(line).toContain('Same strength as last time')
+      expect(line).not.toContain('Total weight moved')
     })
   })
 
