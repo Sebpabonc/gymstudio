@@ -156,13 +156,49 @@ describe('user exercise sync mapping', () => {
 })
 
 describe('syncWorkoutHistory', () => {
+  it('isolates rejected user exercise rows and defers their logs without quarantining them', async () => {
+    localStorage.setItem('gym-studio.exercises', JSON.stringify([
+      { id: 'bad-custom', name: 'Invalid legacy exercise', primaryMuscle: 'Core' },
+      { id: 'good-custom', name: 'Valid exercise', primaryMuscle: 'Chest' },
+    ]))
+    const { saveWorkoutHistory, loadWorkoutHistoryForSync } = await import('./storage')
+    saveWorkoutHistory([
+      { ...localEntry, id: 'bad-exercise-log', exerciseId: 'bad-custom' },
+      { ...localEntry, id: 'good-exercise-log', exerciseId: 'good-custom' },
+    ])
+    const constraintError = { code: '23514', message: 'Body region rejected' }
+    const { upsert, userExerciseUpsert } = mockSyncClient(
+      () => ({ error: null }),
+      [],
+      (rows) => rows.some((row) => row.id === 'bad-custom')
+        ? { error: constraintError, status: 400 }
+        : { error: null },
+    )
+    const { syncWorkoutHistory } = await import('./sync')
+    await syncWorkoutHistory('user-1')
+
+    expect(userExerciseUpsert.mock.calls.map(([rows]) => rows.map((row) => row.id))).toEqual([
+      ['bad-custom', 'good-custom'], ['bad-custom'], ['good-custom'],
+    ])
+    expect(upsert.mock.calls.flatMap(([rows]) => rows).map((row) => row.id)).toEqual(['good-exercise-log'])
+    const blockedLog = (await loadWorkoutHistoryForSync()).find((entry) => entry.id === 'bad-exercise-log')
+    expect(blockedLog).toMatchObject({ dirty: true })
+    expect(blockedLog).not.toHaveProperty('syncError')
+    expect(JSON.parse(localStorage.getItem('gym-studio.sync-metadata')!).userExercises['bad-custom'])
+      .toMatchObject({ dirty: true, syncError: { code: '23514' } })
+
+    userExerciseUpsert.mockClear()
+    await syncWorkoutHistory('user-1')
+    expect(userExerciseUpsert).not.toHaveBeenCalled()
+  })
+
   it('uploads legacy custom exercises before their entries and restores the user exercise id on pull', async () => {
     const legacyId = 'old-name-based-custom-id'
     const entryId = 'custom-exercise-entry'
     localStorage.setItem('gym-studio.exercises', JSON.stringify([
       { id: legacyId, name: 'My old exercise', primaryMuscle: 'Back' },
     ]))
-    const { saveWorkoutHistory, loadWorkoutHistory } = await import('./storage')
+    const { saveWorkoutHistory, loadWorkoutHistory, loadUserExercisesForSync } = await import('./storage')
     saveWorkoutHistory([{ ...localEntry, id: entryId, exerciseId: legacyId }])
     const callOrder: string[] = []
     const remoteExercise: Record<string, unknown> = {
@@ -197,6 +233,9 @@ describe('syncWorkoutHistory', () => {
     expect(await loadWorkoutHistory()).toEqual([
       expect.objectContaining({ id: entryId, exerciseId: legacyId }),
     ])
+    expect((await loadUserExercisesForSync())[0].dirty).toBe(false)
+    await syncWorkoutHistory('user-1')
+    expect(userExerciseUpsert).toHaveBeenCalledTimes(1)
   })
 
   it('isolates a rejected row, uploads A/B logs, pulls, and skips quarantine on later syncs', async () => {

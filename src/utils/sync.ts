@@ -5,14 +5,17 @@ import {
   getWorkoutHistoryLastPulledAt,
   loadUserExercisesForSync,
   loadWorkoutHistoryForSync,
+  markUserExercisesSynced,
   markAllWorkoutEntriesDirty,
   markWorkoutEntriesSynced,
   quarantineWorkoutEntry,
+  quarantineUserExercise,
   saveMergedWorkoutHistory,
   saveSyncedUserExercises,
   setUserExercisesLastPulledAt,
   setWorkoutHistoryLastPulledAt,
   type SyncWorkoutEntry,
+  type SyncUserExercise,
 } from './storage'
 
 export class SyncSignInRequiredError extends Error {
@@ -139,9 +142,9 @@ export function toRemoteWorkoutEntry(entry: SyncWorkoutEntry, userId: string, us
 function toRemoteUserExercise(exercise: Exercise, userId: string): RemoteUserExercise & { user_id: string } {
   const validRegions = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core', 'Full Body', 'Other']
   const validEquipment = ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'other']
-  const bodyRegion = exercise.bodyRegion ?? (
-    validRegions.includes(exercise.primaryMuscle) ? exercise.primaryMuscle : 'Other'
-  )
+  const bodyRegion = validRegions.includes(exercise.bodyRegion ?? '')
+    ? exercise.bodyRegion!
+    : validRegions.includes(exercise.primaryMuscle) ? exercise.primaryMuscle : 'Other'
   return {
     id: exercise.id,
     user_id: userId,
@@ -242,16 +245,31 @@ export async function syncWorkoutHistory(userId: string, isActive: () => boolean
     if (result.error && isSessionError(result.error, result.status)) throw new SyncSignInRequiredError()
     return result
   }
-  const userExercises = await loadUserExercisesForSync()
+  const userExercises = await loadUserExercisesForSync(isActive)
+  checkActive()
   const userExerciseIds = new Set(userExercises.map((exercise) => exercise.id))
-  const uploadUserExercises = async (exercises: Exercise[]) => {
+  const syncedUserExerciseIds = new Set(
+    userExercises.filter((exercise) => !exercise.dirty && !exercise.syncError).map((exercise) => exercise.id)
+  )
+  const uploadUserExercises = async (exercises: SyncUserExercise[]) => {
     const rows = exercises.map((exercise) => toRemoteUserExercise(exercise, userId))
-    return request(() => client
+    const result = await request(() => client
       .from('user_exercises')
       .upsert(rows, { onConflict: 'user_id,id' })
-      .select('id'))
+      .select('id, updated_at'))
+    if (!result.error) {
+      const timestamps = new Map(
+        (result.data ?? []).map((row) => [row.id as string, row.updated_at as string])
+      )
+      await markUserExercisesSynced(exercises.map((exercise) => ({
+        id: exercise.id,
+        expectedUpdatedAt: exercise.updatedAt,
+        updatedAt: timestamps.get(exercise.id),
+      })), isActive)
+    }
+    return result
   }
-  const attemptUserExerciseUpload = async (exercises: Exercise[]) => {
+  const attemptUserExerciseUpload = async (exercises: SyncUserExercise[]) => {
     try {
       return await uploadUserExercises(exercises)
     } catch (error) {
@@ -260,23 +278,37 @@ export async function syncWorkoutHistory(userId: string, isActive: () => boolean
     }
   }
   let pushError: unknown
-  for (let offset = 0; offset < userExercises.length; offset += 25) {
-    const batch = userExercises.slice(offset, offset + 25)
+  const pendingUserExercises = userExercises.filter((exercise) => exercise.dirty && !exercise.syncError)
+  for (let offset = 0; offset < pendingUserExercises.length; offset += 25) {
+    const batch = pendingUserExercises.slice(offset, offset + 25)
     const result = await attemptUserExerciseUpload(batch)
-    if (!result.error) continue
+    if (!result.error) {
+      batch.forEach((exercise) => syncedUserExerciseIds.add(exercise.id))
+      continue
+    }
     if (result.error instanceof SyncSignInRequiredError) {
       pushError = result.error
       break
     }
     for (const exercise of batch) {
       const single = batch.length === 1 ? result : await attemptUserExerciseUpload([exercise])
-      if (!single.error) continue
-      userExerciseIds.delete(exercise.id)
+      if (!single.error) {
+        syncedUserExerciseIds.add(exercise.id)
+        continue
+      }
       if (single.error instanceof SyncSignInRequiredError) {
         pushError = single.error
         break
       }
-      pushError ??= single.error
+      if (isNonRetryableSyncError(single.error, single.status)) {
+        quarantineUserExercise(exercise, {
+          code: errorCode(single.error),
+          message: errorMessage(single.error).slice(0, 160),
+          at: new Date().toISOString(),
+        })
+      } else {
+        pushError ??= single.error
+      }
     }
     if (pushError instanceof SyncSignInRequiredError) break
   }
@@ -307,7 +339,7 @@ export async function syncWorkoutHistory(userId: string, isActive: () => boolean
     }
   }
   const uploadableEntries = validEntries.filter((entry) =>
-    !userExercises.some((exercise) => exercise.id === entry.exerciseId) || userExerciseIds.has(entry.exerciseId)
+    !userExerciseIds.has(entry.exerciseId) || syncedUserExerciseIds.has(entry.exerciseId)
   )
   for (let offset = 0; offset < uploadableEntries.length; offset += 25) {
     const batch = uploadableEntries.slice(offset, offset + 25)
@@ -359,7 +391,8 @@ export async function syncWorkoutHistory(userId: string, isActive: () => boolean
   await saveSyncedUserExercises(remoteUserExercises
     .filter((exercise) => typeof exercise.id === 'string' && typeof exercise.name === 'string' &&
       typeof exercise.body_region === 'string')
-    .map(fromRemoteUserExercise))
+    .map(fromRemoteUserExercise), isActive)
+  checkActive()
   const latestUserExerciseUpdatedAt = remoteUserExercises.reduce(
     (latest, exercise) => exercise.updated_at > latest ? exercise.updated_at : latest,
     userExercisePullCursor ?? ''
