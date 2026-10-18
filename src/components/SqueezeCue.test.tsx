@@ -32,13 +32,19 @@ describe('SqueezeCue', () => {
       sections: [{ heading: 'Last time', lines: ['Mon 12 Oct · 50×10'] }],
     }
     const html = renderToString(<ShortCue label="Squeeze" cue="Elbows back" details={details} id="cue" />)
-    expect(html).toContain('<button type="button" class="workout-short-cue workout-short-cue-open" aria-haspopup="dialog"')
+    expect(html).toContain('<button type="button" class="workout-short-cue cue-card workout-short-cue-open" aria-haspopup="dialog"')
     expect(html).toContain('aria-label="Open details for Lat pulldown"')
   })
 
   it('keeps the short cue as plain text when there are no details', () => {
     const html = renderToString(<ShortCue label="Squeeze" cue="Elbows back" id="cue" />)
-    expect(html).toContain('<p class="workout-short-cue">')
+    expect(html).toContain('<p class="workout-short-cue cue-card">')
     expect(html).not.toContain('<button')
+  })
+
+  it('shows only the cue on screen; the Squeeze label is for screen readers only', () => {
+    const html = renderToString(<ShortCue label="Squeeze" cue="Elbows back" id="cue" />)
+    expect(html).toMatch(/<span class="sr-only">Squeeze(<!-- -->)?: <\/span>Elbows back/)
+    expect(html).not.toContain('<strong>Squeeze')
   })
 })
