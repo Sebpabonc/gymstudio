@@ -1443,6 +1443,10 @@ button {
   margin-top: 16px;
 }
 
+.summary-grid-single {
+  grid-template-columns: 1fr;
+}
+
 .metric-card {
   display: grid;
   gap: 6px;
@@ -2995,56 +2999,6 @@ button {
   flex: 1;
   min-width: 0;
   gap: 0;
-}
-
-.exercise-swap-button {
-  position: relative;
-  display: inline-grid;
-  flex: 0 0 44px;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  padding: 9px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--muted-strong);
-  cursor: pointer;
-}
-
-.exercise-swap-button:hover,
-.exercise-swap-button:focus-visible {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-}
-
-.exercise-swap-button svg {
-  width: 24px;
-  height: 24px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.exercise-swap-badge {
-  position: absolute;
-  right: 5px;
-  bottom: 5px;
-  display: grid;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--nav-active);
-}
-
-.exercise-swap-button .exercise-swap-badge svg {
-  width: 10px;
-  height: 10px;
-  stroke: var(--bg-dark);
-  stroke-width: 3.5;
 }
 
 .exercise-swap-origin {
