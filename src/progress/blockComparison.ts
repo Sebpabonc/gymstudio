@@ -1,5 +1,5 @@
 import type { Exercise, TrainingBlock } from '../types'
-import { dateValue, findEntryBlock, groupExerciseSessions, isDeloadWeek, sessionE1RM, workingSets } from './utils'
+import { bestSetIndex, dateValue, findEntryBlock, groupExerciseSessions, isDeloadWeek, sessionE1RM, workingSets } from './utils'
 import { equipmentStep, sameLoad } from './trends'
 import { PROGRESS_THRESHOLDS } from './thresholds'
 import type { ProgressEntry } from './types'
@@ -9,6 +9,9 @@ export type BlockLiftComparison = {
   start: number | null
   end: number | null
   previousEnd: number | null
+  startBestSet: { weight: number; reps: number } | null
+  endBestSet: { weight: number; reps: number } | null
+  previousEndBestSet: { weight: number; reps: number } | null
   changePercent: number | null
   previousChangePercent: number | null
   newInBlock: boolean
@@ -39,6 +42,22 @@ function highRepSamples(sessions: ReturnType<typeof groupExerciseSessions>, exer
     return { load, reps }
   })
   return samples
+}
+
+function displayBestSet(
+  sessions: ReturnType<typeof groupExerciseSessions>,
+  exercise: Exercise | undefined
+) {
+  const session = sessions[sessions.length - 1]
+  if (!session) return null
+  const index = bestSetIndex(session.sets)
+  if (index !== null) return { weight: session.sets[index].weight, reps: session.sets[index].reps }
+  const eligible = workingSets(session.sets).filter((set) => set.reps >= 1 && set.reps <= 50 && set.weight > 0)
+  const topLoad = Math.max(...eligible.map((set) => set.weight), 0)
+  const topSet = eligible
+    .filter((set) => sameLoad(set.weight, topLoad, equipmentStep(exercise)))
+    .sort((a, b) => b.reps - a.reps)[0]
+  return topSet ? { weight: topSet.weight, reps: topSet.reps } : null
 }
 
 function blockSamples(entries: ProgressEntry[], blocks: TrainingBlock[], block: TrainingBlock, exerciseId: string) {
@@ -119,6 +138,9 @@ export function blockLiftComparisons(
       start: currentStart,
       end: currentEnd,
       previousEnd,
+      startBestSet: displayBestSet(current.slice(0, 1), exercise),
+      endBestSet: displayBestSet(current.slice(-1), exercise),
+      previousEndBestSet: displayBestSet(previous.slice(-1), exercise),
       changePercent: currentChange,
       previousChangePercent: previousChange,
       newInBlock: previous.length === 0,

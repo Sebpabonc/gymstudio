@@ -40,7 +40,9 @@ import {
   watchObservations,
 } from '../progress'
 import { dateValue, startOfWeek, workingSets } from '../progress/utils'
-import { roundEstMax, weeklyBestEstMax } from '../progress/estMax'
+import { weeklyBestEstMax } from '../progress/estMax'
+import { sessionVolumeComparison } from '../progress/volume'
+import type { VolumeContextNote } from '../progress/volume'
 import { MUSCLE_CHART_MAXIMUM, MUSCLE_COMMON_RANGE } from '../progress/muscles'
 import type { WatchObservation } from '../progress/comparison'
 import type { ProgressStatus } from '../progress/status'
@@ -155,6 +157,12 @@ function rateText(trend: LiftTrend, language: 'en' | 'es', t: ReturnType<typeof 
   return t('progress.v3.rate.perWeek', { value: signed })
 }
 
+function bestSetText(language: 'en' | 'es', set: { weight: number; reps: number } | null | undefined) {
+  return set
+    ? `${formatNumber(language, set.weight, { maximumFractionDigits: 1 })} kg × ${formatNumber(language, set.reps)}`
+    : '—'
+}
+
 function Sparkline({ trend, min, max, exercise }: { trend: LiftTrend; min: number; max: number; exercise?: Exercise }) {
   const points = liftTrendIndexPoints(trend, exercise)
   if (!points.length) {
@@ -177,7 +185,12 @@ function Sparkline({ trend, min, max, exercise }: { trend: LiftTrend; min: numbe
   )
 }
 
-function MiniTrendChart({ trend, t }: { trend: LiftTrend; t: ReturnType<typeof useT>['t'] }) {
+function MiniTrendChart({ trend, t, exercise, language }: {
+  trend: LiftTrend
+  t: ReturnType<typeof useT>['t']
+  exercise: string
+  language: 'en' | 'es'
+}) {
   const values = trend.points.map((point) => trend.highRep
     ? point.topLoad === null ? null : point.repsAtTop
     : point.e1rm
@@ -205,8 +218,26 @@ function MiniTrendChart({ trend, t }: { trend: LiftTrend; t: ReturnType<typeof u
       return `${starts ? 'M' : 'L'}${x(point.date).toFixed(1)} ${y(point.movingAverage ?? 0).toFixed(1)}`
     })
     .join(' ')
+  const summaryPoints = trend.points.filter((point) => !point.deload && (trend.highRep
+    ? point.topLoad !== null
+    : point.bestSet !== null))
+  const first = summaryPoints[0]
+  const last = summaryPoints[summaryPoints.length - 1]
+  const ariaLabel = trend.highRep
+    ? t('progress.v3.trends.highRepChartAria', {
+        exercise,
+        verdict: translatedVerdict(trend.verdict, t).toLowerCase(),
+        first: first ? bestSetText(language, { weight: first.topLoad ?? 0, reps: first.repsAtTop }) : '—',
+        last: last ? bestSetText(language, { weight: last.topLoad ?? 0, reps: last.repsAtTop }) : '—',
+      })
+    : t('progress.v3.trends.chartAria', {
+        exercise,
+        verdict: translatedVerdict(trend.verdict, t).toLowerCase(),
+        first: bestSetText(language, first?.bestSet),
+        last: bestSetText(language, last?.bestSet),
+      })
   return (
-    <svg className="pv3-mini-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={t(trend.highRep ? 'progress.v3.trends.highRepNote' : 'progress.v3.trends.e1rmNote')}>
+    <svg className="pv3-mini-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel}>
       {trend.points.map((point, index) => {
         const value = trend.highRep
           ? point.topLoad === null ? null : point.repsAtTop
@@ -253,6 +284,22 @@ function LiftTrendChart({
     value: trend.highRep ? point.repsAtTop : point.e1rm ?? 0,
   }))
   const values = svgPoints.map((point) => point.value)
+  const summaryPoints = points.filter((point) => !point.deload)
+  const first = summaryPoints[0]
+  const last = summaryPoints[summaryPoints.length - 1]
+  const ariaLabel = trend.highRep
+    ? t('progress.v3.trends.highRepChartAria', {
+        exercise: getExerciseDisplayName(exercise, language),
+        verdict: translatedVerdict(trend.verdict, t).toLowerCase(),
+        first: first ? bestSetText(language, { weight: first.topLoad ?? 0, reps: first.repsAtTop }) : '—',
+        last: last ? bestSetText(language, { weight: last.topLoad ?? 0, reps: last.repsAtTop }) : '—',
+      })
+    : t('progress.v3.trends.chartAria', {
+        exercise: getExerciseDisplayName(exercise, language),
+        verdict: translatedVerdict(trend.verdict, t).toLowerCase(),
+        first: bestSetText(language, first?.bestSet),
+        last: bestSetText(language, last?.bestSet),
+      })
   const min = Math.min(...values)
   const max = Math.max(...values)
   const span = max - min || 1
@@ -294,7 +341,7 @@ function LiftTrendChart({
       )
     })
     return (
-      <svg className="pv3-detail-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={t('progress.v3.trends.highRepNote')}>
+      <svg className="pv3-detail-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel}>
         {blockMarks.map((block) => <line key={block.id} x1={x(block.startDate)} x2={x(block.startDate)} y1={top} y2={bottom} className="pv3-block-marker" />)}
         {bars}
       </svg>
@@ -309,7 +356,7 @@ function LiftTrendChart({
     })
     .join(' ')
   return (
-    <svg className="pv3-detail-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={exercise.name}>
+    <svg className="pv3-detail-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel}>
       {[0, 0.5, 1].map((fraction) => <line key={fraction} x1={left} x2={right} y1={top + (bottom - top) * fraction} y2={top + (bottom - top) * fraction} className="pv3-grid-line" />)}
       {blockMarks.map((block) => (
         <g key={block.id}>
@@ -426,25 +473,36 @@ function weeklyBestText(
   t: ReturnType<typeof useT>['t']
 ) {
   if (!summary.current) return ''
-  const format = (value: number) => formatNumber(language, roundEstMax(value), {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  })
-  const best = format(summary.current.value)
+  const best = bestSetText(language, summary.current.bestSet)
   if (!summary.currentWeekComplete) return t('progress.v3.weeklyBest.soFar', { best })
   if (!summary.previous || !summary.previousWeekComplete) {
     return t('progress.v3.weeklyBest.completeFirst', { best })
   }
-  const change = summary.change === 'same'
-    ? t('progress.v3.weeklyBest.same')
-    : t(`progress.v3.weeklyBest.${summary.change}` as TranslationKey, {
-        percent: formatNumber(language, Math.round(Math.abs(summary.changePercent ?? 0))),
-      })
+  const change = t(`progress.v3.weeklyBest.${summary.change ?? 'same'}` as TranslationKey)
   return t('progress.v3.weeklyBest.complete', {
     best,
-    previous: format(summary.previous.value),
+    previous: bestSetText(language, summary.previous.bestSet),
     change,
   })
+}
+
+function volumeContextText(
+  note: VolumeContextNote,
+  language: 'en' | 'es',
+  t: ReturnType<typeof useT>['t']
+) {
+  if (note.code === 'fewer-sets') {
+    return t('progress.v3.detail.volumeFewerSets', {
+      current: formatNumber(language, note.current),
+      previous: formatNumber(language, note.previous),
+    })
+  }
+  const key = note.code === 'deload' ? 'volumeDeload'
+    : note.code === 'heavier-weight' ? 'volumeHeavier'
+      : note.code === 'first-week-back' ? 'volumeFirstBack'
+        : note.code === 'best-set-held' ? 'volumeBestHeld'
+          : 'volumeDifferentTarget'
+  return t(`progress.v3.detail.${key}` as TranslationKey)
 }
 
 function nonDeloadHistory(sessions: ProgressLiftSession[]) {
@@ -641,6 +699,9 @@ export default function ProgressScreen({
   const selectedVolume = useMemo(() => selectedExercise && blocks
     ? exerciseVolumeTrend(progressEntries, blocks, selectedExercise, today, start, end)
     : null, [selectedExercise, blocks, progressEntries, today, start, end])
+  const volumeProgress = useMemo(() => selectedExercise && blocks
+    ? exerciseVolumeTrend(progressEntries, blocks, selectedExercise, today)
+    : null, [selectedExercise, blocks, progressEntries, today])
   const selectedSessions = selectedLiftId
     ? liftSessions.filter((session) => session.exerciseId === selectedLiftId && session.date >= start && session.date <= end)
     : []
@@ -777,8 +838,8 @@ export default function ProgressScreen({
                       lastReps: formatNumber(language, evidence.last.repsAtTop),
                     })
                   : t('progress.v3.evidence.estMax', {
-                      first: formatNumber(language, evidence.first.e1rm ?? 0, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
-                      last: formatNumber(language, evidence.last.e1rm ?? 0, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+                      first: bestSetText(language, evidence.first.bestSet),
+                      last: bestSetText(language, evidence.last.bestSet),
                     })
                 : ''
               const weeklyBest = weeklyBestSummaries.get(id)
@@ -881,7 +942,7 @@ export default function ProgressScreen({
               <button type="button" className="pv3-trend-lift" key={id} onClick={() => setSelectedLiftId(id)}>
                 <span className="pv3-trend-heading"><strong>{displayName(id)}</strong><span>{translatedVerdict(trend.verdict, t)}</span></span>
                 {trend.verdict !== 'not-enough-data' && <span className="pv3-trend-detail">{rateText(trend, language, t)}{rateText(trend, language, t) ? ' · ' : ''}{t(`progress.v3.confidence.${trend.confidence === 'based-on' ? 'basedOn' : trend.confidence ?? 'early'}`, { count: formatNumber(language, trend.points.filter((point) => !point.deload).length) })}</span>}
-                <MiniTrendChart trend={trend} t={t} />
+                <MiniTrendChart trend={trend} t={t} exercise={displayName(id)} language={language} />
               </button>
             )
           })}
@@ -902,10 +963,10 @@ export default function ProgressScreen({
                   {blockComparisons.map((row) => (
                     <tr key={row.exerciseId}>
                       <th scope="row">{displayName(row.exerciseId)}</th>
-                      <td>{row.newInBlock ? t('progress.v3.trends.newBlock') : row.previousEnd === null ? '—' : `${formatNumber(language, row.previousEnd, { maximumFractionDigits: 1 })} kg`}</td>
-                      <td>{row.start === null ? '—' : `${formatNumber(language, row.start, { maximumFractionDigits: 1 })} kg`}</td>
+                      <td>{row.newInBlock ? t('progress.v3.trends.newBlock') : bestSetText(language, row.previousEndBestSet)}</td>
+                      <td>{bestSetText(language, row.startBestSet)}</td>
                       <td>
-                        {row.end === null ? '—' : `${formatNumber(language, row.end, { maximumFractionDigits: 1 })} kg`}
+                        {bestSetText(language, row.endBestSet)}
                         {row.changePercent !== null && <small className="pv3-table-change"> {row.changePercent > 0 ? '+' : ''}{formatNumber(language, row.changePercent, { maximumFractionDigits: 1 })}%</small>}
                         {row.differentRepTarget && <small className="pv3-table-note">{t('progress.v3.trends.differentTarget')}</small>}
                       </td>
@@ -1117,16 +1178,44 @@ export default function ProgressScreen({
       : t('progress.v3.detail.takeaway', {
           exercise: displayName(selectedLiftId),
           verdict: translatedVerdict(selectedTrend.verdict, t).toLowerCase(),
-          start: formatNumber(language, first?.e1rm ?? 0, { maximumFractionDigits: 1 }),
-          end: formatNumber(language, last?.e1rm ?? 0, { maximumFractionDigits: 1 }),
+          start: bestSetText(language, first?.bestSet),
+          end: bestSetText(language, last?.bestSet),
         })
     const volumeWeeks = selectedVolume?.weeks ?? []
-    const completedVolume = volumeWeeks.filter((week) => week.complete && !week.deload && week.volume !== null)
-    const lastWeek = completedVolume[completedVolume.length - 1]
-    const previousThree = completedVolume.slice(-4, -1)
-    const volumeAverage = previousThree.length === 3
-      ? previousThree.reduce((sum, week) => sum + (week.volume ?? 0), 0) / 3
-      : null
+    const currentVolumeWeek = volumeProgress?.weeks.find((week) => week.weekStart === startOfWeek(today))
+    const volumeSummary = !currentVolumeWeek || volumeProgress?.bodyweightUnloaded
+      ? ''
+      : currentVolumeWeek.deload
+        ? t('progress.v3.detail.volumeDeload')
+        : !currentVolumeWeek.complete && currentVolumeWeek.volume !== null
+          ? t('progress.v3.detail.volumeSoFar', {
+              current: formatNumber(language, currentVolumeWeek.volume, { maximumFractionDigits: 0 }),
+              logged: formatNumber(language, currentVolumeWeek.loggedDayCount),
+              planned: formatNumber(language, currentVolumeWeek.plannedDayCount),
+            })
+          : currentVolumeWeek.change && currentVolumeWeek.previousVolume !== null
+            ? t('progress.v3.detail.volumeTakeaway', {
+                change: t(`progress.v3.detail.volume${currentVolumeWeek.change === 'more' ? 'More' : currentVolumeWeek.change === 'less' ? 'Less' : 'Same'}` as TranslationKey),
+                current: formatNumber(language, currentVolumeWeek.volume ?? 0, { maximumFractionDigits: 0 }),
+                previous: formatNumber(language, currentVolumeWeek.previousVolume, { maximumFractionDigits: 0 }),
+              })
+            : currentVolumeWeek.contextNote
+              ? volumeContextText(currentVolumeWeek.contextNote, language, t)
+              : ''
+    const volumeNote = currentVolumeWeek?.change === 'less' && currentVolumeWeek.contextNote
+      ? volumeContextText(currentVolumeWeek.contextNote, language, t)
+      : ''
+    const blockTrend = volumeProgress?.blockTrend
+    const blockTrendText = blockTrend
+      ? t('progress.v3.detail.volumeBlockTrend', {
+          firstWeek: formatNumber(language, blockTrend.firstWeek),
+          lastWeek: formatNumber(language, blockTrend.lastWeek),
+          first: formatNumber(language, blockTrend.firstVolume, { maximumFractionDigits: 0 }),
+          last: formatNumber(language, blockTrend.lastVolume, { maximumFractionDigits: 0 }),
+          percent: `${blockTrend.changePercent > 0 ? '+' : blockTrend.changePercent < 0 ? '−' : ''}${formatNumber(language, Math.abs(blockTrend.changePercent), { maximumFractionDigits: 1 })}%`,
+          change: t(`progress.v3.detail.volumeBlock${blockTrend.change === 'more' ? 'More' : blockTrend.change === 'less' ? 'Less' : 'Same'}` as TranslationKey),
+        })
+      : ''
     const maxVolume = Math.max(1, ...volumeWeeks.map((week) => week.volume ?? 0))
     return (
       <div className="pv3-detail">
@@ -1156,8 +1245,8 @@ export default function ProgressScreen({
 
         <section className="card pv3-card">
           <h3>{t('progress.v3.detail.volume')}</h3>
-          {selectedVolume?.bodyweightUnloaded && <p className="pv3-caption">{t('progress.v3.detail.bodyweightUnloaded')}</p>}
-          {!selectedVolume?.bodyweightUnloaded && (
+          {volumeProgress?.bodyweightUnloaded && <p className="pv3-caption">{t('progress.v3.detail.bodyweightUnloaded')}</p>}
+          {!volumeProgress?.bodyweightUnloaded && (
             <>
               {selectedExercise.equipment?.trim().toLowerCase() === 'bodyweight' && <p className="pv3-caption">{t('progress.v3.detail.bodyweightVolume')}</p>}
               <div className="pv3-volume-chart">
@@ -1170,12 +1259,10 @@ export default function ProgressScreen({
                   </div>
                 ))}
               </div>
-              {selectedVolume?.trendAvailable && lastWeek && volumeAverage !== null
-                ? <p>{t('progress.v3.detail.volumeTakeaway', {
-                    current: formatNumber(language, lastWeek.volume ?? 0, { maximumFractionDigits: 0 }),
-                    average: formatNumber(language, volumeAverage, { maximumFractionDigits: 0 }),
-                  })}</p>
-                : <p className="pv3-caption">{t('progress.v3.detail.volumeBarsOnly')}</p>}
+              {volumeSummary && <p>{volumeSummary}</p>}
+              {volumeNote && <p className="pv3-caption">{volumeNote}</p>}
+              {blockTrendText && <p>{blockTrendText}</p>}
+              {!volumeSummary && !blockTrendText && <p className="pv3-caption">{t('progress.v3.detail.volumeBarsOnly')}</p>}
               <p className="pv3-caption">{t('progress.v3.detail.volumeNote')}</p>
             </>
           )}
@@ -1184,7 +1271,10 @@ export default function ProgressScreen({
         <section className="card pv3-card">
           <h3>{t('progress.v3.detail.sessions')}</h3>
           <div className="pv3-history-list">
-            {detailSessions.length ? detailSessions.map(({ session, previous, comparison }, rowIndex) => (
+            {detailSessions.length ? detailSessions.map(({ session, previous, comparison }, rowIndex) => {
+              const total = sessionVolumeComparison(session, previous, selectedExercise)
+              const day = session.dayKey?.toLowerCase().endsWith('-b') ? 'B' : 'A'
+              return (
               <article className="pv3-history-session" key={`${session.date}-${session.blockId}-${session.dayKey}-${rowIndex}`}>
                 <div className="pv3-history-heading">
                   <strong>{formatShortDate(language, session.date)}{session.dayKey ? ` · ${session.dayKey.toLowerCase().endsWith('-b') ? 'B' : 'A'}` : ''}</strong>
@@ -1201,9 +1291,16 @@ export default function ProgressScreen({
                     )
                   })}
                 </ul>
+                {total && <small className="pv3-history-previous">{t('progress.v3.detail.volumeSession', {
+                  current: formatNumber(language, total.current, { maximumFractionDigits: 0 }),
+                  previous: formatNumber(language, total.previous, { maximumFractionDigits: 0 }),
+                  day,
+                  heavier: total.heavierWeight ? t('progress.v3.detail.volumeHeavierSuffix') : '',
+                })}</small>}
                 {previous && <small className="pv3-history-previous">{t('progress.v3.detail.change')}: {formatShortDate(language, previous.date)}</small>}
               </article>
-            )) : <p className="empty-state">{t('progress.liftDetail.empty')}</p>}
+              )
+            }) : <p className="empty-state">{t('progress.liftDetail.empty')}</p>}
           </div>
         </section>
       </div>

@@ -84,7 +84,7 @@ describe('approved per-exercise weekly volume', () => {
     expect(result.weeks[0].volume).toBe(1920)
   })
 
-  it('shows an unweighted bodyweight lift as not tracked and counts added load only', () => {
+  it('V-T14: does not track unweighted bodyweight work and counts added load only', () => {
     const bodyweight: Exercise = { ...rdl, id: 'dip', equipment: 'bodyweight' }
     const empty = exerciseVolumeTrend([entry('2026-01-05', bodyweight, [{ id: 'set', weight: 0, reps: 12 }])], [block], bodyweight, '2026-01-10')
     expect(empty).toMatchObject({ bodyweightUnloaded: true, weeks: [{ volume: null }] })

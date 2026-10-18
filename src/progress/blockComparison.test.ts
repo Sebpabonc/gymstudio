@@ -55,6 +55,9 @@ describe('approved block-over-block lift comparisons', () => {
       start: 60 * (1 + 3 / 30),
       end: 64 * (1 + 3 / 30),
       previousEnd: 58 * (1 + 3 / 30),
+      startBestSet: { weight: 60, reps: 3 },
+      endBestSet: { weight: 65, reps: 3 },
+      previousEndBestSet: { weight: 58, reps: 3 },
       newInBlock: false,
     })
     expect(result.changePercent).toBeCloseTo(6.7, 1)

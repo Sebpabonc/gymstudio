@@ -1,12 +1,12 @@
 import { cleanNumberInput, selectOnFocus } from '../utils/numberInput'
 import SwipeToDelete from './SwipeToDelete'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import SetTrendChart from './SetTrendChart'
 import { shortSqueezeCues } from '../data/shortSqueezeCues'
 import { explainTrainerRecommendation } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
 import type { AuthStatus } from '../auth/AuthProvider'
-import SqueezeCue, { ShortCue, type SqueezeCueDetails } from './SqueezeCue'
+import SqueezeCue, { CueSheet, ShortCue, type SqueezeCueDetails } from './SqueezeCue'
 import { SupersetLogger } from './SupersetLogger'
 import { localizeBlocks, localizeCatalogue, useSpanishContentReady } from '../i18n/content'
 import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT } from '../i18n'
@@ -80,7 +80,6 @@ import {
   workoutMuscleSetTotals,
 } from '../progress/workoutInsights'
 import type { WorkoutExerciseInsight } from '../progress/workoutInsights'
-import { roundEstMax } from '../progress/estMax'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
 import { loadDemoBlocks } from '../plans/demoBlock'
 import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
@@ -471,7 +470,7 @@ function formatWorkoutInsightLine(insight: WorkoutExerciseInsight, dayName: stri
   return changeText[0] ?? t('workout.insight.sameLine', { sets: '' })
 }
 
-function formatEstMaxInsightLine(
+export function formatEstMaxInsightLine(
   comparison: WorkoutExerciseInsight['estMaxComparison'],
   blocks: TrainingBlock[],
   language: Language,
@@ -479,7 +478,7 @@ function formatEstMaxInsightLine(
 ) {
   if (!comparison) return ''
   if (comparison.kind === 'different-rep-range') {
-    return t('workout.insight.estMax.differentRepRange', { type: comparison.previousDayType })
+    return t('workout.insight.estMax.differentRepRange', { type: comparison.currentDayType })
   }
 
   const previousDay = blocks.find((block) => block.id === comparison.previous.blockId)
@@ -488,20 +487,29 @@ function formatEstMaxInsightLine(
       ? t('workout.insight.dayType', { type: comparison.previousDayType })
       : '')
   const date = formatWeekdayDate(language, `${comparison.previous.date}T00:00:00Z`)
-  const before = formatNumber(language, roundEstMax(comparison.previousValue), {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  })
-  const now = formatNumber(language, roundEstMax(comparison.currentValue), {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  })
+  const formatSet = (set: { weight: number; reps: number }) =>
+    `${formatNumber(language, set.weight, { maximumFractionDigits: 1 })} kg × ${formatNumber(language, set.reps)}`
+  const before = formatSet(comparison.previousBestSet)
+  const now = formatSet(comparison.currentBestSet)
+  const repsDiffer = comparison.currentBestSet.reps !== comparison.previousBestSet.reps
   const percent = formatNumber(language, Math.round(Math.abs(comparison.changePercent)))
   let line: string
   if (comparison.change === 'up') {
-    line = t('workout.insight.estMax.up', { day: previousDay, date, before, now, percent })
+    line = t(repsDiffer ? 'workout.insight.estMax.upAdjusted' : 'workout.insight.estMax.up', {
+      day: previousDay,
+      date,
+      before,
+      now,
+      percent,
+    })
   } else if (comparison.change === 'same') {
-    line = t('workout.insight.estMax.same', { day: previousDay, date, now })
+    const sameKey: TranslationKey = repsDiffer
+      && comparison.currentBestSet.weight !== comparison.previousBestSet.weight
+      ? comparison.currentBestSet.weight > comparison.previousBestSet.weight
+        ? 'workout.insight.estMax.sameMoreWeight'
+        : 'workout.insight.estMax.sameLessWeight'
+      : 'workout.insight.estMax.same'
+    line = t(sameKey, { day: previousDay, date, now, before })
   } else if (comparison.currentDayType && comparison.previousDayType
     && comparison.currentDayType !== comparison.previousDayType) {
     line = t('workout.insight.estMax.crossDayLower', {
@@ -522,6 +530,35 @@ function formatEstMaxInsightLine(
     })}`
   }
   return line
+}
+
+function StrengthInsightLine({ line, id, t }: {
+  line: string
+  id: string
+  t: Translate
+}) {
+  const [open, setOpen] = useState(false)
+  const close = useCallback(() => setOpen(false), [])
+  const details: SqueezeCueDetails = {
+    title: t('workout.insight.strengthHelp.title'),
+    closeLabel: t('workout.insight.strengthHelp.close'),
+    openLabel: t('workout.insight.strengthHelp.link'),
+    sections: [{ heading: '', lines: [t('workout.insight.strengthHelp.explanation')] }],
+  }
+  return (
+    <div className="workout-insight-strength">
+      <small>{line}</small>
+      <button
+        type="button"
+        className="text-button"
+        aria-haspopup="dialog"
+        onClick={() => setOpen(true)}
+      >
+        {t('workout.insight.strengthHelp.link')}
+      </button>
+      {open && <CueSheet details={details} sections={details.sections} id={id} onClose={close} />}
+    </div>
+  )
 }
 
 function workoutInsightIcon(verdict: WorkoutExerciseInsight['comparison']['verdict']) {
@@ -3823,9 +3860,9 @@ export default function WorkoutPlan({
                       <strong><span aria-hidden="true">{insightIcon}</span> {t(insightVerdictKey as TranslationKey)}</strong>
                       <span>{formatWorkoutInsightLine(currentInsight, activeDay?.name ?? '', language, t)}</span>
                       {insightBasis && <small>{insightBasis}</small>}
-                      {estMaxInsightLine && <small>{estMaxInsightLine}</small>}
                       {insightWatch && <small className="workout-insight-watch">{insightWatch}</small>}
                     </button>
+                    {estMaxInsightLine && <StrengthInsightLine line={estMaxInsightLine} id={`${exerciseKey}-strength`} t={t} />}
                     {!workoutInsightPinned ? (
                       <button
                         type="button"
@@ -4567,18 +4604,20 @@ export default function WorkoutPlan({
                           t
                         )
                         return (
-                          <button key={exercise.id} type="button" className="workout-exercise-insight-body"
-                            onClick={() => {
-                              setWorkoutInsightPinned(true)
-                              if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
-                              workoutInsightTimer.current = null
-                            }}>
-                            <strong><span aria-hidden="true">{workoutInsightIcon(verdict)}</span> {displayExerciseName(exercise)} · {t(verdictKey as TranslationKey)}</strong>
-                            <span>{formatWorkoutInsightLine(insight, activeDay?.name ?? '', language, t)}</span>
-                            {basis && <small>{basis}</small>}
-                            {estMaxInsightLine && <small>{estMaxInsightLine}</small>}
-                            {watch && <small className="workout-insight-watch">{watch}</small>}
-                          </button>
+                          <React.Fragment key={exercise.id}>
+                            <button type="button" className="workout-exercise-insight-body"
+                              onClick={() => {
+                                setWorkoutInsightPinned(true)
+                                if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
+                                workoutInsightTimer.current = null
+                              }}>
+                              <strong><span aria-hidden="true">{workoutInsightIcon(verdict)}</span> {displayExerciseName(exercise)} · {t(verdictKey as TranslationKey)}</strong>
+                              <span>{formatWorkoutInsightLine(insight, activeDay?.name ?? '', language, t)}</span>
+                              {basis && <small>{basis}</small>}
+                              {watch && <small className="workout-insight-watch">{watch}</small>}
+                            </button>
+                            {estMaxInsightLine && <StrengthInsightLine line={estMaxInsightLine} id={`${exercise.id}-strength`} t={t} />}
+                          </React.Fragment>
                         )
                       })}
                       {!workoutInsightPinned ? (
@@ -4967,7 +5006,7 @@ export default function WorkoutPlan({
                       </strong>
                       <p>{formatWorkoutInsightLine(insight, sessionSummary.dayName, language, t)}</p>
                       {basis && <small>{basis}</small>}
-                      {estMaxInsightLine && <small>{estMaxInsightLine}</small>}
+                      {estMaxInsightLine && <StrengthInsightLine line={estMaxInsightLine} id={`${exercise.id}-strength`} t={t} />}
                       {watch && <small className="workout-insight-watch">{watch}</small>}
                     </li>
                   )

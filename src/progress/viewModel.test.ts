@@ -113,7 +113,7 @@ describe('progress view model', () => {
 
   it('uses plain block method labels and explains personal record types', () => {
     expect(formatBlockMethod('reverse-pyramid', en)).toBe('Reverse Pyramid')
-    expect(en.t(RECORD_TOOLTIPS.e1rm)).toContain('Estimated one-rep max')
+    expect(en.t(RECORD_TOOLTIPS.e1rm)).toContain('Your strongest set')
     expect(en.t(RECORD_TOOLTIPS.weight)).toContain('Highest weight')
     expect(en.t(RECORD_TOOLTIPS.reps)).toContain('Most reps')
   })
