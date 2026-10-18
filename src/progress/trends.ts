@@ -297,3 +297,10 @@ export function liftTrendIndexPoints(trend: LiftTrend, exercise?: Exercise): Lif
     }
   })
 }
+
+export function liftTrendEvidence(trend: LiftTrend) {
+  const points = trend.points.filter((point) => !point.deload && (trend.highRep
+    ? point.topLoad !== null && point.repsAtTop > 0
+    : point.e1rm !== null))
+  return points.length >= 2 ? { first: points[0], last: points[points.length - 1] } : null
+}

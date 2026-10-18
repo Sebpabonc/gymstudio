@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Exercise, TrainingBlock } from '../types'
-import { liftTrend, liftTrendIndexPoints } from './trends'
+import { liftTrend, liftTrendEvidence, liftTrendIndexPoints } from './trends'
 import type { ProgressEntry } from './types'
 
 const block: TrainingBlock = {
@@ -178,12 +178,21 @@ describe('Progress v3 lift trends', () => {
 
     expect(trend.highRep).toBe(true)
     expect(trend.points.every((point) => point.e1rm === null)).toBe(true)
+    expect(liftTrendEvidence(trend)).toMatchObject({
+      first: { repsAtTop: 45 },
+      last: { repsAtTop: 44 },
+    })
     expect(points[0].value).toBe(0)
     expect(points[1].value).toBeCloseTo((47 / 45 - 1) * 100)
     expect(points[2].value).toBe(0)
     expect(points[3].value).toBeCloseTo(10)
     expect(points.map((point) => point.breakBefore)).toEqual([false, false, true, false])
     expect(points[points.length - 1].latest).toBe(true)
+  })
+
+  it('does not provide verdict evidence from a single session', () => {
+    const trend = analyze([makeEntry('2026-01-05', 60)])
+    expect(liftTrendEvidence(trend)).toBeNull()
   })
 
   it('keeps exercise swaps in separate exercise-id series and marks the new lift baseline', () => {

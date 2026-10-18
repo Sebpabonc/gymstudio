@@ -28,6 +28,7 @@ import {
   equivalentLiftSessions,
   exerciseVolumeTrend,
   liftTrend,
+  liftTrendEvidence,
   liftTrendIndexPoints,
   latestEquivalentComparisons,
   muscleTrend,
@@ -39,6 +40,8 @@ import {
   watchObservations,
 } from '../progress'
 import { workingSets, dateValue } from '../progress/utils'
+import { startOfWeek } from '../progress/utils'
+import { roundEstMax, weeklyBestEstMax } from '../progress/estMax'
 import { MUSCLE_CHART_MAXIMUM, MUSCLE_COMMON_RANGE } from '../progress/muscles'
 import type { WatchObservation } from '../progress/comparison'
 import type { ProgressStatus } from '../progress/status'
@@ -404,6 +407,47 @@ function weekDateLabel(language: 'en' | 'es', date: string) {
   return formatShortDate(language, date)
 }
 
+function dateString(value: number) {
+  return new Date(value).toISOString().slice(0, 10)
+}
+
+function progressWeekStart(today: string, block: TrainingBlock | null) {
+  if (!block) return startOfWeek(today)
+  const blockStart = dateValue(block.startDate)
+  const todayValue = dateValue(today)
+  if (todayValue < blockStart || todayValue >= blockStart + block.weeks * 7 * 86_400_000) {
+    return startOfWeek(today)
+  }
+  return dateString(blockStart + Math.floor((todayValue - blockStart) / (7 * 86_400_000)) * 7 * 86_400_000)
+}
+
+function weeklyBestText(
+  summary: ReturnType<typeof weeklyBestEstMax>,
+  language: 'en' | 'es',
+  t: ReturnType<typeof useT>['t']
+) {
+  if (!summary.current) return ''
+  const format = (value: number) => formatNumber(language, roundEstMax(value), {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
+  const best = format(summary.current.value)
+  if (!summary.currentWeekComplete) return t('progress.v3.weeklyBest.soFar', { best })
+  if (!summary.previous || !summary.previousWeekComplete) {
+    return t('progress.v3.weeklyBest.completeFirst', { best })
+  }
+  const change = summary.change === 'same'
+    ? t('progress.v3.weeklyBest.same')
+    : t(`progress.v3.weeklyBest.${summary.change}` as TranslationKey, {
+        percent: formatNumber(language, Math.round(Math.abs(summary.changePercent ?? 0))),
+      })
+  return t('progress.v3.weeklyBest.complete', {
+    best,
+    previous: format(summary.previous.value),
+    change,
+  })
+}
+
 function nonDeloadHistory(sessions: ProgressLiftSession[]) {
   return sessions.filter((session) => !session.deload)
 }
@@ -550,6 +594,14 @@ export default function ProgressScreen({
     () => blocks ? progressLiftSessions(progressEntries, blocks) : [],
     [progressEntries, blocks]
   )
+  const weeklyBestSummaries = useMemo(() => {
+    if (!blocks) return new Map<string, ReturnType<typeof weeklyBestEstMax>>()
+    const weekStart = progressWeekStart(today, activeBlock)
+    return new Map(mainLiftIds.map((id) => [
+      id,
+      weeklyBestEstMax(liftSessions, id, weekStart, blocks),
+    ]))
+  }, [mainLiftIds, blocks, liftSessions, activeBlock, today])
   const comparisons = useMemo(
     () => blocks ? latestEquivalentComparisons(progressEntries, blocks, exercises) : [],
     [progressEntries, blocks, exercises]
@@ -713,9 +765,25 @@ export default function ProgressScreen({
             {mainLiftIds.map((id) => {
               const trend = overviewTrends.get(id)
               if (!trend) return null
+              const evidence = liftTrendEvidence(trend)
               const latest = trend.points.some((point) => !point.deload && (trend.highRep
                 ? point.topLoad !== null && point.repsAtTop > 0
                 : point.e1rm !== null))
+              const evidenceLine = evidence
+                ? trend.highRep
+                  ? t('progress.v3.evidence.highRep', {
+                      firstLoad: formatNumber(language, evidence.first.topLoad ?? 0, { maximumFractionDigits: 1 }),
+                      firstReps: formatNumber(language, evidence.first.repsAtTop),
+                      lastLoad: formatNumber(language, evidence.last.topLoad ?? 0, { maximumFractionDigits: 1 }),
+                      lastReps: formatNumber(language, evidence.last.repsAtTop),
+                    })
+                  : t('progress.v3.evidence.estMax', {
+                      first: formatNumber(language, evidence.first.e1rm ?? 0, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+                      last: formatNumber(language, evidence.last.e1rm ?? 0, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+                    })
+                : ''
+              const weeklyBest = weeklyBestSummaries.get(id)
+              const weeklyBestLine = weeklyBest ? weeklyBestText(weeklyBest, language, t) : ''
               const reason = worthReasons.get(id)
               const comparison = latestComparisons.get(id)?.comparison
               return (
@@ -723,7 +791,9 @@ export default function ProgressScreen({
                   <button type="button" className="pv3-lift-row" onClick={() => setSelectedLiftId(id)} aria-label={t('progress.strength.openDetail', { exercise: displayName(id) })}>
                     <span className="pv3-lift-copy">
                       <strong>{displayName(id)}</strong>
-                      <span>{translatedVerdict(trend.verdict, t)}</span>
+                      <span>{translatedVerdict(evidence ? trend.verdict : 'not-enough-data', t)}</span>
+                      {evidenceLine && <small>{evidenceLine}</small>}
+                      {weeklyBestLine && <small>{weeklyBestLine}</small>}
                       {rateText(trend, language, t) && <small>{rateText(trend, language, t)}</small>}
                       {!latest && <small>{t('progress.v3.unlock.sessions', { count: formatNumber(language, trend.points.filter((point) => !point.deload).length) })}</small>}
                       {comparison?.messages[0]?.startsWith('sets:') && <small>{t('progress.v3.summary.setCount', {

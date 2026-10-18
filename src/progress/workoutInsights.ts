@@ -1,4 +1,5 @@
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
+import { anyDayEstMaxComparison } from './estMax'
 import { compareLiftSessions, watchObservations } from './comparison'
 import { equivalentLiftSessions, progressLiftSessions } from './trends'
 import { getDayType, workingSets } from './utils'
@@ -17,6 +18,7 @@ export type WorkoutExerciseInsight = {
   current: ProgressLiftSession
   previous: ProgressLiftSession | null
   comparison: SessionComparison
+  estMaxComparison: ReturnType<typeof anyDayEstMaxComparison>
   changes: WorkoutSetChange[]
   watch: ReturnType<typeof watchObservations>[number] | null
 }
@@ -50,7 +52,15 @@ export function buildWorkoutExerciseInsight(
     }]
   })
   const watch = watchObservations([...previousEntries, entry], blocks, [exercise], 1)[0] ?? null
-  return { exerciseId: entry.exerciseId, current, previous, comparison, changes, watch }
+  return {
+    exerciseId: entry.exerciseId,
+    current,
+    previous,
+    comparison,
+    estMaxComparison: anyDayEstMaxComparison(entry, history, blocks),
+    changes,
+    watch,
+  }
 }
 
 export type WorkoutInsightTally = {
