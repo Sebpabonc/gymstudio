@@ -57,3 +57,4 @@ no service_role in clients) still govern.
 
 Vendored unchanged; scanned for prompt-injection patterns before adding. Next.js/server rules in react-best-practices do not apply to this Vite SPA. The app's existing design system (dark/rose tokens, current font sizes) overrides frontend-design's aesthetic guidance.
 | Tech Lead | supabase (Supabase, MIT; LICENSE from repo root) | https://github.com/supabase/agent-skills/tree/c9be0e931b7930f7d02126d04774d904c381e7d7/skills/supabase | `c9be0e931b7930f7d02126d04774d904c381e7d7` |
+| Socialer | marketing-* (brand-review, campaign-plan, competitive-brief, content-creation, draft-content, email-sequence, performance-report, seo-audit) — Anthropic knowledge-work-plugins, Apache-2.0 | https://github.com/anthropics/knowledge-work-plugins/tree/33eeda1e8fd856455b05479d13a0f85b5f803744/marketing/skills | `33eeda1e8fd856455b05479d13a0f85b5f803744` |
