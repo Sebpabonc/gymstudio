@@ -1327,7 +1327,6 @@ export default function ProgressScreen({
         ? renderDetail()
         : <>
             <div className="pv3-page-heading">
-              <h2>{t('progress.title')}</h2>
               {activeBlock?.name.trim() && <span>{activeBlock.name}</span>}
             </div>
             <div className="pv3-tabs" role="tablist" aria-label={t('progress.title')}>

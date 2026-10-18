@@ -4,6 +4,8 @@ import { WorkoutSet } from '../types'
 import { RestTimerState } from '../utils/restTimer'
 import { completedSupersetRounds, createSupersetTicks, nextSupersetFocus, toggleSupersetTick } from '../utils/supersetRounds'
 import { stepWorkoutValue } from '../utils/workoutSets'
+import { equipmentStep } from '../trainer/engine'
+import { selectOnFocus } from '../utils/numberInput'
 import { ShortCue, type SqueezeCueDetails } from './SqueezeCue'
 import RestTimer from './RestTimer'
 
@@ -17,6 +19,7 @@ type LoggerExercise = {
   sets: { weight: number; reps: number }[]
   previousSets: WorkoutSet[]
   previousDate?: string
+  equipment?: string
   restSeconds: number
   actions: React.ReactNode
 }
@@ -50,7 +53,7 @@ export function SupersetLogger({
   const counts = exercises.map((exercise) => exercise.sets.length)
   const [ticks, setTicks] = useState(() => createSupersetTicks(counts, loggedRounds))
   const [times, setTimes] = useState<Array<number | undefined>>([])
-  const [openRounds, setOpenRounds] = useState<Record<number, boolean>>({})
+  const [weightInputs, setWeightInputs] = useState<Record<string, string>>({})
   const [handoff, setHandoff] = useState<{ round: number; exercise: number; code: string; endAt: number } | null>(null)
   const [now, setNow] = useState(Date.now)
   const [saving, setSaving] = useState(false)
@@ -60,7 +63,7 @@ export function SupersetLogger({
   const completed = completedSupersetRounds(ticks)
   const firstIncomplete = completed.findIndex((done) => !done)
   const roundCount = ticks.length
-  const currentRound = firstIncomplete < 0 ? roundCount - 1 : firstIncomplete
+  const currentRound = firstIncomplete
   const loggedSignature = loggedRounds.map(Number).join(',')
 
   useEffect(() => {
@@ -114,10 +117,12 @@ export function SupersetLogger({
     if (!checked) return
     const focus = nextSupersetFocus(next, counts, { round, exercise })
     if (rounds[round]) {
-      setOpenRounds((previous) => ({ ...previous, [round]: false }))
       const nextRound = rounds.findIndex((done) => !done)
       const nextLabel = nextRound >= 0
-        ? `${t('workout.superset.roundOf', { round: nextRound + 1, total: roundCount })} · ${exercises.map((item) =>
+        ? `${t('workout.superset.roundOf', {
+            round: formatNumber(language, nextRound + 1),
+            total: formatNumber(language, roundCount),
+          })} · ${exercises.map((item) =>
             `${item.code} ${item.sets[nextRound] ? pair(item.sets[nextRound]) : '—'}`
           ).join(' · ')}`
         : nextExerciseName ?? t('workout.run.finished')
@@ -152,28 +157,13 @@ export function SupersetLogger({
     >
       <header className="superset-compact-header">
         <strong>{t('workout.technique.superset')} · {exercises.map((item) => item.code).join(' + ')}</strong>
-        <span>{firstIncomplete < 0 ? `✓ ${t('workout.status.done')}` : t('workout.superset.roundOf', { round: currentRound + 1, total: roundCount })}</span>
+        <span>{firstIncomplete < 0
+          ? `✓ ${t('workout.status.done')}`
+          : t('workout.superset.roundOf', {
+              round: formatNumber(language, currentRound + 1),
+              total: formatNumber(language, roundCount),
+            })}</span>
       </header>
-      {exercises.map((exercise) => {
-        return (
-          <div className="superset-compact-exercise" key={exercise.code}>
-            <div>
-              <strong>{exercise.code} · {exercise.name}</strong>
-              {exercise.shortCue && (
-                <ShortCue label={t('workout.run.squeezeLabel')} cue={exercise.shortCue} details={exercise.cueDetails} id={`superset-${groupIndex}-${exercise.code}-cue`} />
-              )}
-              {(exercise.techniqueLabel || exercise.planNote) && (
-                <p className="workout-mode-plan-note">
-                  {exercise.techniqueLabel && <strong>{exercise.techniqueLabel}</strong>}
-                  {exercise.techniqueLabel && exercise.planNote ? ' ' : ''}
-                  {exercise.planNote}
-                </p>
-              )}
-            </div>
-            {exercise.actions}
-          </div>
-        )
-      })}
       <p className="superset-compact-instructions">{t('workout.superset.instructions', {
         first: exercises[0].code, others: exercises.slice(1).map((item) => item.code).join(', '),
       })}</p>
@@ -187,95 +177,129 @@ export function SupersetLogger({
           label={restTimerLabel}
           onUndo={onRestUndo}
         />
-      ) : ticks.map((row, round) => completed[round] && !openRounds[round] ? (
-          <button
-            type="button"
-            className="superset-round-summary"
-            key={round}
-            aria-expanded={false}
-            onClick={() => setOpenRounds((previous) => ({ ...previous, [round]: true }))}
-          >
-            R{round + 1} ✓ {exercises.map((exercise) => exercise.sets[round] ? pair(exercise.sets[round]) : '—').join(' · ')}
-          </button>
-        ) : (
-          <div className={`superset-workout-round${round === currentRound ? ' current' : ''}${round > currentRound ? ' future' : ''}`} key={round}>
-            <strong>{round === currentRound
-              ? t('workout.run.currentSet', { set: formatNumber(language, round + 1), total: formatNumber(language, roundCount) })
-              : t('workout.round.label', { count: round + 1 })}</strong>
-            <div className="superset-workout-table" role="table">
-              <div className="superset-workout-table-header" role="row">
-                <span role="columnheader">#</span>
-                <span role="columnheader">{t('workout.run.lastTime')}</span>
-                <span role="columnheader">{t('workout.run.today')}</span>
-              </div>
-              {exercises.map((exercise, exerciseIndex) => {
-                const set = exercise.sets[round]
-                const previous = exercise.previousSets[round]
-                if (!set) return (
-                  <div className="superset-workout-row" role="row" key={exercise.code}>
-                    <span role="cell">{exercise.code}</span>
-                    <span role="cell">—</span>
-                    <span role="cell">—</span>
-                  </div>
-                )
-                return (
-                  <div className={`superset-workout-row${row[exerciseIndex] ? ' completed' : ''}`} role="row" key={exercise.code}>
-                    <span className="superset-round-code" title={exercise.name} role="cell">{exercise.code}</span>
-                    <span className="superset-last-time" role="cell">
-                      {previous
-                        ? `${exercise.previousDate ? `${formatWeekdayDate(language, `${exercise.previousDate.slice(0, 10)}T00:00:00Z`)} · ` : ''}${pair(previous)}`
-                        : '—'}
-                    </span>
-                    <div className="superset-workout-today" role="cell">
-                      <div className="superset-workout-inputs">
-                        {(['weight', 'reps'] as const).map((field) => (
-                          <div className="superset-workout-input" key={field}>
-                            <span>{field === 'weight' ? 'kg' : t('workout.label.repsInline')}</span>
-                            <div className="set-stepper">
-                              <button
-                                type="button" className="stepper-button" disabled={saving}
-                                aria-label={t(field === 'weight' ? 'workout.superset.weightDecrease' : 'workout.superset.repsDecrease', { set: round + 1, code: exercise.code })}
-                                onClick={() => change(exerciseIndex, round, field, String(stepWorkoutValue(set[field], -1, field === 'weight' ? 2.5 : 1, field === 'weight' ? 0 : 1)))}
-                              >−</button>
-                              <input
-                                type="number" inputMode={field === 'weight' ? 'decimal' : 'numeric'}
-                                min={field === 'weight' ? 0 : 1} step={field === 'weight' ? 2.5 : 1}
-                                value={set[field]} disabled={saving}
-                                aria-label={t(field === 'weight' ? 'workout.superset.weightLabel' : 'workout.superset.repsLabel', { set: round + 1, code: exercise.code })}
-                                ref={field === 'weight' ? (element) => {
-                                  const key = `${round}:${exerciseIndex}`
-                                  if (element) inputs.current.set(key, element)
-                                  else inputs.current.delete(key)
-                                } : undefined}
-                                onChange={(event) => change(exerciseIndex, round, field, event.target.value)}
-                              />
-                              <button
-                                type="button" className="stepper-button" disabled={saving}
-                                aria-label={t(field === 'weight' ? 'workout.superset.weightIncrease' : 'workout.superset.repsIncrease', { set: round + 1, code: exercise.code })}
-                                onClick={() => change(exerciseIndex, round, field, String(stepWorkoutValue(set[field], 1, field === 'weight' ? 2.5 : 1, field === 'weight' ? 0 : 1)))}
-                              >+</button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <button
-                        type="button" className={`complete-set-button${row[exerciseIndex] ? ' checked' : ''}`}
-                        aria-pressed={row[exerciseIndex]} disabled={saving}
-                        aria-label={t(row[exerciseIndex] ? 'workout.superset.tickUndo' : 'workout.superset.tick', { code: exercise.code, round: round + 1 })}
-                        onClick={() => tick(round, exerciseIndex)}
-                      >✓</button>
-                    </div>
-                    {handoff?.round === round && handoff.exercise === exerciseIndex && (
-                      <p className="superset-handoff" role="status" aria-live="polite">
-                        {t('workout.superset.handoff', { code: handoff.code, seconds: Math.max(0, Math.ceil((handoff.endAt - now) / 1000)) })}
-                      </p>
-                    )}
-                  </div>
-                )
-              })}
+      ) : ticks.map((row, round) => {
+        const roundLabel = t('workout.superset.roundOf', {
+          round: formatNumber(language, round + 1),
+          total: formatNumber(language, roundCount),
+        })
+        if (round !== currentRound) {
+          return (
+            <div className={`superset-round-summary${completed[round] ? ' completed' : ' future'}`} key={round}>
+              <span>{completed[round] ? '✓ ' : ''}{roundLabel}</span>
+              <span>{exercises.map((exercise) => exercise.sets[round] ? `${exercise.code} ${pair(exercise.sets[round])}` : `${exercise.code} —`).join(' · ')}</span>
             </div>
+          )
+        }
+        return (
+          <div className="superset-workout-round current" key={round}>
+            <strong>{roundLabel}</strong>
+            {exercises.map((exercise, exerciseIndex) => {
+              const set = exercise.sets[round]
+              if (!set) return null
+              const previous = exercise.previousSets[round]
+              const weightKey = `${round}:${exerciseIndex}`
+              const step = equipmentStep(exercise.equipment)
+              return (
+                <div className={`superset-workout-exercise${row[exerciseIndex] ? ' completed' : ''}`} key={exercise.code}>
+                  <div className="superset-exercise-heading">
+                    <span className="superset-round-code">{exercise.code}</span>
+                    <strong>{exercise.name}</strong>
+                  </div>
+                  <p className="superset-last-time">
+                    {t('workout.run.lastTime')}: {previous ? `${pair(previous)}${exercise.previousDate
+                      ? ` · ${formatWeekdayDate(language, `${exercise.previousDate.slice(0, 10)}T00:00:00Z`)}`
+                      : ''}` : '—'}
+                  </p>
+                  {exercise.shortCue && (
+                    <ShortCue label={t('workout.run.squeezeLabel')} cue={exercise.shortCue} details={exercise.cueDetails} id={`superset-${groupIndex}-${exercise.code}-cue`} />
+                  )}
+                  {(exercise.techniqueLabel || exercise.planNote) && (
+                    <p className="workout-mode-plan-note">
+                      {exercise.techniqueLabel && <strong>{exercise.techniqueLabel}</strong>}
+                      {exercise.techniqueLabel && exercise.planNote ? ' ' : ''}
+                      {exercise.planNote}
+                    </p>
+                  )}
+                  <div className="superset-workout-fields">
+                    {(['weight', 'reps'] as const).map((field) => (
+                      <div className="superset-workout-input" key={field}>
+                        <span>{field === 'weight' ? 'kg' : t('workout.label.repsInline')}</span>
+                        <div className="set-stepper">
+                          <button
+                            type="button" className="stepper-button" disabled={saving}
+                            aria-label={t(field === 'weight' ? 'workout.superset.weightDecrease' : 'workout.superset.repsDecrease', { set: round + 1, code: exercise.code })}
+                            onClick={() => {
+                              const next = stepWorkoutValue(set[field], -1, field === 'weight' ? step : 1, field === 'weight' ? 0 : 1)
+                              if (field === 'weight') setWeightInputs((previousInputs) => {
+                                const { [weightKey]: _removed, ...rest } = previousInputs
+                                return rest
+                              })
+                              change(exerciseIndex, round, field, String(next))
+                            }}
+                          >−</button>
+                          <input
+                            type={field === 'weight' ? 'text' : 'number'}
+                            inputMode={field === 'weight' ? 'decimal' : 'numeric'}
+                            min={field === 'weight' ? 0 : 1} step={field === 'weight' ? step : 1}
+                            value={field === 'weight'
+                              ? weightInputs[weightKey] ?? formatNumber(language, set.weight, { useGrouping: false })
+                              : set.reps}
+                            disabled={saving}
+                            aria-label={t(field === 'weight' ? 'workout.superset.weightLabel' : 'workout.superset.repsLabel', { set: round + 1, code: exercise.code })}
+                            onFocus={selectOnFocus}
+                            ref={field === 'weight' ? (element) => {
+                              if (element) inputs.current.set(weightKey, element)
+                              else inputs.current.delete(weightKey)
+                            } : undefined}
+                            onChange={(event) => {
+                              const value = event.target.value
+                              if (field === 'weight') {
+                                setWeightInputs((previousInputs) => ({ ...previousInputs, [weightKey]: value }))
+                                const numeric = Number(value.replace(',', '.'))
+                                if (value.trim() && Number.isFinite(numeric)) change(exerciseIndex, round, field, String(numeric))
+                              } else {
+                                change(exerciseIndex, round, field, value)
+                              }
+                            }}
+                            onBlur={field === 'weight' ? () => setWeightInputs((previousInputs) => {
+                              const { [weightKey]: _removed, ...rest } = previousInputs
+                              return rest
+                            }) : undefined}
+                          />
+                          <button
+                            type="button" className="stepper-button" disabled={saving}
+                            aria-label={t(field === 'weight' ? 'workout.superset.weightIncrease' : 'workout.superset.repsIncrease', { set: round + 1, code: exercise.code })}
+                            onClick={() => {
+                              const next = stepWorkoutValue(set[field], 1, field === 'weight' ? step : 1, field === 'weight' ? 0 : 1)
+                              if (field === 'weight') setWeightInputs((previousInputs) => {
+                                const { [weightKey]: _removed, ...rest } = previousInputs
+                                return rest
+                              })
+                              change(exerciseIndex, round, field, String(next))
+                            }}
+                          >+</button>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button" className={`complete-set-button${row[exerciseIndex] ? ' checked' : ''}`}
+                      aria-pressed={row[exerciseIndex]} disabled={saving}
+                      aria-label={t(row[exerciseIndex] ? 'workout.superset.tickUndo' : 'workout.superset.tick', { code: exercise.code, round: round + 1 })}
+                      onClick={() => tick(round, exerciseIndex)}
+                    >✓</button>
+                  </div>
+                  {handoff?.round === round && handoff.exercise === exerciseIndex && (
+                    <p className="superset-handoff" role="status" aria-live="polite">
+                      {t('workout.superset.handoff', { code: handoff.code, seconds: formatNumber(language, Math.max(0, Math.ceil((handoff.endAt - now) / 1000))) })}
+                    </p>
+                  )}
+                  {exercise.actions}
+                </div>
+              )
+            })}
           </div>
-        ))}
+        )
+      })}
       {(error || saveFailed) && <p role="alert" className="account-error log-error">{error || t('workout.superset.saveError')}</p>}
       {((firstIncomplete >= 0 && completed.some(Boolean)) || error || saveFailed) && (
         <button type="button" className="primary-button small-button" disabled={saving || !completed.some(Boolean)} onClick={() => void save(completed, times)}>

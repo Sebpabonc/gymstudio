@@ -4145,14 +4145,14 @@ export default function WorkoutPlan({
                         )}
 
                         <div className={`planned-set-grid${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`}>
+                          {isWorkoutMode && previousEntry?.date && (
+                            <p className="planned-set-date">{t('workout.run.lastTime')} · {formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`)}</p>
+                          )}
                           <div className={`planned-set-column-headers${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`} role={isWorkoutMode ? 'row' : undefined}>
                             {isWorkoutMode ? (
                               <>
                                 <span role="columnheader">#</span>
-                                <span role="columnheader">
-                                  {t('workout.run.lastTime')}
-                                  {previousEntry?.date && <small>{formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`)}</small>}
-                                </span>
+                                <span role="columnheader">{t('workout.run.lastTime')}</span>
                                 <span role="columnheader">{t('workout.run.today')}</span>
                               </>
                             ) : (
@@ -4526,6 +4526,7 @@ export default function WorkoutPlan({
                   sets,
                   previousSets: supersetPreviousSets[index],
                   previousDate: previousDatesByExercise.get(exercise.code ?? exercise.name),
+                  equipment: libraryMatch?.equipment,
                   restSeconds: exercise.restSeconds ?? 90,
                   actions: cards[index],
                 }

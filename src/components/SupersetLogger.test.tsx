@@ -4,40 +4,82 @@ import { describe, expect, it, vi } from 'vitest'
 import { createTranslator } from '../i18n/translate'
 import { SupersetLogger } from './SupersetLogger'
 
-describe('SupersetLogger', () => {
-  it('shows one three-column table with last-session values and visible tools', () => {
-    const html = renderToStaticMarkup(
-      <SupersetLogger
-        exercises={[{
-          code: 'A1',
-          name: 'Barbell Back Squat',
-          techniqueLabel: 'Pyramid',
-          planNote: 'Add weight each set.',
-          sets: [{ weight: 75, reps: 8 }],
-          previousSets: [{ id: 'previous-set', weight: 90, reps: 8 }],
+function renderSuperset(language: 'en' | 'es' = 'en') {
+  return renderToStaticMarkup(
+    <SupersetLogger
+      exercises={[
+        {
+          code: 'C1',
+          name: 'Dumbbell Shoulder Press',
+          equipment: 'dumbbell',
+          sets: [
+            { weight: 24, reps: 10 },
+            { weight: 27.5, reps: 8 },
+            { weight: 30, reps: 8 },
+          ],
+          previousSets: [
+            { id: 'previous-c1', weight: 24, reps: 10 },
+            { id: 'previous-c1-round-2', weight: 27, reps: 10 },
+          ],
           previousDate: '2026-10-15',
-          restSeconds: 120,
+          restSeconds: 10,
           actions: <button type="button">Technique</button>,
-        }]}
-        loggedRounds={[false]}
-        groupIndex={0}
-        current
-        t={createTranslator('en')}
-        language="en"
-        onChange={vi.fn()}
-        onStartRest={vi.fn()}
-        restBetweenSets={120}
-        onSave={vi.fn(async () => undefined)}
-      />
-    )
+        },
+        {
+          code: 'C2',
+          name: 'Cable Lat Pulldown',
+          equipment: 'cable',
+          sets: [
+            { weight: 33.5, reps: 10 },
+            { weight: 37.5, reps: 8 },
+            { weight: 40, reps: 8 },
+          ],
+          previousSets: [
+            { id: 'previous-c2', weight: 33.5, reps: 10 },
+            { id: 'previous-c2-round-2', weight: 37.5, reps: 10 },
+          ],
+          previousDate: '2026-10-15',
+          restSeconds: 10,
+          actions: <button type="button">Notes</button>,
+        },
+      ]}
+      loggedRounds={[true, false, false]}
+      groupIndex={0}
+      current
+      t={createTranslator(language)}
+      language={language}
+      onChange={vi.fn()}
+      onStartRest={vi.fn()}
+      restBetweenSets={120}
+      onSave={vi.fn(async () => undefined)}
+    />
+  )
+}
 
-    expect(html).toContain('role="table"')
-    expect(html).toContain('>Last time</span>')
-    expect(html).toContain('>Today</span>')
-    expect(html).not.toContain('>Target</span>')
-    expect(html).toContain('90×8')
-    expect(html).toContain('75')
+describe('SupersetLogger', () => {
+  it('shows compact per-exercise controls and only the current round open', () => {
+    const html = renderSuperset()
+
+    expect(html).toContain('Round 2 of 3')
+    expect(html).toContain('✓ Round 1 of 3')
+    expect(html).toContain('Round 3 of 3')
+    expect(html).toContain('Dumbbell Shoulder Press')
+    expect(html).toContain('Last time: 27×10 · Thu 15 Oct')
+    expect(html).toContain('inputMode="decimal"')
+    expect(html).toContain('value="27.5"')
+    expect(html).toContain('>kg</span>')
+    expect(html).toContain('>Reps</span>')
     expect(html).toContain('>Technique</button>')
-    expect(html).toContain('>Pyramid</strong>')
+    expect(html).not.toContain('role="table"')
+    expect(html.match(/class="complete-set-button/g)).toHaveLength(2)
+  })
+
+  it('formats decimal stepper values and round labels in Spanish', () => {
+    const html = renderSuperset('es')
+
+    expect(html).toContain('Ronda 2 de 3')
+    expect(html).toContain('✓ Ronda 1 de 3')
+    expect(html).toContain('value="27,5"')
+    expect(html).toContain('value="37,5"')
   })
 })
