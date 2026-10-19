@@ -512,8 +512,8 @@ function applyReversePyramidFloors(
   const setReps = input.setReps!
   const topReps = Math.min(...setReps)
   const topIndex = setReps.indexOf(topReps)
-  if (last.technique === 'reverse-pyramid' &&
-    new Set(lastSets.map((set) => set.weight)).size > 1) return recommendation
+  const latestIsReversePyramid = last.technique === 'reverse-pyramid' &&
+    new Set(lastSets.map((set) => set.weight)).size > 1
 
   const recent = progressing.filter((session) => {
     const days = daysBetween(session.date, input.today)
@@ -521,7 +521,7 @@ function applyReversePyramidFloors(
   })
 
   const workingReps = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps)
-  if (lastWeight > 0 && workingReps.length) {
+  if (!latestIsReversePyramid && lastWeight > 0 && workingReps.length) {
     const seriesReps = Math.min(median(workingReps), 12)
     const e1rm = lastWeight * (1 + seriesReps / 30)
     const crossTop = roundToStep(e1rm / (1 + (topReps + 1) / 30), step, 'down')
@@ -532,7 +532,7 @@ function applyReversePyramidFloors(
     session.technique === input.technique &&
     new Set(progressionSets(session.sets, setReps.length).map((set) => set.weight)).size > 1)
   const latestSets = progressionSets(last.sets, input.sets)
-  let topCap = lastWeight > 0 && last.technique !== 'reverse-pyramid'
+  let topCap = !latestIsReversePyramid && lastWeight > 0 && last.technique !== 'reverse-pyramid'
     ? setCap(lastWeight, step)
     : Number.POSITIVE_INFINITY
   if (!sameTechniquePyramids.length && latestSets.length > 0 &&
