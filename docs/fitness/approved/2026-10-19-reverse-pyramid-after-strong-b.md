@@ -1,12 +1,17 @@
 ---
 title: Reverse pyramid after a strong B day - cross-day top set and back-off floors (amendment R25)
-status: draft
+status: approved
 author: pt-fitness-expert
 created: 2026-10-19
-approved_by:
-approved_on:
+approved_by: Sebas (PO) — "implementa lo que discutimos ayer" (PT recommendations)
+approved_on: 2026-10-20
 exercises: [plate-loaded-t-bar-row-chest-supported]
 ---
+
+
+> **PO decision 2026-10-20:** R25 approved; back-off shape cap = at most top − 1 step; block note for this
+> reverse pyramid becomes "Heaviest set first, then lighter for more reps." (ES: "La serie más pesada primero,
+> luego más ligero con más reps."). Tech Lead replays the real history before release (AI Trainer checklist).
 
 ## Summary
 Mon 19 Oct, block 6 (`block-2026-10-05-hypertrophy-flat-pyramid-ii`), Chest & Back A, B1
