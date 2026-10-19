@@ -512,6 +512,9 @@ function applyReversePyramidFloors(
   const setReps = input.setReps!
   const topReps = Math.min(...setReps)
   const topIndex = setReps.indexOf(topReps)
+  if (last.technique === 'reverse-pyramid' &&
+    new Set(lastSets.map((set) => set.weight)).size > 1) return recommendation
+
   const recent = progressing.filter((session) => {
     const days = daysBetween(session.date, input.today)
     return days >= 0 && days <= 28

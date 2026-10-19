@@ -104,7 +104,7 @@ describe('R25 reverse-pyramid cross-day evidence', () => {
       {
         date: '2026-10-12',
         target: rng(8, 12),
-        technique: 'reverse-pyramid',
+        technique: 'straight',
         setReps: [8, 10, 12],
         sets: [
           { weight: 37.5, reps: 10 },
