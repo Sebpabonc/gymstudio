@@ -2,6 +2,7 @@
 // docs/fitness/approved/2026-10-07-progression-engine-spec.md (R1–R11, T1–T29) and its v2 amendment
 // docs/fitness/approved/2026-10-07-progression-engine-spec-v2.md (R12–R19, T30–T52c) and
 // docs/fitness/approved/2026-10-13-engine-same-day-evidence.md (R20–R24, T53–T63).
+// docs/fitness/approved/2026-10-19-reverse-pyramid-after-strong-b.md (R25, T64–T72).
 // The PT owns these rules; change them only through an approved PT spec with test cases.
 // Pure functions: the LLM never chooses numbers — it only explains the structured recommendation returned here.
 
@@ -379,6 +380,10 @@ function applyApprovedFloors(
     : [recommendation.weight]
   let reason = recommendation.reason
 
+  if (input.technique === 'reverse-pyramid' && pyramid) {
+    return applyReversePyramidFloors(input, progressing, last, lastSets, lastWeight, step, recommendation, weights)
+  }
+
   // R21: convert from the median of all working-load sets, not a best set or a mean.
   if (floorsApply && repRangeChanged && !missDrop && lastWeight > 0) {
     const workingReps = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps)
@@ -492,6 +497,138 @@ function applyApprovedFloors(
   return { ...recommendation, weight, setWeights: weights, action, reason }
 }
 
+function applyReversePyramidFloors(
+  input: RecommendInput,
+  progressing: SessionEvidence[],
+  last: SessionEvidence,
+  lastSets: LoggedSet[],
+  lastWeight: number,
+  step: number,
+  recommendation: Recommendation,
+  weights: number[]
+): Recommendation {
+  if (recommendation.reason === 'below_target_twice') return recommendation
+
+  const setReps = input.setReps!
+  const topReps = Math.min(...setReps)
+  const topIndex = setReps.indexOf(topReps)
+  const recent = progressing.filter((session) => {
+    const days = daysBetween(session.date, input.today)
+    return days >= 0 && days <= 28
+  })
+
+  const workingReps = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps)
+  if (lastWeight > 0 && workingReps.length) {
+    const seriesReps = Math.min(median(workingReps), 12)
+    const e1rm = lastWeight * (1 + seriesReps / 30)
+    const crossTop = roundToStep(e1rm / (1 + (topReps + 1) / 30), step, 'down')
+    weights[topIndex] = Math.max(weights[topIndex], crossTop)
+  }
+
+  const sameTechniquePyramids = progressing.filter((session) =>
+    session.technique === input.technique &&
+    new Set(progressionSets(session.sets, setReps.length).map((set) => set.weight)).size > 1)
+  const latestSets = progressionSets(last.sets, input.sets)
+  let topCap = lastWeight > 0 && last.technique !== 'reverse-pyramid'
+    ? setCap(lastWeight, step)
+    : Number.POSITIVE_INFINITY
+  if (!sameTechniquePyramids.length && latestSets.length > 0 &&
+    new Set(latestSets.map((set) => set.weight)).size === 1) {
+    const latestRange = last.target ?? input.target
+    const previousSets = progressionSets(progressing[1]?.sets ?? [], setReps.length)
+    const previousRange = progressing[1]?.target ?? { min: topReps, max: topReps }
+    const latestReachedTop = latestSets.every((set) => set.reps >= latestRange.max)
+    const previousReachedTop = previousSets.length > 0 &&
+      new Set(previousSets.map((set) => set.weight)).size === 1 &&
+      previousSets[0].weight === lastWeight &&
+      previousSets.every((set) => set.reps >= previousRange.max)
+    const tooEasy = latestSets.every((set) => set.reps >= latestRange.max) &&
+      latestSets.filter((set) => set.reps >= latestRange.max + 3).length >= Math.ceil(latestSets.length / 2)
+    const earnedByCrossDay = latestSets.every((set) => set.reps >= latestRange.max + 2)
+    if (!((latestReachedTop && previousReachedTop) || tooEasy || earnedByCrossDay)) {
+      topCap = Math.min(topCap, lastWeight)
+    }
+  }
+  weights[topIndex] = Math.min(weights[topIndex], topCap)
+
+  const top = weights[topIndex]
+  const backOffFormat = new Set(setReps.filter((_, index) => index !== topIndex)).size === 1
+  const lastPyramidSets = sameTechniquePyramids[0]
+    ? progressionSets(sameTechniquePyramids[0].sets, setReps.length)
+    : []
+  setReps.forEach((reps, index) => {
+    if (index === topIndex) return
+    let load = backOffFormat
+      ? roundToStep(top * 0.9, step, 'down')
+      : roundToStep((top * (1 + (topReps + 1) / 30)) / (1 + (reps + 2) / 30), step, 'nearest')
+    const priorLoad = lastPyramidSets[index]?.weight
+    if (!backOffFormat && priorLoad !== undefined && priorLoad > 0) {
+      load = Math.min(load, setCap(priorLoad, step))
+    }
+    weights[index] = load
+  })
+
+  const topProof = recent.reduce((highest, session) => {
+    const achieved = progressionSets(session.sets, input.sets)
+      .filter((set) => set.reps >= topReps)
+      .reduce((weight, set) => Math.max(weight, set.weight), 0)
+    return Math.max(highest, achieved)
+  }, 0)
+  if (topProof > weights[topIndex]) weights[topIndex] = topProof
+
+  let achieved = false
+  setReps.forEach((targetReps, index) => {
+    if (index === topIndex) return
+    const floor = recent.reduce((highest, session) => {
+      const sessionSets = progressionSets(session.sets, input.sets)
+      const straight = session.technique === 'straight' ||
+        (!session.technique && new Set(sessionSets.map((set) => set.weight)).size === 1)
+      const wholeStraightSessionReachedTarget = straight &&
+        sessionSets.length >= input.sets &&
+        sessionSets.every((set) => set.reps >= targetReps)
+      return Math.max(highest, ...sessionSets
+        .filter((set, setIndex) => set.reps >= targetReps && (setIndex > 0 || wholeStraightSessionReachedTarget))
+        .map((set) => set.weight))
+    }, 0)
+    if (floor > weights[index]) {
+      weights[index] = floor
+      achieved = true
+    }
+  })
+  if (achieved) recommendation = { ...recommendation, reason: 'achieved_floor' }
+
+  const sameDay = input.dayKey
+    ? progressing.find((session) =>
+      session.dayKey === input.dayKey &&
+      (input.blockId === undefined || session.blockId === input.blockId) &&
+      session.date < input.today)
+    : undefined
+  if (sameDay) {
+    const sameDaySets = progressionSets(sameDay.sets, input.sets)
+    let boosted = false
+    setReps.forEach((target, index) => {
+      const performed = sameDaySets[index]
+      const cap = latestSets[index]?.weight ?? lastWeight
+      if (performed && performed.reps >= target + 2) {
+        const boost = Math.min(performed.weight + step, cap)
+        if (boost > weights[index]) {
+          weights[index] = boost
+          boosted = true
+        }
+      }
+    })
+    if (boosted) recommendation = { ...recommendation, reason: 'same_day_boost' }
+  }
+
+  const finalTop = weights[topIndex]
+  setReps.forEach((_, index) => {
+    if (index !== topIndex) weights[index] = Math.min(weights[index], finalTop - step)
+  })
+  monotonic(weights, setReps)
+  const action = finalTop > lastWeight ? 'increase_weight' : finalTop < lastWeight ? 'decrease_weight' : 'maintain'
+  return { ...recommendation, weight: finalTop, setWeights: weights, action }
+}
+
 function recommendPyramid(
   input: RecommendInput,
   progressing: SessionEvidence[],
@@ -586,7 +723,9 @@ function recommendPyramid(
       const tooEasy = lastSession.every((set) => set.reps >= lastRange.max) &&
         lastSession.filter((set) => set.reps >= lastRange.max + 3).length >= Math.ceil(lastSession.length / 2)
       const singleLoad = !!single(progressing[0])
-      const earned = (reachedTop(progressing[0]) && reachedTop(progressing[1])) || tooEasy
+      const earnedByCrossDay = input.technique === 'reverse-pyramid' &&
+        lastSession.every((set) => set.reps >= lastRange.max + 2)
+      const earned = (reachedTop(progressing[0]) && reachedTop(progressing[1])) || tooEasy || earnedByCrossDay
       const cap = singleLoad && !earned ? lastLoad : setCap(lastLoad, step)
       setWeights.forEach((weight, index) => { setWeights[index] = Math.min(weight, cap) })
       top = setWeights[topIndex]
