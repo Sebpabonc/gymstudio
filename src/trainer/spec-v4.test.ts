@@ -51,6 +51,17 @@ describe('R25 reverse-pyramid cross-day evidence', () => {
     expect(result.setWeights).toEqual([37.5, 35, 35])
   })
 
+  it('keeps the 28-day top-set proof floor within the R12b cap', () => {
+    const result = recommend({
+      ...reversePyramid,
+      history: [
+        session('2026-10-15', 35, [10, 10, 10], { target: rng(10), technique: 'straight' }),
+        session('2026-10-12', 40, [8], { target: rng(8), technique: 'straight' }),
+      ],
+    })
+    expect(result.setWeights?.[0]).toBe(35)
+  })
+
   it('T67 preserves the approved reverse-pyramid result for a tagged RP session', () => {
     const result = recommend({
       ...reversePyramid,

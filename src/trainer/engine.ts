@@ -577,7 +577,8 @@ function applyReversePyramidFloors(
       .reduce((weight, set) => Math.max(weight, set.weight), 0)
     return Math.max(highest, achieved)
   }, 0)
-  if (topProof > weights[topIndex]) weights[topIndex] = topProof
+  const cappedTopProof = latestIsReversePyramid ? topProof : Math.min(topProof, topCap)
+  if (cappedTopProof > weights[topIndex]) weights[topIndex] = cappedTopProof
 
   let achieved = false
   setReps.forEach((targetReps, index) => {
