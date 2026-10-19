@@ -1,1 +1,0 @@
-import{ad as p,ae as r}from"./index-609a7d15.js";const o=p("App",{web:()=>r(()=>import("./web-115cc91c.js"),["./web-115cc91c.js","./index-609a7d15.js","./index-f82abfca.css"],import.meta.url).then(e=>new e.AppWeb)});export{o as App};
