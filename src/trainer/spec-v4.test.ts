@@ -62,6 +62,27 @@ describe('R25 reverse-pyramid cross-day evidence', () => {
     expect(result.setWeights?.[0]).toBe(35)
   })
 
+  it('recalculates back-offs when the recent top-set proof raises the top', () => {
+    const result = recommend({
+      ...reversePyramid,
+      history: [
+        {
+          date: '2026-10-15',
+          target: rng(8, 12),
+          technique: 'reverse-pyramid',
+          setReps: [8, 10, 12],
+          sets: [
+            { weight: 35, reps: 7 },
+            { weight: 32.5, reps: 10 },
+            { weight: 30, reps: 12 },
+          ],
+        },
+        session('2026-10-12', 37.5, [8], { target: rng(8), technique: 'straight' }),
+      ],
+    })
+    expect(result.setWeights).toEqual([37.5, 35, 32.5])
+  })
+
   it('T67 preserves the approved reverse-pyramid result for a tagged RP session', () => {
     const result = recommend({
       ...reversePyramid,

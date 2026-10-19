@@ -554,6 +554,15 @@ function applyReversePyramidFloors(
   }
   weights[topIndex] = Math.min(weights[topIndex], topCap)
 
+  const topProof = recent.reduce((highest, session) => {
+    const achieved = progressionSets(session.sets, input.sets)
+      .filter((set) => set.reps >= topReps)
+      .reduce((weight, set) => Math.max(weight, set.weight), 0)
+    return Math.max(highest, achieved)
+  }, 0)
+  const cappedTopProof = latestIsReversePyramid ? topProof : Math.min(topProof, topCap)
+  if (cappedTopProof > weights[topIndex]) weights[topIndex] = cappedTopProof
+
   const top = weights[topIndex]
   const backOffFormat = new Set(setReps.filter((_, index) => index !== topIndex)).size === 1
   const lastPyramidSets = sameTechniquePyramids[0]
@@ -570,15 +579,6 @@ function applyReversePyramidFloors(
     }
     weights[index] = load
   })
-
-  const topProof = recent.reduce((highest, session) => {
-    const achieved = progressionSets(session.sets, input.sets)
-      .filter((set) => set.reps >= topReps)
-      .reduce((weight, set) => Math.max(weight, set.weight), 0)
-    return Math.max(highest, achieved)
-  }, 0)
-  const cappedTopProof = latestIsReversePyramid ? topProof : Math.min(topProof, topCap)
-  if (cappedTopProof > weights[topIndex]) weights[topIndex] = cappedTopProof
 
   let achieved = false
   setReps.forEach((targetReps, index) => {
