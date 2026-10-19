@@ -136,6 +136,24 @@ describe('R25 reverse-pyramid cross-day evidence', () => {
     expect(result.setWeights).toEqual([42.5, 40, 40])
   })
 
+  it('compares a direct R1.1 action with the previous top set, not back-off loads', () => {
+    const result = recommend({
+      ...reversePyramid,
+      history: [{
+        date: '2026-10-15',
+        target: rng(8, 12),
+        technique: 'reverse-pyramid',
+        setReps: [8, 10, 12],
+        sets: [
+          { weight: 40, reps: 7 },
+          { weight: 37.5, reps: 10 },
+          { weight: 35, reps: 12 },
+        ],
+      }],
+    })
+    expect(result).toMatchObject({ weight: 40, action: 'maintain' })
+  })
+
   it('T72 shows the R25 recommendation in the next-workout preview', () => {
     const exerciseId = 'plate-loaded-t-bar-row-chest-supported'
     const plan = (day: string, position: number, technique: 'straight' | 'reverse-pyramid', reps: string[]) => ({

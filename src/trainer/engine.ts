@@ -628,7 +628,12 @@ function applyReversePyramidFloors(
     if (index !== topIndex) weights[index] = Math.min(weights[index], finalTop - step)
   })
   monotonic(weights, setReps)
-  const action = finalTop > lastWeight ? 'increase_weight' : finalTop < lastWeight ? 'decrease_weight' : 'maintain'
+  const previousTop = lastSets[topIndex]?.weight ?? lastWeight
+  const action = latestIsReversePyramid
+    ? finalTop === recommendation.weight
+      ? recommendation.action
+      : finalTop > previousTop ? 'increase_weight' : finalTop < previousTop ? 'decrease_weight' : 'maintain'
+    : finalTop > lastWeight ? 'increase_weight' : finalTop < lastWeight ? 'decrease_weight' : 'maintain'
   return { ...recommendation, weight: finalTop, setWeights: weights, action }
 }
 
