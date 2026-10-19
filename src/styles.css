@@ -5017,6 +5017,7 @@ button[class] {
   color: var(--muted);
   font-size: 0.72rem;
   line-height: 1.4;
+  white-space: pre-line;
 }
 
 .trainer-rir-prompt {
@@ -9405,6 +9406,10 @@ button.superset-last-time {
   margin: 0;
   color: var(--muted-strong);
   line-height: 1.45;
+}
+
+.cue-sheet-section p {
+  white-space: pre-line;
 }
 
 .cue-sheet-section ul {

@@ -49,6 +49,7 @@ export function buildEvidence(
       const block = findEntryBlock(blocks, entry)
       const planned = block ? plannedExerciseForEntry(block, entry) : undefined
       const week = block ? blockWeek(block, entry.date) ?? 1 : 1
+      const dayName = entry.dayKey ? block?.days.find((day) => day.key === entry.dayKey)?.name : undefined
       // First number of each planned set ("12+12" drop-set → 12), for pyramids and targets.
       const setReps = planned ? planned.reps.map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0) : []
       if (!target && planned) {
@@ -60,6 +61,7 @@ export function buildEvidence(
       return {
         date: entry.date.slice(0, 10),
         ...(entry.dayKey ? { dayKey: entry.dayKey } : {}),
+        ...(dayName ? { dayName } : {}),
         ...(entry.blockId ? { blockId: entry.blockId } : {}),
         // Keep the PT spec inputs: set tags (R3/R10), reps in reserve (R1) and the nested drop (R3).
         sets: entry.sets.map(({ weight, reps, tag, rir, drop }) => ({

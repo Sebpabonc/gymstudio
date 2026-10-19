@@ -38,10 +38,17 @@ for (const day of block.days) {
       equipment: equipment.get(ex.exerciseId), technique: ex.technique, setReps, deload: week === 6, exerciseId: ex.exerciseId,
     })
     const last = evidence[0] ? evidence[0].sets.map((s) => `${s.weight}×${s.reps}`).join(' ') : '—'
+    const sameDay = rec.evidence.sameDayDate
+      ? `${rec.evidence.sameDayDate} ${rec.evidence.sameDayWeight}×${rec.evidence.sameDayReps?.join('·') ?? '—'} (target ${
+        rec.evidence.sameDayTarget
+          ? `${rec.evidence.sameDayTarget.min}-${rec.evidence.sameDayTarget.max}`
+          : 'unknown'
+      })`
+      : '—'
     const loads = rec.setWeights ? rec.setWeights.join('/') : String(rec.weight ?? '—')
     if (evidence.length && (rec.weight === 0 || rec.setWeights?.some((w) => w <= 0))) problems.push(`${day.key} ${ex.code} 0 kg`)
     if (evidence.some((e) => e.date >= new Date(Date.parse(today) - 42 * 864e5).toISOString().slice(0, 10)) && rec.reason === 'no_history') problems.push(`${day.key} ${ex.code} says no data`)
-    console.log(`  ${ex.code.padEnd(3)} ${ex.exerciseId.padEnd(42)} last ${last.padEnd(28)} → ${loads} kg × ${rec.reps.min}-${rec.reps.max} (${rec.action}, ${rec.reason}, ${rec.confidence})`)
+    console.log(`  ${ex.code.padEnd(3)} ${ex.exerciseId.padEnd(42)} last ${last.padEnd(28)} same day ${sameDay.padEnd(52)} → ${loads} kg × ${rec.reps.min}-${rec.reps.max} (${rec.action}, ${rec.reason}, ${rec.confidence})`)
   }
 }
 console.log(problems.length ? `\nPROBLEMS:\n- ${problems.join('\n- ')}` : '\nNo invariant problems.')
