@@ -149,7 +149,7 @@ describe('PT-approved trainer watch items R26–R30', () => {
         }),
         session('2026-10-12', flat(32, [6, 6, 6]), { dayKey: 'day-a', target: rng(8) }),
       ],
-    })).toMatchObject({ weight: 32, action: 'maintain', reason: 'below_target_once' })
+    })).toMatchObject({ weight: 32, action: 'maintain', reason: 'slightly_below_target' })
   })
 
   it('T85 does not consolidate a straight session after a real pyramid', () => {
@@ -255,5 +255,83 @@ describe('PT-approved trainer watch items R26–R30', () => {
         }),
       ],
     })).toMatchObject({ weight: 82.5, action: 'increase_weight' })
+  })
+
+  it('T94 preserves original_too_easy when the recommendation rises above the same-day load', () => {
+    expect(recommend({
+      ...base, dayKey: 'day-a', target: rng(10, 12), equipment: 'dumbbell', step: 2,
+      exerciseId: 'dumbbell-curl-incline',
+      history: [
+        session('2026-10-15', flat(12, [10, 9, 8]), { dayKey: 'day-a', target: rng(10, 12) }),
+        session('2026-10-19', flat(12, [15, 15, 14]), { dayKey: 'day-b', target: rng(15) }),
+      ],
+    })).toMatchObject({ weight: 14, reps: rng(10, 12), action: 'increase_weight', reason: 'original_too_easy' })
+  })
+
+  it('T95 only relabels the same-day miss when that session has today’s target', () => {
+    const result = recommend({
+      ...base, dayKey: 'day-a', target: rng(13, 15), equipment: 'dumbbell', step: 2,
+      exerciseId: 'standing-db-lateral-raises',
+      history: [
+        session('2026-10-15', flat(12, [11, 11, 10]), { dayKey: 'day-a', target: rng(13, 15) }),
+        session('2026-10-19', flat(10, [20, 20, 20]), { dayKey: 'day-b', target: rng(20) }),
+      ],
+    })
+    expect(result).toMatchObject({ weight: 12, reps: rng(13, 15), action: 'maintain', reason: 'below_target_once' })
+  })
+
+  it('T96 keeps the reps-first label for reverse pec-deck B without a same-day B session', () => {
+    expect(recommend({
+      ...base, dayKey: 'day-b', target: rng(20), equipment: 'machine', step: 2.5,
+      exerciseId: 'reverse-pec-deck-fly', technique: 'drop-set', sets: 3,
+      history: [session('2026-10-19', flat(6.25, [15, 15, 15, 15]), { dayKey: 'day-a', target: rng(12) })],
+    })).toMatchObject({ weight: 6.25, reps: rng(20), action: 'increase_reps', reason: 'light_load_add_reps' })
+  })
+
+  it('T97 reports the same-day load rise as a converted range', () => {
+    const result = recommend({
+      ...base, dayKey: 'day-b', target: rng(15), equipment: 'cable', step: 2.5,
+      exerciseId: 'high-cable-fly',
+      history: [
+        session('2026-10-19', flat(17.5, [12, 12, 12]), { dayKey: 'day-a', target: rng(12) }),
+        session('2026-10-15', flat(15, [15, 15, 15]), { dayKey: 'day-b', target: rng(15) }),
+      ],
+    })
+    expect(result).toMatchObject({ weight: 17.5, reps: rng(15), action: 'increase_weight', reason: 'converted_rep_range' })
+    expect(trainerReason(createTranslator('en'), 'en', result, rng(15))).toContain('up 2.5 kg')
+  })
+
+  it('T98 does not infer a matching target when the same-day target was not recorded', () => {
+    const result = recommend({
+      ...base, dayKey: 'day-a', target: rng(13, 15), equipment: 'dumbbell', step: 2,
+      exerciseId: 'standing-db-lateral-raises',
+      history: [
+        session('2026-10-15', flat(12, [11, 11, 10]), { dayKey: 'day-a' }),
+        session('2026-10-19', flat(10, [20, 20, 20]), { dayKey: 'day-b', target: rng(20) }),
+      ],
+    })
+    expect(result.evidence.sameDayTarget).toBeUndefined()
+    expect(result.reason).toBe('original_too_easy')
+    expect(result.action).not.toBe('increase_weight')
+  })
+
+  it('T99b maintains the converted leg-extension load when there is no same-day reference', () => {
+    const withoutSameDay = recommend({
+      ...base, dayKey: 'day-c', target: rng(15), equipment: 'machine', step: 2.5, sets: 4,
+      exerciseId: 'leg-extensions-toes-dorsiflexed-neutral',
+      history: [session('2026-10-19', flat(32.5, [12, 12, 12, 12]), { dayKey: 'day-a', target: rng(12) })],
+    })
+    expect(withoutSameDay).toMatchObject({ weight: 30, action: 'maintain', reason: 'converted_rep_range' })
+  })
+
+  it('T100 compares the seated leg-curl increase with its same-day working load', () => {
+    expect(recommend({
+      ...base, dayKey: 'day-b', target: rng(15), equipment: 'machine', step: 2.5, sets: 4,
+      exerciseId: 'seated-leg-curl-toes-dorsiflexed-neutral',
+      history: [
+        session('2026-10-19', flat(30, [12, 12, 12, 12]), { dayKey: 'day-a', target: rng(12) }),
+        session('2026-10-15', flat(25, [15, 15, 15, 15]), { dayKey: 'day-b', target: rng(15) }),
+      ],
+    })).toMatchObject({ weight: 27.5, action: 'increase_weight', reason: 'converted_rep_range' })
   })
 })

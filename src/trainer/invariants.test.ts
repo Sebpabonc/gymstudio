@@ -59,6 +59,14 @@ function histories(load: number, setReps: number[], target: { min: number; max: 
 
 const multipleOf = (value: number, step: number) => Math.abs(value / step - Math.round(value / step)) < 1e-6
 
+function workingLoad(sets: LoggedSet[]) {
+  const counts = new Map<number, number>()
+  for (const set of sets) {
+    if (set.weight > 0) counts.set(set.weight, (counts.get(set.weight) ?? 0) + 1)
+  }
+  return [...counts].sort((a, b) => b[1] - a[1] || b[0] - a[0])[0]?.[0] ?? 0
+}
+
 describe('E9: trainer invariants with every historical RIR omitted across blocks 6–9', () => {
   let checked = 0
   for (const { block, day, row } of slots) {
@@ -81,6 +89,16 @@ describe('E9: trainer invariants with every historical RIR omitted across blocks
             const step = equipmentStep(equipment)
             const loads = result.setWeights ?? (result.weight === null ? [] : [result.weight])
             const lastMax = Math.max(0, ...history.flatMap((session) => session.sets.map((set) => set.weight)))
+            const latestSameDay = day
+              ? history.filter((session) => session.dayKey === day && session.date < TODAY &&
+                !session.deload &&
+                (Date.parse(`${TODAY}T00:00:00Z`) - Date.parse(`${session.date}T00:00:00Z`)) / 86_400_000 <= 28)
+                .sort((a, b) => b.date.localeCompare(a.date))[0]
+              : undefined
+            const reference = latestSameDay ?? [...history].sort((a, b) => b.date.localeCompare(a.date))[0]
+            const referenceSets = reference?.sets.filter((set) => !set.tag || set.tag === 'main').slice(0, row.sets)
+            const comparisonLoad = referenceSets ? workingLoad(referenceSets) : 0
+            const finalLoad = result.weight ?? Math.max(...(result.setWeights ?? [0]))
             for (const weight of loads) {
               // Never 0 kg (or negative) for an exercise that was done with load.
               if (lastMax > 0) expect(weight, `0 kg ${context}`).toBeGreaterThan(0)
@@ -98,6 +116,16 @@ describe('E9: trainer invariants with every historical RIR omitted across blocks
             // Never "no history" when there is history in the last 6 weeks.
             const recent = history.some((session) => session.date >= daysAgo(42))
             if (recent && !deload) expect(result.reason === 'no_history' && result.action === 'collect_data' && history.length > 1, context).toBe(false)
+            if (comparisonLoad > 0 && result.action === 'increase_weight') {
+              expect(finalLoad, `increase without a load increase ${context}`).toBeGreaterThan(comparisonLoad)
+            }
+            if (comparisonLoad > 0 && result.action === 'decrease_weight') {
+              expect(finalLoad, `decrease without a load decrease ${context}`).toBeLessThan(comparisonLoad)
+            }
+            if (result.action === 'increase_weight') {
+              expect(['slightly_below_target', 'below_target_once', 'light_load_add_reps', 'within_range'])
+                .not.toContain(result.reason)
+            }
           }
         }
       }

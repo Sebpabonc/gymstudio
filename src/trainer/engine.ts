@@ -696,37 +696,46 @@ function applyLikeForLikeAction(
 ): Recommendation {
   if (recommendation.weight === null) return recommendation
   const lastTarget = last.target ?? input.target
-  if (sameRange(lastTarget, input.target)) return recommendation
-  if (['below_target_twice', 'deload_week', 'long_break'].includes(recommendation.reason)) {
-    return recommendation
-  }
-  if (
-    recommendation.reason === 'converted_rep_range' &&
-    recommendation.action === 'maintain' &&
-    recommendation.weight < topWorkingWeight(last, input.sets)
-  ) return recommendation
   const sameDayWeight = recommendation.evidence.sameDayWeight
-  if (sameDayWeight === undefined) {
-    if (recommendation.reason === 'recent_miss_cap') return { ...recommendation, action: 'maintain' }
-    if (recommendation.reason === 'converted_rep_range' && recommendation.weight < topWorkingWeight(last, input.sets)) {
-      return { ...recommendation, action: 'maintain' }
-    }
-    return recommendation
-  }
   const finalWeight = recommendation.setWeights?.[input.setReps?.indexOf(Math.min(...input.setReps)) ?? -1] ??
     recommendation.weight
-  const action = finalWeight > sameDayWeight
-    ? 'increase_weight'
-    : finalWeight < sameDayWeight
-      ? 'decrease_weight'
-      : recommendation.action === 'increase_weight' || recommendation.action === 'decrease_weight'
+  const comparisonWeight = sameDayWeight ?? topWorkingWeight(last, input.sets)
+  const changedTarget = !sameRange(lastTarget, input.target)
+  const protectedReason = ['below_target_twice', 'deload_week', 'long_break', 'recent_miss_cap']
+    .includes(recommendation.reason)
+  let action = recommendation.action
+  if (changedTarget && !protectedReason) {
+    if (finalWeight > comparisonWeight) action = 'increase_weight'
+    else if (finalWeight < comparisonWeight) {
+      action = sameDayWeight === undefined && recommendation.reason === 'converted_rep_range'
         ? 'maintain'
-        : recommendation.action
+        : 'decrease_weight'
+    } else if (action === 'increase_weight' || action === 'decrease_weight') {
+      action = 'maintain'
+    }
+  }
+  if (action === 'increase_weight' && finalWeight <= comparisonWeight) action = 'maintain'
+  if (action === 'decrease_weight' && finalWeight >= comparisonWeight) action = 'maintain'
+
   const sameDayReps = recommendation.evidence.sameDayReps ?? []
-  const sameDayTarget = recommendation.evidence.sameDayTarget ?? input.target
-  const reason = sameRange(sameDayTarget, input.target) && sameDayReps.some((reps) => reps < input.target.min)
-    ? belowTargetReason(sameDayReps, input.target)
-    : recommendation.reason
+  const sameDayTarget = recommendation.evidence.sameDayTarget
+  let reason = recommendation.reason
+  if (
+    sameDayWeight !== undefined &&
+    finalWeight === sameDayWeight &&
+    sameDayTarget !== undefined &&
+    sameRange(sameDayTarget, input.target) &&
+    !['recent_miss_cap', 'same_day_boost', 'below_target_twice', 'reached_top_of_range'].includes(reason) &&
+    sameDayReps.some((reps) => reps < input.target.min)
+  ) {
+    reason = belowTargetReason(sameDayReps, input.target)
+  }
+  if (
+    (action === 'increase_weight' || action === 'decrease_weight') &&
+    ['light_load_add_reps', 'within_range', 'slightly_below_target', 'below_target_once'].includes(reason)
+  ) {
+    reason = 'converted_rep_range'
+  }
   return {
     ...recommendation,
     action,
