@@ -19,6 +19,7 @@ React app ── src/lib/supabaseClient.ts (lazy, anon key only)
    ├── src/auth/AuthProvider.tsx   session state (supabase.auth), signIn/signUp/signOut/Google
    ├── src/screens/LoginScreen.tsx, ProfileScreen.tsx
    └── src/utils/sync.ts           push/pull workout history  ⇄  public.workout_entries (RLS)
+                                   push/pull owned exercises   ⇄  public.user_exercises (RLS)
             ▲
    src/utils/storage.ts (localStorage stays the source the UI reads; sync runs behind it)
 ```
@@ -55,6 +56,15 @@ React app ── src/lib/supabaseClient.ts (lazy, anon key only)
      up to 5 minutes). A 401/expired JWT refreshes the session once and retries the request;
      an unsuccessful refresh asks the user to sign in again. Profile shows pending logs,
      reasons, and **Retry now**; a pending-count badge sits beside the sync dot.
+- **User-created exercises:** definitions are saved through `src/utils/storage.ts` and sync to
+  `public.user_exercises` (migration 033), scoped to the signed-in user. A new definition gets
+  one `custom-<uuid>` id at creation; existing name-based ids are retained and uploaded with
+  that same id on first sync. Sync pushes definitions in batches of 25 before dependent
+  workout entries, then pulls definitions by their own `updated_at` cursor. Definition rows
+  rejected by constraints are quarantined in local sync metadata; linked entries stay dirty
+  and are skipped until their definition is synced. Entry uploads use `user_exercise_id` and
+  set `exercise_id` to null; pulls map the user exercise id back to the app's `exerciseId`.
+  The app does not provide deletion or editing of exercise definitions yet.
 - **Google OAuth:** needs a Google Cloud OAuth client (owner's Google account). Client ID and
   secret are entered by the owner in the Supabase dashboard; the secret is never committed.
   On iOS (Capacitor) OAuth redirects need a custom URL scheme — tracked separately.

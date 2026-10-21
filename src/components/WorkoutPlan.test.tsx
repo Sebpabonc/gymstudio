@@ -232,6 +232,37 @@ describe('WorkoutPlan', () => {
     expect(html).toMatch(/class="custom-plan-exercise-edit"[\s\S]*?Bench press[\s\S]*?4[\s\S]*?×[\s\S]*?8-10/)
   })
 
+  it('does not show trainer load suggestions for user exercises in a custom day', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => key === 'gym-studio.custom-plan'
+        ? JSON.stringify({
+            version: 2,
+            days: [{
+              id: 'day-a',
+              name: 'Day A',
+              exercises: [{
+                id: 'plan-exercise',
+                exerciseId: 'custom-user-exercise',
+                name: 'My exercise',
+                muscle: 'Chest',
+                sets: '3',
+                reps: '8-12',
+                restSeconds: 120,
+              }],
+            }],
+          })
+        : null,
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    })
+
+    const html = renderToString(
+      <WorkoutPlan mode="custom" lockMode onSignIn={() => undefined} onStartRest={() => undefined} />
+    )
+    expect(html).toContain('My exercise')
+    expect(html).not.toContain('trainer-recommendation-card')
+  })
+
   it('keeps workout rest controls without restoring removed custom-plan tips', () => {
     vi.stubGlobal('localStorage', {
       getItem: (key: string) =>

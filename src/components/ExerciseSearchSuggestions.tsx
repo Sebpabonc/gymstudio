@@ -27,11 +27,13 @@ export default function ExerciseSearchSuggestions({
   selectedExerciseId,
   query,
   onSelect,
+  onCreate,
 }: {
   exercises: Exercise[]
   selectedExerciseId?: string
   query?: string
   onSelect: (exerciseId: string) => void
+  onCreate?: (name: string) => void
 }) {
   const { t, language } = useT()
   return (
@@ -49,11 +51,19 @@ export default function ExerciseSearchSuggestions({
               <span className="result-name">{getExerciseDisplayName(exercise, language)}</span>
               <span className="result-meta">{getExerciseResultSubtitle(exercise, language)}</span>
             </span>
+            {exercise.isUserCreated && <span className="user-exercise-tag">{t('exercises.yours')}</span>}
             <span className="result-chevron" aria-hidden="true">›</span>
           </button>
         ))
       ) : (
-        <p className="empty-state">{query?.trim() ? t('exercises.noMatch', { q: query.trim() }) : t('exercises.noResults')}</p>
+        <>
+          <p className="empty-state">{query?.trim() ? t('exercises.noMatch', { q: query.trim() }) : t('exercises.noResults')}</p>
+          {query?.trim() && onCreate && (
+            <button type="button" className="exercise-create-link" onClick={() => onCreate(query.trim())}>
+              <span aria-hidden="true">⊕</span> {t('exercises.createMatch', { q: query.trim() })}
+            </button>
+          )}
+        </>
       )}
     </div>
   )

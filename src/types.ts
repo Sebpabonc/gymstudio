@@ -7,6 +7,10 @@ export type ExerciseTip = {
 export type Exercise = {
   id: string
   name: string
+  isUserCreated?: boolean
+  createdAt?: string
+  updatedAt?: string
+  deletedAt?: string
   nameEs?: string
   primaryMuscle: string
   mechanic?: 'compound' | 'isolation'
