@@ -407,6 +407,30 @@ describe('WorkoutPlan', () => {
     expect(html).not.toContain('Posture tips')
   })
 
+  it('T134: shows exercise rest in minutes outside Workout mode despite a different Profile rest', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => {
+        if (key === 'gym-studio.rest-between-sets') return '120'
+        if (key === 'gym-studio.custom-plan') return JSON.stringify({
+          version: 2,
+          days: [{
+            id: 'day-a',
+            name: 'Day A',
+            exercises: [{ id: 'press', name: 'Test press', sets: '3', reps: '8', restSeconds: 150 }],
+          }],
+        })
+        return null
+      },
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    })
+    const html = renderToString(
+      <WorkoutPlan mode="custom" lockMode onSignIn={() => undefined} onStartRest={() => undefined} />
+    )
+    expect(html).toMatch(/class="planned-meta-line"[^>]*>[^<]*2:30 rest/)
+    expect(html).not.toMatch(/class="planned-meta-line"[^>]*>[^<]*150 s/)
+  })
+
   it('lists three alternatives and routes each choice to its matching scope', () => {
     const alternatives: Exercise[] = [
       { id: 'alt-one', name: 'Alternative one', nameEs: 'Alternativa uno', primaryMuscle: 'Chest', equipment: 'dumbbell' },

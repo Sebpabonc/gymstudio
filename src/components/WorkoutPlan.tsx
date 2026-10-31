@@ -2409,7 +2409,7 @@ export default function WorkoutPlan({
 
     setHistory(nextHistory)
     saveWorkoutHistory(nextHistory)
-    if (!isWorkoutMode) onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
+    if (!isWorkoutMode) onStartRest(getWorkoutRestSeconds(loadRestBetweenSets(), exercise.restSeconds), displayExerciseName(exercise.name))
     showLogToast([entryToSave], storedHistory, activeCompletionScope, [exercise])
     if (!isWorkoutMode) maybeShowSessionSummary(storedHistory, nextHistory, loggedAt)
     setExerciseCatalog(await loadExercises())
@@ -2577,7 +2577,7 @@ export default function WorkoutPlan({
     saveWorkoutHistory(nextHistory)
     if (startRest && entriesToSave.length === exercises.length) {
       onStartRest(
-        exercises[exercises.length - 1]?.restSeconds ?? 90,
+        getWorkoutRestSeconds(loadRestBetweenSets(), exercises[exercises.length - 1]?.restSeconds),
         exercises.map((item) => displayExerciseName(item.name)).join(' + ')
       )
     }
@@ -4009,7 +4009,7 @@ export default function WorkoutPlan({
                     tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
                     expanded onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />}
                   {(workoutTechnique || workoutPlanNote) && <p className="workout-mode-plan-note">{workoutTechnique && <strong>{workoutTechnique} </strong>}{workoutPlanNote}</p>}
-                  <p className="effortless-rest">{t('workout.label.restInline')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>
+                  <p className="effortless-rest">{t('workout.label.rest')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>
                   {!workoutFinished && !editing && <section className="effortless-logger">
                     <p className="workout-mode-current-set">{t('workout.run.currentSet', { set: formatNumber(language, activeIndex + 1), total: formatNumber(language, setCount) })}</p>
                     {oldSet && <p className="effortless-last">{t('workout.run.lastTime')}: {formatNumber(language, oldSet.weight)} kg × {formatNumber(language, oldSet.reps)}</p>}
@@ -4351,7 +4351,7 @@ export default function WorkoutPlan({
                       </p>
                     )}
                     {!isWorkoutMode && <p className="planned-meta-line">
-                      {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${planMode === 'preset' ? prescribedRestLabel : exercise.rest} ${t('workout.label.restInline')}`}
+                      {`${setLabel(setCount)} · ${exercise.repsPerSet?.join('·') ?? exercise.reps ?? '—'} ${t('workout.label.repsInline')} · ${prescribedRestLabel} ${t('workout.label.restInline')}`}
                     </p>}
                     {isWorkoutMode && isTipsVisible && (
                       <div className="workout-mode-more-panel">
@@ -4411,7 +4411,7 @@ export default function WorkoutPlan({
                             <button
                               type="button"
                               className="rest-start-button"
-                              onClick={() => onStartRest(exercise.restSeconds ?? 90, displayExerciseName(exercise.name))}
+                              onClick={() => onStartRest(prescribedRestSeconds, displayExerciseName(exercise.name))}
                             >
                               {t('workout.action.startRest')}
                             </button>
@@ -4588,7 +4588,7 @@ export default function WorkoutPlan({
                                   )}
                                   aria-pressed={completedRows[index]}
                                   onClick={() => {
-                                    if (!completedRows[index]) onStartRest(isWorkoutMode ? loadRestBetweenSets() : exercise.restSeconds ?? 90, displayExerciseName(exercise.name))
+                                    if (!completedRows[index]) onStartRest(prescribedRestSeconds, displayExerciseName(exercise.name))
                                     togglePlanSetDone(exercise, index, setCount)
                                   }}
                                 >
@@ -4856,7 +4856,7 @@ export default function WorkoutPlan({
                   previousSets: supersetPreviousSets[index],
                   previousDate: previousDatesByExercise.get(exercise.code ?? exercise.name),
                   equipment: libraryMatch?.equipment,
-                  restSeconds: exercise.restSeconds ?? 90,
+                  restSeconds: getWorkoutRestSeconds(loadRestBetweenSets(), exercise.restSeconds),
                   actions: cards[index],
                 }
               })
@@ -4871,7 +4871,7 @@ export default function WorkoutPlan({
                   <SupersetLogger
                     exercises={loggerExercises} loggedRounds={loggedRounds} groupIndex={groupIndex}
                     current={groupIndex === workoutGroupIndex} t={t} language={language} error={error}
-                    restBetweenSets={loadRestBetweenSets()}
+                    restBetweenSets={getWorkoutRestSeconds(loadRestBetweenSets(), supersetExercises[supersetExercises.length - 1]?.restSeconds)}
                     nextExerciseName={nextWorkoutExercise ? displayExerciseName(nextWorkoutExercise.name) : undefined}
                     insightActive={groupIndex === workoutGroupIndex && workoutGroupInsights.length > 0}
                     restTimer={groupIndex === workoutGroupIndex ? restTimer : null}
@@ -4988,7 +4988,7 @@ export default function WorkoutPlan({
                     className="rest-start-button"
                     onClick={() =>
                       onStartRest(
-                        supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90,
+                        getWorkoutRestSeconds(loadRestBetweenSets(), supersetExercises[supersetExercises.length - 1]?.restSeconds),
                         supersetExercises.map((item) => displayExerciseName(item.name)).join(' + ')
                       )
                     }
@@ -5057,7 +5057,7 @@ export default function WorkoutPlan({
                                 // Rest is taken after the pair, using the last exercise's prescribed rest.
                                 if (nextCompleted[setIndex]) {
                                   onStartRest(
-                                    supersetExercises[supersetExercises.length - 1]?.restSeconds ?? 90,
+                                    getWorkoutRestSeconds(loadRestBetweenSets(), supersetExercises[supersetExercises.length - 1]?.restSeconds),
                                     supersetExercises.map((item) => displayExerciseName(item.name)).join(' + ')
                                   )
                                 }

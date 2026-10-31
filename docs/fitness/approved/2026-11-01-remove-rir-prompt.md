@@ -9,9 +9,9 @@ exercises: []            # applies to every planned exercise; no catalogue conte
 ---
 
 
-> **Status 2026-11-01:** approved as written EXCEPT §5.3 (rest). The PO explicitly asked for a 2:00 rest with a Profile
-> setting (2026-10-18), so **the Profile value keeps winning** and the card shows that same value until the PO decides
-> on the PT's recommendation (`rest_seconds` wins). T134/T135 are parked until then; the 10 s superset switch applies.
+> **Status 2026-11-01:** approved as written, including §5.3 (rest), per the PO decision on #381.
+> **The exercise's `rest_seconds` wins; Profile is only the fallback.** T134/T135 are active.
+> Supersets use a 10 s switch after C1 and C2's `rest_seconds` after the pair.
 > Spanish text in this doc still needs the PO's eye on the live app. Edit-rate review after one real week stays open.
 
 ## Summary
