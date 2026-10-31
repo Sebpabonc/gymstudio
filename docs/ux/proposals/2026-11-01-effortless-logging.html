@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effortless Logging</title>
+<style>
+/* Prototype only. Single dark look on purpose: it mirrors the GymStudio app. Type follows the compact scale in 2026-10-18-typography-system.md. */
+:root {
+  color-scheme: dark;
+  --page: #050506; --bg: #0f0f10; --card: #18181a; --panel: rgba(255,255,255,.05); --panel2: rgba(255,255,255,.09);
+  --line: rgba(255,255,255,.11); --text: #f3f3f1; --muted: #c8c7c4; --dim: #93918e;
+  --rose: #c99ca1; --brand: #8d5e63; --rose-wash: rgba(141,94,99,.18); --btn: linear-gradient(120deg,#8d5e63,#6c4a4e);
+  --ok: #a5dcae; --ok-wash: rgba(165,220,174,.14); --amber: #e5c07b;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; } }
+* { box-sizing: border-box; margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--text); font: 400 15px/20px var(--font); padding: 16px; }
+button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; background: none; border: 0; }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+.num, .tab { font-variant-numeric: tabular-nums; }
+
+/* page */
+.page-head { max-width: 1120px; margin: 0 auto 12px; display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.page-head h1 { font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.page-head p { color: var(--muted); font-size: 13px; line-height: 18px; max-width: 62ch; margin-top: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; flex-wrap: wrap; }
+.seg button { min-height: 44px; padding: 0 12px; color: var(--muted); font-size: 13px; font-weight: 600; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--rose-wash); color: var(--text); }
+.layout { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(0,1fr) 390px minmax(0,1fr); gap: 16px; align-items: start; }
+.side { display: grid; gap: 12px; min-width: 0; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px; min-width: 0; }
+.box h2 { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--rose); margin-bottom: 6px; }
+.box p, .box li { font-size: 13px; line-height: 18px; color: var(--muted); }
+.box ul { padding-left: 16px; }
+.box .seg { display: flex; }
+.box .seg button { flex: 1 1 auto; }
+.ctl { display: grid; gap: 8px; }
+.ctl label { font-size: 13px; color: var(--dim); }
+.ghost { min-height: 44px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.row-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.count { display: flex; gap: 12px; }
+.count div { flex: 1; text-align: center; background: var(--panel); border-radius: 12px; padding: 8px 4px; }
+.count b { display: block; font-size: 28px; line-height: 34px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.count span { font-size: 11px; line-height: 14px; color: var(--muted); }
+table.score { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+table.score th { color: var(--dim); font-weight: 600; text-align: left; padding: 4px; }
+table.score td { padding: 6px 4px; border-top: 1px solid var(--line); color: var(--muted); }
+table.score tr.on td { color: var(--text); font-weight: 600; }
+table.score .exp { color: var(--dim); font-weight: 400; }
+
+/* phone */
+.phone { width: 100%; max-width: 390px; height: 760px; margin: 0 auto; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.phone.shake { animation: shake .45s; }
+@keyframes shake { 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(3px)} }
+@media (prefers-reduced-motion: reduce) { .phone.shake { animation: none; } .bar i { transition: none !important; } }
+.top { flex: none; padding: 8px 12px 8px; background: rgba(15,15,16,.97); border-bottom: 1px solid var(--line); }
+.topline { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.topline .ttl { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.topline .elapsed { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tb { min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 12px; font-size: 13px; font-weight: 600; background: var(--panel); white-space: nowrap; }
+.chips { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.chip { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+.chip.cur { border-color: var(--rose); background: var(--rose-wash); color: var(--rose); }
+.chip.done { background: var(--ok); border-color: var(--ok); color: #123; }
+.pair { display: inline-flex; align-items: center; gap: 2px; padding: 0 2px; border: 1px dashed rgba(201,156,161,.5); border-radius: 15px; height: 50px; }
+.pair svg { width: 16px; height: 16px; color: var(--rose); flex: none; }
+.chipnote { margin-left: auto; font-size: 13px; color: var(--muted); text-align: right; line-height: 16px; }
+.screen { flex: 1; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; padding: 12px 12px 88px; display: grid; grid-template-columns: minmax(0,1fr); gap: 12px; align-content: start; }
+.screen > *, .xcard > *, .ins-card > * { min-width: 0; }
+
+/* card */
+.xcard { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; grid-template-columns: minmax(0,1fr); gap: 12px; min-width: 0; }
+.xcard.current { border-color: rgba(201,156,161,.5); }
+.name { font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.name small { display: block; font-size: 13px; line-height: 18px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+.link { display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; color: var(--muted); }
+.link svg { width: 16px; height: 16px; color: var(--rose); flex: none; }
+.link b { font-weight: 600; color: var(--text); }
+.tools { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+.tool { min-height: 52px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); display: grid; place-items: center; align-content: center; gap: 2px; font-size: 11px; line-height: 14px; font-weight: 600; color: var(--muted); }
+.tool svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.cue { display: grid; grid-template-columns: 40px minmax(0,1fr) 24px; align-items: center; gap: 12px; background: var(--rose-wash); border: 1px solid rgba(201,156,161,.25); border-radius: 14px; padding: 10px 12px; font-size: 15px; line-height: 20px; font-weight: 600; text-align: left; min-height: 60px; width: 100%; }
+.cue .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--panel2); display: grid; place-items: center; }
+.cue svg { width: 22px; height: 22px; fill: none; stroke: var(--rose); stroke-width: 1.7; }
+.cue .chev { color: var(--rose); font-size: 18px; }
+.plan-note { font-size: 13px; line-height: 18px; color: var(--muted); }
+.plan-note b { font-weight: 600; color: var(--text); }
+.logger { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: grid; gap: 8px; }
+.setlabel { font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.setlabel span { font-size: 13px; font-weight: 400; color: var(--muted); }
+.field { display: grid; grid-template-columns: 44px 1fr; align-items: center; gap: 8px; }
+.field > span { font-size: 13px; color: var(--muted); }
+.stepper { display: grid; grid-template-columns: 52px 1fr 52px; gap: 6px; }
+.stepper button { height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel2); font-size: 20px; font-weight: 600; }
+.stepper output { height: 48px; border-radius: 12px; border: 1px solid var(--line); display: grid; place-items: center; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.primary { width: 100%; min-height: 56px; border-radius: 14px; background: var(--btn); color: #fff; font-size: 15px; font-weight: 600; padding: 0 12px; font-variant-numeric: tabular-nums; }
+.primary.big { min-height: 64px; font-size: 17px; }
+.secondary { width: 100%; min-height: 48px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); font-size: 15px; font-weight: 600; }
+.hint { font-size: 13px; line-height: 18px; color: var(--muted); }
+.logged-note { font-size: 13px; line-height: 18px; color: var(--ok); }
+
+/* table + trend (stay on every card) */
+.sect-cap { font-size: 13px; line-height: 18px; color: var(--muted); }
+.stable { display: grid; gap: 4px; }
+.shead, .srow { display: grid; grid-template-columns: 28px 1fr 1fr; align-items: center; padding: 0 12px; }
+.shead { font-size: 13px; line-height: 18px; color: var(--dim); }
+.srow { min-height: 44px; border-radius: 12px; width: 100%; text-align: left; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.srow.cur { background: var(--rose-wash); color: var(--text); box-shadow: inset 2px 0 0 var(--rose); }
+.srow .today { color: var(--text); font-weight: 600; }
+.srow .check { color: var(--ok); margin-left: 6px; }
+.editrow { padding: 8px 12px 12px; display: grid; gap: 8px; background: var(--panel); border-radius: 12px; }
+.editrow .hint { display: flex; justify-content: space-between; align-items: center; }
+.textbtn { min-height: 44px; padding: 0 8px; font-size: 13px; font-weight: 600; color: var(--rose); }
+details.trend { border-top: 1px solid var(--line); padding-top: 4px; }
+details.trend summary { min-height: 44px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; cursor: pointer; list-style: none; }
+details.trend summary::-webkit-details-marker { display: none; }
+details.trend summary::after { content: "▾"; color: var(--muted); }
+details.trend:not([open]) summary::after { content: "▸"; }
+.trend-scroll { overflow-x: auto; }
+.trend-legend { display: flex; gap: 12px; font-size: 11px; line-height: 14px; color: var(--muted); margin-top: 4px; }
+.trend-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; }
+.trend-cap { font-size: 11px; line-height: 14px; color: var(--dim); margin-top: 4px; }
+svg.tr text { fill: var(--muted); font-size: 10px; font-family: var(--font); }
+svg.tr text.w { font-weight: 700; fill: var(--text); }
+svg.tr text.d { fill: var(--dim); }
+svg.tr line { stroke: var(--line); }
+svg.tr rect.today { fill: rgba(201,156,161,.06); stroke: rgba(201,156,161,.5); stroke-dasharray: 4 3; }
+
+/* concept 2 list */
+.clist { display: grid; gap: 4px; }
+.chead, .crow { display: grid; grid-template-columns: 24px 60px 1fr 1fr 48px; gap: 4px; align-items: center; }
+.chead { font-size: 13px; color: var(--dim); padding: 0 8px; }
+.crow { border-radius: 12px; padding: 4px 8px; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.crow.cur { background: var(--rose-wash); color: var(--text); }
+.crow.done { color: var(--dim); }
+.cval { min-height: 44px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; font-size: 15px; background: var(--panel); font-variant-numeric: tabular-nums; }
+.tick { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--line); font-size: 18px; font-weight: 700; background: var(--panel); }
+.crow.cur .tick { background: var(--btn); border-color: transparent; color: #fff; }
+.crow.done .tick { background: var(--ok); border-color: var(--ok); color: #123; }
+
+/* concept 3 */
+.ask { display: grid; gap: 8px; text-align: left; }
+.ask .q { font-size: 15px; color: var(--muted); }
+.ask .v { font-size: 20px; line-height: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.two { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+
+/* 10 s switch strip: deliberately not a rest */
+.switch { display: grid; grid-template-columns: 22px minmax(0,1fr) auto; gap: 8px; align-items: center; border: 1px dashed rgba(201,156,161,.55); border-radius: 12px; padding: 4px 4px 4px 10px; font-size: 13px; line-height: 18px; color: var(--text); min-height: 52px; }
+.switch svg { width: 18px; height: 18px; color: var(--rose); }
+.switch b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ribbon { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--rose-wash); border-radius: 12px; padding: 8px 12px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.ribbon .steps { display: flex; align-items: center; gap: 4px; font-weight: 600; color: var(--muted); }
+.ribbon .steps b { color: var(--rose); font-weight: 700; }
+
+/* combined */
+.combo { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+.combo h3 { font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -.01em; text-wrap: balance; }
+.badge { display: inline-block; font-size: 11px; line-height: 14px; font-weight: 600; color: var(--rose); border: 1px solid rgba(201,156,161,.4); border-radius: 6px; padding: 2px 4px; margin-right: 6px; vertical-align: 2px; }
+.mini-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mini-fields span { display: block; font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+.mini { display: grid; grid-template-columns: 44px 1fr 44px; }
+.mini button { height: 44px; border: 1px solid var(--line); background: var(--panel2); font-size: 17px; font-weight: 600; border-radius: 10px; }
+.mini output { display: grid; place-items: center; font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
+.round-line { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; line-height: 18px; color: var(--muted); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.round-line.fut { border-style: dashed; color: var(--dim); }
+
+/* current app replica */
+.cur-today .logger { background: rgba(255,255,255,.04); }
+.logbtn { min-height: 56px; border-radius: 12px; background: var(--btn); font-size: 15px; font-weight: 600; width: 100%; }
+.restbox { background: var(--panel2); border-radius: 14px; padding: 10px; display: grid; gap: 8px; }
+.restbox strong { font-size: 15px; line-height: 20px; font-weight: 600; }
+.restbox .acts { display: flex; gap: 6px; align-items: center; }
+.restbox .acts .t { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 56px; }
+.restbox .acts button { min-height: 44px; padding: 0 10px; border-radius: 10px; background: var(--panel2); font-size: 13px; font-weight: 600; }
+.insight { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px; font-size: 13px; line-height: 18px; color: var(--muted); display: grid; gap: 6px; }
+.insight b { font-weight: 600; color: var(--text); font-size: 15px; }
+.rirbox { display: grid; gap: 6px; font-size: 13px; line-height: 18px; color: var(--muted); }
+.rirbox .q { font-weight: 600; color: var(--text); font-size: 15px; }
+.rirbtns { display: flex; gap: 6px; }
+.rirbtns button { flex: 1; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; font-size: 13px; background: var(--panel); font-variant-numeric: tabular-nums; }
+.todaybar { display: flex; gap: 8px; }
+.today-sup-ex { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.today-sup-ex h3 { font-size: 13px; font-weight: 600; line-height: 18px; }
+.sup-fields { display: grid; grid-template-columns: 1fr 1fr 44px; gap: 4px; align-items: end; }
+
+/* rest pop-up */
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,.62); display: flex; align-items: flex-end; padding: 12px; z-index: 20; }
+.rest { width: 100%; background: #1e1d1f; border: 1px solid rgba(201,156,161,.45); border-radius: 24px; padding: 16px; display: grid; gap: 10px; box-shadow: 0 16px 48px rgba(0,0,0,.6); max-height: calc(100% - 8px); overflow-y: auto; }
+.rest-top { display: flex; align-items: center; justify-content: space-between; }
+.rest-top h2 { font-size: 17px; line-height: 22px; font-weight: 600; display: flex; align-items: center; gap: 6px; color: var(--rose); }
+.rest-top svg { width: 18px; height: 18px; }
+.hidebtn { min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.clock { font-size: 68px; line-height: 72px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.bar { height: 6px; border-radius: 3px; background: var(--panel2); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--rose); transition: width .2s linear; }
+.loggedline { font-size: 13px; line-height: 18px; color: var(--ok); text-align: center; font-variant-numeric: tabular-nums; }
+.nextbox { background: var(--panel); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; }
+.nextbox span { font-size: 13px; line-height: 18px; color: var(--muted); }
+.nextbox b { font-size: 17px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rest-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.go .clock { color: var(--ok); }
+.go { border-color: var(--ok); }
+.alertchip { font-size: 11px; line-height: 14px; color: #123; background: var(--ok); border-radius: 6px; padding: 2px 6px; font-weight: 600; justify-self: center; }
+.inline-ins { font-size: 13px; line-height: 18px; color: var(--muted); }
+.inline-ins b { color: var(--text); font-weight: 600; }
+.minibar { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 15; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 8px; min-height: 60px; padding: 8px 12px; border-radius: 16px; background: #2a2527; border: 1px solid var(--rose); width: calc(100% - 24px); text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.minibar .t { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.minibar .m { font-size: 13px; line-height: 16px; color: var(--muted); min-width: 0; font-variant-numeric: tabular-nums; }
+.minibar .o { font-size: 13px; font-weight: 600; color: var(--rose); }
+.minibar.go { border-color: var(--ok); }
+.minibar.go .t { color: var(--ok); }
+.toast { position: absolute; left: 12px; right: 12px; bottom: 84px; z-index: 30; background: #2b2b2e; border: 1px solid var(--line); border-radius: 14px; padding: 4px 4px 4px 12px; font-size: 13px; line-height: 18px; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 52px; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.toast button { min-height: 44px; padding: 0 10px; font-weight: 600; color: var(--rose); }
+.confirm { position: absolute; inset: 0; background: rgba(0,0,0,.62); display: flex; align-items: center; padding: 16px; z-index: 40; }
+.confirm > div { width: 100%; background: #1e1d1f; border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 8px; }
+.confirm p { font-size: 17px; line-height: 22px; font-weight: 600; text-wrap: balance; }
+
+/* completed */
+.done-head { text-align: center; display: grid; gap: 4px; padding-top: 8px; }
+.done-head h2 { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -.02em; }
+.done-head p { font-size: 13px; color: var(--muted); }
+.stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.stats div { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px; text-align: center; }
+.stats b { display: block; font-size: 20px; line-height: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 13px; color: var(--muted); }
+.ins-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: grid; grid-template-columns: minmax(0,1fr); gap: 6px; }
+.ins-card h3 { font-size: 17px; line-height: 22px; font-weight: 600; text-wrap: balance; }
+.ins-card p { font-size: 13px; line-height: 18px; color: var(--muted); }
+
+/* lock screen preview */
+.lock { background: #0a0a0b; border-radius: 16px; padding: 12px; display: grid; gap: 8px; border: 1px solid var(--line); }
+.la { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; align-items: center; background: rgba(0,0,0,.88); border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
+.la svg { width: 22px; height: 22px; color: var(--rose); }
+.la small { display: block; font-size: 11px; line-height: 14px; color: var(--muted); }
+.la strong { display: block; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.la .big { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.di { justify-self: center; display: inline-flex; align-items: center; gap: 24px; background: #000; border-radius: 16px; padding: 6px 12px; color: var(--rose); font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; border: 1px solid var(--line); }
+.di svg { width: 16px; height: 16px; }
+.quiet { color: var(--dim); font-size: 13px; line-height: 18px; }
+
+@media (max-width: 1020px) {
+  .layout { grid-template-columns: minmax(0,1fr); }
+  .side.left { display: contents; }
+  .box.design { order: 1; }
+  .phonewrap { order: 2; }
+  .box.demo { order: 3; }
+  .side.right { order: 4; }
+  .phone { height: 720px; }
+}
+@media (max-width: 420px) { #pageSub, #supNote { display: none; } .chipnote { display: none; } }
+</style>
+</head>
+<body>
+<header class="page-head">
+  <div>
+    <h1 id="pageTitle"></h1>
+    <p id="pageSub"></p>
+  </div>
+  <div class="seg" role="group" aria-label="Language">
+    <button data-lang="en" aria-pressed="true">EN</button>
+    <button data-lang="es" aria-pressed="false">ES</button>
+  </div>
+</header>
+<div class="layout">
+  <div class="side left">
+    <div class="box ctl design">
+      <h2 id="lblDesign"></h2>
+      <div class="seg" id="tabs" role="group"></div>
+      <h2 id="lblSup"></h2>
+      <div class="seg" id="supOpts" role="group"></div>
+      <p id="supNote" class="hint"></p>
+    </div>
+    <div class="box ctl demo">
+      <h2 id="lblDemo"></h2>
+      <div class="row-btns">
+        <button class="ghost" id="restart"></button>
+        <button class="ghost" id="jump"></button>
+        <button class="ghost" id="closeApp"></button>
+      </div>
+      <div class="seg" id="speed" role="group"></div>
+    </div>
+  </div>
+  <div class="phonewrap"><div class="phone" id="phone" role="application" aria-label="Phone prototype"></div></div>
+  <div class="side right">
+    <div class="box">
+      <h2 id="lblTaps"></h2>
+      <div class="count">
+        <div><b id="tEx">0</b><span id="tExL"></span></div>
+        <div><b id="tSup">0</b><span id="tSupL"></span></div>
+        <div><b id="tScr">0</b><span id="tScrL"></span></div>
+      </div>
+      <p id="tapNote" class="hint" style="margin-top:8px"></p>
+    </div>
+    <div class="box" id="scoreBox"></div>
+    <div class="box">
+      <h2 id="lblLock"></h2>
+      <div id="lock" class="lock" aria-live="off"></div>
+      <p id="lockNote" class="hint" style="margin-top:8px"></p>
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+const STR = {
+  en: {
+    title: "Effortless logging", sub: "Proposal prototype. Click through a real flow: a 3-set reverse pyramid, then a 3-round superset, then Completed. Sample numbers; fitness text is the approved text already in the app.",
+    design: "Design", tabs: ["Today (current)", "1 Big Done", "2 Check list", "3 One question"],
+    supLabel: "Superset layout", sup: ["A Independent cards", "B Card + round", "C Combined round"],
+    supToday: "The current tab always uses the app's combined superset.",
+    supNote: ["A: exactly like a single exercise; a small line names the partner. Recommended.", "B: same card, plus a Round and C1 → C2 indicator.", "C: today's combined round, simplified. Fewest taps, but no C1 → C2 step."],
+    demo: "Demo", restart: "Restart", jump: "Jump to superset", closeApp: "Simulate closing the app", speed: ["Rest 10× faster", "Real time"],
+    taps: "Tap counter", tEx: "taps on the 3-set exercise", tSup: "taps on the 3-round superset", tScr: "scrolls needed", tapNote: "Counts logging taps on the phone. Waiting for rest to run out costs no taps.",
+    score: "Compare", mode: "Design", ex: "Exercise", ssup: "Superset", expected: "Grey = expected. White = your last run.",
+    lock: "Lock screen and Dynamic Island", lockIdle: "No rest running.", lockSwitch: "The ~10 s switch stays in the app. A rest only appears here after the pair.",
+    lockNoteNow: "Today's Live Activity shows the exercise name, then \"Go\". No alert when rest ends.", lockNoteNew: "Same Live Activity, but it says what is next, in your language, and alerts at zero.",
+    exit: "‹ Exit", finish: "Finish", backSaved: "‹ Today", day: "Day 1 · Upper A",
+    savedExit: "Everything you logged is saved. Continue from Today.", demoOnly: "Not wired in this demo.",
+    technique: "Technique", swap: "Swap", notes: "Notes", google: "Google",
+    setOf: (a, b) => `Set ${a} of ${b}`, roundOf: (a, b) => `Round ${a} of ${b}`,
+    logSet: n => `Log set ${n}`, logExercise: "Log exercise", last: "Last time", today: "Today", trend: "Trend by set", fromZero: "Bars from 0 kg", S: n => `Set ${n}`,
+    done: (w, r) => `Done · ${w} kg × ${r}`, yes: "Yes, done", change: "Change", did: "Did you do this?", saveSet: (w, r) => `Save · ${w} kg × ${r}`, doneShort: "Done",
+    carried: "Also applied to your next sets.", ownTarget: "Each set has its own target.", target: t => `Target ${t}`,
+    editing: n => `Editing set ${n}. Saved as you change it.`, close: "Close", saved: "Saved",
+    rest: "Rest", restDone: "Rest done", restOver: "Time's up", hide: "Hide", undo: "Undo", plus15: "+15 s", skip: "Skip", startNext: "Start next set now", startNextEx: "Start next exercise now", ok: "OK, let's go",
+    setLogged: (n, w, r) => `✓ Set ${n} logged · ${w} kg × ${r}`, pairLogged: (n) => `✓ Round ${n} logged`,
+    next: "Next", nextSet: (n, w, r) => `Set ${n} · ${w} kg × ${r}`, whenEnds: "When time runs out your phone vibrates and sounds. The next set will be ready.",
+    alert: "Vibration + sound", open: "Open", restMini: "Rest", go: "Go",
+    restNow: (n, nx) => `✓ Set ${n} logged · Next: ${nx}`, nextSetNow: (n, w, r) => `set ${n} · ${w}×${r}`,
+    supersetWith: (x) => `<b>Superset</b> with ${x} · then 10 s`, thenRest: (x) => `<b>Superset</b> with ${x} · then rest`,
+    switchTo: (c, s) => `Now ${c} · <b>${s} s</b>`, go2: (c) => `Go · ${c}`, undoShort: "Undo",
+    round: "Round", doneRound: n => `Done · round ${n}`, finishSup: "Finish superset",
+    superset: "Superset", instr: (a, b) => `Do ${a}, rest ~10 s, then ${b}; rest after the pair.`, rev: "Reverse pyramid", revNote: "Heaviest set first, then lighter for more reps.",
+    handoff: (c, s) => `Go to ${c} · ${s}s`, keepOpen: "Keep open",
+    rirQ: "Reps left in the tank?", rirH: "Last set only. Helps set your next weight.", rir0: "0 · max", rirSaved: "Got it, your next target will use this.",
+    finishQ: (d, t) => `Finish now? ${d} of ${t} exercises done`, keep: "Keep training", finishNow: "Finish now",
+    completed: "Completed ✓", duration: "Duration", sets: "Sets", exs: "Exercises", back: "Back to Today", insights: "Exercise insights", undoLast: "Last set logged.", earlyTitle: (d, t) => `Finished early · ${d}/${t}`,
+    mixed: "↕ Mixed", mixedL: "Some sets up, some down — Set 1: +2.5 kg", improved: "↑ Improved", setDelta: (d) => `Set 1: +${d} kg`,
+    closedLost: "App closed mid-superset: rounds not finished are gone. Nothing was saved yet.", closedKept: "App closed: every set you tapped Done on is saved. You continue exactly here.",
+    prev: "Sample numbers",
+  },
+  es: {
+    title: "Registro sin esfuerzo", sub: "Prototipo de propuesta. Sigue un flujo real: una pirámide inversa de 3 series, una superserie de 3 rondas y Completado. Números de ejemplo; el texto de fitness es el aprobado que ya está en la app.",
+    design: "Diseño", tabs: ["Hoy (actual)", "1 Hecho grande", "2 Lista", "3 Una pregunta"],
+    supLabel: "Forma de la superserie", sup: ["A Tarjetas independientes", "B Tarjeta + ronda", "C Ronda combinada"],
+    supToday: "La pestaña actual siempre usa la superserie combinada de la app.",
+    supNote: ["A: igual que un ejercicio normal; una línea pequeña nombra a la pareja. Recomendada.", "B: la misma tarjeta, con indicador de ronda y C1 → C2.", "C: la ronda combinada de hoy, simplificada. Menos toques, pero sin el paso C1 → C2."],
+    demo: "Demo", restart: "Reiniciar", jump: "Ir a la superserie", closeApp: "Simular cerrar la app", speed: ["Descanso 10× más rápido", "Tiempo real"],
+    taps: "Contador de toques", tEx: "toques en el ejercicio de 3 series", tSup: "toques en la superserie de 3 rondas", tScr: "veces que hay que deslizar", tapNote: "Cuenta los toques para registrar en el teléfono. Esperar a que termine el descanso no cuesta toques.",
+    score: "Comparar", mode: "Diseño", ex: "Ejercicio", ssup: "Superserie", expected: "Gris = esperado. Blanco = tu última prueba.",
+    lock: "Pantalla bloqueada y Dynamic Island", lockIdle: "Sin descanso en curso.", lockSwitch: "El cambio de ~10 s se queda en la app. Aquí solo aparece el descanso después del par.",
+    lockNoteNow: "La Live Activity de hoy muestra el nombre del ejercicio y luego \"Go\". Sin alerta al terminar el descanso.", lockNoteNew: "La misma Live Activity, pero dice qué sigue, en tu idioma, y avisa en cero.",
+    exit: "‹ Salir", finish: "Terminar", backSaved: "‹ Hoy", day: "Día 1 · Tren superior A",
+    savedExit: "Todo lo registrado está guardado. Continúa desde Hoy.", demoOnly: "No conectado en esta demo.",
+    technique: "Técnica", swap: "Cambiar", notes: "Notas", google: "Google",
+    setOf: (a, b) => `Serie ${a} de ${b}`, roundOf: (a, b) => `Ronda ${a} de ${b}`,
+    logSet: n => `Registrar serie ${n}`, logExercise: "Registrar ejercicio", last: "Última vez", today: "Hoy", trend: "Tendencia por serie", fromZero: "Barras desde 0 kg", S: n => `Serie ${n}`,
+    done: (w, r) => `Hecho · ${w} kg × ${r}`, yes: "Sí, hecho", change: "Cambiar", did: "¿Hiciste esto?", saveSet: (w, r) => `Guardar · ${w} kg × ${r}`, doneShort: "Hecho",
+    carried: "También aplicado a tus siguientes series.", ownTarget: "Cada serie tiene su propio objetivo.", target: t => `Objetivo ${t}`,
+    editing: n => `Editando la serie ${n}. Se guarda al cambiar.`, close: "Cerrar", saved: "Guardado",
+    rest: "Descanso", restDone: "Descanso terminado", restOver: "Se acabó el tiempo", hide: "Ocultar", undo: "Deshacer", plus15: "+15 s", skip: "Omitir", startNext: "Empezar la siguiente serie", startNextEx: "Empezar el siguiente ejercicio", ok: "Vamos",
+    setLogged: (n, w, r) => `✓ Serie ${n} registrada · ${w} kg × ${r}`, pairLogged: (n) => `✓ Ronda ${n} registrada`,
+    next: "Sigue", nextSet: (n, w, r) => `Serie ${n} · ${w} kg × ${r}`, whenEnds: "Cuando se acabe el tiempo, el teléfono vibra y suena. La siguiente serie estará lista.",
+    alert: "Vibración + sonido", open: "Abrir", restMini: "Descanso", go: "Ya",
+    restNow: (n, nx) => `✓ Serie ${n} registrada · Siguiente: ${nx}`, nextSetNow: (n, w, r) => `serie ${n} · ${w}×${r}`,
+    supersetWith: (x) => `<b>Superserie</b> con ${x} · luego 10 s`, thenRest: (x) => `<b>Superserie</b> con ${x} · luego descansa`,
+    switchTo: (c, s) => `Ahora ${c} · <b>${s} s</b>`, go2: (c) => `Ya · ${c}`, undoShort: "Deshacer",
+    round: "Ronda", doneRound: n => `Hecho · ronda ${n}`, finishSup: "Terminar superserie",
+    superset: "Superserie", instr: (a, b) => `Haz ${a}, descansa ~10 s, luego ${b}; descansa al final del par.`, rev: "Pirámide inversa", revNote: "La serie más pesada primero, luego más ligero con más reps.",
+    handoff: (c, s) => `Ahora ${c} · ${s}s`, keepOpen: "Mantener abierto",
+    rirQ: "¿Cuántas reps más podías hacer?", rirH: "Solo la última serie. Ayuda a ajustar tu próximo peso.", rir0: "0 · al máximo", rirSaved: "Listo, tu próximo objetivo lo tendrá en cuenta.",
+    finishQ: (d, t) => `¿Terminar ahora? ${d} de ${t} ejercicios completados`, keep: "Seguir entrenando", finishNow: "Terminar ahora",
+    completed: "Completado ✓", duration: "Duración", sets: "Series", exs: "Ejercicios", back: "Volver a Hoy", insights: "Resumen por ejercicio", undoLast: "Última serie registrada.", earlyTitle: (d, t) => `Terminado antes · ${d}/${t}`,
+    mixed: "↕ Mixto", mixedL: "Algunas series subieron y otras bajaron — Serie 1: +2,5 kg", improved: "↑ Mejoró", setDelta: (d) => `Serie 1: +${d} kg`,
+    closedLost: "App cerrada a mitad de la superserie: las rondas sin terminar se pierden. Aún no se había guardado nada.", closedKept: "App cerrada: cada serie marcada como Hecho está guardada. Sigues exactamente aquí.",
+    prev: "Números de ejemplo",
+  },
+};
+const ICON = {
+  technique: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>', swap: '<path d="M4 8h14l-4-4M20 16H6l4 4"/>',
+  notes: '<path d="M4 20h4L19 9l-4-4L4 16z"/>', google: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+};
+const LINK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 7H7a5 5 0 0 0 0 10h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"/></svg>';
+const TIMER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>';
+const CUEIC = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
+const COLORS = ['#f58a9b', '#e36d83', '#c94f69', '#a83d57'];
+
+const EXS = [
+  { id: 'tbar', code: 'B1', chip: '1', step: 2.5, carry: false,
+    name: { en: 'Plate-Loaded T-Bar Row', es: 'Remo en T en máquina de discos' }, sub: { en: 'Chest-Supported', es: 'con apoyo de pecho' },
+    shortName: { en: 'T-Bar Row', es: 'Remo en T' },
+    cue: { en: 'Elbows back, squeeze shoulder blades together', es: 'Codos atrás, junta fuerte los omóplatos' },
+    plan: [[37.5, 8], [35, 10], [35, 12]], last: [[35, 12], [35, 12], [35, 12]], lastDate: { en: 'Wed 28 Oct', es: 'mié 28 oct' },
+    trend: [['Oct 12', '12 oct', 'A', [[32.5, 8], [30, 10], [27.5, 12]]], ['Oct 19', '19 oct', 'A', [[35, 8], [32.5, 10], [30, 12]]], ['Oct 28', '28 oct', 'B', [[35, 12], [35, 12], [35, 12]]]] },
+  { id: 'c1', code: 'C1', chip: '2', step: 2, carry: true, range: '8–10',
+    name: { en: 'Dumbbell Shoulder Press', es: 'Press de hombros con mancuernas' }, sub: { en: 'Seated', es: 'sentado' },
+    shortName: { en: 'Shoulder Press', es: 'Press de hombros' },
+    cue: { en: 'Biceps toward ears, squeeze front delts', es: 'Bíceps a las orejas, aprieta deltoide frontal' },
+    plan: [[26, 8], [26, 8], [26, 8]], last: [[24, 12], [24, 12], [24, 12]], lastDate: { en: 'Wed 28 Oct', es: 'mié 28 oct' },
+    trend: [['Oct 21', '21 oct', 'B', [[24, 12], [24, 12], [24, 12]]], ['Oct 26', '26 oct', 'A', [[24, 10], [24, 10], [24, 10]]], ['Oct 28', '28 oct', 'B', [[24, 12], [24, 12], [24, 12]]]] },
+  { id: 'c2', code: 'C2', chip: '3', step: 1.5, carry: true, range: '8–10',
+    name: { en: 'Cable Lat Pulldown', es: 'Jalón al pecho en polea' }, sub: { en: 'Wide Grip', es: 'agarre ancho' },
+    shortName: { en: 'Lat Pulldown', es: 'Jalón al pecho' },
+    cue: null,
+    plan: [[35, 8], [35, 8], [35, 8]], last: [[33.5, 12], [33.5, 12], [33.5, 12]], lastDate: { en: 'Wed 28 Oct', es: 'mié 28 oct' },
+    trend: [['Oct 21', '21 oct', 'B', [[33, 12], [33, 12], [33, 12]]], ['Oct 26', '26 oct', 'A', [[33.5, 10], [33.5, 10], [33.5, 10]]], ['Oct 28', '28 oct', 'B', [[33.5, 12], [33.5, 12], [33.5, 12]]]] },
+];
+const REST_SECONDS = 120, SWITCH_SECONDS = 10;
+const TAB_TODAY = 0, TAB_DONE = 1, TAB_LIST = 2, TAB_ASK = 3;
+
+let S;
+const ui = { tab: TAB_DONE, sup: 0, lang: 'en', speed: 10, trendOpen: true };
+const runs = {};
+function fresh(startAt) {
+  const vals = EXS.map(e => e.plan.map(([w, r]) => ({ w, r, done: false, touched: false })));
+  if (startAt === 'sup') vals[0].forEach(v => v.done = true);
+  S = {
+    vals, cur: { ex: startAt === 'sup' ? 1 : 0, set: 0 }, view: startAt === 'sup' ? 1 : 0,
+    rest: null, sw: null, undo: [], edit: null, askEdit: false, listEdit: null, insight: null, insightPin: false,
+    rir: {}, tt: { round: 0, t: [false, false], handoff: null, savedRounds: 0 }, done: false, early: false,
+    taps: { ex: 0, sup: 0 }, scrolls: 0, toast: null, confirm: false, elapsed: 0, carriedNote: null, startedSup: startAt === 'sup',
+  };
+  if (startAt === 'sup') { S.taps.ex = '–'; }
+}
+const T = () => STR[ui.lang];
+const L = o => o[ui.lang];
+const fmt = n => { const s = String(n); return ui.lang === 'es' ? s.replace('.', ',') : s; };
+const pair = v => `${fmt(v.w)}×${v.r}`;
+const fullName = e => L(e.name) + (ui.lang === 'en' ? ` (${L(e.sub)})` : ` (${L(e.sub)})`);
+const clock = s => { const t = Math.max(0, Math.ceil(s)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+const isToday = () => ui.tab === TAB_TODAY;
+const combined = () => !isToday() && ui.sup === 2;
+const exDone = i => S.vals[i].every(v => v.done);
+const countDone = () => EXS.filter((_, i) => exDone(i)).length;
+
+/* ---------- flow ---------- */
+function afterLog(ex, set) {
+  if (ex === 0) return set < 2 ? { ex: 0, set: set + 1, kind: 'rest' } : { ex: 1, set: 0, kind: 'rest', newEx: true };
+  if (ex === 1) return { ex: 2, set, kind: 'switch' };
+  return set < 2 ? { ex: 1, set: set + 1, kind: 'rest' } : { kind: 'end' };
+}
+function snapshot() { return JSON.parse(JSON.stringify({ vals: S.vals, cur: S.cur, view: S.view, tt: S.tt })); }
+function restore(s) { S.vals = s.vals; S.cur = s.cur; S.view = s.view; S.tt = s.tt; }
+
+function logProposed(ex, set) {
+  S.undo.push(snapshot());
+  S.vals[ex][set].done = true;
+  S.edit = null; S.askEdit = false; S.listEdit = null; S.carriedNote = null;
+  S.sw = null;
+  const nx = afterLog(ex, set), v = S.vals[ex][set];
+  if (nx.kind === 'end') { finishFlow(false); return; }
+  if (nx.kind === 'switch') {
+    S.cur = { ex: nx.ex, set: nx.set }; S.view = nx.ex;
+    S.sw = { left: SWITCH_SECONDS, code: EXS[nx.ex].code };
+    scrollTop(); render(); return;
+  }
+  const nextV = S.vals[nx.ex][nx.set];
+  const ctx = {
+    logged: ex === 2 ? T().pairLogged(set + 1) : T().setLogged(set + 1, fmt(v.w), v.r),
+    nextEx: nx.newEx || ex === 2 ? L(EXS[nx.ex].shortName) : null,
+    next: { n: nx.set + 1, w: nextV.w, r: nextV.r, ex: nx.ex },
+    rir: nx.newEx ? ex : null, insight: nx.newEx ? ex : null, newEx: !!nx.newEx,
+  };
+  if (!nx.newEx) { S.cur = { ex: nx.ex, set: nx.set }; S.view = ex === 2 ? nx.ex : ex; }
+  else { S.pendingCur = { ex: nx.ex, set: nx.set }; }
+  if (ex === 2 && !nx.newEx) scrollTop();
+  S.restBy = ex;
+  startRest(ctx);
+  render();
+}
+function logRoundCombined(round) {
+  S.undo.push(snapshot());
+  S.vals[1][round].done = true; S.vals[2][round].done = true;
+  if (round === 2) { finishFlow(false); return; }
+  S.cur = { ex: 1, set: round + 1 }; S.view = 1;
+  const a = S.vals[1][round + 1], b = S.vals[2][round + 1];
+  startRest({ logged: T().pairLogged(round + 1), next: { round: round + 1, a, b }, nextEx: null });
+  render();
+}
+function startRest(ctx) { ctx.seenHint = !!S.hintSeen; S.hintSeen = true; S.rest = { left: REST_SECONDS, total: REST_SECONDS, ctx, hidden: false, over: false, overLeft: 3 }; }
+function closeRest() {
+  if (S.pendingCur) { S.cur = S.pendingCur; S.view = S.pendingCur.ex; S.pendingCur = null; scrollTop(); }
+  S.rest = null; render();
+}
+function restEnded() {
+  S.rest.over = true; S.rest.left = 0; alertUser(); render();
+}
+function alertUser() {
+  const ph = document.getElementById('phone');
+  ph.classList.remove('shake'); void ph.offsetWidth; ph.classList.add('shake');
+  try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
+  try {
+    const A = window.AudioContext || window.webkitAudioContext;
+    if (A) { const c = new A(), o = c.createOscillator(), g = c.createGain(); o.frequency.value = 880; g.gain.value = .05; o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + .25); }
+  } catch (e) {}
+}
+function finishFlow(early) {
+  S.done = true; S.early = early; S.rest = null; S.sw = null; S.pendingCur = null; S.toast = early ? null : { kind: 'undo', left: 8 };
+  const k = runKey();
+  runs[k] = runs[k] || {};
+  if (!early) { if (S.taps.ex !== '–') runs[k].ex = S.taps.ex; runs[k].sup = S.taps.sup; runs[k].scr = S.scrolls; }
+  scrollTop(); render();
+}
+const runKey = () => isToday() ? 't' : `${ui.tab}-${ui.sup}`;
+function doUndo() {
+  const last = S.undo.pop(); if (!last) return;
+  restore(last); S.rest = null; S.sw = null; S.done = false; S.pendingCur = null; S.toast = null; S.insight = null;
+  S.edit = null; render();
+}
+function stepVal(ex, set, f, dir) {
+  const v = S.vals[ex][set], e = EXS[ex];
+  if (f === 'w') v.w = Math.max(0, +(v.w + dir * e.step).toFixed(1)); else v.r = Math.max(1, v.r + dir);
+  v.touched = true;
+  if (!isToday() && e.carry && !v.done) {
+    let any = false;
+    S.vals[ex].forEach((o, i) => { if (i > set && !o.done && !o.touched) { o[f] = v[f]; any = true; } });
+    if (any) S.carriedNote = ex;
+  }
+  render();
+}
+
+/* ---------- today (replica of the current app) ---------- */
+function todayLog(ex, set) {
+  S.undo.push(snapshot());
+  S.vals[ex][set].done = true;
+  const nxt = S.vals[ex].findIndex(v => !v.done);
+  if (nxt >= 0) {
+    S.cur = { ex, set: nxt }; const v = S.vals[ex][nxt];
+    S.rest = { inplace: true, left: REST_SECONDS, total: REST_SECONDS, label: T().restNow(set + 1, T().nextSetNow(nxt + 1, fmt(v.w), v.r)), over: false, overLeft: 3 };
+    render(); return;
+  }
+  // last set: insight self-dismisses after 3 s, RIR with it, then the next exercise with rest already running
+  S.rest = { inplace: true, left: REST_SECONDS, total: REST_SECONDS, label: T().restNow(set + 1, fullName(EXS[1])), over: false, overLeft: 3 };
+  S.insight = { ex, left: 3 }; S.insightPin = false; render();
+}
+function todayLogExercise(ex) {
+  const anyDone = S.vals[ex].some(v => v.done);
+  if (anyDone) { render(); return; }
+  S.undo.push(snapshot());
+  S.vals[ex].forEach(v => v.done = true); // the real app logs every prefilled set if nothing was ticked
+  S.insight = { ex, left: 3 }; S.insightPin = false;
+  S.rest = null; render();
+}
+function leaveInsight() { S.insight = null; S.insightPin = false; S.cur = { ex: 1, set: 0 }; S.view = 1; scrollTop(); render(); }
+function todayTick(i) {
+  const tt = S.tt; tt.t[i] = !tt.t[i];
+  if (i === 0 && tt.t[0] && !tt.t[1]) { tt.handoff = { left: SWITCH_SECONDS }; }
+  else tt.handoff = null;
+  if (tt.t[0] && tt.t[1]) {
+    const r = tt.round;
+    S.undo.push(snapshot());
+    S.vals[1][r].done = true; S.vals[2][r].done = true;
+    if (r === 2) { tt.savedRounds = 3; finishFlow(false); return; }
+    tt.round = r + 1; tt.t = [false, false];
+    const a = S.vals[1][r + 1], b = S.vals[2][r + 1];
+    S.rest = { inplace: true, left: REST_SECONDS, total: REST_SECONDS, label: T().restNow(r + 1, `${T().roundOf(r + 2, 3)} · C1 ${pair(a)} · C2 ${pair(b)}`), over: false, overLeft: 3 };
+    scrollTop();
+  }
+  render();
+}
+
+/* ---------- pieces ---------- */
+function stepper(ex, set, f, compact) {
+  const v = S.vals[ex][set], val = f === 'w' ? fmt(v.w) : v.r, lab = f === 'w' ? 'kg' : 'Reps';
+  if (compact) return `<div><span>${lab}</span><div class="mini"><button data-a="step" data-ex="${ex}" data-set="${set}" data-f="${f}" data-d="-1" aria-label="${lab} −">−</button><output>${val}</output><button data-a="step" data-ex="${ex}" data-set="${set}" data-f="${f}" data-d="1" aria-label="${lab} +">+</button></div></div>`;
+  return `<div class="field"><span>${lab}</span><div class="stepper"><button data-a="step" data-ex="${ex}" data-set="${set}" data-f="${f}" data-d="-1" aria-label="${lab} −">−</button><output>${val}</output><button data-a="step" data-ex="${ex}" data-set="${set}" data-f="${f}" data-d="1" aria-label="${lab} +">+</button></div></div>`;
+}
+function tools() {
+  return `<div class="tools">${[['technique', T().technique], ['swap', T().swap], ['notes', T().notes], ['google', T().google]].map(([k, t]) =>
+    `<button class="tool" data-a="demo" data-nc="1"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>${t}</button>`).join('')}</div>`;
+}
+function cue(e) {
+  if (!e.cue) return '';
+  return `<button class="cue" data-a="demo" data-nc="1"><span class="ic">${CUEIC}</span><span>${L(e.cue)}</span><span class="chev" aria-hidden="true">›</span></button>`;
+}
+function trendSvg(ex) {
+  const e = EXS[ex], vs = S.vals[ex];
+  const sessions = e.trend.map(t => ({ date: ui.lang === 'en' ? t[0] : t[1], day: t[2], sets: t[3].map(([w, r]) => ({ w, r, logged: true })) }));
+  sessions.push({ date: ui.lang === 'en' ? 'Nov 2' : '2 nov', day: 'A', today: true, sets: vs.map(v => ({ w: v.w, r: v.r, logged: v.done })) });
+  const maxW = Math.max(5, ...sessions.flatMap(s => s.sets.map(x => x.w)));
+  const stepTick = [5, 10, 15, 20, 25, 50].find(x => Math.ceil(maxW / x) <= 4) || 50;
+  const axis = Math.ceil(maxW / stepTick) * stepTick, gw = 92, bw = 10, top = 34, base = 94, ph = base - top;
+  const width = Math.max(300, sessions.length * gw + 34);
+  let out = `<text x="2" y="10">kg</text>`;
+  for (let i = 0; i <= Math.floor(axis / stepTick); i++) { const val = axis - i * stepTick, y = base - val / axis * ph; out += `<text x="26" y="${y + 3}" text-anchor="end">${val}</text><line x1="31" x2="${width}" y1="${y}" y2="${y}"/>`; }
+  sessions.forEach((s, si) => {
+    const gx = 38 + si * gw, dw = s.sets.length * (bw + 3), sx = gx + (gw - dw) / 2;
+    if (s.today) out += `<rect class="today" x="${gx + 2}" y="14" width="${gw - 5}" height="103" rx="8"/>`;
+    const uni = s.sets.every(x => x.w === s.sets[0].w);
+    s.sets.forEach((x, i) => {
+      const h = Math.max(1, x.w / axis * ph), bx = sx + i * (bw + 3), by = base - h, c = COLORS[i];
+      const lx = uni ? sx + (s.sets.length - 1) * (bw + 3) / 2 + bw / 2 : bx + bw / 2, ly = Math.max(14, by - 15);
+      if (!uni || i === 0) out += `<text class="w" x="${lx}" y="${ly}" text-anchor="${uni ? 'middle' : 'start'}" ${uni ? '' : `transform="rotate(-45 ${lx} ${ly})"`}>${fmt(x.w)}</text>`;
+      out += `<text x="${bx + bw / 2}" y="${Math.max(23, by - 5)}" text-anchor="middle">${x.r}</text>`;
+      out += `<rect x="${bx}" y="${by}" width="${bw}" height="${h}" rx="2" fill="${x.logged ? c : 'transparent'}" stroke="${c}" ${x.logged ? '' : 'stroke-dasharray="3 2"'}/>`;
+    });
+    out += `<text class="d" x="${gx + gw / 2}" y="108" text-anchor="middle">${s.date}</text><text class="d" x="${gx + gw / 2}" y="120" text-anchor="middle">${s.day}</text>`;
+  });
+  return `<div class="trend-scroll"><svg class="tr" width="${width}" height="126" viewBox="0 0 ${width} 126" role="img" aria-label="${T().trend}">${out}</svg></div>
+    <div class="trend-legend">${vs.map((_, i) => `<span><i style="background:${COLORS[i]}"></i>${T().S(i + 1)}</span>`).join('')}</div>
+    <p class="trend-cap">${T().fromZero} · ${T().prev}</p>`;
+}
+function trend(ex, labelSuffix) {
+  return `<details class="trend" data-trend ${ui.trendOpen ? 'open' : ''}><summary data-nc="1">${T().trend}${labelSuffix ? ' · ' + labelSuffix : ''}</summary>${trendSvg(ex)}</details>`;
+}
+function table(ex, opts = {}) {
+  const e = EXS[ex], vs = S.vals[ex], cur = S.cur.ex === ex ? S.cur.set : -1;
+  const rows = vs.map((v, i) => {
+    const [lw, lr] = e.last[i];
+    const edit = S.edit && S.edit.ex === ex && S.edit.set === i;
+    const row = `<button class="srow ${i === cur && !v.done ? 'cur' : ''}" data-a="${opts.today ? 'pickset' : 'edit'}" data-ex="${ex}" data-set="${i}" ${(!opts.today && !v.done) ? 'data-nc="1"' : ''} aria-label="${T().S(i + 1)} · ${T().last}: ${fmt(lw)}×${lr} · ${T().today}: ${pair(v)}">
+      <span>${i + 1}</span><span>${fmt(lw)}×${lr}</span><span class="today">${pair(v)}${v.done ? '<span class="check" aria-hidden="true">✓</span>' : ''}</span></button>`;
+    const ed = edit ? `<div class="editrow"><div class="hint"><span>${T().editing(i + 1)}</span><button class="textbtn" data-a="editclose" data-nc="1">${T().close}</button></div>${stepper(ex, i, 'w')}${stepper(ex, i, 'r')}</div>` : '';
+    return row + ed;
+  }).join('');
+  return `<div><p class="sect-cap">${T().last} · ${L(e.lastDate)}</p><div class="stable"><div class="shead"><span>#</span><span>${T().last}</span><span>${T().today}</span></div>${rows}</div></div>`;
+}
+function setHeading(ex, set) {
+  const e = EXS[ex];
+  const inB = !isToday() && ui.sup === 1 && ex > 0;
+  const label = inB ? T().roundOf(set + 1, 3) : T().setOf(set + 1, 3);
+  return `<p class="setlabel">${label}${e.range ? `<span>${T().target(e.range)}</span>` : ''}</p>`;
+}
+function supLink(ex) {
+  if (ex === 0 || combined()) return '';
+  const partner = EXS[ex === 1 ? 2 : 1];
+  if (ui.sup === 1) return '';
+  return `<p class="link">${LINK}<span>${ex === 1 ? T().supersetWith(L(partner.shortName)) : T().thenRest(L(partner.shortName))}</span></p>`;
+}
+function supRibbon(ex, set) {
+  if (ex === 0 || ui.sup !== 1) return '';
+  return `<div class="ribbon"><span>${T().superset} · ${T().roundOf(set + 1, 3)}</span><span class="steps">${ex === 1 ? '<b>C1</b> → C2' : 'C1 ✓ → <b>C2</b>'}</span></div>`;
+}
+function switchStrip() {
+  if (!S.sw) return '';
+  return `<div class="switch" data-switch role="status" aria-live="polite">${LINK}<span id="swText">${T().switchTo(S.sw.code, Math.ceil(S.sw.left))}</span><button class="textbtn" data-a="undo" data-nc="0">${T().undoShort}</button></div>`;
+}
+function exerciseCard(ex) {
+  const e = EXS[ex], allDone = exDone(ex);
+  const set = S.cur.ex === ex ? S.cur.set : 0;
+  const v = S.vals[ex][set];
+  let logger = '';
+  if (!allDone && S.cur.ex === ex) {
+    if (ui.tab === TAB_DONE) {
+      logger = `<div class="logger">${setHeading(ex, set)}${stepper(ex, set, 'w')}${stepper(ex, set, 'r')}
+        ${S.carriedNote === ex ? `<p class="logged-note">${T().carried}</p>` : ''}
+        <button class="primary big" data-a="log" data-ex="${ex}" data-set="${set}">${T().done(fmt(v.w), v.r)}</button></div>`;
+    } else if (ui.tab === TAB_ASK) {
+      logger = `<div class="logger ask">${setHeading(ex, set)}
+        ${S.askEdit ? `${stepper(ex, set, 'w')}${stepper(ex, set, 'r')}${S.carriedNote === ex ? `<p class="logged-note">${T().carried}</p>` : ''}<button class="primary big" data-a="log" data-ex="${ex}" data-set="${set}">${T().saveSet(fmt(v.w), v.r)}</button>`
+        : `<p class="q">${T().did}</p><p class="v">${fmt(v.w)} kg × ${v.r}</p><div class="two"><button class="primary big" data-a="log" data-ex="${ex}" data-set="${set}">${T().yes}</button><button class="secondary" style="min-height:64px" data-a="askedit">${T().change}</button></div>`}</div>`;
+    }
+  }
+  const body = ui.tab === TAB_LIST ? listTable(ex) : (logger + table(ex));
+  return `<article class="xcard current">
+    ${supRibbon(ex, set)}
+    <h2 class="name">${L(e.name)}<small>${L(e.sub)}</small></h2>
+    ${supLink(ex)}
+    ${switchStrip()}
+    ${tools()}${cue(e)}
+    ${ex === 0 ? `<p class="plan-note"><b>${T().rev}.</b> ${T().revNote}</p>` : ''}
+    ${ex === 0 && ui.tab !== TAB_LIST ? `<p class="hint" style="display:none">${T().ownTarget}</p>` : ''}
+    ${body}
+    ${trend(ex)}
+  </article>`;
+}
+function listTable(ex) {
+  const e = EXS[ex], vs = S.vals[ex], cur = S.cur.ex === ex ? S.cur.set : -1;
+  const rows = vs.map((v, i) => {
+    const [lw, lr] = e.last[i], isCur = i === cur && !v.done, canTick = isCur || v.done;
+    const ed = S.listEdit && S.listEdit.ex === ex && S.listEdit.set === i;
+    return `<div class="crow ${isCur ? 'cur' : ''} ${v.done ? 'done' : ''}">
+      <span>${i + 1}</span><span>${fmt(lw)}×${lr}</span>
+      <button class="cval" data-a="listedit" data-ex="${ex}" data-set="${i}" aria-label="kg ${fmt(v.w)}">${fmt(v.w)}</button>
+      <button class="cval" data-a="listedit" data-ex="${ex}" data-set="${i}" aria-label="Reps ${v.r}">${v.r}</button>
+      <button class="tick" ${canTick ? `data-a="${v.done ? 'undo' : 'log'}"` : 'data-nc="1" data-a="noop"'} data-ex="${ex}" data-set="${i}" aria-pressed="${v.done}" aria-label="${T().doneShort} ${T().S(i + 1)}">✓</button>
+    </div>${ed ? `<div class="editrow"><div class="hint"><span>${v.done ? T().editing(i + 1) : (e.range ? T().target(e.range) : '')}</span><button class="textbtn" data-a="listclose" data-nc="1">${T().close}</button></div>${stepper(ex, i, 'w')}${stepper(ex, i, 'r')}${S.carriedNote === ex ? `<p class="logged-note">${T().carried}</p>` : ''}</div>` : ''}`;
+  }).join('');
+  return `<div><p class="sect-cap">${T().last} · ${L(e.lastDate)}</p><div class="clist"><div class="chead"><span>#</span><span>${T().last}</span><span>kg</span><span>Reps</span><span></span></div>${rows}</div></div>`;
+}
+function combinedCard() {
+  const round = S.vals[1].findIndex(v => !v.done), r = round < 0 ? 2 : round;
+  const lines = [0, 1, 2].map(i => {
+    if (i === r) return '';
+    const a = S.vals[1][i], b = S.vals[2][i], d = a.done;
+    return `<div class="round-line ${d ? '' : 'fut'}"><span>${d ? '✓ ' : ''}${T().roundOf(i + 1, 3)}</span><span class="num">C1 ${pair(a)} · C2 ${pair(b)}</span></div>`;
+  }).join('');
+  const exBlock = ex => `<div class="combo"><h3><span class="badge">${EXS[ex].code}</span>${fullName(EXS[ex])}</h3>
+    <div class="mini-fields">${stepper(ex, r, 'w', true)}${stepper(ex, r, 'r', true)}</div></div>`;
+  return `<article class="xcard current">
+    <div class="ribbon"><span>${T().superset} · C1 + C2</span><span class="steps">${T().roundOf(r + 1, 3)}</span></div>
+    <p class="hint">${T().instr('C1', 'C2')}</p>
+    ${exBlock(1)}${exBlock(2)}
+    <button class="primary big" data-a="logRound" data-set="${r}">${T().doneRound(r + 1)}</button>
+    ${lines}
+    ${table(1)}${trend(1, 'C1')}
+    ${table(2)}${trend(2, 'C2')}
+    ${tools()}
+  </article>`;
+}
+function restPopup() {
+  const R = S.rest, c = R.ctx;
+  const pct = R.over ? 0 : Math.max(0, R.left / R.total * 100);
+  let nextText = '';
+  if (c.next.round !== undefined) nextText = `${T().roundOf(c.next.round + 1, 3)} · C1 ${pair(c.next.a)} · C2 ${pair(c.next.b)}`;
+  else nextText = (c.nextEx ? `${c.nextEx} · ` : '') + T().nextSet(c.next.n, fmt(c.next.w), c.next.r);
+  if (R.hidden) {
+    return `<button class="minibar ${R.over ? 'go' : ''}" data-a="restshow" data-nc="1"><span class="t" data-rest-clock>${R.over ? T().go : clock(R.left)}</span>
+      <span class="m">${R.over ? '' : T().restMini + ' · '}${T().next}: ${nextText}</span><span class="o">${T().open}</span></button>`;
+  }
+  const ins = c.insight !== null && c.insight !== undefined ? `<p class="inline-ins"><b>${T().mixed}</b> · ${T().mixedL}</p>` : '';
+  const rirEx = c.rir;
+  const rir = rirEx !== null && rirEx !== undefined ? rirBox(rirEx) : '';
+  return `<div class="scrim" data-a="resthide" data-nc="1"><section class="rest ${R.over ? 'go' : ''}" role="dialog" aria-modal="false" aria-label="${T().rest}" data-stop>
+    <div class="rest-top"><h2>${TIMER}${R.over ? T().restOver : T().rest}</h2><button class="hidebtn" data-a="resthide" data-nc="1">${T().hide} ▾</button></div>
+    <div class="clock" data-rest-clock aria-live="off">${R.over ? T().go : clock(R.left)}</div>
+    <div class="bar"><i data-rest-bar style="width:${pct}%"></i></div>
+    ${R.over ? `<span class="alertchip">${T().alert}</span>` : `<p class="loggedline">${c.logged}</p>`}
+    ${ins}${rir}
+    <div class="nextbox"><span>${T().next}</span><b>${nextText}</b>${R.over || c.seenHint ? '' : `<span>${T().whenEnds}</span>`}</div>
+    ${R.over ? `<button class="primary big" data-a="restclose" data-nc="1">${T().ok}</button>` : `
+    <div class="rest-acts"><button class="secondary" data-a="plus15" data-nc="1">${T().plus15}</button><button class="secondary" data-a="undo">${T().undo}</button></div>
+    <button class="primary big" data-a="restclose" data-nc="1">${c.newEx ? T().startNextEx : T().startNext}</button>`}
+  </section></div>`;
+}
+function rirBox(ex) {
+  if (S.rir[ex] === undefined) return `<div class="rirbox"><span class="q">${T().rirQ}</span><span>${T().rirH}</span><div class="rirbtns">${[[0, T().rir0], [2, '1–2'], [3, '3+']].map(([k, l]) => `<button data-a="rir" data-ex="${ex}" data-v="${k}">${l}</button>`).join('')}</div></div>`;
+  return `<p class="logged-note">${T().rirSaved}</p>`;
+}
+function chipsHtml() {
+  const chip = i => {
+    const e = EXS[i], d = exDone(i), c = S.view === i && !S.done;
+    return `<button class="chip ${d ? 'done' : ''} ${c ? 'cur' : ''}" data-a="chip" data-ex="${i}" data-nc="1" aria-label="${L(e.name)}">${d ? '✓' : e.chip}</button>`;
+  };
+  if (isToday()) return `<div class="chips">${chip(0)}${chip(1)}<span style="color:var(--rose)">–</span>${chip(2)}<button class="chip" data-a="demo" data-nc="1" style="margin-left:auto;border-radius:22px;font-size:13px">${ui.lang === 'en' ? 'ES' : 'EN'}</button></div>`;
+  return `<div class="chips">${chip(0)}<span class="pair" aria-label="${T().superset}">${chip(1)}${LINK}${chip(2)}</span><span class="chipnote">${S.view > 0 ? `${T().superset}<br>${S.vals[1].filter(v => v.done).length}/3` : ''}</span></div>`;
+}
+function topBar() {
+  return `<div class="top"><div class="topline">
+    <button class="tb" data-a="exit" data-nc="1">${isToday() ? T().exit : T().backSaved}</button>
+    <span class="ttl">${T().day}</span>
+    <span class="elapsed num" data-elapsed>${clock(S.elapsed)}</span>
+    <button class="tb" data-a="finish" data-nc="1">${T().finish}</button></div>${chipsHtml()}</div>`;
+}
+function restInPlace() {
+  const R = S.rest;
+  return `<div class="restbox"><strong>${R.label}</strong>
+    ${R.over ? `<span>${T().restDone}</span>` : `<div class="acts"><span class="t" data-rest-clock>⏱ ${clock(R.left)}</span>
+      <button data-a="undo">${T().undo}</button><button data-a="plus15">${T().plus15}</button><button data-a="restskip">${T().skip}</button></div>`}</div>`;
+}
+function todaySingle(ex) {
+  const e = EXS[ex], set = S.cur.ex === ex ? S.cur.set : 0, v = S.vals[ex][set];
+  if (S.insight) {
+    return `<article class="xcard current cur-today"><h2 class="name">${fullName(e)}</h2>${tools()}
+      <div class="insight"><b>${T().mixed}</b><span>${T().mixedL}</span><button class="secondary" data-a="pin" data-nc="1">${T().keepOpen}</button></div>
+      ${rirBox(ex)}${table(ex, { today: true })}${trend(ex)}</article>`;
+  }
+  return `<article class="xcard current cur-today"><h2 class="name">${fullName(e)}</h2>${tools()}${cue(e)}
+    ${ex === 0 ? `<p class="plan-note"><b>${T().rev}</b> ${T().revNote}</p>` : ''}
+    <div class="logger">${S.rest ? restInPlace() : `<p class="setlabel">${T().setOf(set + 1, 3)}</p>${stepper(ex, set, 'w')}${stepper(ex, set, 'r')}<button class="logbtn" data-a="todaylog" data-ex="${ex}" data-set="${set}">${T().logSet(set + 1)}</button>`}</div>
+    ${table(ex, { today: true })}${trend(ex)}
+    <button class="secondary" data-a="logall" data-ex="${ex}">${T().logExercise}</button></article>`;
+}
+function todaySuperset() {
+  const tt = S.tt, r = tt.round;
+  const head = `<div class="setlabel" style="font-size:15px">${T().superset} · C1 + C2<span>${T().roundOf(r + 1, 3)}</span></div><p class="hint">${T().instr('C1', 'C2')}</p>`;
+  if (S.rest) return `<article class="xcard current cur-today">${head}${restInPlace()}<button class="logbtn" data-a="finishsup">${T().finishSup}</button></article>`;
+  const others = [0, 1, 2].filter(i => i !== r).map(i => {
+    const a = S.vals[1][i], b = S.vals[2][i];
+    return `<div class="round-line ${a.done ? '' : 'fut'}"><span>${a.done ? '✓ ' : ''}${T().roundOf(i + 1, 3)}</span><span class="num">C1 ${pair(a)} · C2 ${pair(b)}</span></div>`;
+  });
+  const exb = (ex, i) => {
+    const e = EXS[ex], l = e.last[r];
+    return `<div class="today-sup-ex"><p class="link" style="font-size:15px;font-weight:600;color:var(--text)"><span class="badge">${e.code}</span>${fullName(e)}</p>
+      <p class="sect-cap">${T().last}: ${fmt(l[0])}×${l[1]} · ${L(e.lastDate)}</p>${cue(e)}
+      <p class="plan-note"><b>${T().superset}</b></p>
+      <div class="sup-fields">${stepper(ex, r, 'w', true)}${stepper(ex, r, 'r', true)}<button class="tick" style="${tt.t[i] ? 'background:var(--ok);color:#123' : ''}" data-a="tick" data-i="${i}" aria-pressed="${tt.t[i]}" aria-label="C${i + 1}">✓</button></div>
+      ${tt.handoff && i === 0 ? `<p class="logged-note" id="handoff">${T().handoff('C2', Math.ceil(tt.handoff.left))}</p>` : ''}
+      ${tools()}<button class="secondary" data-a="demo" data-nc="1">${T().notes}</button>${trend(ex, e.code)}</div>`;
+  };
+  return `<article class="xcard current cur-today">${head}${r > 0 ? others[0] : ''}<p class="setlabel">${T().roundOf(r + 1, 3)}</p>${exb(1, 0)}${exb(2, 1)}${(r === 0 ? others : others.slice(1)).join('')}</article>`;
+}
+function completed() {
+  const total = S.vals.flat().filter(v => v.done).length;
+  const cards = EXS.map((e, i) => {
+    const d = S.vals[i].filter(v => v.done);
+    if (!d.length) return '';
+    const showRir = i > 0 && !S.early;
+    return `<div class="ins-card"><h3>${L(e.name)}</h3><p>${i === 0 ? `<b>${T().mixed}</b> · ${T().mixedL}` : `<b>${T().improved}</b> · ${T().setDelta(i === 1 ? 2 : fmt(1.5))}`}</p>
+      ${showRir && !isToday() ? rirBox(i) : ''}${trend(i)}</div>`;
+  }).join('');
+  return `<div class="done-head"><h2>${S.early ? T().earlyTitle(countDone(), 3) : T().completed}</h2><p>${T().day}</p></div>
+    <div class="stats"><div><b class="num">${Math.max(1, Math.round(S.elapsed / 60))} min</b><span>${T().duration}</span></div><div><b class="num">${total}/9</b><span>${T().sets}</span></div><div><b class="num">${countDone()}/3</b><span>${T().exs}</span></div></div>
+    <h3 style="font-size:17px;line-height:22px;font-weight:600">${T().insights}</h3>${cards}
+    <button class="primary" data-a="restart" data-nc="1">${T().back}</button>`;
+}
+
+/* ---------- render ---------- */
+let screenEl = null;
+function render() {
+  const ph = document.getElementById('phone');
+  const prevTop = screenEl ? screenEl.scrollTop : 0;
+  let main = '';
+  if (S.done) main = completed();
+  else if (isToday()) main = S.view === 0 ? todaySingle(0) : todaySuperset();
+  else if (combined() && S.view > 0) main = combinedCard();
+  else main = exerciseCard(S.view);
+  const over = [];
+  if (!isToday() && S.rest && !S.done) over.push(restPopup());
+  if (S.toast && S.toast.kind === 'undo' && S.done) over.push(`<div class="toast" role="status"><span>${T().undoLast}</span><button data-a="undo" data-nc="1">${T().undo}</button></div>`);
+  if (S.toast && S.toast.kind === 'msg') over.push(`<div class="toast" role="status"><span>${S.toast.text}</span></div>`);
+  if (S.confirm) over.push(`<div class="confirm"><div><p>${T().finishQ(countDone(), 3)}</p><button class="secondary" data-a="confirmno" data-nc="1">${T().keep}</button><button class="primary" data-a="confirmyes" data-nc="1">${T().finishNow}</button></div></div>`);
+  ph.innerHTML = (S.done ? '' : topBar()) + `<div class="screen" id="screen">${main}</div>` + over.join('');
+  screenEl = document.getElementById('screen');
+  screenEl.scrollTop = S._top0 ? 0 : prevTop; S._top0 = false;
+  screenEl.addEventListener('wheel', onScroll, { passive: true });
+  screenEl.addEventListener('touchmove', onScroll, { passive: true });
+  ph.querySelectorAll('.trend-scroll').forEach(x => x.scrollLeft = x.scrollWidth);
+  ph.querySelectorAll('details[data-trend]').forEach(d => d.addEventListener('toggle', () => { ui.trendOpen = d.open; }));
+  renderSide();
+}
+function scrollTop() { S._top0 = true; }
+let scrollTimer = null, scrolling = false;
+function onScroll() {
+  if (!scrolling) { scrolling = true; S.scrolls++; document.getElementById('tScr').textContent = S.scrolls; }
+  clearTimeout(scrollTimer); scrollTimer = setTimeout(() => scrolling = false, 350);
+}
+
+function renderSide() {
+  const t = T();
+  document.documentElement.lang = ui.lang;
+  document.getElementById('pageTitle').textContent = t.title;
+  document.getElementById('pageSub').textContent = t.sub;
+  document.getElementById('lblDesign').textContent = t.design;
+  document.getElementById('lblSup').textContent = t.supLabel;
+  document.getElementById('lblDemo').textContent = t.demo;
+  document.getElementById('restart').textContent = t.restart;
+  document.getElementById('jump').textContent = t.jump;
+  document.getElementById('closeApp').textContent = t.closeApp;
+  document.getElementById('lblTaps').textContent = t.taps;
+  document.getElementById('tExL').textContent = t.tEx;
+  document.getElementById('tSupL').textContent = t.tSup;
+  document.getElementById('tScrL').textContent = t.tScr;
+  document.getElementById('tapNote').textContent = t.tapNote;
+  document.getElementById('lblLock').textContent = t.lock;
+  document.getElementById('lockNote').textContent = isToday() ? t.lockNoteNow : t.lockNoteNew;
+  document.getElementById('supNote').textContent = isToday() ? t.supToday : t.supNote[ui.sup];
+  document.getElementById('tabs').innerHTML = t.tabs.map((x, i) => `<button data-tab="${i}" aria-pressed="${ui.tab === i}">${x}</button>`).join('');
+  document.getElementById('supOpts').innerHTML = t.sup.map((x, i) => `<button data-sup="${i}" aria-pressed="${!isToday() && ui.sup === i}" ${isToday() ? 'disabled style="opacity:.45"' : ''}>${x}</button>`).join('');
+  document.getElementById('speed').innerHTML = t.speed.map((x, i) => `<button data-speed="${i ? 1 : 10}" aria-pressed="${ui.speed === (i ? 1 : 10)}">${x}</button>`).join('');
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === ui.lang));
+  document.getElementById('tEx').textContent = S.taps.ex;
+  document.getElementById('tSup').textContent = S.taps.sup;
+  document.getElementById('tScr').textContent = S.scrolls;
+  renderScore(); renderLock();
+}
+function renderScore() {
+  const t = T();
+  const rows = [
+    { k: 't', n: t.tabs[0], ex: 3, sup: '6', scr: '3+' },
+    { k: `1-${ui.sup}`, n: t.tabs[1], ex: 3, sup: ui.sup === 2 ? '3' : '6', scr: '0' },
+    { k: `2-${ui.sup}`, n: t.tabs[2], ex: 3, sup: ui.sup === 2 ? '3' : '6', scr: '0' },
+    { k: `3-${ui.sup}`, n: t.tabs[3], ex: 3, sup: ui.sup === 2 ? '3' : '6', scr: '0' },
+  ];
+  const c = (val, exp) => val === undefined ? `<span class="exp">${exp}</span>` : val;
+  document.getElementById('scoreBox').innerHTML = `<h2>${t.score}</h2><table class="score"><thead><tr><th>${t.mode}</th><th>${t.ex}</th><th>${t.ssup}</th><th>↕</th></tr></thead><tbody>${rows.map(r => {
+    const run = runs[r.k] || {};
+    return `<tr class="${runKey() === r.k ? 'on' : ''}"><td>${r.n}</td><td>${c(run.ex, r.ex)}</td><td>${c(run.sup, r.sup)}</td><td>${c(run.scr, r.scr)}</td></tr>`;
+  }).join('')}</tbody></table><p class="hint" style="margin-top:8px">${t.expected}</p>`;
+}
+function lockState() {
+  const R = S.rest, t = T();
+  if (S.done) return null;
+  if (!R) return null;
+  if (isToday()) return { head: t.rest === 'Descanso' ? 'Rest' : 'Rest', sub: S.view === 0 ? fullName(EXS[0]) : `${fullName(EXS[1])} + ${fullName(EXS[2])}`, time: R.over ? 'Go' : clock(R.left) };
+  const c = R.ctx;
+  const nextText = c.next.round !== undefined ? `C1 ${pair(c.next.a)} · C2 ${pair(c.next.b)}` : (c.nextEx ? `${c.nextEx} · ` : '') + `${fmt(c.next.w)} kg × ${c.next.r}`;
+  return { head: t.rest, sub: `${t.next}: ${nextText}`, time: R.over ? t.go : clock(R.left) };
+}
+function renderLock() {
+  const L0 = lockState(), box = document.getElementById('lock');
+  if (!L0) { box.innerHTML = `<p class="quiet">${!isToday() && S.sw ? T().lockSwitch : T().lockIdle}</p>`; return; }
+  box.innerHTML = `<div class="la">${TIMER}<div style="min-width:0"><small>${L0.head}</small><strong>${L0.sub}</strong></div><span class="big" data-lock-time>${L0.time}</span></div>
+    <div class="di">${TIMER}<span data-lock-time>${L0.time}</span></div>`;
+}
+
+/* ---------- ticking ---------- */
+let lastTick = Date.now();
+function tick() {
+  const now = Date.now(), dt = (now - lastTick) / 1000; lastTick = now;
+  if (!S || S.done) { if (S && S.toast && S.toast.kind === 'undo') { S.toast.left -= dt; if (S.toast.left <= 0) { S.toast = null; render(); } } return; }
+  S.elapsed += dt;
+  document.querySelectorAll('[data-elapsed]').forEach(x => x.textContent = clock(S.elapsed));
+  const sp = ui.speed;
+  if (S.rest) {
+    const R = S.rest;
+    if (!R.over) {
+      R.left -= dt * sp;
+      document.querySelectorAll('[data-rest-clock]').forEach(x => x.textContent = (R.inplace ? '⏱ ' : '') + clock(R.left));
+      document.querySelectorAll('[data-rest-bar]').forEach(x => x.style.width = Math.max(0, R.left / R.total * 100) + '%');
+      document.querySelectorAll('[data-lock-time]').forEach(x => x.textContent = clock(R.left));
+      if (R.left <= 0) {
+        if (R.inplace) { R.over = true; try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {} render(); }
+        else restEnded();
+      }
+    } else {
+      R.overLeft -= dt;
+      if (R.overLeft <= 0) closeRest();
+    }
+  }
+  if (S.sw) {
+    S.sw.left -= dt * Math.max(1, sp / 2);
+    const el = document.getElementById('swText');
+    if (S.sw.left <= 0) { const code = S.sw.code; S.sw = null; const box = document.querySelector('[data-switch]'); if (box) box.remove(); }
+    else if (el) el.innerHTML = T().switchTo(S.sw.code, Math.ceil(S.sw.left));
+  }
+  if (S.tt.handoff) {
+    S.tt.handoff.left -= dt * Math.max(1, sp / 2);
+    const el = document.getElementById('handoff');
+    if (S.tt.handoff.left <= 0) { S.tt.handoff = null; if (el) el.remove(); }
+    else if (el) el.textContent = T().handoff('C2', Math.ceil(S.tt.handoff.left));
+  }
+  if (S.insight && !S.insightPin) {
+    S.insight.left -= dt;
+    if (S.insight.left <= 0) leaveInsight();
+  }
+  if (S.toast && S.toast.kind === 'msg') { S.toast.left -= dt; if (S.toast.left <= 0) { S.toast = null; render(); } }
+}
+setInterval(tick, 200);
+
+/* ---------- events ---------- */
+document.getElementById('phone').addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (!b) return;
+  // Taps inside the rest card must not count as a tap on the scrim behind it.
+  if (b.classList.contains('scrim') && e.target.closest('[data-stop]')) return;
+  const a = b.dataset.a, ex = +b.dataset.ex, set = +b.dataset.set;
+  if (b.tagName === 'BUTTON' && b.dataset.nc !== '1') {
+    const phase = (S.view === 0 && !S.done) ? 'ex' : 'sup';
+    if (S.done) { /* post-flow taps are not counted */ }
+    else if (phase === 'ex' && S.taps.ex !== '–') S.taps.ex++;
+    else if (phase === 'sup') S.taps.sup++;
+  }
+  switch (a) {
+    case 'log': logProposed(ex, set); break;
+    case 'logRound': logRoundCombined(set); break;
+    case 'todaylog': todayLog(ex, set); break;
+    case 'logall': todayLogExercise(ex); break;
+    case 'tick': todayTick(+b.dataset.i); break;
+    case 'step': stepVal(ex, set, b.dataset.f, +b.dataset.d); break;
+    case 'pickset': S.cur = { ex, set }; render(); break;
+    case 'edit': if (S.vals[ex][set].done) { S.edit = S.edit && S.edit.ex === ex && S.edit.set === set ? null : { ex, set }; render(); } break;
+    case 'editclose': S.edit = null; render(); break;
+    case 'listedit': S.listEdit = S.listEdit && S.listEdit.ex === ex && S.listEdit.set === set ? null : { ex, set }; render(); break;
+    case 'listclose': S.listEdit = null; render(); break;
+    case 'askedit': S.askEdit = true; render(); break;
+    case 'undo': doUndo(); break;
+    case 'resthide': S.rest.hidden = true; render(); break;
+    case 'restshow': S.rest.hidden = false; render(); break;
+    case 'restclose': closeRest(); break;
+    case 'restskip': S.rest = null; render(); break;
+    case 'plus15': S.rest.left += 15; S.rest.total = Math.max(S.rest.total, S.rest.left); render(); break;
+    case 'rir': S.rir[ex] = +b.dataset.v; render(); break;
+    case 'pin': S.insightPin = true; render(); break;
+    case 'finishsup': { S.rest = null; finishFlow(true); break; }
+    case 'chip': if (!S.done && !S.rest) { S.view = ex; if (!exDone(ex)) { const s = S.vals[ex].findIndex(v => !v.done); if (S.cur.ex !== ex && !isToday() && ex !== 0) S.cur = { ex, set: s }; if (isToday() && ex === 0) S.cur = { ex: 0, set: s }; } scrollTop(); render(); } else if (S.rest) { S.view = ex; scrollTop(); render(); } break;
+    case 'exit': S.toast = { kind: 'msg', text: T().savedExit, left: 3 }; render(); break;
+    case 'finish': S.confirm = true; render(); break;
+    case 'confirmno': S.confirm = false; render(); break;
+    case 'confirmyes': S.confirm = false; finishFlow(true); break;
+    case 'restart': fresh(); render(); break;
+    case 'demo': S.toast = { kind: 'msg', text: T().demoOnly, left: 2 }; render(); break;
+  }
+});
+document.getElementById('restart').addEventListener('click', () => { fresh(); render(); });
+document.getElementById('jump').addEventListener('click', () => { fresh('sup'); render(); });
+document.getElementById('closeApp').addEventListener('click', () => {
+  if (isToday()) {
+    if (S.view > 0) { S.vals[1].forEach(v => v.done = false); S.vals[2].forEach(v => v.done = false); S.tt = { round: 0, t: [false, false], handoff: null, savedRounds: 0 }; S.rest = null; }
+    S.toast = { kind: 'msg', text: T().closedLost, left: 5 };
+  } else S.toast = { kind: 'msg', text: T().closedKept, left: 4 };
+  render();
+});
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { ui.lang = b.dataset.lang; render(); }));
+document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) { ui.tab = +b.dataset.tab; fresh(S.startedSup ? 'sup' : undefined); render(); } });
+document.getElementById('supOpts').addEventListener('click', e => { const b = e.target.closest('[data-sup]'); if (b && !isToday()) { ui.sup = +b.dataset.sup; fresh(S.view > 0 ? 'sup' : undefined); render(); } });
+document.getElementById('speed').addEventListener('click', e => { const b = e.target.closest('[data-speed]'); if (b) { ui.speed = +b.dataset.speed; renderSide(); } });
+try { const q = new URLSearchParams(location.search); if (q.get('lang') === 'es') ui.lang = 'es'; } catch (e) {}
+fresh(); render();
+</script>
+</body>
+</html>
