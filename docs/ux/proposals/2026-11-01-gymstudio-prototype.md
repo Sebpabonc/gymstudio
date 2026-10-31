@@ -86,4 +86,4 @@ For the Tech Lead and QAer:
 
 ## Checks
 
-Tested locally at 390 × 844 in EN and ES: full first run, Today exits, logging, plates, finish, Progress and You. No horizontal overflow and no overlay errors. Not tested on an iPhone. The published link needs the PO's sign-in, so its first load has not been checked. The Web Interface Guidelines audit was not re-run, because no app code changes here.
+Tested locally at 390 × 844 in EN and ES: full first run, Today exits, logging, plates, finish, Progress and You. No horizontal overflow and no overlay errors. Not tested on an iPhone. The PO confirmed that the published link opens. The Web Interface Guidelines audit was not re-run, because no app code changes here.
