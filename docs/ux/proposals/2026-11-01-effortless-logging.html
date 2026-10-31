@@ -325,7 +325,7 @@ const STR = {
     logSet: n => `Log set ${n}`, logExercise: "Log exercise", last: "Last time", today: "Today", trend: "Trend by set", fromZero: "Bars from 0 kg", S: n => `Set ${n}`,
     done: (w, r) => `Done · ${w} kg × ${r}`, yes: "Yes, done", change: "Change", did: "Did you do this?", saveSet: (w, r) => `Save · ${w} kg × ${r}`, doneShort: "Done",
     carried: "Also applied to your next sets.", ownTarget: "Each set has its own target.", target: t => `Target ${t}`,
-    editing: n => `Editing set ${n}. Saved as you change it.`, close: "Close", saved: "Saved",
+    editing: n => `Editing set ${n}. Saved as you change it.`, close: "Close", saved: "Saved", fixSet: "Fix a logged set", lastInline: (w, r) => `Last time: ${w} kg × ${r}`,
     rest: "Rest", restDone: "Rest done", restOver: "Time's up", hide: "Hide", undo: "Undo", plus15: "+15 s", skip: "Skip", startNext: "Start next set now", startNextEx: "Start next exercise now", ok: "OK, let's go",
     setLogged: (n, w, r) => `✓ Set ${n} logged · ${w} kg × ${r}`, pairLogged: (n) => `✓ Round ${n} logged`,
     next: "Next", nextSet: (n, w, r) => `Set ${n} · ${w} kg × ${r}`, whenEnds: "When time runs out your phone vibrates and sounds. The next set will be ready.",
@@ -361,7 +361,7 @@ const STR = {
     logSet: n => `Registrar serie ${n}`, logExercise: "Registrar ejercicio", last: "Última vez", today: "Hoy", trend: "Tendencia por serie", fromZero: "Barras desde 0 kg", S: n => `Serie ${n}`,
     done: (w, r) => `Hecho · ${w} kg × ${r}`, yes: "Sí, hecho", change: "Cambiar", did: "¿Hiciste esto?", saveSet: (w, r) => `Guardar · ${w} kg × ${r}`, doneShort: "Hecho",
     carried: "También aplicado a tus siguientes series.", ownTarget: "Cada serie tiene su propio objetivo.", target: t => `Objetivo ${t}`,
-    editing: n => `Editando la serie ${n}. Se guarda al cambiar.`, close: "Cerrar", saved: "Guardado",
+    editing: n => `Editando la serie ${n}. Se guarda al cambiar.`, close: "Cerrar", saved: "Guardado", fixSet: "Corregir una serie", lastInline: (w, r) => `Última vez: ${w} kg × ${r}`,
     rest: "Descanso", restDone: "Descanso terminado", restOver: "Se acabó el tiempo", hide: "Ocultar", undo: "Deshacer", plus15: "+15 s", skip: "Omitir", startNext: "Empezar la siguiente serie", startNextEx: "Empezar el siguiente ejercicio", ok: "Vamos",
     setLogged: (n, w, r) => `✓ Serie ${n} registrada · ${w} kg × ${r}`, pairLogged: (n) => `✓ Ronda ${n} registrada`,
     next: "Sigue", nextSet: (n, w, r) => `Serie ${n} · ${w} kg × ${r}`, whenEnds: "Cuando se acabe el tiempo, el teléfono vibra y suena. La siguiente serie estará lista.",
@@ -619,11 +619,20 @@ function table(ex, opts = {}) {
   }).join('');
   return `<div><p class="sect-cap">${T().last} · ${L(e.lastDate)}</p><div class="stable"><div class="shead"><span>#</span><span>${T().last}</span><span>${T().today}</span></div>${rows}</div></div>`;
 }
+function fixBlock(ex) {
+  const done = S.vals[ex].map((v, i) => ({ v, i })).filter(x => x.v.done);
+  if (!done.length) return '';
+  if (S.fix !== ex) return `<button class="textbtn" data-a="fixopen" data-ex="${ex}" data-nc="1">${T().fixSet}</button>`;
+  const pills = done.map(({ v, i }) => `<button class="ghost" data-a="edit" data-ex="${ex}" data-set="${i}" data-nc="1" aria-pressed="${!!(S.edit && S.edit.ex === ex && S.edit.set === i)}">${T().S(i + 1)} · ${pair(v)}</button>`).join('');
+  const ed = S.edit && S.edit.ex === ex ? `<div class="editrow"><div class="hint"><span>${T().editing(S.edit.set + 1)}</span></div>${stepper(ex, S.edit.set, 'w')}${stepper(ex, S.edit.set, 'r')}</div>` : '';
+  return `<div class="stable"><div class="row-btns">${pills}</div>${ed}<button class="textbtn" data-a="fixclose" data-nc="1">${T().close}</button></div>`;
+}
 function setHeading(ex, set) {
   const e = EXS[ex];
   const inB = !isToday() && ui.sup === 1 && ex > 0;
   const label = inB ? T().roundOf(set + 1, 3) : T().setOf(set + 1, 3);
-  return `<p class="setlabel">${label}${e.range ? `<span>${T().target(e.range)}</span>` : ''}</p>`;
+  const [lw, lr] = e.last[set];
+  return `<p class="setlabel">${label}${e.range ? `<span>${T().target(e.range)}</span>` : ''}</p><p class="sect-cap">${T().lastInline(fmt(lw), lr)}</p>`;
 }
 function supLink(ex) {
   if (ex === 0 || combined()) return '';
@@ -655,7 +664,7 @@ function exerciseCard(ex) {
         : `<p class="q">${T().did}</p><p class="v">${fmt(v.w)} kg × ${v.r}</p><div class="two"><button class="primary big" data-a="log" data-ex="${ex}" data-set="${set}">${T().yes}</button><button class="secondary" style="min-height:64px" data-a="askedit">${T().change}</button></div>`}</div>`;
     }
   }
-  const body = ui.tab === TAB_LIST ? listTable(ex) : (logger + table(ex));
+  const body = ui.tab === TAB_LIST ? listTable(ex) : logger;
   return `<article class="xcard current">
     ${supRibbon(ex, set)}
     <h2 class="name">${L(e.name)}<small>${L(e.sub)}</small></h2>
@@ -666,6 +675,7 @@ function exerciseCard(ex) {
     ${ex === 0 && ui.tab !== TAB_LIST ? `<p class="hint" style="display:none">${T().ownTarget}</p>` : ''}
     ${body}
     ${trend(ex)}
+    ${ui.tab === TAB_LIST ? '' : fixBlock(ex)}
   </article>`;
 }
 function listTable(ex) {
@@ -697,8 +707,8 @@ function combinedCard() {
     ${exBlock(1)}${exBlock(2)}
     <button class="primary big" data-a="logRound" data-set="${r}">${T().doneRound(r + 1)}</button>
     ${lines}
-    ${table(1)}${trend(1, 'C1')}
-    ${table(2)}${trend(2, 'C2')}
+    ${trend(1, 'C1')}${fixBlock(1)}
+    ${trend(2, 'C2')}${fixBlock(2)}
     ${tools()}
   </article>`;
 }
@@ -955,6 +965,8 @@ document.getElementById('phone').addEventListener('click', e => {
     case 'pickset': S.cur = { ex, set }; render(); break;
     case 'edit': if (S.vals[ex][set].done) { S.edit = S.edit && S.edit.ex === ex && S.edit.set === set ? null : { ex, set }; render(); } break;
     case 'editclose': S.edit = null; render(); break;
+    case 'fixopen': S.fix = ex; S.edit = null; render(); break;
+    case 'fixclose': S.fix = null; S.edit = null; render(); break;
     case 'listedit': S.listEdit = S.listEdit && S.listEdit.ex === ex && S.listEdit.set === set ? null : { ex, set }; render(); break;
     case 'listclose': S.listEdit = null; render(); break;
     case 'askedit': S.askEdit = true; render(); break;

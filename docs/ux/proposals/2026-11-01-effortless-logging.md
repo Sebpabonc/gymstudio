@@ -1,5 +1,7 @@
 # Effortless logging: one tap per set, a clear rest, simpler supersets
 
+> **PO 2026-11-01:** remove the per-set table (# · Last time · Today) from the proposed screens: the Trend by set chart already shows it. The logger keeps one line "Last time: 24 kg × 12"; correcting a logged set moves to a "Fix a logged set" button under the chart.
+
 - **Status:** proposal (UXer), not approved. No code, content or data changed.
 - **Date:** 2026-11-01
 - **Prototype:** [`2026-11-01-effortless-logging.html`](2026-11-01-effortless-logging.html). 390 px phone, EN/ES, tabs "Today (current)" + 3 concepts, superset layouts A/B/C, live tap counter, lock-screen preview.
