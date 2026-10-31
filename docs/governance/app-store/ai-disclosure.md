@@ -1,8 +1,8 @@
 # AI disclosure and consent copy (DRAFT)
 
-Governancer, 2026-10-31. Rule: Apple 5.1.2(i): "You must clearly disclose where personal data will be shared with third parties, including with
+Governancer, 2026-10-31; updated 2026-11-01. Rule: Apple 5.1.2(i): "You must clearly disclose where personal data will be shared with third parties, including with
 third-party AI, and obtain explicit permission before doing so." Read 2026-10-31 at
-`https://developer.apple.com/app-store/review/guidelines/`. UXer checks placement; PT checks D and E; lawyer checks A and G; Tech Lead builds (G2, G3, G5, G9, G20).
+`https://developer.apple.com/app-store/review/guidelines/`. UXer checks placement; PT checks D and E; PO approves A and G (no lawyer, his decision); Tech Lead builds (G2, G3, G5, G9, G20). Wording rule: "AI trainer" / "entrenador con IA", never "personal trainer" (G9). US and Korean rules want sharing consent separate from collection: keep A and the F measurements row as two separate steps, neither inside the Terms step G. Stored with version and time.
 
 **Today:** only the chat asks. `trainer_explain` and `block_plan` send data without asking, even after "Not now" (see `data-inventory.md` section 5). The copy below
 is not true until G2 is done. Keys below are proposals; both dictionaries must have the same keys.
@@ -76,11 +76,11 @@ Store: version, choice, timestamp, on the server.
 
 ## G. Sign-up
 
-Before the account is created, all sign-in methods, unticked. <!-- LAWYER -->
+Before the account is created, all sign-in methods, unticked. <!-- HIGH RISK; PO approves -->
 
 | EN | ES |
 |---|---|
-| ☐ I am [PO: age] or older and I accept the Terms and Privacy Policy. | ☐ Tengo [PO: edad] años o más y acepto los Términos y la Política de privacidad. |
+| ☐ I am 18 or older and I accept the Terms and Privacy Policy. | ☐ Tengo 18 años o más y acepto los Términos y la Política de privacidad. |
 
 Replace `login.benefit3` and `login.privacyBody` (G9):
 

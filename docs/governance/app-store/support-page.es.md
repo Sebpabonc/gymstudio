@@ -1,11 +1,11 @@
 <!--
-BORRADOR, Governancer 2026-10-31. Ver notas en support-page.en.md.
-URL sugerida: https://sebpabonc.github.io/gymstudio/legal/support.es.html
+BORRADOR, Governancer, actualizado 2026-11-01. Ver notas en support-page.en.md.
+URL: https://sebpabonc.github.io/gymstudio/legal/support.es.html (G5)
 -->
 
 # Soporte de GymStudio
 
-**Contacto:** [PO: correo de soporte]. Intentamos responder en [PO: p. ej., 3 días hábiles]. Incluye tu dispositivo, versión de iOS y qué estabas haciendo.
+**Contacto:** js.pabonc979@gmail.com. Intentamos responder en [PO aprueba: 5 días hábiles]. Incluye tu dispositivo, versión de iOS y qué estabas haciendo.
 Nunca nos envíes tu contraseña. Con sesión iniciada, también puedes escribir con el botón de destellos → Comentarios.
 
 **Emergencias médicas:** no podemos ayudarte. Llama al número de emergencias de tu país.
@@ -18,11 +18,11 @@ Nunca nos envíes tu contraseña. Con sesión iniciada, también puedes escribir
 
 Tu cuenta y los datos asociados se eliminan de forma permanente de nuestra base de datos de inmediato. Las copias de seguridad vencen en [VERIFICAR: 7 a 30 días].
 Borrar la app por sí solo no borra tu cuenta. Los datos permanecen en otro teléfono hasta que abras la app allí o la elimines. **¿No puedes iniciar sesión?** Escribe a
-[PO: correo de privacidad] desde el correo de tu cuenta y la borraremos en [PO: p. ej., 30 días].
+js.pabonc979@gmail.com desde el correo de tu cuenta y la borraremos en [PO aprueba: 10 días].
 
 ## Desactivar la IA
 
-**Perfil → Privacidad e IA.** [REQUIERE G3] La app sigue funcionando: verás motivos y planes basados en reglas. Consulta la [Política de privacidad]([PO: URL de privacidad]).
+**Perfil → Privacidad e IA.** [REQUIERE G3] La app sigue funcionando: verás motivos y planes basados en reglas. Consulta la [Política de privacidad](https://sebpabonc.github.io/gymstudio/legal/privacy.es.html).
 
 ## Preguntas frecuentes
 
@@ -34,15 +34,17 @@ Borrar la app por sí solo no borra tu cuenta. Los datos permanecen en otro tel�
 
 **¿Cómo se elige el peso de hoy?** Las reglas de la app usan tus series recientes. Cámbialo si no te parece bien. Tú decides qué levantas.
 
+**¿Me está entrenando una persona?** No. El entrenador con IA de GymStudio es un programa. Ningún entrenador humano ni profesional de la salud revisa tu plan. Las reglas y las plantillas de planes de la app se prepararon con un agente especialista de IA y las aprobó el dueño de la app.
+
 **¿Esto es consejo médico?** No. Consulta a un médico antes de empezar un programa y detente si sientes dolor o malestar.
 
 **¿Por qué no aparece el temporizador en mi pantalla bloqueada?** Las Actividades en vivo necesitan un iPhone con iOS 16.2 o posterior y deben estar activadas en Ajustes de
 iOS → GymStudio → Actividades en vivo. La Dynamic Island aparece en los modelos que la tienen.
 
-**¿GymStudio es gratis?** Sí, en el lanzamiento. [PO: confirmar]
+**¿GymStudio es gratis?** Sí, en el lanzamiento.
 
 ## Legal
 
-[Política de privacidad]([PO: URL de privacidad]) · [Términos de uso]([PO: URL de términos]) · [English](support.en.html)
+[Política de privacidad](https://sebpabonc.github.io/gymstudio/legal/privacy.es.html) · [Términos de uso](https://sebpabonc.github.io/gymstudio/legal/terms.es.html) · [Política de datos de salud del consumidor (EE. UU.)](https://sebpabonc.github.io/gymstudio/legal/consumer-health-data.es.html) · [English](support.en.html)
 
-[PO: nombre legal]. [PO: país]
+Seb Pabon. Australia.
