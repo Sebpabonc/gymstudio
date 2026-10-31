@@ -1,6 +1,6 @@
 # GymStudio prototype: Fitbod's good ideas on the current app
 
-- **Status:** proposal (UXer), not approved. No app code, content or data changed.
+- **Status:** proposal (UXer). PO approved two parts on 2026-11-01: see `docs/ux/approved/2026-11-01-reason-and-questions-first.md`. The rest is not approved. No app code, content or data changed.
 - **Date:** 2026-11-01
 - **Prototype (private link, the PO can share it):** https://claude.ai/artifact/XZeKFk4YzJGt5PKz4Xv5bh
 - **Evidence:** `2026-11-01-fitbod-review.md`, verified on device in PR #393.
@@ -8,11 +8,10 @@
 
 ## How it is built
 
-The prototype runs the deployed GymStudio bundle (`index-0b019417.js`) in demo mode. A small overlay, [`2026-11-01-gymstudio-prototype-overlay.js`](2026-11-01-gymstudio-prototype-overlay.js), adds only what this proposal changes, with a dotted outline that can be switched off. Today, Exercises, Progress, You, technique, rest and supersets are the real screens. The overlay is a prototype, not code to merge.
+The prototype runs the deployed GymStudio bundle (`index-a3588a01.js`, which includes Big Done from PR #382) in demo mode. A small overlay, [`2026-11-01-gymstudio-prototype-overlay.js`](2026-11-01-gymstudio-prototype-overlay.js), adds only what this proposal changes, with a dotted outline that can be switched off. Today, Exercises, Progress, You, Big Done, technique, rest and supersets are the real screens. The overlay is a prototype, not code to merge.
 
 - **Clock:** fixed at Monday 2 Nov 2026 so it always opens on a workout to start. Today's demo entries are cleared once for the same reason.
 - **Content:** catalogue, reasons and weights come from the app and approved files. The two reason sentences reuse approved strings from `src/i18n/sections/workout.ts`.
-- **Not on `main` yet:** Big Done from PR #382, so changed weights do not carry over and the per-set table stays.
 
 ## Problem and opportunity
 
@@ -29,7 +28,7 @@ The on-device review showed three things:
 | First run | 5 chat-style questions, reminder, account, AI question, plan summary, today's workout | Questions first, in a coach's voice | 5 instead of 11, medical notice in view, AI asked once with a real no, no paywall, starts today | 1, 2, 7 |
 | Today | Reason line and two exits under Start | Exits from the day | The reason is always visible; changes are for today only and the plan never regenerates | 5, 6 |
 | Today | One dismissible tip; no welcome card | One tip per feature | Same idea, in our words | 12 |
-| Log | Button states what it saves; reason above the set | One big log button | Theirs repeats no values and gives no reason | 5 |
+| Log | Reason above the set (Big Done already states what the button saves) | One big log button | Theirs repeats no values and gives no reason | 5 |
 | Log | Plate calculator on barbell lifts; no Google button | Plate calculator | Our own drawing, and no outside site | 4, 15 |
 | Finish | Achievement card with real numbers, above the current summary | Quick finish | A real achievement instead of generic confetti | 11 |
 | Progress | One tip; hides "+x kg/week" | One tip per feature | Real sets, no locked score | 9, 12 |
@@ -44,7 +43,6 @@ The on-device review showed three things:
 | Reason line on Today and Log | Very high | S | PT, engine reason codes | Launch |
 | Delete account and AI question | Very high, required | M | Governance, Tech Lead, #384 | Launch |
 | Questions first, workout today | Very high | M | PT for the first day, Tech Lead for moving answers into the account | Launch |
-| Button states what it saves | High | S | PR #382 | With #382 |
 | Tips instead of welcome card | Medium to high | S | None | Launch |
 | Remove Google button | Medium, also helps G12 | S | Images decision | Launch |
 | Achievement on finish | Medium | S | PT | v1.1 |
@@ -64,7 +62,7 @@ The on-device review showed three things:
 
 For the Tech Lead and QAer:
 
-- **Technique wraps:** the "Technique" tool label breaks as "Techniqu / e" at 390 px.
+- **Technique wraps:** in English, the "Technique" tool label broke as "Techniqu / e" at 390 px on the build before Big Done. Not rechecked on the current one.
 - **Mixed message on finish:** moving from 82.5 to 85 kg shows as "Mixed" and "Below last time (−7%)", from a comparison across A and B days. Worth a PT look.
 - **Reason source:** the overlay picks the sentence from the numbers on screen. The real line should use the engine's reason code.
 
@@ -86,4 +84,4 @@ For the Tech Lead and QAer:
 
 ## Checks
 
-Tested locally at 390 × 844 in EN and ES: full first run, Today exits, logging, plates, finish, Progress and You. No horizontal overflow and no overlay errors. Not tested on an iPhone. The PO confirmed that the published link opens. The Web Interface Guidelines audit was not re-run, because no app code changes here.
+Tested locally at 390 × 844 in EN and ES on the earlier bundle: full first run, Today exits, logging, plates, finish, Progress and You. Re-run on the current bundle in ES with a headless browser: first run, reason, plates, rest and finish, with no horizontal overflow and no console errors. Not tested on an iPhone. The PO confirmed that the published link opened before this refresh. The Web Interface Guidelines audit was not re-run, because no app code changes here.

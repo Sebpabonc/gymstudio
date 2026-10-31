@@ -14,7 +14,7 @@
       i_title: '¿Quieres explicaciones con IA?', i_body: 'Las reglas siempre eligen tu peso. La IA solo lo explica y responde preguntas. Si aceptas, tu historial se envía a OpenAI.', i_yes: 'Sí, activar IA', i_no: 'No, sin IA', i_note: 'Sin IA la app funciona igual. Se cambia en Tú.',
       p_title: 'Tu plan está listo', p_body: 'Empieza hoy, no el próximo lunes. Este plan no cambia solo: tú decides cada cambio.', p_cta: 'Ver el entreno de hoy', weeks: '6 semanas',
       why: 'Por qué este peso', short: 'Tengo poco tiempo', machine: 'Máquina ocupada', done: 'Hecho', plates: 'Discos',
-      tip_today: 'Cada peso dice por qué. Y si hoy cambia algo, usa estas dos salidas: tu plan sigue igual.', tip_log: 'Un toque guarda la serie. El botón te dice qué va a guardar.', tip_prog: 'Aquí ves lo que levantaste de verdad, sin puntajes.', ok: 'Entendido',
+      tip_today: 'Cada peso dice por qué. Y si hoy cambia algo, usa estas dos salidas: tu plan sigue igual.', tip_log: 'Este es el motivo de tu peso. Cambia si la última vez cambia.', tip_prog: 'Aquí ves lo que levantaste de verdad, sin puntajes.', ok: 'Entendido',
       s_title: '¿Cuánto tiempo tienes?', s_body: 'Solo cambia hoy. Tu plan sigue igual.', s_45: '45 minutos', s_30: '30 minutos', s_rule: 'Regla de ejemplo, la real la decide el PT: quita los últimos ejercicios del día.', s_done: 'Hoy quitas {n} ejercicios. Tu plan no cambió.', s_tag: 'Hoy no',
       m_title: '¿Qué máquina está ocupada?', m_pick: 'En vez de {x}', m_body: 'Del catálogo aprobado: misma zona y mismo movimiento. Solo cambia hoy.', m_none: 'No hay alternativas para este ejercicio.', m_tag: 'Hoy: {x}', cancel: 'Cancelar',
       pl_title: 'Discos por lado', pl_body: 'Para {kg} kg, con barra de {bar} kg:', pl_less: 'Menos que la barra sola.',
@@ -23,12 +23,12 @@
       changes: [
         ['Primer uso', 'Preguntas tipo chat, luego cuenta, IA con un “no” real, y el entreno de hoy.', 'Fitbod hace 11 preguntas y pide cuenta antes de mostrar un entreno.'],
         ['Hoy', 'El porqué del peso a la vista, y dos salidas: poco tiempo y máquina ocupada.', 'Fitbod tiene salidas, pero no un porqué por ejercicio.'],
-        ['Registrar', 'El botón dice qué guarda. Calculadora de discos en barra. Sin el botón de Google.', 'Fitbod tiene la calculadora; su botón no repite los valores.'],
+        ['Registrar', 'El porqué encima de la serie, calculadora de discos en barra y sin el botón de Google.', 'Fitbod tiene la calculadora, pero no el porqué.'],
         ['Al terminar', 'Un logro con tus números, encima del resumen que ya tienes.', 'Fitbod muestra confeti genérico.'],
         ['Progreso', 'Una ayuda corta. Se oculta “+x kg/semana”.', 'Una ayuda por función, como Fitbod.'],
         ['Tú', 'Borrar cuenta, diciendo qué se borra.', 'Fitbod lo esconde abajo y no lo dice.'],
       ],
-      keep: 'Sin tocar: Hoy, Ejercicios, Progreso, Tú, técnica, descanso y superseries son los actuales. El PR #382 cambiará parte del registro. Los pesos son de la demo; poco tiempo, máquina ocupada y borrar cuenta son simulados.',
+      keep: 'Sin tocar: Hoy, Ejercicios, Progreso, Tú, Big Done, técnica, descanso y superseries son los que están en producción hoy. Los pesos son de la demo; poco tiempo, máquina ocupada y borrar cuenta son simulados.',
     },
     en: {
       pill: 'What changed', title: 'Prototype on the current app', intro: 'This is your real app in demo mode. I only added what has a dotted outline. Nothing is saved to your account.', mark: 'Mark what’s new', replay: 'See the first run again', close: 'Close',
@@ -41,7 +41,7 @@
       i_title: 'Do you want AI explanations?', i_body: 'Rules always choose your weight. AI only explains it and answers questions. If you accept, your history is sent to OpenAI.', i_yes: 'Yes, turn on AI', i_no: 'No AI', i_note: 'Without AI the app works the same. Change it in You.',
       p_title: 'Your plan is ready', p_body: 'It starts today, not next Monday. This plan doesn’t change by itself: you decide every change.', p_cta: 'See today’s workout', weeks: '6 weeks',
       why: 'Why this weight', short: 'Short on time', machine: 'Machine taken', done: 'Done', plates: 'Plates',
-      tip_today: 'Every weight says why. If today changes, use these two exits: your plan stays the same.', tip_log: 'One tap saves the set. The button tells you what it will save.', tip_prog: 'This is what you really lifted, with no scores.', ok: 'Got it',
+      tip_today: 'Every weight says why. If today changes, use these two exits: your plan stays the same.', tip_log: 'This is the reason for your weight. It changes when your last session does.', tip_prog: 'This is what you really lifted, with no scores.', ok: 'Got it',
       s_title: 'How much time do you have?', s_body: 'Only today changes. Your plan stays the same.', s_45: '45 minutes', s_30: '30 minutes', s_rule: 'Example rule, the PT decides the real one: drops the last exercises of the day.', s_done: 'Today you drop {n} exercises. Your plan didn’t change.', s_tag: 'Not today',
       m_title: 'Which machine is taken?', m_pick: 'Instead of {x}', m_body: 'From the approved catalogue: same area and same movement. Only today changes.', m_none: 'No alternatives for this exercise.', m_tag: 'Today: {x}', cancel: 'Cancel',
       pl_title: 'Plates per side', pl_body: 'For {kg} kg, with a {bar} kg bar:', pl_less: 'Less than the bar alone.',
@@ -50,12 +50,12 @@
       changes: [
         ['First run', 'Chat-style questions, then account, AI with a real “no”, and today’s workout.', 'Fitbod asks 11 questions and requires an account before showing a workout.'],
         ['Today', 'The reason for the weight in view, and two exits: short on time and machine taken.', 'Fitbod has exits, but no per-exercise reason.'],
-        ['Log', 'The button says what it saves. Plate calculator on barbell lifts. No Google button.', 'Fitbod has the calculator; its button doesn’t repeat the values.'],
+        ['Log', 'The reason above the set, a plate calculator on barbell lifts, and no Google button.', 'Fitbod has the calculator, but not the reason.'],
         ['Finish', 'An achievement with your numbers, above the summary you already have.', 'Fitbod shows generic confetti.'],
         ['Progress', 'One short tip. Hides “+x kg/week”.', 'One tip per feature, like Fitbod.'],
         ['You', 'Delete account, saying what is deleted.', 'Fitbod hides it low down and doesn’t say.'],
       ],
-      keep: 'Untouched: Today, Exercises, Progress, You, technique, rest and supersets are the current ones. PR #382 will change part of logging. Weights come from the demo; short on time, machine taken and delete account are simulated.',
+      keep: 'Untouched: Today, Exercises, Progress, You, Big Done, technique, rest and supersets are what’s live today. Weights come from the demo; short on time, machine taken and delete account are simulated.',
     },
   };
   const lang = () => (document.documentElement.lang === 'es' ? 'es' : 'en');
@@ -78,9 +78,7 @@
   .gsx-tip button { background: none; border: 0; color: #c99ca1; font: 600 13px/18px var(--font-ui); min-height: 32px; cursor: pointer; }
   .gsx-tag { display: inline-block; margin-top: 4px; font: 600 12px/16px var(--font-ui); color: #e5c07b; }
   article.gsx-cut { opacity: .45; }
-  .workout-mode-log-set.gsx-label { font-size: 0 !important; }
-  .workout-mode-log-set.gsx-label::after { content: attr(data-gsx); font: 700 17px/22px var(--font-ui); }
-  .workout-tool[title="Search on Google"], .workout-tool[title="Buscar en Google"] { display: none !important; }
+  .workout-tool[title*="Google"] { display: none !important; }
   .gsx-win { background: rgba(165,220,174,.13); border-radius: 18px; padding: 14px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 2px; font: 400 14px/19px var(--font-ui); color: var(--text); }
   .gsx-win small { font: 600 12px/16px var(--font-ui); color: #a5dcae; }
   .gsx-win strong { font-size: 26px; line-height: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -199,7 +197,7 @@
 
   function lastBench() {
     try {
-      const h = JSON.parse(localStorage.getItem('gym-studio.demo.history')).filter(e => e.exerciseId === 'barbell-bench-press' && e.date < '2026-11-02').sort((a, b) => (a.date < b.date ? -1 : 1));
+      const h = JSON.parse(localStorage.getItem('gym-studio.demo.history')).filter(e => e.exerciseId === 'barbell-bench-press' && e.dayKey === 'upper-a' && e.date < '2026-11-02').sort((a, b) => (a.date < b.date ? -1 : 1));
       const e = h[h.length - 1]; return e && e.sets[0] ? e.sets[0] : null;
     } catch (e) { return null; }
   }
@@ -226,23 +224,19 @@
   function enhanceLogger() {
     const card = document.querySelector('article.workout-mode-current'); if (!card) return;
     const x = t();
-    const row = card.querySelector('.workout-mode-compact-row.current');
-    const last = row && parseVal((row.querySelector('.set-table-last') || {}).textContent);
-    const today = row && parseVal((row.querySelector('.set-table-today') || {}).textContent);
-    const section = card.querySelector('.planned-set-section');
-    if (section) {
-      ensure(card, section, 'why', () => {
+    const lastEl = card.querySelector('.effortless-last');
+    const last = lastEl && parseVal(lastEl.textContent.replace(/\s*kg\s*/g, ''));
+    const doneBtn = [...card.querySelectorAll('button')].find(b => /^(Done|Hecho) · /.test(b.textContent.trim()));
+    const today = doneBtn && parseVal(doneBtn.textContent.replace(/\s*kg\s*/g, ''));
+    let anchor = lastEl || doneBtn;
+    while (anchor && anchor.parentElement !== card) anchor = anchor.parentElement;
+    if (anchor) {
+      ensure(card, anchor, 'why', () => {
         const tip = state.tips.log ? '' : `<div class="gsx-tip"><span>${x.tip_log}</span><button data-g="tip" data-v="log">${x.ok}</button></div>`;
         const wt = last && today ? whyText(last.kg, last.reps, today.kg, today.reps) : '';
         const why = wt ? `<div class="gsx-why"><b>${x.why}</b>${wt}</div>` : '';
         return tip + why;
       });
-    }
-    const btn = card.querySelector('.workout-mode-log-set');
-    if (btn && today) {
-      btn.classList.add('gsx-label');
-      const label = `${x.done} · ${num(today.kg)} kg × ${today.reps}`;
-      if (btn.dataset.gsx !== label) btn.dataset.gsx = label;
     }
     const tools = card.querySelector('.workout-exercise-tools');
     if (tools && /barbell/.test(card.dataset.exerciseCard || '')) {
