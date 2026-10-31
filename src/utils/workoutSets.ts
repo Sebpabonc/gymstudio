@@ -87,13 +87,15 @@ export function filterLoggableSets(sets: WorkoutSet[], equipment?: string): Work
   return sets.flatMap((set) => {
     const reps = Number(set.reps) || 0
     const weight = Number(set.weight) || 0
-    if (!(weight > 0 || (bodyweight && reps > 0))) return []
+    if (!Number.isFinite(reps) || reps <= 0 || !Number.isFinite(weight) || weight < 0 ||
+      !(weight > 0 || bodyweight)) return []
 
     const { drop, ...rest } = set
     const loggable: WorkoutSet = { ...rest, reps, weight }
     const dropWeight = Number(drop?.weight) || 0
     const dropReps = Number(drop?.reps) || 0
-    if (drop && (dropWeight > 0 || (bodyweight && dropReps > 0))) {
+    if (drop && Number.isFinite(dropReps) && dropReps > 0 &&
+      Number.isFinite(dropWeight) && dropWeight >= 0 && (dropWeight > 0 || bodyweight)) {
       loggable.drop = { reps: dropReps, weight: dropWeight }
     }
     return [loggable]

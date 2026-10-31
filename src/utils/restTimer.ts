@@ -2,6 +2,13 @@ export type RestTimerState =
   | { endAt: number; pausedRemainingMs?: never }
   | { endAt?: never; pausedRemainingMs: number }
 
+export function getWorkoutRestSeconds(profileSeconds?: number, exerciseSeconds?: number): number {
+  for (const seconds of [exerciseSeconds, profileSeconds]) {
+    if (typeof seconds === 'number' && Number.isFinite(seconds) && seconds > 0) return seconds
+  }
+  return 90
+}
+
 export function isRestTimerPaused(
   timer: RestTimerState
 ): timer is { endAt?: never; pausedRemainingMs: number } {

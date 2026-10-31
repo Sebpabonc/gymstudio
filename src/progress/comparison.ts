@@ -126,12 +126,12 @@ export function latestEquivalentComparisons(
 
 export type WatchObservation = {
   exerciseId: string
-  code: 'W1' | 'W2' | 'W3' | 'W4' | 'W5' | 'W6'
+  code: 'W1' | 'W2' | 'W3' | 'W6'
   params: Record<string, string | number>
   priority: number
 }
 
-const WATCH_PRIORITY = { W1: 6, W2: 5, W3: 4, W4: 3, W6: 2, W5: 1 } as const
+const WATCH_PRIORITY = { W1: 6, W2: 5, W3: 4, W6: 2 } as const
 
 export function watchObservations(
   entries: ProgressEntry[],
@@ -167,7 +167,9 @@ export function watchObservations(
     }
     const sameTopLoad = sets.length > 0 && sets.every((set) => sameLoad(set.weight, sets[0].weight, equipmentStep(exercises.find((item) => item.id === exerciseId))))
     const targetMax = session.target?.reps.max
-    const meetsEveryTarget = sets.length > 0 && sets.every((set, index) =>
+    const plannedSetCount = session.target?.sets ?? planned?.sets
+    const meetsEveryTarget = sets.length > 0 && plannedSetCount !== undefined
+      && sets.length >= plannedSetCount && sets.every((set, index) =>
       set.reps >= (targets[index] ?? targetMax ?? Number.POSITIVE_INFINITY)
     )
     if (sameTopLoad && meetsEveryTarget) {
@@ -182,16 +184,9 @@ export function watchObservations(
       push('W3', { weight: Math.max(...sets.map((set) => set.weight)) })
       continue
     }
-    if (lastSet?.rir === 0) {
-      push('W4', {})
-      continue
-    }
     if (!previous) {
       push('W6', { date: session.date })
       continue
-    }
-    if (!Number.isFinite(lastSet?.rir)) {
-      push('W5', {})
     }
   }
   return observations.sort((a, b) => b.priority - a.priority).slice(0, Math.min(limit, PROGRESS_THRESHOLDS.watchMessageLimit))

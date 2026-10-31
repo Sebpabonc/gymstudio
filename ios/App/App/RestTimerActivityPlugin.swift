@@ -32,7 +32,7 @@ public class RestTimerActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             await endAll()
             do {
                 _ = try Activity.request(
-                    attributes: RestTimerAttributes(title: "Rest"),
+                    attributes: RestTimerAttributes(title: state.restLabel ?? "Rest"),
                     content: ActivityContent(state: state, staleDate: state.endDate.addingTimeInterval(60)),
                     pushType: nil
                 )
@@ -76,7 +76,10 @@ public class RestTimerActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         return RestTimerAttributes.ContentState(
             endDate: Date(timeIntervalSince1970: endAtMs / 1000),
             pausedRemaining: pausedMs.map { $0 / 1000 },
-            exercise: call.getString("exercise") ?? "Rest"
+            exercise: call.getString("exercise") ?? "Rest",
+            restLabel: call.getString("restLabel"),
+            goLabel: call.getString("goLabel"),
+            nextLabel: call.getString("nextLabel")
         )
     }
 }

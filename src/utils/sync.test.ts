@@ -95,6 +95,23 @@ function mockSyncClient(
 }
 
 describe('mergeWorkoutEntries', () => {
+  it('T110/T144: sync round-trips partial sets and their target without adding sets or RIR', async () => {
+    const { fromRemoteEntry, toRemoteWorkoutEntry } = await import('./sync')
+    const partial = {
+      ...localEntry, blockId: 'block-6', dayKey: 'chest-back-a',
+      target: { sets: 3, reps: { min: 8, max: 8 }, weight: 60, technique: 'superset' },
+      updatedAt: '2026-10-03T00:00:00Z', dirty: true,
+    }
+    const remote = toRemoteWorkoutEntry(partial, 'user-1', new Set())
+    const restored = fromRemoteEntry(remote as RemoteWorkoutEntry)
+    expect(restored.sets).toEqual(partial.sets)
+    expect(restored.target).toEqual(partial.target)
+    expect(restored.sets).toHaveLength(1)
+    expect(restored.sets[0]).not.toHaveProperty('rir')
+    const old = { ...partial, sets: [{ ...partial.sets[0], rir: 0 }] }
+    expect(fromRemoteEntry(toRemoteWorkoutEntry(old, 'user-1', new Set()) as RemoteWorkoutEntry).sets[0].rir).toBe(0)
+  })
+
   it('adds new remote entries and replaces local entries with newer remote versions', async () => {
     const { mergeWorkoutEntries } = await import('./sync')
     const local = [{ ...localEntry, updatedAt: '2026-10-01T00:00:00Z', dirty: false }]

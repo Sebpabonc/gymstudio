@@ -69,17 +69,50 @@ describe('dictionaries', () => {
     expect(es['workout.label.repsInline']).toBe('Reps')
   })
 
-  it('uses the approved reps-left prompt wording in both languages without a skip label', () => {
-    expect(en['workout.rir.question']).toBe('Reps left in the tank?')
-    expect(en['workout.rir.hint']).toBe('Last set only. Helps set your next weight.')
-    expect(en['workout.rir.zero']).toBe('0 · max')
-    expect(en['workout.rir.saved']).toBe('Got it, your next target will use this.')
-    expect(es['workout.rir.question']).toBe('¿Cuántas reps más podías hacer?')
-    expect(es['workout.rir.hint']).toBe('Solo la última serie. Ayuda a ajustar tu próximo peso.')
-    expect(es['workout.rir.zero']).toBe('0 · al máximo')
-    expect(es['workout.rir.saved']).toBe('Listo, tu próximo objetivo lo tendrá en cuenta.')
-    expect(en).not.toHaveProperty('workout.rir.skip')
-    expect(es).not.toHaveProperty('workout.rir.skip')
+  it('T110: removes the retired logged-effort and RIR prompt keys in both languages', () => {
+    const removedKeys = [
+      'workout.insight.watch.W4',
+      'workout.insight.watch.W5',
+      'progress.v3.watch.W4',
+      'progress.v3.watch.W5',
+      'progress.v3.worth.rir',
+      'workout.insight.estMax.effort',
+      'workout.rir.question',
+      'workout.rir.hint',
+      'workout.rir.zero',
+      'workout.rir.oneTwo',
+      'workout.rir.threePlus',
+      'workout.rir.saved',
+      'workout.rir.skip',
+    ]
+    for (const key of removedKeys) {
+      expect(Object.keys(en)).not.toContain(key)
+      expect(Object.keys(es)).not.toContain(key)
+    }
+  })
+
+  it('T108: uses the approved no-watch summary without calling existing history a baseline', () => {
+    expect(en['progress.v3.summary.empty']).toBe('Nothing to review right now. New lifts start as a baseline.')
+    expect(es['progress.v3.summary.empty']).toBe('Nada para revisar por ahora. Los ejercicios nuevos empiezan como base.')
+  })
+
+  it('uses the approved logging safety hints and partial labels in both languages', () => {
+    expect(en['workout.run.newWeightCheck']).toBe('New weight: check your reps')
+    expect(es['workout.run.newWeightCheck']).toBe('Peso nuevo: revisa tus reps')
+    expect(en['workout.run.weightCarried']).toBe('Applied to the next sets')
+    expect(es['workout.run.weightCarried']).toBe('Aplicado a las siguientes series')
+    expect(en['workout.run.extraThenDone']).toBe("Finish the last-set extra in the note, then tap Done. Log only the main set's full reps.")
+    expect(es['workout.run.extraThenDone']).toBe('Termina el extra de la última serie (ver nota) y luego toca Hecho. Registra solo las reps completas de la serie principal.')
+    expect(translate('en', 'workout.run.partial', { done: 2, total: 3 })).toBe('2 of 3 sets')
+    expect(translate('es', 'workout.run.partial', { done: 2, total: 3 })).toBe('2 de 3 series')
+    expect(translate('en', 'workout.run.loggedSet', { set: 2 })).toBe('Set 2 logged')
+    expect(translate('es', 'workout.run.loggedSet', { set: 2 })).toBe('Serie 2 registrada')
+    expect(translate('en', 'workout.run.nextSuperset', { name: 'Bench' })).toBe('Next: Bench')
+    expect(translate('es', 'workout.run.nextSuperset', { name: 'Bench' })).toBe('Siguiente: Bench')
+    expect(en['workout.run.enterWeight']).toBe('Enter weight')
+    expect(es['workout.run.enterWeight']).toBe('Ingresa el peso')
+    expect(en['workout.run.finishMissing']).toBe('Finish now? Unlogged sets will stay empty.')
+    expect(es['workout.run.finishMissing']).toBe('¿Terminar ahora? Las series sin registrar quedarán vacías.')
   })
 
   it('uses separate sign-in hints for saving goals and creating personal plans', () => {
@@ -87,6 +120,48 @@ describe('dictionaries', () => {
     expect(es['profile.goal.signIn']).toBe('Inicia sesión para guardar tu objetivo')
     expect(en['profile.plan.signIn']).toBe('Sign in to create your personal plan')
     expect(es['profile.plan.signIn']).toBe('Inicia sesión para crear tu plan personal')
+  })
+
+  it('uses bilingual rest controls and an explicit alert-permission reason', () => {
+    expect(en['rest.title']).toBe('Rest')
+    expect(es['rest.title']).toBe('Descanso')
+    expect(en['rest.done']).toBe('Go')
+    expect(es['rest.done']).toBe('Ya')
+    expect(en['rest.hide']).toBe('Hide')
+    expect(es['rest.hide']).toBe('Ocultar')
+    expect(en['rest.open']).toBe('Open')
+    expect(es['rest.open']).toBe('Abrir')
+    expect(en['rest.startNext']).toBe('Start next set now')
+    expect(es['rest.startNext']).toBe('Empezar la siguiente serie ahora')
+    expect(en['rest.permissionReason']).toBe('Allow alerts to let you know when rest ends.')
+    expect(es['rest.permissionReason']).toBe('Permite alertas para avisarte cuando termine el descanso.')
+    expect(en['rest.allowAlerts']).toBe('Allow alerts')
+    expect(es['rest.allowAlerts']).toBe('Permitir alertas')
+    expect(en['rest.notNow']).toBe('Not now')
+    expect(es['rest.notNow']).toBe('Ahora no')
+  })
+
+  it('states the exact saved values on Big Done in both languages', () => {
+    expect(translate('en', 'workout.run.doneWeight', { weight: '37.5', reps: 8 })).toBe('Done · 37.5 kg × 8')
+    expect(translate('es', 'workout.run.doneWeight', { weight: '37,5', reps: 8 })).toBe('Hecho · 37,5 kg × 8')
+    expect(translate('en', 'workout.run.doneBodyweight', { reps: 12 })).toBe('Done · 12 reps')
+    expect(translate('es', 'workout.run.doneBodyweight', { reps: 12 })).toBe('Hecho · 12 reps')
+    const drop = { weight: 40, reps: 12, dropWeight: 30, dropReps: 12 }
+    expect(translate('en', 'workout.run.doneDrop', drop)).toBe('Done · 40 kg × 12 → 30 kg × 12')
+    expect(translate('es', 'workout.run.doneDrop', drop)).toBe('Hecho · 40 kg × 12 → 30 kg × 12')
+    expect(translate('en', 'workout.run.editingLoggedSet', { set: 2 })).toBe('Editing set 2. Saved as you change it.')
+    expect(translate('es', 'workout.run.editingLoggedSet', { set: 2 })).toBe('Editando la serie 2. Se guarda al cambiar.')
+    expect(translate('en', 'workout.run.supersetThenRest', { name: 'Bench' })).toBe('Superset with Bench · then rest')
+    expect(translate('es', 'workout.run.supersetThenRest', { name: 'Bench' })).toBe('Superserie con Bench · luego descansa')
+    expect(en['workout.run.exit']).toBe('‹ Today')
+    expect(es['workout.run.exit']).toBe('‹ Hoy')
+  })
+
+  it('uses approved exercise-rest precedence wording for the Profile fallback', () => {
+    expect(en['profile.restBetweenSets']).toBe('Rest when the plan sets none')
+    expect(en['profile.restBetweenSetsHelp']).toBe("Plan workouts use each exercise's own rest. This time applies only to exercises without one.")
+    expect(es['profile.restBetweenSets']).toBe('Descanso cuando el plan no indica uno')
+    expect(es['profile.restBetweenSetsHelp']).toBe('Los entrenamientos del plan usan el descanso de cada ejercicio. Este tiempo solo aplica a ejercicios que no lo tienen.')
   })
 
   it('uses the approved plain strength wording and confines one-rep-max language to its explanation', () => {

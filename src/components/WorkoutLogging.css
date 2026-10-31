@@ -1,0 +1,97 @@
+.effortless-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+}
+.effortless-name {
+  margin: 0;
+  font-size: var(--type-card-size);
+  line-height: var(--type-card-lh);
+  font-weight: var(--type-card-weight);
+  letter-spacing: var(--type-card-track);
+  text-wrap: balance;
+}
+.effortless-name small {
+  display: block;
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  font-weight: var(--type-caption-weight);
+  color: var(--muted);
+}
+.effortless-logger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+.effortless-card > *, .effortless-logger > * { min-width: 0; }
+.effortless-inputs { border: 0; padding: 0; margin: 0; min-width: 0; }
+.effortless-card .workout-mode-big-inputs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.effortless-card .workout-mode-big-field { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 8px; }
+.effortless-card .workout-mode-big-field .set-stepper { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; width: 100%; }
+.effortless-card .workout-mode-big-field input { width: 100%; min-width: 0; }
+.effortless-card .effortless-done {
+  min-height: 64px;
+  width: 100%;
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
+  letter-spacing: var(--type-headline-track);
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+}
+.effortless-card .effortless-done:disabled { opacity: .5; cursor: not-allowed; }
+.effortless-partner, .effortless-rest, .effortless-last, .effortless-hint {
+  margin: 0;
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  font-weight: var(--type-caption-weight);
+  color: var(--muted);
+}
+.effortless-switch {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px dashed var(--brand);
+  border-radius: 12px;
+  padding: 4px 12px;
+  min-height: 52px;
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  font-weight: var(--type-caption-weight);
+}
+.effortless-switch button, .effortless-fix button, .effortless-notes summary { min-height: 44px; }
+.effortless-fix { display: grid; gap: 8px; }
+.effortless-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.effortless-pills button {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.effortless-pills button[aria-pressed="true"] { border-color: var(--brand); }
+.effortless-drop { display: grid; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.effortless-logged { margin: 0; font-size: var(--type-caption-size); line-height: var(--type-caption-lh); font-weight: var(--type-caption-weight); color: var(--success); }
+.effortless-card button:focus-visible, .effortless-card summary:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.workout-mode-chip.superset-chip { border-style: dashed; }
+.effortless-chip-pair, .effortless-chip-single { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+.effortless-chip-pair { border: 1px dashed var(--brand); border-radius: 15px; padding: 2px; }
+.effortless-chip-link { font-size: var(--type-headline-size); line-height: var(--type-headline-lh); color: var(--brand); }
+.effortless-chip-pair .workout-mode-chip { flex: none; width: 44px; min-width: 44px; }
+.workout-mode-chips { overflow-x: auto; max-width: 100%; }
+.workout-mode-progress { white-space: normal; }
+@media (max-width: 400px) {
+  .effortless-card { padding: 12px; }
+  .effortless-card .set-stepper { grid-template-columns: 44px minmax(0,1fr) 44px; }
+}

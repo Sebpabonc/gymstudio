@@ -65,13 +65,38 @@ describe('per-user calibration', () => {
   it('C8 logged RIR counts: 60 × 10 @ RIR 4 vs target 10 @ 2 → +2', () => {
     expect(exposureResidual({ ...exp(0, 0), weightRecommended: 60, repsTarget: 10, sets: [{ weight: 60, reps: 10, rir: 4 }] })).toBe(2)
   })
-  it('E5: 60 × 10 without RIR against target 10 @ 2 RIR → d = 0', () => {
-    expect(exposureResidual({
+  it('T105/E5: 60 × 10 without RIR has zero residual and learns no offset', () => {
+    const exposure = {
       ...exp(0, 0),
       weightRecommended: 60,
       repsTarget: 10,
       sets: [{ weight: 60, reps: 10 }],
-    })).toBe(0)
+    }
+    expect(exposureResidual(exposure)).toBe(0)
+    expect(computeCalibration(
+      ages(6).map((age) => ({ ...exposure, date: dayMinus(age) })),
+      TODAY,
+      target
+    )).toEqual({ offset: 0, exposures: 6, scope: 'exercise-bucket', early: false })
+  })
+  it('T106: historical RIR expires after 120 days, not at exactly 120 days', () => {
+    const old = ages(6).map((age) => exp(0, 121 + age, { sets: [{ weight: 75, reps: 8, rir: 4 }] }))
+    // Continuous training dates isolate expiry from the independent return-after-break pause.
+    const sessionDates = Array.from({ length: 13 }, (_, index) => dayMinus(index * 14))
+    const none = { offset: 0, exposures: 0, scope: null, early: false }
+    expect(computeCalibration(old, TODAY, target, sessionDates)).toEqual(none)
+
+    const recent = [0, 7, 14].map((age) => exp(0, age, { sets: [{ weight: 75, reps: 8, rir: 4 }] }))
+    const boundary = exp(0, 120, { sets: [{ weight: 75, reps: 8, rir: 4 }] })
+    expect(computeCalibration([...old, ...recent], TODAY, target, sessionDates)).toEqual(none)
+    expect(computeCalibration([...old, ...recent, boundary], TODAY, target, sessionDates))
+      .toEqual({ offset: 1, exposures: 4, scope: 'exercise-bucket', early: true })
+    expect(computeCalibration(
+      [...old, ...recent, { ...boundary, date: dayMinus(121) }],
+      TODAY,
+      target,
+      sessionDates
+    )).toEqual(none)
   })
   it('E6: 60 × 10 @ RIR 2 against target 10 @ 2 RIR → d = 0', () => {
     expect(exposureResidual({

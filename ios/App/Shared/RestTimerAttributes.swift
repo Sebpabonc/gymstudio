@@ -12,6 +12,9 @@ struct RestTimerAttributes: ActivityAttributes {
         var pausedRemaining: Double?
         /// What the user is resting from, e.g. "Dumbbell Bench Press".
         var exercise: String
+        var restLabel: String?
+        var goLabel: String?
+        var nextLabel: String?
     }
 
     var title: String

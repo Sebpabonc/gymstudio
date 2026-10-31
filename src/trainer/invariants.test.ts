@@ -67,7 +67,7 @@ function workingLoad(sets: LoggedSet[]) {
   return [...counts].sort((a, b) => b[1] - a[1] || b[0] - a[0])[0]?.[0] ?? 0
 }
 
-describe('E9: trainer invariants with every historical RIR omitted across blocks 6–9', () => {
+describe('T105/E9: trainer invariants with every historical RIR omitted across blocks 6–9', () => {
   let checked = 0
   for (const { block, day, row } of slots) {
     const equipment = equipmentOf.get(row.exercise_id) ?? 'machine'
@@ -134,6 +134,6 @@ describe('E9: trainer invariants with every historical RIR omitted across blocks
 
   it('ran a meaningful number of scenarios', () => {
     expect(slots.length).toBeGreaterThan(100)
+    expect(checked).toBeGreaterThan(1000)
   })
-  void checked
 })
