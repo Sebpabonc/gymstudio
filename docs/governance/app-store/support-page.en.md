@@ -48,4 +48,4 @@ The Dynamic Island appears on models that have it.
 
 [Privacy Policy](https://sebpabonc.github.io/gymstudio/legal/privacy.en.html) · [Terms of Use](https://sebpabonc.github.io/gymstudio/legal/terms.en.html) · [Consumer Health Data Privacy Policy (US)](https://sebpabonc.github.io/gymstudio/legal/consumer-health-data.en.html) · [Español](support.es.html)
 
-Seb Pabon. Australia.
+Sebastian Pabon. Australia.

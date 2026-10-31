@@ -6,7 +6,7 @@ Repo reminder: this repository is **public**. The PO approved his name and email
 
 ## PO decisions recorded (2026-11-01)
 
-Owner: Seb Pabon, an individual, based in Australia. Contact: js.pabonc979@gmail.com. No human trainer behind the content: "AI trainer" wording. Permission to use blocks 1 to 5 confirmed. 18+. Free at launch. OpenAI stays. Sign in with Apple added. iPhone only. Name "GymStudio". EU out. Retention: inactive accounts 24 months, deleted logs 30 days, feedback 24 months, AI usage 12 months. No lawyer. Domain and mail provider later; personal email for now.
+Owner: Sebastian Pabon, an individual, based in Australia. Contact: js.pabonc979@gmail.com. No human trainer behind the content: "AI trainer" wording. Permission to use blocks 1 to 5 confirmed. 18+. Free at launch. OpenAI stays. Sign in with Apple added. iPhone only. Name "GymStudio". EU out. Retention: inactive accounts 24 months, deleted logs 30 days, feedback 24 months, AI usage 12 months. No lawyer. Domain and mail provider later; personal email for now.
 
 **Launch countries:** Australia; Singapore, Japan, South Korea, India, Hong Kong; all of Latin America; USA. Out: EU, mainland China. UK, Canada and New Zealand were not named, so they are out. **Open:** Hong Kong and Venezuela (OpenAI, G26), Brazil (Portuguese, question 3).
 

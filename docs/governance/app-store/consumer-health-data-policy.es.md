@@ -6,7 +6,7 @@ BORRADOR de Governancer, 2026-11-01. Ver notas en consumer-health-data-policy.en
 
 **Última actualización:** [PO: fecha de publicación]
 
-Esta política es para personas en Estados Unidos, incluidos Washington y Nevada. La responsable es Seb Pabon, js.pabonc979@gmail.com.
+Esta política es para personas en Estados Unidos, incluidos Washington y Nevada. La responsable es Sebastian Pabon, js.pabonc979@gmail.com.
 
 ## Datos de salud que recopilamos
 

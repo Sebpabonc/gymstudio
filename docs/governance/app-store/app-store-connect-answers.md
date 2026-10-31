@@ -171,7 +171,7 @@ Source: `https://developer.apple.com/help/app-store-connect/manage-your-apps-ava
 
 ⚠️ VERIFY when selecting: any extra country-specific seller details the form asks for. Do not give a street address in a repo file.
 
-**Seller name:** Apple: "your personal legal name will be listed as the seller on the App Store" (`https://developer.apple.com/support/enrollment/`, read 2026-10-31). It comes from the enrollment and can't be set to "Seb Pabon" unless that's the legal name. PO checks (question 1), and the documents must let a reader link the two.
+**Seller name:** Apple: "your personal legal name will be listed as the seller on the App Store" (`https://developer.apple.com/support/enrollment/`, read 2026-10-31). It comes from the enrollment and can't be set to "Sebastian Pabon" unless that's the legal name. PO checks (question 1), and the documents must let a reader link the two.
 
 **Age:** 18+ (section 2). **Price:** free. **Devices:** iPhone only (G15). **Name:** GymStudio: AI Trainer (G9). **URLs:** Support, Privacy: G5.
 

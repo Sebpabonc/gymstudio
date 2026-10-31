@@ -47,4 +47,4 @@ iOS → GymStudio → Actividades en vivo. La Dynamic Island aparece en los mode
 
 [Política de privacidad](https://sebpabonc.github.io/gymstudio/legal/privacy.es.html) · [Términos de uso](https://sebpabonc.github.io/gymstudio/legal/terms.es.html) · [Política de datos de salud del consumidor (EE. UU.)](https://sebpabonc.github.io/gymstudio/legal/consumer-health-data.es.html) · [English](support.en.html)
 
-Seb Pabon. Australia.
+Sebastian Pabon. Australia.

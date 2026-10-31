@@ -6,7 +6,7 @@ Gobernanza, actualizado con tus respuestas del 2026-11-01. Solo queda lo que ún
 
 ## Decisiones
 
-1. **Tu nombre en la tienda.** Pusimos "Seb Pabon" en los documentos. Pero Apple muestra como vendedor el **nombre legal** de tu cuenta de desarrollador, no el que tú elijas. Entra a tu cuenta y revisa cuál sale. Si es distinto, dime cuál debe ir en los documentos: tiene que quedar claro que eres la misma persona.
+1. **Tu nombre en la tienda.** Pusimos "Sebastian Pabon" en los documentos. Pero Apple muestra como vendedor el **nombre legal** de tu cuenta de desarrollador, no el que tú elijas. Entra a tu cuenta y revisa cuál sale. Si es distinto, dime cuál debe ir en los documentos: tiene que quedar claro que eres la misma persona.
 
 2. **Hong Kong y Venezuela: OpenAI no funciona allí.** La lista oficial de OpenAI no incluye Hong Kong, China, Macao, Venezuela ni Cuba, y ofrecer acceso fuera de esa lista puede hacer que bloqueen tu cuenta de OpenAI. Tu lista de países incluye Hong Kong y "toda América Latina".
    - *Recomendación:* no lanzar en Hong Kong ni Venezuela por ahora. China continental también queda fuera. Cuba: revisa si aparece en App Store Connect; si aparece, déjala fuera.

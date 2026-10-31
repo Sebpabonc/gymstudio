@@ -53,7 +53,7 @@ The app does not request notifications, location, camera, contacts, photos, Heal
 NETWORK AND OFFLINE
 Logging works offline. Sign-in, sync, plans and AI need a connection. Backend: Supabase. No special network or hardware is needed.
 
-Contact for review: Seb Pabon, js.pabonc979@gmail.com. [PO: phone in the App Store Connect contact fields only, never here]
+Contact for review: Sebastian Pabon, js.pabonc979@gmail.com. [PO: phone in the App Store Connect contact fields only, never here]
 
 ---
 

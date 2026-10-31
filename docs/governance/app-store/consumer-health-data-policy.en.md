@@ -10,7 +10,7 @@ HIGH RISK: Washington allows private lawsuits through its Consumer Protection Ac
 
 **Last updated:** [PO: publication date]
 
-This policy is for people in the United States, including Washington and Nevada. It is run by Seb Pabon, js.pabonc979@gmail.com.
+This policy is for people in the United States, including Washington and Nevada. It is run by Sebastian Pabon, js.pabonc979@gmail.com.
 
 ## Health data we collect
 
