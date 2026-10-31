@@ -83,12 +83,12 @@ describe('dayWorkoutStatus', () => {
 
   it('is not started when nothing of this day was logged this week', () => {
     expect(dayWorkoutStatus(ids, [entry('bench', '2026-10-08'), entry('bench', '2026-10-13', 'd3')], scope))
-      .toEqual({ state: 'not-started', done: 0, total: 3, lastDate: undefined })
+      .toEqual({ state: 'not-started', done: 0, total: 3, loggedSets: 0, lastDate: undefined })
   })
 
   it('is in progress with the count when part of the day is logged', () => {
     expect(dayWorkoutStatus(ids, [entry('bench', '2026-10-16T10:00:00Z'), entry('row', '2026-10-16')], scope))
-      .toEqual({ state: 'in-progress', done: 2, total: 3, lastDate: '2026-10-16' })
+      .toEqual({ state: 'in-progress', done: 2, total: 3, loggedSets: 0, lastDate: '2026-10-16' })
   })
 
   it('is done when every exercise of the day is logged this week', () => {
@@ -104,7 +104,7 @@ describe('dayWorkoutStatus', () => {
     const set = { tag: 'main' }
     const partial = { ...entry('bench', '2026-10-12'), sets: [set, set] }
     expect(dayWorkoutStatus(['bench'], [partial], scope, [3])).toEqual({
-      state: 'in-progress', done: 0, total: 1, lastDate: '2026-10-12',
+      state: 'in-progress', done: 0, total: 1, loggedSets: 2, lastDate: '2026-10-12',
     })
     expect(dayWorkoutStatus(['bench', 'row'], [
       { ...partial, sets: [set, set, set] },
@@ -118,5 +118,15 @@ describe('dayWorkoutStatus', () => {
     ] }
     expect(dayWorkoutStatus(['bench'], [logged], scope, [3]).state).toBe('in-progress')
     expect(dayWorkoutStatus(['bench'], [{ ...logged, sets: [{}, {}, {}] }], scope, [3]).state).toBe('done')
+  })
+
+  it('counts only the latest entry per planned exercise, ignoring other slots and empty evidence', () => {
+    const first = { ...entry('bench', '2026-10-12'), sets: [{}, {}] }
+    const latest = { ...entry('bench', '2026-10-13'), sets: [{}, {}, { tag: 'mini' }] }
+    const otherSlot = { ...entry('row', '2026-10-13', 'd3'), sets: [{}, {}, {}] }
+    expect(dayWorkoutStatus(ids, [first, latest, otherSlot], scope, [3, 3, 3]))
+      .toMatchObject({ done: 0, loggedSets: 2, state: 'in-progress' })
+    expect(dayWorkoutStatus(ids, [{ ...first, sets: [] }], scope, [3, 3, 3]))
+      .toMatchObject({ done: 0, loggedSets: 0, state: 'not-started' })
   })
 })

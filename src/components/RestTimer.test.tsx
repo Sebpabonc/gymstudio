@@ -82,7 +82,7 @@ describe('RestTimer', () => {
     expect(html).toContain('Start next set now')
   })
 
-  it('keeps Go and Undo at zero, never dismisses or logs automatically, and alerts once', () => {
+  it('T139: keeps Go and Undo at zero, never dismisses or logs automatically, and alerts once', () => {
     const onChange = vi.fn()
     const onUndo = vi.fn()
     const tree = RestTimer({ timer: { endAt: 500 }, hidden: false, onChange, onUndo, workoutMode: true })

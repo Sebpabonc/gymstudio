@@ -57,6 +57,7 @@ export type DayWorkoutStatus = {
   state: 'not-started' | 'in-progress' | 'done'
   done: number
   total: number
+  loggedSets: number
   /** Latest date (YYYY-MM-DD) this day was logged in the week, if any. */
   lastDate?: string
 }
@@ -85,7 +86,15 @@ export function dayWorkoutStatus(
       (entry.sets?.filter((set) => !set.tag || set.tag === 'main').length ?? 0) >= plannedSetCounts[index])
   )).length
   const lastDate = dayEntries.map((entry) => entry.date.slice(0, 10)).sort().pop()
-  const hasPartial = dayEntries.some((entry) => exerciseIds.includes(entry.exerciseId))
+  const latestEntries = new Map<string, DayLogEntry>()
+  for (const entry of dayEntries) {
+    if (!exerciseIds.includes(entry.exerciseId)) continue
+    const previous = latestEntries.get(entry.exerciseId)
+    if (!previous || entry.date >= previous.date) latestEntries.set(entry.exerciseId, entry)
+  }
+  const loggedSets = [...latestEntries.values()].reduce((count, entry) =>
+    count + (entry.sets?.filter((set) => !set.tag || set.tag === 'main').length ?? 0), 0)
+  const hasPartial = loggedSets > 0
   const state = total > 0 && done >= total ? 'done' : done > 0 || hasPartial ? 'in-progress' : 'not-started'
-  return { state, done, total, lastDate }
+  return { state, done, total, loggedSets, lastDate }
 }

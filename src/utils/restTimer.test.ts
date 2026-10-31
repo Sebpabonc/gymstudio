@@ -53,6 +53,14 @@ describe('rest timer', () => {
     expect(addRestTime(paused)).toEqual({ pausedRemainingMs: 41_000 })
   })
 
+  it('T138: extending a rest never changes the next prescribed rest', () => {
+    const prescribed = getWorkoutRestSeconds(120, 90)
+    const first = startRestTimer(prescribed, 1_000)
+    expect(remainingRestSeconds(addRestTime(first, 1_000), 1_000)).toBe(105)
+    const next = startRestTimer(getWorkoutRestSeconds(120, 90), 106_000)
+    expect(remainingRestSeconds(next, 106_000)).toBe(90)
+  })
+
   it('supports the workout-mode thirty-second extension', () => {
     expect(addRestTime(startRestTimer(30, 1_000), 5_000, 30)).toEqual({ endAt: 61_000 })
   })

@@ -63,7 +63,10 @@ export function canCarryWorkoutLoad(technique: string | undefined, targets: stri
 }
 
 export function roundDownWorkoutDrop(weight: number, equipment?: string) {
-  return roundToStep(weight * 0.75, equipmentStep(equipment), 'down')
+  // Approved logger T133 uses 5 kg machine drops; the progression engine keeps its own steps.
+  const drop = roundToStep(weight * 0.75, equipment === 'machine' ? 5 : equipmentStep(equipment), 'down')
+  // Preserve existing light-load behavior when 5 kg rounding would erase the drop.
+  return drop > 0 ? drop : roundToStep(weight * 0.75, equipmentStep(equipment), 'down')
 }
 
 export function carryWorkoutWeight(

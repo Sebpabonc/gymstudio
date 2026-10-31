@@ -507,7 +507,7 @@ function nonDeloadHistory(sessions: ProgressLiftSession[]) {
   return sessions.filter((session) => !session.deload)
 }
 
-function worthReason(
+export function worthReason(
   trend: LiftTrend,
   history: ProgressLiftSession[],
   exercise: Exercise,

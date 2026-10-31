@@ -849,6 +849,7 @@ export default function WorkoutPlan({
   const [postureTipsVisible, setPostureTipsVisible] = useState<Record<string, boolean>>({})
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
+  const [savedExitToast, setSavedExitToast] = useState(false)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
   // Workout mode: focus one exercise (or superset) at a time, same cards as the full Today list.
   const [workoutGroupIndex, setWorkoutGroupIndex] = useState<number | null>(null)
@@ -1184,6 +1185,12 @@ export default function WorkoutPlan({
     const timer = window.setTimeout(() => setToast(null), 5000)
     return () => window.clearTimeout(timer)
   }, [toast, workoutGroupIndex])
+
+  useEffect(() => {
+    if (!savedExitToast) return undefined
+    const timer = window.setTimeout(() => setSavedExitToast(false), 3000)
+    return () => window.clearTimeout(timer)
+  }, [savedExitToast])
 
   useEffect(() => {
     if (mode) {
@@ -2081,6 +2088,7 @@ export default function WorkoutPlan({
     })
   }
   const startWorkout = () => {
+    setSavedExitToast(false)
     pendingWorkoutNext.current = null
     setWorkoutWeightInputs({})
     setWorkoutDropWeightInputs({})
@@ -2105,6 +2113,7 @@ export default function WorkoutPlan({
     goToWorkoutGroup(firstOpen >= 0 ? firstOpen : 0)
   }
   const exitWorkout = () => {
+    setSavedExitToast(true)
     pendingWorkoutNext.current = null
     setSwitchUntil(null)
     if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
@@ -3330,7 +3339,9 @@ export default function WorkoutPlan({
           return (
             <button type="button" className="primary-button start-workout-button" onClick={startWorkout}>
               {inProgress && status
-                ? t('workout.run.resumeCount', { done: formatNumber(language, status.done), total: formatNumber(language, status.total) })
+                ? status.done === 0 && status.loggedSets > 0
+                  ? t(status.loggedSets === 1 ? 'workout.run.resumeSets.one' : 'workout.run.resumeSets.other', { count: formatNumber(language, status.loggedSets) })
+                  : t('workout.run.resumeCount', { done: formatNumber(language, status.done), total: formatNumber(language, status.total) })
                 : inProgress ? t('workout.run.resume') : t('workout.run.start')}
             </button>
           )
@@ -3628,7 +3639,6 @@ export default function WorkoutPlan({
         )}
         {isWorkoutMode && (
           <div className="workout-mode-overview">
-            <p className="effortless-exit-note">{t('workout.run.savedExit')}</p>
             <div className="workout-mode-chip-row">
               <nav className="workout-mode-chips" aria-label={t('workout.run.modeAria')}>
                 {workoutGroups.map((group, groupIndex) => <span key={group.key}
@@ -5318,7 +5328,10 @@ export default function WorkoutPlan({
           </section>
         </div>
       )}
-      {toast && (
+      {savedExitToast && (
+        <div className="log-toast" role="status" aria-live="polite">{t('workout.run.savedExit')}</div>
+      )}
+      {toast && !savedExitToast && (
         <div className="log-toast" role="status" aria-live="polite">
           <button type="button" className={sessionSummary ? 'workout-completed-undo' : undefined}
             onClick={undoLastLog}>{t('workout.action.undo')}</button>

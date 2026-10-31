@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { Exercise, TrainingBlock } from '../types'
 import { liftTrend, liftTrendEvidence, liftTrendIndexPoints } from './trends'
+import { compareLiftSessions, latestEquivalentComparisons } from './index'
 import type { ProgressEntry } from './types'
+import { worthReason } from '../screens/ProgressScreen'
+import { createTranslator } from '../i18n/translate'
 
 const block: TrainingBlock = {
   id: 'b1',
@@ -61,6 +64,59 @@ function analyze(entries: ProgressEntry[], exercise = bench, active = block) {
 }
 
 describe('Progress v3 lift trends', () => {
+  it('T109: three unchanged equivalent zero-RIR sessions do not create a stale-best flag', () => {
+    const entries = ['2026-01-05', '2026-01-12', '2026-01-19'].map((date) => ({
+      ...makeEntry(date, 60, bench, { reps: 10, sets: 3 }),
+      sets: Array.from({ length: 3 }, (_, index) => ({ id: `${date}-${index}`, weight: 45, reps: 10, rir: 0 })),
+    }))
+    const trend = analyze(entries)
+    expect(trend.points).toHaveLength(3)
+    expect(trend.worthLookingAt).toBeNull()
+    expect(worthReason(trend, trend.points, bench, [block], createTranslator('en'), 'en')).toBeNull()
+    expect(trend.points.map((point) => point.e1rm)).toEqual([60, 60, 60])
+    expect(trend.points.slice(1).map((point, index) =>
+      compareLiftSessions(trend.points[index], point, bench).verdict
+    )).toEqual(['held', 'held'])
+    expect(latestEquivalentComparisons(entries, [block], [bench])).toMatchObject([{
+      exerciseId: 'bench',
+      session: { date: '2026-01-19' },
+      previous: { date: '2026-01-12' },
+      comparison: { verdict: 'held', improvedSets: 0, droppedSets: 0, heldSets: 3 },
+    }])
+    expect(entries.flatMap((item) => item.sets.map((set) => set.rir))).toEqual(Array(9).fill(0))
+  })
+
+  it('T109: dropped and mixed equivalent verdicts survive when RIR is absent', () => {
+    const entries = [
+      ['2026-01-05', [10, 10, 10]],
+      ['2026-01-12', [9, 9, 9]],
+      ['2026-01-19', [10, 8, 9]],
+    ] as const
+    const history = entries.map(([date, reps]) => ({
+      ...makeEntry(date, 60, bench, { reps: 10, sets: 3 }),
+      sets: reps.map((count, index) => ({ id: `${date}-${index}`, weight: 45, reps: count })),
+    }))
+    const trend = analyze(history)
+    const comparisons = trend.points.slice(1).map((point, index) =>
+      compareLiftSessions(trend.points[index], point, bench))
+    expect(comparisons).toMatchObject([
+      { verdict: 'dropped', droppedSets: 3, improvedSets: 0, heldSets: 0 },
+      { verdict: 'mixed', droppedSets: 1, improvedSets: 1, heldSets: 1 },
+    ])
+    expect(latestEquivalentComparisons(history.slice(0, 2), [block], [bench])).toMatchObject([{
+      comparison: { verdict: 'dropped', droppedSets: 3, improvedSets: 0, heldSets: 0 },
+    }])
+    expect(latestEquivalentComparisons(history, [block], [bench])).toMatchObject([{
+      comparison: { verdict: 'mixed', droppedSets: 1, improvedSets: 1, heldSets: 1 },
+    }])
+    expect(trend.worthLookingAt).toBeNull()
+    for (const language of ['en', 'es'] as const) {
+      const t = createTranslator(language)
+      expect(worthReason(trend, trend.points, bench, [block], t, language)).toBe(t('progress.v3.worth.dropped'))
+    }
+    expect(trend.points.every((point) => point.sets.every((set) => set.rir === undefined))).toBe(true)
+  })
+
   it('computes a trailing three-session average, OLS weekly rate, and early confidence', () => {
     const trend = analyze([
       makeEntry('2026-01-05', 60),

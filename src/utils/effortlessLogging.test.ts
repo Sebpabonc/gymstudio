@@ -62,15 +62,16 @@ describe('approved carry (§5.2)', () => {
     expect(canCarryWorkoutLoad('straight', [], [])).toBe(false)
   })
 
-  it('recalculates drops with the existing approved v2 equipment step', () => {
-    expect(roundDownWorkoutDrop(45, 'machine')).toBe(32.5)
+  it('T133: rounds machine logger drops down by 5 kg without changing other equipment steps', () => {
+    expect(roundDownWorkoutDrop(45, 'machine')).toBe(30)
     expect(roundDownWorkoutDrop(40, 'machine')).toBe(30)
     expect(roundDownWorkoutDrop(37.5, 'barbell')).toBe(27.5)
+    expect(roundDownWorkoutDrop(45, 'cable')).toBe(32.5)
   })
 
-  // T133 assumes 5 kg machine steps, superseded by approved v2's 2.5 kg; awaiting PT clarification on PR #382.
-  it.skip('T133: PT clarification needed for the expected 30 kg drop at a 45 kg main load', () => {
-    expect(roundDownWorkoutDrop(45, 'machine')).toBe(30)
+  it('preserves a light machine drop instead of rounding it to zero', () => {
+    expect(roundDownWorkoutDrop(5, 'machine')).toBe(2.5)
+    expect(roundDownWorkoutDrop(6, 'machine')).toBe(2.5)
   })
 })
 

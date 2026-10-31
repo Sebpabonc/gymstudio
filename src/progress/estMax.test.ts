@@ -135,6 +135,25 @@ describe('any-day Est. max comparison', () => {
     expect(result).toMatchObject({ kind: 'comparison', effort: null })
   })
 
+  it('T107: missing current RIR never becomes zero or creates an effort note', () => {
+    const current = entry('2026-10-16', 30, 10, 'chest-back-a')
+    delete current.sets[0].rir
+    const previous = entry('2026-10-13', 30, 10, 'chest-back-b', { rir: 3 })
+    const result = compare(current, [previous])
+    expect(result).toMatchObject({
+      kind: 'comparison',
+      previousValue: 40,
+      currentValue: 40,
+      changePercent: 0,
+      change: 'same',
+      previousRir: 3,
+      currentRir: undefined,
+      effort: null,
+    })
+    expect(current.sets[0]).not.toHaveProperty('rir')
+    expect(previous.sets[0].rir).toBe(3)
+  })
+
   it('CD8: uses the different-rep-range message when an A/B session has no eligible set', () => {
     const result = compare(
       entry('2026-10-12', 15, 15, 'chest-back-a'),
