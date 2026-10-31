@@ -1,5 +1,7 @@
 # Effortless logging: one tap per set, a clear rest, simpler supersets
 
+> **PO 2026-11-01:** remove the "Reps left in the tank?" prompt from the workout flow (0 of 39 entries answered since 19 Oct). PT to confirm the fallback and the Progress tip before implementation.
+
 > **PO 2026-11-01:** remove the per-set table (# · Last time · Today) from the proposed screens: the Trend by set chart already shows it. The logger keeps one line "Last time: 24 kg × 12"; correcting a logged set moves to a "Fix a logged set" button under the chart.
 
 - **Status:** proposal (UXer), not approved. No code, content or data changed.

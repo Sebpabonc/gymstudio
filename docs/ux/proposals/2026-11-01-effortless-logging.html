@@ -723,14 +723,12 @@ function restPopup() {
       <span class="m">${R.over ? '' : T().restMini + ' · '}${T().next}: ${nextText}</span><span class="o">${T().open}</span></button>`;
   }
   const ins = c.insight !== null && c.insight !== undefined ? `<p class="inline-ins"><b>${T().mixed}</b> · ${T().mixedL}</p>` : '';
-  const rirEx = c.rir;
-  const rir = rirEx !== null && rirEx !== undefined ? rirBox(rirEx) : '';
   return `<div class="scrim" data-a="resthide" data-nc="1"><section class="rest ${R.over ? 'go' : ''}" role="dialog" aria-modal="false" aria-label="${T().rest}" data-stop>
     <div class="rest-top"><h2>${TIMER}${R.over ? T().restOver : T().rest}</h2><button class="hidebtn" data-a="resthide" data-nc="1">${T().hide} ▾</button></div>
     <div class="clock" data-rest-clock aria-live="off">${R.over ? T().go : clock(R.left)}</div>
     <div class="bar"><i data-rest-bar style="width:${pct}%"></i></div>
     ${R.over ? `<span class="alertchip">${T().alert}</span>` : `<p class="loggedline">${c.logged}</p>`}
-    ${ins}${rir}
+    ${ins}
     <div class="nextbox"><span>${T().next}</span><b>${nextText}</b>${R.over || c.seenHint ? '' : `<span>${T().whenEnds}</span>`}</div>
     ${R.over ? `<button class="primary big" data-a="restclose" data-nc="1">${T().ok}</button>` : `
     <div class="rest-acts"><button class="secondary" data-a="plus15" data-nc="1">${T().plus15}</button><button class="secondary" data-a="undo">${T().undo}</button></div>
@@ -799,9 +797,8 @@ function completed() {
   const cards = EXS.map((e, i) => {
     const d = S.vals[i].filter(v => v.done);
     if (!d.length) return '';
-    const showRir = i > 0 && !S.early;
     return `<div class="ins-card"><h3>${L(e.name)}</h3><p>${i === 0 ? `<b>${T().mixed}</b> · ${T().mixedL}` : `<b>${T().improved}</b> · ${T().setDelta(i === 1 ? 2 : fmt(1.5))}`}</p>
-      ${showRir && !isToday() ? rirBox(i) : ''}${trend(i)}</div>`;
+      ${trend(i)}</div>`;
   }).join('');
   return `<div class="done-head"><h2>${S.early ? T().earlyTitle(countDone(), 3) : T().completed}</h2><p>${T().day}</p></div>
     <div class="stats"><div><b class="num">${Math.max(1, Math.round(S.elapsed / 60))} min</b><span>${T().duration}</span></div><div><b class="num">${total}/9</b><span>${T().sets}</span></div><div><b class="num">${countDone()}/3</b><span>${T().exs}</span></div></div>
