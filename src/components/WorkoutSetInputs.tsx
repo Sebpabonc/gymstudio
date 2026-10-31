@@ -16,6 +16,8 @@ export type WorkoutSetInputsProps = {
   language: Language
   t: Translate
   repsLabel: string
+  weightLabel?: string
+  repInputLabel?: string
   onWeightInputChange: (raw: string) => void
   onValueChange: (field: 'weight' | 'reps', value: string) => void
 }
@@ -29,6 +31,8 @@ export default function WorkoutSetInputs({
   language,
   t,
   repsLabel,
+  weightLabel,
+  repInputLabel,
   onWeightInputChange,
   onValueChange,
 }: WorkoutSetInputsProps) {
@@ -54,15 +58,13 @@ export default function WorkoutSetInputs({
             inputMode="decimal"
             value={weightInput}
             data-log-weight
-            aria-label={t('workout.set.weightLabel', { set: setIndex + 1 })}
+            aria-label={weightLabel ?? t('workout.set.weightLabel', { set: setIndex + 1 })}
             onFocus={selectOnFocus}
             onChange={(event) => {
               const raw = event.target.value
               onWeightInputChange(raw)
               const numeric = Number(raw.replace(',', '.'))
-              if (raw.trim() && Number.isFinite(numeric)) {
-                onValueChange('weight', String(numeric))
-              }
+              onValueChange('weight', raw.trim() && Number.isFinite(numeric) ? String(numeric) : '0')
             }}
           />
           <button
@@ -80,14 +82,14 @@ export default function WorkoutSetInputs({
             type="button"
             className="stepper-button"
             aria-label={t('workout.set.repsDecrease', { set: setIndex + 1 })}
-            onClick={() => onValueChange('reps', String(stepWorkoutValue(reps, -1, 1, 1)))}
+            onClick={() => onValueChange('reps', String(stepWorkoutValue(reps, -1, 1, 0)))}
           >−</button>
           <input
             type="number"
             inputMode="numeric"
-            min="1"
+            min="0"
             value={reps}
-            aria-label={t('workout.set.repsLabel', { set: setIndex + 1 })}
+            aria-label={repInputLabel ?? t('workout.set.repsLabel', { set: setIndex + 1 })}
             onFocus={selectOnFocus}
             onChange={(event) => onValueChange('reps', cleanNumberInput(event))}
           />
@@ -95,7 +97,7 @@ export default function WorkoutSetInputs({
             type="button"
             className="stepper-button"
             aria-label={t('workout.set.repsIncrease', { set: setIndex + 1 })}
-            onClick={() => onValueChange('reps', String(stepWorkoutValue(reps, 1, 1, 1)))}
+            onClick={() => onValueChange('reps', String(stepWorkoutValue(reps, 1, 1, 0)))}
           >+</button>
         </div>
       </div>

@@ -19,7 +19,7 @@ private struct RestCountdown: View {
         } else if state.endDate > Date() {
             Text(timerInterval: Date()...state.endDate, countsDown: true)
         } else {
-            Text("Go")
+            Text(state.goLabel ?? "Go")
         }
     }
 }
@@ -33,10 +33,10 @@ struct RestTimerLiveActivity: Widget {
                     .font(.title2)
                     .foregroundStyle(mauve)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(context.state.pausedRemaining == nil ? "Rest" : "Rest paused")
+                    Text(context.state.restLabel ?? "Rest")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(context.state.exercise)
+                    Text(context.state.nextLabel ?? context.state.exercise)
                         .font(.headline)
                         .lineLimit(1)
                 }
@@ -53,7 +53,7 @@ struct RestTimerLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label("Rest", systemImage: "timer")
+                    Label(context.state.restLabel ?? "Rest", systemImage: "timer")
                         .font(.headline)
                         .foregroundStyle(mauve)
                 }
@@ -65,7 +65,7 @@ struct RestTimerLiveActivity: Widget {
                         .frame(maxWidth: 90, alignment: .trailing)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text(context.state.exercise)
+                    Text(context.state.nextLabel ?? context.state.exercise)
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
                         .frame(maxWidth: .infinity, alignment: .leading)

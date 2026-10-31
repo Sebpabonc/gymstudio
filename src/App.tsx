@@ -3,6 +3,7 @@ import WorkoutPlan from './components/WorkoutPlan'
 import ExerciseFinder from './components/ExerciseFinder'
 import RestTimer from './components/RestTimer'
 import { syncRestTimerActivity } from './native/restTimerActivity'
+import { prepareRestAlerts, scheduleRestAlert } from './native/restAlerts'
 import { localizeCatalogue, useSpanishContentReady } from './i18n/content'
 import HelpAndAi from './components/HelpAndAi'
 import { localIsoDate } from './lib/dates'
@@ -59,14 +60,29 @@ export default function App() {
   const updateRestTimer = useCallback((timer: RestTimerState | null) => {
     saveRestTimerState(timer)
     setRestTimer(timer)
-    void syncRestTimerActivity(timer, restLabel.current, false)
-  }, [])
+    const labels = {
+      restLabel: t('rest.title'),
+      goLabel: t('rest.done'),
+      nextLabel: restLabel.current,
+      permissionReason: t('rest.permissionReason'),
+    }
+    void scheduleRestAlert(timer, labels)
+    void syncRestTimerActivity(timer, restLabel.current, false, labels)
+  }, [t])
   const startRest = useCallback((durationSeconds: number, label?: string) => {
+    prepareRestAlerts()
     restLabel.current = label || t('rest.label')
     const timer = startRestTimer(durationSeconds)
     saveRestTimerState(timer)
     setRestTimer(timer)
-    void syncRestTimerActivity(timer, restLabel.current, true)
+    const labels = {
+      restLabel: t('rest.title'),
+      goLabel: t('rest.done'),
+      nextLabel: restLabel.current,
+      permissionReason: t('rest.permissionReason'),
+    }
+    void scheduleRestAlert(timer, labels)
+    void syncRestTimerActivity(timer, restLabel.current, true, labels)
   }, [t])
 
   const [scrollToPlan, setScrollToPlan] = useState(false)
@@ -354,7 +370,7 @@ export default function App() {
             </button>
           ))}
         </nav>
-        {!workoutModeActive && <RestTimer timer={restTimer} hidden={dockHidden} onChange={updateRestTimer} />}
+        {!workoutModeActive && <RestTimer timer={restTimer} hidden={dockHidden} nextLabel={restLabel.current} onChange={updateRestTimer} />}
         <HelpAndAi
           activeTab={activeTab}
           hidden={dockHidden}

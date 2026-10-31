@@ -94,8 +94,6 @@ const WATCH_KEYS: Record<WatchObservation['code'], TranslationKey> = {
   W1: 'progress.v3.watch.W1',
   W2: 'progress.v3.watch.W2',
   W3: 'progress.v3.watch.W3',
-  W4: 'progress.v3.watch.W4',
-  W5: 'progress.v3.watch.W5',
   W6: 'progress.v3.watch.W6',
 }
 const MUSCLE_KEYS: Record<MuscleGroup, TranslationKey> = {
@@ -536,10 +534,6 @@ function worthReason(
     if (verdicts.filter((verdict) => verdict === 'dropped' || verdict === 'mixed').length >= 2) {
       return t('progress.v3.worth.dropped')
     }
-    if (trend.verdict !== 'improving' && recent.every((session) => {
-      const sets = workingSets(session.sets)
-      return sets[sets.length - 1]?.rir === 0
-    })) return t('progress.v3.worth.rir')
   }
   return null
 }

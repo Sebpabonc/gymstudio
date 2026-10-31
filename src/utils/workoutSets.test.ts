@@ -141,4 +141,14 @@ describe('filterLoggableSets', () => {
     const result = filterLoggableSets([set('a', 15, 0), set('b', 0, 0)], 'bodyweight')
     expect(result.map((item) => item.id)).toEqual(['a'])
   })
+
+  it('T124: never saves zero reps or non-finite values even with a positive weight', () => {
+    expect(filterLoggableSets([set('zero', 0, 40), set('negative', -1, 40),
+      set('invalid-reps', Infinity, 40), set('invalid-weight', 8, Infinity)], 'barbell')).toEqual([])
+  })
+
+  it('T151: zero drop reps omits the drop without changing the main set', () => {
+    const [saved] = filterLoggableSets([set('main', 12, 40, { reps: 0, weight: 30 })], 'machine')
+    expect(saved).toEqual({ id: 'main', reps: 12, weight: 40 })
+  })
 })

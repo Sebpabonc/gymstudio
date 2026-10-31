@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Exercise } from '../types'
+import type { Exercise, TrainingBlock } from '../types'
 import { compareLiftSessions, watchObservations } from './comparison'
 import { equivalentLiftSessions } from './trends'
 import type { ProgressEntry, ProgressLiftSession } from './types'
@@ -99,5 +99,92 @@ describe('approved Progress v3 session comparisons', () => {
     const watches = watchObservations(entries, [], [exercise])
     expect(watches).toHaveLength(1)
     expect(watches[0]).toMatchObject({ code: 'W1', params: { reps: 8, target: 12 } })
+  })
+
+  it.each([undefined, 0, 3])('T108: does not generate an effort watch for logged RIR %s', (rir) => {
+    const entries: ProgressEntry[] = [
+      {
+        id: 'previous',
+        exerciseId: 'bench',
+        date: '2026-10-05',
+        blockId: 'b1',
+        dayKey: 'day-a',
+        target: { sets: 3, reps: { min: 8, max: 8 } },
+        sets: [{ id: 'previous-set', weight: 50, reps: 8 }],
+      },
+      {
+        id: 'current',
+        exerciseId: 'bench',
+        date: '2026-10-12',
+        blockId: 'b1',
+        dayKey: 'day-a',
+        target: { sets: 3, reps: { min: 8, max: 8 } },
+        sets: [
+          { id: 'current-1', weight: 52.5, reps: 8 },
+          { id: 'current-2', weight: 55, reps: 8 },
+          { id: 'current-3', weight: 57.5, reps: 8, rir },
+        ],
+      },
+    ]
+    expect(watchObservations(entries, [], [barbell])).toEqual([])
+    expect(entries[1].sets[2].rir).toBe(rir)
+  })
+
+  it('keeps baseline W6 even when an old answer was logged at zero', () => {
+    const entry: ProgressEntry = {
+      id: 'baseline',
+      exerciseId: 'bench',
+      date: '2026-10-05',
+      target: { sets: 3, reps: { min: 8, max: 8 } },
+      sets: [{ id: 'set', weight: 50, reps: 8, rir: 0 }],
+    }
+    expect(watchObservations([entry], [], [barbell])).toMatchObject([{ code: 'W6' }])
+  })
+
+  it.each([false, true])('T148: requires all planned main sets for W2 (saved target: %s)', (savedTarget) => {
+    const block: TrainingBlock = {
+      id: 'b1',
+      number: 1,
+      name: 'Block',
+      method: 'Straight sets',
+      startDate: '2026-10-05',
+      weeks: 6,
+      origin: 'pt',
+      summary: '',
+      insights: [],
+      days: [{
+        key: 'day-a',
+        position: 1,
+        name: 'Day A',
+        exercises: [{
+          code: 'A1',
+          position: 1,
+          exerciseId: 'bench',
+          sets: 3,
+          reps: ['8', '8', '8'],
+          restSeconds: 120,
+          technique: 'straight',
+        }],
+      }],
+    }
+    const entry: ProgressEntry = {
+      id: 'entry',
+      exerciseId: 'bench',
+      date: '2026-10-05',
+      blockId: 'b1',
+      dayKey: 'day-a',
+      target: savedTarget ? { sets: 3, reps: { min: 8, max: 8 } } : undefined,
+      sets: [
+        { id: 'warmup', weight: 20, reps: 8 },
+        { id: '1', weight: 50, reps: 8, drop: { weight: 30, reps: 8 } },
+        { id: '2', weight: 50, reps: 8 },
+      ],
+    }
+    const blocks = savedTarget ? [] : [block]
+    expect(watchObservations([entry], blocks, [barbell]).some((watch) => watch.code === 'W2')).toBe(false)
+    entry.sets.push({ id: '3', weight: 50, reps: 8 })
+    expect(watchObservations([entry], blocks, [barbell])).toMatchObject([
+      { code: 'W2', params: { target: 8, weight: 50 } },
+    ])
   })
 })

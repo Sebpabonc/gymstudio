@@ -23,12 +23,26 @@ Open `https://sebpabonc.github.io/gymstudio/?demo=1` to preview six months of is
 
 To try it on a phone: `npm run dev -- --host` and open the Mac's IP from the phone (same Wi-Fi).
 
+## Logging a workout
+
+Today is a plan preview. Choose **Start workout**, adjust kg/reps if needed, and tap **Done** for each set.
+Every tap saves immediately, including each exercise in a superset. Exit keeps progress; finishing early never
+fills in missing sets. Use **Fix a logged set** to correct a saved set without restarting rest.
+
+Rest shows what comes next. Hide keeps a pinned countdown; reaching zero alerts you but never logs a set.
+The exercise's rest duration wins, with the Profile value used when the plan has none.
+
 ## iOS
 
 ```bash
 npm run mobile:sync      # web build + copy into ios/ (copied files are not versioned)
 npm run mobile:open:ios  # open the project in Xcode
 ```
+
+After adding native plugins, the Tech Lead runs Capacitor sync / CocoaPods installation before building in Xcode.
+Rest alerts ask for notification permission when rest first starts; declining does not prevent logging.
+Verify notification sound on a locked iPhone, foreground haptics, cancellation on skip/Undo, and the localized
+“Next” text in the Live Activity before release. The web uses an audio beep and vibration where supported.
 
 ## Structure
 

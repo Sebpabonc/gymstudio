@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addRestTime,
+  getWorkoutRestSeconds,
   isRestTimerDone,
   remainingRestSeconds,
   skipRestTimer,
@@ -9,6 +10,24 @@ import {
 } from './restTimer'
 
 describe('rest timer', () => {
+  it('T134: uses exercise rest_seconds ahead of the Profile duration', () => {
+    expect(getWorkoutRestSeconds(120, 150)).toBe(150)
+    expect(getWorkoutRestSeconds(120, 60)).toBe(60)
+  })
+
+  it('T135: falls back to Profile rest when the exercise has no rest_seconds', () => {
+    expect(getWorkoutRestSeconds(90, undefined)).toBe(90)
+    expect(getWorkoutRestSeconds(120, undefined)).toBe(120)
+  })
+
+  it('falls back to the default when no valid rest duration is available', () => {
+    expect(getWorkoutRestSeconds(undefined, 60)).toBe(60)
+    expect(getWorkoutRestSeconds(0, 60)).toBe(60)
+    expect(getWorkoutRestSeconds(120, 0)).toBe(120)
+    expect(getWorkoutRestSeconds(120, NaN)).toBe(120)
+    expect(getWorkoutRestSeconds(NaN, Infinity)).toBe(90)
+    expect(getWorkoutRestSeconds()).toBe(90)
+  })
   it('starts from the duration and computes remaining time from the end timestamp', () => {
     const timer = startRestTimer(90, 1_000)
 

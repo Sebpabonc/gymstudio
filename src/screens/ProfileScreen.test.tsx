@@ -35,16 +35,16 @@ describe('profile sync feedback', () => {
     auth.quarantinedEntries[0].exerciseId = 'Bench press'
   })
 
-  it('shows the local rest-between-sets setting in both languages', () => {
+  it('labels the Profile rest setting as the plan fallback in both languages', () => {
     const english = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
-    expect(english).toContain('Rest between sets')
+    expect(english).toContain('Rest when the plan sets none')
     expect(english).toContain('60 seconds')
     expect(english).toContain('120 seconds')
     expect(english).toContain('aria-pressed="true"')
 
     language = 'es'
     const spanish = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
-    expect(spanish).toContain('Descanso entre series')
+    expect(spanish).toContain('Descanso cuando el plan no indica uno')
     expect(spanish).toContain('120 segundos')
   })
 

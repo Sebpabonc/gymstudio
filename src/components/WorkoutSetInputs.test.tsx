@@ -43,7 +43,7 @@ describe('WorkoutSetInputs', () => {
     expect(html).toContain('type="text" inputMode="decimal"')
     expect(html).toContain('data-log-weight="true"')
     expect(html).toContain('value="12,"')
-    expect(html).toContain('type="number" inputMode="numeric" min="1"')
+    expect(html).toContain('type="number" inputMode="numeric" min="0"')
     for (const key of [
       'workout.set.weightDecrease', 'workout.set.weightLabel', 'workout.set.weightIncrease',
       'workout.set.repsDecrease', 'workout.set.repsLabel', 'workout.set.repsIncrease',
@@ -55,13 +55,12 @@ describe('WorkoutSetInputs', () => {
   it.each([
     ['12.', '12'], ['12,', '12'], ['12,5', '12.5'], ['0', '0'],
     ['', undefined], [' ', undefined], ['.', undefined], ['12,5,5', undefined], ['Infinity', undefined],
-  ])('keeps raw %j while only updating finite, nonblank weights', (raw, numeric) => {
+  ])('keeps raw %j and makes an invalid or empty weight unsaveable', (raw, numeric) => {
     const { props, inputs } = renderInputs()
     inputs[0].props.onChange?.({ target: { value: raw } } as React.ChangeEvent<HTMLInputElement>)
 
     expect(props.onWeightInputChange).toHaveBeenCalledWith(raw)
-    if (numeric === undefined) expect(props.onValueChange).not.toHaveBeenCalled()
-    else expect(props.onValueChange).toHaveBeenCalledWith('weight', numeric)
+    expect(props.onValueChange).toHaveBeenCalledWith('weight', numeric ?? '0')
   })
 
   it.each([
@@ -79,14 +78,14 @@ describe('WorkoutSetInputs', () => {
     expect(props.onWeightInputChange).toHaveBeenLastCalledWith(formatted)
   })
 
-  it('preserves rep cleaning, one-rep steps, and the minimum of one', () => {
+  it('T124/T151: permits zero reps so Done disables or the drop is omitted', () => {
     const { props, inputs, buttons } = renderInputs({ reps: 1 })
     const event = { target: { value: '015' } } as React.ChangeEvent<HTMLInputElement>
     inputs[1].props.onChange?.(event)
     expect(event.target.value).toBe('15')
     expect(props.onValueChange).toHaveBeenLastCalledWith('reps', '15')
     buttons[2].props.onClick?.({} as React.MouseEvent<HTMLButtonElement>)
-    expect(props.onValueChange).toHaveBeenLastCalledWith('reps', '1')
+    expect(props.onValueChange).toHaveBeenLastCalledWith('reps', '0')
     buttons[3].props.onClick?.({} as React.MouseEvent<HTMLButtonElement>)
     expect(props.onValueChange).toHaveBeenLastCalledWith('reps', '2')
   })
