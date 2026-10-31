@@ -466,6 +466,21 @@ export function effectiveWorkoutTarget(
   return choice === 'accepted' ? recommended : prescribed
 }
 
+export function matchedWorkoutSessionEntries(matches: Array<WorkoutEntry | undefined>): WorkoutEntry[] {
+  return [...new Map(matches.filter((entry): entry is WorkoutEntry => !!entry).map((entry) => [entry.id, entry])).values()]
+}
+
+export function correctLoggedWorkoutReps(
+  reps: number[], weights: number[], done: boolean[], touched: boolean[],
+  index: number, value: number, carryEligible: boolean,
+) {
+  const corrected = [...reps]
+  corrected[index] = value
+  return carryEligible && done[index] && Number.isFinite(value) && value > 0
+    ? capUnloggedReps(corrected, weights, done, touched, index)
+    : corrected
+}
+
 function formatHistoryDate(language: ReturnType<typeof useT>['language'], value: string) {
   return formatShortDate(language, value)
 }
@@ -851,6 +866,7 @@ export default function WorkoutPlan({
   draftRef.current = plannedDrafts
   const [workoutLoggerExpanded, setWorkoutLoggerExpanded] = useState<Record<string, boolean>>({})
   const [workoutWeightInputs, setWorkoutWeightInputs] = useState<Record<string, string>>({})
+  const [workoutDropWeightInputs, setWorkoutDropWeightInputs] = useState<Record<string, string>>({})
   const [workoutRestContext, setWorkoutRestContext] = useState<{ set: number; next: string; logged?: string } | null>(null)
   const [workoutInsight, setWorkoutInsight] = useState<WorkoutExerciseInsight | null>(null)
   const [workoutGroupInsights, setWorkoutGroupInsights] = useState<Array<{ exercise: Exercise; insight: WorkoutExerciseInsight }>>([])
@@ -1356,7 +1372,7 @@ export default function WorkoutPlan({
         { length: setCount },
         (_, index) => currentDraft.setWeightTouched[index] ?? false
       )
-      const nextSetReps = Array.from(
+      let nextSetReps = Array.from(
         { length: setCount },
         (_, index) => currentDraft.setReps[index] ?? currentDraft.reps
       )
@@ -1405,9 +1421,13 @@ export default function WorkoutPlan({
           }
         }
       } else {
-        const reps = field === 'reps' ? nextSetReps : nextDropSetReps
-        reps[setIndex] = nextReps
-        if (field === 'reps') repsTouched[setIndex] = true
+        if (field === 'reps') {
+          repsTouched[setIndex] = true
+          nextSetReps = correctLoggedWorkoutReps(nextSetReps, nextSetWeights, currentDraft.setDone,
+            repsTouched, setIndex, nextReps, !!currentDraft.carryEligible)
+        } else {
+          nextDropSetReps[setIndex] = nextReps
+        }
       }
 
       const nextDraft: PlanDraft = {
@@ -1944,12 +1964,7 @@ export default function WorkoutPlan({
     if (planMode !== 'preset' || !activeBlock || !activeDay) return
     // The workout is over: no rest timer floating over the Completed screen.
     onRestTimerChange?.(null)
-    const entries = nextHistory.filter(
-      (entry) =>
-        entry.date.slice(0, 10) === activeCompletionScope.date.slice(0, 10) &&
-        entry.blockId === activeCompletionScope.blockId &&
-        entry.dayKey === activeCompletionScope.dayKey
-    )
+    const entries = matchedWorkoutSessionEntries(activeExercises.map((exercise) => findExerciseEntry(exercise, nextHistory)))
     const performance = buildWorkoutSummary(entries, nextHistory, trainingBlocks, exerciseCatalog, today)
     const nextDay = nextUnloggedDay(activeBlock, nextHistory, today)
     const scopeKey = getSessionScopeKey(activeCompletionScope, planMode)
@@ -1997,11 +2012,7 @@ export default function WorkoutPlan({
   const workoutGroupCompletion = workoutGroups.map((group) =>
     group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, history))
   )
-  const workoutSessionEntries = history.filter((entry) =>
-    entry.date.slice(0, 10) === activeCompletionScope.date.slice(0, 10) &&
-    entry.blockId === activeCompletionScope.blockId &&
-    entry.dayKey === activeCompletionScope.dayKey
-  )
+  const workoutSessionEntries = matchedWorkoutSessionEntries(activeExercises.map((exercise) => findExerciseEntry(exercise, history)))
   const workoutDoneExerciseCount = activeExercises.filter((exercise) => {
     const entry = findExerciseEntry(exercise, workoutSessionEntries)
     return !!entry && entry.sets.filter((set) => !set.tag || set.tag === 'main').length >= getDefaultSetCount(exercise)
@@ -2071,6 +2082,8 @@ export default function WorkoutPlan({
   }
   const startWorkout = () => {
     pendingWorkoutNext.current = null
+    setWorkoutWeightInputs({})
+    setWorkoutDropWeightInputs({})
     setSwitchUntil(null)
     setWorkoutRestContext(null)
     if (restTimer) onRestTimerChange?.(null)
@@ -2132,6 +2145,8 @@ export default function WorkoutPlan({
     const nextDrafts = { ...draftRef.current }
     affectedNames.forEach((exercise) => { delete nextDrafts[getPlanDraftKey(exercise.name)] })
     setWorkoutWeightInputs((current) => Object.fromEntries(Object.entries(current).filter(([inputKey]) =>
+      !affectedNames.some((exercise) => inputKey.startsWith(`${getPlanDraftKey(exercise.name)}:`)))))
+    setWorkoutDropWeightInputs((current) => Object.fromEntries(Object.entries(current).filter(([inputKey]) =>
       !affectedNames.some((exercise) => inputKey.startsWith(`${getPlanDraftKey(exercise.name)}:`)))))
     draftRef.current = nextDrafts
     setPlannedDrafts(nextDrafts)
@@ -3640,6 +3655,8 @@ export default function WorkoutPlan({
                       aria-pressed={state === 'current'}
                       onClick={() => {
                         pendingWorkoutNext.current = null
+                        setWorkoutWeightInputs({})
+                        setWorkoutDropWeightInputs({})
                         setSwitchUntil(null)
                         setWorkoutRestContext(null)
                         if (restTimer) onRestTimerChange?.(null)
@@ -3958,11 +3975,11 @@ export default function WorkoutPlan({
                     <div className="effortless-drop">
                       <strong>{t('workout.technique.drop')}</strong>
                       <WorkoutSetInputs setIndex={index} weight={dropSetWeights[index]}
-                        weightInput={formatNumber(language, dropSetWeights[index])} reps={dropSetReps[index]}
+                        weightInput={workoutDropWeightInputs[`${getPlanDraftKey(exercise.name)}:${index}`] ?? formatNumber(language, dropSetWeights[index])} reps={dropSetReps[index]}
                         equipment={libraryMatch?.equipment} language={language} t={t} repsLabel={text.repsShort}
                         weightLabel={t('workout.set.dropWeightLabel', { set: index + 1 })}
                         repInputLabel={t('workout.set.dropRepsLabel', { set: index + 1 })}
-                        onWeightInputChange={() => undefined}
+                        onWeightInputChange={(raw) => setWorkoutDropWeightInputs((current) => ({ ...current, [`${getPlanDraftKey(exercise.name)}:${index}`]: raw }))}
                         onValueChange={(field, value) => updatePlanSetValue(exercise, index, field === 'weight' ? 'dropWeight' : 'dropReps', value, setCount)} />
                     </div>
                   )}

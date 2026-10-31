@@ -1,12 +1,51 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import WorkoutPlan, { ExerciseSwapSheet, filterCustomPlanExercises, formatEstMaxInsightLine, confirmedWorkoutSet, loggingTargetRange, preserveConfirmedWorkoutSet, savedWorkoutEntryScope, effectiveWorkoutTarget } from './WorkoutPlan'
+import WorkoutPlan, { ExerciseSwapSheet, filterCustomPlanExercises, formatEstMaxInsightLine, confirmedWorkoutSet, loggingTargetRange, preserveConfirmedWorkoutSet, savedWorkoutEntryScope, effectiveWorkoutTarget, matchedWorkoutSessionEntries, correctLoggedWorkoutReps } from './WorkoutPlan'
 import { createTranslator } from '../i18n/translate'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { anyDayEstMaxComparison } from '../progress/estMax'
-import { upsertScopedEntry } from '../utils/completedExercises'
+import { findWeekCompletion, upsertScopedEntry } from '../utils/completedExercises'
 import { captureUndoSnapshots, undoLoggedEntries } from '../utils/loggingFeedback'
+import { workoutCompletionCounts } from '../progress/workoutInsights'
+
+describe('resumed weekly workout summaries', () => {
+  it('includes Monday entries when finishing Tuesday, using the exact completion matches', () => {
+    const entry: WorkoutEntry = {
+      id: 'monday-press', date: '2026-10-26', blockId: 'block', dayKey: 'upper-a', exerciseId: 'press',
+      sets: Array.from({ length: 3 }, (_, index) => ({ id: `press-${index}`, weight: 40, reps: 8 })),
+    }
+    const partner = { ...entry, id: 'tuesday-row', exerciseId: 'row', date: '2026-10-27' }
+    const oldWeek = { ...entry, id: 'old', date: '2026-10-19' }
+    const otherDay = { ...entry, id: 'other-day', dayKey: 'upper-b' }
+    const history = [oldWeek, entry, otherDay, partner]
+    const scope = { date: '2026-10-27', blockId: 'block', dayKey: 'upper-a' }
+    const matched = ['press', 'row', 'missing'].map((id) => findWeekCompletion(history.filter((item) => item.exerciseId === id), scope))
+    const entries = matchedWorkoutSessionEntries(matched)
+    expect(entries).toEqual([entry, partner])
+    expect(workoutCompletionCounts(entries, 2, 6, 2)).toMatchObject({ complete: true, sets: 6, exercises: 2 })
+    expect(matchedWorkoutSessionEntries([entry, entry, undefined])).toEqual([entry])
+  })
+})
+
+describe('logged reps correction carries downward immediately', () => {
+  it('caps future untouched same-load sets from eight to six without needing reload', () => {
+    expect(correctLoggedWorkoutReps([8, 8, 8], [40, 40, 40], [true, false, false], [true, false, false], 0, 6, true)).toEqual([6, 6, 6])
+  })
+  it('preserves already logged, explicitly edited, and different-load sets', () => {
+    expect(correctLoggedWorkoutReps([8, 8, 8, 8], [40, 40, 40, 45], [true, true, false, false], [true, false, true, false], 0, 6, true)).toEqual([6, 8, 8, 8])
+  })
+  it('never increases future reps when correcting upward', () => {
+    expect(correctLoggedWorkoutReps([6, 6, 6], [40, 40, 40], [true, false, false], [true, false, false], 0, 8, true)).toEqual([8, 6, 6])
+  })
+  it('does not poison future sets while the correction input is temporarily zero', () => {
+    expect(correctLoggedWorkoutReps([8, 8, 8], [40, 40, 40], [true, false, false], [true, false, false], 0, 0, true)).toEqual([0, 8, 8])
+  })
+  it('does not carry ineligible prescriptions or edits to not-yet-logged sets', () => {
+    expect(correctLoggedWorkoutReps([8, 8, 8], [40, 40, 40], [true, false, false], [true, false, false], 0, 6, false)).toEqual([6, 8, 8])
+    expect(correctLoggedWorkoutReps([8, 8, 8], [40, 40, 40], [false, false, false], [true, false, false], 0, 6, true)).toEqual([6, 8, 8])
+  })
+})
 
 describe('same-prescription logging comparisons', () => {
   it('uses the accepted recommended range for stored evidence and comparisons, not the raw plan target', () => {

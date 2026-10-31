@@ -90,6 +90,24 @@ describe('WorkoutSetInputs', () => {
     expect(props.onValueChange).toHaveBeenLastCalledWith('reps', '2')
   })
 
+  it.each(['en', 'es'] as const)('preserves an unfinished drop-weight decimal in %s until the next digit is typed', (language) => {
+    let weight = 30
+    let raw = '30'
+    const separator = language === 'es' ? ',' : '.'
+    const props = () => ({
+      language, t: createTranslator(language), weight, weightInput: raw,
+      weightLabel: createTranslator(language)('workout.set.dropWeightLabel', { set: 2 }),
+      onWeightInputChange: (next: string) => { raw = next },
+      onValueChange: (field: 'weight' | 'reps', next: string) => { if (field === 'weight') weight = Number(next) },
+    })
+    for (const value of ['12', `12${separator}`, `12${separator}5`]) {
+      renderInputs(props()).inputs[0].props.onChange?.({ target: { value } } as React.ChangeEvent<HTMLInputElement>)
+      expect(renderToString(renderInputs(props()).element)).toContain(`value="${value}"`)
+    }
+    expect(weight).toBe(12.5)
+    expect(raw).toBe(`12${separator}5`)
+  })
+
   it('selects the full weight and reps values on focus', () => {
     const { inputs } = renderInputs()
     for (const input of inputs) {
