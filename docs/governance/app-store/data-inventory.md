@@ -68,7 +68,7 @@ Signed-in keys are `gym-studio.user.<uuid>.*`; guest keys are `gym-studio.*`; de
 | Workout history and sync metadata | `history`, `sync-metadata` | **Not removed on sign-out** (G25) |
 | Own exercises, custom plan, active block, cached plan | `exercises`, `custom-plan`, `active-block-id`, `active-user-plan` | Same |
 | Today-only swaps, cached AI sentences (last 100) | `exercise-swaps`, `trainer-explanations` | Same |
-| AI consent choice | `ai-consent.ask-exercise` | Device only; the server does not see it (G2, G3) |
+| AI consent choice | `gym-studio.ai-consent.v2` | Device only; the server does not see or verify it (G2, G3) |
 | Rest timer state, rest preference, UI preferences, language, welcome flag, app-open counter | various | Never sent; counter is local, not analytics |
 | Catalogue and block caches | `catalogue`, `training-blocks` | Non-personal; block cache holds the owner's program (G7) |
 
@@ -131,7 +131,7 @@ until they expire.
 | Right | In the app today | Gap |
 |---|---|---|
 | Delete account | **No** | G1 |
-| Withdraw AI consent | **No.** Once chosen, the choice cannot be changed | G3 |
+| Withdraw AI consent | Yes, in Profile → Privacy & AI; withdrawal applies on this device | Server cannot verify or synchronize the choice (G2, G3) |
 | Access, portability (export) | No. By email only | G16 |
 | Correct | Yes for logs and goals; by email for name and email | |
 | Delete single items | Logs yes (soft). Measurements, goals, feedback: no | G16 |

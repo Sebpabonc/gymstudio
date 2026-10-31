@@ -4,8 +4,7 @@ Governancer, 2026-10-31. Rule: Apple 5.1.2(i): "You must clearly disclose where 
 third-party AI, and obtain explicit permission before doing so." Read 2026-10-31 at
 `https://developer.apple.com/app-store/review/guidelines/`. UXer checks placement; PT checks D and E; lawyer checks A and G; Tech Lead builds (G2, G3, G5, G9, G20).
 
-**Today:** only the chat asks. `trainer_explain` and `block_plan` send data without asking, even after "Not now" (see `data-inventory.md` section 5). The copy below
-is not true until G2 is done. Keys below are proposals; both dictionaries must have the same keys.
+**Today:** all client AI requests require enabled consent, and Profile → Privacy & AI can withdraw it. Consent is stored locally, so the Edge Function cannot independently verify or synchronize the choice. Server-side consent storage and enforcement remain unresolved (G2). Keys below are proposals; both dictionaries must have the same keys.
 
 ## A. Main AI permission (blocking sheet)
 
