@@ -60,6 +60,9 @@ Do not repeat any of these as fact.
 | Rest away from the app | Only if you find a setting | **A Live Activity keeps counting and then shows the next set.** The rest-ended notification switch was on. The alert itself was not observed |
 | Log All Sets | Logs what you did not confirm | **It asks first**, with an option to stop asking. The concern stays, but it is not a silent action |
 | Supersets | Exact flow unknown | **One set, then the partner opens at once; after the partner, the rest; then back to the first lift.** Each tap saves. Same idea as our layout A |
+| AI inside the app | No public sign of a chat or LLM | **There is one:** an AI chat for injuries and limitations (beta), under My Plan. I read it and sent nothing |
+| Price | $15.99 a month, $95.99 a year | **The paywall on this account showed $24.99 a month and $149.99 a year**, in US dollars. Store and FAQ figures differ; the reason is unknown |
+| Paywall | Before the first workout, exact behaviour unknown | **After log-in: plan summary, then paywall. Its X closes it** and the app works, with the trial banner still showing 7 days |
 | Name of the estimate | Renamed to Estimated Strength | **The Focus Exercises card still says Est. 1 Rep Max.** The rename is not on this surface |
 | Tabs | Names vary between articles | **Workout, Body, Targets, Log.** Body has Results and Recovery |
 
@@ -81,6 +84,12 @@ Do not repeat any of these as fact.
 - **How-To:** two camera angles, playback speed, other names for the exercise, tabs for instructions, target and equipment. The video also plays at the top of the logging sheet.
 - **Replace** gave odd options for a rear-delt raise: Turkish get-up and handstand push-up, which fits the review complaints about illogical choices.
 - **Settings:** export workout data, app icon, gift pass, and no language option in the parts I saw.
+- **My Plan:** goal, injuries chat, location, equipment (70 selected), bodyweight-only, workouts per week, duration, experience, split, variability, focus exercises, warm-up sets, circuits and supersets, timed intervals, units, **Workout Insights (beta, on)**, cardio.
+- **Calibrate Strength:** a button with a red dot, and a screen after the paywall offering a 5-minute check with no equipment: plank, squat, push-up. It can be skipped. I did not run it.
+- **Plan summary after log-in:** goal, days per week, level and gym, then the training week with the first workout marked.
+- **Plate calculator:** draws the plates per side for the set's weight; bars and plates can be edited.
+- **Other surfaces:** milestones (volume, workouts, calories), a 14-day guest pass, empty workout report, optional Health Profile (Apple Health or manual: gender, date of birth, height).
+- **Small flaws:** milestone volume shows lb while the plan is in kg; weekly goal shows 3 days while the plan says 4.
 
 ### Two things that surprised me
 
@@ -89,7 +98,8 @@ Do not repeat any of these as fact.
 
 ### Limits and honesty
 
-- **Effects on the PO's phone, all reversed and checked:** a drag meant to scroll moved Dip in the list; I set a test weight of 30 kg, built a superset, turned the rest timer on and started two workouts. I discarded both workouts, and restored 25 kg, the order, the unbundled lifts and the timer. He must log in again, because I logged out to reach the first run.
+- **Effects on the PO's phone:** a drag meant to scroll moved Dip in the list; I set a test weight of 30 kg, built a superset, turned the rest timer on and started two workouts. I discarded both workouts, and restored 25 kg, the order, the unbundled lifts and the timer. I logged out to reach the first run, and he logged back in.
+- **Not reversed, possibly:** after he logged back in, the plan shows build muscle, 4 days, intermediate and large gym, which match my test answers, and the next workout changed from 9 exercises to Lower Body Day. I cannot tell whether those answers overwrote his or were already the same. He should check My Plan.
 - **One unexplained notice:** on the first Log Set, iPhone Mirroring said the iPhone camera was not available from the Mac. It did not recur. I did not count it as Fitbod behaviour.
 - **Not reached:** see §12. Nothing of Fitbod's was saved in the repo; screens are described in my own words.
 
@@ -102,14 +112,14 @@ Do not repeat any of these as fact.
   - App Store subtitle: "AI Personal Trainer & Workouts". Description repeats "AI workouts".
   - Website and algorithm article: "proprietary, science-backed algorithm", plus machine learning on behaviour. The word AI barely appears.
   - Terms: says Fitbod does not act as a personal trainer. Privacy policy: does not mention AI.
-- **What it is, technically:** no public sign of a chat or LLM in the core product. SensAI, a competitor, calls it rules-based ML **[C]**. The Sept 2026 help articles describe a scoring system over history, recovery and equipment, with a trademarked "mStrength" layer that deliberately varies heavy and light days **[V]**.
-- **Lesson for us:** "AI" sells in the store title, but their legal text denies the personal trainer. That gap is exactly what `docs/governance/app-store/` G9 forbids for us.
+- **What it is, technically:** workouts look rule-based. SensAI, a competitor, calls it rules-based ML **[C]**. **[H]** The app does have an AI chat for injuries and limitations (beta), which suggests changes to the plan, warns that chats may be recorded by Fitbod and its providers, and links to a help article saying it is not medical advice. The Sept 2026 help articles describe a scoring system over history, recovery and equipment, with a trademarked "mStrength" layer that deliberately varies heavy and light days **[V]**.
+- **Lesson for us:** an injury chat is exactly the medical boundary in `docs/ux/README.md`. Any similar idea goes to the PT and the Tech Lead first, and should not be copied by default. "AI" sells in the store title, but their legal text denies the personal trainer. That gap is exactly what `docs/governance/app-store/` G9 forbids for us.
 
 ### Price, trial, paywall
 
-- **$15.99/month, $95.99/year** on the FAQ page and App Store. Older $12.99, $79.99 and legacy tiers are still listed **[V]**. The home page shows no price **[V]**. Regional prices vary.
+- **[H] $24.99/month, $149.99/year on the in-app paywall for this account.** **$15.99/month, $95.99/year** on the FAQ page and App Store. Older $12.99, $79.99 and legacy tiers are still listed **[V]**. The home page shows no price **[V]**. Regional prices vary.
 - **Trial:** 7 days, you must opt into a plan to start, and it rolls into paid unless cancelled **[V]**. Apple cancellations need 24 hours' notice **[V]**.
-- **Paywall timing:** a video breakdown shows onboarding and the first generated workout are free. Paywall appears once the workout exists and before it starts (yearly plan highlighted), with a second paywall after the workout summary framed around 90-day predictions **[S, one source]**. A Mexican review dated 24 March (year not shown) complains of being sent to payment before exploring, and the developer answers with the trial **[V, one review]**. Exact behaviour **[D]**. **[H]** No payment or trial screen appears before sign-up. I did not walk the steps after sign-up, and the PO's account already had the trial running.
+- **Paywall timing:** a video breakdown shows onboarding and the first generated workout are free. Paywall appears once the workout exists and before it starts (yearly plan highlighted), with a second paywall after the workout summary framed around 90-day predictions **[S, one source]**. A Mexican review dated 24 March (year not shown) complains of being sent to payment before exploring, and the developer answers with the trial **[V, one review]**. Exact behaviour **[D]**. **[H]** No payment or trial screen appears before sign-up. After log-in on the PO's account: plan summary, then a paywall with yearly and monthly tabs, four benefits and no mention of the trial; the X closes it. A brand-new sign-up may differ.
 
 ### Platforms, integrations, languages
 
@@ -331,7 +341,7 @@ Evidence: **the app on device [H]**, store screenshots [V, marketing], TechRadar
 
 | Advantage | Confidence | Caveat |
 |---|---|---|
-| **A reason for each weight**: "reached the top of the 8-rep target at 40 kg, so I moved the load up" | **High for a new account [H]:** none on the exercise, How-To, History, More, Replace, rest or effort screens, only a generic card about starting weights. GGR: users must guess the purpose | With logged history it could differ [D]. And ours sits behind a tap on the cue sheet |
+| **A reason for each weight**: "reached the top of the 8-rep target at 40 kg, so I moved the load up" | **Medium:** on a new account, none on the exercise, How-To, History, More, Replace, rest or effort screens, only a generic card about starting weights [H]. GGR: users must guess the purpose | **Workout Insights (beta) is on and I have not seen it work:** it may explain something after logging [D]. Ours sits behind a tap on the cue sheet |
 | **A plan that stays put**: 6 weeks, A/B days, comparable results | High | Needs "machine taken" and "short on time" exits |
 | **Honest variation**: A/B is named and explained. Fitbod also alternates heavy and light, but users ask why | High | Do not claim Fitbod has no variation |
 | **Logging**: 3 taps against 5 or 6 [H], no RiR, no keyboard for common changes, button states values | Medium until PR #382 merges and is tested | **Superset saving per tap is not a lead:** Fitbod does it too [H] |
@@ -473,18 +483,20 @@ No personal data leaves the phone at this stage, and no AI is called. Questions 
 | # | Check | Status |
 |---|---|---|
 | 1 | Onboarding order and count | **Done [H]** on one path, up to sign-up |
-| 1b | When the paywall appears after sign-up and whether it can be skipped | **Open:** the account already existed. The PO can say what he saw |
+| 1b | When the paywall appears and whether it can be skipped | **Done [H]** after log-in on an existing account: skippable. A brand-new sign-up is open |
 | 2 | Taps to log; does a weight change carry | **Done [H]** |
 | 3 | Does it move on; Undo; button words | **Done [H]** |
 | 4 | Superset, set by set | **Done [H]** for the first round. Final round not logged |
-| 5 | Per-exercise "why this weight" | **Done [H]** on a new account. Open with logged history |
+| 5 | Per-exercise "why this weight" | **Done [H]** on a new account. Open with logged history and Workout Insights |
 | 6 | Rest timer locked, alert and sound | **Part:** Live Activity seen counting and then showing the next set. Alert on a locked phone is open |
 | 7 | Spanish quality | **Open:** the phone is in English and I did not change a device setting |
 | 8 | Tabs, motion, density | **Done [H]**, at Mirroring's frame rate. Haptics cannot be felt, open |
 | 9 | Delete account path | **Done [H]**, cancelled at the alert |
-| 10 | Finishing a workout: summary, record card, second paywall, how the next workout adapts | **Open:** I discarded instead of saving test data |
+| 10 | Finishing a workout: summary, record card, second paywall, how the next workout adapts | **Open:** saving a test workout would add to the PO's history, and needs his OK |
+| 11 | The other questionnaire path ("I know my strength") and the last superset rounds | **Open** |
+| 12 | Injury chat and strength check in use | **Not run on purpose:** the chat would need health details, and the check logs results |
 
-**For the PO, about 10 minutes:** log in again; say what appeared between sign-up and the first workout; during one real rest, lock the phone and note whether it vibrates or alerts; finish one real workout and note what comes after. Optional: in iPhone Settings, set Fitbod's language to Spanish, and tell me so I can review it.
+**For the PO, about 10 minutes:** check that My Plan is right; during one real rest, lock the phone and note whether it vibrates or alerts; finish one real workout and note what comes after. Optional: in iPhone Settings, set Fitbod's language to Spanish, and tell me so I can review it.
 
 Also unverified: Google Play rating and Data Safety; direct Reddit threads; Watch behaviour in real use; keyword field; actual revenue or install figures (third-party numbers conflict and are not repeated).
 
