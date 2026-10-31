@@ -173,6 +173,17 @@ export function CueSheet({ details, sections, id, onClose, children }: {
 }
 
 /** PO 2026-10-18: in Workout mode the short "Squeeze" line also opens the exercise details sheet. */
+const CUE_ICON = (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+  </svg>
+)
+
+/**
+ * PO 2026-10-18: in Workout mode the short squeeze line opens the exercise details sheet.
+ * Design option C (PO pick): icon card + cue + arrow, without the word "Squeeze" on screen
+ * (the label stays for screen readers).
+ */
 export function ShortCue({ label, cue, details, id }: {
   label: string
   cue: string
@@ -182,19 +193,26 @@ export function ShortCue({ label, cue, details, id }: {
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
   const sections = details ? visibleSections(details) : []
+  const body = (
+    <>
+      <span className="cue-card-icon">{CUE_ICON}</span>
+      <span className="cue-card-text"><span className="sr-only">{label}: </span>{cue}</span>
+    </>
+  )
   if (!details || sections.length === 0) {
-    return <p className="workout-short-cue"><strong>{label} · </strong>{cue}</p>
+    return <p className="workout-short-cue cue-card">{body}</p>
   }
   return (
     <>
       <button
         type="button"
-        className="workout-short-cue workout-short-cue-open"
+        className="workout-short-cue cue-card workout-short-cue-open"
         aria-haspopup="dialog"
         aria-label={details.openLabel}
         onClick={() => setOpen(true)}
       >
-        <strong>{label} · </strong>{cue}<span className="squeeze-cue-more" aria-hidden="true"> ›</span>
+        {body}
+        <span className="cue-card-chevron" aria-hidden="true">›</span>
       </button>
       {open && <CueSheet details={details} sections={sections} id={id} onClose={close} />}
     </>

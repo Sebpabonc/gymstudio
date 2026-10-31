@@ -2,6 +2,7 @@
 // docs/fitness/approved/2026-10-07-progression-engine-spec.md (R1–R11, T1–T29) and its v2 amendment
 // docs/fitness/approved/2026-10-07-progression-engine-spec-v2.md (R12–R19, T30–T52c) and
 // docs/fitness/approved/2026-10-13-engine-same-day-evidence.md (R20–R24, T53–T63).
+// docs/fitness/approved/2026-10-19-reverse-pyramid-after-strong-b.md (R25, T64–T72).
 // The PT owns these rules; change them only through an approved PT spec with test cases.
 // Pure functions: the LLM never chooses numbers — it only explains the structured recommendation returned here.
 
@@ -27,6 +28,7 @@ export type SessionEvidence = {
   /** Planned technique and per-set reps of that session (pyramids). */
   technique?: string
   setReps?: number[]
+  dayName?: string
   /** Week-6 deload session (R4) — excluded from capacity and "missed twice". */
   deload?: boolean
   /** Second exercise of a double-angle pair (R5) — excluded from this exercise's history. */
@@ -65,6 +67,7 @@ export type ReasonCode =
   | 'consolidate_load'
   | 'achieved_floor'
   | 'same_day_boost'
+  | 'recent_miss_cap'
 
 export type Confidence = 'low' | 'medium' | 'high'
 
@@ -83,6 +86,7 @@ export type Recommendation = {
   dropWeight?: number
   /** Set when per-user calibration moved the load away from the rule result (spec 1.10). */
   calibration?: { offset: number; uncalibratedWeight: number; capped: boolean }
+  firstSessionProtocol?: 'pyramid' | 'reverse-pyramid'
   evidence: {
     lastDate?: string
     lastWeight?: number
@@ -91,6 +95,12 @@ export type Recommendation = {
     estimatedOneRepMax?: number
     sessionsUsed: number
     daysSinceLast?: number
+    sameDayDate?: string
+    sameDayName?: string
+    sameDayWeight?: number
+    sameDayReps?: number[]
+    sameDayTarget?: RepRange
+    recentMiss?: { weight: number; reps: number; target: number; newWeight: number }
   }
 }
 
@@ -233,6 +243,28 @@ function sameRange(a?: RepRange, b?: RepRange) {
   return !!a && !!b && a.min === b.min && a.max === b.max
 }
 
+function sameDaySession(input: RecommendInput, sessions: SessionEvidence[]) {
+  if (!input.dayKey) return undefined
+  return sessions.find((session) => {
+    const days = daysBetween(session.date, input.today)
+    return session.dayKey === input.dayKey &&
+      (input.blockId === undefined || session.blockId === input.blockId) &&
+      session.date < input.today && days >= 0 && days <= 28
+  })
+}
+
+function topWorkingWeight(session: SessionEvidence, planned: number) {
+  const logged = progressionSets(session.sets, planned)
+  return isPyramid(session.technique, session.setReps)
+    ? Math.max(0, ...logged.map((set) => set.weight))
+    : workingWeight(logged)
+}
+
+function firstSessionProtocol(input: RecommendInput) {
+  if (!['machine', 'plate-loaded', 'cable', 'smith-machine'].includes(input.equipment ?? '')) return undefined
+  return input.technique === 'reverse-pyramid' ? 'reverse-pyramid' : 'pyramid'
+}
+
 const isPyramid = (technique?: string, setReps?: number[]) =>
   (technique === 'pyramid' || technique === 'reverse-pyramid') && !!setReps && setReps.length > 1 && new Set(setReps).size > 1
 
@@ -288,6 +320,8 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
   const lastWeight = workingWeight(lastSets)
   const lastReps = lastSets.map((set) => set.reps)
   const daysSinceLast = last ? daysBetween(last.date, today) : undefined
+  const sameDay = sameDaySession(input, progressing)
+  const sameDaySets = sameDay ? progressionSets(sameDay.sets, sets) : []
   const evidence: Recommendation['evidence'] = {
     lastDate: last?.date,
     lastWeight: last ? lastWeight : undefined,
@@ -296,6 +330,13 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
     estimatedOneRepMax: capacity ? Number(capacity.oneRepMax.toFixed(1)) : undefined,
     sessionsUsed: capacity?.sessions.length ?? (last ? 1 : 0),
     daysSinceLast,
+    ...(sameDay ? {
+      sameDayDate: sameDay.date,
+      ...(sameDay.dayName ? { sameDayName: sameDay.dayName } : {}),
+      sameDayWeight: topWorkingWeight(sameDay, sets),
+      sameDayReps: sameDaySets.map((set) => set.reps),
+      sameDayTarget: sameDay.target,
+    } : {}),
   }
   const make: Make = (action, weight, reason, extra = {}) => ({
     action, weight, reps: target, sets, reason, confidence, evidence, ...extra,
@@ -307,7 +348,11 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
   // R4: deload — same loads as the last non-deload session, half the sets, bottom of the range.
   if (input.deload) {
     const half = Math.ceil(sets / 2)
-    if (!last) return make('deload', plannedWeight ?? null, 'deload_week', { sets: half, reps: { min: target.min, max: target.min } })
+    if (!last) {
+      const protocol = firstSessionProtocol(input)
+      if (protocol) return make('collect_data', null, 'no_history', { firstSessionProtocol: protocol })
+      return make('deload', plannedWeight ?? null, 'deload_week', { sets: half, reps: { min: target.min, max: target.min } })
+    }
     if (pyramid && input.setReps) {
       const planned = input.setReps
       const loads = progressionSets(last.sets, planned.length).map((set) => set.weight)
@@ -324,7 +369,13 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
     return make('deload', lastWeight, 'deload_week', { sets: half, reps: { min: target.min, max: target.min } })
   }
 
-  if (!last) return make('collect_data', plannedWeight ?? null, 'no_history')
+  if (!last) {
+    const protocol = firstSessionProtocol(input)
+    return {
+      ...make('collect_data', protocol ? null : plannedWeight ?? null, 'no_history'),
+      ...(protocol ? { firstSessionProtocol: protocol } : {}),
+    }
+  }
 
   // R11: long break — 22-56 days −10 %, more than 56 days −20 %, rounded down; per set for pyramids.
   if (daysSinceLast !== undefined && daysSinceLast > 21) {
@@ -354,6 +405,117 @@ function median(values: number[]) {
   return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2
 }
 
+function belowTargetReason(reps: number[], target: RepRange): ReasonCode {
+  if (!reps.some((count) => count < target.min)) return 'within_range'
+  return target.min - median(reps) >= 2 ? 'below_target_once' : 'slightly_below_target'
+}
+
+function sameTargetSessions(
+  input: RecommendInput,
+  progressing: SessionEvidence[],
+  target = input.target,
+  dayKey = input.dayKey
+) {
+  return progressing.filter((session) => {
+    const days = daysBetween(session.date, input.today)
+    return days >= 0 && days <= 42 &&
+      session.dayKey === dayKey &&
+      (input.blockId === undefined || session.blockId === input.blockId) &&
+      sameRange(session.target ?? target, target)
+  }).slice(0, 2)
+}
+
+function recentMisses(input: RecommendInput, progressing: SessionEvidence[]) {
+  const last = progressing.find((session) => {
+    const days = daysBetween(session.date, input.today)
+    return days >= 0 && days <= 28
+  })
+  if (!last || sameRange(last.target ?? input.target, input.target)) return []
+
+  const logged = progressionSets(last.sets, input.sets)
+  const loads = [...new Set(logged.map((set) => set.weight).filter((weight) => weight > 0))]
+  return loads.flatMap((weight) => {
+    const atLoad = logged.flatMap((set, index) => {
+      if (set.weight !== weight) return []
+      const planned = isPyramid(last.technique, last.setReps)
+        ? last.setReps?.[index] ?? last.target?.min ?? input.target.min
+        : last.target?.min ?? input.target.min
+      return [{ reps: set.reps, planned }]
+    })
+    const missed = atLoad.filter(({ reps, planned }) => reps <= planned - 2)
+    if (missed.length < Math.ceil(atLoad.length / 2)) return []
+    return [{ weight, reps: median(atLoad.map((set) => set.reps)), target: median(atLoad.map((set) => set.planned)) }]
+  })
+}
+
+function capRecentMisses(
+  input: RecommendInput,
+  weights: number[],
+  targets: number[],
+  misses: ReturnType<typeof recentMisses>,
+  step: number,
+  progressing?: SessionEvidence[],
+  respectProof = false
+) {
+  let detail: Recommendation['evidence']['recentMiss']
+  const original = [...weights]
+  targets.forEach((target, index) => {
+    for (const miss of misses) {
+      if (weights[index] < miss.weight || target <= miss.reps) continue
+      if (respectProof && progressing && hasRecentProof(input, progressing, target, weights[index])) continue
+      const cap = Math.max(step, miss.weight - step)
+      if (weights[index] > cap) {
+        weights[index] = cap
+        detail = { ...miss, newWeight: cap }
+      }
+    }
+  })
+  const pyramid = isPyramid(input.technique, input.setReps)
+  if (pyramid && input.setReps) {
+    const topIndex = input.setReps.indexOf(Math.min(...input.setReps))
+    if (weights[topIndex] < original[topIndex]) {
+      const top = weights[topIndex]
+      input.setReps.forEach((reps, index) => {
+        if (index === topIndex) return
+        weights[index] = input.technique === 'reverse-pyramid' &&
+          new Set(input.setReps!.filter((_, i) => i !== topIndex)).size === 1
+          ? roundToStep(top * 0.9, step, 'down')
+          : roundToStep((top * (1 + (input.setReps![topIndex] + 1) / 30)) / (1 + (reps + 2) / 30), step, 'nearest')
+      })
+      if (input.technique === 'pyramid') monotonic(weights, input.setReps)
+    }
+  }
+  return detail
+}
+
+function hasRecentProof(
+  input: RecommendInput,
+  progressing: SessionEvidence[],
+  target: number,
+  weight: number
+) {
+  return progressing.some((session) => {
+    const days = daysBetween(session.date, input.today)
+    if (days < 0 || days > 28) return false
+    const logged = progressionSets(session.sets, input.sets)
+    if (isPyramid(input.technique, input.setReps)) {
+      return logged.some((set) => set.weight >= weight && set.reps >= target)
+    }
+    if (input.technique === 'reverse-pyramid') {
+      const isStraight = session.technique === 'straight' ||
+        new Set(logged.map((set) => set.weight)).size === 1
+      const isTopSet = target === Math.min(...(input.setReps ?? []))
+      return logged.some((set, index) =>
+        set.weight >= weight && set.reps >= target &&
+        (isTopSet || index > 0 || isStraight && logged.length >= input.sets && logged.every((item) => item.reps >= target)))
+    }
+    return logged.length >= input.sets &&
+      new Set(logged.map((set) => set.weight)).size === 1 &&
+      logged[0].weight >= weight &&
+      logged.every((set) => set.reps >= target)
+  })
+}
+
 function applyApprovedFloors(
   input: RecommendInput,
   progressing: SessionEvidence[],
@@ -378,6 +540,30 @@ function applyApprovedFloors(
     ? [...(recommendation.setWeights ?? Array.from({ length: targets.length }, () => recommendation.weight!))]
     : [recommendation.weight]
   let reason = recommendation.reason
+
+  const missTargets = pyramid && input.setReps ? input.setReps : targets
+  const miss = capRecentMisses(input, weights, missTargets, recentMisses(input, progressing), step)
+  if (miss) {
+    reason = 'recent_miss_cap'
+    recommendation = { ...recommendation, evidence: { ...recommendation.evidence, recentMiss: miss } }
+  }
+
+  if (input.technique === 'reverse-pyramid' && pyramid) {
+    let result = applyReversePyramidFloors(input, progressing, last, lastSets, lastWeight, step, recommendation, weights)
+    const finalWeights = [...(result.setWeights ?? weights)]
+    const finalMiss = capRecentMisses(input, finalWeights, missTargets, recentMisses(input, progressing), step, progressing, true)
+    if (finalMiss) {
+      const topIndex = input.setReps!.indexOf(Math.min(...input.setReps!))
+      result = {
+        ...result,
+        weight: finalWeights[topIndex],
+        setWeights: finalWeights,
+        reason: 'recent_miss_cap',
+        evidence: { ...result.evidence, recentMiss: finalMiss },
+      }
+    }
+    return applyLikeForLikeAction(input, last, result)
+  }
 
   // R21: convert from the median of all working-load sets, not a best set or a mean.
   if (floorsApply && repRangeChanged && !missDrop && lastWeight > 0) {
@@ -406,8 +592,10 @@ function applyApprovedFloors(
       const achievedWeight = recent.reduce((highest, session) => {
         const logged = progressionSets(session.sets, input.sets)
         if (ascendingPyramid) {
-          const set = logged.find((candidate) => candidate.reps >= target)
-          return Math.max(highest, set?.weight ?? 0)
+          const achievedWeight = logged
+            .filter((candidate) => candidate.reps >= target)
+            .reduce((weight, candidate) => Math.max(weight, candidate.weight), 0)
+          return Math.max(highest, achievedWeight)
         }
         if (logged.length < input.sets) return highest
         const loads = new Set(logged.map((set) => set.weight))
@@ -422,7 +610,10 @@ function applyApprovedFloors(
         achieved = true
       }
     })
-    if (achieved) reason = 'achieved_floor'
+    if (achieved) {
+      const topIndex = ascendingPyramid ? input.setReps!.indexOf(Math.min(...input.setReps!)) : 0
+      if (!miss || weights[topIndex] > miss.newWeight) reason = 'achieved_floor'
+    }
   }
 
   // R22b: a pyramid built from straight-set history fills upward within one step of the next set.
@@ -436,13 +627,8 @@ function applyApprovedFloors(
   }
 
   // R23: same-day evidence may add one step, but can never exceed the latest any-day session.
-  const sameDay = floorsApply && input.dayKey
-    ? progressing.find((session) =>
-      session.dayKey === input.dayKey &&
-      (input.blockId === undefined || session.blockId === input.blockId) &&
-      session.date < input.today)
-    : undefined
-  if (sameDay) {
+  const sameDay = floorsApply ? sameDaySession(input, progressing) : undefined
+  if (sameDay && !missDrop) {
     const sameDaySets = progressionSets(sameDay.sets, input.sets)
     const latestSets = progressionSets(last.sets, input.sets)
     let boosted = false
@@ -460,7 +646,9 @@ function applyApprovedFloors(
       })
     } else {
       const complete = sameDaySets.length >= input.sets
-      const reachedTop = complete && sameDaySets.every((set) => set.reps >= input.target.max)
+      const crunch = input.exerciseId === 'cable-crunch'
+      const reachedTop = complete && sameDaySets.every((set) =>
+        set.reps >= input.target.max + (crunch ? 2 : 0))
       const coarseStep = step / Math.max(1, workingWeight(sameDaySets)) > MAX_INCREASE_PCT
       const earned = reachedTop || (complete && coarseStep && sameDaySets.every((set) => set.reps >= input.target.max + 2))
       if (earned) {
@@ -475,21 +663,225 @@ function applyApprovedFloors(
     if (boosted) reason = 'same_day_boost'
   }
 
-  if (!pyramid) {
-    const weight = weights[0]
-    const action = weight === recommendation.weight
-      ? recommendation.action
-      : weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
-    return { ...recommendation, weight, action, reason }
+  const finalMiss = capRecentMisses(input, weights, missTargets, recentMisses(input, progressing), step, progressing, true)
+  if (finalMiss) {
+    reason = 'recent_miss_cap'
+    recommendation = { ...recommendation, evidence: { ...recommendation.evidence, recentMiss: finalMiss } }
   }
 
+  const result = !pyramid
+    ? (() => {
+      const weight = weights[0]
+      const action = weight === recommendation.weight
+        ? recommendation.action
+        : weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
+      return { ...recommendation, weight, action, reason }
+    })()
+    : (() => {
+      const setReps = input.setReps!
+      const topIndex = setReps.indexOf(Math.min(...setReps))
+      const weight = weights[topIndex]
+      const action = weight === recommendation.weight
+        ? recommendation.action
+        : weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
+      return { ...recommendation, weight, setWeights: weights, action, reason }
+    })()
+  return applyLikeForLikeAction(input, last, result)
+}
+
+function applyLikeForLikeAction(
+  input: RecommendInput,
+  last: SessionEvidence,
+  recommendation: Recommendation
+): Recommendation {
+  if (recommendation.weight === null) return recommendation
+  const lastTarget = last.target ?? input.target
+  const sameDayWeight = recommendation.evidence.sameDayWeight
+  const finalWeight = recommendation.setWeights?.[input.setReps?.indexOf(Math.min(...input.setReps)) ?? -1] ??
+    recommendation.weight
+  const comparisonWeight = sameDayWeight ?? topWorkingWeight(last, input.sets)
+  const changedTarget = !sameRange(lastTarget, input.target)
+  const protectedReason = ['below_target_twice', 'deload_week', 'long_break', 'recent_miss_cap']
+    .includes(recommendation.reason)
+  let action = recommendation.action
+  if (changedTarget && !protectedReason) {
+    if (finalWeight > comparisonWeight) action = 'increase_weight'
+    else if (finalWeight < comparisonWeight) {
+      action = sameDayWeight === undefined && recommendation.reason === 'converted_rep_range'
+        ? 'maintain'
+        : 'decrease_weight'
+    } else if (action === 'increase_weight' || action === 'decrease_weight') {
+      action = 'maintain'
+    }
+  }
+  if (action === 'increase_weight' && finalWeight <= comparisonWeight) action = 'maintain'
+  if (action === 'decrease_weight' && finalWeight >= comparisonWeight) action = 'maintain'
+
+  const sameDayReps = recommendation.evidence.sameDayReps ?? []
+  const sameDayTarget = recommendation.evidence.sameDayTarget
+  let reason = recommendation.reason
+  if (
+    sameDayWeight !== undefined &&
+    finalWeight === sameDayWeight &&
+    sameDayTarget !== undefined &&
+    sameRange(sameDayTarget, input.target) &&
+    !['recent_miss_cap', 'same_day_boost', 'below_target_twice', 'reached_top_of_range'].includes(reason) &&
+    sameDayReps.some((reps) => reps < input.target.min)
+  ) {
+    reason = belowTargetReason(sameDayReps, input.target)
+  }
+  if (
+    (action === 'increase_weight' || action === 'decrease_weight') &&
+    ['light_load_add_reps', 'within_range', 'slightly_below_target', 'below_target_once'].includes(reason)
+  ) {
+    reason = 'converted_rep_range'
+  }
+  return {
+    ...recommendation,
+    action,
+    reason,
+  }
+}
+
+function applyReversePyramidFloors(
+  input: RecommendInput,
+  progressing: SessionEvidence[],
+  last: SessionEvidence,
+  lastSets: LoggedSet[],
+  lastWeight: number,
+  step: number,
+  recommendation: Recommendation,
+  weights: number[]
+): Recommendation {
+  if (recommendation.reason === 'below_target_twice') return recommendation
+
   const setReps = input.setReps!
-  const topIndex = setReps.indexOf(Math.min(...setReps))
-  const weight = weights[topIndex]
-  const action = weight === recommendation.weight
-    ? recommendation.action
-    : weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
-  return { ...recommendation, weight, setWeights: weights, action, reason }
+  const topReps = Math.min(...setReps)
+  const topIndex = setReps.indexOf(topReps)
+  const latestIsReversePyramid = last.technique === 'reverse-pyramid' &&
+    new Set(lastSets.map((set) => set.weight)).size > 1
+
+  const recent = progressing.filter((session) => {
+    const days = daysBetween(session.date, input.today)
+    return days >= 0 && days <= 28
+  })
+
+  const workingReps = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps)
+  if (!latestIsReversePyramid && lastWeight > 0 && workingReps.length) {
+    const seriesReps = Math.min(median(workingReps), 12)
+    const e1rm = lastWeight * (1 + seriesReps / 30)
+    const crossTop = roundToStep(e1rm / (1 + (topReps + 1) / 30), step, 'down')
+    weights[topIndex] = Math.max(weights[topIndex], crossTop)
+  }
+
+  const sameTechniquePyramids = progressing.filter((session) =>
+    session.technique === input.technique &&
+    new Set(progressionSets(session.sets, setReps.length).map((set) => set.weight)).size > 1)
+  const latestSets = progressionSets(last.sets, input.sets)
+  let topCap = !latestIsReversePyramid && lastWeight > 0 && last.technique !== 'reverse-pyramid'
+    ? setCap(lastWeight, step)
+    : Number.POSITIVE_INFINITY
+  if (!sameTechniquePyramids.length && latestSets.length > 0 &&
+    new Set(latestSets.map((set) => set.weight)).size === 1) {
+    const latestRange = last.target ?? input.target
+    const previousSets = progressionSets(progressing[1]?.sets ?? [], setReps.length)
+    const previousRange = progressing[1]?.target ?? { min: topReps, max: topReps }
+    const latestReachedTop = latestSets.every((set) => set.reps >= latestRange.max)
+    const previousReachedTop = previousSets.length > 0 &&
+      new Set(previousSets.map((set) => set.weight)).size === 1 &&
+      previousSets[0].weight === lastWeight &&
+      previousSets.every((set) => set.reps >= previousRange.max)
+    const tooEasy = latestSets.every((set) => set.reps >= latestRange.max) &&
+      latestSets.filter((set) => set.reps >= latestRange.max + 3).length >= Math.ceil(latestSets.length / 2)
+    const earnedByCrossDay = latestSets.every((set) => set.reps >= latestRange.max + 2)
+    if (!((latestReachedTop && previousReachedTop) || tooEasy || earnedByCrossDay)) {
+      topCap = Math.min(topCap, lastWeight)
+    }
+  }
+  weights[topIndex] = Math.min(weights[topIndex], topCap)
+
+  const topProof = recent.reduce((highest, session) => {
+    const achieved = progressionSets(session.sets, input.sets)
+      .filter((set) => set.reps >= topReps)
+      .reduce((weight, set) => Math.max(weight, set.weight), 0)
+    return Math.max(highest, achieved)
+  }, 0)
+  const cappedTopProof = latestIsReversePyramid ? topProof : Math.min(topProof, topCap)
+  if (cappedTopProof > weights[topIndex]) weights[topIndex] = cappedTopProof
+
+  const top = weights[topIndex]
+  const backOffFormat = new Set(setReps.filter((_, index) => index !== topIndex)).size === 1
+  const lastPyramidSets = sameTechniquePyramids[0]
+    ? progressionSets(sameTechniquePyramids[0].sets, setReps.length)
+    : []
+  setReps.forEach((reps, index) => {
+    if (index === topIndex) return
+    let load = backOffFormat
+      ? roundToStep(top * 0.9, step, 'down')
+      : roundToStep((top * (1 + (topReps + 1) / 30)) / (1 + (reps + 2) / 30), step, 'nearest')
+    const priorLoad = lastPyramidSets[index]?.weight
+    if (!backOffFormat && priorLoad !== undefined && priorLoad > 0) {
+      load = Math.min(load, setCap(priorLoad, step))
+    }
+    weights[index] = load
+  })
+
+  let achieved = false
+  setReps.forEach((targetReps, index) => {
+    if (index === topIndex) return
+    const floor = recent.reduce((highest, session) => {
+      const sessionSets = progressionSets(session.sets, input.sets)
+      const straight = session.technique === 'straight' ||
+        (!session.technique && new Set(sessionSets.map((set) => set.weight)).size === 1)
+      const wholeStraightSessionReachedTarget = straight &&
+        sessionSets.length >= input.sets &&
+        sessionSets.every((set) => set.reps >= targetReps)
+      return Math.max(highest, ...sessionSets
+        .filter((set, setIndex) => set.reps >= targetReps && (setIndex > 0 || wholeStraightSessionReachedTarget))
+        .map((set) => set.weight))
+    }, 0)
+    if (floor > weights[index]) {
+      weights[index] = floor
+      achieved = true
+    }
+  })
+  if (achieved) recommendation = { ...recommendation, reason: 'achieved_floor' }
+
+  const sameDay = input.dayKey
+    ? progressing.find((session) =>
+      session.dayKey === input.dayKey &&
+      (input.blockId === undefined || session.blockId === input.blockId) &&
+      session.date < input.today)
+    : undefined
+  if (sameDay) {
+    const sameDaySets = progressionSets(sameDay.sets, input.sets)
+    let boosted = false
+    setReps.forEach((target, index) => {
+      const performed = sameDaySets[index]
+      const cap = latestSets[index]?.weight ?? lastWeight
+      if (performed && performed.reps >= target + 2) {
+        const boost = Math.min(performed.weight + step, cap)
+        if (boost > weights[index]) {
+          weights[index] = boost
+          boosted = true
+        }
+      }
+    })
+    if (boosted) recommendation = { ...recommendation, reason: 'same_day_boost' }
+  }
+
+  const finalTop = weights[topIndex]
+  setReps.forEach((_, index) => {
+    if (index !== topIndex) weights[index] = Math.min(weights[index], finalTop - step)
+  })
+  monotonic(weights, setReps)
+  const previousTop = lastSets[topIndex]?.weight ?? lastWeight
+  const action = latestIsReversePyramid
+    ? finalTop === recommendation.weight
+      ? recommendation.action
+      : finalTop > previousTop ? 'increase_weight' : finalTop < previousTop ? 'decrease_weight' : 'maintain'
+    : finalTop > lastWeight ? 'increase_weight' : finalTop < lastWeight ? 'decrease_weight' : 'maintain'
+  return { ...recommendation, weight: finalTop, setWeights: weights, action }
 }
 
 function recommendPyramid(
@@ -551,7 +943,11 @@ function recommendPyramid(
     action = top === lastLoad ? 'maintain' : 'increase_weight'
     reason = 'converted_rep_range'
   } else {
-    return make('collect_data', input.plannedWeight ?? null, 'no_history')
+    const protocol = firstSessionProtocol(input)
+    return {
+      ...make('collect_data', protocol ? null : input.plannedWeight ?? null, 'no_history'),
+      ...(protocol ? { firstSessionProtocol: protocol } : {}),
+    }
   }
 
   // R1.2 / R2.2: the other sets.
@@ -586,7 +982,9 @@ function recommendPyramid(
       const tooEasy = lastSession.every((set) => set.reps >= lastRange.max) &&
         lastSession.filter((set) => set.reps >= lastRange.max + 3).length >= Math.ceil(lastSession.length / 2)
       const singleLoad = !!single(progressing[0])
-      const earned = (reachedTop(progressing[0]) && reachedTop(progressing[1])) || tooEasy
+      const earnedByCrossDay = input.technique === 'reverse-pyramid' &&
+        lastSession.every((set) => set.reps >= lastRange.max + 2)
+      const earned = (reachedTop(progressing[0]) && reachedTop(progressing[1])) || tooEasy || earnedByCrossDay
       const cap = singleLoad && !earned ? lastLoad : setCap(lastLoad, step)
       setWeights.forEach((weight, index) => { setWeights[index] = Math.min(weight, cap) })
       top = setWeights[topIndex]
@@ -614,11 +1012,18 @@ function recommendStraight(
   make: Make
 ): Recommendation {
   const result = recommendStraightRules(input, progressing, lastSets, lastWeight, capacity, confidence, step, make)
-  if (result.weight === null || isBodyweight(input.equipment) && lastWeight === 0) return applyR15(result, lastSets, input.target)
+  const last = progressing[0]
+  const repsReference = input.exerciseId === 'cable-crunch' && last &&
+    !sameRange(last.target ?? input.target, input.target)
+    ? progressionSets(sameDaySession(input, progressing)?.sets ?? [], input.sets)
+    : lastSets
+  if (result.weight === null || isBodyweight(input.equipment) && lastWeight === 0) return applyR15(result, repsReference, input.target)
   let { weight, action, reason } = result
   // R18: add load only when every working set used the working load.
   const allAtLoad = lastSets.every((set) => set.weight >= lastWeight)
-  if (!allAtLoad && weight > lastWeight) {
+  const lastWasRealPyramid = !!last && isPyramid(last.technique, last.setReps) &&
+    new Set(lastSets.map((set) => set.weight)).size > 1
+  if (!lastWasRealPyramid && !allAtLoad && weight > lastWeight) {
     weight = lastWeight
     action = 'maintain'
     reason = 'consolidate_load'
@@ -627,7 +1032,7 @@ function recommendStraight(
   if (lastWeight > 0) weight = Math.min(weight, setCap(lastWeight, step))
   const finalAction: TrainerAction = weight === result.weight ? action
     : weight > lastWeight ? 'increase_weight' : weight < lastWeight ? 'decrease_weight' : 'maintain'
-  return applyR15({ ...result, weight, action: finalAction, reason }, lastSets, input.target)
+  return applyR15({ ...result, weight, action: finalAction, reason }, repsReference, input.target)
 }
 
 /** R15: an "increase reps" target always asks for more reps than the lowest set last time. */
@@ -662,7 +1067,7 @@ function recommendStraightRules(
       return logged.length >= sets && logged.every((set) => set.reps >= (session.target ?? target).max + 2)
     }
     if (atPlus2(progressing[0]) && atPlus2(progressing[1])) return make('increase_weight', 2.5, 'bodyweight_add_reps')
-    if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', 0, 'slightly_below_target')
+    if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', 0, belowTargetReason(lastReps, lastTarget))
     return make('increase_reps', 0, 'bodyweight_add_reps')
   }
 
@@ -682,8 +1087,24 @@ function recommendStraightRules(
     if (complete && lastReps.every((reps) => reps >= target.max + 2)) {
       return make('increase_weight', lastWeight + step, 'reached_top_of_range')
     }
-    if (lastReps.some((reps) => reps < target.min)) return make('maintain', lastWeight, 'slightly_below_target')
+    if (lastReps.some((reps) => reps < target.min)) return make('maintain', lastWeight, belowTargetReason(lastReps, target))
     return make('increase_reps', lastWeight, 'light_load_add_reps')
+  }
+
+  // R29: changed crunch targets keep progressing reps from the latest same-day session.
+  if (input.exerciseId === 'cable-crunch' && lastWeight > 0 && !sameRange(lastTarget, target)) {
+    const sameDay = sameDaySession(input, progressing)
+    if (sameDay) {
+      const sameDaySets = progressionSets(sameDay.sets, sets)
+      const sameDayWeight = topWorkingWeight(sameDay, sets)
+      if (sameDaySets.length >= sets && sameDaySets.every((set) => set.reps >= target.max + 2)) {
+        return make('increase_weight', sameDayWeight + step, 'reached_top_of_range')
+      }
+      if (sameDaySets.some((set) => set.reps < target.min)) {
+        return make('maintain', sameDayWeight, belowTargetReason(sameDaySets.map((set) => set.reps), target))
+      }
+      return make('increase_reps', sameDayWeight, 'light_load_add_reps')
+    }
   }
 
   // R8: light loads — when one step is more than 10 % of the load, add reps to max + 2 before adding the step.
@@ -692,7 +1113,7 @@ function recommendStraightRules(
     if ((complete && lastReps.every((reps) => reps >= target.max + 2)) || tooEasyFor(target)) {
       return make('increase_weight', lastWeight + step, 'reached_top_of_range', { reps: { min: target.min, max: target.min } })
     }
-    if (lastReps.some((reps) => reps < target.min)) return make('maintain', lastWeight, 'slightly_below_target')
+    if (lastReps.some((reps) => reps < target.min)) return make('maintain', lastWeight, belowTargetReason(lastReps, target))
     return make('increase_reps', lastWeight, 'light_load_add_reps')
   }
 
@@ -713,7 +1134,8 @@ function recommendStraightRules(
         const t = session.target ?? target
         return progressionSets(session.sets, sets).filter((set) => t.min - set.reps >= 3).length >= 2
       }
-      if (missedBy3(last) && missedBy3(progressing[1])) {
+      const [sameTargetLatest, sameTargetPrevious] = sameTargetSessions(input, progressing, lastTarget, last.dayKey)
+      if (missedBy3(sameTargetLatest) && missedBy3(sameTargetPrevious)) {
         return make('decrease_weight', Math.max(step, lastWeight - step), 'below_target_twice')
       }
       // R19: higher rep target after any miss (even one rep) drops exactly one step when Epley says so.
@@ -724,8 +1146,8 @@ function recommendStraightRules(
         const load = e1rm / (1 + (target.min + 2) / 30)
         if (load <= lastWeight - step / 2) return make('maintain', Math.max(step, lastWeight - step), 'converted_rep_range')
       }
-      const missed = missedBy3(last)
-      return make(!missed && target.min > lastTarget.max ? 'increase_reps' : 'maintain', lastWeight, missed ? 'below_target_once' : 'light_load_add_reps')
+      const missed = missedBy3(sameTargetLatest)
+      return make(!missed && target.min > lastTarget.max ? 'increase_reps' : 'maintain', lastWeight, missed ? belowTargetReason(lastReps, target) : 'light_load_add_reps')
     }
     // R13: never below the load that matches what was already done at those reps.
     const atWorking = lastSets.filter((set) => set.weight === lastWeight).map((set) => set.reps)
@@ -747,7 +1169,7 @@ function recommendStraightRules(
   const stepResult = (): Recommendation => {
     if (!complete) {
       // R6: incomplete session → at most the same load.
-      if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, 'slightly_below_target')
+      if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, belowTargetReason(lastReps, lastTarget))
       return make('maintain', lastWeight, 'incomplete_session')
     }
     if (exceeded && capacity) {
@@ -756,14 +1178,41 @@ function recommendStraightRules(
     }
     if (atTop) return make('increase_weight', capped(lastWeight + step), 'reached_top_of_range')
     if (dropOff) return make('maintain', lastWeight, 'drop_off_across_sets')
-    if (belowBy3 >= 2) {
-      const previous = progressing[1]
-      const previousTarget = previous?.target ?? lastTarget
-      const previousBelow = previous && progressionSets(previous.sets, sets).filter((set) => previousTarget.min - set.reps >= 3).length >= 2
-      if (previousBelow) return make('decrease_weight', roundToStep(lastWeight * 0.925, step, 'down'), 'below_target_twice')
-      return make('maintain', lastWeight, 'below_target_once')
+    const [sameTargetLatest, sameTargetPrevious] = sameTargetSessions(input, progressing)
+    const stallMiss = (session?: SessionEvidence) => {
+      if (!session) return false
+      const logged = progressionSets(session.sets, sets)
+      return lastTarget.min - median(logged.map((set) => set.reps)) >= 2
     }
-    if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, 'slightly_below_target')
+    if (sameTargetLatest && sameTargetPrevious &&
+      workingWeight(sameTargetLatest.sets) === workingWeight(sameTargetPrevious.sets) &&
+      stallMiss(sameTargetLatest) && stallMiss(sameTargetPrevious) &&
+      progressionSets(sameTargetLatest.sets, sets).reduce((sum, set) => sum + set.reps, 0) <=
+        progressionSets(sameTargetPrevious.sets, sets).reduce((sum, set) => sum + set.reps, 0)) {
+      return make('decrease_weight', Math.max(step, workingWeight(sameTargetLatest.sets) - step), 'below_target_twice')
+    }
+    const previousMedian = sameTargetPrevious
+      ? median(progressionSets(sameTargetPrevious.sets, sets).map((set) => set.reps))
+      : undefined
+    const latestTotal = sameTargetLatest
+      ? progressionSets(sameTargetLatest.sets, sets).reduce((sum, set) => sum + set.reps, 0)
+      : 0
+    const previousTotal = sameTargetPrevious
+      ? progressionSets(sameTargetPrevious.sets, sets).reduce((sum, set) => sum + set.reps, 0)
+      : 0
+    const improvingAfterMiss = sameTargetLatest && sameTargetPrevious && previousMedian !== undefined &&
+      lastTarget.min - previousMedian >= 2 &&
+      lastTarget.min - median(lastReps) === 1 &&
+      latestTotal > previousTotal
+    if (improvingAfterMiss) return make('maintain', lastWeight, 'below_target_once')
+    if (belowBy3 >= 2) {
+      const previousBelow = sameTargetLatest && sameTargetPrevious &&
+        progressionSets(sameTargetPrevious.sets, sets).filter((set) =>
+          (sameTargetPrevious.target ?? target).min - set.reps >= 3).length >= 2
+      if (previousBelow) return make('decrease_weight', roundToStep(lastWeight * 0.925, step, 'down'), 'below_target_twice')
+      return make('maintain', lastWeight, belowTargetReason(lastReps, lastTarget))
+    }
+    if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', lastWeight, belowTargetReason(lastReps, lastTarget))
     if (progressing.length === 1 && confidence === 'low') return make('collect_data', lastWeight, 'no_history')
     return make('increase_reps', lastWeight, 'within_range')
   }

@@ -62,6 +62,13 @@ describe('dictionaries', () => {
     expect(es['exercises.postureTips']).toBe('Consejos de postura')
   })
 
+  it('uses sentence case for the current set label in both languages', () => {
+    expect(en['workout.run.currentSet']).toBe('Set {set} of {total}')
+    expect(es['workout.run.currentSet']).toBe('Serie {set} de {total}')
+    expect(en['workout.label.repsInline']).toBe('Reps')
+    expect(es['workout.label.repsInline']).toBe('Reps')
+  })
+
   it('uses the approved reps-left prompt wording in both languages without a skip label', () => {
     expect(en['workout.rir.question']).toBe('Reps left in the tank?')
     expect(en['workout.rir.hint']).toBe('Last set only. Helps set your next weight.')

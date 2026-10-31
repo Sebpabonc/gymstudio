@@ -1,4 +1,4 @@
-import { formatNumber } from '../i18n/format'
+import { formatNumber, formatWeekdayDate } from '../i18n/format'
 import type { Language, Translate, TranslationKey } from '../i18n'
 import type { ReasonCode, Recommendation, RepRange } from './engine'
 
@@ -23,6 +23,7 @@ const reasonTranslations: Record<ReasonCode, TranslationKey> = {
   consolidate_load: 'workout.trainer.reason.consolidate_load',
   achieved_floor: 'workout.trainer.reason.achieved_floor',
   same_day_boost: 'workout.trainer.reason.same_day_boost',
+  recent_miss_cap: 'workout.trainer.reason.recent_miss_cap',
 }
 
 export function trainerRangeLabel(range: RepRange, language: Language) {
@@ -40,7 +41,8 @@ export function isRepTargetAdjustment(recommendation: Recommendation, target: Re
   const top = Math.max(recommendation.weight ?? 0, ...(recommendation.setWeights ?? []))
   return changed && top <= lastWeight && recommendation.reason !== 'deload_week' &&
     recommendation.reason !== 'below_target_once' && recommendation.reason !== 'below_target_twice' &&
-    recommendation.reason !== 'slightly_below_target'
+    recommendation.reason !== 'slightly_below_target' && recommendation.reason !== 'same_day_boost' &&
+    recommendation.reason !== 'recent_miss_cap'
 }
 
 export function trainerReason(
@@ -53,11 +55,72 @@ export function trainerReason(
   const key = isRepTargetAdjustment(recommendation, target)
     ? reasonTranslations.converted_rep_range
     : reasonTranslations[recommendation.reason]
-  return t(key, {
-    reps: evidence.lastReps?.map((reps) => formatNumber(language, reps)).join(' · ') ?? '',
-    weight: formatNumber(language, evidence.lastWeight ?? 0),
-    target: trainerRangeLabel(evidence.lastTarget ?? target, language),
+  const recentMiss = evidence.recentMiss
+  const sameDayMiss = (recommendation.reason === 'below_target_once' || recommendation.reason === 'slightly_below_target') &&
+    evidence.sameDayTarget?.min === target.min && evidence.sameDayTarget.max === target.max
+  const reason = t(key, {
+    reps: recommendation.reason === 'recent_miss_cap' && recentMiss
+      ? formatNumber(language, recentMiss.reps)
+      : sameDayMiss
+        ? evidence.sameDayReps?.map((reps) => formatNumber(language, reps)).join(' · ') ?? ''
+      : evidence.lastReps?.map((reps) => formatNumber(language, reps)).join(' · ') ?? '',
+    weight: formatNumber(language, recommendation.reason === 'recent_miss_cap' && recentMiss
+      ? recentMiss.weight
+      : sameDayMiss
+        ? evidence.sameDayWeight ?? 0
+      : recommendation.reason === 'same_day_boost' && evidence.sameDayWeight !== undefined
+        ? evidence.sameDayWeight
+        : evidence.lastWeight ?? 0),
+    target: trainerRangeLabel(sameDayMiss ? evidence.sameDayTarget ?? target : evidence.lastTarget ?? target, language),
     todayTarget: trainerRangeLabel(target, language),
     days: evidence.daysSinceLast ?? 0,
+    dayName: evidence.sameDayName ?? (evidence.sameDayDate
+      ? formatWeekdayDate(language, evidence.sameDayDate)
+      : ''),
+    sameDayReps: evidence.sameDayReps?.map((reps) => formatNumber(language, reps)).join(' · ') ?? '',
+    sameDayWeight: formatNumber(language, evidence.sameDayWeight ?? 0),
+    newWeight: formatNumber(language, recommendation.weight ?? 0),
+    ...(recentMiss ? {
+      target: formatNumber(language, recentMiss.target),
+      newWeight: formatNumber(language, recentMiss.newWeight),
+    } : {}),
   })
+  if (recommendation.firstSessionProtocol) {
+    const protocol = [
+      t('workout.trainer.firstSession.warmup'),
+      t('workout.trainer.firstSession.effort', { target: trainerRangeLabel(target, language) }),
+      t(recommendation.firstSessionProtocol === 'reverse-pyramid'
+        ? 'workout.trainer.firstSession.reversePyramid'
+        : 'workout.trainer.firstSession.pyramid'),
+      t('workout.trainer.firstSession.log'),
+    ]
+    return protocol.join('\n')
+  }
+
+  if (
+    evidence.sameDayDate &&
+    evidence.sameDayWeight !== undefined &&
+    evidence.lastTarget &&
+    (evidence.lastTarget.min !== target.min || evidence.lastTarget.max !== target.max)
+  ) {
+    const delta = Math.abs((recommendation.weight ?? evidence.sameDayWeight) - evidence.sameDayWeight)
+    const change = delta === 0
+      ? t('workout.trainer.sameDayComparison.same')
+      : t(
+        (recommendation.weight ?? evidence.sameDayWeight) > evidence.sameDayWeight
+          ? 'workout.trainer.sameDayComparison.up'
+          : 'workout.trainer.sameDayComparison.down',
+        { delta: formatNumber(language, delta) }
+      )
+    const comparison = t('workout.trainer.sameDayComparison', {
+      dayName: evidence.sameDayName ?? formatWeekdayDate(language, evidence.sameDayDate),
+      date: formatWeekdayDate(language, evidence.sameDayDate),
+      weight: formatNumber(language, evidence.sameDayWeight),
+      reps: evidence.sameDayReps?.map((reps) => formatNumber(language, reps)).join(' · ') ?? '',
+      change,
+    })
+    return `${comparison}\n${reason}`
+  }
+
+  return reason
 }

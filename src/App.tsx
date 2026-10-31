@@ -157,7 +157,7 @@ export default function App() {
 
 
   return (
-    <div className={`app-shell layout-boxes${workoutModeActive ? ' workout-mode-active' : ''}`}>
+    <div className={`app-shell layout-boxes active-tab-${activeTab}${workoutModeActive ? ' workout-mode-active' : ''}`}>
       <div className="phone-frame">
         <main className={`app-content${restTimer ? ' with-rest-timer' : ''}`} ref={contentRef}>
           <div className="header-sentinel" ref={headerSentinelRef} aria-hidden="true" />

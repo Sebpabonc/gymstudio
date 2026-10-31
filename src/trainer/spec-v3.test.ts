@@ -30,7 +30,7 @@ describe('R20–R24 approved progression evidence', () => {
   it('T53 uses latest any-day evidence and achieved-load floors for each pyramid set', () => {
     const result = recommend({ ...inclinePyramid, history: inclineHistory, dayKey: 'day-b' })
     expect(result.setWeights).toEqual([28, 28, 30])
-    expect(result).toMatchObject({ action: 'maintain', reason: 'achieved_floor', evidence: { lastDate: '2026-10-12' } })
+    expect(result).toMatchObject({ action: 'increase_weight', reason: 'achieved_floor', evidence: { lastDate: '2026-10-12' } })
   })
 
   it('T54 boosts from a successful same-day session, capped at the latest session load', () => {
@@ -43,7 +43,7 @@ describe('R20–R24 approved progression evidence', () => {
       ],
       target: rng(10), sets: 3, equipment: 'smith-machine',
     })
-    expect(result).toMatchObject({ weight: 25, action: 'maintain', reason: 'same_day_boost' })
+    expect(result).toMatchObject({ weight: 25, action: 'increase_weight', reason: 'same_day_boost' })
   })
 
   it('T55 keeps the latest load when at least half the working sets reach the new target', () => {
@@ -59,7 +59,7 @@ describe('R20–R24 approved progression evidence', () => {
       today, history: [sess('2026-10-12', flat(25, [10, 8, 8]), { target: rng(8), technique: 'straight' })],
       target: rng(10), sets: 3, equipment: 'smith-machine',
     })
-    expect(result).toMatchObject({ weight: 22.5, action: 'decrease_weight' })
+    expect(result).toMatchObject({ weight: 22.5, action: 'maintain' })
   })
 
   it('T57 keeps the approved whole-series rep-range floor for dumbbell bench', () => {
@@ -67,7 +67,7 @@ describe('R20–R24 approved progression evidence', () => {
       today, history: [sess('2026-10-12', flat(30, [12, 10, 10]), { target: rng(10), technique: 'straight' })],
       target: rng(12), sets: 3, equipment: 'dumbbell',
     })
-    expect(result).toMatchObject({ weight: 28, reason: 'converted_rep_range' })
+    expect(result).toMatchObject({ weight: 28, action: 'maintain', reason: 'converted_rep_range' })
   })
 
   it('T57b applies the same-day boost when the same-day session reaches the target', () => {
@@ -134,6 +134,7 @@ describe('R20–R24 approved progression evidence', () => {
     const catalogue: Exercise[] = [{ id: 'incline', name: 'Incline DB Press', primaryMuscle: 'chest', equipment: 'dumbbell' }]
     const [row] = buildWorkoutSummary([monday], history, [block], catalogue, monday.date)
     expect(row?.next.setWeights).toEqual([28, 28, 30])
+    expect(row?.next.action).toBe('increase_weight')
   })
 
   it('T62 exposes only the latest any-day session as primary evidence', () => {

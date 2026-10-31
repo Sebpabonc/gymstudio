@@ -47,7 +47,7 @@ describe('R12b / R13 / R14', () => {
   })
   it('T37 dumbbell bench 30×12,10,10 (target 10) → 12 reps: 28 (not 26)', () => {
     const r = recommend({ history: [sess([s(30, 12), s(30, 10), s(30, 10)], { target: rng(10) })], today: TODAY, target: rng(12), sets: 3, equipment: 'dumbbell' })
-    expect(r.weight).toBe(28)
+    expect(r).toMatchObject({ weight: 28, action: 'maintain' })
   })
   it('T38 lat pulldown 65×10, 60×11, 65×11 (target 10) → 12 reps: 62.5 (not 55)', () => {
     const r = recommend({ history: [sess([s(65, 10), s(60, 11), s(65, 11)], { target: rng(10) })], today: TODAY, target: rng(12), sets: 3, equipment: 'cable' })

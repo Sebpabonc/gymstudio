@@ -3771,6 +3771,19 @@ export default function WorkoutPlan({
                       tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
                       expanded={isTipsVisible} onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />
                   )}
+                  {/* PO 2026-10-19: supersets show the same per-set trend as single exercises. */}
+                  <details
+                    className="workout-trend-details superset-trend-details"
+                    open={trendOpen}
+                    onToggle={(event) => {
+                      const next = event.currentTarget.open
+                      setTrendOpen(next)
+                      saveWorkoutTrendOpen(next)
+                    }}
+                  >
+                    <summary>{t('workout.trend.title')}{exercise.code ? ` · ${exercise.code}` : ''} ▾</summary>
+                    <SetTrendChart sessions={trendSessions} language={language} t={t} />
+                  </details>
                 </React.Fragment>
               )
             }
@@ -4159,11 +4172,14 @@ export default function WorkoutPlan({
                         )}
 
                         <div className={`planned-set-grid${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`}>
+                          {isWorkoutMode && previousEntry?.date && (
+                            <p className="planned-set-date">{t('workout.run.lastTime')} · {formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`)}</p>
+                          )}
                           <div className={`planned-set-column-headers${isWorkoutMode ? ' workout-mode-focused-grid' : ''}`} role={isWorkoutMode ? 'row' : undefined}>
                             {isWorkoutMode ? (
                               <>
                                 <span role="columnheader">#</span>
-                                <span role="columnheader">{t('workout.run.lastTime')} {previousEntry?.date ? formatWeekdayDate(language, `${previousEntry.date.slice(0, 10)}T00:00:00Z`) : ''}</span>
+                                <span role="columnheader">{t('workout.run.lastTime')}</span>
                                 <span role="columnheader">{t('workout.run.today')}</span>
                               </>
                             ) : (
@@ -4204,9 +4220,12 @@ export default function WorkoutPlan({
                                     aria-label={`${t('workout.label.set')} ${visibleSetNumber} · ${t('workout.run.lastTime')}: ${visiblePrevious} · ${t('workout.run.today')}: ${visibleToday}`}
                                     onClick={() => setWorkoutSetIndex((current) => ({ ...current, [exerciseKey]: index }))}
                                   >
-                                    <span role="cell">{visibleSetNumber}</span>
-                                    <span role="cell">{visiblePrevious}</span>
-                                    <span role="cell">{visibleToday}</span>
+                                    <span role="cell" className="set-table-number">{visibleSetNumber}</span>
+                                    <span role="cell" className="set-table-last">{visiblePrevious}</span>
+                                    <span role="cell" className={`set-table-today${isSetLogged ? ' logged' : ''}`}>
+                                      {`${formatNumber(language, todaySet.weight)}×${formatNumber(language, todaySet.reps)}`}
+                                      {isSetLogged && <span className="set-table-check" aria-hidden="true">✓</span>}
+                                    </span>
                                   </button>
                                 ) : (
                                   <>
@@ -4534,6 +4553,7 @@ export default function WorkoutPlan({
                   sets,
                   previousSets: supersetPreviousSets[index],
                   previousDate: previousDatesByExercise.get(exercise.code ?? exercise.name),
+                  equipment: libraryMatch?.equipment,
                   restSeconds: exercise.restSeconds ?? 90,
                   actions: cards[index],
                 }

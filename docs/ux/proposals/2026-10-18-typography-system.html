@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Typography System</title>
+<style>
+/* Prototype for docs/ux/proposals/2026-10-18-typography-system.md.
+   One phone (390 px) + a notes panel. Variant x screen x language.
+   Single dark look on purpose: it mirrors the GymStudio app (dark rose theme). */
+:root {
+  color-scheme: dark;
+  --bg: #0b0b0c;
+  --surface: #141416;
+  --card: #18181a;
+  --card-2: #1f1f22;
+  --panel: rgba(255, 255, 255, 0.05);
+  --line: rgba(255, 255, 255, 0.11);
+  --text: #f3f3f1;
+  --muted: #c8c7c4;
+  --dim: #9a9895;
+  --rose: #c99ca1;
+  --brand: #8d5e63;
+  --done: #a6d9a5;
+  --btn: linear-gradient(135deg, #7a5d60, #2f2f31);
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-ui); padding: 16px 16px 40px; }
+button { font: inherit; color: inherit; }
+.top { max-width: 1040px; margin: 0 auto 14px; }
+.top h1 { margin: 0; font-size: 20px; line-height: 26px; font-weight: 700; text-wrap: balance; }
+.top p { margin: 4px 0 0; color: var(--muted); font-size: 14px; line-height: 20px; max-width: 72ch; }
+.controls { max-width: 1040px; margin: 0 auto 16px; display: grid; gap: 8px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.seg > span { font-size: 12px; color: var(--dim); min-width: 64px; }
+.seg button { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-size: 13px; font-weight: 600; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+.seg button .rec { font-weight: 400; opacity: .85; }
+.stage { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 820px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+.notes { font-size: 14px; line-height: 20px; color: var(--muted); display: grid; gap: 12px; }
+.notes h2 { margin: 0; font-size: 17px; line-height: 22px; color: var(--text); }
+.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.notes table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+.notes th, .notes td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.notes th { color: var(--dim); font-weight: 600; }
+.notes .stat { display: flex; gap: 16px; flex-wrap: wrap; }
+.notes .stat b { color: var(--text); font-size: 20px; display: block; font-variant-numeric: tabular-nums; }
+
+/* ---------- phone ---------- */
+.phone { width: 100%; max-width: 390px; height: 800px; border-radius: 36px; border: 1px solid var(--line); background: linear-gradient(180deg, #141415, #08080a); overflow: hidden; position: relative; }
+.scroll { height: 100%; overflow-y: auto; padding: 0 16px 96px; }
+.p * { margin: 0; }
+.p { color: var(--text); font-family: var(--font-ui); }
+.v-cur.p { font-family: Helvetica, Arial, sans-serif; } /* what the live app really renders: Inter is not loaded */
+.row { display: flex; align-items: center; gap: 8px; }
+.row.base { align-items: baseline; }
+.between { justify-content: space-between; }
+.stack { display: grid; gap: 8px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 12px; }
+.v-cur .card { padding: 13px; border-radius: 22px; }
+.box { background: var(--card-2); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; display: grid; gap: 4px; }
+.v-cur .box { padding: 10px 12px; margin: 0 13px; }
+.pill { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); white-space: nowrap; }
+.iconbtn { width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); display: grid; place-items: center; flex: 0 0 auto; }
+.btn { min-height: 48px; border-radius: 14px; background: var(--btn); color: #fff; display: grid; place-items: center; padding: 0 16px; width: 100%; border: 0; }
+.btn2 { min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); display: grid; place-items: center; padding: 0 12px; }
+.tag { display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: 999px; background: rgba(141, 94, 99, .28); color: var(--rose); }
+.ok { color: var(--done); }
+.mut { color: var(--muted); }
+.gap16 { display: grid; gap: 16px; }
+.gap12 { display: grid; gap: 12px; }
+svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ic16 { width: 16px; height: 16px; } .ic20 { width: 20px; height: 20px; }
+.only-cur, .only-new, .only-comp, .only-few { }
+.v-cur .only-new, .v-new .only-cur, .v-few .only-comp, .v-comp .only-few { display: none !important; }
+
+/* top bars */
+.bar { position: sticky; top: 0; z-index: 2; margin: 0 -16px; padding: 12px 16px; background: rgba(12, 12, 13, .92); display: flex; align-items: center; gap: 8px; min-height: 56px; }
+.lang { margin-left: auto; display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.lang span { min-width: 36px; min-height: 30px; display: grid; place-items: center; border-radius: 999px; }
+.lang span.on { background: rgba(255, 255, 255, .1); color: var(--rose); }
+.syncdot { width: 8px; height: 8px; border-radius: 99px; background: #e0b55a; }
+.dock { position: absolute; left: 16px; right: 16px; bottom: 14px; height: 56px; border-radius: 999px; border: 1px solid var(--line); background: rgba(20, 20, 22, .94); display: flex; justify-content: space-around; align-items: center; color: var(--dim); }
+.dock .on { color: var(--rose); }
+
+/* week strip */
+.week { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.week i { display: block; width: 100%; height: 6px; border-radius: 99px; background: var(--brand); }
+.week div { display: grid; gap: 6px; justify-items: center; }
+.week div.on i { outline: 2px solid var(--rose); outline-offset: 2px; }
+
+/* workout */
+.chips { display: flex; gap: 6px; overflow: hidden; }
+.chips span { min-width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: #9fd49e; color: #142014; }
+.chips span.cur { background: rgba(141, 94, 99, .25); border: 1px solid var(--brand); color: var(--rose); }
+.chips span.todo { background: var(--panel); border: 1px solid var(--line); color: var(--dim); }
+.tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tools > span { min-height: 44px; border: 1px solid var(--line); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 4px; overflow: hidden; white-space: nowrap; }
+.v-new .tools > span { flex-direction: column; min-height: 52px; gap: 3px; color: var(--muted); }
+.cue { display: grid; grid-template-columns: 36px minmax(0, 1fr) 28px; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 1px solid rgba(201, 156, 161, .3); background: linear-gradient(135deg, rgba(141, 94, 99, .3), rgba(141, 94, 99, .08)); }
+.cue .ci { width: 36px; height: 36px; border-radius: 10px; background: rgba(201, 156, 161, .18); display: grid; place-items: center; color: var(--rose); }
+.cue .cc { width: 28px; height: 28px; border-radius: 99px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); }
+.logger { border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 8px; background: var(--panel); }
+.v-cur .logger { padding: 14px; margin: 0 2px; }
+.v-new .logger { margin: 0 -16px; border-radius: 0; border-left: 0; border-right: 0; padding: 12px 16px; }
+.lrow { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 8px; }
+.step { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 6px; }
+.step i, .step b { height: 48px; border: 1px solid var(--line); border-radius: 12px; display: grid; place-items: center; background: rgba(255, 255, 255, .04); font-style: normal; }
+.v-cur .step { grid-template-columns: 56px minmax(0, 1fr) 56px; } .v-cur .step i, .v-cur .step b { height: 56px; }
+.v-cur .step i { font-size: 21.6px; font-weight: 700; }
+.v-new .step i { font-size: 20px; font-weight: 400; color: var(--muted); }
+.tbl { display: grid; }
+.tr { display: grid; grid-template-columns: 40px 1fr 1fr; gap: 12px; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; font-variant-numeric: tabular-nums; }
+.v-cur .tr { min-height: 52px; }
+.tr.th { min-height: 0; padding-bottom: 8px; border-bottom: 1px solid var(--line); border-radius: 0; }
+.v-cur .tr.th { align-items: start; }
+.v-new .tr.th { align-items: end; }
+.tr.now { background: rgba(141, 94, 99, .16); box-shadow: inset 3px 0 0 var(--brand); }
+
+/* superset */
+.ss-ex { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.ss-ex:first-of-type { border-top: 0; padding-top: 0; }
+.ss-head { display: grid; grid-template-columns: 28px minmax(0, 1fr) 24px; gap: 8px; align-items: start; }
+.code { width: 28px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: rgba(141, 94, 99, .3); color: var(--rose); font-variant-numeric: tabular-nums; }
+.ss-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px; gap: 8px; align-items: end; }
+.ss-fields.two { grid-template-columns: minmax(0, 1fr) 44px; padding-left: 0; }
+.ss-field { display: grid; gap: 4px; }
+.ss-step { display: grid; grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 4px; }
+.ss-step i, .ss-step b { height: 44px; border: 1px solid var(--line); border-radius: 10px; display: grid; place-items: center; background: rgba(255, 255, 255, .04); font-style: normal; }
+.ss-step i { color: var(--muted); font-size: 18px; }
+.tick { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, .06); display: grid; place-items: center; }
+.tick.on { background: rgba(166, 217, 165, .18); border-color: rgba(166, 217, 165, .5); color: var(--done); }
+.ss-two { display: grid; gap: 6px; }
+.ss-two .lrow { grid-template-columns: 40px minmax(0, 1fr); }
+.ss-line { display: flex; gap: 8px; align-items: baseline; min-height: 40px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, .02); font-variant-numeric: tabular-nums; }
+.ss-line.future { border-style: dashed; color: var(--dim); }
+.handoff { padding: 8px 12px; border-radius: 10px; background: rgba(166, 217, 165, .1); color: var(--done); }
+/* current superset (mirrors the PO's phone screenshot) */
+.c-round { border: 1px solid rgba(201, 156, 161, .45); border-radius: 16px; padding: 12px; display: grid; gap: 8px; background: rgba(141, 94, 99, .12); }
+.c-round.future { border-color: var(--line); background: rgba(255, 255, 255, .02); }
+.c-tr { display: grid; grid-template-columns: 44px 1fr 1.6fr; gap: 8px; align-items: start; }
+.c-tr.th { padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.c-today { display: grid; gap: 4px; justify-items: stretch; }
+.c-step { display: grid; grid-template-columns: 36px 1fr 36px; gap: 4px; }
+.c-step i, .c-step b { height: 40px; border: 1px solid var(--line); border-radius: 10px; display: grid; place-items: center; background: rgba(255, 255, 255, .05); font-style: normal; }
+.c-tick { justify-self: end; width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 10px; display: grid; place-items: center; background: rgba(255, 255, 255, .06); }
+.textarea { min-height: 60px; border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; background: rgba(255, 255, 255, .04); color: var(--dim); }
+
+/* exercises */
+.search { min-height: 44px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, .04); display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+.rchips { display: flex; gap: 6px; overflow: hidden; }
+.rchips span { min-height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); display: grid; place-items: center; white-space: nowrap; }
+.v-cur .rchips span { min-height: 34px; }
+.rchips span.on { border-color: var(--brand); background: rgba(141, 94, 99, .25); }
+.result { display: grid; grid-template-columns: 40px minmax(0, 1fr) 16px; gap: 12px; align-items: center; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); }
+.result .ri { width: 40px; height: 40px; border-radius: 12px; background: var(--panel); display: grid; place-items: center; color: var(--muted); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 24px 24px 0 0; border-top: 1px solid var(--line); background: #1b1b1e; padding: 16px 16px 24px; display: grid; gap: 12px; box-shadow: 0 -20px 60px rgba(0, 0, 0, .6); }
+.sheet .grab { width: 36px; height: 5px; border-radius: 99px; background: var(--line); justify-self: center; margin-top: -6px; }
+.scue { border-left: 3px solid var(--brand); background: rgba(141, 94, 99, .16); padding: 10px 12px; border-radius: 4px 12px 12px 4px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* progress */
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: var(--panel); }
+.tabs span { min-height: 36px; border-radius: 10px; display: grid; place-items: center; white-space: nowrap; }
+.tabs span.on { background: var(--brand); color: #fff; }
+.lift { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.lift:first-of-type { border-top: 0; padding-top: 0; }
+.lift svg { width: 84px; height: 32px; color: var(--rose); stroke-width: 1.6; }
+
+/* ===== ROLES (new variants) ===== */
+.v-new .r-title { font: 700 28px/34px var(--font-ui); letter-spacing: -0.02em; text-wrap: balance; }
+.v-new .r-card { font: 700 22px/28px var(--font-ui); letter-spacing: -0.01em; text-wrap: balance; }
+.v-new .r-head { font: 600 17px/22px var(--font-ui); letter-spacing: -0.01em; text-wrap: balance; }
+.v-new .r-body { font: 400 15px/20px var(--font-ui); }
+.v-new .r-bodys { font: 600 15px/20px var(--font-ui); }
+.v-new .r-cap { font: 400 13px/18px var(--font-ui); color: var(--muted); }
+.v-new .r-cap.sel { font-weight: 600; color: var(--text); }
+.v-new .r-lab { font: 600 11px/14px var(--font-ui); }
+.v-new .r-sec { font: 600 11px/14px var(--font-ui); text-transform: uppercase; letter-spacing: 0.06em; color: var(--rose); }
+.v-new .r-num { font: 700 20px/24px var(--font-ui); font-variant-numeric: tabular-nums; }
+.v-new .tnum { font-variant-numeric: tabular-nums; }
+.v-new .wm { font: 800 15px/20px var(--font-ui); letter-spacing: -0.01em; text-transform: uppercase; }
+/* Compact keeps every current capital, but in ONE style */
+.v-comp .capsable { font: 600 11px/14px var(--font-ui) !important; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.v-comp .capsable.r-sec { color: var(--rose); }
+
+/* ===== CURRENT (measured live values, 390 px, Chromium) ===== */
+.v-cur .c-word { font-size: 34px; line-height: 34px; font-weight: 800; letter-spacing: -0.04em; text-transform: uppercase; }
+.v-cur .c-tag { font-size: 9.92px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; }
+.v-cur .c-scr { font-size: 16px; line-height: 19px; font-weight: 600; }
+.v-cur .c-badge { font-size: 9.28px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #efefeb; }
+.v-cur .c-blk { font-size: 13.76px; font-weight: 700; }
+.v-cur .c-blkst { font-size: 9.92px; font-weight: 600; }
+.v-cur .c-12 { font-size: 12.8px; font-weight: 500; } .v-cur .c-12b { font-size: 12.8px; font-weight: 700; }
+.v-cur .c-wk { font-size: 11.52px; font-weight: 500; color: var(--muted); } .v-cur .c-wk.sel { font-weight: 700; color: var(--text); }
+.v-cur .c-day { font-size: 14.4px; font-weight: 700; }
+.v-cur .c-focus { font-size: 10.24px; font-weight: 500; }
+.v-cur .c-body { font-size: 12.16px; font-weight: 500; line-height: 17.6px; } .v-cur .c-bodyb { font-size: 12.16px; font-weight: 700; }
+.v-cur .c-exname { font-size: 17.02px; font-weight: 500; color: #bdbcb9; }
+.v-cur .c-done { font-size: 12px; font-weight: 700; }
+.v-cur .c-86 { font-size: 8.64px; font-weight: 500; line-height: 12.5px; } .v-cur .c-86b { font-size: 8.64px; font-weight: 700; }
+.v-cur .c-106 { font-size: 10.56px; font-weight: 500; }
+.v-cur .c-btnsm { font-size: 10.88px; font-weight: 500; letter-spacing: 0.08em; }
+.v-cur .c-bar { font-size: 14.4px; font-weight: 700; }
+.v-cur .c-tool { font-size: 11.52px; font-weight: 700; }
+.v-cur .c-cue { font-size: 16px; line-height: 20.8px; font-weight: 700; }
+.v-cur .c-set { font-size: 14.4px; font-weight: 700; text-transform: uppercase; }
+.v-cur .c-field { font-size: 12.8px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.v-cur .c-val { font-size: 28px; font-weight: 800; }
+.v-cur .c-log { font-size: 16.8px; font-weight: 800; letter-spacing: 0.12em; }
+.v-cur .c-th { font-size: 11.52px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.v-cur .c-td { font-size: 16px; font-weight: 500; } .v-cur .c-tdb { font-size: 16px; font-weight: 700; }
+.v-cur .c-small { font-size: 11.2px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.v-cur .c-lh { font-size: 13.6px; font-weight: 700; }
+.v-cur .c-rmeta { font-size: 11.52px; font-weight: 500; color: var(--muted); }
+.v-cur .c-sheett { font-size: 17.6px; font-weight: 700; }
+.v-cur .c-sheetcue { font-size: 14.4px; font-weight: 700; }
+.v-cur .c-pbtn { font-size: 12.48px; font-weight: 800; letter-spacing: 0.12em; }
+.v-cur .c-ph2 { font-size: 27.2px; font-weight: 700; }
+.v-cur .c-status { font-size: 16.8px; font-weight: 700; }
+.v-cur .c-h3 { font-size: 10.4px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.v-cur .c-ssfield { font-size: 11.52px; font-weight: 500; color: var(--muted); }
+.v-cur .c-ssval { font-size: 16.8px; font-weight: 700; }
+.v-cur .c-code { font-size: 12.16px; font-weight: 700; color: var(--rose); }
+.v-cur .c-ssround { font-size: 14.4px; font-weight: 700; text-transform: uppercase; }
+.v-cur .c-ssround.future { text-transform: none; color: var(--muted); }
+.v-cur .c-note { font-size: 15px; font-weight: 500; }
+.v-cur .c-ssh { font-size: 12.16px; font-weight: 700; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="h1"></h1>
+  <p id="lede"></p>
+</header>
+
+<div class="controls" id="controls"></div>
+
+<main class="stage">
+  <div class="phone"><div id="phone" class="p"></div></div>
+  <aside class="notes" id="notes" aria-live="polite"></aside>
+</main>
+
+<script>
+const S = { v: 'few', s: 'workout', l: 'es', ssMode: 'tick', ssLayout: 'side' };
+try { const saved = JSON.parse(localStorage.getItem('gs-type-proto') || 'null'); if (saved) Object.assign(S, saved); } catch (e) {}
+
+const I = {
+  cal: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+  plus: '<svg class="ic16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+  chev: '<svg class="ic16" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
+  back: '<svg class="ic16" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>',
+  tech: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  swap: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg>',
+  notes: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  google: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  target: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+  bar: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h20M5 8v8M8 6v12M16 6v12M19 8v8"/></svg>',
+  body: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M12 8v6M8 10h8M12 14l-3 6M12 14l3 6"/></svg>',
+  home: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>',
+  chart: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M7 15l4-4 3 3 5-6"/></svg>',
+  user: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+  check: '<svg class="ic20" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>',
+  spark: (d) => `<svg viewBox="0 0 84 32" aria-hidden="true"><polyline points="${d}"/></svg>`,
+};
+
+/* Only text already in the app (EN / ES i18n + approved short cues). New UI copy is marked NEW. */
+const T = {
+  en: {
+    today: 'Today', exercises: 'Exercises', progress: 'Progress', tagline: 'Train with intent',
+    badge: '6-week plan · 4 days/week', block: 'Upper / Lower · 4 Days', blockSt: 'Week 4 of 6',
+    thisWeek: 'This week', daysDone: '4 of 4 days done', days: ['Mon 12', 'Tue 13', 'Wed 14', 'Thu 15'],
+    day: 'Day 1 · Upper A', focus: 'Upper body · heavy', completed: '✓ Completed · Mon 12 Oct', viewEdit: 'View or edit',
+    ex1: 'Barbell Bench Press', ex2: 'Plate-Loaded T-Bar Row', det2: 'Chest-Supported',
+    done: 'Done', sets3: '3 sets', top: 'top', superset: 'Superset',
+    ssInst: 'Do C1, rest ~10 s, then C2; rest after the pair.',
+    ex3: 'Dumbbell Shoulder Press', det3: 'Seated', ex4: 'Cable Lat Pulldown', det4: 'Wide Grip',
+    exit: 'Exit', bar: 'Day 1 · Upper A · 1/8', finish: 'Finish',
+    tools: ['Technique', 'Swap', 'Notes', 'Google'], cue1: 'Bend the bar, squeeze chest',
+    setOf: (a, b) => `Set ${a} of ${b}`, reps: 'Reps', logSet: (n) => `Log set ${n}`,
+    lastTime: 'Last time', todayCol: 'Today', setCol: 'Set', date: 'Wed 14 Oct',
+    ssHdr: 'Superset · C1 + C2', roundOf: (a, b) => `Round ${a} of ${b}`, round: (n) => `Round ${n}`,
+    c1: 'Dumbbell Shoulder Press (Seated)', c2: 'Cable Lat Pulldown (Wide Grip)', cueC1: 'Biceps toward ears, squeeze front delts',
+    ssDate: 'Mon 12 Oct', notePh: 'Add a note', handoff: 'Go to C2 · 9s', logRound: (n) => `Log round ${n}`, finishSs: 'Finish superset',
+    find: 'Find an exercise', build: 'Build a custom day', query: 'squat',
+    regions: ['All', 'Chest', 'Back', 'Shoulders', 'Arms', 'Legs'], results: 'Results · 15',
+    rows: [['Barbell Back Squat', 'Quads · Barbell'], ['Barbell Box Squat', 'Quads · Barbell'], ['Barbell Front Squat', 'Quads · Barbell'], ['Bodyweight Squat', 'Quads · Bodyweight'], ['Dumbbell Bulgarian Split Squat', 'Quads · Dumbbell']],
+    sheetMeta: 'Quads · also Glutes, Adductors, Lower Back · Barbell', squeeze: 'Squeeze', sqCue: 'Spread the floor, squeeze quads and glutes',
+    lastVal: '47.5 kg × 10 · Thu 15 Oct', logIt: 'Log it', addToday: 'Add to today', swapPlan: 'Swap into plan', more: '⋯ More',
+    tabs: ['Overview', 'Trends', 'Muscles', 'Consistency'], status: 'Progressing',
+    reason: '8 of 8 main lifts improving · 0 about the same · 0 lower',
+    explainer: 'Status reflects the majority of eligible main-lift verdicts, not a recommendation.',
+    mainLifts: 'Main lifts · this block', improving: 'Improving',
+    lifts: [['Barbell Bench Press', 'Best set: 72.5 kg × 8 → 82.5 kg × 8', '+3.3 kg/week'], ['Plate-Loaded T-Bar Row (Chest-Supported)', 'Best set: 64.5 kg × 8 → 73 kg × 10', '+3.7 kg/week'], ['Dumbbell Shoulder Press (Seated)', 'Best set: 21 kg × 10 → 24 kg × 12', '+1.3 kg/week']],
+  },
+  es: {
+    today: 'Hoy', exercises: 'Ejercicios', progress: 'Progreso', tagline: 'Entrena con intención',
+    badge: 'Plan de 6 semanas · 4 días/semana', block: 'Superior / Inferior · 4 días', blockSt: 'Semana 4 de 6',
+    thisWeek: 'Esta semana', daysDone: '4 de 4 días hechos', days: ['Lun 12', 'Mar 13', 'Mié 14', 'Jue 15'],
+    day: 'Día 1 · Tren superior A', focus: 'Tren superior · pesado', completed: '✓ Completado · lun 12 oct', viewEdit: 'Ver o editar',
+    ex1: 'Press de banca con barra', ex2: 'Remo en T en máquina de discos', det2: 'con apoyo de pecho',
+    done: 'Hecho', sets3: '3 series', top: 'mejor', superset: 'Superserie',
+    ssInst: 'Haz C1, descansa ~10 s, luego C2; descansa al final del par.',
+    ex3: 'Press de hombros con mancuernas', det3: 'sentado', ex4: 'Jalón al pecho en polea', det4: 'agarre ancho',
+    exit: 'Salir', bar: 'Día 1 · Tren superior A · 1/8', finish: 'Terminar',
+    tools: ['Técnica', 'Cambiar', 'Notas', 'Google'], cue1: 'Dobla la barra en U, aprieta el pecho',
+    setOf: (a, b) => `Serie ${a} de ${b}`, reps: 'Reps', logSet: (n) => `Registrar serie ${n}`,
+    lastTime: 'Última vez', todayCol: 'Hoy', setCol: 'Serie', date: 'mié 14 oct',
+    ssHdr: 'Superserie · C1 + C2', roundOf: (a, b) => `Ronda ${a} de ${b}`, round: (n) => `Ronda ${n}`,
+    c1: 'Press de hombros con mancuernas (sentado)', c2: 'Jalón al pecho en polea (agarre ancho)', cueC1: 'Bíceps a las orejas, aprieta deltoide frontal',
+    ssDate: 'lun 12 oct', notePh: 'Agrega una nota', handoff: 'Ahora C2 · 9s', logRound: (n) => `Registrar ronda ${n}`, finishSs: 'Terminar superserie',
+    find: 'Buscar un ejercicio', build: 'Crear un día propio', query: 'sentadilla',
+    regions: ['Todo', 'Pecho', 'Espalda', 'Hombros', 'Brazos', 'Piernas'], results: 'Resultados · 15',
+    rows: [['Sentadilla trasera con barra', 'Cuádriceps · Barra'], ['Sentadilla a cajón con barra', 'Cuádriceps · Barra'], ['Sentadilla frontal con barra', 'Cuádriceps · Barra'], ['Sentadilla con peso corporal', 'Cuádriceps · Peso corporal'], ['Sentadilla búlgara con mancuernas', 'Cuádriceps · Mancuernas']],
+    sheetMeta: 'Cuádriceps · también Glúteos, Aductores, Espalda baja · Barra', squeeze: 'Aprieta', sqCue: 'Abre el piso, aprieta cuádriceps y glúteos',
+    lastVal: '47,5 kg × 10 · jue 15 oct', logIt: 'Registrar', addToday: 'Agregar a hoy', swapPlan: 'Cambiar en el plan', more: '⋯ Más',
+    tabs: ['Resumen', 'Tendencias', 'Músculos', 'Constancia'], status: 'Progresando',
+    reason: '8 de 8 ejercicios principales mejorando · 0 igual · 0 más bajos',
+    explainer: 'El estado refleja la mayoría de los veredictos de ejercicios principales; no es una recomendación.',
+    mainLifts: 'Ejercicios principales · este bloque', improving: 'Mejorando',
+    lifts: [['Press de banca con barra', 'Mejor serie: 72,5 kg × 8 → 82,5 kg × 8', '+3,3 kg/semana'], ['Remo en T en máquina de discos (con apoyo de pecho)', 'Mejor serie: 64,5 kg × 8 → 73 kg × 10', '+3,7 kg/semana'], ['Press de hombros con mancuernas (sentado)', 'Mejor serie: 21 kg × 10 → 24 kg × 12', '+1,3 kg/semana']],
+  },
+};
+const UI = {
+  en: { h1: 'Typography system · GymStudio', lede: 'One compact type scale (7 roles) applied to five screens. Switch variant, screen and language. "Current" reproduces the sizes measured in the live app at 390 px.', variant: 'Variant', screen: 'Screen', lang: 'Language', cur: 'Current', comp: 'Compact', few: 'Compact + fewer capitals', rec: '· recommended', scr: { today: 'Today', workout: 'Workout', superset: 'Workout · superset', exercises: 'Exercises', progress: 'Progress' }, confirm: 'Superset', tick: '✓ per exercise', roundBtn: 'One "Log round" button', layout: 'Fields', side: 'kg | reps side by side', rows2: 'Two rows (like single)' },
+  es: { h1: 'Sistema tipográfico · GymStudio', lede: 'Una sola escala compacta (7 roles) en cinco pantallas. Cambia variante, pantalla e idioma. "Actual" reproduce los tamaños medidos en la app a 390 px.', variant: 'Variante', screen: 'Pantalla', lang: 'Idioma', cur: 'Actual', comp: 'Compacta', few: 'Compacta + menos mayúsculas', rec: '· recomendada', scr: { today: 'Hoy', workout: 'Entreno', superset: 'Entreno · superserie', exercises: 'Ejercicios', progress: 'Progreso' }, confirm: 'Superserie', tick: '✓ por ejercicio', roundBtn: 'Un botón "Registrar ronda"', layout: 'Campos', side: 'kg | reps lado a lado', rows2: 'Dos filas (como la normal)' },
+};
+
+const cur = () => S.v === 'cur';
+const fmt = (n) => (S.l === 'es' && !cur()) ? String(n).replace('.', ',') : String(n);   /* Current keeps the live ES decimal bug */
+const fmtOk = (n) => S.l === 'es' ? String(n).replace('.', ',') : String(n);
+const vcls = () => cur() ? 'v-cur' : `v-new ${S.v === 'comp' ? 'v-comp' : 'v-few'}`;
+
+function topbar(t, screenTitle) {
+  return `
+  <div class="only-cur" style="padding-top:16px">
+    <div class="row" style="justify-content:flex-end"><span class="lang c-12b"><span class="${S.l === 'en' ? 'on' : ''}">EN</span><span class="${S.l === 'es' ? 'on' : ''}">ES</span></span><span class="syncdot" style="margin-left:8px"></span></div>
+    <p class="c-tag" style="margin-top:4px">${t.tagline}</p>
+    <p class="c-word" style="margin-top:6px">Gym Studio</p>
+    <p class="c-scr" style="margin-top:2px">${screenTitle}</p>
+  </div>
+  <div class="only-new">
+    <div class="bar"><span class="wm">Gym Studio</span><span class="lang r-cap"><span class="${S.l === 'en' ? 'on' : ''}">EN</span><span class="${S.l === 'es' ? 'on' : ''}">ES</span></span><span class="syncdot"></span></div>
+    <p class="r-lab capsable only-comp" style="margin-top:4px">${t.tagline}</p>
+    <h2 class="r-title" style="margin-top:4px">${screenTitle}</h2>
+  </div>`;
+}
+const dock = (on) => `<nav class="dock" aria-hidden="true"><span class="${on === 0 ? 'on' : ''}">${I.home}</span><span class="${on === 1 ? 'on' : ''}">${I.google}</span><span class="${on === 2 ? 'on' : ''}">${I.chart}</span><span>${I.user}</span></nav>`;
+
+/* ---------- TODAY ---------- */
+function today(t) {
+  const box = (name, det, top) => `
+    <div class="box">
+      <div class="row between"><div class="stack" style="gap:2px">
+        <p class="c-exname r-head">${name}</p>${det ? `<p class="c-body r-cap">${det}</p>` : ''}
+      </div><span class="iconbtn">${I.plus}</span></div>
+      <p class="c-done r-cap"><span class="ok r-bodys" style="font-size:inherit">✓ ${t.done}</span> · ${t.sets3} · ${t.top} <span class="tnum">${fmt(top)}</span> kg</p>
+    </div>`;
+  return `${topbar(t, t.today)}
+  <div class="gap12" style="margin-top:16px">
+    <div class="row"><span class="iconbtn" style="width:44px;height:44px">${I.cal}</span><span class="pill c-badge r-cap capsable">${t.badge}</span></div>
+    <div class="card" style="padding-block:12px"><div class="row base between">
+      <p class="c-blk r-head">${t.block}</p><span class="row base" style="gap:12px"><span class="c-blkst r-cap" style="white-space:nowrap">${t.blockSt}</span><span class="iconbtn" style="align-self:center">${I.plus}</span></span>
+    </div></div>
+    <div class="card">
+      <div class="row base between"><span class="c-12 r-cap">${t.thisWeek}</span><strong class="c-12b r-bodys tnum">${t.daysDone}</strong></div>
+      <div class="week">${t.days.map((d, i) => `<div class="${i === 0 ? 'on' : ''}"><i></i><span class="c-wk r-cap ${i === 0 ? 'sel' : ''}">${d}</span></div>`).join('')}</div>
+    </div>
+    <div class="stack" style="gap:2px;margin-top:4px"><h3 class="c-day r-head">${t.day}</h3><p class="c-focus r-cap">${t.focus}</p></div>
+    <div class="card" style="padding-block:10px"><div class="row between"><strong class="c-bodyb r-bodys">${t.completed}</strong><span class="btn2 c-btnsm r-bodys">${t.viewEdit}</span></div></div>
+    <div class="card only-cur" style="padding-inline:0">${box(t.ex1, '', 82.5)}${box(t.ex2, t.det2, 73)}
+      <div class="box" style="background:rgba(141,94,99,.12)"><div class="row"><span class="tag c-86b" style="text-transform:capitalize">${t.superset}</span><span class="c-done ok">✓ ${t.done}</span></div><p class="c-106 mut">${t.ssInst}</p></div>
+    </div>
+    <div class="gap12 only-new">${box(t.ex1, '', 82.5)}${box(t.ex2, t.det2, 73)}
+      <div class="box" style="background:rgba(141,94,99,.12)">
+        <div class="row"><span class="tag r-lab">${t.superset}</span><span class="r-cap ok sel">✓ ${t.done}</span></div>
+        <p class="r-cap">${t.ssInst}</p>
+        <p class="r-head" style="margin-top:4px">${t.ex3}</p><p class="r-cap">${t.det3} · ${t.sets3} · ${t.top} <span class="tnum">24</span> kg</p>
+      </div>
+    </div>
+  </div>${dock(0)}`;
+}
+
+/* ---------- WORKOUT (single) ---------- */
+function workoutBar(t) {
+  return `<div class="bar" style="flex-wrap:wrap;row-gap:10px">
+    <span class="btn2 c-btnsm r-bodys" style="min-height:40px">‹ ${t.exit}</span>
+    <strong class="c-bar only-cur" style="flex:1;text-align:center">${t.bar}</strong>
+    <span class="c-body only-cur">12:41</span>
+    <span class="only-new stack" style="flex:1;min-width:0;gap:0;text-align:center"><strong class="r-bodys">${t.bar.replace(/ · \d\/8$/, '')}</strong><span class="r-cap tnum">${(t.bar.match(/\d\/8$/) || [''])[0]} · 12:41</span></span>
+    <span class="btn2 c-btnsm r-bodys" style="min-height:40px">${t.finish}</span>
+    <div class="chips" style="width:100%"><span class="cur c-bodyb r-bodys">1</span><span class="c-bodyb r-bodys">2 ✓</span><span class="c-bodyb r-bodys">3 ✓</span><span class="todo c-bodyb r-bodys">4</span><span class="todo c-bodyb r-bodys">5</span><span class="todo c-bodyb r-bodys">6</span></div>
+  </div>`;
+}
+function workout(t) {
+  const tool = (ic, w) => `<span class="c-tool r-lab">${ic}<span>${w}</span></span>`;
+  const r = (n, last, today, now, done) => `<div class="tr ${now ? 'now' : ''}"><span class="c-tdb r-bodys">${n}</span><span class="c-td r-body mut">${last}</span><span class="${done ? 'c-tdb r-bodys' : 'c-td r-body mut'}">${today}${done ? ' <span class="ok">✓</span>' : ''}</span></div>`;
+  return `${workoutBar(t)}
+  <div class="card" style="margin-top:12px">
+    <h2 class="c-exname r-card">${t.ex1}</h2>
+    <div class="tools">${tool(I.tech, t.tools[0])}${tool(I.swap, t.tools[1])}${tool(I.notes, t.tools[2])}${tool(I.google, t.tools[3])}</div>
+    <div class="cue"><span class="ci">${I.target}</span><span class="c-cue r-bodys">${t.cue1}</span><span class="cc">${I.chev}</span></div>
+    <div class="logger">
+      <p class="c-set r-bodys capsable">${t.setOf(3, 3)}</p>
+      <div class="lrow"><span class="c-field r-cap capsable">kg</span><div class="step"><i>−</i><b class="c-val r-num">${fmtOk(82.5)}</b><i>+</i></div></div>
+      <div class="lrow"><span class="c-field r-cap capsable">${t.reps}</span><div class="step"><i>−</i><b class="c-val r-num">8</b><i>+</i></div></div>
+      <div class="btn c-log r-bodys" style="margin-top:4px">${t.logSet(3)}</div>
+    </div>
+    <p class="r-cap only-new">${t.lastTime} · ${t.date}</p>
+    <div class="tbl">
+      <div class="tr th"><span class="c-th r-cap capsable">${cur() ? '#' : t.setCol}</span><span class="c-th r-cap capsable">${t.lastTime}${cur() ? `<br><small class="c-small">${t.date}</small>` : ''}</span><span class="c-th r-cap capsable">${t.todayCol}</span></div>
+      ${r(1, fmtOk(82.5) + '×10', fmtOk(82.5) + '×8', false, true)}${r(2, fmtOk(82.5) + '×10', fmtOk(82.5) + '×8', false, true)}${r(3, fmtOk(82.5) + '×10', fmtOk(82.5) + '×8', true, false)}
+    </div>
+  </div>`;
+}
+
+/* ---------- WORKOUT · SUPERSET ---------- */
+function superset(t) {
+  if (cur()) return supersetCurrent(t);
+  const last = (v, r) => `${t.lastTime} <span class="tnum">${v}×${r}</span> · ${t.ssDate}`;
+  const fields = (kg, reps, ticked, showTick) => S.ssLayout === 'side' ? `
+    <div class="ss-fields" style="${showTick ? '' : 'grid-template-columns:minmax(0,1fr) minmax(0,1fr)'}">
+      <div class="ss-field"><span class="r-cap capsable">kg</span><div class="ss-step"><i>−</i><b class="r-head tnum">${fmtOk(kg)}</b><i>+</i></div></div>
+      <div class="ss-field"><span class="r-cap capsable">${t.reps}</span><div class="ss-step"><i>−</i><b class="r-head tnum">${reps}</b><i>+</i></div></div>
+      ${showTick ? `<span class="tick ${ticked ? 'on' : ''}">${I.check}</span>` : ''}
+    </div>` : `
+    <div class="ss-fields two" style="${showTick ? '' : 'grid-template-columns:minmax(0,1fr)'}">
+      <div class="ss-two">
+        <div class="lrow"><span class="r-cap capsable">kg</span><div class="ss-step"><i>−</i><b class="r-head tnum">${fmtOk(kg)}</b><i>+</i></div></div>
+        <div class="lrow"><span class="r-cap capsable">${t.reps}</span><div class="ss-step"><i>−</i><b class="r-head tnum">${reps}</b><i>+</i></div></div>
+      </div>
+      ${showTick ? `<span class="tick ${ticked ? 'on' : ''}" style="align-self:center">${I.check}</span>` : ''}
+    </div>`;
+  const tickMode = S.ssMode === 'tick';
+  const ex = (code, name, cue, lastV, lastR, kg, reps, ticked) => `
+    <div class="ss-ex">
+      <div class="ss-head"><span class="code r-lab">${code}</span>
+        <div class="stack" style="gap:2px"><p class="r-head">${name}</p><p class="r-cap">${last(lastV, lastR)}</p>
+          ${cue ? `<p class="r-cap" style="color:var(--rose)">◎ ${cue}</p>` : ''}</div>
+        <span class="mut" style="padding-top:2px">${I.chev}</span></div>
+      ${fields(kg, reps, ticked, tickMode)}
+    </div>`;
+  return `${workoutBar(t).replace('<span class="cur c-bodyb r-bodys">1</span><span class="c-bodyb r-bodys">2 ✓</span><span class="c-bodyb r-bodys">3 ✓</span>', '<span class="c-bodyb r-bodys">1 ✓</span><span class="c-bodyb r-bodys">2 ✓</span><span class="cur c-bodyb r-bodys">3</span>').replaceAll('1/8', '3/8')}
+  <div class="card" style="margin-top:12px;border-color:rgba(201,156,161,.45)">
+    <div class="row base between"><span class="row" style="gap:8px"><span class="tag r-lab">${t.superset}</span><span class="r-head">C1 + C2</span></span><span class="r-cap sel">${t.roundOf(2, 3)}</span></div>
+    <p class="r-cap">${t.ssInst}</p>
+    <div class="ss-line r-body"><span class="ok">✓</span><span class="r-bodys">${t.round(1)}</span><span class="r-cap">C1 ${fmtOk(24)}×10 · C2 ${fmtOk(33.5)}×10</span></div>
+    ${ex('C1', t.c1, t.cueC1, fmtOk(24), 10, 24, 10, true)}
+    ${tickMode ? `<p class="handoff r-bodys tnum">${t.handoff}</p>` : ''}
+    ${ex('C2', t.c2, '', fmtOk(33.5), 10, 33.5, 10, false)}
+    ${tickMode ? '' : `<div class="btn r-bodys">${t.logRound(2)}</div>`}
+    <div class="ss-line future"><span class="r-bodys" style="color:var(--dim)">${t.round(3)}</span><span class="r-cap">C1 ${fmtOk(24)}×10 · C2 ${fmtOk(33.5)}×10</span></div>
+    <div class="row" style="gap:8px"><span class="btn2 r-cap" style="flex:1;display:flex;gap:6px;justify-content:center">${I.notes}${t.tools[2]}</span><span class="btn2 r-cap" style="flex:1;display:flex;gap:6px;justify-content:center">${I.swap}${t.tools[1]}</span></div>
+  </div>`;
+}
+function supersetCurrent(t) {
+  const tool = (ic, w) => `<span class="c-tool">${ic}<span>${w}</span></span>`;
+  const tools = `<div class="tools">${tool(I.tech, t.tools[0])}${tool(I.swap, t.tools[1])}${tool(I.notes, t.tools[2])}${tool(I.google, t.tools[3])}</div>`;
+  const raw = (n) => String(n); /* live bug: input shows 33.5 in ES */
+  const row = (code, kg, reps, last, future) => `
+    <div class="c-tr" style="padding:8px 0;border-top:1px solid var(--line)">
+      <span class="c-code">${code}</span>
+      <span class="c-body mut">${t.ssDate} ·<br>${last}</span>
+      <div class="c-today">
+        <span class="c-ssfield">kg</span><div class="c-step"><i>−</i><b class="c-ssval" ${future ? 'style="color:var(--muted)"' : ''}>${raw(kg)}</b><i>+</i></div>
+        <span class="c-ssfield">reps</span><div class="c-step"><i>−</i><b class="c-ssval" ${future ? 'style="color:var(--muted)"' : ''}>${reps}</b><i>+</i></div>
+        <span class="c-tick">✓</span>
+      </div>
+    </div>`;
+  const head = `<div class="c-tr th"><span class="c-body">#</span><span class="c-body">${t.lastTime}</span><span class="c-body">${t.todayCol}</span></div>`;
+  return `${workoutBar(t).replace('<span class="cur c-bodyb r-bodys">1</span><span class="c-bodyb r-bodys">2 ✓</span><span class="c-bodyb r-bodys">3 ✓</span>', '<span class="c-bodyb r-bodys">1 ✓</span><span class="c-bodyb r-bodys">2 ✓</span><span class="cur c-bodyb r-bodys">3</span>').replaceAll('1/8', '3/8')}
+  <div class="card" style="margin-top:12px;border-color:rgba(201,156,161,.45);background:rgba(141,94,99,.1)">
+    <div class="row between"><strong class="c-ssh">${t.ssHdr}</strong><span class="c-86">${t.roundOf(2, 3)}</span></div>
+    <strong class="c-ssh">C1 · ${t.c1}</strong>
+    <div class="cue"><span class="ci">${I.target}</span><span class="c-cue">${t.cueC1}</span><span class="cc">${I.chev}</span></div>
+    <p class="c-th" style="letter-spacing:.04em">${t.superset}</p>
+    ${tools}
+    <strong class="c-ssh">C2 · ${t.c2}</strong>
+    <p class="c-th" style="letter-spacing:.04em">${t.superset}</p>
+    ${tools}
+    <div class="textarea c-note">${t.notePh}</div>
+    <p class="c-86 mut">${t.ssInst}</p>
+    <div class="ss-line c-body">R1 ✓ 24×10 · 33.5×10</div>
+    <div class="c-round"><strong class="c-ssround">${t.setOf(2, 3)}</strong>${head}${row('C1', 24, 10, '24×10')}${row('C2', 33.5, 10, (S.l === 'es' ? '33,5' : '33.5') + '×10')}</div>
+    <div class="c-round future"><strong class="c-ssround future">${t.round(3)}</strong>${head}${row('C1', 24, 10, '24×10', true)}${row('C2', 33.5, 10, (S.l === 'es' ? '33,5' : '33.5') + '×10', true)}</div>
+  </div>`;
+}
+
+/* ---------- EXERCISES + sheet ---------- */
+function exercises(t) {
+  const icons = [I.bar, I.bar, I.bar, I.body, I.bar];
+  return `${topbar(t, t.exercises)}
+  <div class="gap12" style="margin-top:16px">
+    <div class="two"><span class="btn2 c-bodyb r-bodys" style="background:rgba(141,94,99,.25);border-color:var(--brand)">${t.find}</span><span class="btn2 c-bodyb r-bodys">${t.build}</span></div>
+    <div class="search"><span class="mut">${I.google}</span><span class="c-body r-body">${t.query}</span></div>
+    <div class="rchips">${t.regions.map((r, i) => `<span class="c-86b r-cap ${i === 0 ? 'on sel' : ''}">${r}</span>`).join('')}</div>
+    <p class="c-lh r-sec capsable" style="margin-top:4px">${t.results}</p>
+    ${t.rows.map(([n, m], i) => `<div class="result"><span class="ri">${icons[i]}</span><span class="stack" style="gap:2px"><span class="c-bodyb r-head">${n}</span><span class="c-rmeta r-cap">${m}</span></span><span class="mut">${I.chev}</span></div>`).join('')}
+  </div>
+  <div class="sheet">
+    <span class="grab"></span>
+    <div class="row between" style="align-items:start"><h2 class="c-sheett r-card">${t.rows[0][0]}</h2><span class="iconbtn">✕</span></div>
+    <p class="c-rmeta r-cap">${t.sheetMeta}</p>
+    <div class="scue"><p class="c-sheetcue r-bodys"><span class="only-cur">${t.squeeze} · </span>${t.sqCue}</p></div>
+    <div class="stack" style="gap:2px"><span class="c-body r-cap">${t.lastTime}</span><strong class="c-bodyb r-bodys tnum">${t.lastVal}</strong></div>
+    <div class="btn c-pbtn r-bodys">${t.logIt}</div>
+    <div class="two"><span class="btn2 c-body r-bodys">${t.addToday}</span><span class="btn2 c-body r-bodys">${t.swapPlan}</span></div>
+  </div>`;
+}
+
+/* ---------- PROGRESS ---------- */
+function progress(t) {
+  const sp = ['2,28 18,24 34,22 50,14 66,12 82,6', '2,26 18,24 34,18 50,16 66,10 82,8', '2,24 18,22 34,20 50,16 66,14 82,10'];
+  return `${topbar(t, t.progress)}
+  <div class="gap12" style="margin-top:12px">
+    <div class="row base between only-cur"><h2 class="c-ph2">${t.progress}</h2><span class="c-body">${t.block}</span></div>
+    <p class="r-cap only-new" style="margin-top:-8px">${t.block}</p>
+    <div class="tabs">${t.tabs.map((x, i) => `<span class="c-body r-cap ${i === 0 ? 'on sel' : ''}" style="${i === 0 ? 'color:#fff' : ''}">${x}</span>`).join('')}</div>
+    <div class="card" style="background:linear-gradient(135deg,rgba(141,94,99,.32),rgba(141,94,99,.1))">
+      <p class="c-status r-head">${t.status}</p>
+      <p class="c-body r-body">${t.reason}</p>
+      <p class="c-86 r-cap">${t.explainer}</p>
+    </div>
+    <div class="card">
+      <h3 class="c-h3 r-head capsable">${t.mainLifts}</h3>
+      ${t.lifts.map(([n, b, rate], i) => `<div class="lift"><div class="stack" style="gap:2px">
+        <strong class="c-bodyb r-bodys">${n}</strong><span class="c-body r-cap ok">${t.improving}</span>
+        <small class="c-86 r-cap tnum">${b}</small><small class="c-86 r-cap tnum">${rate}</small></div>${I.spark(sp[i])}</div>`).join('')}
+    </div>
+  </div>${dock(2)}`;
+}
+
+/* ---------- notes panel ---------- */
+const NOTES = {
+  en: {
+    scale: [['Title', '28/34 · 700', 'Screen title'], ['Card title', '22/28 · 700', 'Exercise name on its card, sheet title'], ['Headline', '17/22 · 600', 'List items, section headings, block name'], ['Body', '15/20 · 400 (600)', 'Text, cue, table, all buttons'], ['Caption', '13/18 · 400', 'Meta, dates, kg/Reps, tabs, chips'], ['Label', '11/14 · 600', 'Tool words; SECTION LABEL (only caps)'], ['Numeric', '20/24 · 700 tabular', 'Stepper values, stats']],
+    cur: ['33 font sizes in the app (8.6 to 34 px), 5 weights, 17 letter-spacings.', '8.6 px text: Superset chip, body-part chips, Progress details. Below the 11 px minimum.', 'Exercise name (17 px, regular, grey) is weaker than the cue (16 bold) and the value (28).', '8 different capital styles: KG, REPS, SET 3 OF 3, LAST TIME, PLAN DE 6 SEMANAS…', 'Font is Helvetica by accident (Inter is declared but never loaded).'],
+    comp: ['Same 7-role scale on every screen. Only 3 weights.', 'Every existing capital label kept, but all in ONE style (11 px, 600, +0.06em).', 'Buttons: no wide letter-spacing.'],
+    few: ['Same scale. Capitals only for short section labels (e.g. RESULTS · 15, sheet sections).', 'Sentence case: Set 3 of 3, kg, Reps, Last time, Today, 6-week plan · 4 days/week.', 'Progress card titles become Headlines; tagline removed from working screens.'],
+    ss: ['Superset (compact): one block per exercise = code + name, last time on ONE line, kg | reps side by side, one ✓.', 'Only the current round is open. Done rounds and the next round are one line each.', 'Approved rule kept and shown once: C1 → ~10 s → C2, rest after the pair. "Go to C2 · 9s" hand-off after ticking C1.', 'Notes closed until tapped (no empty textarea). ES decimals always 33,5.', 'Values 17 px so the exercise name (17 px, 600) is never outranked; same steppers and labels as the single logger.'],
+    ssCur: ['Mirrors the PO\'s phone screenshot: names 12 px, cue 16 px bold, "#" and "Last time" columns take ~45% of the width, date wraps to 2 lines.', 'kg and reps stacked, plus a lone ✓, so each exercise is about 230 px tall.', 'Every future round is fully open and repeats the table header; "SET 2 OF 3" vs "Round 3" uses two words for the same thing.', 'Empty notes box open; instruction 8.6 px; ES shows "33.5" (bug).'],
+    rec: 'Recommendation: Compact + fewer capitals.', counts: 'Distinct sizes on this screen', capsCount: 'Capital labels on this screen',
+  },
+  es: {
+    scale: [['Título', '28/34 · 700', 'Título de pantalla'], ['Título de tarjeta', '22/28 · 700', 'Nombre del ejercicio en su tarjeta, título de hoja'], ['Encabezado', '17/22 · 600', 'Ítems de lista, secciones, bloque'], ['Cuerpo', '15/20 · 400 (600)', 'Texto, consejo, tabla, todos los botones'], ['Nota', '13/18 · 400', 'Meta, fechas, kg/Reps, pestañas, chips'], ['Etiqueta', '11/14 · 600', 'Palabras de herramientas; ETIQUETA DE SECCIÓN (únicas mayúsculas)'], ['Número', '20/24 · 700 tabular', 'Valores del stepper, estadísticas']],
+    cur: ['33 tamaños de letra en la app (de 8,6 a 34 px), 5 grosores, 17 espaciados.', 'Texto de 8,6 px: chip de superserie, chips de zona, detalles de Progreso. Menos del mínimo de 11 px.', 'El nombre del ejercicio (17 px, normal, gris) pesa menos que el consejo (16 negrita) y el valor (28).', '8 estilos distintos de mayúsculas: KG, REPS, SERIE 3 DE 3, ÚLTIMA VEZ, PLAN DE 6 SEMANAS…', 'La letra es Helvetica por accidente (Inter está declarada pero nunca se carga).'],
+    comp: ['La misma escala de 7 roles en todas las pantallas. Solo 3 grosores.', 'Se mantienen todas las mayúsculas actuales, pero en UN solo estilo (11 px, 600, +0,06em).', 'Botones sin espaciado ancho entre letras.'],
+    few: ['La misma escala. Mayúsculas solo en etiquetas cortas de sección (p. ej. RESULTADOS · 15, secciones de la hoja).', 'Tipo frase: Serie 3 de 3, kg, Reps, Última vez, Hoy, Plan de 6 semanas · 4 días/semana.', 'Los títulos de tarjetas de Progreso pasan a Encabezado; el lema sale de las pantallas de trabajo.'],
+    ss: ['Superserie (compacta): un bloque por ejercicio = código + nombre, última vez en UNA línea, kg | reps lado a lado, un ✓.', 'Solo la ronda actual está abierta. Las rondas hechas y la siguiente ocupan una línea cada una.', 'Se mantiene la regla aprobada y se muestra una vez: C1 → ~10 s → C2, descanso al final del par. Aviso "Ahora C2 · 9s" al marcar C1.', 'Notas cerradas hasta tocarlas (sin caja vacía). Decimales en ES siempre 33,5.', 'Valores de 17 px para que nada supere al nombre (17 px, 600); mismos steppers y etiquetas que el registro normal.'],
+    ssCur: ['Igual que la captura del PO: nombres de 12 px, consejo de 16 px en negrita, las columnas "#" y "Última vez" ocupan ~45% del ancho, la fecha se parte en 2 líneas.', 'kg y reps apilados más un ✓ suelto: cada ejercicio mide unos 230 px.', 'Cada ronda futura está abierta y repite la cabecera; "SERIE 2 DE 3" y "Ronda 3" usan dos palabras para lo mismo.', 'Caja de notas vacía abierta; instrucción de 8,6 px; en ES aparece "33.5" (error).'],
+    rec: 'Recomendación: Compacta + menos mayúsculas.', counts: 'Tamaños distintos en esta pantalla', capsCount: 'Etiquetas en mayúsculas en esta pantalla',
+  },
+};
+
+function measure(root) {
+  const sizes = new Set(); let caps = 0;
+  root.querySelectorAll('*').forEach((el) => {
+    const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 0);
+    if (!own || !el.offsetParent) return;
+    const cs = getComputedStyle(el);
+    sizes.add(Math.round(parseFloat(cs.fontSize) * 10) / 10);
+    const txt = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g, '');
+    if (txt.length >= 2 && (cs.textTransform === 'uppercase' || txt === txt.toUpperCase()) && !/^(EN|ES|C\d|R\d|CC|GYMSTUDIO)$/i.test(txt) && !el.closest('.wm,.c-word')) caps++;
+  });
+  return { sizes: [...sizes].sort((a, b) => a - b), caps };
+}
+
+function render() {
+  try { localStorage.setItem('gs-type-proto', JSON.stringify(S)); } catch (e) {}
+  const u = UI[S.l], t = T[S.l], n = NOTES[S.l];
+  document.documentElement.lang = S.l;
+  document.getElementById('h1').textContent = u.h1;
+  document.getElementById('lede').textContent = u.lede;
+  const segBtn = (key, val, label) => `<button type="button" aria-pressed="${S[key] === val}" data-k="${key}" data-v="${val}">${label}</button>`;
+  document.getElementById('controls').innerHTML = `
+    <div class="seg" role="group" aria-label="${u.variant}"><span>${u.variant}</span>${segBtn('v', 'cur', u.cur)}${segBtn('v', 'comp', u.comp)}${segBtn('v', 'few', `${u.few} <span class="rec">${u.rec}</span>`)}</div>
+    <div class="seg" role="group" aria-label="${u.screen}"><span>${u.screen}</span>${Object.entries(u.scr).map(([k, l]) => segBtn('s', k, l)).join('')}</div>
+    <div class="seg" role="group" aria-label="${u.lang}"><span>${u.lang}</span>${segBtn('l', 'en', 'EN')}${segBtn('l', 'es', 'ES')}</div>
+    ${S.s === 'superset' && !cur() ? `<div class="seg" role="group" aria-label="${u.confirm}"><span>${u.confirm}</span>${segBtn('ssMode', 'tick', u.tick)}${segBtn('ssMode', 'round', u.roundBtn)}</div>
+    <div class="seg" role="group" aria-label="${u.layout}"><span>${u.layout}</span>${segBtn('ssLayout', 'side', u.side)}${segBtn('ssLayout', 'rows', u.rows2)}</div>` : ''}`;
+  const screens = { today, workout, superset, exercises, progress };
+  const phone = document.getElementById('phone');
+  phone.className = `p ${vcls()}`;
+  phone.style.height = '100%';
+  phone.innerHTML = `<div class="scroll">${screens[S.s](t)}</div>`;
+  const m = measure(phone);
+  const bullets = S.s === 'superset' ? (cur() ? n.ssCur : n.ss) : n[S.v];
+  document.getElementById('notes').innerHTML = `
+    <div class="stat"><div>${n.counts}<b>${m.sizes.length}</b></div><div>${n.capsCount}<b>${m.caps}</b></div></div>
+    <p style="font-variant-numeric:tabular-nums">${m.sizes.join(' · ')} px</p>
+    <ul>${bullets.map((b) => `<li>${b}</li>`).join('')}</ul>
+    ${cur() ? '' : `<table><thead><tr><th>Role</th><th>px · weight</th><th>Use</th></tr></thead><tbody>${n.scale.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table>`}
+    <p><strong style="color:var(--text)">${n.rec}</strong></p>`;
+}
+document.getElementById('controls').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-k]'); if (!b) return;
+  S[b.dataset.k] = b.dataset.v; render();
+});
+render();
+</script>
+</body>
+</html>
