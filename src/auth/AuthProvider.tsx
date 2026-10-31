@@ -5,7 +5,7 @@ import GuestDataPrompt from '../components/GuestDataPrompt'
 import { isDemoMode } from '../utils/demoMode'
 import { SyncSignInRequiredError, syncWorkoutHistory } from '../utils/sync'
 import { createSyncScheduler } from './syncScheduler'
-import { isNativeApp, listenForNativeAuthCallback, startNativeGoogleOAuth } from './nativeOAuth'
+import { isNativeApp, listenForNativeAuthCallback, NATIVE_AUTH_CALLBACK, startNativeGoogleOAuth } from './nativeOAuth'
 import {
   hasGuestWorkoutData,
   isGuestDataClaimed,
@@ -77,6 +77,8 @@ type AuthContextValue = {
   signInWithPassword: (email: string, password: string) => Promise<ActionResult>
   signUp: (email: string, password: string) => Promise<ActionResult>
   resetPassword: (email: string) => Promise<ActionResult>
+  passwordRecovery: boolean
+  updatePassword: (password: string) => Promise<ActionResult>
   signInWithGoogle: () => Promise<ActionResult>
   signOut: () => Promise<ActionResult>
 }
@@ -85,6 +87,15 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 function resultError(error: { message: string } | null | undefined): ActionResult {
   return { error: error?.message ?? null }
+}
+
+export async function updatePasswordWithClient(client: SupabaseClient, password: string): Promise<ActionResult> {
+  const { error } = await client.auth.updateUser({ password })
+  return resultError(error)
+}
+
+export function getPasswordRecoveryRedirect(native: boolean, origin: string, pathname: string): string {
+  return native ? NATIVE_AUTH_CALLBACK : `${origin}${pathname}`
 }
 
 export async function startGoogleOAuth(client: SupabaseClient, redirectTo: string): Promise<ActionResult> {
@@ -117,6 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const intentionalSignOut = useRef(false)
   const authAccountRef = useRef<string | null>(null)
   const [resolvedGuestPromptFor, setResolvedGuestPromptFor] = useState<string | null>(null)
+  const [passwordRecovery, setPasswordRecovery] = useState(false)
 
   const accountId = demoMode ? null : state.session?.user.id ?? null
   // Must be set during render so child effects read the right account's data.
@@ -141,6 +153,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       unsubscribe = subscribeToAuthChanges(supabase, (session, event) => {
         if (!active) return
+        if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true)
+        if (event === 'SIGNED_OUT') setPasswordRecovery(false)
         if (event === 'SIGNED_OUT' || session) {
           setSignInAgainRequired(needsSignInAfterAuthChange(event, session, authAccountRef.current, intentionalSignOut.current))
         }
@@ -277,9 +291,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = useCallback(async (email: string) => {
     const client = await getClient()
     if (!client) return { error: 'Sign-in unavailable offline.' }
-    const redirectTo = `${window.location.origin}${window.location.pathname}`
+    const redirectTo = getPasswordRecoveryRedirect(isNativeApp(), window.location.origin, window.location.pathname)
     const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo })
     return resultError(error)
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
+    const client = await getClient()
+    if (!client) return { error: 'Sign-in unavailable offline.' }
+    const result = await updatePasswordWithClient(client, password)
+    if (!result.error) setPasswordRecovery(false)
+    return result
   }, [])
 
   const signInWithGoogle = useCallback(async () => {
@@ -326,6 +348,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithPassword,
     signUp,
     resetPassword,
+    passwordRecovery,
+    updatePassword,
     signInWithGoogle,
     signOut,
   }), [
@@ -343,6 +367,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithPassword,
     signUp,
     resetPassword,
+    passwordRecovery,
+    updatePassword,
     signInWithGoogle,
     signOut,
   ])

@@ -5,6 +5,12 @@ import RestTimer from './components/RestTimer'
 import { syncRestTimerActivity } from './native/restTimerActivity'
 import { localizeCatalogue, useSpanishContentReady } from './i18n/content'
 import HelpAndAi from './components/HelpAndAi'
+import AiConsentPrompt from './components/AiConsentPrompt'
+import {
+  AI_CONSENT_REQUIRED_EVENT,
+  clearPendingAiConsentPrompt,
+  hasPendingAiConsentPrompt,
+} from './ai/gateway'
 import { localIsoDate } from './lib/dates'
 import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, WorkoutEntry } from './types'
@@ -24,6 +30,7 @@ import {
   saveWorkoutHistory,
   saveRestTimerState,
   recordHelpAiAppOpen,
+  setAskExerciseAiConsent,
 } from './utils/storage'
 import { useT } from './i18n'
 import { RestTimerState, startRestTimer } from './utils/restTimer'
@@ -35,7 +42,7 @@ const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
 
 export default function App() {
   const demoMode = isDemoMode()
-  const { status, syncStatus, user, pendingSyncCount, syncSignInRequired } = useAuth()
+  const { status, syncStatus, user, pendingSyncCount, syncSignInRequired, passwordRecovery } = useAuth()
   const [rawExercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
   const [demoHistoryReady, setDemoHistoryReady] = useState(!demoMode)
@@ -49,11 +56,19 @@ export default function App() {
   const contentRef = useRef<HTMLElement>(null)
   const dockHidden = useTextEntryFocused()
   const [showWelcome, setShowWelcome] = useState(() => !hasDismissedWelcome())
+  const [showAiConsent, setShowAiConsent] = useState(false)
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const { t, language, setLanguage } = useT()
   const spanishReady = useSpanishContentReady(language)
   const exercises = useMemo(() => localizeCatalogue(rawExercises, language), [rawExercises, language, spanishReady])
+
+  useEffect(() => {
+    const showConsent = () => setShowAiConsent(true)
+    window.addEventListener(AI_CONSENT_REQUIRED_EVENT, showConsent)
+    if (hasPendingAiConsentPrompt()) setShowAiConsent(true)
+    return () => window.removeEventListener(AI_CONSENT_REQUIRED_EVENT, showConsent)
+  }, [])
 
   const restLabel = useRef(t('rest.label'))
   const updateRestTimer = useCallback((timer: RestTimerState | null) => {
@@ -203,7 +218,7 @@ export default function App() {
             <h1>{getNavigationTitle(activeTab, t)}</h1>
           </header>
           <div className="screen-surface">
-          {activeTab === 'exercises' && (
+          {!passwordRecovery && activeTab === 'exercises' && (
             <div className="exercise-mode-switch" role="group" aria-label={t('exercises.tools')}>
               <button
                 type="button"
@@ -223,7 +238,11 @@ export default function App() {
               </button>
             </div>
           )}
-          {activeTab === 'you' ? (
+          {passwordRecovery ? (
+            <Suspense fallback={<section className="card account-screen">{t('account.loading')}</section>}>
+              <LoginScreen onClose={() => undefined} />
+            </Suspense>
+          ) : activeTab === 'you' ? (
             demoMode ? (
               <Suspense fallback={<section className="card account-screen">{t('account.loading')}</section>}>
                 <>
@@ -361,6 +380,17 @@ export default function App() {
           showPulse={showHelpPulse}
           onSignIn={() => setActiveTab('you')}
         />
+        {showAiConsent && (
+          <div className="help-ai-overlay ai-permission-overlay" role="presentation">
+            <section className="help-ai-sheet ai-permission-sheet" role="dialog" aria-modal="true" aria-labelledby="ai-permission-title">
+              <AiConsentPrompt onChoice={(choice) => {
+                setAskExerciseAiConsent(choice)
+                clearPendingAiConsentPrompt()
+                setShowAiConsent(false)
+              }} />
+            </section>
+          </div>
+        )}
       </div>
     </div>
   )

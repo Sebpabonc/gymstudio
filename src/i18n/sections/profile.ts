@@ -1,5 +1,10 @@
 export const profile = {
   en: {
+    'privacy.ai.title': 'Privacy & AI',
+    'privacy.ai.toggle': 'AI features (OpenAI)',
+    'privacy.ai.help': 'When on, your questions, plan and recent training data are sent to OpenAI to explain loads, personalise plans and answer you.',
+    'privacy.ai.offConfirm': 'AI is off. Nothing more will be sent. Data already sent can’t be recalled and is kept by OpenAI for up to 30 days.',
+    'profile.goal.notesAiPrivacy': 'Goal notes are not sent to OpenAI.',
     'profile.data.signIn': 'Sign in to save your measurements',
     'profile.goal.signIn': 'Sign in to save your goal',
     'profile.data.loading': 'Loading your profile data…',
@@ -58,6 +63,7 @@ export const profile = {
     'profile.plan.signIn': 'Sign in to create your personal plan',
     'profile.plan.generate': 'Generate my plan',
     'profile.plan.building': 'Building your plan…',
+    'profile.plan.aiOff': 'This plan uses the app’s rules. Turn on AI in Profile to personalise it.',
     'profile.plan.preview': 'Plan preview',
     'profile.plan.starts': 'Starts {date}',
     'profile.plan.aiBadge': 'Personalised by AI',
@@ -73,6 +79,11 @@ export const profile = {
     'profile.plan.published': 'Your personal plan is now active.',
   },
   es: {
+    'privacy.ai.title': 'Privacidad e IA',
+    'privacy.ai.toggle': 'Funciones de IA (OpenAI)',
+    'privacy.ai.help': 'Cuando está activa, tus preguntas, tu plan y tus datos recientes de entrenamiento se envían a OpenAI para explicar cargas, personalizar planes y responderte.',
+    'privacy.ai.offConfirm': 'La IA está desactivada. No se enviará nada más. Los datos ya enviados no se pueden recuperar y OpenAI los guarda hasta 30 días.',
+    'profile.goal.notesAiPrivacy': 'Las notas del objetivo no se envían a OpenAI.',
     'profile.data.signIn': 'Inicia sesión para guardar tus medidas',
     'profile.goal.signIn': 'Inicia sesión para guardar tu objetivo',
     'profile.data.loading': 'Cargando los datos de tu perfil…',
@@ -131,6 +142,7 @@ export const profile = {
     'profile.plan.signIn': 'Inicia sesión para crear tu plan personal',
     'profile.plan.generate': 'Generar mi plan',
     'profile.plan.building': 'Creando tu plan…',
+    'profile.plan.aiOff': 'Este plan usa las reglas de la app. Activa la IA en Perfil para personalizarlo.',
     'profile.plan.preview': 'Vista previa del plan',
     'profile.plan.starts': 'Empieza {date}',
     'profile.plan.aiBadge': 'Personalizado por IA',

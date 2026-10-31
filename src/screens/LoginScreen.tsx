@@ -27,10 +27,12 @@ function friendlyError(message: string, t: Translate) {
 
 export default function LoginScreen({ onClose }: { onClose: () => void }) {
   const { t } = useT()
-  const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle, syncSignInRequired } = useAuth()
+  const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle, syncSignInRequired,
+    passwordRecovery, updatePassword } = useAuth()
   const [mode, setMode] = useState<LoginMode>(() => syncSignInRequired || hasGuestWorkoutData() ? 'sign-in' : 'sign-up')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [busy, setBusy] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -75,8 +77,69 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
     if (result.error) setErrorMessage(friendlyError(result.error, t))
   }
 
+  const submitNewPassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setErrorMessage('')
+    if (password !== confirmPassword) {
+      setErrorMessage(t('login.passwordMismatch'))
+      return
+    }
+
+    setBusy(true)
+    let result: Awaited<ReturnType<typeof updatePassword>>
+    try {
+      result = await updatePassword(password)
+    } catch {
+      result = { error: 'password update failed' }
+    } finally {
+      setBusy(false)
+    }
+    if (result.error) {
+      const message = result.error.toLowerCase()
+      setErrorMessage(message.includes('expired') || message.includes('token') || message.includes('otp')
+        ? t('login.recoveryExpired')
+        : message.includes('weak password') || message.includes('password should be')
+          ? t('login.weakPassword')
+          : t('login.passwordUpdateFailed'))
+    }
+  }
+
   if (status === 'loading') {
     return <section className="card account-screen" aria-live="polite"><p>{t('account.loading')}</p></section>
+  }
+
+  if (passwordRecovery) {
+    return (
+      <section className="card account-screen">
+        <h2>{t('login.recoveryTitle')}</h2>
+        <form className="account-form" onSubmit={submitNewPassword}>
+          <label className="account-label" htmlFor="recovery-password">{t('login.newPassword')}</label>
+          <input
+            id="recovery-password"
+            type="password"
+            autoComplete="new-password"
+            minLength={8}
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <label className="account-label" htmlFor="recovery-confirm-password">{t('login.confirmPassword')}</label>
+          <input
+            id="recovery-confirm-password"
+            type="password"
+            autoComplete="new-password"
+            minLength={8}
+            required
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+          />
+          {errorMessage && <p className="account-error" role="alert">{errorMessage}</p>}
+          <button type="submit" className="primary-button" disabled={busy}>
+            {busy ? t('login.settingPassword') : t('login.setPassword')}
+          </button>
+        </form>
+      </section>
+    )
   }
 
   if (!available) {

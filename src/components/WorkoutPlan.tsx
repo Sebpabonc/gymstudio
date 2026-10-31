@@ -3,7 +3,7 @@ import SwipeToDelete from './SwipeToDelete'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import SetTrendChart from './SetTrendChart'
 import { shortSqueezeCues } from '../data/shortSqueezeCues'
-import { explainTrainerRecommendation } from '../ai/gateway'
+import { explainTrainerRecommendation, isAiConsentRequiredError } from '../ai/gateway'
 import { explanationKey, explanationPayload, validateExplanation } from '../trainer/explain'
 import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue, { CueSheet, ShortCue, type SqueezeCueDetails } from './SqueezeCue'
@@ -877,7 +877,9 @@ export default function WorkoutPlan({
           saveTrainerExplanation(key, text)
           setTrainerExplanations((current) => ({ ...current, [key]: text }))
         })
-        .catch(() => undefined)
+        .catch((error) => {
+          if (isAiConsentRequiredError(error)) requestedExplanations.current.delete(key)
+        })
     }
     return template
   }

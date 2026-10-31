@@ -4,8 +4,7 @@ Governancer, 2026-10-31; updated 2026-11-01. Rule: Apple 5.1.2(i): "You must cle
 third-party AI, and obtain explicit permission before doing so." Read 2026-10-31 at
 `https://developer.apple.com/app-store/review/guidelines/`. UXer checks placement; PT checks D and E; PO approves A and G (no lawyer, his decision); Tech Lead builds (G2, G3, G5, G9, G20). Wording rule: "AI trainer" / "entrenador con IA", never "personal trainer" (G9). US and Korean rules want sharing consent separate from collection: keep A and the F measurements row as two separate steps, neither inside the Terms step G. Stored with version and time.
 
-**Today:** only the chat asks. `trainer_explain` and `block_plan` send data without asking, even after "Not now" (see `data-inventory.md` section 5). The copy below
-is not true until G2 is done. Keys below are proposals; both dictionaries must have the same keys.
+**Today:** all client AI requests require enabled consent, and Profile → Privacy & AI can withdraw it. Consent is stored per device and account, so the Edge Function cannot independently verify it. Tech Lead decision 2026-10-31: the client gate is the enforcement for launch, and each device asks on its own, so the safe default is no AI; the section G requirement to store version and time on the server still applies to the Terms step. Not true yet: "goal notes are never sent" needs the updated `ai-gateway` function deployed (it still reads all goal fields until then). Keys below are proposals; both dictionaries must have the same keys.
 
 ## A. Main AI permission (blocking sheet)
 
@@ -19,8 +18,8 @@ Workout mode; until answered, show the rule-based sentence. Existing users see i
 | `ai.permission.sentTitle` | What is sent | Qué se envía |
 | `ai.permission.sent1` | Your questions | Tus preguntas |
 | `ai.permission.sent2` | Your plan and recent workouts: exercises, weights, reps, dates | Tu plan y entrenamientos recientes: ejercicios, pesos, repeticiones, fechas |
-| `ai.permission.sent3` | When you generate a plan: your goal, experience, activity level, equipment, your goal notes, and your last 14 days of body weight, steps and calories | Cuando generas un plan: tu objetivo, experiencia, nivel de actividad, equipo, tus notas del objetivo y tu peso corporal, pasos y calorías de los últimos 14 días |
-| `ai.permission.notSent` | Never sent: your name, email or workout notes. | Nunca se envían: tu nombre, correo ni notas de entrenamiento. |
+| `ai.permission.sent3` | When you generate a plan: your goal, experience, activity level, equipment, and your last 14 days of body weight, steps and calories | Cuando generas un plan: tu objetivo, experiencia, nivel de actividad, equipo y tu peso corporal, pasos y calorías de los últimos 14 días |
+| `ai.permission.notSent` | Never sent: your name, email, workout notes or goal notes. | Nunca se envían: tu nombre, correo ni notas de entrenamiento u objetivos. |
 | `ai.permission.provider` | OpenAI says it doesn't use this data to train its models and may keep it for up to 30 days for safety. AI is optional. Without it, the app still works with rule-based reasons and plans. You can turn it off any time in Profile → Privacy & AI. | OpenAI dice que no usa estos datos para entrenar sus modelos y que puede guardarlos hasta 30 días por seguridad. La IA es opcional. Sin ella, la app sigue funcionando con motivos y planes basados en reglas. Puedes desactivarla cuando quieras en Perfil → Privacidad e IA. |
 | `ai.permission.policy` | Privacy Policy | Política de privacidad |
 | `ai.permission.allow` | Allow AI | Permitir IA |
@@ -69,7 +68,7 @@ Store: version, choice, timestamp, on the server.
 
 | Where | EN | ES |
 |---|---|---|
-| Goal notes field (`training_goals.notes`) | If AI is on, these notes are sent to OpenAI when you generate a plan. Don't include medical details or names. | Si la IA está activa, estas notas se envían a OpenAI al generar un plan. No incluyas detalles médicos ni nombres. |
+| Goal notes field (`training_goals.notes`) | Goal notes are not sent to OpenAI. | Las notas del objetivo no se envían a OpenAI. |
 | Ask AI placeholder | Don't include names or medical details. | No incluyas nombres ni detalles médicos. |
 | Generate my plan, AI off | This plan uses the app's rules. Turn on AI in Profile to personalise it. | Este plan usa las reglas de la app. Activa la IA en Perfil para personalizarlo. |
 | Measurements, first use (health-data consent, sensitive data) | Weight, steps and calories are optional health data. We store them in your account to show your progress and build your plan. You don't have to give them. [Allow] [Not now] | El peso, los pasos y las calorías son datos de salud opcionales. Los guardamos en tu cuenta para mostrar tu progreso y crear tu plan. No estás obligado a darlos. [Permitir] [Ahora no] |
