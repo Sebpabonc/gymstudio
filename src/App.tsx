@@ -318,6 +318,7 @@ export default function App() {
               exercises={exercises}
               history={history}
               onHistoryChange={setHistory}
+              onExercisesChange={setExercises}
               onProgress={(id) => {
                 setProgressExerciseId(id)
                 setActiveTab('progress')

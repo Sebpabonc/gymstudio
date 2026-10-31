@@ -40,6 +40,15 @@ describe('exercise filters', () => {
     expect(filterExercises(exercises, 'row', 'Chest')).toEqual([])
   })
 
+  it('finds user exercises by their saved body region chip', () => {
+    const yours: Exercise = {
+      id: 'custom-uuid', name: 'My press', primaryMuscle: 'Shoulders',
+      bodyRegion: 'Shoulders', equipment: 'bodyweight', isUserCreated: true,
+    }
+    expect(getAvailableBodyRegions([...exercises, yours])).toContain('Shoulders')
+    expect(filterExercises([...exercises, yours], 'my press', 'Shoulders')).toEqual([yours])
+  })
+
   it('finds exercises by Spanish muscle and region words', () => {
     const core: Exercise = { id: 'crunch', name: 'Cable Crunch', primaryMuscle: 'Abs', bodyRegion: 'Core' }
     const calf: Exercise = { id: 'calf', name: 'Calf Raise', primaryMuscle: 'Calves', bodyRegion: 'Legs' }

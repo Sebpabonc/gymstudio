@@ -15,6 +15,7 @@ import { formatNumber, formatShortDate, formatWeekdayDate, localizeMuscle, useT 
 import type { TranslationKey } from '../i18n'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
 import { filterExercises } from '../utils/exerciseFilters'
+import { userExercisePrescription } from '../utils/customExerciseDefaults'
 import { openExternal } from '../native/openExternal'
 import { localIsoDate } from '../lib/dates'
 import { isDemoMode } from '../utils/demoMode'
@@ -2512,19 +2513,32 @@ export default function WorkoutPlan({
    const templateExercise = activeBlock?.days
      .flatMap((day) => day.exercises)
      .find((item) => item.exerciseId === exercise.id)
+   const savedPrescription = customPlanSheetDraft.customPlanExerciseId
+     ? {
+         sets: customPlanSheetDraft.sets,
+         reps: customPlanSheetDraft.repMin === customPlanSheetDraft.repMax
+           ? String(customPlanSheetDraft.repMin)
+           : `${customPlanSheetDraft.repMin}-${customPlanSheetDraft.repMax}`,
+         restSeconds: customPlanSheetDraft.restSeconds,
+       }
+     : undefined
+   const userPrescription = exercise.isUserCreated
+     ? userExercisePrescription(exercise, loadRestBetweenSets(), savedPrescription)
+     : null
    const prescription = templateExercise ? prescriptionForWeek(templateExercise, activeBlockWeek ?? 1) : null
    const repValues = (prescription?.reps.length ? prescription.reps : ['8', '10'])
      .flatMap((reps) => reps.match(/\d+/g)?.map(Number) ?? [])
    if (!repValues.length) repValues.push(8, 10)
+   const userRepValues = userPrescription?.reps.match(/\d+/g)?.map(Number)
    setCustomPlanSheetDraft({
      ...customPlanSheetDraft,
      exerciseId: exercise.id,
      name: exercise.name,
      muscle: exercise.primaryMuscle || 'General',
-     sets: prescription?.sets ?? 3,
-     repMin: Math.min(...repValues),
-     repMax: Math.max(...repValues),
-     restSeconds: prescription?.restSeconds ?? 90,
+     sets: userPrescription?.sets ?? prescription?.sets ?? 3,
+     repMin: Math.min(...(userRepValues ?? repValues)),
+     repMax: Math.max(...(userRepValues ?? repValues)),
+     restSeconds: userPrescription?.restSeconds ?? prescription?.restSeconds ?? 90,
      selected: true,
      custom: false,
    })
@@ -3363,7 +3377,7 @@ export default function WorkoutPlan({
                 </div>
                 <fieldset className="custom-plan-rest-options">
                   <legend>{text.customRest}</legend>
-                  {([60, 90, 120] as const).map((seconds) => (
+                  {([60, 90, 120, 150, 180] as const).map((seconds) => (
                     <button
                       type="button"
                       key={seconds}

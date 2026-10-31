@@ -59,18 +59,30 @@ describe('ExerciseSearchSuggestions', () => {
     expect(html).toContain('Bíceps · Mancuernas')
   })
 
+  it('tags a user-created exercise in the result list', () => {
+    const html = renderToString(
+      <ExerciseSearchSuggestions
+        exercises={[{ id: 'custom-id', name: 'My exercise', primaryMuscle: 'Back', isUserCreated: true }]}
+        onSelect={vi.fn()}
+      />
+    )
+    expect(html).toContain('class="user-exercise-tag">Yours</span>')
+  })
+
   it.each([
     ['en', 'No match for “hack squat”.'],
     ['es', 'Nada coincide con “hack squat”.'],
-  ] as const)('localizes the query-aware empty state in %s without a create action', (language, message) => {
+  ] as const)('localizes the query-aware empty state in %s', (language, message) => {
     vi.spyOn(i18n, 'useT').mockReturnValue({
       t: createTranslator(language), language, locale: language, setLanguage: vi.fn(),
     })
+    const onCreate = vi.fn()
     const html = renderToString(
-      <ExerciseSearchSuggestions exercises={[]} query="  hack squat  " onSelect={vi.fn()} />
+      <ExerciseSearchSuggestions exercises={[]} query="  hack squat  " onSelect={vi.fn()} onCreate={onCreate} />
     )
     expect(html).toContain(message)
-    expect(html).not.toContain('<button')
+    expect(html).toContain(language === 'en' ? 'Create “hack squat”' : 'Crear “hack squat”')
+    expect(html).toContain('class="exercise-create-link"')
   })
 
   it('retains the generic empty state when there is no query', () => {
