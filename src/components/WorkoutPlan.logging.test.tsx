@@ -301,6 +301,30 @@ describe('approved workout logging integration', () => {
     expect((await loadWorkoutHistory()).map(entry => entry.exerciseId)).toEqual(['row'])
   })
 
+  it('R2: corrections to a saved set buffer typing; live logging does not', async () => {
+    render()
+    await settle()
+    await start()
+    expect(inputs().props.commitOnBlur).toBe(false)
+    await enter(40, 8)
+    await click(doneLabel())
+    await click('Fix a logged set')
+    expect(inputs().props.commitOnBlur).toBe(true)
+  })
+
+  it('R1: Undo on Completed sits inline after Back, never floating over it', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40, 8)
+    await click(doneLabel())
+    await click('Finish')
+    await click('Finish now')
+    const screen = elements(node => node.props.className === 'workout-completed-content')[0]
+    expect(elements(node => node.props.className === 'log-toast in-summary', screen)).toHaveLength(1)
+    expect(elements(node => node.props.className === 'log-toast')).toHaveLength(0)
+  })
+
   it('m1: invalid logged corrections never replace saved values or poison the next set', async () => {
     render()
     await settle()

@@ -7301,6 +7301,8 @@ a.planned-exercise-main-name {
 
 .app-shell.workout-mode-active .brand-bar,
 .app-shell.workout-mode-active .brand-header,
+.app-shell:has(.workout-completed-screen) .bottom-tab-bar,
+.app-shell:has(.workout-completed-screen) .help-ai-button,
 .app-shell.workout-mode-active .bottom-tab-bar,
 .app-shell.workout-mode-active .help-ai-button {
   display: none;
@@ -9068,12 +9070,7 @@ summary:focus-visible,
 }
 
 .workout-completed-screen {
-  padding-bottom: calc(152px + env(safe-area-inset-bottom, 0px));
   color: var(--text);
-}
-
-.log-toast:has(.workout-completed-undo) {
-  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
 }
 
 .workout-completed-content {

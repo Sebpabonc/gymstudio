@@ -3998,8 +3998,8 @@ export default function WorkoutPlan({
               const oldSet = comparable?.sets.filter((set) => !set.tag || set.tag === 'main')[activeIndex]
               const newWeight = !editing && !!oldSet && activeWeight > oldSet.weight && activeBlockWeek !== 6
               const input = (index: number) => (
-                <fieldset className="effortless-inputs" disabled={savingSet}>
-                  <WorkoutSetInputs setIndex={index} weight={setWeights[index]}
+                <fieldset key={index} className="effortless-inputs" disabled={savingSet}>
+                  <WorkoutSetInputs setIndex={index} weight={setWeights[index]} commitOnBlur={editing}
                     weightInput={workoutWeightInputs[`${getPlanDraftKey(exercise.name)}:${index}`] ?? formatNumber(language, setWeights[index])}
                     reps={setReps[index]} equipment={libraryMatch?.equipment} language={language} t={t} repsLabel={text.repsShort}
                     onWeightInputChange={(raw) => setWorkoutWeightInputs((current) => ({ ...current, [`${getPlanDraftKey(exercise.name)}:${index}`]: raw }))}
@@ -4007,7 +4007,7 @@ export default function WorkoutPlan({
                   {exercise.technique === 'drop-set' && (
                     <div className="effortless-drop">
                       <strong>{t('workout.technique.drop')}</strong>
-                      <WorkoutSetInputs setIndex={index} weight={dropSetWeights[index]}
+                      <WorkoutSetInputs setIndex={index} weight={dropSetWeights[index]} commitOnBlur={editing}
                         weightInput={workoutDropWeightInputs[`${getPlanDraftKey(exercise.name)}:${index}`] ?? formatNumber(language, dropSetWeights[index])} reps={dropSetReps[index]}
                         equipment={libraryMatch?.equipment} language={language} t={t} repsLabel={text.repsShort}
                         weightLabel={t('workout.set.dropWeightLabel', { set: index + 1 })}
@@ -5348,16 +5348,20 @@ export default function WorkoutPlan({
             <button type="button" className="primary-button workout-completed-back" onClick={dismissSessionSummary}>
               {t('workout.completed.back')}
             </button>
+            {toast && !savedExitToast && (
+              <div className="log-toast in-summary" role="status" aria-live="polite">
+                <button type="button" className="workout-completed-undo" onClick={undoLastLog}>{t('workout.action.undo')}</button>
+              </div>
+            )}
           </section>
         </div>
       )}
       {savedExitToast && (
         <div className="log-toast" role="status" aria-live="polite">{t('workout.run.savedExit')}</div>
       )}
-      {toast && !savedExitToast && (
+      {toast && !savedExitToast && !sessionSummary && (
         <div className="log-toast" role="status" aria-live="polite">
-          <button type="button" className={sessionSummary ? 'workout-completed-undo' : undefined}
-            onClick={undoLastLog}>{t('workout.action.undo')}</button>
+          <button type="button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
         </div>
       )}
     </div>
