@@ -14,7 +14,7 @@ const TRAINING_BLOCKS_KEY = 'gym-studio.training-blocks'
 const ACTIVE_USER_PLAN_KEY = 'gym-studio.active-user-plan'
 const ACTIVE_BLOCK_KEY = 'gym-studio.active-block-id'
 const SYNC_METADATA_KEY = 'gym-studio.sync-metadata'
-const ASK_EXERCISE_AI_CONSENT_KEY = 'gym-studio.ai-consent.ask-exercise'
+const AI_CONSENT_KEY = 'gym-studio.ai-consent.v2'
 const WELCOME_DISMISSED_KEY = 'gym-studio.welcome-dismissed'
 const LAYOUT_MODE_KEY = 'gym-studio.layout-mode'
 const LANGUAGE_KEY = 'gym-studio.language'
@@ -362,10 +362,14 @@ export function saveWorkoutTrendOpen(open: boolean) {
 }
 
 export type AskExerciseAiConsent = 'enabled' | 'declined'
+const aiConsentOverrides = new Map<string, AskExerciseAiConsent>()
 
 export function getAskExerciseAiConsent(): AskExerciseAiConsent | null {
+  const key = storageKey(AI_CONSENT_KEY)
+  const override = aiConsentOverrides.get(key)
+  if (override) return override
   try {
-    const choice = localStorage.getItem(storageKey(ASK_EXERCISE_AI_CONSENT_KEY))
+    const choice = localStorage.getItem(key)
     return choice === 'enabled' || choice === 'declined' ? choice : null
   } catch {
     return null
@@ -373,11 +377,14 @@ export function getAskExerciseAiConsent(): AskExerciseAiConsent | null {
 }
 
 export function setAskExerciseAiConsent(choice: AskExerciseAiConsent) {
+  const key = storageKey(AI_CONSENT_KEY)
+  aiConsentOverrides.set(key, choice)
   try {
-    localStorage.setItem(storageKey(ASK_EXERCISE_AI_CONSENT_KEY), choice)
+    localStorage.setItem(key, choice)
   } catch {
     // Consent cannot be remembered when browser storage is unavailable.
   }
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('gym-studio:ai-consent-changed'))
 }
 
 /** Cached AI Trainer sentences, keyed by recommendation (kept small: last 100). */

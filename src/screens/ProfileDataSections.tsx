@@ -102,7 +102,7 @@ function buildWeightTrend(metrics: BodyMetric[], language: Language) {
   }
 }
 
-export default function ProfileDataSections() {
+export default function ProfileDataSections({ aiEnabled = false }: { aiEnabled?: boolean }) {
   const { t, language } = useT()
   const { user } = useAuth()
   const disabled = !user
@@ -335,6 +335,7 @@ export default function ProfileDataSections() {
               <span>{t('profile.goal.notes')}</span>
               <textarea maxLength={500} value={goal.notes} onChange={(event) => setGoal({ ...goal, notes: event.target.value })} />
             </label>
+            <p className="profile-data-hint">{t('profile.goal.notesAiPrivacy')}</p>
             <button type="submit" className="primary-button profile-data-save" disabled={disabled || busy}>
               {busy ? t('profile.data.saving') : t('profile.goal.save')}
             </button>
@@ -342,6 +343,7 @@ export default function ProfileDataSections() {
         )}
       </CollapsibleCard>
       <MyPlanSection
+        aiEnabled={aiEnabled}
         signedOut={disabled}
         goal={savedGoal}
         activePlan={activePlan}

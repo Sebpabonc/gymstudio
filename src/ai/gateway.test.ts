@@ -1,10 +1,18 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }))
+const { invoke, getConsent } = vi.hoisted(() => ({ invoke: vi.fn(), getConsent: vi.fn() }))
 
 vi.mock('../lib/supabaseClient', () => ({
   getSupabaseClient: vi.fn(async () => ({ functions: { invoke } })),
 }))
+
+vi.mock('../utils/storage', () => ({
+  getAskExerciseAiConsent: getConsent,
+}))
+
+beforeEach(() => {
+  getConsent.mockReturnValue('enabled')
+})
 
 afterEach(() => {
   vi.resetModules()
@@ -130,6 +138,89 @@ describe('AI gateway wrappers', () => {
     expect(invoke).toHaveBeenCalledWith('ai-gateway', {
       body: { feature: 'general_chat', question: 'How do I progress?', language: 'es' },
     })
+  })
+
+  it('sends only the fields needed to personalise a block plan', async () => {
+    invoke.mockResolvedValue({
+      data: { answer: '{"summary":"Ready.","exercises":[]}', remainingToday: 38 },
+      error: null,
+    })
+    const { requestBlockPlan } = await import('./gateway')
+    const plan = {
+      id: 'private-plan-id',
+      number: 1,
+      name: 'Private plan name',
+      method: 'private method',
+      startDate: '2026-10-26',
+      weeks: 6,
+      origin: 'pt' as const,
+      summary: 'private summary',
+      insights: [{ title: 'private note', body: 'private body' }],
+      days: [{
+        key: 'upper-a',
+        position: 1,
+        name: 'Upper A',
+        focus: 'private focus',
+        exercises: [{
+          code: 'A1',
+          position: 1,
+          exerciseId: 'barbell-bench-press',
+          sets: 3,
+          reps: ['8', '8', '8'],
+          restSeconds: 120,
+          technique: 'straight' as const,
+          notes: 'private exercise note',
+        }],
+      }],
+    }
+
+    await requestBlockPlan(plan)
+
+    expect(invoke).toHaveBeenCalledWith('ai-gateway', {
+      body: {
+        feature: 'block_plan',
+        plan: {
+          days: [{
+            dayKey: 'upper-a',
+            exercises: [{ code: 'A1', exerciseId: 'barbell-bench-press', sets: 3, restSeconds: 120 }],
+          }],
+        },
+        language: 'en',
+      },
+    })
+  })
+
+  it.each(['unknown', 'declined'] as const)('blocks every requested path when consent is %s', async (choice) => {
+    getConsent.mockReturnValue(choice === 'unknown' ? null : 'declined')
+    const { askGeneral, explainTrainerRecommendation, requestBlockPlan } = await import('./gateway')
+    const plan = {
+      id: 'block',
+      number: 1,
+      name: 'Block',
+      method: '',
+      startDate: '2026-10-26',
+      weeks: 6,
+      origin: 'pt' as const,
+      summary: '',
+      insights: [],
+      days: [],
+    }
+
+    await Promise.all([
+      expect(askGeneral('How do I progress?')).rejects.toThrow(),
+      expect(requestBlockPlan(plan)).rejects.toThrow(),
+      expect(explainTrainerRecommendation('barbell-bench-press', {})).rejects.toThrow(),
+    ])
+    expect(invoke).not.toHaveBeenCalled()
+  })
+
+  it('rechecks consent after client initialization so withdrawal prevents a pending request', async () => {
+    getConsent.mockReturnValueOnce('enabled').mockReturnValueOnce('declined')
+    const { askGeneral } = await import('./gateway')
+
+    await expect(askGeneral('How do I progress?')).rejects.toThrow()
+
+    expect(invoke).not.toHaveBeenCalled()
   })
 
   it.each([

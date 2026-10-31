@@ -1,6 +1,6 @@
 import React, { FormEvent, useEffect, useRef, useState } from 'react'
 import packageJson from '../../package.json'
-import { askGeneral, mapAiGatewayError } from '../ai/gateway'
+import { askGeneral, mapAiGatewayError, requestAiConsent } from '../ai/gateway'
 import { useAuth } from '../auth/AuthProvider'
 import { AppTab, getNavigationTitle } from '../navigation'
 import { submitFeedback, FeedbackType } from '../utils/feedback'
@@ -10,7 +10,6 @@ import {
   setAskExerciseAiConsent,
 } from '../utils/storage'
 import { TranslationKey, useT } from '../i18n'
-import AiConsentPrompt from './AiConsentPrompt'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 
 const suggestedQuestionKeys = ['help.ai.suggestion1', 'help.ai.suggestion2', 'help.ai.suggestion3'] as const
@@ -58,18 +57,30 @@ export default function HelpAndAi({ activeTab, hidden, showPulse, onSignIn }: He
   }, [open])
 
   useEffect(() => {
+    const syncConsent = () => setConsent(getAskExerciseAiConsent())
+    window.addEventListener('gym-studio:ai-consent-changed', syncConsent)
+    window.addEventListener('storage', syncConsent)
+    return () => {
+      window.removeEventListener('gym-studio:ai-consent-changed', syncConsent)
+      window.removeEventListener('storage', syncConsent)
+    }
+  }, [])
+
+  useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight
   }, [messages, error])
 
   const openSheet = () => {
-    setConsent(getAskExerciseAiConsent())
+    const choice = getAskExerciseAiConsent()
+    setConsent(choice)
+    if (choice === null && status === 'signed-in') requestAiConsent()
     setError('')
     setOpen(true)
   }
 
-  const chooseConsent = (choice: AskExerciseAiConsent) => {
-    setAskExerciseAiConsent(choice)
-    setConsent(choice)
+  const enableAi = () => {
+    setAskExerciseAiConsent('enabled')
+    setConsent('enabled')
   }
 
   const ask = async (value: string) => {
@@ -205,11 +216,14 @@ export default function HelpAndAi({ activeTab, hidden, showPulse, onSignIn }: He
               ) : tab === 'ai' ? (
                 consent === null ? (
                   <div className="help-ai-consent">
-                    <AiConsentPrompt onChoice={chooseConsent} bodyKey="help.ai.consent" />
+                    <p>{t('ai.permission.required')}</p>
                   </div>
                 ) : consent === 'declined' ? (
                   <div className="help-ai-body">
                     <p>{t('ai.declinedMessage')}</p>
+                    <button type="button" className="secondary-button" onClick={enableAi}>
+                      {t('ai.permission.enable')}
+                    </button>
                   </div>
                 ) : (
                   <>

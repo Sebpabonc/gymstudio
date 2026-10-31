@@ -48,6 +48,19 @@ describe('profile sync feedback', () => {
     expect(spanish).toContain('120 segundos')
   })
 
+  it('shows the AI privacy control and its disclosure in both languages', () => {
+    const english = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
+    expect(english).toContain('Privacy &amp; AI')
+    expect(english).toContain('AI features (OpenAI)')
+    expect(english).toContain('When on, your questions, plan and recent training data are sent to OpenAI')
+
+    language = 'es'
+    const spanish = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
+    expect(spanish).toContain('Privacidad e IA')
+    expect(spanish).toContain('Funciones de IA (OpenAI)')
+    expect(spanish).toContain('Cuando está activa, tus preguntas, tu plan y tus datos recientes')
+  })
+
   it('shows the pending count, quarantine reason and retry controls even after a successful pull', () => {
     const html = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
     expect(html).toContain('2 logs not uploaded')

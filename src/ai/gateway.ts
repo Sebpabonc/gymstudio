@@ -1,5 +1,6 @@
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { Language, translate } from '../i18n/translate'
+import { getAskExerciseAiConsent } from '../utils/storage'
 
 export type AiGatewayResponse = {
   answer: string
@@ -8,15 +9,51 @@ export type AiGatewayResponse = {
 
 export type AskExerciseResponse = AiGatewayResponse
 
+export const AI_CONSENT_REQUIRED_EVENT = 'gym-studio:ai-consent-required'
+let aiConsentPromptPending = false
+
 const errorKeys = {
   daily_limit: 'ai.error.dailyLimit',
   monthly_budget_reached: 'ai.error.monthlyBudget',
   sign_in_required: 'ai.error.signIn',
   no_session: 'ai.error.noSession',
   offline: 'ai.error.offline',
+  consent_required: 'ai.permission.required',
+  consent_declined: 'ai.permission.declined',
 } as const
 
-class AiGatewayError extends Error {}
+class AiGatewayError extends Error {
+  constructor(message: string, readonly code = '') {
+    super(message)
+  }
+}
+
+export function isAiConsentRequiredError(error: unknown): boolean {
+  return error instanceof AiGatewayError && error.code === 'consent_required'
+}
+
+export function hasPendingAiConsentPrompt(): boolean {
+  return aiConsentPromptPending
+}
+
+export function clearPendingAiConsentPrompt() {
+  aiConsentPromptPending = false
+}
+
+export function requestAiConsent() {
+  if (typeof window !== 'undefined') {
+    aiConsentPromptPending = true
+    window.dispatchEvent(new Event(AI_CONSENT_REQUIRED_EVENT))
+  }
+}
+
+function requireAiConsent(language: Language) {
+  const consent = getAskExerciseAiConsent()
+  if (consent === 'enabled') return
+  if (consent === null) requestAiConsent()
+  const code = consent === 'declined' ? 'consent_declined' : 'consent_required'
+  throw new AiGatewayError(mapAiGatewayError(code, language), code)
+}
 
 export function mapAiGatewayError(code: string, language: Language = 'en'): string {
   const key = errorKeys[code as keyof typeof errorKeys] ?? 'ai.error.unavailable'
@@ -44,9 +81,11 @@ async function invokeAiGateway(
 ): Promise<AiGatewayResponse> {
   const language: Language = body.language === 'es' ? 'es' : 'en'
   try {
+    requireAiConsent(language)
     const client = await getSupabaseClient()
     if (!client) throw new AiGatewayError(mapAiGatewayError('client_unavailable', language))
 
+    requireAiConsent(language)
     const { data, error } = await client.functions.invoke<AiGatewayResponse | { error: string }>(
       'ai-gateway',
       { body }
@@ -115,7 +154,21 @@ export function requestNextSessionPlan(
 
 /** AI personalisation of a rule-based 6-week plan (JSON answer, applied with applyAiAdjustments). */
 export function requestBlockPlan(plan: import('../types').TrainingBlock, language: Language = 'en'): Promise<AiGatewayResponse> {
-  return invokeAiGateway({ feature: 'block_plan', plan, language })
+  return invokeAiGateway({
+    feature: 'block_plan',
+    plan: {
+      days: plan.days.map((day) => ({
+        dayKey: day.key,
+        exercises: day.exercises.map(({ code, exerciseId, sets, restSeconds }) => ({
+          code,
+          exerciseId,
+          sets,
+          restSeconds,
+        })),
+      })),
+    },
+    language,
+  })
 }
 
 /** Phase 4: PT-style sentence for a recommendation the engine already made (numbers are validated client-side). */

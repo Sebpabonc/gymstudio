@@ -92,10 +92,10 @@ server-only. OpenAI sees the Supabase server's IP address, not the user's. The r
 
 | Feature | Called from today | Trigger | Data sent | Consent check today |
 |---|---|---|---|---|
-| `general_chat` | `HelpAndAi.tsx` | User asks | Question (300 characters), date, current plan, last 30 log rows (exercise ID, date, sets) | **Yes**, device-level |
-| `trainer_explain` | `WorkoutPlan.tsx:866-873` | **Automatic** when a recommendation renders for a signed-in user | Exercise name, action, reason, confidence, recommended and original loads, last session date, weight, reps, target, days ago, estimated 1RM, sessions used | **None. Runs even after "Not now"** (G2) |
-| `block_plan` | `src/plans/buildMyPlan.ts:38` | User taps "Generate my plan" | **Whole goal row including `user_id` and free-text notes**, last 14 days of weight, steps and calories, the plan, alternatives from the catalogue | **None** (G2) |
-| `ask_exercise`, `explain_suggestion`, `session_summary`, `exercise_feedback`, `next_session_plan` | **No caller in `src/`** | Deployed and reachable with a valid session | Exercise data, last 5 to 60 log rows, the supplied plan or question | No (G18) |
+| `general_chat` | `HelpAndAi.tsx` | User asks | Question (300 characters), date, current plan, last 30 log rows (exercise ID, date, sets) | **Client-side, per device/account**; no server-side consent record |
+| `trainer_explain` | `WorkoutPlan.tsx:866-873` | **Automatic** when a recommendation renders for a signed-in user | Exercise name, action, reason, confidence, recommended and original loads, last session date, weight, reps, target, days ago, estimated 1RM, sessions used | **Client-side, per device/account**; template shown unless enabled |
+| `block_plan` | `src/plans/buildMyPlan.ts:38` | User taps "Generate my plan" | Goal, days per week, experience, activity level, session length and equipment; last 14 days of body metrics; compact day keys and exercise codes, IDs, sets and rest; alternatives from the catalogue. No `user_id` or free-text notes. | **Client-side, per device/account**; rules plan used unless enabled |
+| `ask_exercise`, `explain_suggestion`, `session_summary`, `exercise_feedback`, `next_session_plan` | **No caller in `src/`** | Deployed and reachable with a valid session | Exercise data, last 5 to 60 log rows, the supplied plan or question | Client-side gateway gate; no server-side consent record (G18) |
 
 **Provider terms, read 2026-10-31** (`https://developers.openai.com/api/docs/guides/your-data`): API data is not used for
 training unless the customer opts in; abuse-monitoring logs are kept up to 30 days; Chat Completions keeps no application

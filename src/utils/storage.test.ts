@@ -807,6 +807,7 @@ describe('per-account storage namespaces', () => {
   afterEach(() => setStorageNamespace(null))
 
   it('stores Ask AI consent separately for each account', () => {
+    localStorage.setItem('gym-studio.ai-consent.ask-exercise', 'enabled')
     expect(getAskExerciseAiConsent()).toBeNull()
 
     setStorageNamespace('user-a')
@@ -820,6 +821,15 @@ describe('per-account storage namespaces', () => {
 
     setStorageNamespace('user-a')
     expect(getAskExerciseAiConsent()).toBe('enabled')
+  })
+
+  it('keeps withdrawal effective in memory if the browser cannot persist it', () => {
+    setAskExerciseAiConsent('enabled')
+    vi.spyOn(localStorage, 'setItem').mockImplementation(() => { throw new Error('storage unavailable') })
+
+    setAskExerciseAiConsent('declined')
+
+    expect(getAskExerciseAiConsent()).toBe('declined')
   })
 
   it('keeps each account and the guest history separate', async () => {

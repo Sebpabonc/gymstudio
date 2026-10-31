@@ -9,6 +9,8 @@ const auth = {
   signInWithPassword: vi.fn(),
   signUp: vi.fn(),
   resetPassword: vi.fn(),
+  passwordRecovery: false,
+  updatePassword: vi.fn(),
   signInWithGoogle: vi.fn(),
 }
 vi.mock('../auth/AuthProvider', () => ({
@@ -21,6 +23,7 @@ describe('LoginScreen', () => {
   beforeEach(() => {
     auth.available = false
     auth.syncSignInRequired = false
+    auth.passwordRecovery = false
   })
 
   it('keeps a demo path visible in the signed-out offline card', () => {
@@ -39,5 +42,17 @@ describe('LoginScreen', () => {
     expect(html).toContain('role="status" aria-live="polite">Sign in again to sync')
     expect(html).toContain('Welcome back')
     expect(html.toLowerCase()).toContain('autocomplete="current-password"')
+  })
+
+  it('shows the new-password form for a recovery session', () => {
+    auth.available = true
+    auth.status = 'signed-in'
+    auth.passwordRecovery = true
+    const html = renderToStaticMarkup(<LoginScreen onClose={() => undefined} />)
+
+    expect(html).toContain('Set a new password')
+    expect(html).toContain('New password')
+    expect(html).toContain('Confirm new password')
+    expect(html).toContain('id="recovery-password"')
   })
 })
