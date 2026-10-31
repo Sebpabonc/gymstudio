@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0f10">
+<title>Revisión de Fitbod</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0f0f10;--soft:#171719;--panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.09);--line:rgba(255,255,255,.11);
+  --text:#f3f3f1;--muted:#c8c7c4;--dim:#9b9a97;
+  --brand:#8d5e63;--brand-soft:rgba(141,94,99,.2);--rose:#c99ca1;
+  --good:#9fc7a6;--good-soft:rgba(159,199,166,.13);--warn:#d9b77a;--warn-soft:rgba(217,183,122,.13);--bad:#d99292;--bad-soft:rgba(217,146,146,.13);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.5 var(--font);padding-bottom:env(safe-area-inset-bottom)}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+h1,h2,h3{line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,8vw,2.75rem);font-weight:800;letter-spacing:-.025em}
+h2{font-size:1.5rem;font-weight:700;letter-spacing:-.015em;margin-bottom:8px}
+h3{font-size:1.06rem;font-weight:650;margin:22px 0 8px}
+p{margin:0 0 12px;text-wrap:pretty}
+a{color:var(--rose)}
+a:focus-visible{outline:2px solid var(--rose);outline-offset:2px;border-radius:4px}
+ul,ol{margin:0 0 12px;padding-left:20px}
+li{margin-bottom:6px}
+small,.sm{font-size:.84rem;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+header{padding:36px 0 18px}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;color:var(--rose);font-weight:650;margin-bottom:10px}
+.lede{font-size:1.1rem;color:var(--muted);margin-top:14px}
+.lede strong{color:var(--text)}
+.meta{font-size:.82rem;color:var(--dim);margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:22px 0 4px}
+@media(min-width:620px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.stat{background:var(--soft);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0}
+.stat b{display:block;font-size:1.3rem;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.stat span{font-size:.78rem;color:var(--muted);display:block;line-height:1.3}
+nav{position:sticky;top:0;z-index:5;background:rgba(15,15,16,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:760px;margin:0 auto;scrollbar-width:none;overscroll-behavior-x:contain}
+nav div::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;display:flex;align-items:center;min-height:40px;padding:0 13px;border-radius:999px;background:var(--panel);color:var(--muted);font-size:.86rem;font-weight:550;text-decoration:none;touch-action:manipulation}
+nav a:hover{background:var(--panel2);color:var(--text)}
+section{padding:32px 0 8px;scroll-margin-top:58px}
+section+section{border-top:1px solid var(--line);margin-top:24px}
+.sub{color:var(--muted);margin-bottom:16px}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card>:last-child{margin-bottom:0}
+.lessons{counter-reset:l;display:grid;gap:10px}
+.lesson{counter-increment:l;display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;background:var(--soft);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.lesson:before{content:counter(l);width:32px;height:32px;border-radius:50%;background:var(--brand-soft);color:var(--rose);display:grid;place-items:center;font-weight:750}
+.lesson b{display:block;margin-bottom:3px}
+.lesson span{color:var(--muted);font-size:.95rem}
+.tag{display:inline-block;font-size:.72rem;font-weight:650;padding:2px 7px;border-radius:6px;white-space:nowrap;background:var(--panel2);color:var(--muted);vertical-align:.1em}
+.v{background:var(--good-soft);color:var(--good)}.s{background:rgba(160,180,215,.14);color:#b5c4dc}.c{background:var(--warn-soft);color:var(--warn)}.d{background:var(--bad-soft);color:var(--bad)}
+.legend{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:12px}
+.legend div{font-size:.86rem;color:var(--muted)}
+.cmp{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px;background:var(--soft)}
+.cmp .h{display:grid;grid-template-columns:1fr 1fr;background:var(--panel);font-size:.78rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.cmp .h div{padding:9px 12px}
+.cmp .h div:last-child{color:var(--rose)}
+.row{border-top:1px solid var(--line);padding:10px 0 11px}
+.row>b{display:block;padding:0 12px 5px;font-size:.84rem;color:var(--dim);font-weight:600}
+.row .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.row .two div{padding:0 12px;font-size:.92rem;line-height:1.38;min-width:0}
+.row .two div+div{border-left:1px solid var(--line)}
+.big{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;display:block;font-variant-numeric:tabular-nums;line-height:1.15}
+.note{background:var(--warn-soft);border:1px solid rgba(217,183,122,.28);border-radius:12px;padding:12px 14px;font-size:.93rem;margin:12px 0}
+.note.b{background:var(--brand-soft);border-color:rgba(201,156,161,.3)}
+.note.g{background:var(--good-soft);border-color:rgba(159,199,166,.3)}
+.note b:first-child{display:block;margin-bottom:2px}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:12px}
+.flow>div{min-width:0}
+.flow h4{margin:0 0 8px;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.flow>div:last-child h4{color:var(--rose)}
+.step{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:9px 10px;font-size:.87rem;line-height:1.3;margin-bottom:6px}
+.step.win{border-color:rgba(159,199,166,.45);background:var(--good-soft)}
+.step.lose{border-color:rgba(217,146,146,.45);background:var(--bad-soft)}
+.shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+@media(min-width:620px){.shots{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.shot{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#1b1b1e,#101012);padding:10px;min-height:128px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.shot i{font-style:normal;font-size:.72rem;color:var(--dim);font-weight:700}
+.shot b{font-size:.9rem;line-height:1.2}
+.shot span{font-size:.78rem;color:var(--muted);line-height:1.25;margin-top:auto}
+.shot.ours{background:linear-gradient(180deg,rgba(141,94,99,.22),#141214);border-color:rgba(201,156,161,.3)}
+.lists{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:620px){.lists{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lists .card h3{margin-top:0}
+ul.x{list-style:none;padding:0;margin:0}
+ul.x li{padding-left:16px;position:relative;font-size:.94rem;margin-bottom:7px}
+ul.x li:before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--brand)}
+.good li:before{background:var(--good)}.bad li:before{background:var(--bad)}
+.rec{display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;padding:13px 0;border-top:1px solid var(--line)}
+.rec:first-child{border-top:0;padding-top:0}
+.rec .n{width:32px;height:32px;border-radius:9px;background:var(--panel2);display:grid;place-items:center;font-weight:750;font-variant-numeric:tabular-nums}
+.rec.top .n{background:var(--brand);color:#fff}
+.rec b{display:block;line-height:1.3}
+.rec p{font-size:.92rem;color:var(--muted);margin:3px 0 7px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.imp{background:var(--brand-soft);color:var(--rose)}
+.eff{background:var(--panel2);color:var(--text)}
+.when{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.dec{counter-reset:d;list-style:none;padding:0;margin:0}
+.dec li{counter-increment:d;display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+.dec li:before{content:counter(d) ".";font-weight:750;color:var(--rose)}
+.dec em{font-style:normal;display:block;font-size:.87rem;color:var(--muted);margin-top:3px}
+.check{list-style:none;padding:0;margin:0}
+.check li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:.93rem;margin:0}
+.check li:first-child{border-top:0}
+.check span{color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+details{background:var(--soft);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+summary{padding:13px 14px;cursor:pointer;font-weight:600;min-height:44px;touch-action:manipulation}
+summary:focus-visible{outline:2px solid var(--rose);outline-offset:-2px;border-radius:12px}
+details .in{padding:0 14px 12px;font-size:.88rem;color:var(--muted);overflow-wrap:anywhere}
+details a{margin-right:2px}
+.tbl{overflow-x:auto;overscroll-behavior-x:contain;margin-bottom:12px;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:520px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;background:var(--panel)}
+footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px solid var(--line);margin-top:28px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media(max-width:430px){.row .two div{padding:0 10px;font-size:.88rem}.big{font-size:1.4rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">UXer · Competencia</div>
+  <h1>Fitbod, de pies a cabeza</h1>
+  <p class="lede"><strong>Fitbod gana antes y alrededor del entreno:</strong> primer uso, videos, equipo y recordatorios. <strong>GymStudio puede ganar dentro del entreno y en confianza</strong>, si primero cerramos lo que bloquea el lanzamiento.</p>
+  <div class="stats">
+    <div class="stat"><b>4,8</b><span>289 mil calificaciones en EE. UU.</span></div>
+    <div class="stat"><b>US$15,99</b><span>al mes · US$95,99 al año</span></div>
+    <div class="stat"><b>7 días</b><span>de prueba; pasa a pago solo</span></div>
+    <div class="stat"><b>#36</b><span>Salud y fitness, gratis, EE. UU.</span></div>
+  </div>
+  <p class="meta">Propuesta, sin aprobar. Fuentes leídas el 31-10-2026. No instalé Fitbod ni creé cuentas.</p>
+</header>
+</div>
+
+<nav aria-label="Secciones"><div>
+  <a href="#lecciones">Lecciones</a><a href="#recs">Qué haría</a><a href="#decidir">Decidir</a><a href="#quien">Quién es</a><a href="#inicio">Primer uso</a><a href="#genera">Cómo genera</a><a href="#registro">Registro</a><a href="#progreso">Progreso</a><a href="#biblio">Ejercicios</a><a href="#diseno">Diseño</a><a href="#confianza">Confianza</a><a href="#tienda">App Store</a><a href="#vs">Versus</a><a href="#noverif">Sin verificar</a><a href="#fuentes">Fuentes</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="lecciones" style="border:0;margin:0">
+  <h2>Las 5 lecciones</h2>
+  <div class="lessons">
+    <div class="lesson"><div><b>Ver antes de comprometerse.</b><span>Fitbod te muestra un entreno armado antes de pedirte pagar. Nosotros, después de “Entendido”, mostramos una pantalla casi vacía que pide iniciar sesión, y luego un plan que empieza el próximo lunes.</span></div></div>
+    <div class="lesson"><div><b>El plan estable es una ventaja de verdad.</b><span>Fitbod añadió “Focus Exercises” (ciclos de 4 semanas) y un modo “más constante” porque la gente quería repetir y medir. Nuestros bloques de 6 semanas ya resuelven eso; nos faltan salidas fáciles: poco tiempo, máquina ocupada.</span></div></div>
+    <div class="lesson"><div><b>Con el botón grande íbamos bien.</b><span>Su pantalla también termina en un gran botón de registrar. Nos da ventaja: no pedir esfuerzo, repetir el peso en el botón y avisar bien al terminar el descanso. Lo suyo falla justo ahí en el Apple Watch.</span></div></div>
+    <div class="lesson"><div><b>Los videos son lo más querido.</b><span>Es el elogio más frecuente en las reseñas. Nosotros abrimos Google Imágenes, lo que además puede subir la edad recomendada de la app. Merece reabrir la propuesta de imágenes.</span></div></div>
+    <div class="lesson"><div><b>“AI Personal Trainer” vende, pero no nos sirve.</b><span>Fitbod lo pone en la tienda y sus Términos dicen que no actúa como entrenador personal. Tú ya decidiste “entrenador con IA”. Nuestra frase fuerte es otra: el peso de hoy, y por qué.</span></div></div>
+  </div>
+</section>
+
+<section id="recs">
+  <h2>Qué haría, en orden</h2>
+  <p class="sub">Impacto, esfuerzo (S, M, L) y quién debe intervenir. <b>PT</b> es una regla de entreno o un mensaje sobre fitness. <b>IA</b> toca las reglas de <code>docs/ux/README.md</code>.</p>
+  <div class="card">
+    <div class="rec top"><div class="n">1</div><div><b>Probar antes de crear cuenta</b><p>Cinco preguntas, tu plan y el entreno de hoy a la vista. Cuenta solo para guardar. Sin IA ni datos fuera del teléfono en este paso.</p><div class="chips"><span class="tag imp">Impacto muy alto</span><span class="tag eff">Esfuerzo L</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag">Gobernanza</span><span class="tag when">Lanzamiento</span></div></div></div>
+    <div class="rec top"><div class="n">2</div><div><b>Cerrar los bloqueos de confianza, mejor que ellos</b><p>Borrar cuenta, interruptor de IA y enlaces en Perfil → Privacidad e IA, a dos toques. Permiso de IA una vez, con un “no” real. Ya está en el issue #384.</p><div class="chips"><span class="tag imp">Impacto muy alto, obligatorio</span><span class="tag eff">Esfuerzo M</span><span class="tag">IA</span><span class="tag">Tech Lead</span><span class="tag">Gobernanza</span><span class="tag when">Lanzamiento</span></div></div></div>
+    <div class="rec top"><div class="n">3</div><div><b>Reescribir la ficha de la tienda</b><p>Sin “personal trainer”, 8 imágenes, una idea por imagen, abrir con el porqué y ficha real en español.</p><div class="chips"><span class="tag imp">Impacto alto</span><span class="tag eff">Esfuerzo S</span><span class="tag">PT</span><span class="tag">Gobernanza</span><span class="tag when">Lanzamiento</span></div></div></div>
+    <div class="rec top"><div class="n">4</div><div><b>Imágenes de ejercicios dentro de la app</b><p>Quitar Google Imágenes para el lanzamiento; imágenes propias con licencia justo después. Nunca sus videos.</p><div class="chips"><span class="tag imp">Impacto alto</span><span class="tag eff">Esfuerzo M + costo</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag">Tu presupuesto</span><span class="tag when">Lanzamiento / después</span></div></div></div>
+    <div class="rec top"><div class="n">5</div><div><b>Mostrar el porqué en la tarjeta de Hecho</b><p>Una línea sobre el botón: hoy está escondido tras tocar la señal de técnica. Es nuestra diferencia y hay que verla sin buscarla.</p><div class="chips"><span class="tag imp">Impacto alto</span><span class="tag eff">Esfuerzo S</span><span class="tag">PT</span><span class="tag">IA</span><span class="tag when">Lanzamiento o v1.1</span></div></div></div>
+    <div class="rec"><div class="n">6</div><div><b>Dos salidas para hoy: “tengo poco tiempo” y “máquina ocupada”</b><p>Qué series se quitan primero es una regla del PT.</p><div class="chips"><span class="tag imp">Alto</span><span class="tag eff">M</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag when">v1.1</span></div></div></div>
+    <div class="rec"><div class="n">7</div><div><b>Recordatorio del día de entreno y resumen semanal</b><p>Opcional. “4 de 6 semanas”, sin rachas que castigan el descanso.</p><div class="chips"><span class="tag imp">Alto</span><span class="tag eff">M</span><span class="tag">Tech Lead</span><span class="tag when">v1.1</span></div></div></div>
+    <div class="rec"><div class="n">8</div><div><b>Libras y saltos de peso por gimnasio</b><p>Hoy la app es solo en kg. Sin esto, EE. UU. queda débil.</p><div class="chips"><span class="tag imp">Alto para EE. UU.</span><span class="tag eff">L</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag when">Antes de EE. UU.</span></div></div></div>
+    <div class="rec"><div class="n">9</div><div><b>Limpiar Progreso</b><p>Quitar o reescribir “+4,5 kg/semana”: se lee como peso que subes cada semana, y contradice tu decisión de palabras simples. Filas más cortas.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S</span><span class="tag">PT</span><span class="tag when">Rápido</span></div></div></div>
+    <div class="rec"><div class="n">10</div><div><b>Página de ayuda simple, EN y ES</b><p>Cómo se elige mi peso, por qué hoy es más ligero, qué se envía a la IA. Ask AI puede responder desde ahí.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S</span><span class="tag">PT</span><span class="tag">IA</span><span class="tag when">Lanzamiento</span></div></div></div>
+    <div class="rec"><div class="n">11</div><div><b>Un momento de logro concreto</b><p>“Tu serie más fuerte en banca: 82,5 × 10” al terminar, no confeti genérico. Tarjeta para compartir, opcional.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S–M</span><span class="tag">PT</span><span class="tag when">v1.1</span></div></div></div>
+    <div class="rec"><div class="n">12</div><div><b>Pistas de una línea la primera semana</b><p>En lugar de la tarjeta de bienvenida.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S</span><span class="tag when">Lanzamiento</span></div></div></div>
+    <div class="rec"><div class="n">13</div><div><b>Más adelante</b><p>Cuerpo con las series de la semana (sin % de recuperación, arte propio), más / menos / nunca por ejercicio, calculadora de discos, Apple Health solo escritura, Apple Watch.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">M–L</span><span class="tag">PT en lo que aplique</span><span class="tag">Gobernanza en Health</span></div></div></div>
+  </div>
+  <div class="note g"><b>Rápido:</b> 3, 5, 9, 10, 12. <b>Apuestas grandes:</b> 1, 4, 6, 7, 8.</div>
+</section>
+
+<section id="decidir">
+  <h2>Lo que necesito que decidas</h2>
+  <ol class="dec">
+    <li><div><b>¿Mostrar plan y entreno antes de crear cuenta?</b><em>Recomiendo sí. Es trabajo grande, y la mayor ganancia.</em></div></li>
+    <li><div><b>¿Un plan nuevo puede empezar hoy, no el próximo lunes?</b><em>Recomiendo sí; el PT decide cuál es el primer día.</em></div></li>
+    <li><div><b>¿La ficha sin “personal trainer” y abriendo con el porqué?</b><em>Ya dijiste “entrenador con IA”; confírmame que cambie también en la tienda.</em></div></li>
+    <li><div><b>¿Qué países primero?</b><em>Sin libras, EE. UU. queda débil. Opción: hispanohablantes y países en kg, EE. UU. después.</em></div></li>
+    <li><div><b>¿Reabrimos imágenes de ejercicios, con presupuesto?</b><em>Estimación anterior: US$300 a 1.000, falta cotización. Como mínimo, quitar Google Imágenes.</em></div></li>
+    <li><div><b>¿Gratis al lanzar, sin muro de pago?</b><em>Recomiendo sí. Coincide con Gobernanza y evita su principal queja.</em></div></li>
+    <li><div><b>¿Puedes dedicar 30 minutos a probar Fitbod en tu teléfono?</b><em>Necesita tu Apple ID y una prueba que debes cancelar a tiempo. Yo no puedo hacerlo. <a href="#noverif">Lista de qué mirar</a>.</em></div></li>
+  </ol>
+</section>
+
+<section id="quien">
+  <h2>Quién es Fitbod</h2>
+  <div class="legend">
+    <div><span class="tag v">Verificado</span> en sus páginas o su ficha</div>
+    <div><span class="tag s">Terceros</span> reseñas o videos de la app</div>
+    <div><span class="tag c">Baja confianza</span> competidor o resumen</div>
+    <div><span class="tag d">Falta probar</span> solo en un dispositivo</div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Promesa y audiencia</h3>
+    <p>Solo fuerza. Un plan que se adapta para que siempre sepas qué sigue. Dice ser para todos los niveles, con foco en intermedios y avanzados. <span class="tag v">Verificado</span></p>
+    <h3>Cómo habla de la IA</h3>
+    <ul class="x">
+      <li><b>Tienda:</b> “AI Personal Trainer” en el subtítulo y “AI workouts” en la descripción.</li>
+      <li><b>Web:</b> “algoritmo propio”, casi sin la palabra IA.</li>
+      <li><b>Términos:</b> dicen que no actúa como entrenador personal. La política de privacidad no menciona IA.</li>
+    </ul>
+    <p class="sm">No hay señales públicas de chat ni de modelo de lenguaje en el producto. Un competidor (SensAI) lo llama aprendizaje automático con reglas. <span class="tag c">Baja confianza</span></p>
+    <h3>Precio y momento de pago</h3>
+    <p>US$15,99 al mes o US$95,99 al año; aún figuran precios anteriores. Para la prueba de 7 días hay que elegir plan, y pasa a pago si no cancelas. <span class="tag v">Verificado</span></p>
+    <p>Un análisis en video muestra que el cuestionario y el primer entreno son gratis; el muro aparece antes de empezarlo y otra vez tras el resumen, con predicciones a 90 días. <span class="tag s">Terceros</span> <span class="tag d">Falta probar</span></p>
+    <h3>Plataformas e idiomas</h3>
+    <p>iPhone, Android, Apple Watch, Wear OS, widget de iOS. Apple Health, Health Connect, Fitbit, Strava. Inglés, español y portugués. <span class="tag v">Verificado</span></p>
+    <h3>Ritmo</h3>
+    <p>Versión casi cada semana, con notas genéricas. Una salió con el texto <code>{version}</code> sin rellenar. <span class="tag v">Verificado</span></p>
+  </div>
+  <div class="lists">
+    <div class="card"><h3>Lo que aman</h3><ul class="x good">
+      <li>Videos y ayuda de técnica</li><li>No tener que planear</li><li>Perfiles de equipo: casa y gimnasio</li><li>Variedad que no aburre</li><li>Más barato que un entrenador humano</li>
+    </ul></div>
+    <div class="card"><h3>Lo que odian</h3><ul class="x bad">
+      <li>Cobros y cancelación</li><li>Apple Watch: temporizador congelado, series que se pierden</li><li>Cambios que se borran solos</li><li>Sesiones sin lógica; pesos que no existen en el gimnasio</li><li>Sin plan de varias semanas</li><li>Subidas de precio</li>
+    </ul></div>
+  </div>
+  <p class="sm">Temas de muestras pequeñas o resúmenes automáticos. Sirven como dirección, no como medida. No pude leer Reddit directamente.</p>
+  <h3>Cómo te hace volver</h3>
+  <p>Aviso con el entreno del día, meta semanal y racha, anillo de series por músculo, informe semanal y mensual, resumen del año, récords, tarjetas para Instagram, ligas por gimnasio (beta) y ranking contra usuarios parecidos (en despliegue). <span class="tag v">Verificado</span></p>
+</section>
+
+<section id="inicio">
+  <h2>Primer uso</h2>
+  <p class="sub">La mayor brecha de toda la revisión.</p>
+  <div class="flow">
+    <div><h4>Fitbod</h4>
+      <div class="step">Cuestionario. En la web, la primera pregunta es la edad</div>
+      <div class="step">14 pasos según una fuente, unos 30 según otra</div>
+      <div class="step">Objetivo, experiencia, equipo detallado</div>
+      <div class="step">Proyección de fuerza antes de la cuenta</div>
+      <div class="step win">Entreno armado al instante</div>
+      <div class="step">Pesos prudentes para empezar</div>
+      <div class="step">Muro de pago antes de empezar</div>
+    </div>
+    <div><h4>GymStudio hoy</h4>
+      <div class="step">Tarjeta de bienvenida con 3 frases</div>
+      <div class="step">“Entendido”</div>
+      <div class="step lose">Pantalla casi vacía: “Inicia sesión para crear tu plan”</div>
+      <div class="step">Crear cuenta</div>
+      <div class="step">Objetivos en Perfil</div>
+      <div class="step">Generar plan</div>
+      <div class="step lose">Empieza el próximo lunes</div>
+    </div>
+  </div>
+  <div class="note"><b>Cuidado con la comparación.</b> Solo vi la primera pantalla de su cuestionario, sin responderla. El resto viene de un análisis en video y de su ayuda. Además, ninguna cuenta real ha publicado todavía un plan personal en producción: lo marcó Gobernanza (G7).</div>
+</section>
+
+<section id="genera">
+  <h2>Cómo genera un entreno y cómo se cambia</h2>
+  <div class="cmp">
+    <div class="h"><div>Fitbod</div><div>GymStudio</div></div>
+    <div class="row"><b>Qué planifica</b><div class="two"><div>Sesión nueva cada vez. Opcional: un ejercicio grande por día en ciclos de 4 semanas</div><div>Bloque de 6 semanas, días fijos, días A y B</div></div></div>
+    <div class="row"><b>Recuperación</b><div class="two"><div>0–100% por músculo, hasta 7 días, ajustable a mano. Admiten que es una estimación, sin fórmula</div><div>No se modela. La estructura del plan reparte los músculos</div></div></div>
+    <div class="row"><b>Peso</b><div class="two"><div>Máximo estimado a 1 rep. Baja si dejas de registrar el ejercicio. Pesos iniciales desde datos de usuarios parecidos</div><div>Motor con reglas aprobadas desde tus últimas sesiones, con límites de seguridad</div></div></div>
+    <div class="row"><b>Variación</b><div class="two"><div>“mStrength” alterna pesado y ligero. La gente pregunta por qué</div><div>A y B con nombre y explicación</div></div></div>
+    <div class="row"><b>Calibrar</b><div class="two"><div>Reps en reserva, opcional. “Max Effort Days”: series al máximo, automáticas</div><div>Pregunta eliminada: 0 de 39 respondidas. Sin series al máximo</div></div></div>
+    <div class="row"><b>Equipo</b><div class="two"><div>Varios gimnasios con nombre, saltos de peso editables, compartir</div><div>Tres niveles: completo, básico, casa</div></div></div>
+    <div class="row"><b>Duración</b><div class="two"><div>De 15 a 90 minutos</div><div>45, 60, 75, 90 en Perfil</div></div></div>
+    <div class="row"><b>Unidades</b><div class="two"><div>kg y lb</div><div>Solo kg</div></div></div>
+  </div>
+  <div class="note"><b>Su trampa, confirmada en su ayuda.</b> Los cambios antes de “Start” no se guardan. Si cambia algo, o si llega un entreno de Apple Health o Strava en segundo plano, regenera todo y los borra. No copiar.</div>
+  <p>Para cambiar: menú “Swap” (otro día, músculos, guardados, desde cero), ajustes de solo hoy (tiempo y equipo), deslizar para reemplazar con filtros, mantener para reordenar, y marcar más, menos o nunca. <span class="tag v">Verificado</span></p>
+</section>
+
+<section id="registro">
+  <h2>Registro en el gimnasio, frente a Big Done</h2>
+  <p class="sub">Sus toques son una estimación con documentos públicos. Nuestros números vienen de la propuesta; el PR #382 aún no se fusiona.</p>
+  <div class="cmp">
+    <div class="h"><div>Fitbod</div><div>Big Done</div></div>
+    <div class="row"><b>Ejercicio de 3 series, como estaba planeado</b><div class="two"><div><span class="big">4–5</span>abrir, 3 registros, a veces esfuerzo</div><div><span class="big">3</span>avanza solo</div></div></div>
+    <div class="row"><b>Cambiar el peso en las 3</b><div class="two"><div>Tocar y escribir con teclado, por serie. Si se arrastra: falta probar</div><div><span class="big">4</span>un botón y se arrastra</div></div></div>
+    <div class="row"><b>El botón dice</b><div class="two"><div>Registrar serie (por confirmar)</div><div>“Done · 37,5 kg × 8”</div></div></div>
+    <div class="row"><b>Registrar todo de golpe</b><div class="two"><div>Sí, “Log All Sets”</div><div>No, a propósito: ensucia el historial</div></div></div>
+    <div class="row"><b>Fin del descanso</b><div class="two"><div>Sonido o vibración con la app abierta. Fuera, solo si activaste una opción</div><div>Ventana, vibración, notificación y Live Activity (por confirmar en iPhone)</div></div></div>
+    <div class="row"><b>Superseries</b><div class="two"><div>Agrupar en menú; registrar todo desde “…”. Admiten ignorar la fatiga del par</div><div>Tarjetas independientes, salto al compañero, guarda cada toque. <span class="num">6</span> toques en 3 rondas</div></div></div>
+    <div class="row"><b>Corregir</b><div class="two"><div>Tocar el campo; deslizar para borrar; editar luego desde el historial</div><div>Deshacer, o “Corregir una serie”</div></div></div>
+    <div class="row"><b>Reloj</b><div class="two"><div>Sí, pero necesita iPhone para empezar y guardar. Temporizador se pausa al atenuarse la pantalla</div><div>No hay</div></div></div>
+    <div class="row"><b>Sin conexión</b><div class="two"><div>El entreno sí; los videos no</div><div>Registro sí</div></div></div>
+  </div>
+  <p>Su pantalla (imagen 4 de la tienda, descrita): banner con video, nombre, chips de descanso, historial y reemplazo; lista de series con escudo verde en las hechas; serie actual enmarcada; “Log All Sets” y un botón principal rosa.</p>
+  <div class="note b"><b>Conclusión.</b> La ventaja en toques es pequeña. Lo que sí pesa es no pedir esfuerzo, no depender del teclado y avisar bien. Pendiente para el PT: si un toque hace que se confirmen números no hechos. Medir cuántas series se editan.</div>
+</section>
+
+<section id="progreso">
+  <h2>Progreso</h2>
+  <div class="cmp">
+    <div class="h"><div>Fitbod</div><div>GymStudio</div></div>
+    <div class="row"><b>Número principal</b><div class="two"><div>“Overall Strength Score”, sin unidad, bloqueado hasta entrenar todos los músculos</div><div>Sin puntaje: “8 de 8 ejercicios principales mejorando”</div></div></div>
+    <div class="row"><b>Por ejercicio</b><div class="two"><div>“Estimated Strength”: máximo estimado, baja si no lo registras</div><div>Series reales: “72,5 kg × 8 → 82,5 kg × 10”</div></div></div>
+    <div class="row"><b>Vista rápida</b><div class="two"><div>Mapa del cuerpo por colores y anillo semanal</div><div>Series por músculo, rango 10–20</div></div></div>
+    <div class="row"><b>Bajadas</b><div class="two"><div>Lo explican como recalibración</div><div>“Más ligero a propósito”</div></div></div>
+    <div class="row"><b>Comparación</b><div class="two"><div>“Top X%” contra usuarios parecidos, solo si estás en el 40% superior</div><div>No hay</div></div></div>
+  </div>
+  <p>Fitbod tuvo el mismo problema que nos dijiste en octubre: cambió “Projected 1-Rep Max” por “Estimated Strength”. Es el mismo número con otro nombre, y su artículo sigue definiéndolo como lo máximo que levantarías una vez. <b>Nosotros fuimos más lejos: mostramos lo que levantaste.</b></p>
+  <div class="note"><b>Algo que quedó en nuestra app.</b> Bajo cada ejercicio de Resumen sigue “+4,5 kg/semana”. Está aprobado como dato de apoyo, pero se lee como peso que subes a la barra. Choca con tu decisión.</div>
+  <p>Lo que hacen mejor: una imagen que se entiende en un segundo, y motivos para volver. Evitar el nombre “Strength Score”: allí significa otra cosa.</p>
+</section>
+
+<section id="biblio">
+  <h2>Biblioteca de ejercicios</h2>
+  <div class="cmp">
+    <div class="h"><div>Fitbod</div><div>GymStudio</div></div>
+    <div class="row"><b>Tamaño</b><div class="two"><div>Entre “800+” y “1.600+”, según la página</div><div>227 aprobados</div></div></div>
+    <div class="row"><b>Medios</b><div class="two"><div>Video de varios ángulos, pasos y músculos. Sin video offline</div><div>Consejos y señales en texto. Enlace a Google Imágenes</div></div></div>
+    <div class="row"><b>Encontrar</b><div class="two"><div>Búsqueda, músculo, equipo, categorías</div><div>Búsqueda, músculo, “plan de hoy”, recientes</div></div></div>
+    <div class="row"><b>Propios</b><div class="two"><div>Sí, pero no se editan y el algoritmo no los ajusta</div><div>Sí, con IDs estables; falta verificarlo con cuenta real (#361)</div></div></div>
+  </div>
+</section>
+
+<section id="diseno">
+  <h2>Diseño</h2>
+  <p class="sub">Desde imágenes de la tienda, una pantalla web y reseñas. La sensación en la mano falta probarla.</p>
+  <div class="lists">
+    <div class="card"><h3>Qué lo hace sentir premium</h3><ul class="x good">
+      <li>Fotos y video reales, no ilustraciones sueltas</li>
+      <li>Figura anatómica como imagen estrella</li>
+      <li>Un solo color fuerte: rosa rojizo</li>
+      <li>Nombres en cursiva gruesa y números grandes</li>
+      <li>Una forma propia: el hexágono</li>
+      <li>Un ejercicio por pantalla</li>
+    </ul></div>
+    <div class="card"><h3>Dónde falla</h3><ul class="x bad">
+      <li>Mucha densidad; sin ayudas abruma</li>
+      <li>Ajustes dentro de la pestaña de historial</li>
+      <li>Nombres de pestañas que cambian entre artículos</li>
+      <li>Confeti genérico, sin relación con tus logros</li>
+      <li>Rutinas guardadas difíciles de encontrar</li>
+    </ul></div>
+  </div>
+  <div class="note"><b>Ojo:</b> oscuro y rosa, con botón grande, se parece a Fitbod. No acercarnos más. Nuestro tono es más sobrio, y lo primero en pantalla debe ser el porqué y la barra del plan.</div>
+</section>
+
+<section id="confianza">
+  <h2>Confianza y cumplimiento</h2>
+  <div class="cmp">
+    <div class="h"><div>Fitbod</div><div>Para nuestro lanzamiento (#384)</div></div>
+    <div class="row"><b>Etiqueta de privacidad</b><div class="two"><div>Rastrea uso. Vincula salud, contacto, IDs, publicidad, diagnósticos</div><div>La nuestra puede ser mucho más pequeña, y real</div></div></div>
+    <div class="row"><b>Datos de salud</b><div class="two"><div>Lee Apple Health. Dice que no los usa para publicidad</div><div>Sin HealthKit hoy</div></div></div>
+    <div class="row"><b>IA</b><div class="two"><div>Política de 2024 sin mención</div><div>Enviamos datos a OpenAI: hay que avisar y pedir permiso (G2). No imitar su silencio</div></div></div>
+    <div class="row"><b>Avisos</b><div class="two"><div>No es consejo médico; bajo tu riesgo; no actúa como entrenador personal</div><div>Aviso de salud en borrador, pendiente del PT</div></div></div>
+    <div class="row"><b>Edad</b><div class="two"><div>Tienda 9+, pero Términos solo para mayores de 18</div><div>Elegir edad y que coincida en ambos lados</div></div></div>
+    <div class="row"><b>Borrar cuenta</b><div class="two"><div>Historial → Ajustes → Ayuda → Borrar. Advierte que no cancela la suscripción</div><div>Aún no existe (G1). A dos toques, explicando qué pasa</div></div></div>
+  </div>
+  <p class="sm">Todo <span class="tag v">Verificado</span> en sus páginas o ficha. No es consejo legal; eso es del abogado.</p>
+</section>
+
+<section id="tienda">
+  <h2>La ficha de App Store como modelo</h2>
+  <p>Nombre: marca más categoría. Subtítulo con la palabra que vende. Descripción: premio, beneficios cortos, funciones con subtítulos, términos, enlaces. En México cambia el nombre a “Rutinas Personalizadas”: no traduce, busca lo que la gente escribe.</p>
+  <h3>Sus 10 imágenes, en orden (descritas)</h3>
+  <div class="shots">
+    <div class="shot"><i>1</i><b>Entrenos hechos para ti</b><span>Premio y número de reseñas. Lista del día</span></div>
+    <div class="shot"><i>2</i><b>Cita de usuario, 5 estrellas</b><span>Mapa muscular</span></div>
+    <div class="shot"><i>3</i><b>Tu equipo</b><span>Lista de equipos</span></div>
+    <div class="shot"><i>4</i><b>Cuánto levantar</b><span>Pantalla de ejercicio y reloj</span></div>
+    <div class="shot"><i>5</i><b>Avanza con confianza</b><span>Récord de fuerza</span></div>
+    <div class="shot"><i>6</i><b>Tus metas semanales</b><span>Anillo de series</span></div>
+    <div class="shot"><i>7</i><b>Sigue tu progreso</b><span>Puntaje y tendencias</span></div>
+    <div class="shot"><i>8</i><b>Técnica correcta</b><span>Video e instrucciones</span></div>
+    <div class="shot"><i>9</i><b>Alternativas</b><span>Lista para reemplazar</span></div>
+    <div class="shot"><i>10</i><b>Cita de usuario</b><span>Foto de un atleta</span></div>
+  </div>
+  <p class="sm">Títulos resumidos en español, sin copiar su texto. Lo que no podemos usar: premio, calificaciones, citas (aún no son reales) ni sus frases.</p>
+  <h3>Borrador para nosotros (Socialer y PT lo ajustan)</h3>
+  <div class="shots">
+    <div class="shot ours"><i>1</i><b>El peso de hoy, y por qué</b><span>Tarjeta con el motivo</span></div>
+    <div class="shot ours"><i>2</i><b>Un toque por serie</b><span>Big Done</span></div>
+    <div class="shot ours"><i>3</i><b>Un descanso claro</b><span>Qué sigue</span></div>
+    <div class="shot ours"><i>4</i><b>Plan de 6 semanas</b><span>Barra semanal</span></div>
+    <div class="shot ours"><i>5</i><b>Superseries sin confusión</b><span>Tarjetas</span></div>
+    <div class="shot ours"><i>6</i><b>Tus mejores series</b><span>Sin jerga</span></div>
+    <div class="shot ours"><i>7</i><b>Técnica a un toque</b><span>Señales</span></div>
+    <div class="shot ours"><i>8</i><b>En español e inglés</b><span>En la ficha ES, candidata a primera</span></div>
+  </div>
+  <div class="note"><b>Dos cambios a nuestro borrador.</b> “GymStudio: AI Personal Trainer” choca con tu decisión y usa las mismas palabras que el subtítulo de Fitbod. Y “Know what to lift today” se parece a su imagen 4. Abrir con el porqué nos diferencia. Las imágenes deben mostrar la interfaz final.</div>
+</section>
+
+<section id="vs">
+  <h2>GymStudio contra Fitbod</h2>
+  <div class="lists">
+    <div class="card"><h3>Ya somos mejores</h3><ul class="x good">
+      <li><b>Un motivo por cada peso.</b> En público no encontré algo igual en Fitbod; falta verlo en la app</li>
+      <li><b>Plan estable</b> y resultados comparables</li>
+      <li><b>Días A y B</b> con nombre y explicación</li>
+      <li><b>Registro</b> sin esfuerzo ni teclado, si el #382 se confirma</li>
+      <li><b>Progreso simple:</b> series reales</li>
+      <li><b>Sin publicidad ni rastreo.</b> Pero el permiso de IA aún no se respeta (G2): arreglar antes de presumirlo</li>
+    </ul></div>
+    <div class="card"><h3>Nos ganan</h3><ul class="x bad">
+      <li>Primer uso</li><li>Videos de ejercicios</li><li>Equipo, saltos de peso y libras</li><li>Salidas del plan del día</li><li>Motivos para volver</li><li>Página de tienda</li><li>Android, reloj, Health, Strava</li><li>Datos para el primer peso</li><li>Centro de ayuda</li>
+    </ul></div>
+  </div>
+  <div class="note b"><b>Dos correcciones honestas.</b> <b>El español no es una ventaja clara:</b> Fitbod lo tiene, con ficha mexicana bien hecha. Lo nuestro es el cambio de idioma dentro de la app y consejos en español revisados por el PT. Decir “en español desde el primer día”, nunca “la única”. <b>“Primero la IA” tampoco es ventaja técnica hoy:</b> las reglas deciden y la IA explica. Es una ventaja de confianza.</div>
+  <h3>Para lanzar, y para después</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Debe estar</th><th>Conviene</th><th>Puede esperar</th></tr></thead>
+    <tbody>
+      <tr><td>Usuario nuevo con entreno usable hoy (G7)</td><td>Imágenes, o al menos quitar Google</td><td>Apple Health, luego reloj</td></tr>
+      <tr><td>Borrar cuenta, permiso IA, retirarlo, enlaces (G1, G2, G3, G5)</td><td>El porqué en la tarjeta</td><td>Mapa corporal, discos</td></tr>
+      <tr><td>Ficha reescrita (G9), imágenes finales</td><td>“Poco tiempo” y “máquina ocupada”</td><td>Rutinas guardadas, compartir</td></tr>
+      <tr><td>Big Done fusionado y probado en iPhone</td><td>Recordatorio, ayuda simple</td><td>Android</td></tr>
+      <tr><td>Decidir unidades y países</td><td>Momento de récord</td><td>Informe largo</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Qué no copiar</h3>
+  <div class="card"><ul class="x bad">
+    <li>“AI Personal Trainer” en el nombre</li>
+    <li>Entrenos que se regeneran y borran tus cambios</li>
+    <li>Sesión distinta cada día: nuestro plan es la diferencia</li>
+    <li>“Log All Sets”: registra lo que no confirmaste</li>
+    <li>Preguntar el esfuerzo a la fuerza</li>
+    <li>Series al máximo automáticas (seguridad, decide el PT)</li>
+    <li>% de recuperación presentado como hecho</li>
+    <li>Puntaje sin unidad, bloqueado, y el nombre “Strength Score”</li>
+    <li>Ranking contra otros: pide edad, género y peso</li>
+    <li>Racha que vuelve a 0 y castiga el descanso</li>
+    <li>Ligas que publican entrenos automáticamente</li>
+    <li>Muro antes del primer entreno, prueba que cobra sola</li>
+    <li>Cifras sin método</li>
+    <li>Categoría de embarazo, HSA/FSA, lenguaje de lesiones</li>
+    <li>Datos ligados a publicidad, borrado escondido</li>
+  </ul></div>
+  <div class="note"><b>Contenido protegido y marcas.</b> Nada de su nombre en metadatos o palabras clave, “mStrength”, logo, sistema del hexágono, frases, videos, capturas, arte del mapa muscular ni textos de ayuda. Cualquier comparación pública necesita datos verificados en esa fecha y tu aprobación.</div>
+</section>
+
+<section id="noverif">
+  <h2>Lo que no pude verificar</h2>
+  <p class="sub">Hace falta alguien con la app instalada. Cancelar la prueba al menos 24 horas antes de que termine.</p>
+  <div class="card"><ul class="check">
+    <li>Orden del cuestionario, cuándo pide cuenta y cuándo cobra<span>5 min</span></li>
+    <li>Toques reales al registrar; si un cambio de peso se arrastra<span>5 min</span></li>
+    <li>Si avanza solo, si hay Deshacer, qué dice el botón<span>3 min</span></li>
+    <li>Superserie, serie por serie<span>3 min</span></li>
+    <li>Si existe algún “por qué este peso” por ejercicio<span>3 min</span></li>
+    <li>Descanso con pantalla bloqueada, sin activar opciones<span>3 min</span></li>
+    <li>Calidad del español y si traducen los consejos<span>3 min</span></li>
+    <li>Pestañas, movimiento, densidad, vibración<span>3 min</span></li>
+    <li>Cómo se ve borrar la cuenta<span>2 min</span></li>
+  </ul></div>
+  <p class="sm"><b>Bloqueado o no disponible:</b> Reddit (leído solo mediante resumen de terceros), ficha de Google Play (calificación y seguridad de datos), informe kimola, palabras clave de la tienda (nunca son públicas). Tampoco sé si las imágenes coinciden con la versión actual. Sus propias cifras se contradicen (ejercicios, entrenos, días de recuperación, tipo de prueba), así que no las repitas como hechos.</p>
+  <p class="sm"><b>Nuestra app:</b> build local en <code>main</code>, 390 × 844, español, sin iniciar sesión. El registro se juzgó desde la propuesta y la descripción del PR #382. No probé en iPhone.</p>
+</section>
+
+<section id="fuentes">
+  <h2>Fuentes</h2>
+  <p class="sub">Leídas el 31-10-2026. Lista completa y enlaces en <code>2026-11-01-fitbod-review.md</code>.</p>
+  <details><summary>Fitbod oficial</summary><div class="in">
+    <a href="https://fitbod.me/">Inicio</a> · <a href="https://fitbod.me/faqs/">Preguntas</a> · <a href="https://fitbod.me/privacy-policy/">Privacidad</a> · <a href="https://www.fitbod.me/terms-conditions">Términos</a> · <a href="https://apps.apple.com/us/app/fitbod-gym-fitness-planner/id1041517543">App Store EE. UU.</a> · <a href="https://apps.apple.com/mx/app/fitbod-gym-fitness-planner/id1041517543">App Store México</a> · <a href="https://fitbod.me/blog/fitbod-algorithm">Algoritmo</a> · <a href="https://fitbod.me/blog/estimated-strength/">Estimated Strength</a> · <a href="https://fitbod.me/blog/fitbod-insights-feature/">Insights</a>
+  </div></details>
+  <details><summary>Centro de ayuda</summary><div class="in">
+    <a href="https://help.fitbod.me/hc/en-us/articles/43489869175063-How-does-Fitbod-decide-my-sets-reps-and-weight">Series, reps y peso</a> · <a href="https://help.fitbod.me/hc/en-us/articles/43492170863895">Recuperación</a> · <a href="https://help.fitbod.me/hc/en-us/articles/42333470514455-Why-did-my-workout-change-Understanding-workout-refreshes">Por qué cambió</a> · <a href="https://help.fitbod.me/hc/en-us/articles/360006340194-Rest-Timer">Descanso</a> · <a href="https://help.fitbod.me/hc/en-us/articles/360006427813-Circuits-Supersets">Superseries</a> · <a href="https://help.fitbod.me/hc/en-us/articles/360006499194-Apple-Watch">Apple Watch</a> · <a href="https://help.fitbod.me/hc/en-us/articles/12732749777047">Métricas</a> · <a href="https://help.fitbod.me/hc/en-us/articles/35301260960663">Focus Exercises</a> · <a href="https://help.fitbod.me/hc/en-us/articles/30542136101527-How-the-Trial-Works">Prueba</a> · <a href="https://help.fitbod.me/hc/en-us/sections/1500000606861-Account-Management">Cuenta</a>
+  </div></details>
+  <details><summary>Independientes</summary><div class="in">
+    <a href="https://www.garagegymreviews.com/fitbod-review">Garage Gym Reviews</a> · <a href="https://www.techradar.com/health-fitness/fitbod-app-review">TechRadar (2023)</a> · <a href="https://screensdesign.com/showcase/fitbod-gym-fitness-planner">screensdesign</a>
+  </div></details>
+  <details><summary>Baja confianza</summary><div class="in">
+    <a href="https://www.sensai.fit/blog/fitbod-review-2026">SensAI (competidor)</a> · <a href="https://dr-muscle.com/fitbod-workout-app-review/">Dr. Muscle (competidor)</a> · <a href="https://www.onclarity.com/leaderboard/insight/fitbod">onclarity (resumen IA)</a> · <a href="https://justuseapp.com/en/app/1041517543/fitbod-gym-fitness-planner/reviews">justuseapp (26 reseñas)</a> · <a href="https://fitnessaitrends.com/blog/is-fitbod-still-worth-it-2026/">fitnessaitrends (resume r/fitbod)</a>
+  </div></details>
+</section>
+
+</main>
+<div class="wrap"><footer>UXer · 2026-11-01 · Propuesta, sin aprobar. Fitbod es una marca de Fitbod, Inc. Este informe describe su producto, no reproduce su contenido, y no incluye capturas.</footer></div>
+</body>
+</html>
