@@ -98,17 +98,23 @@ describe('comparable logging history', () => {
     expect(history[0].id).toBe('today')
   })
 
-  it('uses stored targets, excludes deloads and preserves historical RIR', () => {
-    const last = { ...entry('last', '2026-10-12', 'a'), target: { sets: 3, reps: { min: 6, max: 8 } },
+  it('compares plan targets, excludes deloads and preserves historical RIR', () => {
+    const last = { ...entry('last', '2026-10-12', 'a'), target: { sets: 3, reps: { min: 8, max: 9 } },
       sets: [{ id: 'old', weight: 40, reps: 7, rir: 0 }] }
     const history = [entry('deload', '2026-11-10', 'a'), last]
-    expect(findComparableLoggingEntry(history, 'press', { min: 6, max: 8 }, false,
+    expect(findComparableLoggingEntry(history, 'press', { min: 8, max: 8 }, false,
       { ...scope, date: '2026-11-16' }, [block])).toBe(last)
     expect(last.sets[0].rir).toBe(0)
   })
 
+  it('falls back to the stored target only when no plan row exists', () => {
+    const offPlan = { ...entry('off', '2026-10-12', 'a'), exerciseId: 'swapped-in', target: { sets: 3, reps: { min: 6, max: 8 } } }
+    expect(findComparableLoggingEntry([offPlan], 'swapped-in', { min: 6, max: 8 }, false, scope, [block])).toBe(offPlan)
+    expect(findComparableLoggingEntry([offPlan], 'swapped-in', { min: 8, max: 8 }, false, scope, [block])).toBeUndefined()
+  })
+
   it('can use a partial entry from another slot done today', () => {
-    const last = { ...entry('other-slot', scope.date, 'b'), target: { sets: 3, reps: { min: 8, max: 8 } } }
-    expect(findComparableLoggingEntry([last], 'press', { min: 8, max: 8 }, false, scope, [block])).toBe(last)
+    const last = entry('other-slot', scope.date, 'b')
+    expect(findComparableLoggingEntry([last], 'press', { min: 12, max: 12 }, false, scope, [block])).toBe(last)
   })
 })

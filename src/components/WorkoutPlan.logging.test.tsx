@@ -9,6 +9,7 @@ import type { RestTimerState } from '../utils/restTimer'
 import { createTranslator } from '../i18n/translate'
 import { loadWorkoutHistory, saveWorkoutHistory } from '../utils/storage'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
+import { recommend } from '../trainer/engine'
 
 const harness = vi.hoisted(() => ({
   active: false,
@@ -483,6 +484,32 @@ describe('approved workout logging integration', () => {
     await click(doneLabel())
     expect(inputs().props.weight).toBe(87.5)
     expect((await loadWorkoutHistory())[0].sets.map(set => set.weight)).toEqual([85, 87.5])
+  })
+
+  it.each([
+    ['T112', '6-8', 'barbell', 37.5, [7, 7, 7], { min: 8, max: 9 }, { min: 6, max: 8 }, 37.5],
+    ['T116', '8', 'barbell', 37.5, [8, 7, 6], undefined, { min: 8, max: 8 }, 37.5],
+    ['T118', '12', 'cable', 10, [13, 13, 13], { min: 14, max: 15 }, { min: 12, max: 12 }, 10],
+  ])('%s: untouched Done repeats last reps and the next load stays', async (_, prescription, equipment, load, reps, storedRange, target, nextLoad) => {
+    harness.catalogue[0].equipment = equipment
+    harness.block!.days[0].exercises[0].reps = [prescription]
+    saveWorkoutHistory([{
+      id: 'last', exerciseId: 'press', date: '2026-10-12', blockId: 'block', dayKey: 'chest-back-a',
+      ...(storedRange ? { target: { sets: 3, reps: storedRange } } : {}),
+      sets: reps.map((count, index) => ({ id: `last-${index}`, weight: load, reps: count })),
+    }])
+    render()
+    await settle()
+    await start()
+    for (const _set of reps) await click(doneLabel())
+    const saved = (await loadWorkoutHistory()).find((item) => item.date.startsWith('2026-10-19'))!
+    expect(saved.sets.map((set) => [set.weight, set.reps])).toEqual(reps.map((count) => [load, count]))
+    const next = recommend({
+      today: '2026-10-26', sets: 3, equipment, target,
+      history: [saved, { date: '2026-10-12', target, sets: reps.map((count) => ({ weight: load, reps: count })) }]
+        .map((session) => ({ date: session.date.slice(0, 10), target, sets: session.sets.map((set) => ({ weight: set.weight, reps: set.reps })) })),
+    })
+    expect(next.weight).toBe(nextLoad)
   })
 
   it('caps future same-load reps immediately after a saved correction and after reload', async () => {

@@ -1428,7 +1428,7 @@ export default function WorkoutPlan({
           ) : nextSetWeights
           const trainer = getTrainerRecommendation(exercise)
           const comparable = exercise.exerciseId && trainer ? findComparableLoggingEntry(
-            history, exercise.exerciseId, effectiveWorkoutTarget(currentDraft.trainerChoice, trainer.target, trainer.recommendation.reps),
+            history, exercise.exerciseId, trainer.target,
             /\btempo\b/i.test(exercise.notes ?? ''), activeCompletionScope, trainingBlocks
           ) : undefined
           nextSetWeights.forEach((weight, index) => {
@@ -1632,7 +1632,7 @@ export default function WorkoutPlan({
       return prescription
     })
     const comparable = exercise?.exerciseId && trainer
-      ? findComparableLoggingEntry(history, exercise.exerciseId, effectiveWorkoutTarget(applied.trainerChoice, trainer.target, trainer.recommendation.reps),
+      ? findComparableLoggingEntry(history, exercise.exerciseId, trainer.target,
           /\btempo\b/i.test(exercise.notes ?? ''), activeCompletionScope, trainingBlocks)
       : undefined
     const fresh: PlanDraft = {
@@ -3992,7 +3992,7 @@ export default function WorkoutPlan({
                   [setCount, getDefaultSetCount(partner)], 0)?.thinSwitch !== true
               const loggerRestSeconds = getWorkoutRestSeconds(loadRestBetweenSets(), usesPairRest ? partner?.restSeconds : exercise.restSeconds)
               const comparable = exercise.exerciseId && trainer ? findComparableLoggingEntry(
-                history, exercise.exerciseId, effectiveWorkoutTarget(draft.trainerChoice, trainer.target, trainer.recommendation.reps),
+                history, exercise.exerciseId, trainer.target,
                 /\btempo\b/i.test(exercise.notes ?? ''), activeCompletionScope, trainingBlocks
               ) : undefined
               const oldSet = comparable?.sets.filter((set) => !set.tag || set.tag === 'main')[activeIndex]

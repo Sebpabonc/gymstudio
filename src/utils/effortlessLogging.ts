@@ -46,10 +46,11 @@ export function findComparableLoggingEntry(
       if (week === 6) return false
       if (/\btempo\b/i.test(planned?.notes ?? '') !== tempo) return false
       const ranges = planned ? prescriptionForWeek(planned, week).reps.map(mainRepRange) : []
-      const previousTarget = entry.target?.reps ?? (ranges.length ? {
+      // "Same target" means the plan's target: entry.target holds that day's engine range, which R15 raises.
+      const previousTarget = ranges.length ? {
         min: Math.min(...ranges.map((range) => range.min)),
         max: Math.max(...ranges.map((range) => range.max)),
-      } : undefined)
+      } : entry.target?.reps
       return previousTarget?.min === target.min && previousTarget.max === target.max
     })
     .sort((a, b) => b.date.localeCompare(a.date))[0]
