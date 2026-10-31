@@ -3092,11 +3092,14 @@ button {
 
 .day-exercises {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
 .planned-exercise-card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: 10px;
   padding: 12px;
   border: 1px solid var(--line);
@@ -7246,7 +7249,7 @@ a.planned-exercise-main-name {
   box-shadow: none;
 }
 
-.plan-card.workout-mode-active > :not(.day-plan-card):not(.workout-finish-backdrop):not(.workout-completed-screen) {
+.plan-card.workout-mode-active > :not(.day-plan-card):not(.workout-finish-backdrop):not(.workout-completed-screen):not(.exercise-swap-backdrop) {
   display: none;
 }
 
@@ -7451,12 +7454,14 @@ a.planned-exercise-main-name {
 }
 
 .set-trend-chart {
+  contain: inline-size;
   min-width: 0;
   padding: 8px 0 4px;
   border-top: 1px solid var(--line);
 }
 
 .set-trend-scroll {
+  min-width: 0;
   max-width: 100%;
   overflow-x: auto;
   overscroll-behavior-x: contain;
@@ -8924,16 +8929,30 @@ summary:focus-visible,
 }
 
 .workout-trend-details {
+  min-width: 0;
   margin-top: 10px;
   border-top: 1px solid var(--line);
 }
 
 .workout-trend-details > summary {
+  list-style: none;
   min-height: 44px;
   padding: 12px 2px;
   color: var(--text);
   font-weight: 700;
   cursor: pointer;
+}
+
+.workout-trend-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.workout-trend-details > summary::after {
+  content: ' ▸';
+}
+
+.workout-trend-details[open] > summary::after {
+  content: ' ▾';
 }
 
 .workout-finish-backdrop,
@@ -8972,11 +8991,17 @@ summary:focus-visible,
 }
 
 .workout-completed-screen {
+  padding-bottom: calc(152px + env(safe-area-inset-bottom, 0px));
   color: var(--text);
+}
+
+.log-toast:has(.workout-completed-undo) {
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
 }
 
 .workout-completed-content {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   width: min(100%, 640px);
   margin: 0 auto;
@@ -9084,6 +9109,8 @@ summary:focus-visible,
 
 .workout-completed-insights li {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: 5px;
   padding: 10px 12px;
   border-left: 3px solid var(--line);
@@ -9869,7 +9896,7 @@ p.workout-short-cue.cue-card {
   padding: 16px;
 }
 
-.layout-boxes .day-plan-card .planned-exercise-card {
+.layout-boxes .day-plan-card .planned-exercise-card.collapsed {
   padding: 12px 0;
 }
 
@@ -9983,8 +10010,8 @@ p.workout-short-cue.cue-card {
   line-height: var(--type-label-lh);
   font-weight: var(--type-label-weight);
   letter-spacing: 0;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
   text-align: center;
 }
 

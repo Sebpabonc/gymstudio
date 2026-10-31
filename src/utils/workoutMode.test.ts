@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from './workoutMode'
+import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from './workoutMode'
+
+it('B1: accepts a fresh confirmation only after the 600 ms deadline', () => {
+  const deadline = 1000 + WORKOUT_DONE_GUARD_MS
+  expect(canConfirmWorkoutDone(1000, deadline)).toBe(false)
+  expect(canConfirmWorkoutDone(1120, deadline)).toBe(false)
+  expect(canConfirmWorkoutDone(1599, deadline)).toBe(false)
+  expect(canConfirmWorkoutDone(1600, deadline)).toBe(true)
+})
 
 describe('independent superset logging', () => {
   it('never carries a cached last-set cursor into the same exercise on another day', () => {

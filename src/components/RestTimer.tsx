@@ -84,6 +84,12 @@ export default function RestTimer({
     fireRestAlert()
   }, [now, timer, hidden])
 
+  useEffect(() => {
+    if (hidden || !workoutMode || !timer || timer.endAt === undefined || !isRestTimerDone(timer, now)) return undefined
+    const timeout = window.setTimeout(() => onChange(null), Math.max(0, timer.endAt + 3000 - Date.now()))
+    return () => window.clearTimeout(timeout)
+  }, [now, timer, hidden, workoutMode, onChange])
+
   if (!timer || hidden) return null
 
   const isDone = isRestTimerDone(timer, now)
@@ -98,7 +104,7 @@ export default function RestTimer({
   if (workoutMode) {
     if (minimized) {
       return (
-        <aside className="workout-rest-bar" aria-label={restLabel}>
+        <aside className={`workout-rest-bar${isDone ? ' done' : ''}`} aria-label={restLabel}>
           <strong role="status">{isDone ? goLabel : formatRemainingTime(remainingRestSeconds(timer, now))}</strong>
           <span className="workout-rest-next">{nextLabel}</span>
           <button type="button" onClick={() => setMinimized(false)}>{t('rest.open')}</button>
@@ -107,8 +113,10 @@ export default function RestTimer({
       )
     }
     return (
-      <div className="workout-rest-backdrop">
-        <section className="workout-rest-popup" role="dialog" aria-modal="true" aria-label={restLabel}
+      <div className="workout-rest-backdrop" onClick={event => {
+        if (event.target === event.currentTarget) setMinimized(true)
+      }}>
+        <section className={`workout-rest-popup${isDone ? ' done' : ''}`} role="dialog" aria-modal="true" aria-label={restLabel}
           ref={popup} tabIndex={-1} onKeyDown={event => {
             if (event.key === 'Escape') {
               event.stopPropagation()

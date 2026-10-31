@@ -103,7 +103,7 @@ import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
-import { dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from '../utils/workoutMode'
+import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from '../utils/workoutMode'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
 import RestTimer from './RestTimer'
@@ -435,9 +435,9 @@ export function confirmedWorkoutSet(
   weight: number, reps: number, equipment?: Exercise['equipment'],
   drop?: { weight: number; reps: number }
 ): WorkoutSet | undefined {
-  if (!Number.isFinite(weight) || weight < 0 || !Number.isFinite(reps) || reps <= 0 ||
+  if (!Number.isFinite(weight) || weight < 0 || !Number.isInteger(reps) || reps <= 0 ||
     (equipment !== 'bodyweight' && weight === 0)) return undefined
-  if (drop && (!Number.isFinite(drop.reps) || drop.reps < 0)) return undefined
+  if (drop && (!Number.isInteger(drop.reps) || drop.reps < 0)) return undefined
   if (drop && drop.reps > 0 && (!Number.isFinite(drop.weight) || drop.weight <= 0)) return undefined
   return { ...createSet(reps, weight), ...(drop && drop.reps > 0 ? { drop: { ...drop } } : {}) }
 }
@@ -850,6 +850,7 @@ export default function WorkoutPlan({
   const [loggedAtByExercise, setLoggedAtByExercise] = useState<Record<string, number>>({})
   const [toast, setToast] = useState<LogToast | null>(null)
   const [savedExitToast, setSavedExitToast] = useState(false)
+  const doneBlockedUntil = useRef(0)
   const [sessionSummary, setSessionSummary] = useState<DaySessionSummary | null>(null)
   // Workout mode: focus one exercise (or superset) at a time, same cards as the full Today list.
   const [workoutGroupIndex, setWorkoutGroupIndex] = useState<number | null>(null)
@@ -1368,6 +1369,24 @@ export default function WorkoutPlan({
     const key = getPlanDraftKey(exercise.name)
     const currentDraft = draftRef.current[key] ?? getDraftForExercise(exercise.name, exercise)
     const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
+    if (currentDraft.setDone[setIndex]) {
+      const updated = {
+        weight: field === 'weight' ? Number(value) : currentDraft.setWeights[setIndex],
+        reps: field === 'reps' ? Number(value) : currentDraft.setReps[setIndex],
+      }
+      const drop = exercise.technique === 'drop-set' ? {
+        weight: field === 'dropWeight' ? Number(value) : currentDraft.dropSetWeights[setIndex],
+        reps: field === 'dropReps' ? Number(value) : currentDraft.dropSetReps[setIndex],
+      } : undefined
+      if (!confirmedWorkoutSet(updated.weight, updated.reps, equipment, drop)) {
+        if (field === 'weight' || field === 'dropWeight') {
+          const restore = field === 'weight' ? setWorkoutWeightInputs : setWorkoutDropWeightInputs
+          const previous = field === 'weight' ? currentDraft.setWeights[setIndex] : currentDraft.dropSetWeights[setIndex]
+          restore(current => ({ ...current, [`${key}:${setIndex}`]: formatNumber(language, previous) }))
+        }
+        return
+      }
+    }
     const repsTouched = Array.from({ length: setCount }, (_, index) => currentDraft.setRepsTouched?.[index] ?? false)
     const dropTouched = Array.from({ length: setCount }, (_, index) => currentDraft.dropWeightTouched?.[index] ?? false)
 
@@ -2035,6 +2054,16 @@ export default function WorkoutPlan({
         next: workoutRestContext.next,
       })
     : undefined
+  const resumedRestExercise = restTimer ? activeExercises[workoutExerciseIndex] : undefined
+  const resumedRestDraft = resumedRestExercise ? getDraftForExercise(resumedRestExercise.name, resumedRestExercise) : undefined
+  const resumedRestSet = resumedRestDraft ? nextWorkoutLoggingSet(resumedRestDraft.setDone, getDefaultSetCount(resumedRestExercise!)) : 0
+  const workoutRestNextLabel = workoutRestContext?.next ?? (resumedRestExercise && resumedRestDraft
+    ? t('workout.run.nextSuperset', { name: `${displayExerciseName(resumedRestExercise.name)} · ${t('workout.run.nextSetTarget', {
+      set: formatNumber(language, resumedRestSet + 1),
+      weight: formatNumber(language, resumedRestDraft.setWeights[resumedRestSet]),
+      reps: formatNumber(language, resumedRestDraft.setReps[resumedRestSet]),
+    })}` })
+    : undefined)
   useEffect(() => {
     if (!isWorkoutMode) return undefined
     setElapsedNow(Date.now())
@@ -2053,8 +2082,9 @@ export default function WorkoutPlan({
       if (isWorkoutMode) onWorkoutModeChange?.(false)
     }
   }, [isWorkoutMode, onWorkoutModeChange])
-  const groupExerciseKeys = (index: number) =>
-    (workoutGroups[index]?.items ?? []).map(({ exercise }) => normalizeExerciseName(exercise.name))
+  useEffect(() => {
+    doneBlockedUntil.current = Date.now() + WORKOUT_DONE_GUARD_MS
+  }, [workoutGroupIndex, workoutExerciseIndex])
   const goToWorkoutGroup = (index: number) => {
     if (index < 0 || index >= workoutGroups.length) return
     setFixLoggedExercise(null)
@@ -2075,10 +2105,6 @@ export default function WorkoutPlan({
     const firstPending = resumedPosition !== undefined ? selectedGroup.items[resumedPosition]
       : selectedGroup.items.find(({ exercise }) => !findExerciseCompletion(exercise, history)) ?? selectedGroup.items[0]
     setWorkoutExerciseIndex(firstPending.exerciseIndex)
-    setCollapsedExercises((current) => ({
-      ...current,
-      ...Object.fromEntries(groupExerciseKeys(index).map((key) => [key, false] as const)),
-    }))
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
         const target = document.querySelector<HTMLElement>(`[data-workout-group="${index}"]`)
@@ -2089,22 +2115,17 @@ export default function WorkoutPlan({
   }
   const startWorkout = () => {
     setSavedExitToast(false)
-    pendingWorkoutNext.current = null
     setWorkoutWeightInputs({})
     setWorkoutDropWeightInputs({})
     setSwitchUntil(null)
-    setWorkoutRestContext(null)
-    if (restTimer) onRestTimerChange?.(null)
+    if (!restTimer) {
+      pendingWorkoutNext.current = null
+      setWorkoutRestContext(null)
+    }
     const completed = workoutGroups.map((group) =>
       group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, history))
     )
     const firstOpen = nextWorkoutGroupIndex(completed, -1)
-    setCollapsedExercises(Object.fromEntries(
-      activeExercises.map((exercise) => [
-        normalizeExerciseName(exercise.name),
-        !!findExerciseCompletion(exercise, history),
-      ])
-    ))
     startSession(Date.now(), activeCompletionScope)
     setFinishConfirmOpen(false)
     setWorkoutInsight(null)
@@ -2114,7 +2135,6 @@ export default function WorkoutPlan({
   }
   const exitWorkout = () => {
     setSavedExitToast(true)
-    pendingWorkoutNext.current = null
     setSwitchUntil(null)
     if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
     workoutInsightTimer.current = null
@@ -2244,13 +2264,14 @@ export default function WorkoutPlan({
   }
 
   const logWorkoutSet = async (exercise: PlanExercise, setIndex: number, setCount: number) => {
-    if (savingSetRef.current) return
+    if (savingSetRef.current || !canConfirmWorkoutDone(Date.now(), doneBlockedUntil.current)) return
     const key = getPlanDraftKey(exercise.name)
     const draft = getDraftForExercise(exercise.name, exercise)
     if (draft.setDone[setIndex]) return
     const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
     if (!confirmedWorkoutSet(draft.setWeights[setIndex], draft.setReps[setIndex], equipment,
       exercise.technique === 'drop-set' ? { weight: draft.dropSetWeights[setIndex], reps: draft.dropSetReps[setIndex] } : undefined)) return
+    doneBlockedUntil.current = Date.now() + WORKOUT_DONE_GUARD_MS
     prepareRestAlerts()
     savingSetRef.current = true
     setSavingSet(true)
@@ -3687,7 +3708,7 @@ export default function WorkoutPlan({
         )}
         {isWorkoutMode && restTimer && onRestTimerChange && <RestTimer
           timer={restTimer} hidden={false} onChange={advanceWorkoutRest} workoutMode
-          label={workoutRestLabel} nextLabel={workoutRestContext?.next}
+          label={workoutRestLabel} nextLabel={workoutRestNextLabel}
           onUndo={toast ? undoLastLog : undefined}>
           {workoutInsight && <p className="effortless-hint">{formatWorkoutInsightLine(workoutInsight, activeDay?.name ?? '', language, t)}</p>}
         </RestTimer>}
@@ -4001,7 +4022,7 @@ export default function WorkoutPlan({
                   <h2 className="effortless-name">{displayTitle.main}{displayTitle.details && <small>{displayTitle.details}</small>}</h2>
                   {partner && <p className="effortless-partner">{t(group.items[0].exerciseIndex === exerciseIndex && !usesPairRest ? 'workout.run.supersetWith' : 'workout.run.supersetThenRest', { name: displayExerciseName(partner.name) })}</p>}
                   {switchUntil && switchUntil > elapsedNow && <div className="effortless-switch" role="status">
-                    <span>{t('workout.run.supersetSwitch', { name: exercise.code ?? displayName, seconds: supersetSwitchSeconds(switchUntil, elapsedNow) })}</span>
+                    <span>{t('workout.run.supersetSwitch', { name: displayName, seconds: supersetSwitchSeconds(switchUntil, elapsedNow) })}</span>
                     <button type="button" className="text-button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
                   </div>}
                   <WorkoutExerciseActions label={t('workout.run.exerciseActions')} googleLabel={t('workout.run.google')}
@@ -4018,8 +4039,8 @@ export default function WorkoutPlan({
                   {isTipsVisible && <SqueezeCue cue={libraryMatch?.squeezeCue} cueLabel={t('workout.squeezeCue')}
                     tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
                     expanded onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />}
-                  {(workoutTechnique || workoutPlanNote) && <p className="workout-mode-plan-note">{workoutTechnique && <strong>{workoutTechnique} </strong>}{workoutPlanNote}</p>}
-                  <p className="effortless-rest">{t('workout.label.rest')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>
+                  {((workoutTechnique && exercise.technique !== 'superset') || workoutPlanNote) && <p className="workout-mode-plan-note">{workoutTechnique && exercise.technique !== 'superset' && <strong>{workoutTechnique} </strong>}{workoutPlanNote}</p>}
+                  {(!partner || group.items[0].exerciseIndex !== exerciseIndex || usesPairRest) && <p className="effortless-rest">{t('workout.label.rest')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>}
                   {!workoutFinished && !editing && <section className="effortless-logger">
                     <p className="workout-mode-current-set">{t('workout.run.currentSet', { set: formatNumber(language, activeIndex + 1), total: formatNumber(language, setCount) })}</p>
                     {oldSet && <p className="effortless-last">{t('workout.run.lastTime')}: {formatNumber(language, oldSet.weight)} kg × {formatNumber(language, oldSet.reps)}</p>}
@@ -4037,7 +4058,7 @@ export default function WorkoutPlan({
                     const next = event.currentTarget.open
                     setTrendOpen(next)
                     saveWorkoutTrendOpen(next)
-                  }}><summary>{t('workout.trend.title')} ▾</summary><SetTrendChart sessions={trendSessions} language={language} t={t} /></details>
+                  }}><summary>{t('workout.trend.title')}</summary><SetTrendChart sessions={trendSessions} language={language} t={t} /></details>
                   {logged && <div className="effortless-fix">
                     {!editing ? <button type="button" className="text-button" onClick={() => { setFixLoggedExercise(exerciseKey); setFixLoggedIndex(0) }}>{t('workout.run.fixLoggedSet')}</button> : <>
                       <div className="effortless-pills">{logged.sets.map((set, index) => <button key={set.id} type="button" aria-pressed={index === fixLoggedIndex}
@@ -4106,7 +4127,7 @@ export default function WorkoutPlan({
                       saveWorkoutTrendOpen(next)
                     }}
                   >
-                    <summary>{t('workout.trend.title')}{exercise.code ? ` · ${exercise.code}` : ''} ▾</summary>
+                    <summary>{t('workout.trend.title')}{exercise.code ? ` · ${exercise.code}` : ''}</summary>
                     <SetTrendChart sessions={trendSessions} language={language} t={t} />
                   </details>
                 </React.Fragment>
@@ -4341,7 +4362,7 @@ export default function WorkoutPlan({
                           const next = event.currentTarget.open
                           setTrendOpen(next)
                           saveWorkoutTrendOpen(next)
-                        }}><summary>{t('workout.trend.title')} ▾</summary><SetTrendChart sessions={trendSessions} language={language} t={t} /></details>
+                        }}><summary>{t('workout.trend.title')}</summary><SetTrendChart sessions={trendSessions} language={language} t={t} /></details>
                       </>
                     )}
                     {!isWorkoutMode && <div className="chip-row chip-row-tight">
@@ -4678,7 +4699,7 @@ export default function WorkoutPlan({
                               saveWorkoutTrendOpen(next)
                             }}
                           >
-                            <summary>{t('workout.trend.title')} ▾</summary>
+                            <summary>{t('workout.trend.title')}</summary>
                             <SetTrendChart sessions={trendSessions} language={language} t={t} />
                           </details>
                         )}
@@ -5313,7 +5334,7 @@ export default function WorkoutPlan({
                         setTrendOpen(next)
                         saveWorkoutTrendOpen(next)
                       }}>
-                        <summary>{t('workout.trend.title')} ▾</summary>
+                        <summary>{t('workout.trend.title')}</summary>
                         <SetTrendChart sessions={buildWorkoutSetTrend(history, trainingBlocks, exercise.id, sessionSummary.date, [])}
                           language={language} t={t} />
                       </details>

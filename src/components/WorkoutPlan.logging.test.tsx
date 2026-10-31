@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import WorkoutPlan from './WorkoutPlan'
 import WorkoutSetInputs from './WorkoutSetInputs'
 import RestTimer from './RestTimer'
+import WorkoutExerciseActions from './WorkoutExerciseActions'
+import type { RestTimerState } from '../utils/restTimer'
 import { createTranslator } from '../i18n/translate'
 import { loadWorkoutHistory, saveWorkoutHistory } from '../utils/storage'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
@@ -72,7 +74,8 @@ let tree: React.ReactElement
 const startRest = vi.fn()
 const changeRest = vi.fn()
 const modeChanged = vi.fn()
-const props = { onSignIn: vi.fn(), onStartRest: startRest, onRestTimerChange: changeRest, onWorkoutModeChange: modeChanged }
+const props = { onSignIn: vi.fn(), onStartRest: startRest, onRestTimerChange: changeRest, onWorkoutModeChange: modeChanged,
+  restTimer: null as RestTimerState | null }
 
 function render() {
   harness.cursor = 0
@@ -92,7 +95,7 @@ async function settle() {
   }
 }
 
-function elements(predicate: (node: React.ReactElement) => boolean) {
+function elements(predicate: (node: React.ReactElement) => boolean, root: React.ReactNode = tree) {
   const found: React.ReactElement[] = []
   const visit = (node: React.ReactNode) => {
     if (Array.isArray(node)) return node.forEach(visit)
@@ -100,7 +103,7 @@ function elements(predicate: (node: React.ReactElement) => boolean) {
     if (predicate(node)) found.push(node)
     visit(node.props.children)
   }
-  visit(tree)
+  visit(root)
   return found
 }
 
@@ -111,6 +114,7 @@ function button(text: string) {
 }
 
 async function click(text: string) {
+  vi.advanceTimersByTime(600)
   await button(text).props.onClick()
   await settle()
 }
@@ -158,6 +162,7 @@ beforeEach(() => {
   harness.effects = []
   harness.cleanups = []
   harness.language = 'en'
+  props.restTimer = null
   harness.catalogue = ['press', 'row', 'curl', 'drop'].map(id => ({
     id, name: id, primaryMuscle: 'Chest', equipment: id === 'drop' ? 'machine' : 'barbell',
   }))
@@ -199,6 +204,154 @@ afterEach(() => {
 })
 
 describe('approved workout logging integration', () => {
+  it('M4: Swap opens a cancellable sheet alongside the workout card', async () => {
+    render()
+    await settle()
+    await start()
+    const actions = elements(node => node.type === WorkoutExerciseActions)[0]
+    actions.props.onSwap()
+    await settle()
+    expect(elements(node => node.props.className === 'exercise-swap-backdrop')).toHaveLength(1)
+    expect(renderToStaticMarkup(tree)).toContain('Suggested alternatives')
+    elements(node => node.props.className === 'exercise-swap-backdrop')[0].props.onClick()
+    await settle()
+    expect(elements(node => node.props.className === 'exercise-swap-backdrop')).toHaveLength(0)
+  })
+
+  it('m3: Continue retains a running rest instead of clearing the saved countdown', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40)
+    await click(doneLabel())
+    props.restTimer = { endAt: Date.now() + 120_000 }
+    await settle()
+    await click('‹ Today')
+    changeRest.mockClear()
+    await click('▶ Continue · 1 set logged')
+    expect(changeRest).not.toHaveBeenCalledWith(null)
+    expect(elements(node => node.type === RestTimer)[0].props.timer).toEqual(props.restTimer)
+    await reload()
+    await click('▶ Continue · 1 set logged')
+    expect(elements(node => node.type === RestTimer)[0].props.nextLabel).toContain('press')
+  })
+
+  it('M3: rest dismissal advances after an exercise without confirming another set', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40)
+    for (let i = 0; i < 3; i++) await click(doneLabel())
+    props.restTimer = { endAt: Date.now() }
+    await settle()
+    const before = await loadWorkoutHistory()
+    elements(node => node.type === RestTimer)[0].props.onChange(null)
+    await settle()
+    expect(renderToStaticMarkup(tree)).toContain('row</h2>')
+    expect(await loadWorkoutHistory()).toEqual(before)
+  })
+
+  it('m1: decrementing a minimum logged weight cannot overwrite a rejected correction', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(2.5, 8)
+    await click(doneLabel())
+    await click('Fix a logged set')
+    const decrease = elements(node => node.type === 'button', WorkoutSetInputs(inputs().props))[0]
+    decrease.props.onClick()
+    await settle()
+    expect(inputs().props.weightInput).toBe('2.5')
+    expect((await loadWorkoutHistory())[0].sets[0].weight).toBe(2.5)
+  })
+
+  it.each([0, 120, 599])('B1: ignores a second superset Done %s ms after the first confirmation', async delay => {
+    render()
+    await settle()
+    await start()
+    await click('2 · row')
+    await enter(40)
+    await click(doneLabel())
+    await enter(40)
+    vi.advanceTimersByTime(delay)
+    await button(doneLabel()).props.onClick()
+    await settle()
+    expect((await loadWorkoutHistory()).map(entry => entry.exerciseId)).toEqual(['row'])
+    expect(startRest).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(600)
+    await button(doneLabel()).props.onClick()
+    await settle()
+    expect((await loadWorkoutHistory()).map(entry => entry.exerciseId).sort()).toEqual(['curl', 'row'])
+  })
+
+  it('B1: blocks Done immediately after a manually selected card', async () => {
+    render()
+    await settle()
+    await start()
+    await click('2 · row')
+    await enter(40)
+    await button(doneLabel()).props.onClick()
+    await settle()
+    expect(await loadWorkoutHistory()).toEqual([])
+    vi.advanceTimersByTime(600)
+    await button(doneLabel()).props.onClick()
+    await settle()
+    expect((await loadWorkoutHistory()).map(entry => entry.exerciseId)).toEqual(['row'])
+  })
+
+  it('m1: invalid logged corrections never replace saved values or poison the next set', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40, 8)
+    await click(doneLabel())
+    await click('Fix a logged set')
+    inputs().props.onWeightInputChange('')
+    inputs().props.onValueChange('weight', '0')
+    await settle()
+    expect(inputs().props.weight).toBe(40)
+    expect(inputs().props.weightInput).toBe('40')
+    inputs().props.onValueChange('reps', '0')
+    await settle()
+    expect(inputs().props.reps).toBe(8)
+    expect((await loadWorkoutHistory())[0].sets[0]).toMatchObject({ weight: 40, reps: 8 })
+    await click('Close')
+    expect(inputs().props.weight).toBe(40)
+    expect(doneLabel()).not.toBe('Enter weight')
+  })
+
+  it('m2: fractional main or drop reps cannot be confirmed', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40, 7.5)
+    await click(doneLabel())
+    expect(await loadWorkoutHistory()).toEqual([])
+    await click('4 · drop')
+    await enter(40, 12)
+    inputs(true).props.onValueChange('reps', '7.5')
+    render()
+    await click(doneLabel())
+    expect(await loadWorkoutHistory()).toEqual([])
+  })
+
+  it('M2: starting and exiting preserves Today collapsed/expanded cards', async () => {
+    render()
+    await settle()
+    const expand = elements(node => node.type === 'button' && node.props['aria-expanded'] === false &&
+      String(node.props['aria-label']).includes('press'))[0]
+    expect(expand).toBeDefined()
+    expand.props.onClick({ stopPropagation: vi.fn() })
+    await settle()
+    const before = elements(node => node.type === 'button' && typeof node.props['aria-expanded'] === 'boolean')
+      .map(node => [node.props['aria-label'], node.props['aria-expanded']])
+    await start()
+    await click('2 · row')
+    await click('‹ Today')
+    expect(elements(node => node.type === 'button' && typeof node.props['aria-expanded'] === 'boolean')
+      .map(node => [node.props['aria-label'], node.props['aria-expanded']])).toEqual(before)
+  })
+
   it('T111/T156: has no RIR prompt or bulk save with no sets ticked, including supersets', async () => {
     render()
     await settle()
@@ -235,13 +388,13 @@ describe('approved workout logging integration', () => {
     await click(doneLabel())
     expect(startRest).not.toHaveBeenCalled()
     expect(elements(node => node.type === RestTimer)).toHaveLength(0)
-    expect(renderToStaticMarkup(tree)).toContain('Now C2 · 10 s')
+    expect(renderToStaticMarkup(tree)).toContain('Now curl · 10 s')
     expect((await loadWorkoutHistory()).map(entry => entry.exerciseId)).toEqual(['row'])
     await click('2 · row')
     await enter(40)
     await click(doneLabel())
     expect(startRest).toHaveBeenLastCalledWith(90, expect.stringContaining('row'))
-    expect(renderToStaticMarkup(tree)).not.toContain('Now C2')
+    expect(renderToStaticMarkup(tree)).not.toContain('Now curl')
     await click('3 · curl')
     await enter(40)
     await click(doneLabel())

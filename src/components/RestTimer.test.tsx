@@ -82,22 +82,48 @@ describe('RestTimer', () => {
     expect(html).toContain('Start next set now')
   })
 
-  it('T139: keeps Go and Undo at zero, never dismisses or logs automatically, and alerts once', () => {
+  it('M3/T139: shows green Go and Undo, alerts once, then dismisses after three seconds without logging', () => {
     const onChange = vi.fn()
     const onUndo = vi.fn()
-    const tree = RestTimer({ timer: { endAt: 500 }, hidden: false, onChange, onUndo, workoutMode: true })
+    const tree = RestTimer({ timer: { endAt: 1000 }, hidden: false, onChange, onUndo, workoutMode: true })
     const html = renderToStaticMarkup(tree!)
     expect(html).toContain('>Go</div>')
     expect(html).toContain('>Undo</button>')
+    expect(html).toContain('workout-rest-popup done')
     const cleanups = mocks.effects.map(effect => effect())
-    vi.advanceTimersByTime(10_000)
+    vi.advanceTimersByTime(2999)
     expect(onChange).not.toHaveBeenCalled()
     expect(onUndo).not.toHaveBeenCalled()
     expect(mocks.fire).toHaveBeenCalledTimes(1)
+    vi.advanceTimersByTime(1)
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith(null)
     button(tree, 'Undo').props.onClick()
     expect(onUndo).toHaveBeenCalledOnce()
     button(tree, 'Start next set now').props.onClick()
     expect(onChange).toHaveBeenCalledWith(null)
+    cleanups.forEach(cleanup => { if (cleanup) cleanup() })
+  })
+
+  it('m4: tapping outside minimizes the popup but tapping inside does not', () => {
+    const tree = RestTimer({ timer: { endAt: 121_000 }, hidden: false, onChange: vi.fn(), workoutMode: true })!
+    const target = {}
+    tree.props.onClick({ target, currentTarget: {} })
+    expect(mocks.setMinimized).not.toHaveBeenCalled()
+    tree.props.onClick({ target, currentTarget: target })
+    expect(mocks.setMinimized).toHaveBeenCalledWith(true)
+  })
+
+  it('M3: minimized rest also shows Go and clears without invoking Undo', () => {
+    mocks.minimized = true
+    const onChange = vi.fn()
+    const onUndo = vi.fn()
+    const tree = RestTimer({ timer: { endAt: 1000 }, hidden: false, onChange, onUndo, workoutMode: true })
+    expect(renderToStaticMarkup(tree!)).toContain('workout-rest-bar done')
+    const cleanups = mocks.effects.map(effect => effect())
+    vi.advanceTimersByTime(3000)
+    expect(onChange).toHaveBeenCalledWith(null)
+    expect(onUndo).not.toHaveBeenCalled()
     cleanups.forEach(cleanup => { if (cleanup) cleanup() })
   })
 

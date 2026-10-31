@@ -38,8 +38,8 @@ export default function WorkoutSetInputs({
 }: WorkoutSetInputsProps) {
   const stepWeight = (direction: -1 | 1) => {
     const value = stepWorkoutValue(weight, direction, equipmentStep(equipment), 0)
-    onValueChange('weight', String(value))
     onWeightInputChange(formatNumber(language, value))
+    onValueChange('weight', String(value))
   }
 
   return (
@@ -50,7 +50,7 @@ export default function WorkoutSetInputs({
           <button
             type="button"
             className="stepper-button"
-            aria-label={t('workout.set.weightDecrease', { set: setIndex + 1 })}
+            aria-label={weightLabel ? `${weightLabel} −` : t('workout.set.weightDecrease', { set: setIndex + 1 })}
             onClick={() => stepWeight(-1)}
           >−</button>
           <input
@@ -70,7 +70,7 @@ export default function WorkoutSetInputs({
           <button
             type="button"
             className="stepper-button"
-            aria-label={t('workout.set.weightIncrease', { set: setIndex + 1 })}
+            aria-label={weightLabel ? `${weightLabel} +` : t('workout.set.weightIncrease', { set: setIndex + 1 })}
             onClick={() => stepWeight(1)}
           >+</button>
         </div>
@@ -81,7 +81,7 @@ export default function WorkoutSetInputs({
           <button
             type="button"
             className="stepper-button"
-            aria-label={t('workout.set.repsDecrease', { set: setIndex + 1 })}
+            aria-label={repInputLabel ? `${repInputLabel} −` : t('workout.set.repsDecrease', { set: setIndex + 1 })}
             onClick={() => onValueChange('reps', String(stepWorkoutValue(reps, -1, 1, 0)))}
           >−</button>
           <input
@@ -96,7 +96,7 @@ export default function WorkoutSetInputs({
           <button
             type="button"
             className="stepper-button"
-            aria-label={t('workout.set.repsIncrease', { set: setIndex + 1 })}
+            aria-label={repInputLabel ? `${repInputLabel} +` : t('workout.set.repsIncrease', { set: setIndex + 1 })}
             onClick={() => onValueChange('reps', String(stepWorkoutValue(reps, 1, 1, 0)))}
           >+</button>
         </div>

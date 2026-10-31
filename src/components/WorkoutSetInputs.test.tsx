@@ -33,6 +33,15 @@ function renderInputs(overrides: Partial<WorkoutSetInputsProps> = {}) {
 }
 
 describe('WorkoutSetInputs', () => {
+  it.each(['en', 'es'] as const)('m11: drop stepper labels differ from main set controls in %s', language => {
+    const t = createTranslator(language)
+    const weightLabel = t('workout.set.dropWeightLabel', { set: 2 })
+    const repInputLabel = t('workout.set.dropRepsLabel', { set: 2 })
+    const { buttons } = renderInputs({ language, t, weightLabel, repInputLabel })
+    expect(buttons.map(button => button.props['aria-label'])).toEqual([
+      `${weightLabel} −`, `${weightLabel} +`, `${repInputLabel} −`, `${repInputLabel} +`,
+    ])
+  })
   it.each(['en', 'es'] as const)('preserves raw weight text and accessible set labels in %s', (language) => {
     const { props, element } = renderInputs({
       language, t: createTranslator(language), weightInput: '12,',
@@ -73,6 +82,8 @@ describe('WorkoutSetInputs', () => {
     const { props, buttons } = renderInputs({ equipment, language, weight })
     buttons[0].props.onClick?.({} as React.MouseEvent<HTMLButtonElement>)
     expect(props.onValueChange).toHaveBeenLastCalledWith('weight', lower)
+    expect(vi.mocked(props.onWeightInputChange).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(props.onValueChange).mock.invocationCallOrder[0])
     buttons[1].props.onClick?.({} as React.MouseEvent<HTMLButtonElement>)
     expect(props.onValueChange).toHaveBeenLastCalledWith('weight', upper)
     expect(props.onWeightInputChange).toHaveBeenLastCalledWith(formatted)
