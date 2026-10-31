@@ -9,6 +9,7 @@ import type { SavedUserPlan, TrainingGoal } from '../utils/profileData'
 type PlanPreview = Pick<BuiltPlan, 'startDate' | 'block' | 'source' | 'cappedForBeginner'>
 
 type Props = {
+  aiEnabled?: boolean
   signedOut: boolean
   goal: TrainingGoal | null
   activePlan: SavedUserPlan | null
@@ -26,6 +27,7 @@ type Props = {
 }
 
 export default function MyPlanSection({
+  aiEnabled = false,
   signedOut,
   goal,
   activePlan,
@@ -129,9 +131,12 @@ export default function MyPlanSection({
         </div>
       )}
       {!signedOut && !preview && !activePlan && goal && (
-        <button type="button" className="primary-button" onClick={onGenerate} disabled={loading}>
-          {building ? t('profile.plan.building') : t('profile.plan.generate')}
-        </button>
+        <>
+          {!aiEnabled && <p className="profile-data-hint">{t('profile.plan.aiOff')}</p>}
+          <button type="button" className="primary-button" onClick={onGenerate} disabled={loading}>
+            {building ? t('profile.plan.building') : t('profile.plan.generate')}
+          </button>
+        </>
       )}
       {building && (!preview || confirmingRegeneration) && (
         <p className="profile-data-hint" role="status">{t('profile.plan.building')}</p>

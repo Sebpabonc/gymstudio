@@ -203,7 +203,10 @@ Deno.serve(async (req) => {
   } else if (feature === 'block_plan') {
     const plan = body.plan as { days?: Array<{ exercises?: Array<{ exerciseId?: string }> }> } | undefined
     if (!plan || !Array.isArray(plan.days) || JSON.stringify(plan).length > 15000) return json(400, { error: 'invalid_plan' })
-    const { data: goals } = await userClient.from('training_goals').select('*').maybeSingle()
+    const { data: goals } = await userClient
+      .from('training_goals')
+      .select('goal, days_per_week, experience, activity_level, session_minutes, equipment')
+      .maybeSingle()
     if (!goals) return json(400, { error: 'goals_required' })
     const { data: metrics } = await userClient
       .from('body_metrics')

@@ -424,6 +424,39 @@ button {
   padding: 18px;
 }
 
+.profile-ai-setting {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.profile-ai-setting legend {
+  padding-inline: 4px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.profile-ai-setting label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+
+.profile-ai-setting input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--nav-active);
+}
+
+.profile-ai-setting p {
+  margin: 0;
+  color: var(--muted);
+}
+
 .account-screen h2 {
   margin: 0;
   color: var(--text);
@@ -4509,6 +4542,50 @@ button[class] {
   align-items: end;
   justify-items: center;
   background: rgba(0, 0, 0, 0.62);
+}
+
+.ai-permission-overlay {
+  align-items: center;
+  padding: 16px;
+}
+
+.ai-permission-sheet {
+  display: block;
+  min-height: 0;
+  max-height: min(90dvh, 800px);
+  overflow-y: auto;
+  border-bottom: 1px solid var(--line);
+  border-radius: 26px;
+}
+
+.ai-consent-details {
+  display: grid;
+  gap: 10px;
+}
+
+.ai-consent-details h3,
+.ai-consent-details h4,
+.ai-consent-details p,
+.ai-consent-details ul {
+  margin: 0;
+}
+
+.ai-consent-details h3 {
+  color: var(--text);
+}
+
+.ai-consent-details h4 {
+  color: var(--text);
+}
+
+.ai-consent-details p,
+.ai-consent-details ul {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ai-consent-details ul {
+  padding-left: 20px;
 }
 
 .help-ai-sheet {

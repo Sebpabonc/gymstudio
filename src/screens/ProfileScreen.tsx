@@ -4,7 +4,14 @@ import { useAuth } from '../auth/AuthProvider'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { useT } from '../i18n'
 import ProfileDataSections from './ProfileDataSections'
-import { loadExercises, loadRestBetweenSets, saveRestBetweenSets } from '../utils/storage'
+import {
+  getAskExerciseAiConsent,
+  loadExercises,
+  loadRestBetweenSets,
+  saveRestBetweenSets,
+  setAskExerciseAiConsent,
+} from '../utils/storage'
+import { requestAiConsent } from '../ai/gateway'
 import type { Exercise } from '../types'
 
 export default function ProfileScreen({ onClose }: { onClose: () => void }) {
@@ -16,6 +23,17 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [restBetweenSets, setRestBetweenSets] = useState(loadRestBetweenSets)
+  const [aiConsent, setAiConsent] = useState(getAskExerciseAiConsent)
+
+  useEffect(() => {
+    const syncConsent = () => setAiConsent(getAskExerciseAiConsent())
+    window.addEventListener('gym-studio:ai-consent-changed', syncConsent)
+    window.addEventListener('storage', syncConsent)
+    return () => {
+      window.removeEventListener('gym-studio:ai-consent-changed', syncConsent)
+      window.removeEventListener('storage', syncConsent)
+    }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -67,6 +85,24 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
         <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
         {name && <p className="profile-name">{name}</p>}
         <p className="profile-email">{user?.email}</p>
+        <fieldset className="profile-ai-setting">
+          <legend>{t('privacy.ai.title')}</legend>
+          <label>
+            <input
+              type="checkbox"
+              checked={aiConsent === 'enabled'}
+              onChange={(event) => {
+                if (event.target.checked) requestAiConsent()
+                else setAskExerciseAiConsent('declined')
+              }}
+            />
+            {t('privacy.ai.toggle')}
+          </label>
+          <p>{t('privacy.ai.help')}</p>
+          {aiConsent === 'declined' && (
+            <p role="status" aria-live="polite">{t('privacy.ai.offConfirm')}</p>
+          )}
+        </fieldset>
         <fieldset className="profile-rest-setting">
           <legend>{t('profile.restBetweenSets')}</legend>
           <p>{t('profile.restBetweenSetsHelp')}</p>
@@ -129,7 +165,7 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
         </button>
         {error && <p className="account-error" role="alert">{error}</p>}
       </CollapsibleCard>
-      <ProfileDataSections />
+      <ProfileDataSections aiEnabled={aiConsent === 'enabled'} />
     </>
   )
 }

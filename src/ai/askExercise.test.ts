@@ -1,10 +1,18 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }))
+const { invoke, getConsent } = vi.hoisted(() => ({ invoke: vi.fn(), getConsent: vi.fn() }))
 
 vi.mock('../lib/supabaseClient', () => ({
   getSupabaseClient: vi.fn(async () => ({ functions: { invoke } })),
 }))
+
+vi.mock('../utils/storage', () => ({
+  getAskExerciseAiConsent: getConsent,
+}))
+
+beforeEach(() => {
+  getConsent.mockReturnValue('enabled')
+})
 
 afterEach(() => {
   vi.resetModules()
@@ -46,5 +54,13 @@ describe('askExercise', () => {
     const { askExercise } = await import('./askExercise')
 
     await expect(askExercise('barbell-bench-press', 'How do I fix my form?')).rejects.toThrow(message)
+  })
+
+  it.each(['unknown', 'declined'] as const)('does not reach the gateway when consent is %s', async (choice) => {
+    getConsent.mockReturnValue(choice === 'unknown' ? null : 'declined')
+    const { askExercise } = await import('./askExercise')
+
+    await expect(askExercise('barbell-bench-press', 'Where should I feel this?')).rejects.toThrow()
+    expect(invoke).not.toHaveBeenCalled()
   })
 })
