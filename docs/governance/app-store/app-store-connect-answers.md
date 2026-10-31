@@ -1,6 +1,6 @@
 # App Store Connect answers (DRAFT)
 
-Governancer, 2026-10-31. For the PO to enter with his own login, after approval. Answers assume the gaps in `gaps-for-tech-lead.md` are closed. Not legal advice.
+Governancer, 2026-10-31; updated with the PO's answers of 2026-11-01. For the PO to enter with his own login, after approval. Answers assume the gaps in `gaps-for-tech-lead.md` are closed. Not legal advice; no lawyer review (PO decision).
 
 ## 1. App Privacy (nutrition label)
 
@@ -39,44 +39,45 @@ Sources: `https://developer.apple.com/help/app-store-connect/reference/app-infor
 |---|---|---|
 | Parental controls | No | None |
 | Age assurance | No | A checkbox doesn't "confirm an individual's age" |
-| **Unrestricted web access** | **No, only after G12.** Today the answer would be Yes = **16+** | Google Images opens in an in-app browser |
+| **Unrestricted web access** | **No, only after G12.** Today the truthful answer would be Yes. The final rating is 18+ either way | Google Images opens in an in-app browser |
 | User-generated content | No | Notes and feedback are private, no "broad distribution" |
 | Messaging and chat | No | "Users can directly communicate with one another": no. AI chat isn't user to user. Answer any AI question truthfully: yes |
 | Advertising | No | None |
 | Social media | No | None |
-| **Medical or treatment information** | **None** | App declines diagnosis; AI says see a professional. If you'd read "guidance around the management of… health and wellness" to include plans: Infrequent = 13+. Lawyer/PT opinion welcome |
+| **Medical or treatment information** | **None** | App declines diagnosis; AI says see a professional. If you'd read "guidance around the management of… health and wellness" to include plans: Infrequent = 13+. The final rating is 18+ either way |
 | **Health or wellness topics** | **Yes** | Training, goals, fat-loss, "self-care or lifestyle recommendations" = 9+ |
 | Violence, sexuality, nudity, mature themes, profanity, horror, alcohol, gambling, contests, loot boxes, weapons | None | |
 | Made for Kids | No | |
 
-**Result:** calculated about 9+. **Override:** "If a EULA has minimum age requirements above Apple's calculated rating, you must override to a rating that adheres to the requirements." So if the Terms say 16, choose **16+**; if 18, choose **18+** (PO question 5). The override applies in all regions, and the content descriptors still reflect the answers.
-Age Suitability URL: optional, skip. Region rules (for example, Texas age-verification law reported by a secondary source): ⚠️ VERIFY with lawyer.
+**Result:** calculated about 9+. **Override:** "If a EULA has minimum age requirements above Apple's calculated rating, you must override to a rating that adheres to the requirements." The Terms say 18 (PO 2026-11-01), so **choose 18+**. The override applies in all regions, and the content descriptors still reflect the answers.
+Age Suitability URL: optional, skip. Region rules (for example, Texas age-verification law reported by a secondary source): ⚠️ VERIFY; relevant now that the USA is a launch market.
 
 ## 3. Export compliance
 
 Source: `https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations`, read 2026-10-31.
 
-**Answer: uses only exempt encryption.** Add `ITSAppUsesNonExemptEncryption` = `NO` in both Info.plist files (G14). Apple: built-in encryption is "exempt", such as "HTTPS connections using URLSession". The app uses HTTPS through the WebView and system stack. Grep found no CryptoKit or CommonCrypto in app Swift. Web `crypto.randomUUID()` only creates IDs. `pgcrypto` runs on the server. Apple's page says nothing about France; ⚠️ VERIFY if the form asks. The app also doesn't store passwords itself.
+**Answer: uses only exempt encryption.** Add `ITSAppUsesNonExemptEncryption` = `NO` in both Info.plist files (G14). Apple: built-in encryption is "exempt", such as "HTTPS connections using URLSession". The app uses HTTPS through the WebView and system stack. Grep found no CryptoKit or CommonCrypto in app Swift. Web `crypto.randomUUID()` only creates IDs. `pgcrypto` runs on the server. France does not apply (EU left out). The app also doesn't store passwords itself.
 
 ## 4. Content rights
 
 "Does your app contain, show, or access third-party content?"
 
-- **Exercise catalogue, plans, cues:** drafted by the PT agent, approved by PO. Own content. ⚠️ Copyright position of AI-assisted text: lawyer.
-- **Blocks 1 to 5, `origin: 'coach'`:** in the public bundle (G7). Rights unknown; PO question 10. **Remove or license before answering.**
+- **Exercise catalogue, plans, cues:** drafted by the AI specialist agent, approved by the owner. Own content. ⚠️ Copyright position of AI-assisted text is unsettled and no lawyer checks it: PO accepts this risk.
+- **Blocks 1 to 5, `origin: 'coach'`:** in the public bundle (G7). PO confirmed permission to use them (2026-11-01); public distribution is question 5. **Remove from the bundle before answering.**
 - **Google Images links:** "access" third-party content. After G12 they open in Safari, outside the app. **Answer No after G7 and G12.** Otherwise Yes, with rights you don't hold.
 - **AI output:** generated per request; not third-party content that you're licensing per se. Mention in notes.
 - **Icons and fonts:** system fonts in `styles.css` (Arial etc.); `docs/reference/branding.png` source unknown. PO confirms the final icon.
 
 ## 5. EU Digital Services Act trader status
 
+**PO decided 2026-11-01: EU left out at launch**, so no trader details are published. Exclude all 27 EU countries in availability (section 10). ⚠️ VERIFY whether App Store Connect still asks; if it does, answer what its page says for an app not distributed in the EU. Revisit before any EU launch. Background:
+
 Source: `https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements/`, and upcoming requirements, read 2026-10-31.
 
 - Applies if distributed in the EU. Apple: non-traders' consumers are told consumer rights don't apply; apps without verified status were removed from Feb 17, 2025. Declaring is required.
 - Self-assessment factors: revenue (IAP, paid apps, ads), commercial practices such as promotion, VAT, professional capacity. "A hobbyist with no intent to commercialize may not be a trader."
-- **Assessment:** with Pro and a marketing plan in place, **probably trader**, even if free on day one. Lawyer confirms.
+- **Assessment for later:** with Pro and a marketing plan in place, **probably trader**, even if free on day one.
 - **Effect:** individuals give an address or P.O. Box, phone, email, verified and **shown publicly on the EU product page**. Organisations show the D-U-N-S address.
-- **PO decision** (question 16): accept, use a company or P.O. box, or exclude the 27 EU countries at launch.
 
 ## 6. Sign in with Apple (guideline 4.8)
 
@@ -84,12 +85,14 @@ Apple: apps using "a third-party or social login service (such as… Google Sign
 
 **GymStudio uses Google (`src/auth/`) to set up the primary account, so 4.8 applies.** Email and password does not fix it: it's the app's own account system, not a login service with private-email support.
 
+**PO chose A (2026-11-01).**
+
 | Option | Work | Consequences |
 |---|---|---|
-| **A. Add Sign in with Apple (recommended, and issue #384's plan)** | Supabase Apple provider. Native (`signInWithIdToken`, needs an approved plugin since Capacitor has none installed) needs no secret rotation. Web OAuth needs a new client secret about every 6 months. Enable capability, entitlements file (none exists today), Team ID, key, Services ID if web | Name comes only on first authorization: capture it. Register email source for relay addresses (ties to G6). Add token revocation to G1. Update policy, label already covers Name. Equal prominence |
-| **B. Hide Google in the native app** | `isNativeApp()` in `LoginScreen` | 4.8 not triggered. Email-only on iOS. Google users, including possibly the PO, need a password, and G10 must work. Listing's "sign in with Google" must go |
+| **A. Add Sign in with Apple (chosen)** | Supabase Apple provider. Native (`signInWithIdToken`, needs an approved plugin since Capacitor has none installed) needs no secret rotation. Web OAuth needs a new client secret about every 6 months. Enable capability, entitlements file (none exists today), Team ID, key, Services ID if web | Name comes only on first authorization: capture it. Register email source for relay addresses (ties to G6). Add token revocation to G1. Update policy, label already covers Name. Equal prominence |
+| B. Hide Google in the native app (not chosen) | `isNativeApp()` in `LoginScreen` | 4.8 not triggered. Email-only on iOS |
 
-PO decides (question 8). Nothing here is verified on a device.
+Nothing here is verified on a device.
 
 ## 7. Account deletion
 
@@ -107,7 +110,7 @@ PO decides (question 8). Nothing here is verified on a device.
 | 5.1.2(ii) | "may not be repurposed without further consent" | Training a future model or analytics on user data needs new consent |
 | 5.1.1(ii) | withdraw consent | **Fails today.** G3 |
 | 5.1.1(i) | privacy policy link in metadata and in app | **Missing.** G5 |
-| 1.2 | "AI content creation apps" need moderation tools | Not applicable in my reading: AI text is private, not published. The gateway restricts to fitness and caps question length. Lawyer not needed; Tech Lead confirm |
+| 1.2 | "AI content creation apps" need moderation tools | Not applicable in my reading: AI text is private, not published. The gateway restricts to fitness and caps question length. Tech Lead confirm |
 | 2.3 | Metadata including privacy information must be accurate | See listing check in `README.md` |
 
 ## 9. Privacy manifest
@@ -151,3 +154,24 @@ If a later scan finds `UserDefaults` in the app, the reason is `CA92.1` (app onl
 ```
 
 **`ios/App/RestTimerWidget/PrivacyInfo.xcprivacy`** (Widget target): the widget collects nothing, has no network and no required-reason API, so all empty: `NSPrivacyTracking` false, and empty `NSPrivacyTrackingDomains`, `NSPrivacyAccessedAPITypes`, `NSPrivacyCollectedDataTypes`. Apple requires a manifest only when such an API is used, so this is optional and defensive.
+
+## 10. Availability and seller name
+
+Source: `https://developer.apple.com/help/app-store-connect/manage-your-apps-availability/manage-availability-for-your-app-on-the-app-store`, read 2026-10-31. Pricing and Availability → Set Up Availability → **Specific Countries or Regions**. **Leave "future countries or regions" unticked.**
+
+| Group | Decision | Status |
+|---|---|---|
+| Australia; Singapore, Japan, South Korea, India; USA | Include | PO confirmed |
+| Latin America | Include | PO confirmed, except below |
+| Hong Kong, Venezuela | **Recommend leave out**: OpenAI doesn't list them | PO question 2, G26 |
+| Brazil | **Recommend second stage**: no Portuguese | PO question 3 |
+| Mainland China | **Leave out** | Apple: "some apps" need an ICP Filing Number; status "ICP Filing Number Missing" means "Your app isn't available in China mainland" (`.../reference/app-information/app-information`, `.../app-and-submission-statuses`, read 2026-10-31). Apple doesn't define "some". OpenAI also not offered. PIPL local representative |
+| Macau, Cuba | Leave out | OpenAI doesn't list them. ⚠️ VERIFY Cuba appears at all |
+| EU 27 | Leave out | PO. UK, Canada, New Zealand also not selected, as not named |
+
+⚠️ VERIFY when selecting: any extra country-specific seller details the form asks for. Do not give a street address in a repo file.
+
+**Seller name:** Apple: "your personal legal name will be listed as the seller on the App Store" (`https://developer.apple.com/support/enrollment/`, read 2026-10-31). It comes from the enrollment and can't be set to "Sebastian Pabon" unless that's the legal name. PO checks (question 1), and the documents must let a reader link the two.
+
+**Age:** 18+ (section 2). **Price:** free. **Devices:** iPhone only (G15). **Name:** GymStudio: AI Trainer (G9). **URLs:** Support, Privacy: G5.
+

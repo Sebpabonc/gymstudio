@@ -1,11 +1,11 @@
 # Notes for Apple's reviewer (DRAFT)
 
-Governancer, 2026-10-31. Paste the text between the rules into App Store Connect → App Review Information → Notes, after every condition below is true. Guideline 2.3.1(a):
+Governancer, 2026-10-31; updated 2026-11-01. Paste the text between the rules into App Store Connect → App Review Information → Notes, after every condition below is true. Guideline 2.3.1(a):
 "generic descriptions will be rejected"; 2.1(a): "include demo account info (and turn on your back-end service!) if your app includes a login."
 
 ## Conditions before pasting
 
-- G1 to G10 in `gaps-for-tech-lead.md` are done. G4 decides the sign-in sentence.
+- G1 to G10 and G26 in `gaps-for-tech-lead.md` are done. If the PO launches without email sign-up (question 4), rewrite the sign-in and deletion paragraphs.
 - QAer has run the exact path below on a real device, on any weekday (G7).
 - AI monthly budget is enough for review (G18).
 
@@ -22,10 +22,10 @@ Governancer, 2026-10-31. Paste the text between the rules into App Store Connect
 
 ---
 
-GymStudio is a training log and planner for gym-goers: look up exercises, follow a 6-week plan, log sets (weight and reps), and see progress. English and Spanish (toggle in the header).
+GymStudio is a training log and planner for gym-goers aged 18 and over: look up exercises, follow a 6-week plan, log sets (weight and reps), and see progress. English and Spanish (toggle in the header). iPhone only. Free, no purchases. "AI trainer" is the name of a software feature; no human trainer is involved.
 
 SIGN-IN
-Demo account: provided in the Sign-In Information fields above. It has a plan and sample workouts. You can also tap "Try the demo without an account" on the sign-in screen; demo mode uses sample data and sends nothing. Sign in with Google [and Sign in with Apple, see G4] are available too.
+Demo account: provided in the Sign-In Information fields above. It has a plan and sample workouts. You can also tap "Try the demo without an account" on the sign-in screen; demo mode uses sample data and sends nothing. Sign in with Apple and Sign in with Google are available too.
 
 CORE FEATURES
 1. Today tab: the current plan, weekly progress and exercises.
@@ -53,7 +53,7 @@ The app does not request notifications, location, camera, contacts, photos, Heal
 NETWORK AND OFFLINE
 Logging works offline. Sign-in, sync, plans and AI need a connection. Backend: Supabase. No special network or hardware is needed.
 
-Contact for review: [PO: name, phone, email in App Store Connect only]
+Contact for review: Sebastian Pabon, js.pabonc979@gmail.com. [PO: phone in the App Store Connect contact fields only, never here]
 
 ---
 
@@ -63,4 +63,5 @@ Contact for review: [PO: name, phone, email in App Store Connect only]
 - **4.2 risk (minimum functionality):** the app is a web app in Capacitor and the same app is live on GitHub Pages. Mention native value truthfully: Live Activity, offline logging, native sign-in, if built.
 - **Screenshots** must show the final UI (#381/#382 still WIP); `docs/marketing/2026-10-18-app-store-screenshots.html` are mockups.
 - Keep the demo-mode link working under `capacitor://` (G7).
-- iPad: if iPad stays enabled, review may run there (G15).
+- iPhone only (PO): `TARGETED_DEVICE_FAMILY` must be changed first, or review may run on iPad (G15).
+- Availability and OpenAI's country list: G26. The reviewer may be anywhere; the AI still works, since calls leave from the server.
