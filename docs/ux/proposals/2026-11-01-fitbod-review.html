@@ -56,7 +56,7 @@ section+section{border-top:1px solid var(--line);margin-top:24px}
 .lesson b{display:block;margin-bottom:3px}
 .lesson span{color:var(--muted);font-size:.95rem}
 .tag{display:inline-block;font-size:.72rem;font-weight:650;padding:2px 7px;border-radius:6px;white-space:nowrap;background:var(--panel2);color:var(--muted);vertical-align:.1em}
-.v{background:var(--good-soft);color:var(--good)}.s{background:rgba(160,180,215,.14);color:#b5c4dc}.c{background:var(--warn-soft);color:var(--warn)}.d{background:var(--bad-soft);color:var(--bad)}
+.h{background:var(--good);color:#0f0f10}.v{background:var(--good-soft);color:var(--good)}.s{background:rgba(160,180,215,.14);color:#b5c4dc}.c{background:var(--warn-soft);color:var(--warn)}.d{background:var(--bad-soft);color:var(--bad)}
 .legend{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:12px}
 .legend div{font-size:.86rem;color:var(--muted)}
 .cmp{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px;background:var(--soft)}
@@ -132,29 +132,77 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
 <header>
   <div class="eyebrow">UXer · Competencia</div>
   <h1>Fitbod, de pies a cabeza</h1>
-  <p class="lede"><strong>Fitbod gana antes y alrededor del entreno:</strong> primer uso, videos, equipo y recordatorios. <strong>GymStudio puede ganar dentro del entreno y en confianza</strong>, si primero cerramos lo que bloquea el lanzamiento.</p>
+  <p class="lede"><strong>Fitbod gana antes y alrededor del entreno:</strong> primer uso guiado, videos, equipo y recordatorios. Aun así, también pide cuenta antes de mostrar un entreno. <strong>GymStudio puede ganar dentro del entreno y en confianza</strong>, si primero cerramos lo que bloquea el lanzamiento.</p>
   <div class="stats">
     <div class="stat"><b>4,8</b><span>289 mil calificaciones en EE. UU.</span></div>
-    <div class="stat"><b>US$15,99</b><span>al mes · US$95,99 al año</span></div>
+    <div class="stat"><b>US$24,99</b><span>al mes en la app · US$149,99 al año. En tienda y FAQ: 15,99 y 95,99</span></div>
     <div class="stat"><b>7 días</b><span>de prueba; pasa a pago solo</span></div>
     <div class="stat"><b>#36</b><span>Salud y fitness, gratis, EE. UU.</span></div>
   </div>
-  <p class="meta">Propuesta, sin aprobar. Fuentes leídas el 31-10-2026. No instalé Fitbod ni creé cuentas.</p>
+  <p class="meta">Propuesta, sin aprobar. Actualizada el 31-10-2026 tras usar la app en tu iPhone, con tu cuenta y tu prueba. Yo no creé cuentas, no inicié sesión ni compré nada.</p>
+  <p class="meta"><b>Después de este reporte:</b> el PR #382 (Big Done) se fusionó el 01-11-2026 y ya está en producción. Donde diga que sigue abierto, léelo como publicado. Sus toques vienen de la propuesta; no los volví a contar.</p>
 </header>
 </div>
 
 <nav aria-label="Secciones"><div>
-  <a href="#lecciones">Lecciones</a><a href="#recs">Qué haría</a><a href="#decidir">Decidir</a><a href="#quien">Quién es</a><a href="#inicio">Primer uso</a><a href="#genera">Cómo genera</a><a href="#registro">Registro</a><a href="#progreso">Progreso</a><a href="#biblio">Ejercicios</a><a href="#diseno">Diseño</a><a href="#confianza">Confianza</a><a href="#tienda">App Store</a><a href="#vs">Versus</a><a href="#noverif">Sin verificar</a><a href="#fuentes">Fuentes</a>
+  <a href="#iphone">En el iPhone</a><a href="#lecciones">Lecciones</a><a href="#recs">Qué haría</a><a href="#decidir">Decidir</a><a href="#quien">Quién es</a><a href="#inicio">Primer uso</a><a href="#genera">Cómo genera</a><a href="#registro">Registro</a><a href="#progreso">Progreso</a><a href="#biblio">Ejercicios</a><a href="#diseno">Diseño</a><a href="#confianza">Confianza</a><a href="#tienda">App Store</a><a href="#vs">Versus</a><a href="#noverif">Sin verificar</a><a href="#fuentes">Fuentes</a>
 </div></nav>
 
 <main class="wrap">
 
-<section id="lecciones" style="border:0;margin:0">
+<section id="iphone" style="border:0;margin:0">
+  <h2>Lo que cambió al usar la app</h2>
+  <p class="sub">Usé Fitbod en tu iPhone con iPhone Mirroring, en inglés porque tu teléfono está en inglés. Tu cuenta nueva: prueba de 7 días y 0 entrenos.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Tema</th><th>El primer reporte decía</th><th>Lo que vi</th></tr></thead>
+    <tbody>
+      <tr><td><b>Cuenta</b></td><td>Muestra un entreno antes de comprometerte</td><td><b>Pide cuenta después de las preguntas y antes de mostrar un entreno.</b></td></tr>
+      <tr><td><b>Cuestionario</b></td><td>14 o unos 30 pasos; empieza por la edad</td><td><b>11 respuestas hasta la cuenta.</b> Empieza por el objetivo. No pregunta la edad antes de la cuenta</td></tr>
+      <tr><td><b>Toques, ejercicio de 3 series</b></td><td>4–5</td><td><b>5, o 6 con calentamiento:</b> abrir, una por serie y cerrar</td></tr>
+      <tr><td><b>Cambio de peso</b></td><td>No se sabía si se arrastra</td><td><b>Pasa de inmediato a las series siguientes</b>, no al calentamiento</td></tr>
+      <tr><td><b>Tras la última serie</b></td><td>No se sabía</td><td><b>No avanza.</b> Esfuerzo opcional, luego vuelve a la lista</td></tr>
+      <tr><td><b>Descanso</b></td><td>Empieza al registrar</td><td><b>Estaba apagado</b> hasta que lo encendí. El tiempo cambia por ejercicio</td></tr>
+      <tr><td><b>Fuera de la app</b></td><td>Solo si encuentras un ajuste</td><td><b>Actividad en vivo</b> con la cuenta atrás y luego la siguiente serie. No pude comprobar el aviso con el teléfono bloqueado</td></tr>
+      <tr><td><b>Log All Sets</b></td><td>Registra lo que no confirmaste</td><td><b>Pregunta antes</b>, con opción de no volver a preguntar</td></tr>
+      <tr><td><b>Superseries</b></td><td>No se sabía el flujo</td><td><b>Una serie, pasa al compañero, descanso tras el par, vuelve al primero.</b> Casi nuestra opción A</td></tr>
+      <tr><td><b>Por qué este peso</b></td><td>No encontrado en público</td><td><b>No está por ejercicio</b> en cuenta nueva. Solo una tarjeta general sobre pesos iniciales</td></tr>
+      <tr><td><b>IA en la app</b></td><td>Sin señales de chat</td><td><b>Hay un chat con IA para lesiones y limitaciones</b> (beta), en My Plan. Lo leí sin enviarle nada</td></tr>
+      <tr><td><b>Precio</b></td><td>US$15,99 al mes, US$95,99 al año</td><td><b>La pantalla de pago mostró US$24,99 y US$149,99.</b> No sé por qué difiere</td></tr>
+      <tr><td><b>Pantalla de pago</b></td><td>Antes de empezar, sin confirmar</td><td><b>Tras entrar: resumen del plan y pago. La X la cierra</b> y la app funciona</td></tr>
+      <tr><td><b>Al terminar</b></td><td>Segundo muro de pago tras el resumen, según un video</td><td><b>Sin muro</b> con la prueba activa. Hoja de cierre, resumen con confeti y pantalla de racha</td></tr>
+      <tr><td><b>Siguiente entreno</b></td><td>Sesión nueva cada vez</td><td><b>Cambió sin explicación:</b> otros ejercicios; press cerrado de 8 × 32,5 a 10 × 35</td></tr>
+      <tr><td><b>Nombre del estimado</b></td><td>Lo cambió por “Estimated Strength”</td><td><b>La tarjeta en la app dice “Est. 1 Rep Max”</b></td></tr>
+    </tbody>
+  </table></div>
+  <div class="lists">
+    <div class="card"><h3>Lo que me gustó</h3><ul class="x good">
+      <li><b>Voz de entrenador</b> en el primer uso: preguntas como mensajes, y una respuesta corta a cada una</li>
+      <li><b>Notificaciones con un motivo claro</b> (ver el entreno del día) y un “más tarde” de verdad</li>
+      <li><b>Una tarjeta de ayuda por función</b>, la primera vez que llegas a ella</li>
+      <li><b>Corregir es fácil:</b> tocas la serie registrada y la editas ahí mismo</li>
+      <li><b>Más opciones por ejercicio:</b> notas, calentamiento, kg o lb, más, menos o nunca</li>
+      <li><b>Prueba de fuerza opcional:</b> 5 minutos sin equipo, plancha, sentadilla y flexión</li>
+      <li><b>Calculadora de discos</b> que dibuja qué poner en cada lado</li>
+    </ul></div>
+    <div class="card"><h3>Lo que no</h3><ul class="x bad">
+      <li><b>Hay que abrir y cerrar cada ejercicio</b>, salvo en superseries</li>
+      <li><b>El botón no dice qué guarda:</b> no repite peso ni reps</li>
+      <li><b>Sin botón de Deshacer</b></li>
+      <li><b>Descartar un entreno conservó mis cambios</b> de peso, orden y superserie</li>
+      <li><b>La barra de pestañas se encoge</b> y “Start Workout” ocupa su lugar: empecé un entreno por error</li>
+      <li><b>Reemplazos raros:</b> para un ejercicio de hombro posterior ofreció Turkish get-up y handstand push-up</li>
+      <li><b>Detalles sueltos:</b> logros en lb con el plan en kg; meta de 3 días con plan de 4</li>
+    </ul></div>
+  </div>
+  <div class="note"><b>Efectos en tu teléfono.</b> Con tu permiso quedó guardado un entreno de prueba del 1 de noviembre: press de banca, 8 × 42,5 kg. Afecta las estimaciones de Fitbod para ese ejercicio. Moví “Dip” sin querer, puse 30 kg de prueba, armé una superserie, encendí el temporizador y empecé dos entrenos. Descarté ambos y dejé el peso, el orden y el temporizador como estaban. <b>Revisa My Plan:</b> ahora dice ganar músculo, 4 días, intermedio y gimnasio grande, igual que mis respuestas de prueba, y el siguiente entreno cambió a Lower Body Day. No sé si esas respuestas reemplazaron las tuyas. Un aviso de iPhone Mirroring sobre la cámara apareció una vez; no lo cuento como comportamiento de Fitbod.</div>
+</section>
+
+<section id="lecciones">
   <h2>Las 5 lecciones</h2>
   <div class="lessons">
-    <div class="lesson"><div><b>Ver antes de comprometerse.</b><span>Fitbod te muestra un entreno armado antes de pedirte pagar. Nosotros, después de “Entendido”, mostramos una pantalla casi vacía que pide iniciar sesión, y luego un plan que empieza el próximo lunes.</span></div></div>
+    <div class="lesson"><div><b>Primero las preguntas, y el entreno enseguida.</b><span>Fitbod también pide cuenta antes de mostrar un entreno, pero se la gana con 11 respuestas rápidas en voz de entrenador. Nosotros, después de “Entendido”, mostramos una pantalla casi vacía que pide iniciar sesión, y luego un plan que empieza el próximo lunes.</span></div></div>
     <div class="lesson"><div><b>El plan estable es una ventaja de verdad.</b><span>Fitbod añadió “Focus Exercises” (ciclos de 4 semanas) y un modo “más constante” porque la gente quería repetir y medir. Nuestros bloques de 6 semanas ya resuelven eso; nos faltan salidas fáciles: poco tiempo, máquina ocupada.</span></div></div>
-    <div class="lesson"><div><b>Con el botón grande íbamos bien.</b><span>Su pantalla también termina en un gran botón de registrar. Nos da ventaja: no pedir esfuerzo, repetir el peso en el botón y avisar bien al terminar el descanso. Lo suyo falla justo ahí en el Apple Watch.</span></div></div>
+    <div class="lesson"><div><b>Con el botón grande íbamos bien.</b><span>Su pantalla también termina en un gran botón de registrar. Nos da ventaja: 3 toques contra 5 o 6, no pedir esfuerzo y repetir el peso en el botón. El aviso de descanso ya no es una ventaja clara: tienen Actividad en vivo.</span></div></div>
     <div class="lesson"><div><b>Los videos son lo más querido.</b><span>Es el elogio más frecuente en las reseñas. Nosotros abrimos Google Imágenes, lo que además puede subir la edad recomendada de la app. Merece reabrir la propuesta de imágenes.</span></div></div>
     <div class="lesson"><div><b>“AI Personal Trainer” vende, pero no nos sirve.</b><span>Fitbod lo pone en la tienda y sus Términos dicen que no actúa como entrenador personal. Tú ya decidiste “entrenador con IA”. Nuestra frase fuerte es otra: el peso de hoy, y por qué.</span></div></div>
   </div>
@@ -164,43 +212,45 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
   <h2>Qué haría, en orden</h2>
   <p class="sub">Impacto, esfuerzo (S, M, L) y quién debe intervenir. <b>PT</b> es una regla de entreno o un mensaje sobre fitness. <b>IA</b> toca las reglas de <code>docs/ux/README.md</code>.</p>
   <div class="card">
-    <div class="rec top"><div class="n">1</div><div><b>Probar antes de crear cuenta</b><p>Cinco preguntas, tu plan y el entreno de hoy a la vista. Cuenta solo para guardar. Sin IA ni datos fuera del teléfono en este paso.</p><div class="chips"><span class="tag imp">Impacto muy alto</span><span class="tag eff">Esfuerzo L</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag">Gobernanza</span><span class="tag when">Lanzamiento</span></div></div></div>
+    <div class="rec top"><div class="n">1</div><div><b>Primero las preguntas, y el entreno de hoy</b><p><b>Cambia:</b> Fitbod también exige cuenta. Cinco preguntas en voz de entrenador, cuenta, y el entreno de hoy, no el próximo lunes. Probar sin cuenta queda para después, como diferencia frente a ellos. Sin IA ni datos fuera del teléfono antes de la cuenta.</p><div class="chips"><span class="tag imp">Impacto muy alto</span><span class="tag eff">Esfuerzo M; sin cuenta, L</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag">Gobernanza</span><span class="tag when">Base al lanzar</span></div></div></div>
     <div class="rec top"><div class="n">2</div><div><b>Cerrar los bloqueos de confianza, mejor que ellos</b><p>Borrar cuenta, interruptor de IA y enlaces en Perfil → Privacidad e IA, a dos toques. Permiso de IA una vez, con un “no” real. Ya está en el issue #384.</p><div class="chips"><span class="tag imp">Impacto muy alto, obligatorio</span><span class="tag eff">Esfuerzo M</span><span class="tag">IA</span><span class="tag">Tech Lead</span><span class="tag">Gobernanza</span><span class="tag when">Lanzamiento</span></div></div></div>
     <div class="rec top"><div class="n">3</div><div><b>Reescribir la ficha de la tienda</b><p>Sin “personal trainer”, 8 imágenes, una idea por imagen, abrir con el porqué y ficha real en español.</p><div class="chips"><span class="tag imp">Impacto alto</span><span class="tag eff">Esfuerzo S</span><span class="tag">PT</span><span class="tag">Gobernanza</span><span class="tag when">Lanzamiento</span></div></div></div>
     <div class="rec top"><div class="n">4</div><div><b>Imágenes de ejercicios dentro de la app</b><p>Quitar Google Imágenes para el lanzamiento; imágenes propias con licencia justo después. Nunca sus videos.</p><div class="chips"><span class="tag imp">Impacto alto</span><span class="tag eff">Esfuerzo M + costo</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag">Tu presupuesto</span><span class="tag when">Lanzamiento / después</span></div></div></div>
-    <div class="rec top"><div class="n">5</div><div><b>Mostrar el porqué en la tarjeta de Hecho</b><p>Una línea sobre el botón: hoy está escondido tras tocar la señal de técnica. Es nuestra diferencia y hay que verla sin buscarla.</p><div class="chips"><span class="tag imp">Impacto alto</span><span class="tag eff">Esfuerzo S</span><span class="tag">PT</span><span class="tag">IA</span><span class="tag when">Lanzamiento o v1.1</span></div></div></div>
+    <div class="rec top"><div class="n">5</div><div><b>Mostrar el porqué en la tarjeta de Hecho</b><p><b>Sube:</b> en la app de Fitbod no aparece por ejercicio. Una línea sobre el botón: hoy está escondido tras tocar la señal de técnica. Es nuestra diferencia más visible.</p><div class="chips"><span class="tag imp">Impacto muy alto</span><span class="tag eff">Esfuerzo S</span><span class="tag">PT</span><span class="tag">IA</span><span class="tag when">Lanzamiento</span></div></div></div>
     <div class="rec"><div class="n">6</div><div><b>Dos salidas para hoy: “tengo poco tiempo” y “máquina ocupada”</b><p>Qué series se quitan primero es una regla del PT.</p><div class="chips"><span class="tag imp">Alto</span><span class="tag eff">M</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag when">v1.1</span></div></div></div>
-    <div class="rec"><div class="n">7</div><div><b>Recordatorio del día de entreno y resumen semanal</b><p>Opcional. “4 de 6 semanas”, sin rachas que castigan el descanso.</p><div class="chips"><span class="tag imp">Alto</span><span class="tag eff">M</span><span class="tag">Tech Lead</span><span class="tag when">v1.1</span></div></div></div>
-    <div class="rec"><div class="n">8</div><div><b>Libras y saltos de peso por gimnasio</b><p>Hoy la app es solo en kg. Sin esto, EE. UU. queda débil.</p><div class="chips"><span class="tag imp">Alto para EE. UU.</span><span class="tag eff">L</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag when">Antes de EE. UU.</span></div></div></div>
+    <div class="rec"><div class="n">7</div><div><b>Recordatorio del día de entreno y resumen semanal</b><p>Opcional. “4 de 6 semanas”, sin rachas que castigan el descanso. Pedir el permiso en el primer uso, explicando para qué sirve y con un “más tarde” real.</p><div class="chips"><span class="tag imp">Alto</span><span class="tag eff">M</span><span class="tag">Tech Lead</span><span class="tag when">v1.1</span></div></div></div>
+    <div class="rec"><div class="n">8</div><div><b>Libras y saltos de peso por gimnasio</b><p>Hoy la app es solo en kg. Sin esto, EE. UU. queda débil. Fitbod lo cambia hasta por ejercicio; a nosotros nos basta por usuario.</p><div class="chips"><span class="tag imp">Alto para EE. UU.</span><span class="tag eff">L</span><span class="tag">PT</span><span class="tag">Tech Lead</span><span class="tag when">Antes de EE. UU.</span></div></div></div>
     <div class="rec"><div class="n">9</div><div><b>Limpiar Progreso</b><p>Quitar o reescribir “+4,5 kg/semana”: se lee como peso que subes cada semana, y contradice tu decisión de palabras simples. Filas más cortas.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S</span><span class="tag">PT</span><span class="tag when">Rápido</span></div></div></div>
     <div class="rec"><div class="n">10</div><div><b>Página de ayuda simple, EN y ES</b><p>Cómo se elige mi peso, por qué hoy es más ligero, qué se envía a la IA. Ask AI puede responder desde ahí.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S</span><span class="tag">PT</span><span class="tag">IA</span><span class="tag when">Lanzamiento</span></div></div></div>
-    <div class="rec"><div class="n">11</div><div><b>Un momento de logro concreto</b><p>“Tu serie más fuerte en banca: 82,5 × 10” al terminar, no confeti genérico. Tarjeta para compartir, opcional.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S–M</span><span class="tag">PT</span><span class="tag when">v1.1</span></div></div></div>
-    <div class="rec"><div class="n">12</div><div><b>Pistas de una línea la primera semana</b><p>En lugar de la tarjeta de bienvenida.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S</span><span class="tag when">Lanzamiento</span></div></div></div>
+    <div class="rec"><div class="n">11</div><div><b>Un momento de logro concreto</b><p>“Tu serie más fuerte en banca: 82,5 × 10” al terminar, no confeti genérico como el suyo en un primer entreno. <span class="tag h">En el iPhone</span> Tarjeta para compartir, opcional.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">S–M</span><span class="tag">PT</span><span class="tag when">v1.1</span></div></div></div>
+    <div class="rec"><div class="n">12</div><div><b>Una ayuda corta por función, la primera semana</b><p><b>Sube:</b> así enseña Fitbod casi todo. Reemplaza la tarjeta de bienvenida.</p><div class="chips"><span class="tag imp">Medio a alto</span><span class="tag eff">S</span><span class="tag when">Lanzamiento</span></div></div></div>
     <div class="rec"><div class="n">13</div><div><b>Más adelante</b><p>Cuerpo con las series de la semana (sin % de recuperación, arte propio), más / menos / nunca por ejercicio, calculadora de discos, Apple Health solo escritura, Apple Watch.</p><div class="chips"><span class="tag imp">Medio</span><span class="tag eff">M–L</span><span class="tag">PT en lo que aplique</span><span class="tag">Gobernanza en Health</span></div></div></div>
   </div>
-  <div class="note g"><b>Rápido:</b> 3, 5, 9, 10, 12. <b>Apuestas grandes:</b> 1, 4, 6, 7, 8.</div>
+  <div class="note g"><b>Rápido:</b> 3, 5, 9, 10, 12. <b>Apuestas grandes:</b> 1 (sin cuenta), 4, 6, 7, 8.</div>
+  <div class="note b"><b>Qué se movió.</b> La 1 cambia de forma. La 5 y la 12 suben. La 7 y la 8 ganan un patrón concreto. El aviso de descanso baja como ventaja, y la opción A de superseries queda confirmada.</div>
 </section>
 
 <section id="decidir">
   <h2>Lo que necesito que decidas</h2>
   <ol class="dec">
-    <li><div><b>¿Mostrar plan y entreno antes de crear cuenta?</b><em>Recomiendo sí. Es trabajo grande, y la mayor ganancia.</em></div></li>
+    <li><div><b>¿Hacer las preguntas antes de la cuenta y mostrar el entreno de hoy justo después?</b><em>Recomiendo sí para el lanzamiento. Probar sin cuenta puede esperar: Fitbod tampoco lo ofrece, así que sería una diferencia para más adelante.</em></div></li>
     <li><div><b>¿Un plan nuevo puede empezar hoy, no el próximo lunes?</b><em>Recomiendo sí; el PT decide cuál es el primer día.</em></div></li>
     <li><div><b>¿La ficha sin “personal trainer” y abriendo con el porqué?</b><em>Ya dijiste “entrenador con IA”; confírmame que cambie también en la tienda.</em></div></li>
     <li><div><b>¿Qué países primero?</b><em>Sin libras, EE. UU. queda débil. Opción: hispanohablantes y países en kg, EE. UU. después.</em></div></li>
     <li><div><b>¿Reabrimos imágenes de ejercicios, con presupuesto?</b><em>Estimación anterior: US$300 a 1.000, falta cotización. Como mínimo, quitar Google Imágenes.</em></div></li>
     <li><div><b>¿Gratis al lanzar, sin muro de pago?</b><em>Recomiendo sí. Coincide con Gobernanza y evita su principal queja.</em></div></li>
-    <li><div><b>¿Puedes dedicar 30 minutos a probar Fitbod en tu teléfono?</b><em>Necesita tu Apple ID y una prueba que debes cancelar a tiempo. Yo no puedo hacerlo. <a href="#noverif">Lista de qué mirar</a>.</em></div></li>
+    <li><div><b>¿Puedes hacer las últimas comprobaciones durante tu prueba?</b><em>Unos 10 minutos. Luego cancela al menos 24 horas antes de que termine. <a href="#noverif">Qué falta</a>.</em></div></li>
   </ol>
 </section>
 
 <section id="quien">
   <h2>Quién es Fitbod</h2>
   <div class="legend">
+    <div><span class="tag h">En el iPhone</span> lo vi yo en la app</div>
     <div><span class="tag v">Verificado</span> en sus páginas o su ficha</div>
     <div><span class="tag s">Terceros</span> reseñas o videos de la app</div>
     <div><span class="tag c">Baja confianza</span> competidor o resumen</div>
-    <div><span class="tag d">Falta probar</span> solo en un dispositivo</div>
+    <div><span class="tag d">Falta probar</span> sigue pendiente</div>
   </div>
   <div class="card">
     <h3 style="margin-top:0">Promesa y audiencia</h3>
@@ -211,10 +261,11 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
       <li><b>Web:</b> “algoritmo propio”, casi sin la palabra IA.</li>
       <li><b>Términos:</b> dicen que no actúa como entrenador personal. La política de privacidad no menciona IA.</li>
     </ul>
-    <p class="sm">No hay señales públicas de chat ni de modelo de lenguaje en el producto. Un competidor (SensAI) lo llama aprendizaje automático con reglas. <span class="tag c">Baja confianza</span></p>
+    <p class="sm">Los entrenos parecen basados en reglas; un competidor (SensAI) lo llama aprendizaje automático con reglas. <span class="tag c">Baja confianza</span> Pero la app sí tiene un chat con IA para lesiones (beta), que avisa que el chat puede quedar grabado y enlaza una ayuda que dice que no es consejo médico. <span class="tag h">En el iPhone</span> Es justo nuestro límite médico: cualquier idea parecida pasa antes por el PT y el Tech Lead.</p>
     <h3>Precio y momento de pago</h3>
-    <p>US$15,99 al mes o US$95,99 al año; aún figuran precios anteriores. Para la prueba de 7 días hay que elegir plan, y pasa a pago si no cancelas. <span class="tag v">Verificado</span></p>
-    <p>Un análisis en video muestra que el cuestionario y el primer entreno son gratis; el muro aparece antes de empezarlo y otra vez tras el resumen, con predicciones a 90 días. <span class="tag s">Terceros</span> <span class="tag d">Falta probar</span></p>
+    <p>En la app, con tu cuenta: US$24,99 al mes o US$149,99 al año. <span class="tag h">En el iPhone</span> En tienda y FAQ: US$15,99 y US$95,99; aún figuran precios anteriores. Para la prueba de 7 días hay que elegir plan, y pasa a pago si no cancelas. <span class="tag v">Verificado</span></p>
+    <p>Un análisis en video muestra que el cuestionario y el primer entreno son gratis; el muro aparece antes de empezarlo y otra vez tras el resumen, con predicciones a 90 días. <span class="tag s">Terceros</span></p>
+    <p>No hay pantalla de pago antes de la cuenta. Al entrar: resumen del plan y pantalla de pago sin mención de la prueba; la X la cierra. <span class="tag h">En el iPhone</span> Una cuenta totalmente nueva puede ser distinta. <span class="tag d">Falta probar</span></p>
     <h3>Plataformas e idiomas</h3>
     <p>iPhone, Android, Apple Watch, Wear OS, widget de iOS. Apple Health, Health Connect, Fitbit, Strava. Inglés, español y portugués. <span class="tag v">Verificado</span></p>
     <h3>Ritmo</h3>
@@ -235,16 +286,17 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
 
 <section id="inicio">
   <h2>Primer uso</h2>
-  <p class="sub">La mayor brecha de toda la revisión.</p>
+  <p class="sub">Sigue siendo la mayor brecha, pero no la que describí primero. Fitbod recorrido en el iPhone hasta la pantalla de cuenta. <span class="tag h">En el iPhone</span></p>
   <div class="flow">
     <div><h4>Fitbod</h4>
-      <div class="step">Cuestionario. En la web, la primera pregunta es la edad</div>
-      <div class="step">14 pasos según una fuente, unos 30 según otra</div>
-      <div class="step">Objetivo, experiencia, equipo detallado</div>
-      <div class="step">Proyección de fuerza antes de la cuenta</div>
-      <div class="step win">Entreno armado al instante</div>
-      <div class="step">Pesos prudentes para empezar</div>
-      <div class="step">Muro de pago antes de empezar</div>
+      <div class="step">Video de bienvenida, Empezar o Entrar</div>
+      <div class="step win">Preguntas tipo chat: objetivo, rutina, años entrenando, lugar</div>
+      <div class="step">Equipo ya marcado según el lugar; se revisa y se edita</div>
+      <div class="step">¿Conoces tu fuerza? Si no, calibra con los primeros entrenos</div>
+      <div class="step">Días por semana, avisos, calorías, cómo llegaste</div>
+      <div class="step lose">Cuenta: Apple, Google o correo, sin ver aún un entreno</div>
+      <div class="step">Resumen del plan y pantalla de pago, que se puede cerrar</div>
+      <div class="step win">Prueba de fuerza opcional y entreno con pesos iniciales</div>
     </div>
     <div><h4>GymStudio hoy</h4>
       <div class="step">Tarjeta de bienvenida con 3 frases</div>
@@ -256,7 +308,7 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
       <div class="step lose">Empieza el próximo lunes</div>
     </div>
   </div>
-  <div class="note"><b>Cuidado con la comparación.</b> Solo vi la primera pantalla de su cuestionario, sin responderla. El resto viene de un análisis en video y de su ayuda. Además, ninguna cuenta real ha publicado todavía un plan personal en producción: lo marcó Gobernanza (G7).</div>
+  <div class="note"><b>Cuidado con la comparación.</b> Recorrí una sola ruta: la de “no conozco mi fuerza”. La web empieza por la edad, y la app no. No vi proyecciones de fuerza en esta ruta, aunque un análisis en video las muestra. Lo que sigue a la cuenta lo vi al entrar con tu cuenta, no creando una nueva. Además, ninguna cuenta real ha publicado todavía un plan personal en producción: lo marcó Gobernanza (G7).</div>
 </section>
 
 <section id="genera">
@@ -272,40 +324,40 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
     <div class="row"><b>Duración</b><div class="two"><div>De 15 a 90 minutos</div><div>45, 60, 75, 90 en Perfil</div></div></div>
     <div class="row"><b>Unidades</b><div class="two"><div>kg y lb</div><div>Solo kg</div></div></div>
   </div>
-  <div class="note"><b>Su trampa, confirmada en su ayuda.</b> Los cambios antes de “Start” no se guardan. Si cambia algo, o si llega un entreno de Apple Health o Strava en segundo plano, regenera todo y los borra. No copiar.</div>
-  <p>Para cambiar: menú “Swap” (otro día, músculos, guardados, desde cero), ajustes de solo hoy (tiempo y equipo), deslizar para reemplazar con filtros, mantener para reordenar, y marcar más, menos o nunca. <span class="tag v">Verificado</span></p>
+  <div class="note"><b>Su trampa, confirmada en su ayuda.</b> Los cambios antes de “Start” no se guardan. Si cambia algo, o si llega un entreno de Apple Health o Strava en segundo plano, regenera todo y los borra. No copiar. <b>Y al revés:</b> al descartar un entreno, mis cambios de peso, orden y superserie seguían en el siguiente. <span class="tag h">En el iPhone</span></div>
+  <p>Para cambiar: botón “Switch” (otro día de la división, músculos, guardados, desde cero), botones de tiempo y gimnasio, “…” o “Replace” para reemplazar con búsqueda, mantener para reordenar, y marcar más, menos o nunca. <span class="tag h">En el iPhone</span></p>
 </section>
 
 <section id="registro">
   <h2>Registro en el gimnasio, frente a Big Done</h2>
-  <p class="sub">Sus toques son una estimación con documentos públicos. Nuestros números vienen de la propuesta; el PR #382 aún no se fusiona.</p>
+  <p class="sub">Sus toques ya están contados en el iPhone. <span class="tag h">En el iPhone</span> Nuestros números vienen de la propuesta; el PR #382 aún no se fusiona.</p>
   <div class="cmp">
     <div class="h"><div>Fitbod</div><div>Big Done</div></div>
-    <div class="row"><b>Ejercicio de 3 series, como estaba planeado</b><div class="two"><div><span class="big">4–5</span>abrir, 3 registros, a veces esfuerzo</div><div><span class="big">3</span>avanza solo</div></div></div>
-    <div class="row"><b>Cambiar el peso en las 3</b><div class="two"><div>Tocar y escribir con teclado, por serie. Si se arrastra: falta probar</div><div><span class="big">4</span>un botón y se arrastra</div></div></div>
-    <div class="row"><b>El botón dice</b><div class="two"><div>Registrar serie (por confirmar)</div><div>“Done · 37,5 kg × 8”</div></div></div>
-    <div class="row"><b>Registrar todo de golpe</b><div class="two"><div>Sí, “Log All Sets”</div><div>No, a propósito: ensucia el historial</div></div></div>
-    <div class="row"><b>Fin del descanso</b><div class="two"><div>Sonido o vibración con la app abierta. Fuera, solo si activaste una opción</div><div>Ventana, vibración, notificación y Live Activity (por confirmar en iPhone)</div></div></div>
-    <div class="row"><b>Superseries</b><div class="two"><div>Agrupar en menú; registrar todo desde “…”. Admiten ignorar la fatiga del par</div><div>Tarjetas independientes, salto al compañero, guarda cada toque. <span class="num">6</span> toques en 3 rondas</div></div></div>
-    <div class="row"><b>Corregir</b><div class="two"><div>Tocar el campo; deslizar para borrar; editar luego desde el historial</div><div>Deshacer, o “Corregir una serie”</div></div></div>
+    <div class="row"><b>Ejercicio de 3 series, como estaba planeado</b><div class="two"><div><span class="big">5–6</span>abrir, 3 registros, a veces calentamiento, y “Done”. Esfuerzo opcional</div><div><span class="big">3</span>avanza solo</div></div></div>
+    <div class="row"><b>Cambiar el peso en las 3</b><div class="two"><div>Tocar y escribir una vez; las siguientes cambian al instante. Sin botones + y − en pantalla</div><div><span class="big">4</span>un botón y se arrastra</div></div></div>
+    <div class="row"><b>El botón dice</b><div class="two"><div>“Log Set”, sin valores</div><div>“Done · 37,5 kg × 8”</div></div></div>
+    <div class="row"><b>Registrar todo de golpe</b><div class="two"><div>Sí, “Log All Sets”, con una pregunta que se puede desactivar</div><div>No, a propósito: ensucia el historial</div></div></div>
+    <div class="row"><b>Fin del descanso</b><div class="two"><div>Actividad en vivo con cuenta atrás y siguiente serie; interruptor de aviso encendido. Aviso bloqueado y vibración: falta probar</div><div>Ventana, vibración, notificación y Live Activity (por confirmar en iPhone)</div></div></div>
+    <div class="row"><b>Superseries</b><div class="two"><div>4 toques para armarla. Una serie, pasa al compañero sin esperar, descanso tras el par. <span class="num">6</span> toques en 3 rondas, más abrir. Guarda cada toque</div><div>Tarjetas independientes, salto al compañero, guarda cada toque. <span class="num">6</span> toques en 3 rondas</div></div></div>
+    <div class="row"><b>Corregir</b><div class="two"><div>Tocar la serie y editarla. Sin botón de Deshacer</div><div>Deshacer, o “Corregir una serie”</div></div></div>
     <div class="row"><b>Reloj</b><div class="two"><div>Sí, pero necesita iPhone para empezar y guardar. Temporizador se pausa al atenuarse la pantalla</div><div>No hay</div></div></div>
     <div class="row"><b>Sin conexión</b><div class="two"><div>El entreno sí; los videos no</div><div>Registro sí</div></div></div>
   </div>
-  <p>Su pantalla (imagen 4 de la tienda, descrita): banner con video, nombre, chips de descanso, historial y reemplazo; lista de series con escudo verde en las hechas; serie actual enmarcada; “Log All Sets” y un botón principal rosa.</p>
-  <div class="note b"><b>Conclusión.</b> La ventaja en toques es pequeña. Lo que sí pesa es no pedir esfuerzo, no depender del teclado y avisar bien. Pendiente para el PT: si un toque hace que se confirmen números no hechos. Medir cuántas series se editan.</div>
+  <p>Su pantalla coincide con la imagen 4 de la tienda: video arriba, nombre, botones de descanso, historial, discos y reemplazo; lista de series con escudo verde en las hechas; serie actual enmarcada; “Log All Sets” y un botón principal rosa. Durante el descanso, una hoja inferior con cuenta atrás, −10, +10 y pausa tapa esos botones.</p>
+  <div class="note b"><b>Conclusión.</b> La ventaja en toques es mayor de lo que estimé: 3 contra 5 o 6. También pesa no pedir esfuerzo y no depender del teclado. El aviso de descanso ya no es una ventaja clara. En superseries llegamos casi al mismo diseño por separado, buena señal para la opción A; el nuestro conserva la pausa de unos 10 segundos del PT. Pendiente para el PT: si un toque hace que se confirmen números no hechos. Medir cuántas series se editan.</div>
 </section>
 
 <section id="progreso">
   <h2>Progreso</h2>
   <div class="cmp">
     <div class="h"><div>Fitbod</div><div>GymStudio</div></div>
-    <div class="row"><b>Número principal</b><div class="two"><div>“Overall Strength Score”, sin unidad, bloqueado hasta entrenar todos los músculos</div><div>Sin puntaje: “8 de 8 ejercicios principales mejorando”</div></div></div>
-    <div class="row"><b>Por ejercicio</b><div class="two"><div>“Estimated Strength”: máximo estimado, baja si no lo registras</div><div>Series reales: “72,5 kg × 8 → 82,5 kg × 10”</div></div></div>
-    <div class="row"><b>Vista rápida</b><div class="two"><div>Mapa del cuerpo por colores y anillo semanal</div><div>Series por músculo, rango 10–20</div></div></div>
+    <div class="row"><b>Número principal</b><div class="two"><div>“Overall Strength Score”, sin unidad, bloqueado; la app pide registrar 3 entrenos</div><div>Sin puntaje: “8 de 8 ejercicios principales mejorando”</div></div></div>
+    <div class="row"><b>Por ejercicio</b><div class="two"><div>“Est. 1 Rep Max” en la tarjeta de la app, “Estimated Strength” en su ayuda: máximo estimado, baja si no lo registras</div><div>Series reales: “72,5 kg × 8 → 82,5 kg × 10”</div></div></div>
+    <div class="row"><b>Vista rápida</b><div class="two"><div>Body: figura que gira, días desde el último entreno y músculos frescos. Targets: hexágono de empuje, tirón y pierna</div><div>Series por músculo, rango 10–20</div></div></div>
     <div class="row"><b>Bajadas</b><div class="two"><div>Lo explican como recalibración</div><div>“Más ligero a propósito”</div></div></div>
     <div class="row"><b>Comparación</b><div class="two"><div>“Top X%” contra usuarios parecidos, solo si estás en el 40% superior</div><div>No hay</div></div></div>
   </div>
-  <p>Fitbod tuvo el mismo problema que nos dijiste en octubre: cambió “Projected 1-Rep Max” por “Estimated Strength”. Es el mismo número con otro nombre, y su artículo sigue definiéndolo como lo máximo que levantarías una vez. <b>Nosotros fuimos más lejos: mostramos lo que levantaste.</b></p>
+  <p>Fitbod tuvo el mismo problema que nos dijiste en octubre: en sus artículos cambió “Projected 1-Rep Max” por “Estimated Strength”. Es el mismo número con otro nombre, y <b>la tarjeta en la app sigue diciendo máximo estimado a 1 rep</b>. <b>Nosotros fuimos más lejos: mostramos lo que levantaste.</b></p>
   <div class="note"><b>Algo que quedó en nuestra app.</b> Bajo cada ejercicio de Resumen sigue “+4,5 kg/semana”. Está aprobado como dato de apoyo, pero se lee como peso que subes a la barra. Choca con tu decisión.</div>
   <p>Lo que hacen mejor: una imagen que se entiende en un segundo, y motivos para volver. Evitar el nombre “Strength Score”: allí significa otra cosa.</p>
 </section>
@@ -315,15 +367,15 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
   <div class="cmp">
     <div class="h"><div>Fitbod</div><div>GymStudio</div></div>
     <div class="row"><b>Tamaño</b><div class="two"><div>Entre “800+” y “1.600+”, según la página</div><div>227 aprobados</div></div></div>
-    <div class="row"><b>Medios</b><div class="two"><div>Video de varios ángulos, pasos y músculos. Sin video offline</div><div>Consejos y señales en texto. Enlace a Google Imágenes</div></div></div>
-    <div class="row"><b>Encontrar</b><div class="two"><div>Búsqueda, músculo, equipo, categorías</div><div>Búsqueda, músculo, “plan de hoy”, recientes</div></div></div>
+    <div class="row"><b>Medios</b><div class="two"><div>Video también arriba al registrar. Dos ángulos, velocidad, otros nombres, instrucciones, músculos y equipo. Sin video offline</div><div>Consejos y señales en texto. Enlace a Google Imágenes</div></div></div>
+    <div class="row"><b>Encontrar</b><div class="two"><div>Búsqueda, filtros, por músculo, categorías; selección múltiple que se puede agrupar como superserie</div><div>Búsqueda, músculo, “plan de hoy”, recientes</div></div></div>
     <div class="row"><b>Propios</b><div class="two"><div>Sí, pero no se editan y el algoritmo no los ajusta</div><div>Sí, con IDs estables; falta verificarlo con cuenta real (#361)</div></div></div>
   </div>
 </section>
 
 <section id="diseno">
   <h2>Diseño</h2>
-  <p class="sub">Desde imágenes de la tienda, una pantalla web y reseñas. La sensación en la mano falta probarla.</p>
+  <p class="sub">Visto en la app <span class="tag h">En el iPhone</span>, por iPhone Mirroring. La fluidez y la vibración en la mano faltan por probar.</p>
   <div class="lists">
     <div class="card"><h3>Qué lo hace sentir premium</h3><ul class="x good">
       <li>Fotos y video reales, no ilustraciones sueltas</li>
@@ -331,14 +383,16 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
       <li>Un solo color fuerte: rosa rojizo</li>
       <li>Nombres en cursiva gruesa y números grandes</li>
       <li>Una forma propia: el hexágono</li>
-      <li>Un ejercicio por pantalla</li>
+      <li>Hojas que suben para todo: ejercicio, descanso, menús</li>
+      <li>Video que arranca solo al abrir un ejercicio</li>
     </ul></div>
     <div class="card"><h3>Dónde falla</h3><ul class="x bad">
       <li>Mucha densidad; sin ayudas abruma</li>
       <li>Ajustes dentro de la pestaña de historial</li>
-      <li>Nombres de pestañas que cambian entre artículos</li>
-      <li>Confeti genérico, sin relación con tus logros</li>
-      <li>Rutinas guardadas difíciles de encontrar</li>
+      <li>Barra de pestañas que se encoge y deja “Start Workout” en su lugar</li>
+      <li>Listas largas de ajustes: borrar cuenta queda muy abajo</li>
+      <li>Confeti genérico, sin relación con un logro concreto</li>
+      <li>Rutinas guardadas dentro de “Switch”, difíciles de encontrar</li>
     </ul></div>
   </div>
   <div class="note"><b>Ojo:</b> oscuro y rosa, con botón grande, se parece a Fitbod. No acercarnos más. Nuestro tono es más sobrio, y lo primero en pantalla debe ser el porqué y la barra del plan.</div>
@@ -353,9 +407,9 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
     <div class="row"><b>IA</b><div class="two"><div>Política de 2024 sin mención</div><div>Enviamos datos a OpenAI: hay que avisar y pedir permiso (G2). No imitar su silencio</div></div></div>
     <div class="row"><b>Avisos</b><div class="two"><div>No es consejo médico; bajo tu riesgo; no actúa como entrenador personal</div><div>Aviso de salud en borrador, pendiente del PT</div></div></div>
     <div class="row"><b>Edad</b><div class="two"><div>Tienda 9+, pero Términos solo para mayores de 18</div><div>Elegir edad y que coincida en ambos lados</div></div></div>
-    <div class="row"><b>Borrar cuenta</b><div class="two"><div>Historial → Ajustes → Ayuda → Borrar. Advierte que no cancela la suscripción</div><div>Aún no existe (G1). A dos toques, explicando qué pasa</div></div></div>
+    <div class="row"><b>Borrar cuenta</b><div class="two"><div>Log → Ajustes → bajar a Ayuda → Borrar. Una alerta avisa que no cancela la suscripción; no dice qué se borra. Cancelé sin borrar</div><div>Aún no existe (G1). A dos toques, explicando qué pasa</div></div></div>
   </div>
-  <p class="sm">Todo <span class="tag v">Verificado</span> en sus páginas o ficha. No es consejo legal; eso es del abogado.</p>
+  <p class="sm"><span class="tag v">Verificado</span> en sus páginas o ficha; borrar cuenta, <span class="tag h">En el iPhone</span>. No es consejo legal; eso es del abogado.</p>
 </section>
 
 <section id="tienda">
@@ -393,15 +447,15 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
   <h2>GymStudio contra Fitbod</h2>
   <div class="lists">
     <div class="card"><h3>Ya somos mejores</h3><ul class="x good">
-      <li><b>Un motivo por cada peso.</b> En público no encontré algo igual en Fitbod; falta verlo en la app</li>
+      <li><b>Un motivo por cada peso.</b> En la app de Fitbod no aparece por ejercicio, ni tras guardar un entreno. Ojo: “Workout Insights” (beta) está activo y puede necesitar más sesiones</li>
       <li><b>Plan estable</b> y resultados comparables</li>
       <li><b>Días A y B</b> con nombre y explicación</li>
-      <li><b>Registro</b> sin esfuerzo ni teclado, si el #382 se confirma</li>
+      <li><b>Registro:</b> 3 toques contra 5 o 6, sin esfuerzo ni teclado, si el #382 se confirma</li>
       <li><b>Progreso simple:</b> series reales</li>
       <li><b>Sin publicidad ni rastreo.</b> Pero el permiso de IA aún no se respeta (G2): arreglar antes de presumirlo</li>
     </ul></div>
     <div class="card"><h3>Nos ganan</h3><ul class="x bad">
-      <li>Primer uso</li><li>Videos de ejercicios</li><li>Equipo, saltos de peso y libras</li><li>Salidas del plan del día</li><li>Motivos para volver</li><li>Página de tienda</li><li>Android, reloj, Health, Strava</li><li>Datos para el primer peso</li><li>Centro de ayuda</li>
+      <li>Primer uso guiado, con entreno justo después de la cuenta</li><li>Videos de ejercicios</li><li>Equipo, saltos de peso y libras</li><li>Salidas del plan del día</li><li>Motivos para volver</li><li>Página de tienda</li><li>Android, reloj, Health, Strava</li><li>Datos para el primer peso</li><li>Centro de ayuda</li>
     </ul></div>
   </div>
   <div class="note b"><b>Dos correcciones honestas.</b> <b>El español no es una ventaja clara:</b> Fitbod lo tiene, con ficha mexicana bien hecha. Lo nuestro es el cambio de idioma dentro de la app y consejos en español revisados por el PT. Decir “en español desde el primer día”, nunca “la única”. <b>“Primero la IA” tampoco es ventaja técnica hoy:</b> las reglas deciden y la IA explica. Es una ventaja de confianza.</div>
@@ -421,7 +475,10 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
     <li>“AI Personal Trainer” en el nombre</li>
     <li>Entrenos que se regeneran y borran tus cambios</li>
     <li>Sesión distinta cada día: nuestro plan es la diferencia</li>
-    <li>“Log All Sets”: registra lo que no confirmaste</li>
+    <li>“Log All Sets”: registra lo que no confirmaste, aunque pregunte antes</li>
+    <li>Cambios que sobreviven a un entreno descartado</li>
+    <li>Barra que se encoge y deja un botón de empezar en su lugar</li>
+    <li>Reemplazos sin relación con el ejercicio</li>
     <li>Preguntar el esfuerzo a la fuerza</li>
     <li>Series al máximo automáticas (seguridad, decide el PT)</li>
     <li>% de recuperación presentado como hecho</li>
@@ -429,7 +486,7 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
     <li>Ranking contra otros: pide edad, género y peso</li>
     <li>Racha que vuelve a 0 y castiga el descanso</li>
     <li>Ligas que publican entrenos automáticamente</li>
-    <li>Muro antes del primer entreno, prueba que cobra sola</li>
+    <li>Prueba que cobra sola sin recordatorios claros</li>
     <li>Cifras sin método</li>
     <li>Categoría de embarazo, HSA/FSA, lenguaje de lesiones</li>
     <li>Datos ligados a publicidad, borrado escondido</li>
@@ -438,21 +495,30 @@ footer{padding:32px 0 48px;color:var(--dim);font-size:.82rem;border-top:1px soli
 </section>
 
 <section id="noverif">
-  <h2>Lo que no pude verificar</h2>
-  <p class="sub">Hace falta alguien con la app instalada. Cancelar la prueba al menos 24 horas antes de que termine.</p>
-  <div class="card"><ul class="check">
-    <li>Orden del cuestionario, cuándo pide cuenta y cuándo cobra<span>5 min</span></li>
-    <li>Toques reales al registrar; si un cambio de peso se arrastra<span>5 min</span></li>
-    <li>Si avanza solo, si hay Deshacer, qué dice el botón<span>3 min</span></li>
-    <li>Superserie, serie por serie<span>3 min</span></li>
-    <li>Si existe algún “por qué este peso” por ejercicio<span>3 min</span></li>
-    <li>Descanso con pantalla bloqueada, sin activar opciones<span>3 min</span></li>
-    <li>Calidad del español y si traducen los consejos<span>3 min</span></li>
-    <li>Pestañas, movimiento, densidad, vibración<span>3 min</span></li>
-    <li>Cómo se ve borrar la cuenta<span>2 min</span></li>
-  </ul></div>
-  <p class="sm"><b>Bloqueado o no disponible:</b> Reddit (leído solo mediante resumen de terceros), ficha de Google Play (calificación y seguridad de datos), informe kimola, palabras clave de la tienda (nunca son públicas). Tampoco sé si las imágenes coinciden con la versión actual. Sus propias cifras se contradicen (ejercicios, entrenos, días de recuperación, tipo de prueba), así que no las repitas como hechos.</p>
-  <p class="sm"><b>Nuestra app:</b> build local en <code>main</code>, 390 × 844, español, sin iniciar sesión. El registro se juzgó desde la propuesta y la descripción del PR #382. No probé en iPhone.</p>
+  <h2>Lo que falta por verificar</h2>
+  <p class="sub">La lista de la primera versión, con su estado. Cancela la prueba al menos 24 horas antes de que termine.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Punto</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>Orden del cuestionario y cuándo pide cuenta</td><td><span class="tag h">En el iPhone</span> en una ruta</td></tr>
+      <tr><td>Qué aparece tras la cuenta; cuándo cobra</td><td><span class="tag h">En el iPhone</span> al entrar. <span class="tag d">Falta</span> con cuenta nueva</td></tr>
+      <tr><td>Toques al registrar y arrastre del peso</td><td><span class="tag h">En el iPhone</span></td></tr>
+      <tr><td>Si avanza solo, Deshacer, qué dice el botón</td><td><span class="tag h">En el iPhone</span></td></tr>
+      <tr><td>Superserie, serie por serie</td><td><span class="tag h">En el iPhone</span> primera ronda</td></tr>
+      <tr><td>“Por qué este peso” por ejercicio</td><td><span class="tag h">En el iPhone</span> ninguno tras un entreno. <span class="tag d">Falta</span> con más historial y Workout Insights</td></tr>
+      <tr><td>Descanso con pantalla bloqueada</td><td><span class="tag h">En el iPhone</span> Actividad en vivo. <span class="tag d">Falta</span> el aviso bloqueado</td></tr>
+      <tr><td>Calidad del español</td><td><span class="tag d">Falta</span> tu teléfono está en inglés</td></tr>
+      <tr><td>Pestañas, movimiento, densidad</td><td><span class="tag h">En el iPhone</span> <span class="tag d">Falta</span> vibración</td></tr>
+      <tr><td>Cómo se ve borrar la cuenta</td><td><span class="tag h">En el iPhone</span> cancelado en la alerta</td></tr>
+      <tr><td>Terminar un entreno: resumen, segundo muro, siguiente entreno</td><td><span class="tag h">En el iPhone</span> con un entreno de prueba</td></tr>
+      <tr><td>Récord, puntaje de fuerza y adaptación con varias sesiones</td><td><span class="tag d">Falta</span> pide al menos 3 entrenos reales</td></tr>
+      <tr><td>La otra ruta del cuestionario (“conozco mi fuerza”) y las últimas rondas de superserie</td><td><span class="tag d">Falta</span></td></tr>
+      <tr><td>Chat de lesiones y prueba de fuerza en uso</td><td>No los usé a propósito: el chat pide datos de salud y la prueba registra resultados</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note b"><b>Para ti, unos 10 minutos.</b> Revisa que My Plan esté bien. En un descanso real, bloquea el teléfono y fíjate si vibra o avisa. Tras 3 entrenos reales, cuéntame qué dicen el puntaje y los mensajes. Si quieres revisar el español, cambia el idioma de Fitbod en Ajustes del iPhone y avísame.</div>
+  <p class="sm"><b>Bloqueado o no disponible:</b> Reddit (leído solo mediante resumen de terceros), ficha de Google Play (calificación y seguridad de datos), informe kimola, palabras clave de la tienda (nunca son públicas).</p>
+  <p class="sm"><b>Nuestra app:</b> build local en <code>main</code>, 390 × 844, español, sin iniciar sesión. El registro se juzgó desde la propuesta y la descripción del PR #382, aún abierto. No la probé en iPhone en esta sesión.</p>
 </section>
 
 <section id="fuentes">
