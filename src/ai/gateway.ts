@@ -43,7 +43,8 @@ export function clearPendingAiConsentPrompt() {
 export function requestAiConsent() {
   if (typeof window !== 'undefined') {
     aiConsentPromptPending = true
-    window.dispatchEvent(new Event(AI_CONSENT_REQUIRED_EVENT))
+    // Callers may be mid-render (trainerWhy); App's listener sets state, so don't fire synchronously.
+    queueMicrotask(() => window.dispatchEvent(new Event(AI_CONSENT_REQUIRED_EVENT)))
   }
 }
 

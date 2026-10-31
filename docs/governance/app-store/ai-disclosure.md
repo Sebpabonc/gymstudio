@@ -4,7 +4,7 @@ Governancer, 2026-10-31; updated 2026-11-01. Rule: Apple 5.1.2(i): "You must cle
 third-party AI, and obtain explicit permission before doing so." Read 2026-10-31 at
 `https://developer.apple.com/app-store/review/guidelines/`. UXer checks placement; PT checks D and E; PO approves A and G (no lawyer, his decision); Tech Lead builds (G2, G3, G5, G9, G20). Wording rule: "AI trainer" / "entrenador con IA", never "personal trainer" (G9). US and Korean rules want sharing consent separate from collection: keep A and the F measurements row as two separate steps, neither inside the Terms step G. Stored with version and time.
 
-**Today:** all client AI requests require enabled consent, and Profile → Privacy & AI can withdraw it. Consent is stored locally, so the Edge Function cannot independently verify or synchronize the choice. Server-side consent storage and enforcement remain unresolved (G2). Keys below are proposals; both dictionaries must have the same keys.
+**Today:** all client AI requests require enabled consent, and Profile → Privacy & AI can withdraw it. Consent is stored per device and account, so the Edge Function cannot independently verify it. Tech Lead decision 2026-10-31: the client gate is the enforcement for launch, and each device asks on its own, so the safe default is no AI; the section G requirement to store version and time on the server still applies to the Terms step. Not true yet: "goal notes are never sent" needs the updated `ai-gateway` function deployed (it still reads all goal fields until then). Keys below are proposals; both dictionaries must have the same keys.
 
 ## A. Main AI permission (blocking sheet)
 
