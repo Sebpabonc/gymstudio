@@ -9,9 +9,8 @@ exercises: []            # applies to every planned exercise; no catalogue conte
 ---
 
 
-> **Status 2026-11-01:** approved as written, including §5.3 (rest), per the PO decision on #381.
-> **The exercise's `rest_seconds` wins; Profile is only the fallback.** T134/T135 are active.
-> Supersets use a 10 s switch after C1 and C2's `rest_seconds` after the pair.
+> **Status 2026-11-01:** approved as written, including §5.3: the exercise's `rest_seconds` wins and the Profile value
+> is only the fallback (PO: "todo lo que el PT diga, sigamos su consejo", replacing his earlier fixed 2:00).
 > Spanish text in this doc still needs the PO's eye on the live app. Edit-rate review after one real week stays open.
 
 ## Summary
