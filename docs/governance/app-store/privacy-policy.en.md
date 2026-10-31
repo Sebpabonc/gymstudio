@@ -16,7 +16,7 @@ GymStudio is a training app for looking up exercises, following a plan, logging 
 
 ## 1. Who is responsible
 
-GymStudio is run by **Seb Pabon**, an individual based in Australia, not a company. He is responsible for your personal data ("we").
+GymStudio is run by **Sebastian Pabon**, an individual based in Australia, not a company. He is responsible for your personal data ("we").
 Privacy contact: js.pabonc979@gmail.com.
 <!-- PO: the App Store shows the legal name on the Apple Developer account as the seller. Check it matches (question 1). -->
 
@@ -99,7 +99,7 @@ Profile → Privacy & AI [REQUIRES G3]. Data already sent cannot be recalled, bu
 | [REQUIRES G6: email provider, name] | Sends account emails | [VERIFY] |
 | Authorities, courts | When the law requires it | |
 
-Seb Pabon can access stored data when needed to provide support, fix problems or meet legal duties.
+Sebastian Pabon can access stored data when needed to provide support, fix problems or meet legal duties.
 
 ### International transfers
 
@@ -170,4 +170,4 @@ English version applies. <!-- PO approve. Brazil: a Portuguese version is needed
 
 ## 15. Contact
 
-Seb Pabon, js.pabonc979@gmail.com. Support: https://sebpabonc.github.io/gymstudio/legal/support.en.html [REQUIRES G5]
+Sebastian Pabon, js.pabonc979@gmail.com. Support: https://sebpabonc.github.io/gymstudio/legal/support.en.html [REQUIRES G5]

@@ -8,7 +8,7 @@ Decisión sobre el EULA de Apple: ver terms.en.md. Este texto prevalece para qui
 
 **Última actualización:** [PO: fecha de publicación]
 
-Estos Términos son un acuerdo entre tú y Seb Pabon, una persona natural con base en Australia ("nosotros"), sobre la app y el sitio web de GymStudio. Al crear una cuenta o usar GymStudio, los
+Estos Términos son un acuerdo entre tú y Sebastian Pabon, una persona natural con base en Australia ("nosotros"), sobre la app y el sitio web de GymStudio. Al crear una cuenta o usar GymStudio, los
 aceptas. Si obtuviste la app en el App Store de Apple, también aplica el Contrato de Licencia de Usuario Final de Aplicaciones con Licencia de Apple como
 licencia de la app; si estos Términos entran en conflicto con él en cuanto a la licencia, prevalecen los términos de Apple.
 
@@ -112,7 +112,7 @@ la licencia como terceros beneficiarios, según su EULA. Para cualquier reclamo 
 
 ## 15. Contacto
 
-Seb Pabon, js.pabonc979@gmail.com. Soporte: https://sebpabonc.github.io/gymstudio/legal/support.es.html
+Sebastian Pabon, js.pabonc979@gmail.com. Soporte: https://sebpabonc.github.io/gymstudio/legal/support.es.html
 
 ## 16. Idioma <!-- PO aprueba; HIGH RISK: el español obliga a quienes lo usan -->
 

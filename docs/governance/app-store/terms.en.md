@@ -13,7 +13,7 @@ forces the 18+ App Store rating (app-store-connect-answers.md section 2). Do not
 
 **Last updated:** [PO: publication date]
 
-These Terms are an agreement between you and Seb Pabon, an individual based in Australia ("we"), for the GymStudio app and website. By creating an account or using
+These Terms are an agreement between you and Sebastian Pabon, an individual based in Australia ("we"), for the GymStudio app and website. By creating an account or using
 GymStudio, you accept them. If you got the app from Apple's App Store, Apple's Licensed Application End User License Agreement also applies
 as the licence for the app; if these Terms conflict with it about the licence, Apple's terms govern.
 
@@ -116,7 +116,7 @@ licence terms as third-party beneficiaries as stated in its EULA. For any claim 
 
 ## 15. Contact
 
-Seb Pabon, js.pabonc979@gmail.com. Support: https://sebpabonc.github.io/gymstudio/legal/support.en.html
+Sebastian Pabon, js.pabonc979@gmail.com. Support: https://sebpabonc.github.io/gymstudio/legal/support.en.html
 
 ## 16. Language <!-- PO approve; HIGH RISK: Spanish is binding for Spanish speakers, so check it as carefully as the English. Brazil needs Portuguese first (question 3) -->
 

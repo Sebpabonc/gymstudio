@@ -333,7 +333,7 @@ possibly consent. Update first, ship second.
 ## G23. Public repository (S2)
 
 The repo is **public**. Everything committed under `docs/governance/` is public, including `questions-for-po.md` and placeholders.
-The PO approved his name (Seb Pabon) and email for public pages (2026-11-01). **Never commit his address, city or phone.** Public documents say "Australia" only. Consider whether review notes belong in
+The PO approved his name (Sebastian Pabon) and email for public pages (2026-11-01). **Never commit his address, city or phone.** Public documents say "Australia" only. Consider whether review notes belong in
 the repo at all (they contain no credentials). Migration 028 already contains the PO's user UUID.
 
 ## G24. Live Activity (S3)
