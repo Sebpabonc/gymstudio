@@ -2,6 +2,7 @@
 
 - **Status:** research proposal (UXer), not approved. No GymStudio code, content or data changed. The AI created no account, signed in to nothing and bought nothing; the PO's own account and trial were used.
 - **Date:** 2026-11-01 (file name, as requested). All sources read 2026-10-31. **Updated after an on-device session on 2026-10-31 (§0A).**
+- **After this report:** PR #382 (Big Done) merged on 2026-11-01 and is live. Where this report says it is open, read it as live. Its tap counts still come from the proposal and were not recounted against Fitbod.
 - **Readable report for the PO (Spanish):** [`2026-11-01-fitbod-review.html`](2026-11-01-fitbod-review.html)
 - **Summary in one line:** Fitbod wins before and around the workout (guided first run, demos, equipment, reminders, store page), but it also asks for an account before showing any workout. GymStudio can win inside the workout and in trust (one tap, a plan that stays put, a reason for each number, plain wording), if the launch blockers are closed first.
 
