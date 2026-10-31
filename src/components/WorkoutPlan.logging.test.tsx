@@ -1,16 +1,19 @@
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import WorkoutPlan from './WorkoutPlan'
+import WorkoutPlan, { WorkoutWeightReason } from './WorkoutPlan'
+import { CueSheet } from './SqueezeCue'
 import WorkoutSetInputs from './WorkoutSetInputs'
 import RestTimer from './RestTimer'
 import WorkoutExerciseActions from './WorkoutExerciseActions'
 import type { RestTimerState } from '../utils/restTimer'
 import { createTranslator } from '../i18n/translate'
-import { loadWorkoutHistory, saveWorkoutHistory } from '../utils/storage'
+import { loadWorkoutHistory, saveCustomPlan, saveWorkoutHistory } from '../utils/storage'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { recommend } from '../trainer/engine'
 import { buildEvidence } from '../trainer/evidence'
+import { trainerReason } from '../trainer/presentation'
+import { explainTrainerRecommendation } from '../ai/gateway'
 
 const harness = vi.hoisted(() => ({
   active: false,
@@ -21,6 +24,7 @@ const harness = vi.hoisted(() => ({
   language: 'en' as 'en' | 'es',
   block: null as TrainingBlock | null,
   catalogue: [] as Exercise[],
+  demoMode: false,
 }))
 
 vi.mock('react', async () => {
@@ -69,6 +73,18 @@ vi.mock('../utils/storage', async () => ({
   loadExercises: async () => harness.catalogue,
   getCachedTrainingBlocks: () => [harness.block],
   fetchTrainingBlocks: async () => [harness.block],
+  fetchActiveUserPlan: async () => null,
+}))
+vi.mock('../utils/demoMode', () => ({ isDemoMode: () => harness.demoMode }))
+vi.mock('../plans/demoBlock', () => ({ loadDemoBlocks: async () => [harness.block] }))
+vi.mock('../utils/profileData', async () => ({
+  ...await vi.importActual<typeof import('../utils/profileData')>('../utils/profileData'),
+  fetchCalibrationRecommendations: async () => [],
+  fetchExerciseSwaps: async () => [],
+}))
+vi.mock('../ai/gateway', async () => ({
+  ...await vi.importActual<typeof import('../ai/gateway')>('../ai/gateway'),
+  explainTrainerRecommendation: vi.fn(),
 }))
 vi.mock('../native/restAlerts', () => ({ prepareRestAlerts: vi.fn(), fireRestAlert: vi.fn() }))
 
@@ -77,7 +93,7 @@ const startRest = vi.fn()
 const changeRest = vi.fn()
 const modeChanged = vi.fn()
 const props = { onSignIn: vi.fn(), onStartRest: startRest, onRestTimerChange: changeRest, onWorkoutModeChange: modeChanged,
-  restTimer: null as RestTimerState | null }
+  restTimer: null as RestTimerState | null, authStatus: 'signed-out' as 'signed-out' | 'signed-in' }
 
 function render() {
   harness.cursor = 0
@@ -164,6 +180,8 @@ beforeEach(() => {
   harness.effects = []
   harness.cleanups = []
   harness.language = 'en'
+  harness.demoMode = false
+  props.authStatus = 'signed-out'
   props.restTimer = null
   harness.catalogue = ['press', 'row', 'curl', 'drop'].map(id => ({
     id, name: id, primaryMuscle: 'Chest', equipment: id === 'drop' ? 'machine' : 'barbell',
@@ -206,6 +224,116 @@ afterEach(() => {
 })
 
 describe('approved workout logging integration', () => {
+  it.each(['en', 'es'] as const)('shows the existing reason above the steppers only while logging in %s', async language => {
+    harness.language = language
+    const entry = historyEntry('press', '2026-10-12')
+    saveWorkoutHistory([entry])
+    render()
+    await settle()
+    expect(elements(node => node.type === WorkoutWeightReason)).toHaveLength(0)
+    await start()
+    const reasons = elements(node => node.type === WorkoutWeightReason)
+    expect(reasons).toHaveLength(1)
+    const reason = reasons[0]
+    const target = { min: 8, max: 8 }
+    const recommendation = recommend({
+      history: buildEvidence([entry], 'press', [harness.block!], '2026-10-19', 'chest-back-a'), today: '2026-10-19',
+      target, sets: 3, equipment: 'barbell', dayKey: 'chest-back-a', blockId: 'block',
+    })
+    expect(reason.props.reason).toBe(trainerReason(createTranslator(language), language, recommendation, target))
+    expect(reason.props.label).toBe(language === 'en' ? 'Why this weight' : 'Por qué este peso')
+    expect(reason.props.details.sections[0].lines[1]).toBe(reason.props.reason)
+    const html = renderToStaticMarkup(tree)
+    expect(html.indexOf('class="effortless-reason"')).toBeLessThan(html.indexOf('class="effortless-inputs"'))
+    expect(html.indexOf('class="effortless-inputs"')).toBeLessThan(html.indexOf('class="primary-button effortless-done"'))
+    expect(elements(node => node.props['data-exercise-card'])).toHaveLength(1)
+    await click(language === 'en' ? '‹ Today' : '‹ Hoy')
+    expect(elements(node => node.type === WorkoutWeightReason)).toHaveLength(0)
+  })
+
+  it('shows no reason block without history, including first-session drop sets', async () => {
+    render()
+    await settle()
+    await start()
+    expect(elements(node => node.type === WorkoutWeightReason)).toHaveLength(0)
+    await click('4 · drop')
+    expect(elements(node => node.type === WorkoutWeightReason)).toHaveLength(0)
+    expect(renderToStaticMarkup(tree)).not.toContain('effortless-reason')
+  })
+
+  it('shows no reason for a custom plan without a trainer recommendation', async () => {
+    saveWorkoutHistory([historyEntry('press', '2026-10-12')])
+    saveCustomPlan({ version: 2, days: [{ id: 'custom-day', name: 'Custom day', exercises: [{
+      id: 'custom-press', exerciseId: 'press', name: 'press', muscle: 'Chest', sets: '3', reps: '8', restSeconds: 120,
+    }] }] })
+    harness.active = true
+    try { tree = WorkoutPlan({ ...props, mode: 'custom' }) } finally { harness.active = false }
+    expect(elements(node => node.type === WorkoutWeightReason)).toHaveLength(0)
+  })
+
+  it('updates the reason when moving between exercises and logging a superset partner', async () => {
+    const entries = ['press', 'row', 'curl'].map(id => historyEntry(id, '2026-10-12'))
+    entries[1].sets.forEach(set => { set.reps = 7 })
+    entries[2].sets.forEach(set => { set.weight = 20; set.reps = 6 })
+    saveWorkoutHistory(entries)
+    render()
+    await settle()
+    await start()
+    const currentReason = () => elements(node => node.type === WorkoutWeightReason)[0]
+    const pressReason = currentReason().props.reason
+    await click('2 · row')
+    expect(currentReason().props.details.title).toBe('row')
+    const rowReason = currentReason().props.reason
+    expect(rowReason).not.toBe(pressReason)
+    const rowValues = { weight: inputs().props.weight, reps: inputs().props.reps }
+    await click(doneLabel())
+    expect(currentReason().props.details.title).toBe('curl')
+    expect(currentReason().props.reason).not.toBe(rowReason)
+    expect(currentReason().props.details.sections[0].lines[1]).toBe(currentReason().props.reason)
+    expect(elements(node => node.type === WorkoutWeightReason)).toHaveLength(1)
+    expect((await loadWorkoutHistory()).find(entry => entry.exerciseId === 'row' && entry.date === '2026-10-19')?.sets[0])
+      .toMatchObject(rowValues)
+    await click('4 · drop')
+    expect(elements(node => node.type === WorkoutWeightReason)).toHaveLength(0)
+  })
+
+  it.each([false, true])('opens and closes the existing cue sheet without an AI request (demo=%s)', async demoMode => {
+    props.authStatus = 'signed-in'
+    saveWorkoutHistory([historyEntry('press', '2026-10-12')])
+    render()
+    await settle()
+    await start()
+    harness.demoMode = demoMode
+    render()
+    const reason = elements(node => node.type === WorkoutWeightReason)[0]
+    expect(reason).toBeDefined()
+    // Render the reason's hooks separately from the parent, as React does.
+    const parentSlots = harness.slots
+    harness.slots = []
+    const renderReason = () => {
+      harness.cursor = 0
+      harness.active = true
+      try { return WorkoutWeightReason(reason.props as Parameters<typeof WorkoutWeightReason>[0]) }
+      finally { harness.active = false }
+    }
+    try {
+      let content = renderReason()
+      expect(elements(node => node.type === CueSheet, content)).toHaveLength(0)
+      const trigger = elements(node => node.type === 'button', content)[0]
+      expect(trigger.props['aria-haspopup']).toBe('dialog')
+      trigger.props.onClick()
+      content = renderReason()
+      const sheet = elements(node => node.type === CueSheet, content)[0]
+      expect(sheet.props.details).toBe(reason.props.details)
+      expect(sheet.props.sections[0].lines).toContain(reason.props.reason)
+      sheet.props.onClose()
+      expect(elements(node => node.type === CueSheet, renderReason())).toHaveLength(0)
+      expect(explainTrainerRecommendation).not.toHaveBeenCalled()
+    } finally {
+      harness.slots = parentSlots
+    }
+  })
+
   it('M4: Swap opens a cancellable sheet alongside the workout card', async () => {
     render()
     await settle()
