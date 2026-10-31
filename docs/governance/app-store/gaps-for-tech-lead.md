@@ -1,6 +1,6 @@
 # Gaps for the Tech Lead (DRAFT)
 
-Governancer, 2026-10-31. App changes needed for the store documents to be true. Tracking issue: #384.
+Governancer, 2026-10-31; updated with the PO's answers of 2026-11-01. App changes needed for the store documents to be true. Tracking issue: #384.
 Severity: **S1** blocks submission or makes a document false; **S2** fix before public release; **S3** soon after.
 Items marked **New** were not in issue #384.
 
@@ -9,20 +9,20 @@ Items marked **New** were not in issue #384.
 | G1 | S1 | In-app account deletion | TL |
 | G2 | S1 | **New.** AI calls bypass consent, and "Not now" is ignored | TL |
 | G3 | S1 | **New.** No way to withdraw AI consent | TL, UXer |
-| G4 | S1 | Login option under guideline 4.8 | PO decides, TL |
-| G5 | S1 | Hosted policy and support URLs, in-app links, terms and age step | TL |
-| G6 | S1 | **New.** No production email provider, so sign-ups cannot confirm | PO + TL |
+| G4 | S1 | Build Sign in with Apple (PO decided 2026-11-01) | TL |
+| G5 | S1 | Hosted policy, US health policy and support URLs, in-app links, terms and 18+ step | TL |
+| G6 | S1 | **New.** No production email provider, so sign-ups cannot confirm. PO said later: must be before launch | PO + TL |
 | G7 | S1 | New-user path unproven; bundled fallback exposes the private program | TL, QAer |
 | G8 | S1 | Bundle ID, team, App IDs | TL + PO |
-| G9 | S1 | **New.** Untrue statements inside the app ("PT", "only visible to your account") | PO, PT, TL |
+| G9 | S1 | **New.** Untrue statements in app and listing. Exact strings below | TL, Socialer, PT |
 | G10 | S1 | **New.** Forgot password does not let anyone set a new password | TL |
 | G11 | S2 | **New.** Data minimisation in `block_plan` | TL |
-| G12 | S2 | **New.** Google Images in an in-app browser can raise the age rating | TL |
+| G12 | S2 | **New.** Google Images in an in-app browser; affects the truthful age answer and rights | TL |
 | G13 | S2 | Privacy manifest and report | TL |
 | G14 | S2 | **New.** Export compliance key | TL |
-| G15 | S2 | **New.** Build requirements and bundle details | TL |
+| G15 | S2 | **New.** Build requirements and bundle details; iPhone only | TL |
 | G16 | S2 | **New.** Delete items, purge soft deletes, export | TL |
-| G17 | S2 | **New.** Retention jobs | PO decides, TL |
+| G17 | S2 | **New.** Retention jobs; periods decided | TL |
 | G18 | S2 | **New.** AI budget, unused gateway features | TL |
 | G19 | S2 | Verify provider settings | PO login, TL |
 | G20 | S2 | **New.** Health notice and AI labels in the app | TL, PT, UXer |
@@ -31,6 +31,7 @@ Items marked **New** were not in issue #384.
 | G23 | S2 | **New.** Public repo: what gets committed | TL |
 | G24 | S3 | **New.** Live Activity English-only, Lock Screen name | TL |
 | G25 | S2 | **New.** Local data stays after sign-out | TL, PO |
+| G26 | S1 | **New.** Countries where the AI provider is not offered; store availability | PO, TL |
 
 ---
 
@@ -97,14 +98,14 @@ the choice is null and nothing clears it, so a decline is permanent and an accep
 
 ## G4. Login option (S1)
 
-See `app-store-connect-answers.md` section 6. PO picks: add Sign in with Apple (issue #384's plan) or hide Google on iOS.
+PO decided 2026-11-01: **add Sign in with Apple.** Design and consequences: `app-store-connect-answers.md` section 6. The Apple relay needs a registered email source, which ties to G6.
 
 ## G5. URLs, links, terms and age step (S1)
 
 **Does GitHub Pages work? Yes for now.** `gh-pages.yml` publishes `dist/`. Vite has no `public/` folder yet; adding
 `public/legal/` copies files to `dist/legal/` and also into the iOS bundle (harmless). Proposed:
 `https://sebpabonc.github.io/gymstudio/legal/privacy.en.html`, `privacy.es.html`, `terms.en.html`, `terms.es.html`,
-`support.en.html`, `support.es.html`. Static HTML, no scripts, no bundle needed. Generate from the approved Markdown.
+`support.en.html`, `support.es.html`, `consumer-health-data.en.html`, `consumer-health-data.es.html`. These URLs are now written in the drafts; the PO accepts Pages for now (domain later). Static HTML, no scripts, no bundle needed. Generate from the approved Markdown, in the languages the PO confirms (Brazil would need Portuguese).
 
 Limit: GitHub says Pages may not be used to run "your online business" if "primarily directed at either facilitating
 commercial transactions or providing commercial software as a service"
@@ -113,11 +114,11 @@ for a free app look fine; a paid Pro or landing page should move to a custom dom
 user name.
 
 In the app (EN and ES):
-- Profile: Privacy policy, Terms, Support, Delete account. Also on the login screen. Opened with `openExternal`.
+- Profile: Privacy policy, Terms, Support, Delete account, and a **separate** link "Consumer Health Data Privacy Policy (US)" / "Política de datos de salud del consumidor (EE. UU.)" (RCW 19.373.010(16), .020(1)(b): in-app settings link, plus the App Store download page). Also on the login screen. Opened with `openExternal`.
   The bottom tab is labelled "You" while the documents say "Profile → …": once built, align the policy, terms, support page and
   review notes with the exact labels, in both languages.
-- Sign-up: terms acceptance and minimum-age confirmation before account creation, including Google and Apple paths.
-  Record version and timestamp.
+- Sign-up: terms acceptance and 18+ confirmation before account creation, including Google and Apple paths.
+  Record version and timestamp. This does **not** count as health or AI consent (RCW 19.373.010(6)(b): not through general terms); those stay separate (G2, `ai-disclosure.md` F). Health and sharing consents must be recorded per person, with version.
 
 ## G6. Email provider (S1)
 
@@ -126,6 +127,8 @@ that are not part of the project's team", at 2 messages per hour, and is meant f
 (`https://supabase.com/docs/guides/auth/auth-smtp`, read 2026-10-31). Email confirmation is on, so **a new email user cannot
 activate an account** unless custom SMTP is set in the dashboard. ⚠️ VERIFY dashboard. Needs a provider, a sending domain
 (PO), and an entry in the policy. A domain also solves the support address.
+
+**PO said 2026-11-01: domain and mail provider later, personal email for now.** Personal email is fine for support. The provider can't wait until after launch: confirmation, reset, inactive-account warnings (G17) and Apple relay mail all depend on it, and App Review tests email sign-up. Options: provider before submission (recommended), or launch with Apple and Google only and hide email sign-up (`LoginScreen`), adjusting review notes, Terms and policy. PO question 4.
 
 ## G7. New-user path and the private program (S1)
 
@@ -139,8 +142,9 @@ Read from code:
 - **Bundled fallback:** when the fetch throws or Supabase is unavailable and no cache exists, `storage.ts:741` imports
   `docs/fitness/approved/training-blocks/blocks.json`. So a new user offline on first launch can see the PO's private 9-block
   program, contradicting migration 028. The file also ships in every public bundle. Blocks 1 to 5 have `origin: 'coach'`
-  and may come from a third party's plan (`docs/reference/workout-plan.xlsx`), a content-rights question for the PO.
-  Recommendation: remove from the public bundle.
+  and came from `docs/reference/workout-plan.xlsx`. The PO confirmed permission to use them (2026-11-01); whether it covers public distribution is question 5.
+  **Still remove from the public bundle:** the Terms now say no human trainer writes or reviews a user's plan, and that is only true once a new user can't get these blocks.
+  ⚠️ VERIFY `docs/fitness/approved/templates/` were not derived from the coach blocks.
 - `?demo=1` uses a PT template, fine.
 
 ## G8. Bundle ID and team (S1)
@@ -151,16 +155,93 @@ under the paid team, since it matches the brand; IDs are global, so it may be ta
 Then align `capacitor.config`, the widget prefix (must start with the parent ID), and enable the capabilities.
 A deep link scheme `gymstudio` is already in Supabase's allow-list and doesn't depend on the ID.
 
-## G9. Untrue statements in the app (S1)
+## G9. Untrue statements in the app and listing (S1)
 
-- `login.benefit3` "Your synced data is private to your account", `login.privacyBody` "Synced history is only visible to your
-  account": the owner has dashboard access, and data goes to Supabase and OpenAI. Proposed in `ai-disclosure.md`.
-- `workout.block.origin.pt` "Designed by the PT", `profile.goal.copy` "Your PT plan", the prompts ("the plan itself is designed
-  by the PT"), and the listing's "rules written by a personal trainer": the PT is `.claude/agents/pt-fitness-expert.md`, an AI
-  agent, with the PO approving (`docs/fitness/README.md`). Unless a qualified human reviews this content, it misrepresents
-  the source. Needs PO answer (question 9) and PT rewording. Also guideline 2.3.
-- `ai.error.dailyLimit` "You've used today's 40 questions": automatic `trainer_explain` calls count, so users can hit it with
-  few questions. `docs/architecture/ai-gateway.md` still says 20 per day.
+PO answer 2026-11-01: **there is no human trainer behind the content.** Use "AI trainer" everywhere, never "personal trainer". The rules are reviewed by the app's AI specialist agent (`.claude/agents/pt-fitness-expert.md`) and approved by the owner (`docs/fitness/README.md`). Also guideline 2.3 and consumer law. Tech Lead applies A to D; Socialer applies E (PT checks prompts and "learns"; prompt changes affect trainer sentences, so follow the AGENTS.md trainer checklist). Internal code comments saying "PT" and `origin: 'pt'` values can stay: users don't see them.
+
+### A. App dictionaries (`src/i18n/sections/`), exact replacements
+
+| Key (file) | EN today | EN new | ES today | ES new |
+|---|---|---|---|---|
+| `profile.goal.copy` (`profile.ts`) | Your PT plan is built from this. | Your plan is built from this. | Tu plan de entrenamiento se basa en esto. | No change |
+| `workout.block.pt` (`workout.ts`), badge at `WorkoutPlan.tsx:2981` | PT | App plan | PT | Plan de la app |
+| `workout.block.coach` (`workout.ts`), same badge | Coach | My plan | Entrenador | Mi plan |
+| `workout.block.origin.pt` (no caller found) | Designed by the PT | Delete the key, or: From the app's rules | Diseñado por el PT | Eliminar, o: Según las reglas de la app |
+| `workout.block.origin.coach` (no caller found) | Designed by your coach | Delete the key, or: Your own plan | Diseñado por tu entrenador | Eliminar, o: Tu propio plan |
+| `workout.ai.coachThinking` (`workout.ts`) | Coach is thinking… | AI trainer is thinking… | El entrenador está pensando… | El entrenador con IA está pensando… |
+| `workout.ai.summary` (`workout.ts`) | AI coach summary | AI trainer summary | Resumen con IA | No change |
+| `login.benefit3` (`app.ts`) | Your synced data is private to your account. | Your data is separated from other users' data. | Tus datos sincronizados son privados de tu cuenta. | Tus datos están separados de los de otros usuarios. |
+| `login.privacyBody` (`app.ts`) | Workout history stays on this device while you're signed out. Synced history is only visible to your account. | Signed out, your workouts stay on this device. With an account, they are stored with our hosting provider, Supabase, and only sent to OpenAI if you turn on AI. Read the Privacy Policy. | Tu historial de entrenamientos se queda en este dispositivo mientras no has iniciado sesión. El historial sincronizado solo lo ve tu cuenta. | Sin sesión, tus entrenamientos se quedan en este dispositivo. Con una cuenta, se guardan con nuestro proveedor de alojamiento, Supabase, y solo se envían a OpenAI si activas la IA. Lee la Política de privacidad. |
+| `ai.error.dailyLimit` (`app.ts`) | You've used today's 40 questions. Try again tomorrow. | You've reached today's AI limit. Try again tomorrow. | Ya usaste tus 40 preguntas de hoy. Inténtalo de nuevo mañana. | Llegaste al límite de IA de hoy. Inténtalo de nuevo mañana. |
+
+Why the last row: automatic `trainer_explain` calls count, so users can hit it with few questions. `docs/architecture/ai-gateway.md` still says 20 per day. `help.ai.consent` and `ai.consent.body` ("Nothing else") go with G2 and `ai-disclosure.md`.
+
+Existing "AI Trainer" labels (`workout.trainer.title`) stay. The rule sentences in the first person ("I moved the load up") stay, as the AI Trainer's voice, with the labels in G20.
+
+### B. AI prompts (`supabase/functions/ai-gateway/index.ts`), so the model never claims to be a person
+
+| Prompt | Today | New |
+|---|---|---|
+| `TRAINER_PROMPT` | You are the user's personal trainer inside GymStudio. | You are the user's AI trainer inside GymStudio. |
+| `TRAINER_PROMPT` | like a real PT standing next to them | in a direct, practical tone |
+| `GENERAL_PROMPT` | You are GymStudio's training coach inside a gym-tracking app. | You are GymStudio's AI trainer inside a gym-tracking app. You are software: never claim to be a human or a certified trainer. |
+| `GENERAL_PROMPT` | plan itself is designed by the PT | plan itself comes from the app's rules |
+| `PLAN_PROMPT` | You are GymStudio's coach preparing the user's next session of a given day of their PT plan. | You are GymStudio's AI trainer preparing the user's next session of a given day of their plan. |
+| `PLAN_PROMPT` | the PT owns the plan | the app's rules own the plan |
+| `BLOCK_PROMPT` | You are GymStudio's PT personalising | You are GymStudio's AI trainer personalising |
+| `BLOCK_PROMPT` | already built from a PT template with the approved rules | already built from an app template with the approved rules |
+| `SUGGESTION_PROMPT`, `SESSION_PROMPT` | You are GymStudio's coach inside a gym-tracking app. | You are GymStudio's AI trainer inside a gym-tracking app. |
+| `FEEDBACK_PROMPT` | You are GymStudio's coach. | You are GymStudio's AI trainer. |
+| Exercise prompt | you may suggest what to discuss with their coach | you may suggest they ask a qualified professional |
+
+Check the top of the file for any other "coach" in prompts. The five features with no caller (G18) can be removed instead.
+
+### C. Name "GymStudio" (PO 2026-11-01)
+
+| File | Today | New |
+|---|---|---|
+| `ios/App/App/Info.plist` `CFBundleDisplayName`; `capacitor.config.json` `appName`; `index.html` title; `src/App.tsx:166`, `:202` wordmarks | Gym Studio | GymStudio |
+| `index.html` description | Gym Studio tracking app for exercise logs and progress | GymStudio tracking app for exercise logs and progress |
+| `ios/App/RestTimerWidget/Info.plist` | Gym Studio Rest Timer | GymStudio Rest Timer |
+
+### D. Sentences that must stay out
+
+Never in app, listing, site or video: "personal trainer", "entrenador personal", "written by a trainer", "designed by the PT", a real person's coaching, credentials, or "reviewed by a professional". The only allowed mention of certified trainers is the disclaimer in Terms section 5.
+
+### E. Marketing (owner: Socialer; PT for fitness claims; nothing published without PO)
+
+App Store listing, `docs/marketing/2026-10-18-marketing-plan.md` §8. Lengths checked: name 21/30 and 24/30; promo 134/170 and 153/170.
+
+| Field | EN new | ES new |
+|---|---|---|
+| Name | GymStudio: AI Trainer | GymStudio: Entrenador IA (no change) |
+| Promotional text | Know what to lift today. GymStudio sets each exercise's weight from your last sets, using the app's training rules, and tells you why. | Sabe qué levantar hoy. GymStudio ajusta el peso de cada ejercicio según tus últimas series, con las reglas de entrenamiento de la app, y te dice por qué. |
+| Description, first line | Stop guessing your weights. GymStudio is a training app with an AI trainer that learns from every set. | Deja de adivinar tus pesos. GymStudio es una app de entrenamiento con un entrenador con IA que aprende de cada serie. |
+| Description, "know what to lift" | Every exercise shows today's weight and reps, calculated from your last sessions with the app's training rules. AI can explain them in plain words. Tap to see why: "Last time you reached the top of the 8-rep target at 40 kg, so I moved the load up." | Cada ejercicio muestra el peso y las repeticiones de hoy, calculados a partir de tus últimas sesiones con las reglas de entrenamiento de la app. La IA puede explicarlos en palabras simples. Toca para ver por qué: "La última vez alcanzaste el máximo del objetivo de 8 repeticiones con 40 kg, así que subí el peso." |
+| Description, plan | With a free account, answer a few questions and get a 6-week plan for 3 to 6 days a week, at the gym or with dumbbells. Your week is one bar, so you always know what's next. | Con una cuenta gratis, responde unas preguntas y recibe un plan de 6 semanas de 3 a 6 días por semana, en el gimnasio o con mancuernas. Tu semana es una barra: siempre sabes qué sigue. |
+| Description, cues bullet | • Technique cues and posture tips for every exercise in the library | • Técnica y consejos de postura para cada ejercicio de la biblioteca |
+| Description, language | Switch language any time. Log offline; sign in with Apple, Google or email to sync. | Cambia de idioma cuando quieras. Registra sin conexión; inicia sesión con Apple, Google o correo para sincronizar. |
+| Description, end | GymStudio does not give medical advice. Check with a doctor before starting a new training program. Its AI trainer is software and its answers can be wrong. AI is optional and uses OpenAI. For ages 18 and over. Privacy: https://sebpabonc.github.io/gymstudio/legal/privacy.en.html US consumer health data policy: https://sebpabonc.github.io/gymstudio/legal/consumer-health-data.en.html | GymStudio no ofrece consejo médico. Consulta a un médico antes de empezar un nuevo programa de entrenamiento. Su entrenador con IA es un programa y sus respuestas pueden tener errores. La IA es opcional y usa OpenAI. Para mayores de 18 años. Privacidad: https://sebpabonc.github.io/gymstudio/legal/privacy.es.html Política de datos de salud de EE. UU.: https://sebpabonc.github.io/gymstudio/legal/consumer-health-data.es.html |
+
+Localisation: Spanish (Mexico) only, not Spain (EU left out). "learns from every set": PT confirms, or use "adapts to your sets" / "se adapta a tus series".
+
+Everywhere else in `docs/marketing/` (plan, `2026-10-18-promo-15s.html`, `-promo-30s.html`, `-app-store-screenshots.html`, `2026-10-07-*`, `2026-10-10-rollout-and-monetization.md`):
+
+| Find | Replace |
+|---|---|
+| Train with an AI Personal Trainer that learns from every set. | An AI trainer that learns from every set. |
+| Entrena con un entrenador personal con IA que aprende de cada serie. / Entrena con un Entrenador Personal IA que aprende de cada serie. | Un entrenador con IA que aprende de cada serie. |
+| GymStudio is a personal trainer that learns from every set. | GymStudio has an AI trainer that learns from every set. |
+| using rules written by a personal trainer / with rules written by a trainer | using the app's training rules |
+| con reglas escritas por un entrenador / con reglas escritas por un entrenador personal | con las reglas de entrenamiento de la app |
+| 6-week plans built from a personal trainer's templates. / builds your 6-week plan from a personal trainer's templates / A plan built from a personal trainer's templates. | 6-week plans built from the app's training templates. |
+| Planes de 6 semanas creados a partir de plantillas de un entrenador personal. / a partir de plantillas de un entrenador personal / Un plan creado con plantillas de un entrenador personal. | Planes de 6 semanas creados con las plantillas de entrenamiento de la app. |
+| **A real plan, written by a trainer** (pillar 4) | **A real plan** |
+| Rules written by a personal trainer (landing "Trust") | Clear training rules, prepared with an AI specialist and approved by the owner. No human trainer reviews your plan. |
+| A personal trainer writes the rules / Un entrenador personal escribe las reglas (post 19) | How the rules get made: an AI specialist drafts them, the owner approves them / Cómo se hacen las reglas: un especialista de IA las redacta y el dueño las aprueba |
+| "AI Personal Trainer" (honesty rule, §1), "PT-written rules" | "AI trainer", "the app's rules" |
+
+Also update the §14 row "rules written by a personal trainer" and §13 contact email (js.pabonc979@gmail.com). Marketing text naming a real training result or user needs its own check (5.1.3).
 
 ## G10. Forgot password (S1)
 
@@ -179,7 +260,7 @@ Notes (500 characters) may contain injuries or conditions; either stop sending t
 
 `openExternal` uses `Browser.open` (Safari view) from `exerciseImages.ts` links in `ExerciseFinder.tsx` and `WorkoutPlan.tsx`.
 Apple's age-rating item "Unrestricted web access" is "Users can navigate to any webpage within the app or freely browse the
-web", which rates 16+. Recommendation: open these links in the system browser, not in-app, and keep the sign-in sheet.
+web". With the 18+ decision the final rating no longer depends on it, but the answer must stay truthful and it affects content rights. Recommendation: open these links in the system browser, not in-app, and keep the sign-in sheet.
 Long term: licensed images (parked). This also simplifies the content-rights answer.
 
 ## G13. Privacy manifest (S2)
@@ -200,22 +281,21 @@ CryptoKit or CommonCrypto in app Swift.
 - Apple requires Xcode 26 and the iOS 26 SDK for uploads since 2026-04-28 and an iOS 13 minimum since 2026-09-09
   (`https://developer.apple.com/news/upcoming-requirements/`, read 2026-10-31). Test Capacitor 6.2.2 with them.
 - `Info.plist` `UIRequiredDeviceCapabilities` has `armv7`; the app is arm64-only in practice. Check validation; switch to `arm64`.
-- Display name "Gym Studio" against listing name "GymStudio". PO spelling decision.
+- Name: PO chose "GymStudio" (2026-11-01). Strings in G9 C.
 - `package.json` is 0.1.0, feedback sends that; Xcode says 1.0.
-- `TARGETED_DEVICE_FAMILY = "1,2"`: iPad is on, so Apple reviews and requires iPad screenshots. Decide, or set to iPhone only.
+- **iPhone only** (PO 2026-11-01): set `TARGETED_DEVICE_FAMILY = "1"` on both targets. Today it is `"1,2"`, so Apple would review on iPad and require iPad screenshots.
 - Icon: one `AppIcon-512@2x.png`; brand undecided.
 
 ## G16. Delete items and export (S2)
 
-- Logs: soft-deleted rows stay forever, and `workout_entries` and `user_exercises` have no DELETE policy. Add a purge after N
-  days once all devices have synced. The policy says what N is.
+- Logs: soft-deleted rows stay forever, and `workout_entries` and `user_exercises` have no DELETE policy. Add a purge after **30 days** (PO), and
+  check another device can't resurrect a purged row. The policy says 30 days.
 - Measurements, goals: add delete in Profile (RLS already allows). Feedback: by email.
 - Export: JSON or CSV in Profile. GDPR portability; also reduces support work. Until then, by email within the legal period.
 
 ## G17. Retention (S2)
 
-Today nothing expires. Once the PO decides: job (`pg_cron`, Edge schedule) for inactive accounts with warning email, purge old
-`user_plans`, `trainer_recommendations`, `ai_usage`, `feedback`. Policy has the `[PO: …]` values.
+Today nothing expires. PO decided 2026-11-01: **inactive accounts 24 months** with warning email first (needs G6; define "inactive" as last sign-in or sync), **feedback 24 months**, **AI usage 12 months**. Previous plans: until the account is deleted, pending PO approval. Job: `pg_cron` or Edge schedule. Deleting `ai_usage` older than 12 months doesn't affect the monthly cap. An inactive-account deletion must run the same flow as G1 (Apple revoke included).
 
 ## G18. AI budget and leftovers (S2)
 
@@ -229,12 +309,14 @@ Today nothing expires. Once the PO decides: job (`pg_cron`, Edge schedule) for i
 Supabase region, plan and backups, DPA acceptance, leaked-password protection, log retention; OpenAI data-sharing off, DPA,
 retention; Google OAuth consent screen uses final policy and terms URLs; Google provider tokens not stored.
 
+**Agent access:** development agents have Supabase tools that can run SQL on production. ⚠️ VERIFY they never read other users' rows; if they can or do, the AI vendor behind them becomes a recipient and the policy must say so. Recommendation: read-only metadata only, in writing.
+
 ## G20. Health notice and AI labels (S2)
 
 - 1.4.1 says apps "should remind users to check with a doctor". Today only "Not medical advice" in chat and the login-free
   listing. Add a first-run notice and before starting a plan (copy from `ai-disclosure.md`, after PT review).
 - Label AI text: "AI Trainer" sentence and "Personalised by AI" exist; add a mark on the sentence itself, since a template and
-  an AI sentence look identical. EU AI Act transparency duties: ⚠️ VERIFY with lawyer.
+  an AI sentence look identical. EU AI Act: not targeted, as the EU is left out; recheck before any EU launch.
 - `fat_loss` goal with calories tracking: PT reviews the wording and the minimum-age decision.
 
 ## G21. Tidy (S3)
@@ -251,7 +333,7 @@ possibly consent. Update first, ship second.
 ## G23. Public repository (S2)
 
 The repo is **public**. Everything committed under `docs/governance/` is public, including `questions-for-po.md` and placeholders.
-Do not commit his real name, address, phone or answers until he decides they are public. Consider whether review notes belong in
+The PO approved his name (Seb Pabon) and email for public pages (2026-11-01). **Never commit his address, city or phone.** Public documents say "Australia" only. Consider whether review notes belong in
 the repo at all (they contain no credentials). Migration 028 already contains the PO's user UUID.
 
 ## G24. Live Activity (S3)
@@ -263,3 +345,17 @@ disclosed in the policy.
 
 Sign-out keeps `gym-studio.user.<uuid>.*`. On a shared device another person can't read it through the UI, but it stays. Decide:
 wipe on sign-out if everything is synced, or ask. Documents currently state it stays until the app is removed.
+
+## G26. AI provider countries and store availability (S1)
+
+OpenAI's list (`https://developers.openai.com/api/docs/supported-countries`, read 2026-10-31) has **no Hong Kong, China, Macau, Venezuela or Cuba**, and warns about "Accessing or offering access to our services outside of the countries and territories listed". All other named launch countries are listed. ⚠️ I did not check every Latin American and Caribbean country: compare the final list against this page.
+
+The call leaves from Supabase's server, so it would technically work, but that does not make offering it acceptable and could lose the OpenAI account.
+
+- **Recommended:** leave Hong Kong, Venezuela, Cuba, mainland China and Macau out of App Store availability (PO question 2).
+- **Alternative:** disable AI by storefront or location. Not built; adds a location signal the policy says we don't use.
+- In App Store Connect: "Specific Countries or Regions", final list only, and **leave "future countries" unticked**, so EU or other countries aren't added by accident.
+- **The web app is not geo-limited.** GitHub Pages stays reachable from the EU and any other country, and it has AI and accounts. Do not target excluded countries: no EU prices, ads or Spain-specific Spanish. PO should know this is the limit of "EU left out".
+- If Brazil stays: Portuguese versions of policy, terms, support, consent copy (A, C, E, F, G of `ai-disclosure.md`).
+- Korea and Japan get English-only UI; users there accept English consent. ⚠️ VERIFY consent validity if those markets grow.
+

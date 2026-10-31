@@ -1,6 +1,6 @@
 # GymStudio data inventory (DRAFT)
 
-- **Prepared by:** Governancer, 2026-10-31. Not legal advice. Working document in English.
+- **Prepared by:** Governancer, 2026-10-31; PO decisions of 2026-11-01 noted. Not legal advice. Working document in English.
 - **Sources:** repo at `main` (72c02eb) and a read-only schema check of the production Supabase project on
   2026-10-31 (table and column metadata and row counts only; no user content was read).
 - **Rule:** if the app changes what it collects, update this file first, then the policy and the App Privacy answers.
@@ -30,7 +30,7 @@
 ## 3. Data on the server (Supabase Postgres, RLS per user)
 
 All listed tables have `ON DELETE CASCADE` to `auth.users` (confirmed in production), so deleting the auth user removes
-them. See G1 for the one foreign key that needs a test. Retention today: **no automatic deletion anywhere**.
+them. See G1 for the one foreign key that needs a test. Retention today: **no automatic deletion anywhere**. Decided by the PO, not built (G16, G17): inactive accounts 24 months, deleted logs 30 days, feedback 24 months, AI usage 12 months.
 
 | Data | Table / column | Source | Purpose | Linked | Retention today | Sent to OpenAI? |
 |---|---|---|---|---|---|---|
@@ -112,12 +112,12 @@ change (`e8373cc`, 2026-10-06). ⚠️ VERIFY contents are identical before rely
 | **Supabase** (Supabase Pte. Ltd.) | Database, auth, Edge Functions, logs | Everything in section 3 | Project URL `gxcxnttbzechusggtxfz.supabase.co`. ⚠️ VERIFY **region** in dashboard | DPA v1 of 2026-08-01 forms part of the terms, includes SCCs (`https://supabase.com/legal/dpa`). Subprocessors: `https://supabase.com/legal/customer-resources/subprocessor-list` |
 | **OpenAI** | AI text | Section 5 | Assume US | ⚠️ VERIFY DPA accepted |
 | **Google** | Optional sign-in; Google Images when tapped | Identity data | Global | Google OAuth client owned by the PO |
-| **Apple** | App distribution; Sign in with Apple once built (G4) | Apple's own App Store data; name and email or relay address | Global | Apple terms |
+| **Apple** | App distribution; Sign in with Apple once built (PO decided, G4) | Apple's own App Store data; name and email or relay address | Global | Apple terms |
 | **GitHub Pages** | Hosts the web app and, planned, the policy pages | Visitor IP in server logs. ⚠️ VERIFY: the limits page does not describe logging | US | The iOS app loads its assets from its bundle, not from Pages |
-| **Email provider** | Auth emails | Email address, message | ⚠️ **None configured in repo** (G6) | Add to the policy when chosen |
+| **Email provider** | Auth emails | Email address, message | ⚠️ **None configured in repo; PO choosing later, must be before launch** (G6) | Add to the policy when chosen |
 
 Staff access: the owner can read all rows through the Supabase dashboard (service role). So in-app text saying data is "only
-visible to your account" is not accurate (G9).
+visible to your account" is not accurate (G9). Development agents with production SQL tools: ⚠️ VERIFY (G19).
 
 ## 7. Backups
 
