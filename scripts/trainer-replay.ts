@@ -1,14 +1,17 @@
 // Prevention plan step 2 (PO 2026-10-07): replay a user's real history (exported read-only to a local JSON file,
 // never committed) through the current engine and print what the AI Trainer would recommend for every planned
 // exercise of the current block. Run before shipping engine changes:
-//   npx vite-node scripts/trainer-replay.ts <entries.json> [today]
+//   npx vite-node scripts/trainer-replay.ts <entries.json> [today] [old-id=new-id,...]
 import { readFileSync, readdirSync } from 'node:fs'
 import { recommend } from '../src/trainer/engine'
 import { buildEvidence } from '../src/trainer/evidence'
 import { parseRepPrescription } from '../src/utils/workoutSets'
+import { findComparableLoggingEntry, prefillLoggedReps } from '../src/utils/effortlessLogging'
 import type { TrainingBlock, WorkoutEntry } from '../src/types'
 
-const [file, todayArg] = process.argv.slice(2)
+// Optional third argument applies permanent swaps: old-id=new-id,old-id=new-id
+const [file, todayArg, swapsArg] = process.argv.slice(2)
+const swaps = new Map((swapsArg ?? '').split(',').filter(Boolean).map((pair) => pair.split('=') as [string, string]))
 const today = todayArg ?? new Date().toISOString().slice(0, 10)
 const entries = JSON.parse(readFileSync(file, 'utf8')) as WorkoutEntry[]
 type RawBlock = { id: string; number: number; name: string; start_date: string; weeks: number; days: Array<{ key: string; name: string; exercises: Array<{ code: string; exercise_id: string; sets: number; reps: string[]; rest_seconds: number; technique: string; angle_degrees?: number; notes?: string }> }> }
@@ -16,7 +19,7 @@ const raw = JSON.parse(readFileSync('docs/fitness/approved/training-blocks/block
 const blocks: TrainingBlock[] = raw.map((b) => ({
   id: b.id, number: b.number, name: b.name, method: '', startDate: b.start_date, weeks: b.weeks, origin: 'pt', summary: '', insights: [],
   days: b.days.map((d, i) => ({ key: d.key, position: i + 1, name: d.name, exercises: d.exercises.map((e, j) => ({
-    code: e.code, position: j + 1, exerciseId: e.exercise_id, sets: e.sets, reps: e.reps, restSeconds: e.rest_seconds,
+    code: e.code, position: j + 1, exerciseId: swaps.get(e.exercise_id) ?? e.exercise_id, sets: e.sets, reps: e.reps, restSeconds: e.rest_seconds,
     technique: e.technique as never, ...(e.angle_degrees != null ? { angleDegrees: e.angle_degrees } : {}), ...(e.notes ? { notes: e.notes } : {}),
   })) })),
 }))
@@ -48,7 +51,14 @@ for (const day of block.days) {
     const loads = rec.setWeights ? rec.setWeights.join('/') : String(rec.weight ?? '—')
     if (evidence.length && (rec.weight === 0 || rec.setWeights?.some((w) => w <= 0))) problems.push(`${day.key} ${ex.code} 0 kg`)
     if (evidence.some((e) => e.date >= new Date(Date.parse(today) - 42 * 864e5).toISOString().slice(0, 10)) && rec.reason === 'no_history') problems.push(`${day.key} ${ex.code} says no data`)
-    console.log(`  ${ex.code.padEnd(3)} ${ex.exerciseId.padEnd(42)} last ${last.padEnd(28)} same day ${sameDay.padEnd(52)} → ${loads} kg × ${rec.reps.min}-${rec.reps.max} (${rec.action}, ${rec.reason}, ${rec.confidence})`)
+    const comparable = findComparableLoggingEntry(entries, ex.exerciseId, target, /\btempo\b/i.test(ex.notes ?? ''),
+      { date: today, blockId: block.id, dayKey: day.key }, blocks)
+    const previous = comparable?.sets.filter((set) => !set.tag || set.tag === 'main') ?? []
+    const prefill = Array.from({ length: ex.sets }, (_, index) => prefillLoggedReps({
+      target: rec.setReps?.[index] !== undefined ? String(rec.setReps[index]) : `${rec.reps.min}-${rec.reps.max}`,
+      weight: rec.setWeights?.[index] ?? rec.weight ?? 0, previous: previous[index], deload: week === 6,
+    })).join('·')
+    console.log(`  ${ex.code.padEnd(3)} ${ex.exerciseId.padEnd(42)} last ${last.padEnd(28)} same day ${sameDay.padEnd(52)} → ${loads} kg × ${rec.reps.min}-${rec.reps.max} (${rec.action}, ${rec.reason}, ${rec.confidence}) · prefill ${prefill}`)
   }
 }
 console.log(problems.length ? `\nPROBLEMS:\n- ${problems.join('\n- ')}` : '\nNo invariant problems.')
