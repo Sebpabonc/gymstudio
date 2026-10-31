@@ -89,7 +89,16 @@ Do not repeat any of these as fact.
 - **Plan summary after log-in:** goal, days per week, level and gym, then the training week with the first workout marked.
 - **Plate calculator:** draws the plates per side for the set's weight; bars and plates can be edited.
 - **Other surfaces:** milestones (volume, workouts, calories), a 14-day guest pass, empty workout report, optional Health Profile (Apple Health or manual: gender, date of birth, height).
-- **Small flaws:** milestone volume shows lb while the plan is in kg; weekly goal shows 3 days while the plan says 4.
+- **Small flaws:** milestone volume shows lb while the plan is in kg; weekly goal shows 3 days while the plan says 4; the summary shows 0m for a 45-second workout.
+
+### Saving a workout (one test workout, with the PO's OK)
+
+- **Flow:** stop button → sheet with duration, exercises, volume and calories, plus Apple Health, Strava and Fitbit switches → Log Workout → summary with confetti, muscle figure, calories, volume, sets, Share and Done → a screen about unlocking the weekly streak → Log tab. **No second paywall appeared**, with the trial active, and a single exercise was enough to save.
+- **No reason given:** nothing explained the weight or the next workout after saving.
+- **Generic celebration:** the confetti was not tied to any achievement, and no record card appeared on this first workout.
+- **The next workout changed without explanation:** still called Upper Body Day, with other exercises. Close-grip bench went from 8 reps at 32.5 kg to 10 reps at 35 kg. I do not know which change caused what, because the plan and the date had also changed. Strength Calibrate left the top bar.
+- **Progress reacts at once:** Benchmark Lifts shows a calculated 57.2 kg as a one-rep estimate, from 42.5 kg × 8 with 2 reps left. Recovery colours the chest and lists it with the time since. Targets rose to 9%. Exercise History shows the effort answer, warm-up, working sets and the estimate.
+- **Past workouts stay editable:** sets, effort answer and added exercises.
 
 ### Two things that surprised me
 
@@ -99,6 +108,7 @@ Do not repeat any of these as fact.
 ### Limits and honesty
 
 - **Effects on the PO's phone:** a drag meant to scroll moved Dip in the list; I set a test weight of 30 kg, built a superset, turned the rest timer on and started two workouts. I discarded both workouts, and restored 25 kg, the order, the unbundled lifts and the timer. I logged out to reach the first run, and he logged back in.
+- **Left in place, with the PO's OK:** one test workout dated 1 Nov 2026, one exercise, Barbell Bench Press 8 × 42.5 kg. It affects Fitbod's estimates for that lift.
 - **Not reversed, possibly:** after he logged back in, the plan shows build muscle, 4 days, intermediate and large gym, which match my test answers, and the next workout changed from 9 exercises to Lower Body Day. I cannot tell whether those answers overwrote his or were already the same. He should check My Plan.
 - **One unexplained notice:** on the first Log Set, iPhone Mirroring said the iPhone camera was not available from the Mac. It did not recur. I did not count it as Fitbod behaviour.
 - **Not reached:** see §12. Nothing of Fitbod's was saved in the repo; screens are described in my own words.
@@ -119,7 +129,7 @@ Do not repeat any of these as fact.
 
 - **[H] $24.99/month, $149.99/year on the in-app paywall for this account.** **$15.99/month, $95.99/year** on the FAQ page and App Store. Older $12.99, $79.99 and legacy tiers are still listed **[V]**. The home page shows no price **[V]**. Regional prices vary.
 - **Trial:** 7 days, you must opt into a plan to start, and it rolls into paid unless cancelled **[V]**. Apple cancellations need 24 hours' notice **[V]**.
-- **Paywall timing:** a video breakdown shows onboarding and the first generated workout are free. Paywall appears once the workout exists and before it starts (yearly plan highlighted), with a second paywall after the workout summary framed around 90-day predictions **[S, one source]**. A Mexican review dated 24 March (year not shown) complains of being sent to payment before exploring, and the developer answers with the trial **[V, one review]**. Exact behaviour **[D]**. **[H]** No payment or trial screen appears before sign-up. After log-in on the PO's account: plan summary, then a paywall with yearly and monthly tabs, four benefits and no mention of the trial; the X closes it. A brand-new sign-up may differ.
+- **Paywall timing:** a video breakdown shows onboarding and the first generated workout are free. Paywall appears once the workout exists and before it starts (yearly plan highlighted), with a second paywall after the workout summary framed around 90-day predictions **[S, one source]**. A Mexican review dated 24 March (year not shown) complains of being sent to payment before exploring, and the developer answers with the trial **[V, one review]**. Exact behaviour **[D]**. **[H]** No payment or trial screen appears before sign-up. After log-in on the PO's account: plan summary, then a paywall with yearly and monthly tabs, four benefits and no mention of the trial; the X closes it. No second paywall after saving a workout, with the trial active. A brand-new sign-up may differ.
 
 ### Platforms, integrations, languages
 
@@ -287,7 +297,7 @@ Evidence: **the app on device [H]**, store screenshots [V, marketing], TechRadar
 - **Colour:** near-black with one saturated rose-red, green for done, gold for records. Close to our dark and rose. **Our rose is more muted, theirs more energetic.** Do not move closer: brand confusion.
 - **Shape:** the hexagon recurs in the logo, set markers and the weekly ring. A single distinctive shape is why it feels designed. **Hexagon use is theirs; do not copy.**
 - **Tone:** direct, encouraging, emoji in help. Our calm tone stands apart.
-- **Why it feels premium:** real photography and video, an anatomical figure as hero, a single accent, and few decorative elements. Density is the cost: one reviewer says the workout screen would overwhelm first-timers without tooltips [S]; on device, the one-tip-per-feature cards do most of that work [H]. Generic confetti at the end, not tied to achievements [S]; I did not finish a workout, so not seen.
+- **Why it feels premium:** real photography and video, an anatomical figure as hero, a single accent, and few decorative elements. Density is the cost: one reviewer says the workout screen would overwhelm first-timers without tooltips [S]; on device, the one-tip-per-feature cards do most of that work [H]. Generic confetti at the end, not tied to achievements [S, H].
 
 ## 8. Trust, compliance and the store listing
 
@@ -341,7 +351,7 @@ Evidence: **the app on device [H]**, store screenshots [V, marketing], TechRadar
 
 | Advantage | Confidence | Caveat |
 |---|---|---|
-| **A reason for each weight**: "reached the top of the 8-rep target at 40 kg, so I moved the load up" | **Medium:** on a new account, none on the exercise, How-To, History, More, Replace, rest or effort screens, only a generic card about starting weights [H]. GGR: users must guess the purpose | **Workout Insights (beta) is on and I have not seen it work:** it may explain something after logging [D]. Ours sits behind a tap on the cue sheet |
+| **A reason for each weight**: "reached the top of the 8-rep target at 40 kg, so I moved the load up" | **Medium to high:** none on the exercise, How-To, History, More, Replace, rest, effort or summary screens, even after one saved workout, only a generic card about starting weights [H]. GGR: users must guess the purpose | **Workout Insights (beta) is on and showed nothing after one workout:** it may need more sessions [D]. Ours sits behind a tap on the cue sheet |
 | **A plan that stays put**: 6 weeks, A/B days, comparable results | High | Needs "machine taken" and "short on time" exits |
 | **Honest variation**: A/B is named and explained. Fitbod also alternates heavy and light, but users ask why | High | Do not claim Fitbod has no variation |
 | **Logging**: 3 taps against 5 or 6 [H], no RiR, no keyboard for common changes, button states values | Medium until PR #382 merges and is tested | **Superset saving per tap is not a lead:** Fitbod does it too [H] |
@@ -417,7 +427,7 @@ Tags: **[PT]** fitness rule or claim. **[AI]** touches `docs/ux/README.md` guard
 | 8 | **Units and increments**: lb option; dumbbell steps set per gym. Fitbod even switches kg or lb per exercise [H]; a user-level choice is enough for us | High for US, medium otherwise | L | PT, TL | Before any US push |
 | 9 | **Progress clean-up**: remove or reword "+x kg/semana"; shorten rows | Medium | S | PT, TL | Quick win |
 | 10 | **Plain help page** in EN/ES: how is my weight chosen, why is today lighter, what is sent to AI. Feed Ask AI from it | Medium | S | PT, AI, GOV | Launch |
-| 11 | **Specific win moment**: "Strongest set on bench: 82.5 × 10" on Completed, optional clean share card | Medium | S–M | PT | v1.1 |
+| 11 | **Specific win moment**: "Strongest set on bench: 82.5 × 10" on Completed, optional clean share card. Fitbod's summary was generic confetti on a first workout [H], so this stands out | Medium | S–M | PT | v1.1 |
 | 12 | **First-week hints**, one short dismissible card per feature, the first time it is reached, instead of a welcome card. **Moved up within launch work:** on device this carries most of Fitbod's teaching | Medium to high | S | | Launch |
 | 13 | **Body visual of this week's sets**: no recovery %, approved weekly-set data only, own art | Medium, appeal | M | PT, PO | Later |
 | 14 | **More / less / never** for exercises in a plan | Medium | M | PT, TL | Later |
@@ -427,7 +437,7 @@ Tags: **[PT]** fitness rule or claim. **[AI]** touches `docs/ux/README.md` guard
 
 **Quick wins:** 3, 5, 9, 10, 12, 17. **Bigger bets:** 1 (preview), 4, 6, 7, 8.
 
-**What moved after the session:** 1 changes shape, because Fitbod also requires an account. 5 and 12 move up. 7 and 8 gain a concrete pattern. The clear rest alert drops as an advantage, and layout A for supersets is confirmed.
+**What moved after the session:** 1 changes shape, because Fitbod also requires an account. 5 and 12 move up. 7 and 8 gain a concrete pattern. The clear rest alert drops as an advantage, and layout A for supersets is confirmed. 11 gains support. A plan that stays put gains support too, since the next workout changed without explanation.
 
 **Expected impact and measurement:**
 
@@ -487,16 +497,16 @@ No personal data leaves the phone at this stage, and no AI is called. Questions 
 | 2 | Taps to log; does a weight change carry | **Done [H]** |
 | 3 | Does it move on; Undo; button words | **Done [H]** |
 | 4 | Superset, set by set | **Done [H]** for the first round. Final round not logged |
-| 5 | Per-exercise "why this weight" | **Done [H]** on a new account. Open with logged history and Workout Insights |
+| 5 | Per-exercise "why this weight" | **Done [H]** after one saved workout: none. Open with more history and Workout Insights |
 | 6 | Rest timer locked, alert and sound | **Part:** Live Activity seen counting and then showing the next set. Alert on a locked phone is open |
 | 7 | Spanish quality | **Open:** the phone is in English and I did not change a device setting |
 | 8 | Tabs, motion, density | **Done [H]**, at Mirroring's frame rate. Haptics cannot be felt, open |
 | 9 | Delete account path | **Done [H]**, cancelled at the alert |
-| 10 | Finishing a workout: summary, record card, second paywall, how the next workout adapts | **Open:** saving a test workout would add to the PO's history, and needs his OK |
+| 10 | Finishing a workout: summary, second paywall, how the next workout adapts | **Done [H]** with one test workout. Record card, unlocked strength score and adaptation over several sessions are open |
 | 11 | The other questionnaire path ("I know my strength") and the last superset rounds | **Open** |
 | 12 | Injury chat and strength check in use | **Not run on purpose:** the chat would need health details, and the check logs results |
 
-**For the PO, about 10 minutes:** check that My Plan is right; during one real rest, lock the phone and note whether it vibrates or alerts; finish one real workout and note what comes after. Optional: in iPhone Settings, set Fitbod's language to Spanish, and tell me so I can review it.
+**For the PO, about 10 minutes:** check that My Plan is right; during one real rest, lock the phone and note whether it vibrates or alerts; after 3 real workouts, tell me what the score and any insights say. Optional: in iPhone Settings, set Fitbod's language to Spanish, and tell me so I can review it.
 
 Also unverified: Google Play rating and Data Safety; direct Reddit threads; Watch behaviour in real use; keyword field; actual revenue or install figures (third-party numbers conflict and are not repeated).
 
