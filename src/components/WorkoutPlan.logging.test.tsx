@@ -10,6 +10,7 @@ import { createTranslator } from '../i18n/translate'
 import { loadWorkoutHistory, saveWorkoutHistory } from '../utils/storage'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { recommend } from '../trainer/engine'
+import { buildEvidence } from '../trainer/evidence'
 
 const harness = vi.hoisted(() => ({
   active: false,
@@ -487,29 +488,38 @@ describe('approved workout logging integration', () => {
   })
 
   it.each([
-    ['T112', '6-8', 'barbell', 37.5, [7, 7, 7], { min: 8, max: 9 }, { min: 6, max: 8 }, 37.5],
-    ['T116', '8', 'barbell', 37.5, [8, 7, 6], undefined, { min: 8, max: 8 }, 37.5],
-    ['T118', '12', 'cable', 10, [13, 13, 13], { min: 14, max: 15 }, { min: 12, max: 12 }, 10],
-  ])('%s: untouched Done repeats last reps and the next load stays', async (_, prescription, equipment, load, reps, storedRange, target, nextLoad) => {
+    ['T112', '6-8', 'barbell', 37.5, [7, 7, 7], { min: 8, max: 9 }, 37.5, [7, 7, 7], 37.5, undefined],
+    ['T113', '6-8', 'barbell', 37.5, [8, 8, 8], { min: 6, max: 8 }, 40, [6, 6, 6], 40, undefined],
+    ['T115', '8', 'barbell', 37.5, [8, 8, 8], undefined, 40, [8, 8, 8], 42.5, undefined],
+    ['T116', '8', 'barbell', 37.5, [8, 7, 6], undefined, 37.5, [8, 7, 6], 37.5, undefined],
+    ['T117', '8', 'barbell', 37.5, [6, 6, 6], undefined, 37.5, [6, 6, 6], 35, 'below_target_twice'],
+    ['T118', '12', 'cable', 10, [13, 13, 13], { min: 14, max: 15 }, 10, [13, 13, 13], 10, 'light_load_add_reps'],
+  ])('%s: untouched Done saves the approved reps and next load through real evidence', async (
+    _, prescription, equipment, lastLoad, lastReps, storedRange, load, savedReps, nextLoad, nextReason,
+  ) => {
     harness.catalogue[0].equipment = equipment
     harness.block!.days[0].exercises[0].reps = [prescription]
     saveWorkoutHistory([{
       id: 'last', exerciseId: 'press', date: '2026-10-12', blockId: 'block', dayKey: 'chest-back-a',
       ...(storedRange ? { target: { sets: 3, reps: storedRange } } : {}),
-      sets: reps.map((count, index) => ({ id: `last-${index}`, weight: load, reps: count })),
+      sets: lastReps.map((count, index) => ({ id: `last-${index}`, weight: lastLoad, reps: count })),
     }])
     render()
     await settle()
     await start()
-    for (const _set of reps) await click(doneLabel())
-    const saved = (await loadWorkoutHistory()).find((item) => item.date.startsWith('2026-10-19'))!
-    expect(saved.sets.map((set) => [set.weight, set.reps])).toEqual(reps.map((count) => [load, count]))
+    if (_ === 'T115') expect(renderToStaticMarkup(tree)).toContain(createTranslator('en')('workout.run.newWeightCheck'))
+    for (const _set of lastReps) await click(doneLabel())
+    const history = await loadWorkoutHistory()
+    const saved = history.find((item) => item.date.startsWith('2026-10-19'))!
+    expect(saved.sets.map((set) => [set.weight, set.reps])).toEqual(savedReps.map((count) => [load, count]))
+    const numbers = prescription.match(/\d+/g)!.map(Number)
     const next = recommend({
-      today: '2026-10-26', sets: 3, equipment, target,
-      history: [saved, { date: '2026-10-12', target, sets: reps.map((count) => ({ weight: load, reps: count })) }]
-        .map((session) => ({ date: session.date.slice(0, 10), target, sets: session.sets.map((set) => ({ weight: set.weight, reps: set.reps })) })),
+      history: buildEvidence(history, 'press', [harness.block!], '2026-10-26', 'chest-back-a'),
+      today: '2026-10-26', dayKey: 'chest-back-a', blockId: 'block', sets: 3, equipment,
+      target: { min: Math.min(...numbers), max: Math.max(...numbers) },
     })
     expect(next.weight).toBe(nextLoad)
+    if (nextReason) expect(next.reason).toBe(nextReason)
   })
 
   it('caps future same-load reps immediately after a saved correction and after reload', async () => {
