@@ -103,7 +103,7 @@ import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
-import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from '../utils/workoutMode'
+import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, WORKOUT_UNDO_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from '../utils/workoutMode'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
 import RestTimer from './RestTimer'
@@ -856,8 +856,9 @@ export default function WorkoutPlan({
   const [workoutGroupIndex, setWorkoutGroupIndex] = useState<number | null>(null)
   const [workoutSetIndex, setWorkoutSetIndex] = useState<Record<string, number>>({})
   const [workoutExerciseIndex, setWorkoutExerciseIndex] = useState(0)
-  const [fixLoggedExercise, setFixLoggedExercise] = useState<string | null>(null)
-  const [fixLoggedIndex, setFixLoggedIndex] = useState(0)
+  const [openSetRow, setOpenSetRow] = useState<string | null>(null)
+  // Longer than the Done guard and counted from the end of the save: a slow render must not turn a double tap into an undo.
+  const undoBlockedUntil = useRef(0)
   const [savingSet, setSavingSet] = useState(false)
   const savingSetRef = useRef(false)
   const saveQueue = useRef<Promise<unknown>>(Promise.resolve())
@@ -2089,7 +2090,7 @@ export default function WorkoutPlan({
   }, [workoutGroupIndex, workoutExerciseIndex])
   const goToWorkoutGroup = (index: number) => {
     if (index < 0 || index >= workoutGroups.length) return
-    setFixLoggedExercise(null)
+    setOpenSetRow(null)
     supersetRestUndo.current = null
     if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
     workoutInsightTimer.current = null
@@ -2207,6 +2208,44 @@ export default function WorkoutPlan({
     }
   }
 
+  /** Green circle: removes the latest logged set. Older sets are corrected by editing their numbers. */
+  const undoWorkoutSet = async (exercise: PlanExercise, setIndex: number, setCount: number) => {
+    if (savingSetRef.current || !canConfirmWorkoutDone(Date.now(), Math.max(doneBlockedUntil.current, undoBlockedUntil.current))) return
+    const key = getPlanDraftKey(exercise.name)
+    const draft = getDraftForExercise(exercise.name, exercise)
+    if (!draft.setDone[setIndex] || draft.setDone[setIndex + 1]) return
+    doneBlockedUntil.current = Date.now() + WORKOUT_DONE_GUARD_MS
+    savingSetRef.current = true
+    setSavingSet(true)
+    const completed = Array.from({ length: setCount }, (_, index) => index !== setIndex && (draft.setDone[index] ?? false))
+    if (completed.some(Boolean)) {
+      await persistLoggedDraft(exercise, { ...draft, setDone: completed }, true)
+    } else {
+      await saveQueue.current
+      const previous = findExerciseEntry(exercise, await loadWorkoutHistory())
+      if (previous) setHistory(await deleteWorkoutEntry(previous.id))
+    }
+    savingSetRef.current = false
+    setSavingSet(false)
+    pendingWorkoutNext.current = null
+    setSwitchUntil(null)
+    setToast(null)
+    setOpenSetRow(null)
+    setWorkoutInsight(null)
+    setWorkoutRestContext(null)
+    onRestTimerChange?.(null)
+    // Rebuild the draft from history so reps capped by the removed set go back to their prefill (T130).
+    const nextDrafts = { ...draftRef.current }
+    delete nextDrafts[key]
+    draftRef.current = nextDrafts
+    setPlannedDrafts(nextDrafts)
+    const clearInputs = (current: Record<string, string>) => Object.fromEntries(Object.entries(current).filter(([inputKey]) => !inputKey.startsWith(`${key}:`)))
+    setWorkoutWeightInputs(clearInputs)
+    setWorkoutDropWeightInputs(clearInputs)
+    setWorkoutSetIndex((current) => ({ ...current, [key]: setIndex }))
+    setWorkoutExerciseIndex(activeExercises.findIndex((item) => item.name === exercise.name))
+  }
+
   const persistLoggedDraft = (exercise: PlanExercise, draft: PlanDraft, edit = false) => {
     const write = async () => {
       const canonicalId = exercise.exerciseId ?? (await upsertExerciseRecord({
@@ -2288,6 +2327,7 @@ export default function WorkoutPlan({
     savingSetRef.current = false
     setSavingSet(false)
     if (!result) return
+    undoBlockedUntil.current = Date.now() + WORKOUT_UNDO_GUARD_MS
     draftRef.current = { ...draftRef.current, [key]: nextDraft }
     setPlannedDrafts(draftRef.current)
     const nextSet = completed.findIndex((done) => !done)
@@ -2300,7 +2340,7 @@ export default function WorkoutPlan({
     const allComplete = completeGroups.every(Boolean)
     startSession(times[setIndex]!, activeCompletionScope)
     setWorkoutSetIndex((current) => ({ ...current, [getPlanDraftKey(exercise.name)]: nextSet >= 0 ? nextSet : setIndex }))
-    setFixLoggedExercise(null)
+    setOpenSetRow(null)
     if (allComplete) {
       pendingWorkoutNext.current = null
       setSwitchUntil(null)
@@ -3971,20 +4011,8 @@ export default function WorkoutPlan({
               const storedLogged = findExerciseEntry(exercise, history)
               const logged = storedLogged ? { ...storedLogged,
                 sets: storedLogged.sets.filter((set) => !set.tag || set.tag === 'main').slice(0, setCount) } : undefined
-              const editing = fixLoggedExercise === exerciseKey
-              const activeIndex = editing ? fixLoggedIndex : currentWorkoutSetIndex
+              const activeIndex = currentWorkoutSetIndex
               const activeWeight = setWeights[activeIndex]
-              const activeReps = setReps[activeIndex]
-              const activeDrop = exercise.technique === 'drop-set'
-                ? { weight: dropSetWeights[activeIndex], reps: dropSetReps[activeIndex] } : undefined
-              const bodyweight = libraryMatch?.equipment === 'bodyweight' && activeWeight === 0
-              const valid = !!confirmedWorkoutSet(activeWeight, activeReps, libraryMatch?.equipment, activeDrop)
-              const buttonLabel = !valid && activeWeight === 0 && !bodyweight
-                ? t('workout.run.enterWeight')
-                : t(activeDrop && activeDrop.reps > 0 ? 'workout.run.doneDrop' : bodyweight ? 'workout.run.doneBodyweight' : 'workout.run.doneWeight', {
-                  weight: formatNumber(language, activeWeight), reps: formatNumber(language, activeReps),
-                  dropWeight: formatNumber(language, activeDrop?.weight ?? 0), dropReps: formatNumber(language, activeDrop?.reps ?? 0),
-                })
               const partner = group.isSuperset ? group.items.find((item) => item.exerciseIndex !== exerciseIndex)?.exercise : undefined
               const partnerMainCount = partner ? findExerciseEntry(partner, history)?.sets.filter((set) => !set.tag || set.tag === 'main').length ?? 0 : 0
               const usesPairRest = !!partner && group.items[0].exerciseIndex === exerciseIndex &&
@@ -3996,28 +4024,43 @@ export default function WorkoutPlan({
                 /\btempo\b/i.test(exercise.notes ?? ''), activeCompletionScope, trainingBlocks
               ) : undefined
               const oldSet = comparable?.sets.filter((set) => !set.tag || set.tag === 'main')[activeIndex]
-              const newWeight = !editing && !!oldSet && activeWeight > oldSet.weight && activeBlockWeek !== 6
-              const input = (index: number) => (
-                <fieldset key={index} className="effortless-inputs" disabled={savingSet}>
-                  <WorkoutSetInputs setIndex={index} weight={setWeights[index]} commitOnBlur={editing}
-                    weightInput={workoutWeightInputs[`${getPlanDraftKey(exercise.name)}:${index}`] ?? formatNumber(language, setWeights[index])}
-                    reps={setReps[index]} equipment={libraryMatch?.equipment} language={language} t={t} repsLabel={text.repsShort}
-                    onWeightInputChange={(raw) => setWorkoutWeightInputs((current) => ({ ...current, [`${getPlanDraftKey(exercise.name)}:${index}`]: raw }))}
-                    onValueChange={(field, value) => updatePlanSetValue(exercise, index, field, value, setCount)} />
-                  {exercise.technique === 'drop-set' && (
-                    <div className="effortless-drop">
-                      <strong>{t('workout.technique.drop')}</strong>
-                      <WorkoutSetInputs setIndex={index} weight={dropSetWeights[index]} commitOnBlur={editing}
-                        weightInput={workoutDropWeightInputs[`${getPlanDraftKey(exercise.name)}:${index}`] ?? formatNumber(language, dropSetWeights[index])} reps={dropSetReps[index]}
-                        equipment={libraryMatch?.equipment} language={language} t={t} repsLabel={text.repsShort}
-                        weightLabel={t('workout.set.dropWeightLabel', { set: index + 1 })}
-                        repInputLabel={t('workout.set.dropRepsLabel', { set: index + 1 })}
-                        onWeightInputChange={(raw) => setWorkoutDropWeightInputs((current) => ({ ...current, [`${getPlanDraftKey(exercise.name)}:${index}`]: raw }))}
-                        onValueChange={(field, value) => updatePlanSetValue(exercise, index, field === 'weight' ? 'dropWeight' : 'dropReps', value, setCount)} />
-                    </div>
-                  )}
-                </fieldset>
-              )
+              const newWeight = !!oldSet && activeWeight > oldSet.weight && activeBlockWeek !== 6 && !draft.setDone[activeIndex]
+              const lastSets = comparable?.sets.filter((set) => !set.tag || set.tag === 'main') ?? []
+              const input = (item: PlanExercise, itemDraft: PlanDraft, index: number, equipment: Exercise['equipment'] | undefined) => {
+                const itemKey = getPlanDraftKey(item.name)
+                const correcting = !!itemDraft.setDone[index]
+                return (
+                  <fieldset key={index} className="effortless-inputs" disabled={savingSet}>
+                    <WorkoutSetInputs setIndex={index} weight={itemDraft.setWeights[index]} commitOnBlur={correcting}
+                      weightInput={workoutWeightInputs[`${itemKey}:${index}`] ?? formatNumber(language, itemDraft.setWeights[index])}
+                      reps={itemDraft.setReps[index]} equipment={equipment} language={language} t={t} repsLabel={text.repsShort}
+                      onWeightInputChange={(raw) => setWorkoutWeightInputs((current) => ({ ...current, [`${itemKey}:${index}`]: raw }))}
+                      onValueChange={(field, value) => updatePlanSetValue(item, index, field, value, getDefaultSetCount(item))} />
+                    {item.technique === 'drop-set' && (
+                      <div className="effortless-drop">
+                        <strong>{t('workout.technique.drop')}</strong>
+                        <WorkoutSetInputs setIndex={index} weight={itemDraft.dropSetWeights[index]} commitOnBlur={correcting}
+                          weightInput={workoutDropWeightInputs[`${itemKey}:${index}`] ?? formatNumber(language, itemDraft.dropSetWeights[index])} reps={itemDraft.dropSetReps[index]}
+                          equipment={equipment} language={language} t={t} repsLabel={text.repsShort}
+                          weightLabel={t('workout.set.dropWeightLabel', { set: index + 1 })}
+                          repInputLabel={t('workout.set.dropRepsLabel', { set: index + 1 })}
+                          onWeightInputChange={(raw) => setWorkoutDropWeightInputs((current) => ({ ...current, [`${itemKey}:${index}`]: raw }))}
+                          onValueChange={(field, value) => updatePlanSetValue(item, index, field === 'weight' ? 'dropWeight' : 'dropReps', value, getDefaultSetCount(item))} />
+                      </div>
+                    )}
+                  </fieldset>
+                )
+              }
+              const rowItems = (group.isSuperset ? group.items.map((item) => item.exercise) : [exercise]).map((item) => ({
+                item,
+                draft: item.name === exercise.name ? draft : getDraftForExercise(item.name, item),
+                count: getDefaultSetCount(item),
+                equipment: exerciseCatalog.find((catalogue) => catalogue.id === item.exerciseId)?.equipment,
+              }))
+              const setRows = Array.from({ length: Math.max(...rowItems.map(({ count }) => count)) }, (_, index) =>
+                rowItems.filter(({ count }) => index < count).map((row) => ({ ...row, index }))).flat()
+              const needsWeight = !confirmedWorkoutSet(setWeights[activeIndex], setReps[activeIndex], libraryMatch?.equipment,
+                exercise.technique === 'drop-set' ? { weight: dropSetWeights[activeIndex], reps: dropSetReps[activeIndex] } : undefined) && !draft.setDone[activeIndex]
               return (
                 <article key={exercise.code ?? exercise.name} className="planned-exercise-card effortless-card workout-mode-current"
                   data-exercise-card={exerciseKey} data-workout-group={groupIndex} tabIndex={-1}>
@@ -4037,39 +4080,70 @@ export default function WorkoutPlan({
                       const notes = anchor.closest('article')?.querySelector<HTMLDetailsElement>('.effortless-notes')
                       if (notes) notes.open = !notes.open
                     }} />
-                  {shortCue && <ShortCue label={t('workout.run.squeezeLabel')} cue={shortCue} details={cueDetails} id={`${exerciseKey}-short-cue`} />}
+                  {shortCue && <ShortCue label={t('workout.run.squeezeLabel')} cue={shortCue} details={cueDetails} id={`${exerciseKey}-short-cue`}
+                    expanded={isTipsVisible} onToggle={() => togglePostureTips(exercise.name)} />}
                   {isTipsVisible && <SqueezeCue cue={libraryMatch?.squeezeCue} cueLabel={t('workout.squeezeCue')}
                     tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
                     expanded onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />}
                   {((workoutTechnique && exercise.technique !== 'superset') || workoutPlanNote) && <p className="workout-mode-plan-note">{workoutTechnique && exercise.technique !== 'superset' && <strong>{workoutTechnique} </strong>}{workoutPlanNote}</p>}
                   {(!partner || group.items[0].exerciseIndex !== exerciseIndex || usesPairRest) && <p className="effortless-rest">{t('workout.label.rest')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>}
-                  {!workoutFinished && !editing && <section className="effortless-logger">
-                    <p className="workout-mode-current-set">{t('workout.run.currentSet', { set: formatNumber(language, activeIndex + 1), total: formatNumber(language, setCount) })}</p>
-                    {oldSet && <p className="effortless-last">{t('workout.run.lastTime')}: {formatNumber(language, oldSet.weight)} kg × {formatNumber(language, oldSet.reps)}</p>}
-                    {input(activeIndex)}
+                  <section className="effortless-logger">
+                    <div className="effortless-set-head" aria-hidden="true"><span /><span>kg</span><span>{text.repsShort}</span><span /></div>
+                    <div className="effortless-set-rows">
+                      {setRows.map(({ item, draft: rowDraft, count, equipment, index }) => {
+                        const rowKey = `${getPlanDraftKey(item.name)}:${index}`
+                        const done = !!rowDraft.setDone[index]
+                        const nextOpen = Array.from({ length: count }, (_, set) => !!rowDraft.setDone[set]).indexOf(false)
+                        const isNext = index === nextOpen
+                        const isLatest = done && !rowDraft.setDone[index + 1]
+                        const current = isNext && item.name === exercise.name
+                        const weight = rowDraft.setWeights[index]
+                        const reps = rowDraft.setReps[index]
+                        const drop = item.technique === 'drop-set' ? { weight: rowDraft.dropSetWeights[index], reps: rowDraft.dropSetReps[index] } : undefined
+                        const valid = !!confirmedWorkoutSet(weight, reps, equipment, drop)
+                        const bodyweight = equipment === 'bodyweight' && weight === 0
+                        const open = openSetRow === rowKey || (current && !valid)
+                        const doneLabel = !valid && weight === 0 && !bodyweight
+                          ? t('workout.run.enterWeight')
+                          : t(drop && drop.reps > 0 ? 'workout.run.doneDrop' : bodyweight ? 'workout.run.doneBodyweight' : 'workout.run.doneWeight', {
+                            weight: formatNumber(language, weight), reps: formatNumber(language, reps),
+                            dropWeight: formatNumber(language, drop?.weight ?? 0), dropReps: formatNumber(language, drop?.reps ?? 0),
+                          })
+                        const toggleRow = () => setOpenSetRow((currentRow) => currentRow === rowKey ? null : rowKey)
+                        return (
+                          <div key={rowKey} className={`effortless-set-row${done ? ' done' : ''}${current ? ' now' : ''}`}>
+                            {group.isSuperset && <small className="effortless-set-exercise">{displayExerciseName(item.name)}</small>}
+                            <span className="effortless-set-number">{formatNumber(language, index + 1)}</span>
+                            <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
+                              aria-label={t('workout.set.weightLabel', { set: index + 1 })}>{bodyweight ? '—' : formatNumber(language, weight)}</button>
+                            <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
+                              aria-label={t('workout.set.repsLabel', { set: index + 1 })}>{formatNumber(language, reps)}</button>
+                            <button type="button" className="effortless-tick" data-next={current || undefined} aria-pressed={done}
+                              disabled={savingSet || (done ? !isLatest : !isNext || !valid)}
+                              aria-label={done ? t('workout.run.undoSet', { set: index + 1 }) : doneLabel}
+                              onClick={() => void (done ? undoWorkoutSet(item, index, count) : logWorkoutSet(item, index, count))}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                            </button>
+                            {drop && drop.reps > 0 && <p className="effortless-set-drop">↓ {formatNumber(language, drop.weight)} kg × {formatNumber(language, drop.reps)}</p>}
+                            {open && <div className="effortless-set-editor">{input(item, rowDraft, index, equipment)}</div>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {needsWeight && <p className="effortless-hint">{t('workout.run.enterWeight')}</p>}
                     {newWeight && <p className="effortless-hint">{t('workout.run.newWeightCheck')}</p>}
                     {weightCarried === getPlanDraftKey(exercise.name) && <p className="effortless-hint" role="status">{t('workout.run.weightCarried')}</p>}
-                    {activeIndex === setCount - 1 && /\b(last|final)\s+set\b/i.test(exercise.notes ?? '') &&
+                    {activeIndex === setCount - 1 && !draft.setDone[activeIndex] && /\b(last|final)\s+set\b/i.test(exercise.notes ?? '') &&
                       /\b(myo[- ]reps?|rest[- ]pause|partials?)\b/i.test(exercise.notes ?? '') &&
                       activeBlockWeek !== 1 && activeBlockWeek !== 6 && <p className="effortless-hint">{t('workout.run.extraThenDone')}</p>}
-                    <button type="button" className="primary-button effortless-done" disabled={!valid || savingSet}
-                      onClick={() => void logWorkoutSet(exercise, activeIndex, setCount)}>{buttonLabel}</button>
-                  </section>}
+                    {lastSets.length > 0 && <p className="effortless-last">{t('workout.run.lastTime')}: {lastSets.map((set) => `${formatNumber(language, set.weight)} kg × ${formatNumber(language, set.reps)}`).join(', ')}</p>}
+                  </section>
                   {logged && <p className="effortless-logged" role="status">{workoutFinished ? t('workout.status.done') : t('workout.run.partial', { done: logged.sets.length, total: setCount })}</p>}
                   <details className="workout-trend-details" open={trendOpen} onToggle={(event) => {
                     const next = event.currentTarget.open
                     setTrendOpen(next)
                     saveWorkoutTrendOpen(next)
                   }}><summary>{t('workout.trend.title')}</summary><SetTrendChart sessions={trendSessions} language={language} t={t} /></details>
-                  {logged && <div className="effortless-fix">
-                    {!editing ? <button type="button" className="text-button" onClick={() => { setFixLoggedExercise(exerciseKey); setFixLoggedIndex(0) }}>{t('workout.run.fixLoggedSet')}</button> : <>
-                      <div className="effortless-pills">{logged.sets.map((set, index) => <button key={set.id} type="button" aria-pressed={index === fixLoggedIndex}
-                        onClick={() => setFixLoggedIndex(index)}>{t('workout.label.set')} {index + 1} · {formatNumber(language, set.weight)}×{formatNumber(language, set.reps)}</button>)}</div>
-                      <p className="effortless-hint">{t('workout.run.editingLoggedSet', { set: fixLoggedIndex + 1 })}</p>
-                      {input(fixLoggedIndex)}
-                      <button type="button" className="text-button" onClick={() => setFixLoggedExercise(null)}>{t('workout.cueSheet.close')}</button>
-                    </>}
-                  </div>}
                   {logError[getPlanDraftKey(exercise.name)] && <p role="alert">{logError[getPlanDraftKey(exercise.name)]}</p>}
                   <details className="effortless-notes"><summary>{t('workout.label.notes')}</summary>
                     <label className="planned-notes-field"><span>{t('workout.label.notes')}</span>
@@ -5359,7 +5433,7 @@ export default function WorkoutPlan({
       {savedExitToast && (
         <div className="log-toast" role="status" aria-live="polite">{t('workout.run.savedExit')}</div>
       )}
-      {toast && !savedExitToast && !sessionSummary && (
+      {toast && !savedExitToast && !sessionSummary && !isWorkoutMode && (
         <div className="log-toast" role="status" aria-live="polite">
           <button type="button" onClick={undoLastLog}>{t('workout.action.undo')}</button>
         </div>

@@ -35,17 +35,26 @@
 .effortless-card .workout-mode-big-field { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 8px; }
 .effortless-card .workout-mode-big-field .set-stepper { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; width: 100%; }
 .effortless-card .workout-mode-big-field input { width: 100%; min-width: 0; }
-.effortless-card .effortless-done {
-  min-height: 64px;
-  width: 100%;
-  font-size: var(--type-headline-size);
-  line-height: var(--type-headline-lh);
-  font-weight: var(--type-headline-weight);
-  letter-spacing: var(--type-headline-track);
-  font-variant-numeric: tabular-nums;
-  white-space: normal;
-}
-.effortless-card .effortless-done:disabled { opacity: .5; cursor: not-allowed; }
+/* One row per set: number, weight, reps, circle. The circle is the only way to confirm a set. */
+.effortless-set-head, .effortless-set-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr) 52px; gap: 6px; align-items: center; }
+.effortless-set-head { padding: 0 6px; font-size: var(--type-caption-size); color: var(--muted); text-align: center; }
+.effortless-set-rows { display: grid; gap: 6px; }
+.effortless-set-row { padding: 6px; border: 1px solid transparent; border-radius: 12px; }
+.effortless-set-row.now { border-color: var(--line); background: rgba(255, 255, 255, .05); }
+.effortless-set-row.done { background: rgba(79, 174, 110, .13); }
+.effortless-set-exercise { grid-column: 1 / -1; font-size: var(--type-caption-size); color: var(--muted); overflow-wrap: anywhere; }
+.effortless-set-number { font-weight: 650; text-align: center; color: var(--muted); font-variant-numeric: tabular-nums; }
+.effortless-set-value { min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-dark); color: var(--text); font: inherit; font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; cursor: pointer; }
+.effortless-set-value[aria-expanded="true"] { border-color: var(--brand); }
+.effortless-set-row.done .effortless-set-value { border-color: transparent; background: transparent; }
+.effortless-tick { justify-self: center; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 2.5px solid var(--muted); border-radius: 50%; background: transparent; color: var(--text); cursor: pointer; touch-action: manipulation; }
+.effortless-tick svg { width: 24px; height: 24px; opacity: .3; }
+.effortless-set-row.now .effortless-tick { border-color: var(--text); }
+.effortless-tick:disabled { opacity: .4; cursor: default; }
+.effortless-tick[aria-pressed="true"] { border-color: #4fae6e; background: #4fae6e; color: #fff; opacity: 1; }
+.effortless-tick[aria-pressed="true"] svg { opacity: 1; }
+.effortless-set-drop { grid-column: 2 / -1; margin: 0; font-size: var(--type-caption-size); color: var(--muted); }
+.effortless-set-editor { grid-column: 1 / -1; padding-top: 4px; }
 .effortless-partner, .effortless-rest, .effortless-last, .effortless-hint {
   margin: 0;
   font-size: var(--type-caption-size);
@@ -66,18 +75,7 @@
   line-height: var(--type-caption-lh);
   font-weight: var(--type-caption-weight);
 }
-.effortless-switch button, .effortless-fix button, .effortless-notes summary { min-height: 44px; }
-.effortless-fix { display: grid; gap: 8px; }
-.effortless-pills { display: flex; flex-wrap: wrap; gap: 6px; }
-.effortless-pills button {
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-}
-.effortless-pills button[aria-pressed="true"] { border-color: var(--brand); }
+.effortless-switch button, .effortless-notes summary { min-height: 44px; }
 .effortless-drop { display: grid; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .effortless-logged { margin: 0; font-size: var(--type-caption-size); line-height: var(--type-caption-lh); font-weight: var(--type-caption-weight); color: var(--success); }
 .effortless-card button:focus-visible, .effortless-card summary:focus-visible {

@@ -1,4 +1,5 @@
 export const WORKOUT_DONE_GUARD_MS = 600
+export const WORKOUT_UNDO_GUARD_MS = 1200
 
 export function canConfirmWorkoutDone(now: number, blockedUntil: number) {
   return now >= blockedUntil

@@ -40,7 +40,8 @@ export default function RestTimer({
 }) {
   const { t } = useT()
   const [now, setNow] = useState(Date.now())
-  const [minimized, setMinimized] = useState(false)
+  // During a workout the rest stays in a bar so the set list remains visible.
+  const [minimized, setMinimized] = useState(workoutMode)
   const lastVibratedEndAt = useRef<number | null>(null)
   const previousTimer = useRef<RestTimerState | null>(null)
   const popup = useRef<HTMLElement | null>(null)
@@ -57,7 +58,7 @@ export default function RestTimer({
   useEffect(() => {
     if (hidden) return
     if (timer && !previousTimer.current) {
-      setMinimized(false)
+      setMinimized(workoutMode)
       lastVibratedEndAt.current = null
     }
     previousTimer.current = timer
@@ -107,8 +108,11 @@ export default function RestTimer({
         <aside className={`workout-rest-bar${isDone ? ' done' : ''}`} aria-label={restLabel}>
           <strong role="status">{isDone ? goLabel : formatRemainingTime(remainingRestSeconds(timer, now))}</strong>
           <span className="workout-rest-next">{nextLabel}</span>
-          <button type="button" onClick={() => setMinimized(false)}>{t('rest.open')}</button>
-          {onUndo && <button type="button" onClick={undo}>{t('rest.undo')}</button>}
+          <div className="workout-rest-bar-actions">
+            {children && <button type="button" onClick={() => setMinimized(false)}>{t('rest.open')}</button>}
+            <button type="button" onClick={() => onChange(addRestTime(timer, Date.now(), 15))}>{t('rest.add15')}</button>
+            <button type="button" onClick={stop}>{t('rest.skip')}</button>
+          </div>
         </aside>
       )
     }
