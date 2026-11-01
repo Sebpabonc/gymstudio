@@ -117,6 +117,38 @@ body.workout-rest-bar-visible .app-content {
   box-sizing: border-box;
 }
 
-.workout-rest-bar strong { font-size: 26px; line-height: 1; }
+/* The whole bar is the countdown: it drains from right to left and turns green at zero. */
+.workout-rest-bar {
+  gap: 10px;
+  min-height: 76px;
+  padding: 10px 10px 10px 16px;
+  overflow: hidden;
+  border-color: rgba(201, 156, 161, .35);
+  border-radius: 20px;
+  background: #221a1c;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .55);
+}
+.workout-rest-bar > * { position: relative; }
+.workout-rest-bar .workout-rest-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #6f4a4f, var(--brand, #8d5e63));
+  transition: width .25s linear;
+}
+aside.workout-rest-bar > strong { flex: none; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+.workout-rest-bar .workout-rest-next { line-height: 1.25; overflow-wrap: anywhere; color: var(--text, #f4eef0); }
+.workout-rest-bar-title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; opacity: .85; }
+.workout-rest-bar .workout-rest-next b { display: block; color: var(--text, #f4eef0); font-size: 14px; font-weight: 650; }
 .workout-rest-bar-actions { display: flex; flex: none; gap: 6px; }
-.workout-rest-bar-actions button { min-width: 48px; padding: 8px 10px; }
+.workout-rest-bar .workout-rest-bar-actions button {
+  min-width: 46px;
+  padding: 8px 10px;
+  border-color: rgba(255, 255, 255, .16);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .08);
+  font-size: 13px;
+  font-weight: 600;
+}
+.workout-rest-bar.done { border-color: #4fae6e; background: #4fae6e; color: #fff; }
+.workout-rest-bar.done .workout-rest-bar-fill { display: none; }
+.workout-rest-bar.done .workout-rest-next, .workout-rest-bar.done .workout-rest-next b { color: #fff; }

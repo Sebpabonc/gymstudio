@@ -870,7 +870,7 @@ export default function WorkoutPlan({
   const [workoutLoggerExpanded, setWorkoutLoggerExpanded] = useState<Record<string, boolean>>({})
   const [workoutWeightInputs, setWorkoutWeightInputs] = useState<Record<string, string>>({})
   const [workoutDropWeightInputs, setWorkoutDropWeightInputs] = useState<Record<string, string>>({})
-  const [workoutRestContext, setWorkoutRestContext] = useState<{ set: number; next: string; logged?: string } | null>(null)
+  const [workoutRestContext, setWorkoutRestContext] = useState<{ set: number; next: string; logged?: string; barTitle?: string; barValue?: string } | null>(null)
   const [workoutInsight, setWorkoutInsight] = useState<WorkoutExerciseInsight | null>(null)
   const [workoutGroupInsights, setWorkoutGroupInsights] = useState<Array<{ exercise: Exercise; insight: WorkoutExerciseInsight }>>([])
   const [workoutGroupInsightNext, setWorkoutGroupInsightNext] = useState<number | null>(null)
@@ -2372,7 +2372,13 @@ export default function WorkoutPlan({
     const confirmed = `${equipment === 'bodyweight' ? '' : `${formatNumber(language, draft.setWeights[setIndex])} kg × `}${formatNumber(language, draft.setReps[setIndex])}`
     const drop = exercise.technique === 'drop-set' && draft.dropSetReps[setIndex] > 0
       ? ` ↓ ${formatNumber(language, draft.dropSetWeights[setIndex])} kg × ${formatNumber(language, draft.dropSetReps[setIndex])}` : ''
-    setWorkoutRestContext({ set: setIndex + 1, next, logged: `✓ ${t('workout.run.logged')} · ${confirmed}${drop}` })
+    const nextEquipment = exerciseCatalog.find((item) => item.id === nextExercise.exerciseId)?.equipment
+    setWorkoutRestContext({ set: setIndex + 1, next, logged: `✓ ${t('workout.run.logged')} · ${confirmed}${drop}`,
+      barTitle: nextExercise.name === exercise.name
+        ? t('workout.run.restNextSet', { set: formatNumber(language, nextIndex + 1) })
+        : displayExerciseName(nextExercise.name),
+      barValue: `${nextEquipment === 'bodyweight' && nextDraftValues.setWeights[nextIndex] === 0 ? '' : `${formatNumber(language, nextDraftValues.setWeights[nextIndex])} kg × `}${formatNumber(language, nextDraftValues.setReps[nextIndex])}`,
+    })
     if (thinSwitch) {
       pendingWorkoutNext.current = null
       setWorkoutExerciseIndex(nextItem.exerciseIndex)
@@ -3751,6 +3757,7 @@ export default function WorkoutPlan({
         {isWorkoutMode && restTimer && onRestTimerChange && <RestTimer
           timer={restTimer} hidden={false} onChange={advanceWorkoutRest} workoutMode
           label={workoutRestLabel} nextLabel={workoutRestNextLabel}
+          barTitle={workoutRestContext?.barTitle} barValue={workoutRestContext?.barValue}
           onUndo={toast ? undoLastLog : undefined}>
           {workoutInsight && <p className="effortless-hint">{formatWorkoutInsightLine(workoutInsight, activeDay?.name ?? '', language, t)}</p>}
         </RestTimer>}
