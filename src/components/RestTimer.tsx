@@ -25,6 +25,8 @@ export default function RestTimer({
   inPlace = false,
   label,
   nextLabel,
+  barTitle,
+  barValue,
   children,
   onUndo,
 }: {
@@ -35,6 +37,9 @@ export default function RestTimer({
   inPlace?: boolean
   label?: string
   nextLabel?: string
+  /** Short bar text: what comes next, then its numbers. Falls back to nextLabel. */
+  barTitle?: string
+  barValue?: string
   children?: React.ReactNode
   onUndo?: () => void
 }) {
@@ -44,6 +49,9 @@ export default function RestTimer({
   const [minimized, setMinimized] = useState(workoutMode)
   const lastVibratedEndAt = useRef<number | null>(null)
   const previousTimer = useRef<RestTimerState | null>(null)
+  // Timers only store their end, so the bar's full width is the longest time seen for this rest.
+  const fullMs = useRef(0)
+  const fullFor = useRef<string | undefined>(undefined)
   const popup = useRef<HTMLElement | null>(null)
   const restLabel = t('rest.title')
   const goLabel = t('rest.done')
@@ -104,15 +112,25 @@ export default function RestTimer({
 
   if (workoutMode) {
     if (minimized) {
+      const remainingMs = isRestTimerPaused(timer) ? timer.pausedRemainingMs : Math.max(0, (timer.endAt ?? 0) - now)
+      // A new "next" means a new rest, even when it replaces one still running.
+      fullMs.current = !previousTimer.current || fullFor.current !== barTitle ? remainingMs : Math.max(fullMs.current, remainingMs)
+      fullFor.current = barTitle
+      const progress = fullMs.current > 0 ? Math.min(1, remainingMs / fullMs.current) : 0
       return (
         <aside className={`workout-rest-bar${isDone ? ' done' : ''}`} aria-label={restLabel}>
+          <span className="workout-rest-bar-fill" style={{ width: `${progress * 100}%` }} aria-hidden="true" />
           <strong role="status">{isDone ? goLabel : formatRemainingTime(remainingRestSeconds(timer, now))}</strong>
-          <span className="workout-rest-next">{nextLabel}</span>
-          <div className="workout-rest-bar-actions">
-            {children && <button type="button" onClick={() => setMinimized(false)}>{t('rest.open')}</button>}
-            <button type="button" onClick={() => onChange(addRestTime(timer, Date.now(), 15))}>{t('rest.add15')}</button>
+          <span className="workout-rest-next">
+            <span className="workout-rest-bar-title">{barTitle ?? nextLabel}</span>
+            {barValue && <b>{barValue}</b>}
+          </span>
+          {!isDone && <div className="workout-rest-bar-actions">
+            {children
+              ? <button type="button" onClick={() => setMinimized(false)}>{t('rest.open')}</button>
+              : <button type="button" onClick={() => onChange(addRestTime(timer, Date.now(), 15))}>{t('rest.add15')}</button>}
             <button type="button" onClick={stop}>{t('rest.skip')}</button>
-          </div>
+          </div>}
         </aside>
       )
     }
