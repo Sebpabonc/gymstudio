@@ -122,7 +122,14 @@ async function click(text: string) {
 }
 
 function inputs(drop = false) {
-  const found = elements(node => node.type === WorkoutSetInputs)
+  let found = elements(node => node.type === WorkoutSetInputs)
+  if (!found.length) {
+    // A row's editor opens from its numbers; default to the set you are on.
+    const row = elements(node => typeof node.props.className === 'string' && node.props.className.includes('effortless-set-row') && node.props.className.includes('now'))[0]
+    elements(node => node.props.className === 'effortless-set-value', row)[0].props.onClick()
+    render()
+    found = elements(node => node.type === WorkoutSetInputs)
+  }
   return found[drop ? 1 : 0]
 }
 
@@ -133,8 +140,13 @@ async function enter(weight: number, reps = 8) {
   render()
 }
 
+function fixSet(set = 1) {
+  elements(node => node.props.className === 'effortless-set-value')[(set - 1) * 2].props.onClick()
+  render()
+}
+
 function doneLabel() {
-  return elements(node => node.type === 'button' && node.props.className === 'primary-button effortless-done')[0].props.children
+  return elements(node => node.type === 'button' && node.props['data-next'] === true)[0].props['aria-label']
 }
 
 async function start() {
@@ -259,7 +271,7 @@ describe('approved workout logging integration', () => {
     await start()
     await enter(2.5, 8)
     await click(doneLabel())
-    await click('Fix a logged set')
+    fixSet()
     const decrease = elements(node => node.type === 'button', WorkoutSetInputs(inputs().props))[0]
     decrease.props.onClick()
     await settle()
@@ -301,6 +313,58 @@ describe('approved workout logging integration', () => {
     expect((await loadWorkoutHistory()).map(entry => entry.exerciseId)).toEqual(['row'])
   })
 
+  it('T130/T145: a green circle undoes only the latest set, restores capped reps and removes an empty entry', async () => {
+    harness.block!.days[0].exercises[0].reps = ['8']
+    saveWorkoutHistory([{ id: 'last', exerciseId: 'press', date: '2026-10-12', blockId: 'block', dayKey: 'chest-back-a',
+      sets: [8, 7, 6].map((reps, index) => ({ id: `last-${index}`, weight: 37.5, reps })) }])
+    render()
+    await settle()
+    await start()
+    await enter(37.5, 5)
+    await click(doneLabel())
+    const ticks = () => elements(node => node.props.className === 'effortless-tick')
+    expect(ticks().map(tick => tick.props['aria-pressed'])).toEqual([true, false, false])
+    expect(ticks()[2].props.disabled).toBe(true)
+    // The guard covers undo, so a double tap can't mark then undo.
+    await ticks()[0].props.onClick()
+    await settle()
+    expect(ticks()[0].props['aria-pressed']).toBe(true)
+    vi.advanceTimersByTime(1200)
+    await click('Undo set 1')
+    expect(ticks().map(tick => tick.props['aria-pressed'])).toEqual([false, false, false])
+    expect(doneLabel()).toContain('× 8')
+    expect((await loadWorkoutHistory()).filter(entry => entry.date.startsWith('2026-10-19'))).toEqual([])
+    expect(changeRest).toHaveBeenLastCalledWith(null)
+  })
+
+  it('only the next open set can be marked, and only the latest green undone', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40, 8)
+    await click(doneLabel())
+    await enter(40, 8)
+    await click(doneLabel())
+    const ticks = elements(node => node.props.className === 'effortless-tick')
+    expect(ticks.map(tick => !!tick.props.disabled)).toEqual([true, false, false])
+    expect(ticks[1].props['aria-label']).toBe('Undo set 2')
+  })
+
+  it('T132/T149: superset rows belong to each exercise and unequal counts keep their own sets', async () => {
+    harness.block!.days[0].exercises[2].sets = 2
+    render()
+    await settle()
+    await start()
+    await click('2 · row')
+    const names = () => elements(node => node.props.className === 'effortless-set-exercise').map(node => node.props.children)
+    expect(names()).toEqual(['row', 'curl', 'row', 'curl', 'row'])
+    await enter(40)
+    await click(doneLabel())
+    expect(elements(node => node.type === 'button' && node.props.className === 'effortless-tick' && node.props['aria-pressed'] === true)).toHaveLength(1)
+    expect((await loadWorkoutHistory()).map(entry => entry.exerciseId)).toEqual(['row'])
+    expect(startRest).not.toHaveBeenCalled()
+  })
+
   it('R2: corrections to a saved set buffer typing; live logging does not', async () => {
     render()
     await settle()
@@ -308,7 +372,7 @@ describe('approved workout logging integration', () => {
     expect(inputs().props.commitOnBlur).toBe(false)
     await enter(40, 8)
     await click(doneLabel())
-    await click('Fix a logged set')
+    fixSet()
     expect(inputs().props.commitOnBlur).toBe(true)
   })
 
@@ -331,7 +395,7 @@ describe('approved workout logging integration', () => {
     await start()
     await enter(40, 8)
     await click(doneLabel())
-    await click('Fix a logged set')
+    fixSet()
     inputs().props.onWeightInputChange('')
     inputs().props.onValueChange('weight', '0')
     await settle()
@@ -341,7 +405,8 @@ describe('approved workout logging integration', () => {
     await settle()
     expect(inputs().props.reps).toBe(8)
     expect((await loadWorkoutHistory())[0].sets[0]).toMatchObject({ weight: 40, reps: 8 })
-    await click('Close')
+    fixSet()
+    await settle()
     expect(inputs().props.weight).toBe(40)
     expect(doneLabel()).not.toBe('Enter weight')
   })
@@ -552,11 +617,12 @@ describe('approved workout logging integration', () => {
     await start()
     await enter(40)
     await click(doneLabel())
-    await click('Fix a logged set')
+    fixSet()
     inputs().props.onValueChange('reps', '6')
     await settle()
     expect((await loadWorkoutHistory())[0].sets[0].reps).toBe(6)
-    await click('Close')
+    fixSet()
+    await settle()
     expect(inputs().props.reps).toBe(6)
     await reload()
     await click('▶ Continue · 1 set logged')

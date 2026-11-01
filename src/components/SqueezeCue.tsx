@@ -184,11 +184,14 @@ const CUE_ICON = (
  * Design option C (PO pick): icon card + cue + arrow, without the word "Squeeze" on screen
  * (the label stays for screen readers).
  */
-export function ShortCue({ label, cue, details, id }: {
+export function ShortCue({ label, cue, details, id, expanded, onToggle }: {
   label: string
   cue: string
   details?: SqueezeCueDetails
   id: string
+  /** With onToggle, opens the technique inline instead of the sheet, so the sets stay visible. */
+  expanded?: boolean
+  onToggle?: () => void
 }) {
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
@@ -199,6 +202,14 @@ export function ShortCue({ label, cue, details, id }: {
       <span className="cue-card-text"><span className="sr-only">{label}: </span>{cue}</span>
     </>
   )
+  if (onToggle) {
+    return (
+      <button type="button" className="workout-short-cue cue-card workout-short-cue-open" aria-expanded={!!expanded} onClick={onToggle}>
+        {body}
+        <span className="cue-card-chevron" aria-hidden="true">{expanded ? '−' : '+'}</span>
+      </button>
+    )
+  }
   if (!details || sections.length === 0) {
     return <p className="workout-short-cue cue-card">{body}</p>
   }
