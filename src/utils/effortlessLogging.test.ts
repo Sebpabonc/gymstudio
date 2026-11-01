@@ -23,6 +23,7 @@ describe('approved Big Done prefill (§5.1)', () => {
     ['T120 new load', '8', 35, 32.5, 7, 8],
     ['T125', '8', 37.5, 37.5, 7, 7],
     ['T150 main', '12+12', 40, 37.5, 10, 12],
+    ['T181 off-grid cable', '12', 5, 6, 10, 12],
   ])('%s', (_, target, weight, previousWeight, previousReps, expected) => {
     expect(prefillLoggedReps({ target, weight, previous: { weight: previousWeight, reps: previousReps } })).toBe(expected)
   })

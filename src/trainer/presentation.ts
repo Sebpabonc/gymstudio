@@ -35,7 +35,8 @@ export function trainerRangeLabel(range: RepRange, language: Language) {
 // R24 (PT 2026-10-13): when the load is not above the last one and only the rep target changed,
 // the user sees "adjusted to N reps", never "increase"/"decrease"/"same-day boost".
 export function isRepTargetAdjustment(recommendation: Recommendation, target: RepRange) {
-  const { lastWeight, lastTarget } = recommendation.evidence
+  const { lastGridWeight, lastTarget } = recommendation.evidence
+  const lastWeight = lastGridWeight ?? recommendation.evidence.lastWeight
   if (lastWeight === undefined || !lastTarget) return false
   const changed = lastTarget.min !== target.min || lastTarget.max !== target.max
   const top = Math.max(recommendation.weight ?? 0, ...(recommendation.setWeights ?? []))
@@ -43,6 +44,11 @@ export function isRepTargetAdjustment(recommendation: Recommendation, target: Re
     recommendation.reason !== 'below_target_once' && recommendation.reason !== 'below_target_twice' &&
     recommendation.reason !== 'slightly_below_target' && recommendation.reason !== 'same_day_boost' &&
     recommendation.reason !== 'recent_miss_cap'
+}
+
+// R31d: a logged load the cable does not have is shown as logged, with the load it counted as.
+function offGridNote(t: Translate, language: Language, logged: number, grid: number) {
+  return t('workout.trainer.offGridLoad', { logged: formatNumber(language, logged), grid: formatNumber(language, grid) })
 }
 
 export function trainerReason(
@@ -103,11 +109,14 @@ export function trainerReason(
     evidence.lastTarget &&
     (evidence.lastTarget.min !== target.min || evidence.lastTarget.max !== target.max)
   ) {
-    const delta = Math.abs((recommendation.weight ?? evidence.sameDayWeight) - evidence.sameDayWeight)
-    const change = delta === 0
+    const reference = evidence.sameDayGridWeight ?? evidence.sameDayWeight
+    const delta = Math.abs((recommendation.weight ?? reference) - reference)
+    const change = evidence.sameDayGridWeight !== undefined
+      ? offGridNote(t, language, evidence.sameDayWeight, evidence.sameDayGridWeight)
+      : delta === 0
       ? t('workout.trainer.sameDayComparison.same')
       : t(
-        (recommendation.weight ?? evidence.sameDayWeight) > evidence.sameDayWeight
+        (recommendation.weight ?? reference) > reference
           ? 'workout.trainer.sameDayComparison.up'
           : 'workout.trainer.sameDayComparison.down',
         { delta: formatNumber(language, delta) }
@@ -122,5 +131,7 @@ export function trainerReason(
     return `${comparison}\n${reason}`
   }
 
-  return reason
+  return evidence.lastWeight !== undefined && evidence.lastGridWeight !== undefined
+    ? `${reason}\n${offGridNote(t, language, evidence.lastWeight, evidence.lastGridWeight)}`
+    : reason
 }

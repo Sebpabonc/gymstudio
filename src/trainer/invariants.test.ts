@@ -26,6 +26,8 @@ const daysAgo = (days: number) => new Date(Date.parse(`${TODAY}T00:00:00Z`) - da
 function loadsFor(equipment: string): number[] {
   const step = equipmentStep(equipment)
   if (equipment === 'bodyweight') return [0, 5, 10]
+  // T179: he logged loads his cables do not have.
+  if (equipment === 'cable') return [1, 2, 4, 10, 30, 0.4, 1.6, 2.4, 10.4, 11.2, 11.5].map((multiple) => Number((step * multiple).toFixed(2)))
   return [1, 2, 4, 10, 30].map((multiple) => Number((step * multiple).toFixed(2)))
 }
 
@@ -38,7 +40,7 @@ const repPatterns = (target: number, count: number): number[][] => {
   ]
 }
 
-function histories(load: number, setReps: number[], target: { min: number; max: number }, technique: string, unit: number): SessionEvidence[][] {
+function histories(load: number, setReps: number[], target: { min: number; max: number }, technique: string, unit: number, equipment: string): SessionEvidence[][] {
   const out: SessionEvidence[][] = []
   for (const reps of repPatterns(setReps[0], setReps.length)) {
     const sets: LoggedSet[] = reps.map((count, index) => ({ weight: load, reps: count, ...(index === 99 ? {} : {}) }))
@@ -53,6 +55,8 @@ function histories(load: number, setReps: number[], target: { min: number; max: 
   if (load > 0) {
     const step = unit
     out.push([{ date: daysAgo(4), target, technique, setReps, sets: setReps.map((reps, i) => ({ weight: i === 0 ? Math.max(step, load - step) : load, reps })) }])
+    // T179: one heavier off-grid set, like 28, 25, 25, 25.
+    if (equipment === 'cable') out.push([{ date: daysAgo(4), target, technique, setReps, sets: setReps.map((reps, i) => ({ weight: i === 0 ? load + 3 : load, reps })) }])
   }
   return out
 }
@@ -77,7 +81,7 @@ describe('T105/E9: trainer invariants with every historical RIR omitted across b
 
     it(`block ${block} ${day} ${row.exercise_id} (${equipment}, ${row.technique})`, () => {
       for (const load of loadsFor(equipment)) {
-        for (const history of histories(load, setReps, target, row.technique, equipment === 'bodyweight' ? 2.5 : equipmentStep(equipment))) {
+        for (const history of histories(load, setReps, target, row.technique, equipment === 'bodyweight' ? 2.5 : equipmentStep(equipment), equipment)) {
           expect(history.every((session) => session.sets.every((set) => set.rir === undefined))).toBe(true)
           for (const deload of [false, true]) {
             const result = recommend({
@@ -88,7 +92,11 @@ describe('T105/E9: trainer invariants with every historical RIR omitted across b
             const context = JSON.stringify({ load, history: history.map((h) => h.sets.map((s) => `${s.weight}x${s.reps}`)), deload })
             const step = equipmentStep(equipment)
             const loads = result.setWeights ?? (result.weight === null ? [] : [result.weight])
-            const lastMax = Math.max(0, ...history.flatMap((session) => session.sets.map((set) => set.weight)))
+            // R31b: a cable's guardrail is measured from the grid load below the log (one step at least).
+            const lastMax = Math.max(0, ...history.flatMap((session) => session.sets.map((set) => {
+              if (equipment !== 'cable' || set.weight <= 0) return set.weight
+              return Math.max(step, Math.floor(set.weight / step + 1e-9) * step)
+            })))
             const latestSameDay = day
               ? history.filter((session) => session.dayKey === day && session.date < TODAY &&
                 !session.deload &&
@@ -99,6 +107,10 @@ describe('T105/E9: trainer invariants with every historical RIR omitted across b
             const referenceSets = reference?.sets.filter((set) => !set.tag || set.tag === 'main').slice(0, row.sets)
             const comparisonLoad = referenceSets ? workingLoad(referenceSets) : 0
             const finalLoad = result.weight ?? Math.max(...(result.setWeights ?? [0]))
+            if (result.dropWeight !== undefined && equipment === 'cable') {
+              expect(result.dropWeight, `0 kg drop ${context}`).toBeGreaterThan(0)
+              expect(multipleOf(result.dropWeight, step), `${result.dropWeight} drop not a ${step} kg step ${context}`).toBe(true)
+            }
             for (const weight of loads) {
               // Never 0 kg (or negative) for an exercise that was done with load.
               if (lastMax > 0) expect(weight, `0 kg ${context}`).toBeGreaterThan(0)
