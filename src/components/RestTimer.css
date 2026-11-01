@@ -135,7 +135,7 @@ body.workout-rest-bar-visible .app-content {
   background: linear-gradient(90deg, #6f4a4f, var(--brand, #8d5e63));
   transition: width .25s linear;
 }
-aside.workout-rest-bar > strong { flex: none; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+.plan-card.workout-mode-active aside.workout-rest-bar > strong { flex: none; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
 .workout-rest-bar .workout-rest-next { line-height: 1.25; overflow-wrap: anywhere; color: var(--text, #f4eef0); }
 .workout-rest-bar-title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; opacity: .85; }
 .workout-rest-bar .workout-rest-next b { display: block; color: var(--text, #f4eef0); font-size: 14px; font-weight: 650; }
@@ -150,5 +150,6 @@ aside.workout-rest-bar > strong { flex: none; font-size: 32px; font-weight: 800;
   font-weight: 600;
 }
 .workout-rest-bar.done { border-color: #4fae6e; background: #4fae6e; color: #fff; }
+.plan-card.workout-mode-active aside.workout-rest-bar.done > strong { color: #fff; }
 .workout-rest-bar.done .workout-rest-bar-fill { display: none; }
 .workout-rest-bar.done .workout-rest-next, .workout-rest-bar.done .workout-rest-next b { color: #fff; }
