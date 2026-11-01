@@ -604,6 +604,27 @@ export function formatEstMaxInsightLine(
   return line
 }
 
+export function WorkoutWeightReason({ label, reason, details, id }: {
+  label: string
+  reason: string
+  details: SqueezeCueDetails
+  id: string
+}) {
+  const [open, setOpen] = useState(false)
+  const close = useCallback(() => setOpen(false), [])
+  return (
+    <>
+      <button type="button" className="effortless-reason" aria-haspopup="dialog" onClick={() => setOpen(true)}>
+        <strong>{label}</strong>
+        <span>{reason}</span>
+      </button>
+      {open && <CueSheet details={details}
+        sections={details.sections.filter((section) => section.lines.some((line) => line.trim()))}
+        id={id} onClose={close} />}
+    </>
+  )
+}
+
 function StrengthInsightLine({ line, id, t }: {
   line: string
   id: string
@@ -3849,6 +3870,7 @@ export default function WorkoutPlan({
             ].filter(Boolean).join(' ')
             // PO 2026-10-18: tapping the squeeze cue opens a sheet with today's recommendation, last time,
             // the full approved cue, technique tips and plan notes (approved content only; no new fitness rules).
+            const weightReason = trainer ? trainerReason(t, language, trainer.recommendation, trainer.target) : ''
             const cueDetails: SqueezeCueDetails = {
               title: displayName,
               closeLabel: t('workout.cueSheet.close'),
@@ -3865,7 +3887,7 @@ export default function WorkoutPlan({
                           reps: trainerRangeLabel(trainer.recommendation.reps),
                           sets: formatNumber(language, trainer.recommendation.sets),
                         }),
-                        trainerReason(t, language, trainer.recommendation, trainer.target),
+                        weightReason,
                       ]
                     : [],
                 },
@@ -4088,6 +4110,8 @@ export default function WorkoutPlan({
                   {((workoutTechnique && exercise.technique !== 'superset') || workoutPlanNote) && <p className="workout-mode-plan-note">{workoutTechnique && exercise.technique !== 'superset' && <strong>{workoutTechnique} </strong>}{workoutPlanNote}</p>}
                   {(!partner || group.items[0].exerciseIndex !== exerciseIndex || usesPairRest) && <p className="effortless-rest">{t('workout.label.rest')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>}
                   <section className="effortless-logger">
+                    {trainer && trainer.recommendation.evidence.sessionsUsed > 0 && <WorkoutWeightReason
+                      label={t('workout.run.whyWeight')} reason={weightReason} details={cueDetails} id={`${exerciseKey}-weight-reason`} />}
                     <div className="effortless-set-head" aria-hidden="true"><span /><span>kg</span><span>{text.repsShort}</span><span /></div>
                     <div className="effortless-set-rows">
                       {setRows.map(({ item, draft: rowDraft, count, equipment, index }) => {
