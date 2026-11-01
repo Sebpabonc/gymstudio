@@ -93,7 +93,7 @@ export function progressSuggestions(
       plannedWeight: workingWeight(latest.sets) || undefined,
       deload: blockWeek(block, today) === 6,
     })
-    const previousWeight = recommendation.evidence.lastWeight ?? workingWeight(latest.sets)
+    const previousWeight = recommendation.evidence.lastGridWeight ?? recommendation.evidence.lastWeight ?? workingWeight(latest.sets)
     if (
       recommendation.action === 'increase_weight' &&
       recommendation.weight !== null &&

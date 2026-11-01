@@ -319,6 +319,7 @@ export const workout = {
     'workout.trainer.reason.achieved_floor': 'You have already reached this load for today’s reps, so I kept it at {weight} kg.',
     'workout.trainer.reason.same_day_boost': 'Last {dayName} you did {sameDayReps} at {sameDayWeight} kg, so today goes up to {newWeight} kg.',
     'workout.trainer.reason.recent_miss_cap': 'Last time {weight} kg gave {reps} reps (target {target}), so I kept the heaviest set at {newWeight} kg. Beat your last reps first.',
+    'workout.trainer.offGridLoad': 'You logged {logged} kg. This cable moves in 2.5 kg steps, so I count it as {grid} kg.',
     'workout.trainer.sameDayComparison': 'vs last {dayName} ({date}: {weight} kg × {reps}): {change}',
     'workout.trainer.sameDayComparison.up': 'up {delta} kg',
     'workout.trainer.sameDayComparison.same': 'same weight',
@@ -748,6 +749,7 @@ export const workout = {
     // TODO(i18n): PT will provide approved translations
     'workout.trainer.reason.same_day_boost': 'Last {dayName} you did {sameDayReps} at {sameDayWeight} kg, so today goes up to {newWeight} kg.',
     'workout.trainer.reason.recent_miss_cap': 'Last time {weight} kg gave {reps} reps (target {target}), so I kept the heaviest set at {newWeight} kg. Beat your last reps first.',
+    'workout.trainer.offGridLoad': 'You logged {logged} kg. This cable moves in 2.5 kg steps, so I count it as {grid} kg.',
     'workout.trainer.sameDayComparison': 'vs last {dayName} ({date}: {weight} kg × {reps}): {change}',
     'workout.trainer.sameDayComparison.up': 'up {delta} kg',
     'workout.trainer.sameDayComparison.same': 'same weight',

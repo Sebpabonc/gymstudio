@@ -101,6 +101,9 @@ export type Recommendation = {
     sameDayReps?: number[]
     sameDayTarget?: RepRange
     recentMiss?: { weight: number; reps: number; target: number; newWeight: number }
+    /** R31d: the grid load behind an off-grid logged lastWeight / sameDayWeight; only set when they differ. */
+    lastGridWeight?: number
+    sameDayGridWeight?: number
   }
 }
 
@@ -284,10 +287,68 @@ function monotonic(weights: number[], reps: number[]) {
   return weights
 }
 
+/** R5 / R10 / R4: which past sessions count, newest first. */
+function progressingSessions(input: RecommendInput) {
+  return [...input.history]
+    .filter((session) => session.sets.length > 0 && !session.follower && !!session.tempo === !!input.tempo && !session.deload)
+    .sort((a, b) => b.date.localeCompare(a.date))
+}
+
 type Make = (action: TrainerAction, weight: number | null, reason: ReasonCode, extra?: Partial<Recommendation>) => Recommendation
 
-/** Every recommendation passes the PT global floor (never 0 kg for a weighted exercise, minimum one step). */
+/** R31a: on a cable grid a load counts as the grid load at or below it, and never below one step. */
+function gridLoad(weight: number, step: number) {
+  return weight <= 0 ? weight : Math.max(step, roundToStep(weight, step, 'down'))
+}
+
 export function recommend(input: RecommendInput): Recommendation {
+  return input.equipment === 'cable' ? recommendOnCableGrid(input) : recommendWithFloor(input)
+}
+
+/** R31 (PT 2026-11-01): cables only offer the grid. Rules read logs at the grid load; evidence still shows what was logged. */
+function recommendOnCableGrid(input: RecommendInput): Recommendation {
+  const step = input.step ?? equipmentStep(input.equipment)
+  const toGrid = (weight: number) => gridLoad(weight, step)
+  const result = recommendWithFloor({
+    ...input,
+    history: input.history.map((session) => ({
+      ...session,
+      sets: session.sets.map((set) => (!set.tag || set.tag === 'main' ? { ...set, weight: toGrid(set.weight) } : set)),
+    })),
+  })
+  const progressing = progressingSessions(input)
+  const last = progressing[0]
+  const sameDay = sameDaySession(input, progressing)
+  const evidence = { ...result.evidence }
+  if (last) {
+    evidence.lastGridWeight = evidence.lastWeight
+    evidence.lastWeight = workingWeight(progressionSets(last.sets, input.sets))
+    if (evidence.lastGridWeight === evidence.lastWeight) delete evidence.lastGridWeight
+    const capacity = estimateCapacity(progressing, input.today, input.sets)
+    if (capacity) evidence.estimatedOneRepMax = Number(capacity.oneRepMax.toFixed(1))
+  }
+  if (sameDay) {
+    evidence.sameDayGridWeight = evidence.sameDayWeight
+    evidence.sameDayWeight = topWorkingWeight(sameDay, input.sets)
+    if (evidence.sameDayGridWeight === evidence.sameDayWeight) delete evidence.sameDayGridWeight
+  }
+  if (evidence.recentMiss) {
+    const missLoad = evidence.recentMiss.weight
+    const logged = progressing.flatMap((session) => progressionSets(session.sets, input.sets)).find((set) => toGrid(set.weight) === missLoad)
+    if (logged) evidence.recentMiss = { ...evidence.recentMiss, weight: logged.weight }
+  }
+  return {
+    ...result,
+    evidence,
+    // R31c: inputs that do not come from history (R5 followLoad, planned weight) end on the grid too.
+    weight: result.weight === null ? null : toGrid(result.weight),
+    ...(result.setWeights ? { setWeights: result.setWeights.map(toGrid) } : {}),
+    ...(result.dropWeight !== undefined ? { dropWeight: Math.max(step, toGrid(result.dropWeight)) } : {}),
+  }
+}
+
+/** Every recommendation passes the PT global floor (never 0 kg for a weighted exercise, minimum one step). */
+function recommendWithFloor(input: RecommendInput): Recommendation {
   const result = recommendUnfloored(input)
   const lastMax = Math.max(0, ...input.history.flatMap((session) => session.sets.map((set) => set.weight)))
   if (!(lastMax > 0)) return result
@@ -307,11 +368,7 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
   const step = input.step ?? equipmentStep(input.equipment)
   const pyramid = isPyramid(input.technique, input.setReps)
 
-  // R5 / R10 / R4: which past sessions count.
-  const usable = [...input.history]
-    .filter((session) => session.sets.length > 0 && !session.follower && !!session.tempo === !!input.tempo)
-    .sort((a, b) => b.date.localeCompare(a.date))
-  const progressing = usable.filter((session) => !session.deload)
+  const progressing = progressingSessions(input)
   const last = progressing[0]
 
   const capacity = estimateCapacity(progressing, today, sets)
