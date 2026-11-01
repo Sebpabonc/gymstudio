@@ -5,12 +5,12 @@ author: pt-fitness-expert
 created: 2026-11-01
 approved_by:
 approved_on:
-exercises: [back-squat, barbell-bench-press, dumbbell-goblet-squat, dumbbell-bench-press, dumbbell-romanian-deadlift, push-up]
+exercises: [back-squat, barbell-bench-press, dumbbell-goblet-squat, dumbbell-bench-press, dumbbell-romanian-deadlift, push-up, romanian-deadlift, hex-bar-deadlift, dumbbell-bulgarian-split-squat, seated-leg-curl-toes-dorsiflexed-neutral, standing-calf-raises-toes-neutral, leg-press-quad-dominant, barbell-hip-thrust]
 ---
 
 ## Summary
-A new user can start today, safely, on any day of the week. Five questions are enough, as long as the experience and
-equipment options say what they mean. The plan's week 1 starts on the day of the first logged set, so there is no partial
+A new user can start today, safely, on any day of the week. The first run asks six required questions (the PO added activity
+level on 2026-11-01), and the experience, equipment and activity options must say what they mean. The plan's week 1 starts on the day of the first logged set, so there is no partial
 week and Monday means nothing special. The app recommends rest days when the plan calls for them, and it never invents a
 first-time weight: the user finds it, stopping about 3 reps short of failure, and the engine's guardrail applies from then on.
 
@@ -23,8 +23,9 @@ templates and `personalizeTemplate`.
 
 ## 1. Questions
 
-**Decision: 5 questions is right.** `selectTemplate` needs 3 answers to choose a template (experience, days, equipment), and
-`personalizeTemplate` needs 2 more to set the volume safely (goal, session length). All five reuse the Profile values.
+**Decision: 6 questions (PO decision, 2026-11-01).** `selectTemplate` needs 3 answers to choose a template (experience, days,
+equipment), and `personalizeTemplate` uses 3 more to set the volume (goal, session length, activity level). The PO chose to ask
+activity level, which overrides my earlier recommendation to skip it and default to `moderate`. All six reuse the Profile values.
 
 | # | Question | Values (existing keys) | What it decides | Safety role |
 |---|---|---|---|---|
@@ -33,11 +34,13 @@ templates and `personalizeTemplate`.
 | 3 | Days per week | `3`, `4`, `5`, `6` | Split | Medium |
 | 4 | Where you train | `full_gym`, `basic_gym`, `home` | Template kit | **High**: the workout must be possible today |
 | 5 | Session length | `45`, `60`, `75`, `90` | Exercises and sets | Low |
+| 6 | Activity level (existing labels: EN Low / Moderate / High; ES Bajo / Moderado / Alto) | `low`, `moderate`, `high` | `high`: one set fewer on leg accessories, never below 2. `low`, `moderate`: base | Low |
 
-All five are required. There are no silent defaults, because a wrong equipment answer gives a workout the user cannot do.
+All six are required. There are no silent defaults and no preselected options, because a wrong equipment answer gives a workout
+the user cannot do, and an activity answer the user never gave would look like theirs.
 
-### Two answers need a helper line
-Both labels are too vague for what depends on them. The stored values do not change.
+### Three answers need a helper line
+These labels are too vague for what depends on them. The stored values do not change.
 
 | Option | EN | ES |
 |---|---|---|
@@ -47,10 +50,32 @@ Both labels are too vague for what depends on them. The stored values do not cha
 | `full_gym` | Barbells, machines, cables and dumbbells. | Barras, máquinas, poleas y mancuernas. |
 | `basic_gym` | Dumbbells, a bench, cables and a pulldown. | Mancuernas, un banco, poleas y jalón. |
 | `home` | Dumbbells and an adjustable bench. | Mancuernas y un banco ajustable. |
+| `low` | Outside your workouts, you don't move much and do little sport or cardio. | Fuera de tus entrenamientos, te mueves poco y casi no haces deporte ni cardio. |
+| `moderate` | Outside your workouts, you move fairly often, with some walking, sport or cardio. | Fuera de tus entrenamientos, te mueves con frecuencia: caminas o haces algo de deporte o cardio. |
+| `high` | Outside your workouts, you have a physical job, play sports regularly or do lots of cardio. | Fuera de tus entrenamientos, tienes un trabajo físico, practicas deportes con regularidad o haces mucho cardio. |
 
 Why: overstating experience is the biggest risk here. It removes the 4-day cap and brings back barbell squats and bench
 presses. Someone returning after a long break also needs to count as a beginner. The prototype's "At home" also hides the
-fact that `tpl-*-db` needs dumbbells and a bench.
+fact that `tpl-*-db` needs dumbbells and a bench. "Activity level" alone does not say that gym training is left out.
+
+The activity helpers follow `templates/README.md` section 2.4: its heading ("outside the gym") and its description of `high`
+(physical job, sports, lots of cardio). The approved rules do not describe `low` or `moderate` or give numeric cut-offs, so that
+wording is my judgement and has no numbers. They say "your workouts" rather than "the gym" because `home` users answer them too.
+
+### Activity level: what the answer does
+The approved rule does not change (`templates/README.md` section 2.4, `personalizeTemplate`).
+
+- **`low`, `moderate`:** the rule plan is the same for both.
+- **`high`:** one set fewer on each leg accessory. Main lifts (`A1`, `B1` straight sets) are not touched, and the 2-set minimum
+  still applies. No template has more than 3 sets, so only a 3-set leg accessory can drop, and only to 2.
+- **Who sees no change on `high`:** beginners and goals `fat_loss` and `general`, because their accessories are already at 2 sets.
+  So `high` changes the rule plan only for intermediate and advanced users with goal `muscle` or `strength`.
+- **The rest of the `high` rule** (week 1 about 3 reps from failure, the week-6 deload) already applies to every user.
+- **Do not promise** that the plan fits the user's lifestyle or job. For most answers it changes nothing.
+
+**Safety: no conclusion in this draft changes.** A wrong answer has a small effect either way. Overstating costs one set on some
+leg accessories. Understating gives the base volume, which is what my earlier `moderate` default would have given. Experience and
+equipment remain the answers that matter most for safety. The test cases do change: see Q7 and Q16 to Q23.
 
 ### What not to ask
 | Item | Decision | Reason |
@@ -58,7 +83,7 @@ fact that `tpl-*-db` needs dumbbells and a bench.
 | Age | Do not ask | The Terms say 18+, and the unticked sign-up box (`ai-disclosure.md` section G) confirms it **before** the account, so before the first workout. No rule changes by age, so the answer would only be stored data. |
 | Injuries or health | Do not ask | No approved rule uses the answer, so asking would imply the plan accounts for it. It is also health data. The notice in section 5 covers this. |
 | Sex, bodyweight | Do not ask | No approved rule uses them, and I reject bodyweight-ratio weights (section 3). |
-| Activity level | Do not ask, default `moderate`, editable in Profile | Only `high` changes anything today (one set fewer on leg accessories). The rest of the `high` rule, a lighter week 1 and the deload, already applies to everyone. |
+| Activity level | **Ask** (question 6, PO decision, 2026-11-01). Still editable in Profile | Overrides my earlier recommendation not to ask. There is no `moderate` default in the first run. |
 | Notes | Do not ask | Optional, and never used by the plan rules. |
 
 ### Two rule changes for day one
@@ -187,8 +212,8 @@ lift, and are not from a study.
 | 60 | 48 | 80 | 150 | 200 | 400 |
 
 **Coverage gap:** `invariants.test.ts` only covers blocks 6 and above, and its 0 kg and guardrail checks only run when an earlier
-load exists. New users' plans are not covered today. The suite needs all 8 templates, personalised for every experience and
-equipment value, with no-history cases included.
+load exists. New users' plans are not covered today. The suite needs all 8 templates, personalised for every experience,
+equipment and activity value, with no-history cases included.
 
 ## 4. First-session wording
 
@@ -238,6 +263,9 @@ the old text and must change with them.
 ## 6. Test cases
 
 ### Questions and templates
+Unless a case names an activity level, its input uses `moderate`. This is test data only: the first run has no default. Q16 to
+Q21 check the rule plan with AI off, on `tpl-3d-full-body-gym`. Exercises not listed keep the same sets as `moderate`.
+
 | # | Input | Expected |
 |---|---|---|
 | Q1 | Beginner, 3, `full_gym`, `muscle`, 60 | `tpl-3d-full-body-gym`, not capped. Day 1 Full Body A: A1 `dumbbell-goblet-squat`, B1 `dumbbell-bench-press`, D1 `dumbbell-romanian-deadlift` |
@@ -246,7 +274,7 @@ the old text and must change with them.
 | Q4 | Intermediate, 5, `home` | `tpl-5d-upper-lower-ppl-db`, not capped |
 | Q5 | Advanced, 6, `basic_gym` | `tpl-6d-ab-split-db`, not capped |
 | Q6 | Intermediate, 4, `full_gym`, `muscle`, 60 | `tpl-4d-upper-lower-gym`. Upper A: A1 `barbell-bench-press` unchanged |
-| Q7 | Any first-run answers | `activityLevel` = `moderate`; no leg-accessory set removed |
+| Q7 | First run, activity level not answered | No option preselected, the questions cannot finish, no goal row saved, and `moderate` is never stored unless the user picks it |
 | Q8 | Beginner, 3, `full_gym`, `strength` | A1 `dumbbell-goblet-squat` 3 × 8, B1 `dumbbell-bench-press` 3 × 8, rest at least 180 s (**today 3 × 5**) |
 | Q9 | Intermediate, 3, `full_gym`, `strength` | A1 `back-squat` 4 × 5 (unchanged) |
 | Q10 | Beginner, 3, `full_gym`, `muscle`, 90 | Accessories stay at 2 sets, same as 60 min (**today up to 3**) |
@@ -255,6 +283,14 @@ the old text and must change with them.
 | Q13 | AI swaps a `dumbbell` exercise to a `machine` one for a `home` user | Swap ignored |
 | Q14 | AI unavailable or declined | Rule plan is complete and today's workout still shows |
 | Q15 | Any path to the first workout | 18+ box already ticked; no workout before it |
+| Q16 | Intermediate, 3, `full_gym`, `muscle`, 60, `low` or `moderate` | Identical plan, equal to the base template |
+| Q17 | Intermediate or advanced, 3, `full_gym`, `muscle`, 60, `high` | Full Body A: D1 `romanian-deadlift` 2 sets (from 3). Full Body B: E1 `seated-leg-curl-toes-dorsiflexed-neutral` 2 and E2 `standing-calf-raises-toes-neutral` 2 (from 3). Full Body C: C1 `barbell-hip-thrust` 2 (from 3). Stay as they are: A1 `back-squat` 3, A1 `hex-bar-deadlift` 3, A1 `leg-press-quad-dominant` 3, D1 `dumbbell-bulgarian-split-squat` 2 (already at the minimum) |
+| Q18 | Intermediate, 3, `full_gym`, `strength`, 60, `high` | Full Body A: A1 `back-squat` 4 × 5, D1 `romanian-deadlift` 2 × 10 |
+| Q19 | Beginner, 3, `full_gym`, `muscle`, 60, `high` | Identical to the same answers with `moderate`. D1 `dumbbell-romanian-deadlift` 2 sets. No leg accessory drops |
+| Q20 | Intermediate, 3, `full_gym`, `fat_loss` or `general`, 60, `high` | Identical to the same answers with `moderate`. D1 `romanian-deadlift` 2 sets |
+| Q21 | Intermediate, 3, `full_gym`, `muscle`, `high`, 75 or 90 | Full Body A, D1 `romanian-deadlift`: 75 gives 2 sets (`moderate` 3); 90 gives 3 sets (`moderate` 4) |
+| Q22 | Activity level question, EN and ES | Labels Low / Moderate / High and Bajo / Moderado / Alto, each with its helper line from section 1. No English in ES |
+| Q23 | `high` chosen in the first run, then Profile opened | Profile shows `high`, not the Profile form's `moderate` starting value |
 
 ### Start date and rest
 | # | Input | Expected |
@@ -300,7 +336,7 @@ Same day key and block unless stated. Barbell step 2.5 kg, dumbbell step 2 kg.
 | F17 | `barbell` 40 × 8, 8, 8, then 30 days off | 35, `long_break` |
 | F18 | `dumbbell` first log 200 kg; then 30 kg | 200: confirm before saving. 30: no prompt |
 | F19 | Guest log of an exercise moved into the new account | That exercise uses normal rules; others use the first-time rule |
-| F20 | All 8 templates, every experience and equipment value, no history and F10-F17 histories | Invariants pass: never 0 kg when loaded, only real steps, no jump above the guardrail, no "no data" with recent sessions |
+| F20 | All 8 templates, every experience, equipment and activity value, no history and F10-F17 histories | Invariants pass: never 0 kg when loaded, only real steps, no jump above the guardrail, no "no data" with recent sessions |
 
 ### Wording
 | # | Input | Expected |
@@ -320,9 +356,13 @@ Same day key and block unless stated. Barbell step 2.5 kg, dumbbell step 2 kg.
 5. ⚠️ REVISAR (Governancer, PO): update section E with the notice in section 5, and confirm the no-screening position. Not a legal opinion.
 6. ⚠️ REVISAR (PO): the experience cut-offs (6 months, 3 months off, 3 years) and the F13 limits are coaching judgement, not exact research figures. Mainstream sources describe these levels only roughly.
 7. ⚠️ REVISAR (Tech Lead): I found no label in the app saying how to log a barbell or dumbbell weight. Dumbbells are per hand in the approved spec. For barbells, I assume total with the bar. Please check that against Sebas's own logs before this line ships.
-8. ⚠️ REVISAR (PO): the helper lines add text to the questions. If UXer needs them shorter, the meaning must stay, especially "back after 3+ months off" and "dumbbells and an adjustable bench".
+8. ⚠️ REVISAR (PO): the helper lines add text to the questions. If UXer needs them shorter, the meaning must stay, especially "back after 3+ months off", "dumbbells and an adjustable bench", and that activity means outside workouts.
 9. Week 1 note: `prescriptionForWeek` has a `beginnerIntro` option that no caller passes, so the week 1 note never appears. Week 1 effort for new users reaches them only through this wording and the template text. The engine does not apply the template effort ramp by week. No change proposed here; I can review it separately.
 10. AI Trainer release checklist applies: PT pre-merge review, invariants (F20) and the QAer week flow, including a first-time exercise on each equipment type.
+11. ⚠️ REVISAR (PO): with the approved rule, `high` changes the rule plan only for intermediate and advanced users with goal `muscle` or `strength` (section 1). Everyone else answers a required question that changes nothing in the rule plan. I did not change the rule, as instructed. A wider effect would need a new PT rule.
+12. ⚠️ REVISAR (PO, Tech Lead): the "no change" results cover the rule plan only. When AI is on, `block_plan` receives `activity_level` and may change sets by 1, so it can treat `low` and `moderate` differently, and it can add back a leg set that `high` removed. `applyAiAdjustments` allows both. No rule added here. If this should be blocked, I can specify it.
+13. ⚠️ REVISAR (PO): the `low` and `moderate` helper wording is my judgement. The approved rules describe only `high`.
+14. For the Tech Lead: `emptyGoal` in `ProfileDataSections.tsx` starts at `moderate` (and pre-fills the other answers). The first run cannot reuse those starting values and still meet "no preselected option" (Q7, Q23).
 
 ## Sources
 - American College of Sports Medicine (2009). Position Stand: Progression models in resistance training for healthy adults. *Med Sci Sports Exerc* 41(3):687-708 (novice, intermediate and advanced levels; moderate loads for novices).
@@ -333,4 +373,4 @@ Same day key and block unless stated. Barbell step 2.5 kg, dumbbell step 2 kg.
 - Halperin I et al. (2022). Accuracy in predicting repetitions to task failure in resistance exercise. *Sports Med* 52:377-390.
 - Refalo MC et al. (2023). Influence of resistance training proximity-to-failure on skeletal muscle hypertrophy. *Sports Med* 53:649-665.
 - Approved GymStudio documents: `docs/fitness/approved/templates/README.md` and templates; `2026-10-07-progression-engine-spec.md` and v2; `2026-10-10-progress-interpretation.md`; `2026-11-01-remove-rir-prompt.md`. Draft: `docs/governance/app-store/ai-disclosure.md` (sections E, G), `terms.en.md` (sections 2, 4).
-- Code read: `src/plans/` (`buildMyPlan.ts`, `personalizePlan.ts`, `weekPrescription.ts`), `src/trainer/` (`engine.ts`, `presentation.ts`, `summary.ts`, `invariants.test.ts`), `src/utils/trainingBlocks.ts`, `src/utils/completedExercises.ts`, `src/components/WorkoutPlan.tsx`, `src/screens/ProfileDataSections.tsx`, `src/i18n/sections/`, `supabase/functions/ai-gateway/index.ts`; proposal `docs/ux/proposals/2026-11-01-gymstudio-prototype.md`.
+- Code read: `src/plans/` (`buildMyPlan.ts`, `personalizePlan.ts`, `weekPrescription.ts`), `src/trainer/` (`engine.ts`, `presentation.ts`, `summary.ts`, `invariants.test.ts`), `src/utils/trainingBlocks.ts`, `src/utils/profileData.ts`, `src/utils/completedExercises.ts`, `src/components/WorkoutPlan.tsx`, `src/screens/ProfileDataSections.tsx`, `src/i18n/sections/`, `supabase/functions/ai-gateway/index.ts`; proposal `docs/ux/proposals/2026-11-01-gymstudio-prototype.md`.
