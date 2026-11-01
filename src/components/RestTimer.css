@@ -116,3 +116,7 @@ body.workout-rest-bar-visible .app-content {
 .workout-rest-bar {
   box-sizing: border-box;
 }
+
+.workout-rest-bar strong { font-size: 26px; line-height: 1; }
+.workout-rest-bar-actions { display: flex; flex: none; gap: 6px; }
+.workout-rest-bar-actions button { min-width: 48px; padding: 8px 10px; }

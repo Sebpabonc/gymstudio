@@ -375,3 +375,16 @@ Barbell step 2.5 kg, cable step 5 kg. Careless means Done with the prefilled val
 - Schoenfeld BJ et al. Longer interset rest periods enhance muscle strength and hypertrophy in resistance-trained men. J Strength Cond Res. 2016.
 - Approved GymStudio specs: 2026-10-07-progression-engine-spec.md (R1, R2, R3, R5, R6, R8, R10, R14), 2026-10-07-continuous-learning-spec.md, 2026-10-18-rir-prompt-review.md, 2026-10-10-progress-interpretation.md; training-blocks-spec.md.
 - Code read at commit 6c2b00f. Proposal: docs/ux/proposals/2026-11-01-effortless-logging.md.
+
+## Addendum 2026-11-01: per-set circles (PT ruling, PO approved the design)
+
+Workout mode lists every set with one circle per set; the circle replaces Big Done. Saved fields and all prefill and carry
+rules above are unchanged.
+
+- **Order:** only the next open set can be marked, and only the latest green set can be undone. Older sets are corrected by
+  editing their numbers. The PT required this for pyramids and mixed targets; the Tech Lead applies it to every exercise so
+  saved positions always match plan positions.
+- **Finish:** unmarked sets are never saved or filled.
+- **Careless risk:** a circle at zero is disabled with the reason shown; the double-tap guard covers undo; undo restores
+  capped reps (T130); undoing the only set removes the entry (T145); drop rows show both parts (T150).
+- **Supersets:** rows are keyed by exercise and set, with T132, T136, T149 and unequal set counts retested.

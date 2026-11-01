@@ -135,7 +135,7 @@ describe('RestTimer', () => {
     button(tree, 'Hide').props.onClick()
     expect(mocks.setMinimized).toHaveBeenCalledWith(true)
     mocks.minimized = true
-    const bar = RestTimer({ timer: { endAt: 121_000 }, hidden: false, onChange, workoutMode: true, nextLabel: 'Next: Press' })
+    const bar = RestTimer({ timer: { endAt: 121_000 }, hidden: false, onChange, workoutMode: true, nextLabel: 'Next: Press', children: 'Insight' })
     expect(renderToStaticMarkup(bar!)).toContain('workout-rest-bar')
     expect(renderToStaticMarkup(bar!)).toContain('Next: Press')
     button(bar, 'Open').props.onClick()
