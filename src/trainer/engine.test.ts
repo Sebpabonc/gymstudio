@@ -66,8 +66,11 @@ describe('recommend — same target as last time', () => {
 describe('recommend — insufficient history, outliers, breaks, deload', () => {
   const base = { today: '2026-10-08', sets: 3, equipment: 'barbell' }
 
-  it('no history → collect data with the planned weight', () => {
-    expect(recommend({ ...base, history: [], target: range(10), plannedWeight: 40 })).toMatchObject({ action: 'collect_data', weight: 40, confidence: 'low' })
+  it('no history → collect data, and never a number for a loaded exercise (PT first-run spec F1)', () => {
+    expect(recommend({ ...base, history: [], target: range(10), plannedWeight: 40 }))
+      .toMatchObject({ action: 'collect_data', weight: null, confidence: 'low', firstSessionProtocol: 'straight' })
+    expect(recommend({ ...base, equipment: 'bodyweight', history: [], target: range(10), plannedWeight: 0 }))
+      .toMatchObject({ action: 'collect_data', weight: 0, firstSessionProtocol: 'bodyweight' })
   })
 
   it('one extraordinary session is capped to a single step', () => {

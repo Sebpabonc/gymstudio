@@ -591,6 +591,37 @@ button {
   margin: 0 0 4px;
 }
 
+.effortless-first-time {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.first-workout-note {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.first-workout-note p {
+  margin: 0;
+}
+
+.first-workout-note p:first-child {
+  color: var(--text);
+}
+
 .rest-day-note {
   display: grid;
   gap: 4px;

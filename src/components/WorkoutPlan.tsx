@@ -443,6 +443,17 @@ export function confirmedWorkoutSet(
   return { ...createSet(reps, weight), ...(drop && drop.reps > 0 ? { drop: { ...drop } } : {}) }
 }
 
+/** F13 (PT spec 2026-11-01 §3): above these kg (per hand for dumbbells and kettlebells), ask before saving a likely typo. */
+const HEAVY_LOAD_LIMITS: Partial<Record<NonNullable<Exercise['equipment']>, number>> = {
+  dumbbell: 60, kettlebell: 48, 'ez-bar': 80, cable: 150, machine: 150,
+  barbell: 200, 'hex-bar': 200, 'smith-machine': 200, 'plate-loaded': 400,
+}
+
+export function needsHeavyLoadConfirm(weight: number, equipment?: Exercise['equipment']) {
+  const limit = equipment ? HEAVY_LOAD_LIMITS[equipment] : undefined
+  return limit !== undefined && weight > limit
+}
+
 export function loggingTargetRange(targets: string[]) {
   const values = targets.flatMap((target) => target.split('+', 1)[0].match(/\d+/g)?.map(Number) ?? [])
     .filter((reps) => reps > 0)
@@ -917,6 +928,7 @@ export default function WorkoutPlan({
   // Phase 4: PT sentence from the AI for the engine's decision; the template sentence shows until (or unless) it arrives.
   const [trainerExplanations, setTrainerExplanations] = useState<Record<string, string>>({})
   const requestedExplanations = useRef(new Set<string>())
+  const firstTimeLinesRef = useRef<Record<string, string[]>>({})
   const trainerWhy = (
     exerciseId: string | undefined,
     recommendation: Parameters<typeof explanationPayload>[0],
@@ -2319,6 +2331,10 @@ export default function WorkoutPlan({
     const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
     if (!confirmedWorkoutSet(draft.setWeights[setIndex], draft.setReps[setIndex], equipment,
       exercise.technique === 'drop-set' ? { weight: draft.dropSetWeights[setIndex], reps: draft.dropSetReps[setIndex] } : undefined)) return
+    const heavy = [draft.setWeights[setIndex], exercise.technique === 'drop-set' ? draft.dropSetWeights[setIndex] : 0]
+      .find((weight) => needsHeavyLoadConfirm(weight, equipment))
+    // A confirmation, not a block: the first log becomes the base for every later number.
+    if (heavy !== undefined && !window.confirm(t('workout.run.confirmHeavy', { weight: formatNumber(language, heavy) }))) return
     doneBlockedUntil.current = Date.now() + WORKOUT_DONE_GUARD_MS
     prepareRestAlerts()
     savingSetRef.current = true
@@ -3733,6 +3749,14 @@ export default function WorkoutPlan({
             </button>
           </div>
         )}
+        {isWorkoutMode && history.length === 0 && (
+          // PT spec 2026-11-01 §4: once, at the top of the first workout.
+          <div className="first-workout-note" role="note">
+            <p>{t('workout.firstDay.intro')}</p>
+            <p>{t('workout.firstDay.sore')}</p>
+            <p>{t('workout.firstDay.pain')}</p>
+          </div>
+        )}
         {isWorkoutMode && (
           <div className="workout-mode-overview">
             <div className="workout-mode-chip-row">
@@ -4066,7 +4090,7 @@ export default function WorkoutPlan({
                 return (
                   <fieldset key={index} className="effortless-inputs" disabled={savingSet}>
                     <WorkoutSetInputs setIndex={index} weight={itemDraft.setWeights[index]} commitOnBlur={correcting}
-                      weightInput={workoutWeightInputs[`${itemKey}:${index}`] ?? formatNumber(language, itemDraft.setWeights[index])}
+                      weightInput={workoutWeightInputs[`${itemKey}:${index}`] ?? (itemDraft.setWeights[index] === 0 && equipment !== 'bodyweight' ? '' : formatNumber(language, itemDraft.setWeights[index]))}
                       reps={itemDraft.setReps[index]} equipment={equipment} language={language} t={t} repsLabel={text.repsShort}
                       onWeightInputChange={(raw) => setWorkoutWeightInputs((current) => ({ ...current, [`${itemKey}:${index}`]: raw }))}
                       onValueChange={(field, value) => updatePlanSetValue(item, index, field, value, getDefaultSetCount(item))} />
@@ -4095,6 +4119,15 @@ export default function WorkoutPlan({
                 rowItems.filter(({ count }) => index < count).map((row) => ({ ...row, index }))).flat()
               const needsWeight = !confirmedWorkoutSet(setWeights[activeIndex], setReps[activeIndex], libraryMatch?.equipment,
                 exercise.technique === 'drop-set' ? { weight: dropSetWeights[activeIndex], reps: dropSetReps[activeIndex] } : undefined) && !draft.setDone[activeIndex]
+              // PT spec 2026-11-01 §4: the first time on an exercise, its how-to-find-the-weight lines sit under the sets.
+              // Kept until the exercise is finished (PT review): the same-weight line matters most after set 1.
+              const firstTimeKey = `${today}:${language}:${getPlanDraftKey(exercise.name)}`
+              if (planMode === 'preset' && !draft.setDone.some(Boolean) && !firstTimeLinesRef.current[firstTimeKey]) {
+                const firstTime = getTrainerRecommendation(exercise)
+                firstTimeLinesRef.current[firstTimeKey] = firstTime?.recommendation.firstSessionProtocol
+                  ? trainerReason(t, language, firstTime.recommendation, firstTime.target).split('\n') : []
+              }
+              const firstTimeLines = draft.setDone.every(Boolean) ? [] : firstTimeLinesRef.current[firstTimeKey] ?? []
               return (
                 <article key={exercise.code ?? exercise.name} className="planned-exercise-card effortless-card workout-mode-current"
                   data-exercise-card={exerciseKey} data-workout-group={groupIndex} tabIndex={-1}>
@@ -4149,7 +4182,7 @@ export default function WorkoutPlan({
                             {group.isSuperset && <small className="effortless-set-exercise">{displayExerciseName(item.name)}</small>}
                             <span className="effortless-set-number">{formatNumber(language, index + 1)}</span>
                             <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
-                              aria-label={t('workout.set.weightLabel', { set: index + 1 })}>{bodyweight ? '—' : formatNumber(language, weight)}</button>
+                              aria-label={t('workout.set.weightLabel', { set: index + 1 })}>{bodyweight ? '—' : weight === 0 ? '' : formatNumber(language, weight)}</button>
                             <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
                               aria-label={t('workout.set.repsLabel', { set: index + 1 })}>{formatNumber(language, reps)}</button>
                             <button type="button" className="effortless-tick" data-next={current || undefined} aria-pressed={done}
@@ -4164,6 +4197,9 @@ export default function WorkoutPlan({
                         )
                       })}
                     </div>
+                    {firstTimeLines.length > 0 && (
+                      <ul className="effortless-first-time">{firstTimeLines.map((line) => <li key={line}>{line}</li>)}</ul>
+                    )}
                     {needsWeight && <p className="effortless-hint">{t('workout.run.enterWeight')}</p>}
                     {newWeight && <p className="effortless-hint">{t('workout.run.newWeightCheck')}</p>}
                     {weightCarried === getPlanDraftKey(exercise.name) && <p className="effortless-hint" role="status">{t('workout.run.weightCarried')}</p>}

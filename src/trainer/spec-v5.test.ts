@@ -228,11 +228,13 @@ describe('PT-approved trainer watch items R26–R30', () => {
       action: 'collect_data', weight: null, reason: 'no_history',
       firstSessionProtocol: 'reverse-pyramid',
     })
+    // Wording replaced by the PT first-run spec 2026-11-01 §4 (warm-up, effort, technique, adjust, log; no reps-left question).
     expect(trainerReason(createTranslator('en'), 'en', result, result.reps).split('\n')).toEqual([
-      'Warm up with 2-3 light sets, adding weight each time.',
-      'Pick a weight you could lift for about 3 more reps than the target; first sessions stay below your limit.',
+      "Start light and add a little weight over 1-3 easy warm-up sets. Don't log these.",
+      'Choose a weight that lets you finish 8–12 reps with about 3 more left in you.',
       'Then take off about 10% for each lighter set.',
-      'Log the weight and how many reps you had left on the heaviest set; next time I will progress from it.',
+      "Too heavy or too light? Change it. That's normal today.",
+      'Your next target will start from what you log.',
     ])
     expect(recommend({
       ...base, target: rng(8, 12), equipment: 'plate-loaded', technique: 'reverse-pyramid',
