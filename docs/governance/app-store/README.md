@@ -4,6 +4,14 @@ Prepared by Governancer, 2026-10-31; updated with the PO's answers of 2026-11-01
 
 Repo reminder: this repository is **public**. The PO approved his name and email for public pages. No address or phone, ever (G23).
 
+## PO approval 2026-11-07
+
+The PO approved the privacy policy, terms and support page (EN and ES, effective 7 November 2026) for publication at
+https://sebpabonc.github.io/gymstudio/privacy/, /terms/ and /support/ (Spanish under /es/), built by `scripts/build-legal-pages.mjs`.
+Approving the text also approved: deletion by email within 10 days until in-app deletion ships; Terms governed by NSW law,
+AUD 100 liability cap, 5 and 10 business-day response times, Spanish prevails; the "reviews or supervises" AI-trainer wording.
+The US consumer health data policy is not published; the US launch decision is still open (questions-for-po.md).
+
 ## PO decisions recorded (2026-11-01)
 
 Owner: Sebastian Pabon, an individual, based in Australia. Contact: js.pabonc979@gmail.com. No human trainer behind the content: "AI trainer" wording. Permission to use blocks 1 to 5 confirmed. 18+. Free at launch. OpenAI stays. Sign in with Apple added. iPhone only. Name "GymStudio". EU out. Retention: inactive accounts 24 months, deleted logs 30 days, feedback 24 months, AI usage 12 months. No lawyer. Domain and mail provider later; personal email for now.
