@@ -1,7 +1,7 @@
-# Video department (Videoer)
+# Exercise videos (Marketing / Socialer)
 
-Created 2026-11-07 at the PO's request ("necesitamos ese departamento, porque eso genera mucho valor").
-Agent: `.claude/agents/videoer.md`. Goal: our own short technique video for every catalogue exercise, in one
+PO 2026-11-07: videos are made by the marketing department, not a separate one. Owner: Socialer
+(`.claude/agents/socialer.md`). Goal: our own short technique video for every catalogue exercise, in one
 consistent style, that GymStudio is allowed to use.
 
 ## Why
