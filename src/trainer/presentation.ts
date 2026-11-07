@@ -71,7 +71,9 @@ export function trainerReasonParts(
   const recentMiss = evidence.recentMiss
   const sameDayMiss = (recommendation.reason === 'below_target_once' || recommendation.reason === 'slightly_below_target') &&
     evidence.sameDayTarget?.min === target.min && evidence.sameDayTarget.max === target.max
-  const withBasis = (lines: string[]) => evidence.lastOtherDayName && evidence.lastDate
+  // Only when the sentence reasons from that last session, not from today's same-day session (QA retest 2026-11-07).
+  const usesSameDay = recommendation.reason === 'same_day_boost' || sameDayMiss
+  const withBasis = (lines: string[]) => !usesSameDay && evidence.lastOtherDayName && evidence.lastDate
     ? [t('workout.trainer.basedOnLast', { dayName: evidence.lastOtherDayName, date: formatWeekdayDate(language, evidence.lastDate) }), ...lines]
     : lines
   const reason = t(key, {

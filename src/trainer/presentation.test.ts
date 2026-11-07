@@ -65,3 +65,12 @@ describe('why this weight: evidence day and unchanged loads', () => {
     expect(trainerReason(createTranslator('es'), 'es', band, { min: 12, max: 12 })).toBe('Sin carga añadida: suma repeticiones antes de agregar peso (12 · 12 la última vez).')
   })
 })
+
+it('QA retest: no "based on" line when the reason uses the same-day session', () => {
+  const boost: Recommendation = {
+    action: 'increase_weight', weight: 62.5, reps: { min: 8, max: 8 }, sets: 3, reason: 'same_day_boost', confidence: 'high',
+    evidence: { lastDate: '2026-11-03', lastOtherDayName: 'Lower A', lastWeight: 62.5, lastReps: [8, 8, 8], lastTarget: { min: 8, max: 8 }, sessionsUsed: 2,
+      sameDayDate: '2026-10-29', sameDayName: 'Lower B', sameDayWeight: 60, sameDayReps: [10, 10, 10], sameDayTarget: { min: 8, max: 8 } },
+  }
+  expect(trainerReasonParts(createTranslator('en'), 'en', boost, { min: 8, max: 8 }).lines.join(' ')).not.toContain('Based on your last session')
+})

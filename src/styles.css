@@ -2502,8 +2502,6 @@ a.secondary-button {
 .calendar-popover-header strong {
   color: var(--muted-strong);
   font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .calendar-program {
@@ -2514,8 +2512,6 @@ a.secondary-button {
 .calendar-program > strong {
   color: var(--muted-strong);
   font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .calendar-block-list {
@@ -2670,8 +2666,6 @@ a.secondary-button {
 .calendar-field span {
   color: var(--muted);
   font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .calendar-field input {
@@ -2691,8 +2685,6 @@ a.secondary-button {
 .calendar-history > strong {
   color: var(--muted-strong);
   font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .calendar-history-list {
@@ -10922,3 +10914,9 @@ p.workout-short-cue.cue-card {
 
 /* R31: muted note under a cable set whose load is off the 2.5 kg grid. */
 .set-off-grid-hint { grid-column: 1 / -1; margin: 0; font-size: var(--type-caption-size); color: var(--muted); }
+
+/* Super QA 2026-11-07: the swap sheet name keeps one size; the image-link tail inherits it. */
+.exercise-swap-name,
+.exercise-swap-name .exercise-image-link-tail {
+  font-size: 0.9375rem;
+}
