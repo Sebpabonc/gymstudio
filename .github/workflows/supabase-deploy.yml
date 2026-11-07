@@ -41,11 +41,11 @@ jobs:
 
       - name: Migrations (dry run)
         if: ${{ !inputs.apply }}
-        run: supabase db push --dry-run
+        run: supabase db push --linked --dry-run
 
       - name: Apply migrations
         if: ${{ inputs.apply }}
-        run: supabase db push
+        run: supabase db push --linked
 
       - name: Deploy ai-gateway
         if: ${{ inputs.apply }}
