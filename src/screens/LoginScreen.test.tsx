@@ -35,6 +35,15 @@ describe('LoginScreen', () => {
     expect(html).toContain('Try the demo')
   })
 
+  it('QA #61: the sign-in / create-account switch is a pressed-button group, not a tablist without panels', () => {
+    auth.available = true
+    const html = renderToStaticMarkup(<LoginScreen onClose={() => undefined} />)
+    expect(html).not.toContain('role="tablist"')
+    expect(html).not.toContain('role="tab"')
+    expect(html).toContain('aria-pressed="true"')
+    expect(html).toContain('aria-pressed="false"')
+  })
+
   it('shows an accessible reauth message and sign-in form after automatic signout', () => {
     auth.available = true
     auth.syncSignInRequired = true

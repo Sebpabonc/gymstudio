@@ -11,6 +11,8 @@ import {
 } from '../utils/storage'
 import { TranslationKey, useT } from '../i18n'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
+import { hiddenControlProps, useDialogFocus } from '../utils/useDialogFocus'
+import { onTabListKeyDown } from '../utils/tabs'
 
 const suggestedQuestionKeys = ['help.ai.suggestion1', 'help.ai.suggestion2', 'help.ai.suggestion3'] as const
 const feedbackTypes: Array<{ value: FeedbackType; label: TranslationKey }> = [
@@ -19,6 +21,8 @@ const feedbackTypes: Array<{ value: FeedbackType; label: TranslationKey }> = [
   { value: 'content', label: 'help.feedback.content' },
   { value: 'other', label: 'help.feedback.other' },
 ]
+
+const HELP_TABS = ['ai', 'feedback'] as const
 
 type ChatMessage = { role: 'user' | 'assistant'; text: string }
 
@@ -44,17 +48,10 @@ export default function HelpAndAi({ activeTab, hidden, showPulse, onSignIn }: He
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
   const chatRef = useRef<HTMLDivElement>(null)
+  const sheetRef = useRef<HTMLElement>(null)
 
   useBodyScrollLock(open)
-
-  useEffect(() => {
-    if (!open) return
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('keydown', closeOnEscape)
-    return () => document.removeEventListener('keydown', closeOnEscape)
-  }, [open])
+  useDialogFocus(sheetRef, open, () => setOpen(false))
 
   useEffect(() => {
     const syncConsent = () => setConsent(getAskExerciseAiConsent())
@@ -139,6 +136,7 @@ export default function HelpAndAi({ activeTab, hidden, showPulse, onSignIn }: He
       <button
         type="button"
         className={`help-ai-button${hidden ? ' hidden' : ''}`}
+        {...hiddenControlProps(hidden)}
         aria-label={t('help.button')}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -159,19 +157,21 @@ export default function HelpAndAi({ activeTab, hidden, showPulse, onSignIn }: He
           }}
         >
           <section
+            ref={sheetRef}
             className="help-ai-sheet"
             role="dialog"
             aria-modal="true"
             aria-labelledby="help-ai-title"
           >
             <header className="help-ai-header">
-              <div className="help-ai-tabs" role="tablist" aria-label={t('help.tabs')}>
+              <div className="help-ai-tabs" role="tablist" aria-label={t('help.tabs')} onKeyDown={(event) => onTabListKeyDown(event, HELP_TABS, tab, setTab)}>
                 <button
                   id="help-ai-tab"
                   type="button"
                   role="tab"
                   aria-selected={tab === 'ai'}
                   aria-controls="help-ai-panel"
+                  tabIndex={tab === 'ai' ? 0 : -1}
                   onClick={() => setTab('ai')}
                 >
                   {t('help.tab.ai')}
@@ -182,6 +182,7 @@ export default function HelpAndAi({ activeTab, hidden, showPulse, onSignIn }: He
                   role="tab"
                   aria-selected={tab === 'feedback'}
                   aria-controls="help-ai-panel"
+                  tabIndex={tab === 'feedback' ? 0 : -1}
                   onClick={() => setTab('feedback')}
                 >
                   {t('help.tab.feedback')}

@@ -18,6 +18,7 @@ import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, WorkoutEntry } from './types'
 import { useAuth } from './auth/AuthProvider'
 import { useTextEntryFocused } from './utils/textEntryFocus'
+import { hiddenControlProps, useDialogFocus } from './utils/useDialogFocus'
 import { loadDemoBlocks } from './plans/demoBlock'
 import { exitDemoMode, isDemoMode, isNewUserDemo } from './utils/demoMode'
 import {
@@ -65,6 +66,8 @@ export default function App() {
   const dockHidden = useTextEntryFocused()
   const [showWelcome, setShowWelcome] = useState(() => !hasDismissedWelcome())
   const [showAiConsent, setShowAiConsent] = useState(false)
+  const aiConsentRef = useRef<HTMLElement>(null)
+  useDialogFocus(aiConsentRef, showAiConsent)
   // PO 2026-11-07: a new visitor opens straight into the questionnaire; answers wait on the device until sign-up.
   const [firstRunVisitor, setFirstRunVisitor] = useState(() => isNewVisitor())
   const [pendingFirstRunGoal, setPendingFirstRunGoal] = useState(() => getPendingFirstRunGoal())
@@ -412,7 +415,7 @@ export default function App() {
           )}
           </div>
         </main>
-        <nav className={`bottom-tab-bar${dockHidden || firstRunActive ? ' hidden' : ''}`} aria-label={t('nav.aria')}>
+        <nav className={`bottom-tab-bar${dockHidden || firstRunActive ? ' hidden' : ''}`} aria-label={t('nav.aria')} {...hiddenControlProps(dockHidden || firstRunActive)}>
           {navigationTabs.map((tab) => (
             <button
               key={tab.id}
@@ -446,7 +449,7 @@ export default function App() {
         />
         {showAiConsent && (
           <div className="help-ai-overlay ai-permission-overlay" role="presentation">
-            <section className="help-ai-sheet ai-permission-sheet" role="dialog" aria-modal="true" aria-labelledby="ai-permission-title">
+            <section ref={aiConsentRef} className="help-ai-sheet ai-permission-sheet" role="dialog" aria-modal="true" aria-labelledby="ai-permission-title">
               <AiConsentPrompt onChoice={(choice) => {
                 setAskExerciseAiConsent(choice)
                 clearPendingAiConsentPrompt()

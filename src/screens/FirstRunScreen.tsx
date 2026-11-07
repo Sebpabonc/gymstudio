@@ -47,7 +47,7 @@ function Question({ name, answers, onChange }: {
   return (
     <fieldset className="profile-choice-group">
       <legend>{label}</legend>
-      <div className={`profile-choice-chips${question.help ? ' first-run-stack' : ''}`} role="group" aria-label={label}>
+      <div className={`profile-choice-chips${question.help ? ' first-run-stack' : ''}`}>
         {options.map((option) => (
           <button
             key={option}
