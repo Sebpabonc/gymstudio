@@ -6,7 +6,7 @@ Items marked **New** were not in issue #384.
 
 | # | Sev | Gap | Owner |
 |---|---|---|---|
-| G1 | S1 | In-app account deletion | TL |
+| G1 | ~~S1~~ Done | ~~In-app account deletion~~ Done 2026-11-08 | TL |
 | G2 | S1 | **New.** AI calls bypass consent, and "Not now" is ignored | TL |
 | G3 | S1 | **New.** No way to withdraw AI consent | TL, UXer |
 | G4 | S1 | Build Sign in with Apple (PO decided 2026-11-01) | TL |
@@ -35,7 +35,14 @@ Items marked **New** were not in issue #384.
 
 ---
 
-## G1. Account deletion (S1)
+## G1. Account deletion (S1) - DONE 2026-11-08
+
+**Status: done (Tech Lead, 2026-11-08).** You → "Delete account" → "Delete my account" → "Delete permanently". Edge Function
+`supabase/functions/delete-account/index.ts` takes the user from the JWT and calls `auth.admin.deleteUser`; every user table
+cascades from `auth.users` (all `references auth.users` in `supabase/migrations/` are `on delete cascade`). The app then signs
+out locally and clears that account's device data (`src/auth/AuthProvider.tsx` `deleteAccountWithClient`). Privacy policy (s. 8),
+terms (s. 11) and support page updated 2026-11-08. Still open elsewhere: Apple token revocation (item 7) moves with G4; QAer
+confirms the flow on a real device. The notes below are kept as the original design record.
 
 Apple: "If your app supports account creation, you must also offer account deletion within the app" (5.1.1(v)); see
 `https://developer.apple.com/support/offering-account-deletion-in-your-app/`, read 2026-10-31. No email or support flow

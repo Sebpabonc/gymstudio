@@ -15,6 +15,7 @@ import {
   loadWorkoutHistoryForSync,
   retryQuarantinedWorkoutEntry,
   type SyncWorkoutEntry,
+  clearAccountLocalData,
 } from '../utils/storage'
 
 export type AuthStatus = 'loading' | 'signed-out' | 'signed-in'
@@ -81,6 +82,7 @@ type AuthContextValue = {
   updatePassword: (password: string) => Promise<ActionResult>
   signInWithGoogle: () => Promise<ActionResult>
   signOut: () => Promise<ActionResult>
+  deleteAccount: () => Promise<ActionResult>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -92,6 +94,17 @@ function resultError(error: { message: string } | null | undefined): ActionResul
 export async function updatePasswordWithClient(client: SupabaseClient, password: string): Promise<ActionResult> {
   const { error } = await client.auth.updateUser({ password })
   return resultError(error)
+}
+
+/** Deletes the signed-in account on the server (delete-account function), then signs out locally and clears
+ * that account's data on this device. The guest data and shared caches on the device are left alone. */
+export async function deleteAccountWithClient(client: SupabaseClient, userId: string): Promise<ActionResult> {
+  const { data, error } = await client.functions.invoke<{ deleted?: boolean }>('delete-account', { body: { confirm: 'DELETE' } })
+  if (error || !data?.deleted) return { error: error?.message ?? 'delete_failed' }
+  // The server already removed the account and its sessions; only the local session is left to clear.
+  await client.auth.signOut({ scope: 'local' })
+  clearAccountLocalData(userId)
+  return { error: null }
 }
 
 export function getPasswordRecoveryRedirect(native: boolean, origin: string, pathname: string): string {
@@ -327,6 +340,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  const deleteAccount = useCallback(async () => {
+    const client = await getClient()
+    const userId = state.session?.user.id
+    if (!client || !userId) return { error: 'Sign-in unavailable offline.' }
+    intentionalSignOut.current = true
+    try {
+      return await deleteAccountWithClient(client, userId)
+    } finally {
+      intentionalSignOut.current = false
+    }
+  }, [state.session?.user.id])
+
   const resolveGuestPrompt = (move: boolean) => {
     if (!accountId) return
     if (move) moveGuestDataToAccount(accountId)
@@ -352,6 +377,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updatePassword,
     signInWithGoogle,
     signOut,
+    deleteAccount,
   }), [
     state,
     syncStatus,
@@ -371,6 +397,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updatePassword,
     signInWithGoogle,
     signOut,
+    deleteAccount,
   ])
 
   return (

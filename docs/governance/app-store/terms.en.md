@@ -3,12 +3,12 @@ Draft by Governancer, 2026-11-07, for publication at https://sebpabonc.github.io
 advice; Governancer is not a lawyer, and no lawyer has reviewed this (PO decision 2026-11-01). Written for a free app with no payments.
 Licence decision: keep Apple's Standard EULA as the licence in App Store Connect (https://www.apple.com/legal/internet-services/itunes/dev/stdeula/,
 read 2026-10-31) and publish these Terms as supplemental service terms; do not upload a custom EULA. Minimum age 18 here matches the 18+
-App Store rating. Sections 4 and 5 carry fitness and AI wording for the PT to review. Update section 11 when in-app deletion ships.
+App Store rating. Sections 4 and 5 carry fitness and AI wording for the PT to review. Section 11 updated 2026-11-08 for in-app deletion.
 -->
 
 # GymStudio Terms of Use
 
-**Effective date:** 7 November 2026
+**Effective date:** 7 November 2026 · **Updated:** 8 November 2026
 
 These Terms are an agreement between you and Sebastian Pabon, an individual based in Australia ("we", "us"), for the GymStudio iPhone app
 and web app. By creating an account or using GymStudio, you accept them. If you got the app from Apple's App Store, Apple's Licensed
@@ -97,9 +97,10 @@ of important changes to these Terms; continuing to use GymStudio after that mean
 
 ## 11. Ending your use
 
-You can stop at any time. **To delete your account and its data, email gymstudioapp@gmail.com** from your account's email address with the
-subject "Delete my account". We delete it within 10 days and confirm by email. The [Privacy Policy](https://sebpabonc.github.io/gymstudio/privacy/)
-explains what happens and when. We are adding a delete button inside the app.
+You can stop at any time. **To delete your account and its data, open You in the app, tap Delete my account under Delete account, then tap
+Delete permanently.** The deletion is immediate and cannot be undone. If you cannot sign in, email gymstudioapp@gmail.com from your account's
+email address with the subject "Delete my account"; we delete it within 10 days and confirm by email. The
+[Privacy Policy](https://sebpabonc.github.io/gymstudio/privacy/) explains what happens and when.
 
 We may delete an account that has not been used for 24 months, after warning you by email. We may end the service; if we do, we will try to
 give notice so you can ask for a copy of your data.

@@ -11274,3 +11274,36 @@ body {
   font-weight: 600;
   text-decoration: none;
 }
+
+/* You: delete account (App Store 5.1.1(v)). The final button is clearly destructive. */
+.profile-delete {
+  display: grid;
+  gap: var(--gap-stack, 8px);
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.profile-delete h3 {
+  margin: 0;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: var(--type-body-strong-weight);
+}
+
+.profile-delete-confirm {
+  display: grid;
+  gap: 8px;
+}
+
+.profile-delete-confirm p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.profile-delete-start {
+  color: #ff8a80;
+}
+
+.profile-delete-final {
+  background: #b3261e;
+}
