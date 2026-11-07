@@ -4219,8 +4219,9 @@ export default function WorkoutPlan({
                   [rowItems[0].draft.setDone.slice(0, rowItems[0].count).filter(Boolean).length, rowItems[1].draft.setDone.slice(0, rowItems[1].count).filter(Boolean).length],
                   [rowItems[0].count, rowItems[1].count]) ?? 0].item
                 : exercise
-              const setRows = Array.from({ length: Math.max(...rowItems.map(({ count }) => count)) }, (_, index) =>
-                rowItems.filter(({ count }) => index < count).map((row) => ({ ...row, index }))).flat()
+              const setRounds = Array.from({ length: Math.max(...rowItems.map(({ count }) => count)) }, (_, index) =>
+                rowItems.filter(({ count }) => index < count).map((row) => ({ ...row, index })))
+              const setRows = setRounds.flat()
               const needsWeight = !confirmedWorkoutSet(setWeights[activeIndex], setReps[activeIndex], libraryMatch?.equipment,
                 exercise.technique === 'drop-set' ? { weight: dropSetWeights[activeIndex], reps: dropSetReps[activeIndex] } : undefined) && !draft.setDone[activeIndex]
               // PT spec 2026-11-01 §4: the first time on an exercise, its how-to-find-the-weight lines sit under the sets.
@@ -4267,7 +4268,8 @@ export default function WorkoutPlan({
                   <section className="effortless-logger">
                     <div className="effortless-set-head" aria-hidden="true"><span /><span>kg</span><span>{text.repsShort}</span><span /></div>
                     <div className="effortless-set-rows">
-                      {setRows.map(({ item, draft: rowDraft, count, equipment, index }) => {
+                      {(group.isSuperset ? setRounds : [setRows]).map((roundRows, round) => {
+                        const rows = roundRows.map(({ item, draft: rowDraft, count, equipment, index }) => {
                         const rowKey = `${getPlanDraftKey(item.name)}:${index}`
                         const done = !!rowDraft.setDone[index]
                         const nextOpen = Array.from({ length: count }, (_, set) => !!rowDraft.setDone[set]).indexOf(false)
@@ -4305,6 +4307,22 @@ export default function WorkoutPlan({
                             </button>
                             {drop && drop.reps > 0 && <p className="effortless-set-drop">↓ {formatNumber(language, drop.weight)} kg × {formatNumber(language, drop.reps)}</p>}
                             {open && <div className="effortless-set-editor">{input(item, rowDraft, index, equipment)}</div>}
+                          </div>
+                        )
+                        })
+                        if (!group.isSuperset) return rows
+                        // One shaded block per superset round: set N of every exercise in the pair goes together.
+                        const roundLabel = t('workout.superset.roundOf', {
+                          round: formatNumber(language, round + 1), total: formatNumber(language, setRounds.length),
+                        })
+                        const roundDone = roundRows.every(({ draft: rowDraft, index }) => !!rowDraft.setDone[index])
+                        const roundNow = !roundDone && roundRows.some(({ draft: rowDraft, index }) => !rowDraft.setDone[index]) &&
+                          setRounds.slice(0, round).every((earlier) => earlier.every(({ draft: rowDraft, index }) => !!rowDraft.setDone[index]))
+                        return (
+                          <div key={round} role="group" aria-label={roundLabel}
+                            className={`effortless-set-round${roundDone ? ' done' : ''}${roundNow ? ' current' : ''}`}>
+                            <span className="effortless-set-round-label" aria-hidden="true">{roundDone ? '✓ ' : ''}{roundLabel}</span>
+                            {rows}
                           </div>
                         )
                       })}

@@ -402,6 +402,19 @@ describe('approved workout logging integration', () => {
     expect(ticks[1].props['aria-label']).toBe('Undo set 2')
   })
 
+  it('PO 2026-11-07: superset sets are grouped per round, one shaded block each', async () => {
+    render()
+    await settle()
+    await start()
+    await click('2 · row')
+    const rounds = elements(node => typeof node.props.className === 'string' && node.props.className.split(' ').includes('effortless-set-round'))
+    expect(rounds.length).toBeGreaterThan(1)
+    // Each round holds set N of both exercises, in plan order.
+    expect(elements(node => node.type === 'small', rounds[0]).map(node => node.props.children)).toEqual(['row', 'curl'])
+    expect(rounds[0].props.className.split(' ')).toContain('current')
+    expect(rounds[1].props.className.split(' ')).not.toContain('current')
+  })
+
   it('QA 2026-11-07: after C1 1 and C2 1 the highlighted row is C1 set 2 (approved C1 → C2 order)', async () => {
     render()
     await settle()
