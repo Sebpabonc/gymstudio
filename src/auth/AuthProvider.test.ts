@@ -2,12 +2,27 @@ import type { AuthChangeEvent, Session, SupabaseClient } from '@supabase/supabas
 import { describe, expect, it, vi } from 'vitest'
 import {
   authStateReducer,
+  deleteAccountWithClient,
   getPasswordRecoveryRedirect,
   needsSignInAfterAuthChange,
   subscribeToAuthChanges,
   updatePasswordWithClient,
 } from './AuthProvider'
 import { NATIVE_AUTH_CALLBACK } from './nativeOAuth'
+
+function createMemoryStorage(): Storage {
+  const data = new Map<string, string>()
+  return {
+    get length() {
+      return data.size
+    },
+    clear: () => data.clear(),
+    getItem: (key) => data.get(key) ?? null,
+    key: (index) => Array.from(data.keys())[index] ?? null,
+    removeItem: (key) => void data.delete(key),
+    setItem: (key, value) => void data.set(key, String(value)),
+  }
+}
 
 describe('AuthProvider state transitions', () => {
   it('tracks mocked Supabase sign-in and sign-out events and unsubscribes', () => {
@@ -47,6 +62,37 @@ describe('AuthProvider state transitions', () => {
 
     await expect(updatePasswordWithClient(client, 'new-secure-password')).resolves.toEqual({ error: null })
     expect(updateUser).toHaveBeenCalledWith({ password: 'new-secure-password' })
+  })
+
+  it('deletes the account on the server, signs out locally and clears only that account\'s local data', async () => {
+    vi.stubGlobal('localStorage', createMemoryStorage())
+    localStorage.setItem('gym-studio.user.u1.workout-history', '[]')
+    localStorage.setItem('gym-studio.user.u2.workout-history', '[]')
+    localStorage.setItem('gym-studio.workout-history', '[]')
+    const invoke = vi.fn().mockResolvedValue({ data: { deleted: true }, error: null })
+    const signOut = vi.fn().mockResolvedValue({ error: null })
+    const client = { functions: { invoke }, auth: { signOut } } as unknown as SupabaseClient
+
+    await expect(deleteAccountWithClient(client, 'u1')).resolves.toEqual({ error: null })
+    expect(invoke).toHaveBeenCalledWith('delete-account', { body: { confirm: 'DELETE' } })
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' })
+    expect(localStorage.getItem('gym-studio.user.u1.workout-history')).toBeNull()
+    expect(localStorage.getItem('gym-studio.user.u2.workout-history')).toBe('[]')
+    expect(localStorage.getItem('gym-studio.workout-history')).toBe('[]')
+    localStorage.clear()
+  })
+
+  it('keeps the session and local data when the server delete fails', async () => {
+    vi.stubGlobal('localStorage', createMemoryStorage())
+    localStorage.setItem('gym-studio.user.u1.workout-history', '[]')
+    const invoke = vi.fn().mockResolvedValue({ data: null, error: { message: 'delete_failed' } })
+    const signOut = vi.fn()
+    const client = { functions: { invoke }, auth: { signOut } } as unknown as SupabaseClient
+
+    await expect(deleteAccountWithClient(client, 'u1')).resolves.toEqual({ error: 'delete_failed' })
+    expect(signOut).not.toHaveBeenCalled()
+    expect(localStorage.getItem('gym-studio.user.u1.workout-history')).toBe('[]')
+    localStorage.clear()
   })
 
   it('uses the registered native callback for recovery but the current page on web', () => {

@@ -203,6 +203,17 @@ export function setStorageNamespace(userId: string | null) {
   storageNamespace = userId
 }
 
+/** After an account is deleted: removes every key stored for that account on this device. Guest and shared keys stay. */
+export function clearAccountLocalData(userId: string) {
+  const prefix = `gym-studio.user.${userId}.`
+  try {
+    const keys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index))
+    for (const key of keys) if (key?.startsWith(prefix)) localStorage.removeItem(key)
+  } catch {
+    // Storage unavailable: nothing to clear.
+  }
+}
+
 export function storageKey(key: string) {
   if (key === LANGUAGE_KEY) return key
   if (isNewUserDemo()) return key.replace(/^gym-studio\./, 'gym-studio.demo-new.')

@@ -1,7 +1,7 @@
 <!--
 Draft by Governancer, 2026-11-07, for publication at https://sebpabonc.github.io/gymstudio/support/ (App Store Support URL) after the PO
 approves it. Apple guideline 1.5 asks for an easy way to contact us; guideline 2.1 forbids placeholder text. No sign-in needed to read
-this page. Update "Delete your account" when in-app deletion ships. Owner name and app email only; never a street address or phone number.
+this page. "Delete your account" updated 2026-11-08 for in-app deletion. Owner name and app email only; never a street address or phone number.
 -->
 
 # GymStudio support
@@ -15,16 +15,21 @@ Signed in, you can also write to us from the app: tap the **Help and AI** button
 
 ## Delete your account
 
-Today, account deletion works by email:
+You can delete your account inside the app:
 
-1. Write to **gymstudioapp@gmail.com** from your GymStudio account's email address (for Google sign-in, your Google email), with the
-   subject "Delete my account".
-2. We may ask you to confirm the request, to make sure it comes from you.
-3. We delete your account and all its data within **10 days** and email you when it is done.
+1. Sign in and open **You**.
+2. Under **Delete account**, tap **Delete my account**.
+3. Read the warning and tap **Delete permanently**.
 
-Removing the app alone does not delete your account. Data on your phone stays until you remove the app. Details are in the
-[Privacy Policy](https://sebpabonc.github.io/gymstudio/privacy/). We are adding a delete button inside the app; this page will say so
-when it is available.
+Your account and all its synced data are deleted at once, and this cannot be undone. The app then signs you out on that phone and removes
+that account's data from it. Workouts saved on the phone without signing in (as a guest) stay on the phone.
+
+**Can't sign in?** Write to **gymstudioapp@gmail.com** from your GymStudio account's email address (for Google sign-in, your Google email),
+with the subject "Delete my account". We may ask you to confirm the request, to make sure it comes from you. We delete your account and
+all its data within **10 days** and email you when it is done.
+
+Removing the app alone does not delete your account. Details are in the
+[Privacy Policy](https://sebpabonc.github.io/gymstudio/privacy/).
 
 ## Turn AI off
 

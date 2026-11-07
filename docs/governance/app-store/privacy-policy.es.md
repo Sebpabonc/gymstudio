@@ -1,14 +1,14 @@
 <!--
 Borrador de Governancer, 2026-11-07, para publicar en https://sebpabonc.github.io/gymstudio/privacy/ cuando el PO lo apruebe.
 No es asesoría legal; Governancer no es abogado. Cada frase describe la app al 2026-11-07 (fuentes: data-inventory.md y las notas del
-2026-11-07 en questions-for-po.md). Actualizar cuando lleguen el borrado de cuenta dentro de la app, Iniciar sesión con Apple, las tareas
-de retención o un proveedor nuevo. Este texto prevalece para quienes usan la app en español (sección 14): revisarlo con el mismo cuidado
+2026-11-07 en questions-for-po.md). Borrado de cuenta dentro de la app agregado el 2026-11-08 (supabase/functions/delete-account/index.ts,
+src/auth/AuthProvider.tsx). Actualizar cuando lleguen Iniciar sesión con Apple, las tareas de retención o un proveedor nuevo. Este texto prevalece para quienes usan la app en español (sección 14): revisarlo con el mismo cuidado
 que el inglés. Regla de documentos públicos: solo nombre del dueño y correo de la app; nunca dirección ni teléfono.
 -->
 
 # Política de privacidad de GymStudio
 
-**Fecha de entrada en vigor:** 7 de noviembre de 2026
+**Fecha de entrada en vigor:** 7 de noviembre de 2026 · **Actualizada:** 8 de noviembre de 2026
 
 Esta política explica qué recopila GymStudio, para qué, quién lo recibe, cuánto tiempo lo guardamos y cómo puedes controlarlo.
 GymStudio es una app de entrenamiento para consultar ejercicios, seguir un plan, registrar series y ver tu progreso. Está disponible como
@@ -127,16 +127,23 @@ IA o pídenos borrar tu cuenta. La app no puede sincronizar sin su proveedor de 
 
 ## 8. Cómo borrar tu cuenta
 
-Hoy el borrado de cuenta se hace por correo:
+Puedes borrar tu cuenta dentro de la app:
 
-1. Escribe a **gymstudioapp@gmail.com** desde el correo de tu cuenta de GymStudio (si usas Google, tu correo de Google), con el asunto
-   "Borrar mi cuenta".
-2. Podemos pedirte que confirmes la solicitud, para asegurarnos de que viene de ti.
-3. Borramos tu cuenta y todos sus datos de nuestra base de datos en un plazo de **10 días** y te avisamos por correo cuando esté hecho.
+1. Inicia sesión y abre **Tú**.
+2. En **Borrar cuenta**, toca **Borrar mi cuenta**.
+3. Lee el aviso y toca **Borrar para siempre**.
 
-Las copias en respaldos y registros vencen como se indica en la sección 7. Los datos en tus dispositivos se quedan hasta que quites la app.
-Quitar la app no borra tu cuenta. Estamos agregando un botón para borrar la cuenta dentro de la app; actualizaremos esta sección cuando esté
-disponible.
+Esto borra de inmediato tu cuenta y todos sus datos de nuestra base de datos: tu perfil, entrenamientos, ejercicios propios, objetivos,
+medidas, planes, recomendaciones, cambios de ejercicio, comentarios y conteo de uso de IA. No se puede deshacer. Después la app cierra tu
+sesión en ese dispositivo y borra de él los datos de esa cuenta.
+
+Si no puedes iniciar sesión, escribe a **gymstudioapp@gmail.com** desde el correo de tu cuenta de GymStudio (si usas Google, tu correo de
+Google), con el asunto "Borrar mi cuenta". Podemos pedirte que confirmes la solicitud, para asegurarnos de que viene de ti. Borramos tu
+cuenta y todos sus datos en un plazo de **10 días** y te avisamos por correo cuando esté hecho.
+
+Las copias en respaldos y registros vencen como se indica en la sección 7. Los entrenamientos guardados en un teléfono sin iniciar sesión
+(como invitado) se quedan en ese teléfono hasta que quites la app. En otros dispositivos donde usaste la cuenta, sus datos se quedan hasta
+que quites la app allí. Quitar la app no borra tu cuenta.
 
 ## 9. Tus derechos
 

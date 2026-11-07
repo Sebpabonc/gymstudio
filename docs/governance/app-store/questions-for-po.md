@@ -49,9 +49,9 @@ gymstudioapp@gmail.com. Cada frase describe la app de hoy. Al aprobar esos texto
 (Nueva Gales del Sur, tope de 100 AUD, soporte en 5 días hábiles, privacidad en 10 días hábiles, borrado por correo en 10 días,
 el español prevalece). Lo que sigue no está resuelto y no aparece como cierto en las páginas:
 
-1. **Borrar la cuenta dentro de la app (G1). Bloquea el envío.** Apple no acepta el borrado por correo en una app como esta: lo exige
-   dentro de la app. Las páginas describen el correo porque es lo que funciona hoy; hay que cambiarlas cuando exista el botón.
-   Mientras tanto, cada pedido de borrado lo haces tú a mano, a tiempo, y confirmas por correo.
+1. ~~**Borrar la cuenta dentro de la app (G1).**~~ **Hecho el 2026-11-08.** Ya existe en la app: Tú → "Borrar cuenta" → "Borrar mi
+   cuenta" → "Borrar para siempre". Las páginas ya lo describen. El correo queda solo para quien no puede iniciar sesión: esos pedidos
+   los sigues haciendo tú a mano, en 10 días, y confirmas por correo.
 2. **Iniciar sesión con Apple (G4).** Decidiste agregarlo; no existe. Las páginas solo mencionan correo y Google. Hay que actualizarlas cuando llegue.
 3. **Manifiesto de privacidad (G13)** y quitar los **bloques 1 a 5** del paquete público (G7, pregunta 5). Hoy, un usuario nuevo sin
    conexión en el primer arranque podría ver tu programa privado.

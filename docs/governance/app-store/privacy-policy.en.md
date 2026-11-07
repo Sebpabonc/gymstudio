@@ -1,13 +1,13 @@
 <!--
 Draft by Governancer, 2026-11-07, for publication at https://sebpabonc.github.io/gymstudio/privacy/ after the PO approves it.
 Not legal advice; Governancer is not a lawyer. Every statement describes the app as of 2026-11-07 (sources: data-inventory.md and the
-2026-11-07 notes in questions-for-po.md). Update this text when in-app account deletion, Sign in with Apple, retention jobs or a new
-provider ship. Public-document rule: owner name and app email only; never a street address or phone number.
+2026-11-07 notes in questions-for-po.md). In-app account deletion added 2026-11-08 (supabase/functions/delete-account/index.ts,
+src/auth/AuthProvider.tsx). Update this text when Sign in with Apple, retention jobs or a new provider ship. Public-document rule: owner name and app email only; never a street address or phone number.
 -->
 
 # GymStudio Privacy Policy
 
-**Effective date:** 7 November 2026
+**Effective date:** 7 November 2026 · **Updated:** 8 November 2026
 
 This policy explains what GymStudio collects, why, who receives it, how long we keep it and how you can control it.
 GymStudio is a training app for looking up exercises, following a plan, logging sets and seeing your progress. It is available as an
@@ -123,15 +123,23 @@ ask us to delete your account. The app cannot sync without its hosting provider.
 
 ## 8. How to delete your account
 
-Today, account deletion works by email:
+You can delete your account inside the app:
 
-1. Write to **gymstudioapp@gmail.com** from the email address of your GymStudio account (for Google sign-in, your Google email), with the
-   subject "Delete my account".
-2. We may ask you to confirm the request, to make sure it comes from you.
-3. We delete your account and all its data from our database within **10 days**, and email you when it is done.
+1. Sign in and open **You**.
+2. Under **Delete account**, tap **Delete my account**.
+3. Read the warning and tap **Delete permanently**.
 
-Copies in backups and logs expire as described in section 7. Data on your devices stays until you remove the app there. Removing the app
-alone does not delete your account. We are adding a delete button inside the app; this section will be updated when it is available.
+This deletes your account and all its data from our database at once: your profile, workouts, own exercises, goals, measurements, plans,
+recommendations, exercise swaps, feedback and AI usage counts. It cannot be undone. The app then signs you out on that device and removes
+that account's data from it.
+
+If you cannot sign in, write to **gymstudioapp@gmail.com** from the email address of your GymStudio account (for Google sign-in, your Google
+email), with the subject "Delete my account". We may ask you to confirm the request, to make sure it comes from you. We delete your account
+and all its data within **10 days** and email you when it is done.
+
+Copies in backups and logs expire as described in section 7. Workouts saved on a phone without signing in (as a guest) stay on that phone
+until you remove the app. On other devices where you used the account, its data stays until you remove the app there. Removing the app
+alone does not delete your account.
 
 ## 9. Your rights
 

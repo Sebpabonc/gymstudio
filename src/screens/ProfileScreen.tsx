@@ -14,11 +14,12 @@ import {
 } from '../utils/storage'
 import { requestAiConsent } from '../ai/gateway'
 import { legalUrl } from '../legal'
+import { isDemoMode } from '../utils/demoMode'
 import type { Exercise } from '../types'
 
 export default function ProfileScreen({ onClose }: { onClose: () => void }) {
   const { t, locale, language } = useT()
-  const { user, signOut, syncStatus, lastSyncedAt, syncErrorDetail, syncSignInRequired,
+  const { user, signOut, deleteAccount, syncStatus, lastSyncedAt, syncErrorDetail, syncSignInRequired,
     pendingSyncCount, quarantinedEntries, retrySyncNow, retryQuarantinedEntry } = useAuth()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [fullName, setFullName] = useState('')
@@ -26,6 +27,8 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false)
   const [restBetweenSets, setRestBetweenSets] = useState(loadRestBetweenSets)
   const [aiConsent, setAiConsent] = useState(getAskExerciseAiConsent)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const syncConsent = () => setAiConsent(getAskExerciseAiConsent())
@@ -79,6 +82,15 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
     const result = await signOut()
     setBusy(false)
     if (result.error) setError(t('profile.signOutError'))
+  }
+
+  // App Store 5.1.1(v): delete the account inside the app. Two steps so it can't happen by accident.
+  const removeAccount = async () => {
+    setDeleting(true)
+    setError('')
+    const result = await deleteAccount()
+    setDeleting(false)
+    if (result.error) setError(t('profile.delete.error'))
   }
 
   return (
@@ -170,6 +182,26 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
         <button type="button" className="secondary-button profile-signout" onClick={leaveAccount} disabled={busy}>
           {busy ? t('profile.signingOut') : t('profile.signOut')}
         </button>
+        {!isDemoMode() && (
+        <section className="profile-delete" aria-labelledby="profile-delete-title">
+          <h3 id="profile-delete-title">{t('profile.delete.title')}</h3>
+          {!confirmDelete ? (
+            <button type="button" className="secondary-button profile-delete-start" onClick={() => setConfirmDelete(true)} disabled={busy}>
+              {t('profile.delete.start')}
+            </button>
+          ) : (
+            <div className="profile-delete-confirm" role="alertdialog" aria-labelledby="profile-delete-title" aria-describedby="profile-delete-body">
+              <p id="profile-delete-body">{t('profile.delete.body')}</p>
+              <button type="button" className="primary-button profile-delete-final" onClick={() => void removeAccount()} disabled={deleting}>
+                {deleting ? t('profile.delete.deleting') : t('profile.delete.confirm')}
+              </button>
+              <button type="button" className="secondary-button" onClick={() => setConfirmDelete(false)} disabled={deleting}>
+                {t('profile.delete.cancel')}
+              </button>
+            </div>
+          )}
+        </section>
+        )}
         {error && <p className="account-error" role="alert">{error}</p>}
       </CollapsibleCard>
       <ProfileDataSections aiEnabled={aiConsent === 'enabled'} />

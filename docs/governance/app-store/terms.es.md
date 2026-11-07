@@ -2,13 +2,13 @@
 Borrador de Governancer, 2026-11-07, para publicar en https://sebpabonc.github.io/gymstudio/terms/ cuando el PO lo apruebe. No es asesoría
 legal; Governancer no es abogado y ningún abogado lo revisó (decisión del PO, 2026-11-01). Escrito para una app gratis, sin pagos. La
 licencia es el EULA estándar de Apple (ver terms.en.md). Las secciones 4 y 5 tienen texto de entrenamiento e IA para revisión del PT.
-Este texto prevalece para quienes usan la app en español (sección 16): revisarlo con el mismo cuidado que el inglés. Actualizar la sección
-11 cuando exista el borrado dentro de la app.
+Este texto prevalece para quienes usan la app en español (sección 16): revisarlo con el mismo cuidado que el inglés. Sección 11 actualizada el
+2026-11-08 por el borrado dentro de la app.
 -->
 
 # Términos de uso de GymStudio
 
-**Fecha de entrada en vigor:** 7 de noviembre de 2026
+**Fecha de entrada en vigor:** 7 de noviembre de 2026 · **Actualizados:** 8 de noviembre de 2026
 
 Estos Términos son un acuerdo entre tú y Sebastian Pabon, una persona natural con base en Australia ("nosotros"), para la app de GymStudio
 para iPhone y la app web. Al crear una cuenta o usar GymStudio, los aceptas. Si obtuviste la app en el App Store de Apple, también aplica el
@@ -98,10 +98,10 @@ que los aceptas.
 
 ## 11. Dejar de usar GymStudio
 
-Puedes dejar de usarla en cualquier momento. **Para borrar tu cuenta y sus datos, escribe a gymstudioapp@gmail.com** desde el correo de tu
-cuenta, con el asunto "Borrar mi cuenta". La borramos en un plazo de 10 días y te lo confirmamos por correo. La
-[Política de privacidad](https://sebpabonc.github.io/gymstudio/privacy/) explica qué pasa y cuándo. Estamos agregando un botón para borrar la
-cuenta dentro de la app.
+Puedes dejar de usarla en cualquier momento. **Para borrar tu cuenta y sus datos, abre Tú en la app, toca Borrar mi cuenta en Borrar
+cuenta y luego toca Borrar para siempre.** El borrado es inmediato y no se puede deshacer. Si no puedes iniciar sesión, escribe a
+gymstudioapp@gmail.com desde el correo de tu cuenta, con el asunto "Borrar mi cuenta"; la borramos en un plazo de 10 días y te lo
+confirmamos por correo. La [Política de privacidad](https://sebpabonc.github.io/gymstudio/privacy/) explica qué pasa y cuándo.
 
 Podemos borrar una cuenta que no se haya usado en 24 meses, después de avisarte por correo. Podemos terminar el servicio; si lo hacemos,
 intentaremos avisarte para que puedas pedir una copia de tus datos.

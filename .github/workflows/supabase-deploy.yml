@@ -57,6 +57,6 @@ jobs:
         if: ${{ inputs.apply }}
         run: supabase db push --linked --yes
 
-      - name: Deploy ai-gateway
+      - name: Deploy functions
         if: ${{ inputs.apply }}
-        run: supabase functions deploy ai-gateway --project-ref "$PROJECT_REF" --yes
+        run: supabase functions deploy --project-ref "$PROJECT_REF" --yes
