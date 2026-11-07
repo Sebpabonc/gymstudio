@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { formatNumber, type Language, type Translate } from '../i18n'
-import { equipmentStep } from '../trainer/engine'
+import { equipmentStep, gridLoad } from '../trainer/engine'
 import type { Exercise } from '../types'
 import { cleanNumberInput, selectOnFocus } from '../utils/numberInput'
 import { stepWorkoutValue } from '../utils/workoutSets'
@@ -84,6 +84,9 @@ export default function WorkoutSetInputs({
     onValueChange('weight', raw.trim() && Number.isFinite(numeric) ? String(numeric) : '0')
   }
 
+  // R31 (PT 2026-11-07): a light note when a cable load is off the 2.5 kg grid; the value is never changed.
+  const step = equipmentStep(equipment)
+  const grid = equipment === 'cable' && weight > 0 ? gridLoad(weight, step) : weight
   return (
     <div className="workout-mode-big-inputs">
       <div className="workout-mode-big-field">
@@ -162,6 +165,9 @@ export default function WorkoutSetInputs({
           >+</button>
         </div>
       </div>
+      {grid !== weight && (
+        <p className="set-off-grid-hint">{t('workout.set.offGrid', { grid: formatNumber(language, grid) })}</p>
+      )}
     </div>
   )
 }
