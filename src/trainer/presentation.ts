@@ -98,8 +98,9 @@ export function trainerReason(
     return [
       t('workout.trainer.firstSession.warmup'),
       t('workout.trainer.firstSession.effort', { target: trainerRangeLabel(target, language) }),
-      t(protocol === 'reverse-pyramid' ? 'workout.trainer.firstSession.reversePyramid'
-        : protocol === 'pyramid' ? 'workout.trainer.firstSession.pyramid' : 'workout.trainer.firstSession.same'),
+      // PT review: the same-weight line is for straight sets and supersets only; a drop set skips the technique line.
+      ...(protocol === 'drop-set' ? [] : [t(protocol === 'reverse-pyramid' ? 'workout.trainer.firstSession.reversePyramid'
+        : protocol === 'pyramid' ? 'workout.trainer.firstSession.pyramid' : 'workout.trainer.firstSession.same')]),
       t('workout.trainer.firstSession.adjust'),
       ...(recommendation.firstSessionLoad === 'dumbbell' ? [t('workout.trainer.firstSession.dumbbell')] : []),
       ...(recommendation.firstSessionLoad === 'barbell' ? [t('workout.trainer.firstSession.barbell')] : []),

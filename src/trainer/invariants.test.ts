@@ -5,6 +5,9 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { equipmentStep, recommend, type LoggedSet, type SessionEvidence } from './engine'
 import { parseRepPrescription } from '../utils/workoutSets'
+import { personalizeTemplate } from '../plans/personalizePlan'
+import { templateToBlock, type TemplateJson } from '../plans/templates'
+import { trainingGoalOptions, type TrainingGoal } from '../utils/profileData'
 
 type PlanRow = { exercise_id: string; sets: number; reps: string[]; technique: string; notes?: string }
 type Block = { number: number; days: Array<{ key: string; exercises: PlanRow[] }> }
@@ -17,7 +20,30 @@ const equipmentOf = new Map(
     .map((exercise) => [exercise.id, exercise.equipment])
 )
 const blocks = (JSON.parse(readFileSync('docs/fitness/approved/training-blocks/blocks.json', 'utf8')) as Block[]).filter((block) => block.number >= 6)
-const slots = blocks.flatMap((block) => block.days.flatMap((day) => day.exercises.map((row) => ({ block: block.number, day: day.key, row }))))
+const blockSlots = blocks.flatMap((block) => block.days.flatMap((day) => day.exercises.map((row) => ({ block: block.number, day: day.key, row }))))
+
+// F20 (PT first-run spec 2026-11-01): the same checks over every personalised first-run plan (all 8 templates × every
+// goal, experience, days, equipment, session length and activity value), deduplicated by exercise row. Block 0 = personal.
+const catalogueRows = readdirSync(catalogueDir).filter((file) => file.endsWith('.json'))
+  .flatMap((file) => JSON.parse(readFileSync(`${catalogueDir}/${file}`, 'utf8')) as Array<{ id: string; primary_muscles?: string[] }>)
+  .map((exercise) => ({ id: exercise.id, primaryMuscle: exercise.primary_muscles?.[0] ?? '' }))
+const templates = readdirSync('docs/fitness/approved/templates').filter((file) => file.startsWith('tpl-') && file.endsWith('.json'))
+  .map((file) => JSON.parse(readFileSync(`docs/fitness/approved/templates/${file}`, 'utf8')) as TemplateJson)
+const personalRows = new Map<string, { block: number; day: string; row: PlanRow }>()
+for (const template of templates) {
+  for (const goal of trainingGoalOptions.goal) for (const experience of trainingGoalOptions.experience)
+    for (const equipment of trainingGoalOptions.equipment) for (const sessionMinutes of trainingGoalOptions.sessionMinutes)
+      for (const activityLevel of trainingGoalOptions.activityLevel) {
+        const profile = { goal, experience, equipment, sessionMinutes, activityLevel, daysPerWeek: 4, notes: '' } as TrainingGoal
+        for (const day of personalizeTemplate(templateToBlock(template, '2026-10-14'), profile, catalogueRows).days) {
+          for (const exercise of day.exercises) {
+            const row: PlanRow = { exercise_id: exercise.exerciseId, sets: exercise.sets, reps: exercise.reps, technique: exercise.technique, notes: exercise.notes }
+            personalRows.set(JSON.stringify([row.exercise_id, row.sets, row.reps, row.technique]), { block: 0, day: day.key, row })
+          }
+        }
+      }
+}
+const slots = [...blockSlots, ...personalRows.values()]
 
 const TODAY = '2026-10-14'
 const daysAgo = (days: number) => new Date(Date.parse(`${TODAY}T00:00:00Z`) - days * 86_400_000).toISOString().slice(0, 10)

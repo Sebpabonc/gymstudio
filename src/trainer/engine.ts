@@ -87,7 +87,7 @@ export type Recommendation = {
   /** Set when per-user calibration moved the load away from the rule result (spec 1.10). */
   calibration?: { offset: number; uncalibratedWeight: number; capped: boolean }
   /** First time on this exercise (PT spec 2026-11-01 §3-4): no number, a protocol to find the weight. */
-  firstSessionProtocol?: 'straight' | 'pyramid' | 'reverse-pyramid' | 'bodyweight'
+  firstSessionProtocol?: 'straight' | 'pyramid' | 'reverse-pyramid' | 'drop-set' | 'bodyweight'
   /** Which load line the first-time text adds: one dumbbell, or the total with the bar. */
   firstSessionLoad?: 'dumbbell' | 'barbell'
   evidence: {
@@ -273,14 +273,16 @@ function firstSessionProtocol(input: RecommendInput): Recommendation['firstSessi
   if (isBodyweight(input.equipment)) return 'bodyweight'
   if (!LOADED.includes(input.equipment ?? '')) return undefined
   if (input.technique === 'reverse-pyramid') return 'reverse-pyramid'
+  if (input.technique === 'drop-set') return 'drop-set'
   return input.technique === 'pyramid' ? 'pyramid' : 'straight'
 }
 
 function firstSessionExtra(input: RecommendInput): Partial<Recommendation> {
   const protocol = firstSessionProtocol(input)
   if (!protocol) return {}
-  // The barbell line (total with the bar) waits for the PO: his EZ-bar logs look like plates only (spec open decision 7).
-  const load = input.equipment === 'dumbbell' ? 'dumbbell' : undefined
+  // Open decision 7, PO 2026-11-07 ("correcto total con barra"): barbell, EZ and hex bar weights are the total with the bar.
+  const load = input.equipment === 'dumbbell' ? 'dumbbell'
+    : ['barbell', 'ez-bar', 'hex-bar'].includes(input.equipment ?? '') ? 'barbell' : undefined
   return { firstSessionProtocol: protocol, ...(load ? { firstSessionLoad: load } : {}) }
 }
 

@@ -928,6 +928,7 @@ export default function WorkoutPlan({
   // Phase 4: PT sentence from the AI for the engine's decision; the template sentence shows until (or unless) it arrives.
   const [trainerExplanations, setTrainerExplanations] = useState<Record<string, string>>({})
   const requestedExplanations = useRef(new Set<string>())
+  const firstTimeLinesRef = useRef<Record<string, string[]>>({})
   const trainerWhy = (
     exerciseId: string | undefined,
     recommendation: Parameters<typeof explanationPayload>[0],
@@ -4119,9 +4120,14 @@ export default function WorkoutPlan({
               const needsWeight = !confirmedWorkoutSet(setWeights[activeIndex], setReps[activeIndex], libraryMatch?.equipment,
                 exercise.technique === 'drop-set' ? { weight: dropSetWeights[activeIndex], reps: dropSetReps[activeIndex] } : undefined) && !draft.setDone[activeIndex]
               // PT spec 2026-11-01 §4: the first time on an exercise, its how-to-find-the-weight lines sit under the sets.
-              const firstTime = planMode === 'preset' && !draft.setDone.some(Boolean) ? getTrainerRecommendation(exercise) : null
-              const firstTimeLines = firstTime?.recommendation.firstSessionProtocol
-                ? trainerReason(t, language, firstTime.recommendation, firstTime.target).split('\n') : []
+              // Kept until the exercise is finished (PT review): the same-weight line matters most after set 1.
+              const firstTimeKey = `${today}:${language}:${getPlanDraftKey(exercise.name)}`
+              if (planMode === 'preset' && !draft.setDone.some(Boolean) && !firstTimeLinesRef.current[firstTimeKey]) {
+                const firstTime = getTrainerRecommendation(exercise)
+                firstTimeLinesRef.current[firstTimeKey] = firstTime?.recommendation.firstSessionProtocol
+                  ? trainerReason(t, language, firstTime.recommendation, firstTime.target).split('\n') : []
+              }
+              const firstTimeLines = draft.setDone.every(Boolean) ? [] : firstTimeLinesRef.current[firstTimeKey] ?? []
               return (
                 <article key={exercise.code ?? exercise.name} className="planned-exercise-card effortless-card workout-mode-current"
                   data-exercise-card={exerciseKey} data-workout-group={groupIndex} tabIndex={-1}>

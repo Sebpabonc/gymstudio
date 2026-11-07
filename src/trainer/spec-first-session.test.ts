@@ -125,3 +125,50 @@ describe('first-time wording (L1, L2)', () => {
     expect(text.slice(-2)).toEqual(['Log the weight of one dumbbell.', 'Your next target will start from what you log.'])
   })
 })
+
+describe('PT pre-merge review 2026-11-07', () => {
+  it('drop set: no same-weight line, the other first-time lines stay', () => {
+    const result = recommend({ ...base, equipment: 'machine', technique: 'drop-set' })
+    expect(result).toMatchObject({ weight: null, firstSessionProtocol: 'drop-set' })
+    expect(lines(result)).toEqual([
+      "Start light and add a little weight over 1-3 easy warm-up sets. Don't log these.",
+      'Choose a weight that lets you finish 8 reps with about 3 more left in you.',
+      "Too heavy or too light? Change it. That's normal today.",
+      'Your next target will start from what you log.',
+    ])
+  })
+
+  it.each(['barbell', 'ez-bar', 'hex-bar', 'dumbbell', 'kettlebell', 'cable', 'machine', 'plate-loaded', 'smith-machine'])(
+    'F7: a first exposure in the deload week on %s has no number, never 0', (equipment) => {
+      expect(recommend({ ...base, equipment, deload: true, plannedWeight: 30 })).toMatchObject({ weight: null, action: 'collect_data' })
+    })
+
+  it('F6: day 2 with all new exercises gets the first-time text even with day 1 logged', () => {
+    // History is per exercise: day 1 logs of other exercises are not this exercise's history.
+    const dayOne = [session(2, [s(40, 8), s(40, 8), s(40, 8)], { dayKey: 'full-body-a' })]
+    expect(recommend({ ...base, equipment: 'dumbbell', dayKey: 'full-body-b', history: [] }).firstSessionProtocol).toBe('straight')
+    expect(recommend({ ...base, equipment: 'barbell', dayKey: 'full-body-a', history: dayOne }).firstSessionProtocol).toBeUndefined()
+  })
+
+  it('L3: the Spanish first-time lines are all Spanish', () => {
+    const en = lines(recommend({ ...base, equipment: 'dumbbell', technique: 'straight' }))
+    const es = lines(recommend({ ...base, equipment: 'dumbbell', technique: 'straight' }), 'es')
+    es.forEach((line, index) => expect(line).not.toBe(en[index]))
+    expect(lines(recommend({ ...base, equipment: 'bodyweight' }), 'es')).toEqual(['Haz las reps con control y detente cuando aún te queden unas 3 más.'])
+  })
+
+  it('L4: the second session shows no first-time text', () => {
+    const result = recommend({ ...base, equipment: 'barbell', history: [session(3, [s(40, 8), s(40, 8), s(40, 8)])] })
+    expect(result.firstSessionProtocol).toBeUndefined()
+    expect(lines(result).join(' ')).not.toContain('warm-up sets')
+  })
+
+  it('open decision 7 (PO): barbell, EZ and hex bar cards say to log the total with the bar', () => {
+    for (const equipment of ['barbell', 'ez-bar', 'hex-bar']) {
+      const text = lines(recommend({ ...base, equipment, technique: 'straight' }))
+      expect(text.slice(-2)).toEqual(['Log the total weight, including the bar.', 'Your next target will start from what you log.'])
+      expect(lines(recommend({ ...base, equipment, technique: 'straight' }), 'es')).toContain('Registra el peso total, incluida la barra.')
+    }
+    expect(lines(recommend({ ...base, equipment: 'machine', technique: 'straight' })).join(' ')).not.toContain('including the bar')
+  })
+})
