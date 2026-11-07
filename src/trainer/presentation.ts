@@ -110,11 +110,13 @@ export function trainerReasonParts(
     const protocol = recommendation.firstSessionProtocol
     const suggested = !!recommendation.firstSessionSuggested && recommendation.weight !== null
     const kg = (value: number) => formatNumber(language, value)
+    // PT 2026-11-07 (short card): the unit lives only in the headline, so pyramid and drop-set headlines name it too.
+    const unit = recommendation.firstSessionLoad === 'dumbbell' ? 'Dumbbell' : recommendation.firstSessionLoad === 'barbell' ? 'Bar' : ''
     const suggestion = !suggested ? []
       : protocol === 'pyramid' || protocol === 'reverse-pyramid'
-        ? [t('workout.trainer.firstSession.suggestedSets', { weight: kg(recommendation.weight!) })]
+        ? [t(`workout.trainer.firstSession.suggestedSets${unit}`, { weight: kg(recommendation.weight!) })]
       : protocol === 'drop-set' && recommendation.dropWeight !== undefined
-        ? [t('workout.trainer.firstSession.suggestedDrop', { weight: kg(recommendation.weight!), drop: kg(recommendation.dropWeight) })]
+        ? [t(`workout.trainer.firstSession.suggestedDrop${unit}`, { weight: kg(recommendation.weight!), drop: kg(recommendation.dropWeight) })]
       : recommendation.firstSessionLoad === 'dumbbell'
         ? [t('workout.trainer.firstSession.suggestedDumbbell', { weight: kg(recommendation.weight!) })]
       : recommendation.firstSessionLoad === 'barbell'
@@ -122,8 +124,13 @@ export function trainerReasonParts(
       : equipmentIsKettlebell(recommendation)
         ? [t('workout.trainer.firstSession.suggestedKettlebell', { weight: kg(recommendation.weight!) })]
         : [t('workout.trainer.firstSession.suggested', { weight: kg(recommendation.weight!) })]
-    return { lines: [
+    // PT 2026-11-07 (approved by the PO): with a suggested weight the card is the headline plus two short lines.
+    if (suggestion.length > 0) return { lines: [
       ...suggestion,
+      t('workout.trainer.firstSession.warmupShort'),
+      t('workout.trainer.firstSession.effortAdjust', { target: trainerRangeLabel(target, language) }),
+    ] }
+    return { lines: [
       t('workout.trainer.firstSession.warmup'),
       t(suggested ? 'workout.trainer.firstSession.effort' : 'workout.trainer.firstSession.effortFind', { target: trainerRangeLabel(target, language) }),
       // PT review: the same-weight line is for straight sets and supersets only; a drop set skips the technique line.
