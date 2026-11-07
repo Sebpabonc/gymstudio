@@ -1580,7 +1580,7 @@ export default function WorkoutPlan({
         ? 'lower'
         : 'upper'
     const targetReps = getExerciseTargetReps(exercise)
-    return recommendNextTarget(sets, targetReps, progressionType, deload)
+    return recommendNextTarget(sets, targetReps, progressionType, deload, exerciseInfo?.equipment)
   }
 
   const getExerciseTargetReps = (exercise: PlanExercise) =>
@@ -1591,6 +1591,7 @@ export default function WorkoutPlan({
     }).filter((reps) => reps > 0)
 
   const getNextTargetWhy = (target: NextTarget) => {
+    if (target.action === 'add_reps') return t('workout.trainer.reason.bodyweight_add_reps', { reps: target.topReps ?? 0 })
     if (target.action === 'deload') return t('workout.nextTarget.why.deload')
     if (target.action === 'reduce') return t('workout.nextTarget.why.reduce')
     if (target.action === 'increase' && target.firstSetAboveTarget) {
@@ -1647,7 +1648,7 @@ export default function WorkoutPlan({
         ? scaleWeightForOtherDay(weight, source?.reps, exercise ? getExerciseTargetReps(exercise)[index] : undefined)
         : weight
     })
-    const baseSetWeights = nextTarget
+    const baseSetWeights = nextTarget && nextTarget.action !== 'add_reps'
       ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
       : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
@@ -4595,7 +4596,8 @@ export default function WorkoutPlan({
                 )}
                 {insightTarget && !isCollapsed && (toastRecommendation || completedEntry) && (
                   <aside className="next-target-card" role="status" aria-live="polite">
-                    <strong>{getNextTargetLabel(insightTarget)}</strong>
+                    {/* PT super-QA 2026-11-07 (F7): no kg label for bodyweight work without added load. */}
+                    {insightTarget.action !== 'add_reps' && <strong>{getNextTargetLabel(insightTarget)}</strong>}
                     <p>{getNextTargetWhy(insightTarget)}</p>
                   </aside>
                 )}

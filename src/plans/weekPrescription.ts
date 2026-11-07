@@ -1,7 +1,7 @@
 import type { PlannedExercise } from '../types'
 
-const INTRO_NOTE = 'Week 1: straight sets, 3-second lowering, 2-3 reps in reserve.'
-const DELOAD_NOTE = 'Deload: same weights, half the sets, 3+ reps in reserve.'
+const INTRO_NOTE = 'Week 1: straight sets, 3-second lowering, stop with about 3 reps left in you.'
+const DELOAD_NOTE = 'Deload: same weights, half the sets, stop with 3 or more reps left in you.'
 const TECHNIQUE_NOTE = /\b(?:rest[\s-]?pause|myo[\s-]?reps?|partials?|top[\s-]?set)\b/i
 
 function hasHeavyTopSet(exercise: PlannedExercise, week: number) {

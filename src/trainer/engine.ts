@@ -155,7 +155,7 @@ export function equipmentStep(equipment?: string) {
   }
 }
 
-const isBodyweight = (equipment?: string) => equipment === 'bodyweight' || equipment === 'band'
+export const isBodyweight = (equipment?: string) => equipment === 'bodyweight' || equipment === 'band'
 
 export function roundToStep(weight: number, step: number, direction: 'down' | 'up' | 'nearest' = 'down') {
   if (step <= 0) return Math.max(0, weight)

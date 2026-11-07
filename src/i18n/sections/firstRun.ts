@@ -46,7 +46,7 @@ export const firstRun = {
   es: {
     'firstRun.title': 'Tu plan',
     'firstRun.intro': 'Seis preguntas y tu plan estará listo. Puedes cambiar tus respuestas después en Tú.',
-    'firstRun.startsFirst': 'Tu semana 1 empieza con tu primer entreno, cualquier día.',
+    'firstRun.startsFirst': 'Tu semana 1 empieza con tu primer entrenamiento, cualquier día.',
     'workout.restDay.title': 'Hoy se recomienda descansar',
     'workout.firstDay.intro': 'Estos primeros pesos son tu punto de partida, no una prueba. Hoy puede tomar un poco más de tiempo.',
     'workout.firstDay.sore': '¿Tienes dolor muscular por un entrenamiento reciente? Puedes empezar mañana. Tu plan te espera.',
@@ -76,7 +76,7 @@ export const firstRun = {
     'firstRun.continue': 'Continuar',
     'firstRun.account.note': 'Tus respuestas quedan guardadas en este dispositivo. Crea tu cuenta para armar tu plan.',
     'firstRun.account.back': '‹ Volver a las preguntas',
-    'firstRun.building': 'Armando tu plan…',
+    'firstRun.building': 'Creando tu plan…',
     'firstRun.ready': 'Tu plan está listo',
     'firstRun.kept': 'Tu cuenta ya tenía un objetivo y un plan. Los mantuvimos; puedes cambiarlos en Tú.',
     'firstRun.seeToday': 'Ver Hoy',
