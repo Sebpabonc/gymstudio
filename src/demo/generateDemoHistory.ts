@@ -3,6 +3,7 @@ import back from '../../docs/fitness/approved/catalogue-v2/back.json'
 import chestShoulders from '../../docs/fitness/approved/catalogue-v2/chest-shoulders.json'
 import legsGlutes from '../../docs/fitness/approved/catalogue-v2/legs-glutes.json'
 import { localIsoDate } from '../lib/dates'
+import { equipmentStep } from '../trainer/engine'
 import { TrainingBlock, WorkoutEntry } from '../types'
 import { parseRepPrescription } from '../utils/workoutSets'
 
@@ -76,12 +77,13 @@ function startingLoad(exerciseId: string, seed: number | string) {
   return range[0] + randomValue(seed, `starting-load:${exerciseId}`) * (range[1] - range[0])
 }
 
+/** Real equipment steps (R12a): dumbbells and kettlebells 2 kg, cables, machines and bars 2.5 kg. */
 function incrementFor(exerciseId: string) {
-  const equipment = equipmentByExerciseId.get(exerciseId)?.equipment?.toLowerCase()
-  if (equipment === 'dumbbell') return 1
-  if (equipment === 'barbell' || equipment === 'hex-bar') return 2.5
-  return 0.5
+  return equipmentStep(equipmentByExerciseId.get(exerciseId)?.equipment?.toLowerCase())
 }
+
+/** Share of a finished block's gains kept into the next one, so earlier blocks start lighter. */
+const CARRIED_GROWTH = 0.5
 
 function roundLoad(weight: number, increment: number) {
   return Number((Math.round(weight / increment) * increment).toFixed(2))
@@ -122,6 +124,9 @@ export function generateDemoHistory({
     ? blockAtEnd[Math.floor(randomValue(seed, 'plateau-block') * blockAtEnd.length)]
     : undefined
   const plateauStart = plateauBlock ? 2 + Math.floor(randomValue(seed, 'plateau-week') * 2) : undefined
+  // Weeks of training in earlier blocks inside the range, for loads that keep rising block over block.
+  const firstStart = blockAtEnd.length ? dateValue(blockAtEnd[0].startDate) : startValue
+  const priorWeeks = (block: TrainingBlock) => Math.max(0, Math.round((dateValue(block.startDate) - firstStart) / (7 * DAY_MS)))
   const history: WorkoutEntry[] = []
 
   for (let value = startValue; value <= endValue; value += DAY_MS) {
@@ -144,6 +149,7 @@ export function generateDemoHistory({
       for (let growthWeek = 1; growthWeek <= effectiveWeek; growthWeek += 1) {
         weeklyGrowth += 0.0175 + randomValue(seed, `growth:${exercise.exerciseId}:${growthWeek}`) * 0.01
       }
+      weeklyGrowth += priorWeeks(block) * CARRIED_GROWTH * 0.0225
       const deload = week === 0 ? 0.92 : 1
       const sessionKey = `${formatDate(value)}:${block.id}:${day.key}:${exercise.code}`
       const sets = Array.from({ length: exercise.sets }, (_, setIndex) => {
@@ -151,17 +157,15 @@ export function generateDemoHistory({
         const repTargets = parseRepPrescription(prescription)
         const reps = repTargets[0] ?? repsForSet(exercise.reps, setIndex)
         const dropReps = repTargets[1] ?? reps
-        const pyramidMultiplier =
-          exercise.technique === 'reverse-pyramid'
-            ? 1 - setIndex * 0.07
-            : exercise.technique === 'pyramid'
-              ? 1 + setIndex * 0.07
-              : 1
+        // Pyramids change about 7% per set, and always by at least one real step.
+        const topLoad = roundLoad(baseWeight * (1 + weeklyGrowth) * deload, increment)
+        const pyramidStep = Math.max(increment, roundLoad(topLoad * 0.07, increment))
+        const pyramidDirection = exercise.technique === 'reverse-pyramid' ? -1 : exercise.technique === 'pyramid' ? 1 : 0
         const missedReps =
           setIndex === exercise.sets - 1 && randomValue(seed, `miss:${sessionKey}`) < 0.07
             ? 1 + Math.floor(randomValue(seed, `miss-count:${sessionKey}`) * 2)
             : 0
-        const weight = roundLoad(baseWeight * (1 + weeklyGrowth) * deload * pyramidMultiplier, increment)
+        const weight = topLoad > 0 ? Math.max(increment, topLoad + pyramidDirection * setIndex * pyramidStep) : 0
         return {
           id: `${sessionKey}:${setIndex + 1}`,
           reps: Math.max(1, reps - missedReps),

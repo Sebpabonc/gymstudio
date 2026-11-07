@@ -821,4 +821,42 @@ describe('approved workout logging integration', () => {
     await click(t('workout.run.exit'))
     button(t('workout.run.resumeCount', { done: 1, total: 4 }))
   })
+
+  describe('QA 2026-11-07: week bar on a day with no planned session', () => {
+    const segments = () => elements(node => typeof node.props.className === 'string' && node.props.className.includes('week-progress-segment'))
+    const dayEntries = (dayKey: string, date: string) => ['press', 'row', 'curl', 'drop'].map(id => ({ ...historyEntry(id, date), id: `${id}-${dayKey}`, dayKey }))
+    beforeEach(() => {
+      harness.block!.days.push({ ...harness.block!.days[0], key: 'chest-back-b', name: 'Second day', position: 2 })
+    })
+
+    it('marks no day as Today on a Saturday, and keeps the next unlogged day as Today on its own date', async () => {
+      saveWorkoutHistory(dayEntries('chest-back-a', '2026-10-19'))
+      vi.setSystemTime(new Date('2026-10-24T12:00:00Z'))
+      render()
+      await settle()
+      expect(segments().map(node => node.props['aria-label'])).toEqual(['Day 1 · Test day · 4/4', 'Day 2 · Second day · 0/4'])
+      await reload()
+      vi.setSystemTime(new Date('2026-10-20T12:00:00Z'))
+      await reload()
+      expect(segments()[1].props['aria-label']).toBe('Day 2 · Second day · Today · 0/4')
+    })
+
+    it.each(['en', 'es'] as const)('opens next week after a finished week without telling the person to go back (%s)', async language => {
+      harness.language = language
+      const t = createTranslator(language)
+      saveWorkoutHistory([...dayEntries('chest-back-a', '2026-10-19'), ...dayEntries('chest-back-b', '2026-10-20')])
+      vi.setSystemTime(new Date('2026-10-24T12:00:00Z'))
+      render()
+      await settle()
+      const html = renderToStaticMarkup(tree)
+      expect(html).toContain(t('workout.week.doneNextNote', { week: 3 }))
+      expect(html).not.toContain(t('workout.week.previewNote'))
+      // Moving by hand afterwards brings back the normal note.
+      await click(t('workout.week.next'))
+      expect(renderToStaticMarkup(tree)).toContain(t('workout.week.previewNote'))
+      await click(t('workout.week.previous'))
+      await click(t('workout.week.previous'))
+      expect(segments().every(node => !String(node.props['aria-label']).includes(t('workout.day.today')))).toBe(true)
+    })
+  })
 })

@@ -236,13 +236,14 @@ export default function LoginScreen({ onClose, initialMode, backLabel, intro }: 
             <span>{t('login.ageConfirm')}</span>
           </label>
         )}
-        <button type="submit" className="primary-button" disabled={busy || needsAge}>
+        <button type="submit" className="primary-button" disabled={busy || needsAge} aria-describedby={needsAge ? 'account-age-required' : undefined}>
           {busy ? t('login.wait') : mode === 'sign-in' ? t('login.signIn') : t('login.createAccount')}
         </button>
+        {needsAge && <p className="account-age-required" id="account-age-required">{t('login.ageRequired')}</p>}
       </form>
 
       <div className="account-divider"><span>{t('login.or')}</span></div>
-      <button type="button" className="google-button" onClick={continueWithGoogle} disabled={busy || needsAge}>
+      <button type="button" className="google-button" onClick={continueWithGoogle} disabled={busy || needsAge} aria-describedby={needsAge ? 'account-age-required' : undefined}>
         <span className="google-mark" aria-hidden="true">G</span>
         {t('login.google')}
       </button>

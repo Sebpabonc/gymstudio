@@ -59,6 +59,8 @@ export default function SetTrendChart({
   const groupWidth = GROUP_WIDTH
   const barWidth = 10
   const maxSetCount = Math.max(1, ...sessions.map((session) => session.sets.length))
+  // 12 px labels (QA 2026-11-07) need a little more room between bars; never wider than the session group.
+  const barStep = Math.min(barWidth + 8, (groupWidth - 10) / maxSetCount)
 
   useEffect(() => {
     const element = scrollRef.current
@@ -139,7 +141,7 @@ export default function SetTrendChart({
           })}
           {sessions.map((session, sessionIndex) => {
             const groupX = GROUP_LEFT + sessionIndex * groupWidth
-            const dataWidth = Math.min(groupWidth - 10, maxSetCount * (barWidth + 3))
+            const dataWidth = Math.min(groupWidth - 10, maxSetCount * barStep)
             const startX = groupX + (groupWidth - dataWidth) / 2
             const uniformWeight = metric === 'kg' && session.sets.length > 0 &&
               session.sets.every((set) => set.weight === session.sets[0].weight)
@@ -150,11 +152,11 @@ export default function SetTrendChart({
                 )}
                 {session.sets.map((set, setIndex) => {
                   const height = Math.max(1, valueOf(set) / axisMaximum * PLOT_HEIGHT)
-                  const x = startX + setIndex * (barWidth + 3)
+                  const x = startX + setIndex * barStep
                   const y = BASELINE - height
                   const key = `${sessionIndex}:${setIndex}`
                   const weightLabelX = uniformWeight
-                    ? startX + (session.sets.length - 1) * (barWidth + 3) / 2 + barWidth / 2
+                    ? startX + (session.sets.length - 1) * barStep / 2 + barWidth / 2
                     : x + barWidth / 2
                   const weightLabelY = Math.max(14, y - 15)
                   const label = setText(session, setIndex)
@@ -171,7 +173,7 @@ export default function SetTrendChart({
                           {formatNumber(language, set.weight)}
                         </text>
                       )}
-                      <text className="set-trend-reps-label" x={x + barWidth / 2} y={Math.max(23, y - 5)} textAnchor="middle">
+                      <text className="set-trend-reps-label" x={x + barWidth / 2} y={Math.max(26, y - 5)} textAnchor="middle">
                         {formatNumber(language, set.reps)}
                       </text>
                       <rect

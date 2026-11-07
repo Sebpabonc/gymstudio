@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { useT } from '../i18n'
 import ProfileDataSections from './ProfileDataSections'
+import { syncErrorKey } from '../utils/syncErrorMessage'
 import {
   getAskExerciseAiConsent,
   loadExercises,
@@ -128,7 +129,7 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
         </p>
         <p className="sync-pending-summary" role="status">{t('profile.pendingLogs', { count: pendingSyncCount })}</p>
         {syncErrorDetail && (
-          <p className="sync-error-detail">{t('profile.lastSyncError', { reason: syncErrorDetail })}</p>
+          <p className="sync-error-detail">{t('profile.lastSyncError', { reason: t(syncErrorKey(syncErrorDetail)) })}</p>
         )}
         <button type="button" className="secondary-button" onClick={retrySyncNow} disabled={syncStatus === 'syncing'}>
           {t('profile.retryNow')}
@@ -149,7 +150,7 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
                   <li key={entry.id}>
                     <strong>{name}</strong>
                     <span>{date}</span>
-                    <p>{entry.syncError?.message}</p>
+                    <p>{t(syncErrorKey(entry.syncError))}</p>
                     <button type="button" className="secondary-button" disabled={syncStatus === 'syncing'}
                       aria-label={t('profile.retryLog', { name, date })} onClick={() => retryQuarantinedEntry(entry.id)}>
                       {t('profile.retry')}

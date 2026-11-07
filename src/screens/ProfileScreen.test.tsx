@@ -64,7 +64,9 @@ describe('profile sync feedback', () => {
   it('shows the pending count, quarantine reason and retry controls even after a successful pull', () => {
     const html = renderToStaticMarkup(<ProfileScreen onClose={() => undefined} />)
     expect(html).toContain('2 logs not uploaded')
-    expect(html).toContain('Last sync error: Unknown exercise')
+    // QA 2026-11-07: a plain reason, never the raw code or message.
+    expect(html).toContain("Last sync error: Something went wrong while uploading. We&#x27;ll retry.")
+    expect(html).not.toContain('Unknown exercise')
     expect(html).toContain('Logs needing attention')
     expect(html).toContain('Bench press')
     expect(html).toContain('2026')
@@ -80,7 +82,7 @@ describe('profile sync feedback', () => {
     expect(html).toContain('2 registros sin subir')
     expect(html).toContain('Reintentar ahora')
     expect(html).toContain('Registros que necesitan atención')
-    expect(html).toContain('Último error de sincronización: Unknown exercise')
+    expect(html).toContain('Último error de sincronización: Algo salió mal al subir. Lo reintentaremos.')
   })
 
   it('renders invalid runtime dates and exercise IDs safely instead of crashing', () => {
