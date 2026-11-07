@@ -1,173 +1,178 @@
 <!--
-DRAFT by Governancer, updated with the PO's answers of 2026-11-01. Not legal advice. Governancer is not a lawyer.
-No lawyer will review this (PO decision 2026-11-01): the PO reads and approves it himself. HIGH RISK comments mark what a lawyer would
-normally check; README.md lists the laws considered and what could not be verified.
-Do not publish until: every [PO approve: …] is approved and its marker removed, every [REQUIRES Gn: …] is delivered and removed, every
-[VERIFY: …] is confirmed. Gn refers to gaps-for-tech-lead.md. Facts: data-inventory.md. Links work once G5 publishes the pages.
-Public-document rule: name and email approved by the PO; never add a street address or phone.
+Draft by Governancer, 2026-11-07, for publication at https://sebpabonc.github.io/gymstudio/privacy/ after the PO approves it.
+Not legal advice; Governancer is not a lawyer. Every statement describes the app as of 2026-11-07 (sources: data-inventory.md and the
+2026-11-07 notes in questions-for-po.md). Update this text when in-app account deletion, Sign in with Apple, retention jobs or a new
+provider ship. Public-document rule: owner name and app email only; never a street address or phone number.
 -->
 
 # GymStudio Privacy Policy
 
-**Last updated:** [PO: publication date]
+**Effective date:** 7 November 2026
 
 This policy explains what GymStudio collects, why, who receives it, how long we keep it and how you can control it.
-GymStudio is a training app for looking up exercises, following a plan, logging sets and seeing your progress.
+GymStudio is a training app for looking up exercises, following a plan, logging sets and seeing your progress. It is available as an
+iPhone app and as a web app at https://sebpabonc.github.io/gymstudio/.
 
 ## 1. Who is responsible
 
-GymStudio is run by **Sebastian Pabon**, an individual based in Australia, not a company. He is responsible for your personal data ("we").
-Privacy contact: js.pabonc979@gmail.com.
-<!-- PO: the App Store shows the legal name on the Apple Developer account as the seller. Check it matches (question 1). -->
+GymStudio is run by **Sebastian Pabon**, an individual based in Australia, not a company. He is responsible for your personal data ("we", "us").
+Privacy contact: **gymstudioapp@gmail.com**.
 
 ## 2. Using GymStudio without an account
 
-You can use the demo or keep workouts on your device without an account. In that case your workouts stay on your device.
-When the app downloads the exercise list, our hosting provider receives your IP address as part of the connection. Planned
-workouts, goals, measurements, feedback and AI features require an account.
+You can try GymStudio without an account. Anything you log then stays on your device. When the app
+downloads the exercise list, our hosting provider receives your IP address as part of the connection. Plans, goals, measurements,
+feedback, sync and AI features need an account.
 
-GymStudio is for people aged 18 or older. It is not offered in the European Union.
+GymStudio is for people aged 18 or older. The iPhone app is not offered in the European Union.
 
 ## 3. What we collect with an account
 
 | Data | Examples | Why we use it |
 |---|---|---|
-| Account details | Email; password (stored in hashed form by our provider); if you use Google or Apple [REQUIRES G4: Apple], your name, email (Apple lets you hide it), Google's profile picture link and the provider's ID for you | To create your account and sign you in |
-| Workout data | Exercises, dates, weights, reps, sets and timing, reps in reserve, plan targets, your notes, exercises you create | To run the app, sync it across devices and show progress |
-| Health and fitness data | Body weight, steps and calories you type in; your goal (such as losing fat or gaining muscle), experience, activity level, equipment and any notes you add | To build and adapt your plan and show your progress |
-| Plans and recommendations | Your plans, exercise swaps, the loads we recommended and whether you used them | To recommend today's load and adapt it to you |
-| AI questions | What you type to the AI, if you turn AI on | To answer you. We do not save your questions or the answers on our servers |
-| AI usage counts | Which AI feature, model, amount of text processed, cost, time. Not the content | To apply daily limits and control cost |
-| Feedback | Your message, with app version, screen and language | To answer you and improve the app |
+| Account details | Your email address and password (our hosting provider stores the password only in hashed form). If you sign in with Google: your name, email, Google profile picture link and Google's ID for you | To create your account and sign you in |
+| Workout data | Exercises, dates, weights, reps, sets, reps in reserve, set times, plan targets, your workout notes, exercises you create | To run the app, sync it across your devices and show your progress |
+| Health and fitness data | Body weight, steps and calories you type in; your training goal (such as losing fat or gaining muscle), days per week, experience, activity level, session length, equipment and any goal notes you add | To build and adapt your plan and show your progress |
+| Plans and recommendations | Your plans, exercise swaps, the loads the app recommended and whether you used them | To recommend today's load and adapt it to you |
+| AI questions | What you type to the AI, if you allow AI | To answer you. We do not save your questions or the AI's answers on our servers |
+| AI usage counts | Which AI feature was used, the model, the amount of text processed, the cost and the time. Not the content | To apply daily limits and control cost |
+| Feedback | Your message, with the app version, the screen you were on and your language | To answer you and improve the app |
+| Emails | Emails you send us, and the account emails we send you (such as confirmation and password reset) | To help you and to run your account |
 | Technical data | IP address, device and browser type, session times, server logs | To keep your account secure and the service working |
 
-We do not use Apple Health, your location, camera, contacts or photos. GymStudio has no ads, no analytics tools and no tracking
-across other companies' apps or websites. We do not sell your data. We do not use your health and fitness data for advertising or
-marketing.
+All of this is optional except your email address (and a password if you don't use Google). You can use GymStudio without entering body
+weight, steps, calories or goal notes.
 
-On your device, the app also stores your data, preferences and session locally so it can work offline. During a rest, the timer
-and exercise name can appear on your Lock Screen and Dynamic Island through Live Activities. This stays on your device.
+We do not use Apple Health, your location, camera, microphone, contacts or photos. GymStudio has no ads, no analytics tools and no tracking
+across other companies' apps or websites. We do not sell your data. We do not use your health and fitness data for advertising or marketing.
+
+On your device, the app also stores your data, preferences and sign-in session so it can work offline. During a rest, the timer and the
+exercise name can appear on your Lock Screen and in the Dynamic Island through Live Activities. This stays on your device.
 
 ## 4. Why we are allowed to use your data
 
-<!-- HIGH RISK: the bases differ per country (Brazil, Colombia, Korea, Japan, Argentina lean on consent for health data). We treat weight,
-steps, calories and goal notes as health data everywhere, which is the safe reading. -->
-
 | Purpose | Basis (where the law asks for one) |
 |---|---|
-| Provide the account, sync, plan and progress | The contract with you |
-| Store and use your health and fitness data | Your explicit consent, which you can withdraw. [REQUIRES G5/G20: consent step in the app] |
-| Send data to the AI provider | Your explicit consent, separate from the one above, which you can withdraw. [REQUIRES G2, G3] |
+| Provide the account, sync, plan and progress | The agreement between you and us (our Terms of Use) |
+| Store and use the health and fitness data you choose to enter | Your consent, which you give by entering it for this purpose and can withdraw by asking us to delete it |
+| Send data to the AI provider | Your explicit consent, asked for in the app before anything is sent, which you can withdraw at any time |
 | Store and process your data outside your country | Your consent, or what your local law allows for service providers. See section 6 |
-| Security, abuse prevention, limits and cost control, answering feedback | Our legitimate interests |
+| Security, abuse prevention, limits and cost control, answering feedback | Our legitimate interest in running a safe and affordable service |
 | Legal obligations | Law |
 
-You are not required to give health data or turn on AI. Without them, the app still logs workouts and gives rule-based plans and
-recommendations. Accepting our Terms does not count as consent to these uses.
+You don't have to enter health data or turn on AI. Without them, the app still logs workouts and gives rule-based plans and
+recommendations.
 
 ## 5. AI features
 
-GymStudio's AI features, including the AI trainer's explanations, use **OpenAI** as a third-party provider. They are optional, and nothing
-is sent until you turn them on. [REQUIRES G2]
+Some GymStudio features use **OpenAI**, a company in the United States, to write text. AI is optional. **Nothing is sent to OpenAI until you
+tap "Allow AI"** in the app. If you choose "Not now", or turn AI off later, the app does not send anything to OpenAI.
 
-| Feature | What is sent to OpenAI |
-|---|---|
-| Ask AI | Your question, today's date, your current plan and up to 30 recent workout entries |
-| AI Trainer explanation | Exercise name; recommended and previous load; last session's date, weight and reps; estimated one-rep maximum; number of sessions used |
-| AI plan personalisation | Your goal, experience, activity level, session length, equipment and notes; your last 14 days of weight, steps and calories; your plan and alternative exercises |
+The app uses AI in three places:
 
-We do not send your name, email or workout notes. [REQUIRES G11: remove the internal user ID from plan personalisation] Avoid
-typing names or medical details into notes or questions.
+| Feature | When | What is sent to OpenAI |
+|---|---|---|
+| Ask AI (Help and AI button) | When you ask a question | Your question, today's date, your current plan, and your 30 most recent workout entries (exercise, date, and each set's weight, reps and related set details) |
+| AI Trainer explanation | Automatically, when the app shows a recommended load | The exercise name; the recommended and previous load and reps; your last session's date, weight, reps and target; how many days ago it was; your estimated one-rep maximum; how many sessions were used |
+| Plan personalisation | When you generate a plan | Your goal, days per week, experience, activity level, session length and equipment; your 14 most recent body measurement entries (date, body weight, steps, calories); your plan's days, exercises, sets and rest times; a list of alternative exercises from the app's library |
 
-According to OpenAI, data sent through its API is not used to train its models unless the customer opts in, which we have not done
-[VERIFY: dashboard], and it may keep it for up to 30 days to monitor abuse, longer where the law requires. OpenAI handles it mainly
-in the United States.
+**Never sent to OpenAI:** your name, your email address, your account ID, your workout notes or your goal notes. The request goes from our
+server, so OpenAI does not see your IP address. Please avoid typing names or medical details into AI questions.
 
-The load shown each day is calculated by the app's rules. The AI writes the explanation, and it can personalise a plan only inside
-limits set by those rules. The AI trainer is software, not a person. AI answers can be wrong. You can turn AI off at any time in
-Profile → Privacy & AI [REQUIRES G3]. Data already sent cannot be recalled, but it follows the retention above.
+OpenAI says that data sent through its API is not used to train its models unless the customer chooses to share it, and that it may keep
+the data for up to 30 days to detect abuse, or longer where the law requires.
+
+The load shown each day is calculated by the app's rules. The AI writes the explanation, and it can personalise a plan only inside limits
+set by those rules. The AI trainer is software, not a person, and AI answers can be wrong.
+
+**To turn AI off:** in the app, go to **You → Privacy & AI** and switch off "AI features (OpenAI)". Your choice is saved on each device you
+use, so a new device asks you again. Data already sent cannot be recalled; OpenAI keeps it as described above.
 
 ## 6. Who receives your data
 
 | Recipient | Role | Location |
 |---|---|---|
-| Supabase | Hosts the database, sign-in, server functions and logs | [VERIFY: region] |
-| OpenAI | AI text, only if you turn AI on | United States |
-| Google | Only if you sign in with Google, or tap a link that opens Google Images (only the exercise search goes to Google, and Google's own terms apply) | Global |
-| Apple [REQUIRES G4] | Sign in with Apple, if you use it; the App Store handles your download under Apple's terms | Global |
+| Supabase | Hosts our database, sign-in, server functions and server logs | Database in Singapore. Server functions may run in a Supabase location near you |
+| OpenAI | Writes AI text, only if you allow AI (section 5) | United States |
+| Google | Sends our account emails (confirmation and password reset) from our Gmail account, gymstudioapp@gmail.com, and holds the emails you send us. Also, only if you use them: Google sign-in, and links that open a Google Images search for an exercise (only the search goes to Google) | United States and other countries where Google operates |
 | GitHub | Hosts our web app and these pages, and can see visitors' IP addresses | United States |
-| [REQUIRES G6: email provider, name] | Sends account emails | [VERIFY] |
-| Authorities, courts | When the law requires it | |
+| Apple | Distributes the iPhone app through the App Store and TestFlight, under Apple's own terms and privacy policy | United States and other countries |
+| Authorities and courts | Only when the law requires it | |
 
 Sebastian Pabon can access stored data when needed to provide support, fix problems or meet legal duties.
 
 ### International transfers
 
-<!-- HIGH RISK: every launch country has its own rule: APP 8 (Australia), APPI art. 28 (Japan), PIPA art. 28-8 (Korea), PDPA transfer limitation
-(Singapore), LGPD ch. V (Brazil), Ley 1581 art. 26 (Colombia), Ley 25.326 art. 12 (Argentina), Mexico. Named recipient + country + consent is the
-common denominator; contracts with providers must be accepted (G19). -->
-Your data is stored and processed outside your country, in the places listed above, including the United States and wherever our providers
-operate. Their laws may protect your data less than yours does, and they may give you fewer ways to complain. We use providers that commit to data-processing
-terms [VERIFY: DPAs accepted for Supabase and OpenAI]. By giving the consents in section 4 you agree to these transfers; you can withdraw at any time, though
-the app cannot sync without its hosting provider.
+Your data is stored and processed outside your country, in the places listed above, including Singapore and the United States. The laws
+there may protect your data less than yours does and may give you fewer ways to complain. Supabase's terms include a data processing
+agreement. By using an account, and by allowing AI where you choose to, you agree to these transfers. You can withdraw: turn AI off, or
+ask us to delete your account. The app cannot sync without its hosting provider.
 
 ## 7. How long we keep data
 
 | Data | Period |
 |---|---|
-| Account, workouts, goals, measurements, plans, recommendations | Until you delete them or your account. If an account is not used for **24 months**, we delete it, after warning you by email. [REQUIRES G6, G17] |
-| A log or exercise you delete | Removed from view at once; removed from the server after **30 days** [REQUIRES G16] |
-| Previous plans | Until you delete your account [PO approve: this period] |
-| Feedback | **24 months** [REQUIRES G17] |
-| AI usage counts | **12 months** [REQUIRES G17] |
-| Server and sign-in logs | [VERIFY: Supabase log period] |
-| Backups | Until the backup expires, up to [VERIFY: plan, 7 to 30 days]. Not used except to restore service |
-| Data at OpenAI | Up to 30 days, per OpenAI |
-| Data on your device | Until you delete the account in the app or remove the app. Signing out does not erase it [see G25] |
+| Account, workouts, own exercises, goals, measurements, plans (current and previous), recommendations | Until you delete your account. We may delete an account that has not been used for 24 months, after warning you by email |
+| A workout log you delete in the app | Hidden at once. It stays on our server, marked as deleted, until your account is deleted. Ask us if you want it erased sooner |
+| Feedback and AI usage counts | Until your account is deleted. Ask us if you want them erased sooner |
+| Emails with us and account emails | In our Gmail mailbox until we delete them. Ask us to delete yours |
+| Server and sign-in logs | Kept by Supabase for up to 28 days, depending on our hosting plan |
+| Backups | If our hosting plan makes backups, copies are kept for up to 14 days and used only to restore the service |
+| Data at OpenAI | Up to 30 days, per OpenAI, unless the law requires longer |
+| Data on your device | Until you remove the app or clear its data. Signing out does not erase it |
 
 ## 8. How to delete your account
 
-In the app: **Profile → Delete account**. [REQUIRES G1] This permanently removes your account and all associated data from our
-database right away. Copies in backups expire as described above. Data stays on another device until you open the app there or
-remove it. Deleting the app alone does not delete your account. If you can't sign in, write to js.pabonc979@gmail.com.
+Today, account deletion works by email:
+
+1. Write to **gymstudioapp@gmail.com** from the email address of your GymStudio account (for Google sign-in, your Google email), with the
+   subject "Delete my account".
+2. We may ask you to confirm the request, to make sure it comes from you.
+3. We delete your account and all its data from our database within **10 days**, and email you when it is done.
+
+Copies in backups and logs expire as described in section 7. Data on your devices stays until you remove the app there. Removing the app
+alone does not delete your account. We are adding a delete button inside the app; this section will be updated when it is available.
 
 ## 9. Your rights
 
-Depending on where you live, you can ask to see your data, get a copy, correct it, delete it, limit or object to how it is used, ask who
-received it, and withdraw consent at any time without affecting earlier use. Corrections are available in the app for most data; deletion is too.
-For anything else, write to js.pabonc979@gmail.com. We answer within [PO approve: 10 business days], or sooner if your local law sets a shorter period. If
-we refuse, we will tell you why and you can ask us to review it. We won't treat you worse for using your rights.
+Depending on where you live, you can ask to see your data, get a copy, correct it, delete it, limit or object to how it is used, find out
+who received it, and withdraw consent at any time without affecting earlier use. You can correct most data in the app. For everything
+else, write to gymstudioapp@gmail.com. We answer within **10 business days**, or sooner if your local law sets a shorter period. If we
+refuse a request, we will tell you why, and you can ask us to review that decision. We won't treat you worse for using your rights.
 
-You can also complain to your data protection or consumer authority. Examples: Office of the Australian Information Commissioner (Australia),
-Personal Data Protection Commission (Singapore), Personal Information Protection Commission (Japan, South Korea), Data Protection Board (India), Superintendencia
-de Industria y Comercio (Colombia), Secretaría Anticorrupción y Buen Gobierno (Mexico), Agencia de Acceso a la Información Pública (Argentina),
-Autoridade Nacional de Proteção de Dados (Brazil), your state attorney general or the Federal Trade Commission (United States).
+You can also complain to your data protection or consumer authority. Examples: Office of the Australian Information Commissioner
+(Australia), Personal Data Protection Commission (Singapore), Personal Information Protection Commission (Japan and South Korea), Data
+Protection Board (India), Superintendencia de Industria y Comercio (Colombia), Secretaría Anticorrupción y Buen Gobierno (Mexico), Agencia
+de Acceso a la Información Pública (Argentina), your state attorney general or the Federal Trade Commission (United States).
 
 ## 10. Children
 
-GymStudio is only for people aged 18 or older. We do not knowingly collect data from younger people. If you think a younger person has an account, write to us
-and we will delete it and its data.
+GymStudio is only for people aged 18 or older. We do not knowingly collect data from younger people. If you think a younger person has an
+account, write to us and we will delete it and its data.
 
 ## 11. Security
 
-Connections are encrypted. Each person's data is separated in the database by access rules. AI keys and administrator keys are kept
-on the server. No system is fully secure. If a breach affects you, we will notify you and the authorities where the law requires.
+Connections are encrypted. Each person's data is kept separate in the database by access rules, so other users cannot see it. AI keys
+and administrator keys stay on our server and are never in the app. No system is fully secure. If a breach affects you, we will notify you
+and the authorities where the law requires.
 
-## 12. United States
+## 12. If you live in the United States
 
-If you live in the United States, also read our [Consumer Health Data Privacy Policy](https://sebpabonc.github.io/gymstudio/legal/consumer-health-data.en.html) [REQUIRES G5],
-which covers Washington, Nevada and similar state laws. We do not sell your personal data or share it for targeted advertising.
+We treat your body weight, steps, calories and training goals as consumer health data. We collect it only from you, use it only to
+provide the features you use (your plan, recommendations and progress), and share it only with the providers in section 6 for that
+purpose, and with OpenAI only if you allow AI. We do not sell it or use it for targeted advertising. To see, delete or stop sharing it,
+write to gymstudioapp@gmail.com; if we refuse, you can ask us to review the decision, and then contact your state attorney general.
 
 ## 13. Changes
 
-If we change this policy, we will update the date, and if a change is important, tell you in the app before it takes effect. If we
-want to use your data for a new purpose, we will ask you first.
+If we change this policy, we will update the effective date, and if a change is important, tell you in the app or by email before it takes
+effect. If we want to use your data for a new purpose, we will ask you first.
 
 ## 14. Language
 
-This policy exists in English and Spanish. If you use the app in Spanish or live in a Spanish-speaking country, the Spanish version applies. Otherwise, the
-English version applies. <!-- PO approve. Brazil: a Portuguese version is needed before launching there (question 3). -->
+This policy is available in English and Spanish. If you use the app in Spanish or live in a Spanish-speaking country, the Spanish version
+applies. Otherwise, the English version applies.
 
 ## 15. Contact
 
-Sebastian Pabon, js.pabonc979@gmail.com. Support: https://sebpabonc.github.io/gymstudio/legal/support.en.html [REQUIRES G5]
+Sebastian Pabon, gymstudioapp@gmail.com. Support: https://sebpabonc.github.io/gymstudio/support/

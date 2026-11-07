@@ -41,3 +41,40 @@ Gobernanza, actualizado con tus respuestas del 2026-11-01. Solo queda lo que ún
 ## Para tu aprobación final
 
 10. Como no habrá abogado, **tú eres quien aprueba** la Política, los Términos, la Política de datos de salud de EE. UU., la página de soporte, los textos de consentimiento y las respuestas de App Store Connect, después de que el PT revise lo de salud. Nada se publica ni se envía sin tu aprobación, y el envío lo haces tú con tu login.
+
+## Abierto antes de enviar a App Store (actualizado 2026-11-07)
+
+Política, Términos y Soporte (EN y ES) quedaron listos para publicar con fecha de vigencia **7 de noviembre de 2026** y el correo
+gymstudioapp@gmail.com. Cada frase describe la app de hoy. Al aprobar esos textos apruebas también los valores de la pregunta 6
+(Nueva Gales del Sur, tope de 100 AUD, soporte en 5 días hábiles, privacidad en 10 días hábiles, borrado por correo en 10 días,
+el español prevalece). Lo que sigue no está resuelto y no aparece como cierto en las páginas:
+
+1. **Borrar la cuenta dentro de la app (G1). Bloquea el envío.** Apple no acepta el borrado por correo en una app como esta: lo exige
+   dentro de la app. Las páginas describen el correo porque es lo que funciona hoy; hay que cambiarlas cuando exista el botón.
+   Mientras tanto, cada pedido de borrado lo haces tú a mano, a tiempo, y confirmas por correo.
+2. **Iniciar sesión con Apple (G4).** Decidiste agregarlo; no existe. Las páginas solo mencionan correo y Google. Hay que actualizarlas cuando llegue.
+3. **Manifiesto de privacidad (G13)** y quitar los **bloques 1 a 5** del paquete público (G7, pregunta 5). Hoy, un usuario nuevo sin
+   conexión en el primer arranque podría ver tu programa privado.
+4. **Política de datos de salud de EE. UU.** La ley de Washington pide una política aparte con su propio enlace. Solo se publican
+   tres páginas, así que resumí lo esencial en la sección 12 de la Política de privacidad. Antes de lanzar en EE. UU.: publicar
+   `consumer-health-data-policy` como cuarta página (hay que actualizarla igual que las otras) o sacar EE. UU. de la lista de países.
+5. **Consentimiento aparte para datos de salud (G5, G20).** No existe. La IA sí pide permiso explícito; el peso, los pasos y las
+   calorías no. Washington, Corea y Colombia piden un consentimiento separado y explícito para eso. El registro por correo ya pide
+   confirmar 18+; falta confirmar que el camino con Google también lo pida y que se guarde la aceptación de los Términos.
+6. **Plazos de retención automáticos (G16, G17).** No hay tareas automáticas. Por eso las páginas dicen la verdad de hoy: todo se
+   guarda hasta que se borra la cuenta, y los registros borrados quedan marcados en el servidor. Cuando existan las tareas (registros
+   borrados 30 días, comentarios 24 meses, uso de IA 12 meses), cambiamos la tabla.
+7. **Tu plan de Supabase.** Puse "registros hasta 28 días" y "copias hasta 14 días", que vale para Free, Pro y Team. Dime cuál tienes
+   para poner el número exacto. La base de datos está en Singapur (dato del enlace del proyecto, región ap-southeast-1).
+8. **OpenAI:** confirma en el panel que **no** activaste compartir datos para entrenamiento y si aceptaste su acuerdo de datos (DPA).
+   Hoy la política solo cita lo que dice OpenAI; si confirmas, agrego "no lo hemos activado".
+9. **Gmail como proveedor.** Una cuenta de Gmail normal no tiene acuerdo de tratamiento de datos, guarda en "Enviados" cada correo de
+   cuenta, y tiene límite diario de envíos. Para lanzar sirve; cuando tengas dominio, conviene un proveedor de correo con acuerdo de datos.
+   Mientras tanto, borra de vez en cuando los correos de cuenta enviados.
+10. **Textos de la app que aún no son ciertos (G9).** `login.benefit3` y `login.privacyBody` dicen que tus datos sincronizados "solo los
+    ve tu cuenta" (tú, como dueño, también puedes verlos). Las instrucciones de la IA en el servidor todavía dicen "personal trainer" y
+    "PT". El nombre en el iPhone sigue siendo "Gym Studio".
+11. **Enlaces dentro de la app (G5).** El Tech Lead los está agregando (cambios sin publicar en el registro y en Perfil). Si el español
+    queda en otra ruta (por ejemplo `/privacy/es/`), avísame para cambiar los enlaces entre páginas.
+12. **Revisión del PT** de las secciones 4 y 5 de los Términos y de las respuestas de salud del Soporte, antes de publicar.
+13. **Siguen abiertas** las preguntas 1 (nombre legal del vendedor), 2 (Hong Kong y Venezuela), 3 (Brasil), 5 (bloques 1 a 5) y 8 (Team ID).

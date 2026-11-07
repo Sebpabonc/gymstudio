@@ -32,6 +32,9 @@ jobs:
       - name: Validate training blocks
         run: python3 scripts/validate-blocks.py
 
+      - name: Legal pages are built from approved text
+        run: node scripts/build-legal-pages.mjs --check
+
       - name: Typecheck
         run: npm run typecheck
 

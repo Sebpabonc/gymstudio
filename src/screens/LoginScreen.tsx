@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import { hasGuestWorkoutData } from '../utils/storage'
 import { Translate, useT } from '../i18n'
+import { legalUrl } from '../legal'
 
 type LoginMode = 'sign-in' | 'sign-up'
 
@@ -31,7 +32,7 @@ export default function LoginScreen({ onClose, initialMode, backLabel, intro }: 
   backLabel?: string
   intro?: string
 }) {
-  const { t } = useT()
+  const { t, language } = useT()
   const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle, syncSignInRequired,
     passwordRecovery, updatePassword } = useAuth()
   const [mode, setMode] = useState<LoginMode>(() => initialMode ?? (syncSignInRequired || hasGuestWorkoutData() ? 'sign-in' : 'sign-up'))
@@ -235,6 +236,13 @@ export default function LoginScreen({ onClose, initialMode, backLabel, intro }: 
             <input type="checkbox" checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} />
             <span>{t('login.ageConfirm')}</span>
           </label>
+        )}
+        {mode === 'sign-up' && (
+          <p className="account-legal-links">
+            <a href={legalUrl('terms', language)} target="_blank" rel="noopener noreferrer">{t('legal.terms')}</a>
+            {' · '}
+            <a href={legalUrl('privacy', language)} target="_blank" rel="noopener noreferrer">{t('legal.privacy')}</a>
+          </p>
         )}
         <button type="submit" className="primary-button" disabled={busy || needsAge} aria-describedby={needsAge ? 'account-age-required' : undefined}>
           {busy ? t('login.wait') : mode === 'sign-in' ? t('login.signIn') : t('login.createAccount')}

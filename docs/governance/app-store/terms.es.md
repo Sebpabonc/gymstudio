@@ -1,25 +1,29 @@
 <!--
-BORRADOR de Governancer, actualizado con las respuestas del PO del 2026-11-01. No es asesoría legal. Governancer no es abogado. Ningún abogado lo revisará (decisión del PO): el PO lo lee y lo aprueba,
-en especial las secciones 1, 4, 5, 11, 12, 13 y 16 (marcadas HIGH RISK). El texto de actividad física de las secciones 4 y 5 va al PT. Escrito para un lanzamiento GRATIS; un plan de pago necesita términos de suscripción.
-Decisión sobre el EULA de Apple: ver terms.en.md. Este texto prevalece para quienes usan la app en español o viven en países de habla hispana (sección 16).
+Borrador de Governancer, 2026-11-07, para publicar en https://sebpabonc.github.io/gymstudio/terms/ cuando el PO lo apruebe. No es asesoría
+legal; Governancer no es abogado y ningún abogado lo revisó (decisión del PO, 2026-11-01). Escrito para una app gratis, sin pagos. La
+licencia es el EULA estándar de Apple (ver terms.en.md). Las secciones 4 y 5 tienen texto de entrenamiento e IA para revisión del PT.
+Este texto prevalece para quienes usan la app en español (sección 16): revisarlo con el mismo cuidado que el inglés. Actualizar la sección
+11 cuando exista el borrado dentro de la app.
 -->
 
 # Términos de uso de GymStudio
 
-**Última actualización:** [PO: fecha de publicación]
+**Fecha de entrada en vigor:** 7 de noviembre de 2026
 
-Estos Términos son un acuerdo entre tú y Sebastian Pabon, una persona natural con base en Australia ("nosotros"), sobre la app y el sitio web de GymStudio. Al crear una cuenta o usar GymStudio, los
-aceptas. Si obtuviste la app en el App Store de Apple, también aplica el Contrato de Licencia de Usuario Final de Aplicaciones con Licencia de Apple como
-licencia de la app; si estos Términos entran en conflicto con él en cuanto a la licencia, prevalecen los términos de Apple.
+Estos Términos son un acuerdo entre tú y Sebastian Pabon, una persona natural con base en Australia ("nosotros"), para la app de GymStudio
+para iPhone y la app web. Al crear una cuenta o usar GymStudio, los aceptas. Si obtuviste la app en el App Store de Apple, también aplica el
+Contrato de Licencia de Usuario Final de Aplicaciones con Licencia de Apple como licencia de la app; si estos Términos entran en conflicto con
+él en cuanto a la licencia, prevalecen los términos de Apple.
 
-## 1. Qué es GymStudio <!-- HIGH RISK: honestidad sobre quién está detrás del contenido -->
+## 1. Qué es GymStudio
 
-GymStudio te ayuda a consultar ejercicios, seguir un plan de entrenamiento, registrar series y ver tu progreso. Incluye recomendaciones de carga basadas en
-reglas y funciones opcionales de IA. Es un software general de actividad física. No es un servicio médico ni reemplaza a una persona calificada que te observe
-entrenar.
+GymStudio te ayuda a consultar ejercicios, seguir un plan de entrenamiento, registrar series y ver tu progreso. Incluye recomendaciones de
+carga basadas en reglas y funciones opcionales de IA. Es un software general de actividad física. No es un servicio médico ni reemplaza a una
+persona calificada que te observe entrenar.
 
-**El entrenador con IA de GymStudio es un programa, no una persona.** Ningún entrenador humano ni profesional de la salud escribe, revisa o supervisa tu plan. Las reglas de entrenamiento y las plantillas de
-planes de la app se prepararon con un agente especialista de IA y las aprobó el dueño de la app, que es quien la administra. [REQUIERE G7: quitar el programa privado incluido en la app]
+**El entrenador con IA de GymStudio es un programa, no una persona.** Ningún entrenador humano ni profesional de la salud revisa o supervisa
+tu plan ni tu entrenamiento. Las reglas de entrenamiento y las plantillas de planes de la app se prepararon con un agente especialista de IA y
+las aprobó el dueño de la app, que es quien la administra.
 
 ## 2. Quién puede usarla
 
@@ -27,32 +31,35 @@ Debes tener al menos 18 años, y la edad necesaria para aceptar este acuerdo don
 
 ## 3. Tu cuenta
 
-Mantén privado tu inicio de sesión. Eres responsable de lo que pase en tu cuenta, salvo que no sea culpa tuya. Avísanos a js.pabonc979@gmail.com si crees que
-otra persona la está usando.
+Mantén privado tu inicio de sesión. Eres responsable de lo que pase en tu cuenta, salvo que no sea culpa tuya. Avísanos a
+gymstudioapp@gmail.com si crees que otra persona la está usando.
 
-## 4. Tu salud y seguridad: léelo, por favor <!-- PT; HIGH RISK -->
+## 4. Tu salud y seguridad: léelo, por favor
 
 - **GymStudio no da consejo médico**, y no diagnostica, trata ni previene ninguna condición.
-- **Habla con un médico o profesional de la salud calificado** antes de empezar un programa de entrenamiento o cambiar tu entrenamiento, y antes de tomar cualquier
-  decisión médica, en especial si estás embarazada, te estás recuperando de una lesión o enfermedad, tomas medicamentos o tienes alguna condición del corazón, de
-  presión arterial, de articulaciones, de espalda u otra.
-- **El ejercicio tiene riesgos, incluidas lesiones graves.** Tú eliges lo que levantas y entrenas bajo tu propio riesgo, en la medida en que la ley lo permita.
-- **La app no puede verte.** Los pesos, repeticiones, descansos, indicaciones y planes son sugerencias generales basadas en lo que escribes. Puede que no sean
-  adecuadas para ti. Tú decides si las sigues. Usa buena técnica, equipo de seguridad o un compañero de apoyo cuando corresponda, y baja la carga cuando lo necesites.
-- **Detente si algo anda mal:** dolor, mareo, molestia en el pecho, falta de aire o sensación de desmayo. Busca ayuda médica. En una emergencia, llama al número de
-  emergencias de tu país.
-- **No prometemos resultados,** incluidos fuerza, ganancia muscular o pérdida de grasa. Las funciones de peso y calorías son registros para ti; no son consejo
-  dietético ni médico.
+- **Habla con un médico o profesional de la salud calificado** antes de empezar un programa de entrenamiento o cambiar tu entrenamiento, y
+  antes de tomar cualquier decisión médica, en especial si estás embarazada, te estás recuperando de una lesión o enfermedad, tomas
+  medicamentos o tienes alguna condición del corazón, de presión arterial, de articulaciones, de espalda u otra.
+- **El ejercicio tiene riesgos, incluidas lesiones graves.** Tú eliges lo que levantas y entrenas bajo tu propio riesgo, en la medida en que
+  la ley lo permita.
+- **La app no puede verte.** Los pesos, repeticiones, descansos, indicaciones y planes son sugerencias generales basadas en lo que escribes.
+  Puede que no sean adecuadas para ti. Tú decides si las sigues. Usa buena técnica, equipo de seguridad o un compañero de apoyo cuando
+  corresponda, y baja la carga cuando lo necesites.
+- **Detente si algo anda mal:** dolor, mareo, molestia en el pecho, falta de aire o sensación de desmayo. Busca ayuda médica. En una
+  emergencia, llama al número de emergencias de tu país.
+- **No prometemos resultados,** incluidos fuerza, ganancia muscular o pérdida de grasa. Las funciones de peso y calorías son registros para
+  ti; no son consejo dietético ni médico.
 
-## 5. Funciones de IA <!-- PT; HIGH RISK -->
+## 5. Funciones de IA
 
-- Las funciones de IA son opcionales y las presta un tercero, OpenAI. Solo funcionan si las activas. La [Política de privacidad](https://sebpabonc.github.io/gymstudio/legal/privacy.es.html) explica qué se
-  envía. Puedes desactivarlas en Perfil → Privacidad e IA.
+- Las funciones de IA son opcionales y las presta un tercero, OpenAI. No se envía nada a OpenAI hasta que permites la IA en la app. La
+  [Política de privacidad](https://sebpabonc.github.io/gymstudio/privacy/) explica qué se envía. Puedes desactivar la IA cuando quieras en
+  **Tú → Privacidad e IA**.
 - **La IA puede equivocarse**, estar incompleta o desactualizada. Puede sonar segura y aun así estar equivocada. Revísala y usa tu criterio.
 - Lo que genera la IA no es consejo de un médico, fisioterapeuta, nutricionista o entrenador certificado.
 - No ingreses datos personales de otras personas ni detalles médicos en la IA.
-- Las reglas de la app calculan las cargas diarias. La IA las explica y solo puede personalizar un plan dentro de esas reglas, pero ninguna regla puede tener en cuenta
-  todo sobre ti.
+- Las reglas de la app calculan las cargas diarias. La IA las explica y solo puede personalizar un plan dentro de esas reglas, pero ninguna
+  regla puede tener en cuenta todo sobre ti.
 - Podemos limitar o pausar la IA, incluidos límites diarios y cuando se alcance un presupuesto mensual.
 
 ## 6. Uso aceptable
@@ -69,51 +76,61 @@ Podemos suspender o cerrar cuentas que incumplan estas reglas. Te avisaremos cua
 
 ## 7. Tu contenido
 
-Tus entrenamientos, notas, medidas y mensajes son tuyos. Nos autorizas a guardarlos y tratarlos solo para hacer funcionar GymStudio como se describe en la Política de
-privacidad. Si nos envías comentarios o ideas, podemos usarlos sin deberte nada.
+Tus entrenamientos, notas, medidas y mensajes son tuyos. Nos autorizas a guardarlos y tratarlos solo para hacer funcionar GymStudio como se
+describe en la Política de privacidad. Si nos envías comentarios o ideas, podemos usarlos sin deberte nada.
 
 ## 8. Nuestro contenido
 
-La app, la biblioteca de ejercicios, los planes y los textos son nuestros o de quienes nos dan licencia. Puedes usarlos para tu propio entrenamiento. No los copies ni
-los redistribuyas.
+La app, la biblioteca de ejercicios, los planes y los textos son nuestros o de quienes nos dan licencia. Puedes usarlos para tu propio
+entrenamiento. No los copies ni los redistribuyas.
 
 ## 9. Precio
 
-GymStudio es gratis en el lanzamiento. Si agregamos funciones de pago, las venderemos mediante la compra dentro de la app de Apple, con precios y condiciones claros, y no
-te cobraremos sin tu confirmación.
+GymStudio es gratis. La app no tiene pagos ni suscripciones. Si agregamos funciones de pago, las venderemos mediante la compra dentro de la
+app de Apple, con precios y condiciones claros, y no te cobraremos sin tu confirmación.
 
 ## 10. Cambios y disponibilidad
 
-La app puede cambiar, y se pueden agregar o quitar funciones. A veces puede no estar disponible. Puede funcionar sin conexión para registrar, pero la sincronización, el
-inicio de sesión, los planes y la IA necesitan conexión. Ten en cuenta que los datos guardados solo en tu dispositivo se pueden perder si eliminas la app. Daremos un aviso
-razonable de cambios importantes en estos Términos; si sigues usando GymStudio después, significa que los aceptas.
+La app puede cambiar, y se pueden agregar o quitar funciones. A veces puede no estar disponible. Puede funcionar sin conexión para registrar,
+pero la sincronización, el inicio de sesión, los planes y la IA necesitan conexión. Los datos guardados solo en tu dispositivo se pueden
+perder si eliminas la app. Daremos un aviso razonable de cambios importantes en estos Términos; si sigues usando GymStudio después, significa
+que los aceptas.
 
-## 11. Dejar de usar GymStudio <!-- HIGH RISK: borrado de cuentas inactivas -->
+## 11. Dejar de usar GymStudio
 
-Puedes dejar de usarla en cualquier momento. **Para borrar tu cuenta y tus datos, ve a Perfil → Borrar cuenta en la app** [REQUIERE G1]. La Política de privacidad explica
-qué pasa y cuándo. Si no usas tu cuenta durante 24 meses, la borramos después de avisarte por correo. [REQUIERE G6, G17] Podemos terminar el servicio; si lo hacemos, intentaremos avisarte para que puedas obtener tus datos.
+Puedes dejar de usarla en cualquier momento. **Para borrar tu cuenta y sus datos, escribe a gymstudioapp@gmail.com** desde el correo de tu
+cuenta, con el asunto "Borrar mi cuenta". La borramos en un plazo de 10 días y te lo confirmamos por correo. La
+[Política de privacidad](https://sebpabonc.github.io/gymstudio/privacy/) explica qué pasa y cuándo. Estamos agregando un botón para borrar la
+cuenta dentro de la app.
 
-## 12. Garantía y responsabilidad <!-- HIGH RISK: los límites no valen donde la ley del consumidor los prohíbe -->
+Podemos borrar una cuenta que no se haya usado en 24 meses, después de avisarte por correo. Podemos terminar el servicio; si lo hacemos,
+intentaremos avisarte para que puedas pedir una copia de tus datos.
 
-GymStudio se ofrece "tal cual" y "según disponibilidad", en la medida en que la ley lo permita. No garantizamos que no tenga errores ni que las recomendaciones sean adecuadas
-para ti. En la medida en que la ley lo permita, no somos responsables por pérdidas indirectas o consecuentes, ni por lesiones derivadas de tus decisiones de entrenamiento,
-y nuestra responsabilidad total se limita a [PO aprueba: 100 dólares australianos]. **Nada de esto limita los derechos que te da la ley y que no se pueden limitar**, como las garantías de la
-ley australiana del consumidor, otros derechos obligatorios del consumidor en tu país, o la responsabilidad por muerte o lesiones causadas por negligencia cuando no se pueda excluir.
+## 12. Garantía y responsabilidad
 
-## 13. Ley y conflictos <!-- HIGH RISK: sugerencia, para aprobación del PO -->
+GymStudio se ofrece "tal cual" y "según disponibilidad", en la medida en que la ley lo permita. No garantizamos que no tenga errores ni que
+las recomendaciones sean adecuadas para ti. En la medida en que la ley lo permita, no somos responsables por pérdidas indirectas o
+consecuentes, ni por lesiones derivadas de tus decisiones de entrenamiento, y nuestra responsabilidad total se limita a 100 dólares
+australianos. **Nada de esto limita los derechos que te da la ley y que no se pueden limitar**, como las garantías de la ley australiana del
+consumidor, otros derechos obligatorios del consumidor en tu país, o la responsabilidad por muerte o lesiones causadas por negligencia cuando
+no se pueda excluir.
 
-Estos Términos se rigen por las leyes de [PO aprueba: Nueva Gales del Sur, Australia]. Conservas las protecciones obligatorias al consumidor del lugar donde vives y el derecho a acudir a los tribunales de allí, si
-tu ley local te los da.
+## 13. Ley y conflictos
+
+Estos Términos se rigen por las leyes de Nueva Gales del Sur, Australia. Conservas las protecciones obligatorias al consumidor del lugar donde
+vives y el derecho a acudir a los tribunales de allí, si tu ley local te los da.
 
 ## 14. Apple
 
-Apple no es responsable de GymStudio, de su contenido ni de su soporte, y no es parte de estos Términos, salvo que Apple y sus filiales pueden hacer cumplir los términos de
-la licencia como terceros beneficiarios, según su EULA. Para cualquier reclamo sobre la app, contáctanos a nosotros, no a Apple.
+Apple no es responsable de GymStudio, de su contenido ni de su soporte, y no es parte de estos Términos, salvo que Apple y sus filiales
+pueden hacer cumplir los términos de la licencia como terceros beneficiarios, según su EULA. Para cualquier reclamo sobre la app, contáctanos
+a nosotros, no a Apple.
 
 ## 15. Contacto
 
-Sebastian Pabon, js.pabonc979@gmail.com. Soporte: https://sebpabonc.github.io/gymstudio/legal/support.es.html
+Sebastian Pabon, gymstudioapp@gmail.com. Soporte: https://sebpabonc.github.io/gymstudio/support/
 
-## 16. Idioma <!-- PO aprueba; HIGH RISK: el español obliga a quienes lo usan -->
+## 16. Idioma
 
-Estos Términos existen en inglés y en español. Si usas la app en español o vives en un país de habla hispana, aplica la versión en español. En los demás casos, aplica la versión en inglés.
+Estos Términos están disponibles en inglés y en español. Si usas la app en español o vives en un país de habla hispana, aplica la versión en
+español. En los demás casos, aplica la versión en inglés.

@@ -13,6 +13,7 @@ import {
   setAskExerciseAiConsent,
 } from '../utils/storage'
 import { requestAiConsent } from '../ai/gateway'
+import { legalUrl } from '../legal'
 import type { Exercise } from '../types'
 
 export default function ProfileScreen({ onClose }: { onClose: () => void }) {
@@ -104,6 +105,11 @@ export default function ProfileScreen({ onClose }: { onClose: () => void }) {
             <p role="status" aria-live="polite">{t('privacy.ai.offConfirm')}</p>
           )}
         </fieldset>
+        <nav className="profile-legal-links" aria-label={t('legal.title')}>
+          <a href={legalUrl('support', language)} target="_blank" rel="noopener noreferrer">{t('legal.support')}</a>
+          <a href={legalUrl('privacy', language)} target="_blank" rel="noopener noreferrer">{t('legal.privacy')}</a>
+          <a href={legalUrl('terms', language)} target="_blank" rel="noopener noreferrer">{t('legal.terms')}</a>
+        </nav>
         <fieldset className="profile-rest-setting">
           <legend>{t('profile.restBetweenSets')}</legend>
           <p>{t('profile.restBetweenSetsHelp')}</p>

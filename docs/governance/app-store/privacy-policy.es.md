@@ -1,175 +1,184 @@
 <!--
-BORRADOR de Governancer, actualizado con las respuestas del PO del 2026-11-01. No es asesoría legal. Governancer no es abogado.
-Ningún abogado lo revisará (decisión del PO, 2026-11-01): el PO lo lee y lo aprueba. Los comentarios HIGH RISK marcan lo que normalmente revisaría un abogado;
-README.md lista las leyes consideradas y lo que no se pudo verificar.
-No publicar hasta que: se aprueben los [PO aprueba: …] y se quite la marca, se entreguen los [REQUIERE Gn: …] y se quite la marca, y se confirmen los
-[VERIFICAR: …]. Gn se refiere a gaps-for-tech-lead.md. Hechos: data-inventory.md. Los enlaces funcionan cuando G5 publique las páginas.
-Regla de documentos públicos: el PO aprobó nombre y correo; nunca agregar dirección ni teléfono.
-Este texto prevalece para quienes usan la app en español o viven en países de habla hispana (sección 14): revísalo con el mismo cuidado que el inglés.
+Borrador de Governancer, 2026-11-07, para publicar en https://sebpabonc.github.io/gymstudio/privacy/ cuando el PO lo apruebe.
+No es asesoría legal; Governancer no es abogado. Cada frase describe la app al 2026-11-07 (fuentes: data-inventory.md y las notas del
+2026-11-07 en questions-for-po.md). Actualizar cuando lleguen el borrado de cuenta dentro de la app, Iniciar sesión con Apple, las tareas
+de retención o un proveedor nuevo. Este texto prevalece para quienes usan la app en español (sección 14): revisarlo con el mismo cuidado
+que el inglés. Regla de documentos públicos: solo nombre del dueño y correo de la app; nunca dirección ni teléfono.
 -->
 
 # Política de privacidad de GymStudio
 
-**Última actualización:** [PO: fecha de publicación]
+**Fecha de entrada en vigor:** 7 de noviembre de 2026
 
 Esta política explica qué recopila GymStudio, para qué, quién lo recibe, cuánto tiempo lo guardamos y cómo puedes controlarlo.
-GymStudio es una app de entrenamiento para consultar ejercicios, seguir un plan, registrar series y ver tu progreso.
+GymStudio es una app de entrenamiento para consultar ejercicios, seguir un plan, registrar series y ver tu progreso. Está disponible como
+app para iPhone y como app web en https://sebpabonc.github.io/gymstudio/.
 
 ## 1. Responsable
 
-GymStudio está a cargo de **Sebastian Pabon**, una persona natural con base en Australia, no una empresa. Él es el responsable de tus datos personales ("nosotros").
-Contacto de privacidad: js.pabonc979@gmail.com.
-<!-- PO: el App Store muestra como vendedor el nombre legal de la cuenta de Apple Developer. Revisa que coincida (pregunta 1). -->
+GymStudio está a cargo de **Sebastian Pabon**, una persona natural con base en Australia, no una empresa. Él es el responsable de tus datos
+personales ("nosotros").
+Contacto de privacidad: **gymstudioapp@gmail.com**.
 
 ## 2. Usar GymStudio sin cuenta
 
-Puedes usar la demo o guardar entrenamientos en tu dispositivo sin crear una cuenta. En ese caso, tus entrenamientos se quedan en tu
-dispositivo. Cuando la app descarga la lista de ejercicios, nuestro proveedor de alojamiento recibe tu dirección IP como parte de la
-conexión. Los planes, objetivos, medidas, comentarios y funciones de IA requieren una cuenta.
+Puedes probar GymStudio sin crear una cuenta. Lo que registres en ese caso se queda en tu dispositivo. Cuando la app descarga la lista de ejercicios, nuestro proveedor de alojamiento recibe tu dirección IP como parte de la
+conexión. Los planes, objetivos, medidas, comentarios, la sincronización y las funciones de IA requieren una cuenta.
 
-GymStudio es para personas de 18 años o más. No se ofrece en la Unión Europea.
+GymStudio es para personas de 18 años o más. La app para iPhone no se ofrece en la Unión Europea.
 
 ## 3. Qué recopilamos si tienes cuenta
 
 | Datos | Ejemplos | Para qué los usamos |
 |---|---|---|
-| Datos de la cuenta | Correo; contraseña (nuestro proveedor la guarda cifrada con hash); si usas Google o Apple [REQUIERE G4: Apple], tu nombre, correo (Apple te deja ocultarlo), el enlace a tu foto de perfil de Google y el identificador que te asigna el proveedor | Crear tu cuenta e iniciar sesión |
-| Datos de entrenamiento | Ejercicios, fechas, pesos, repeticiones, series y tiempos, repeticiones en reserva, objetivos del plan, tus notas, ejercicios que creas | Hacer funcionar la app, sincronizar entre dispositivos y mostrar tu progreso |
-| Datos de salud y actividad física | Peso corporal, pasos y calorías que escribes; tu objetivo (como perder grasa o ganar músculo), experiencia, nivel de actividad, equipo y las notas que agregues | Crear y adaptar tu plan y mostrar tu progreso |
-| Planes y recomendaciones | Tus planes, cambios de ejercicio, las cargas que recomendamos y si las usaste | Recomendar la carga de hoy y adaptarla a ti |
-| Preguntas a la IA | Lo que le escribes a la IA, si la activas | Responderte. No guardamos tus preguntas ni las respuestas en nuestros servidores |
-| Conteo de uso de IA | Función, modelo, cantidad de texto procesado, costo, hora. No el contenido | Aplicar límites diarios y controlar costos |
-| Comentarios | Tu mensaje, con versión de la app, pantalla e idioma | Responderte y mejorar la app |
+| Datos de la cuenta | Tu correo y tu contraseña (nuestro proveedor de alojamiento solo guarda la contraseña cifrada con hash). Si inicias sesión con Google: tu nombre, correo, el enlace a tu foto de perfil de Google y el identificador que Google te asigna | Crear tu cuenta e iniciar sesión |
+| Datos de entrenamiento | Ejercicios, fechas, pesos, repeticiones, series, repeticiones en reserva, hora de cada serie, objetivos del plan, tus notas de entrenamiento, ejercicios que creas | Hacer funcionar la app, sincronizarla entre tus dispositivos y mostrar tu progreso |
+| Datos de salud y actividad física | Peso corporal, pasos y calorías que escribes; tu objetivo de entrenamiento (como perder grasa o ganar músculo), días por semana, experiencia, nivel de actividad, duración de la sesión, equipo y las notas de objetivo que agregues | Crear y adaptar tu plan y mostrar tu progreso |
+| Planes y recomendaciones | Tus planes, cambios de ejercicio, las cargas que la app recomendó y si las usaste | Recomendar la carga de hoy y adaptarla a ti |
+| Preguntas a la IA | Lo que le escribes a la IA, si permites la IA | Responderte. No guardamos tus preguntas ni las respuestas de la IA en nuestros servidores |
+| Conteo de uso de IA | Qué función de IA se usó, el modelo, la cantidad de texto procesado, el costo y la hora. No el contenido | Aplicar límites diarios y controlar costos |
+| Comentarios | Tu mensaje, con la versión de la app, la pantalla en la que estabas y tu idioma | Responderte y mejorar la app |
+| Correos | Los correos que nos envías y los correos de cuenta que te enviamos (como confirmación y restablecimiento de contraseña) | Ayudarte y gestionar tu cuenta |
 | Datos técnicos | Dirección IP, tipo de dispositivo y navegador, horas de sesión, registros del servidor | Proteger tu cuenta y mantener el servicio funcionando |
 
-No usamos Apple Salud, tu ubicación, cámara, contactos ni fotos. GymStudio no tiene anuncios, ni herramientas de analítica, ni rastreo
-a través de apps o sitios de otras empresas. No vendemos tus datos. No usamos tus datos de salud y actividad física para publicidad ni
-marketing.
+Todo esto es opcional, salvo tu correo (y una contraseña si no usas Google). Puedes usar GymStudio sin escribir tu peso, pasos, calorías ni
+notas de objetivo.
 
-En tu dispositivo, la app también guarda tus datos, preferencias y sesión para funcionar sin conexión. Durante un descanso, el
-temporizador y el nombre del ejercicio pueden aparecer en tu pantalla bloqueada y en la Dynamic Island mediante Actividades en vivo.
-Esto se queda en tu dispositivo.
+No usamos Apple Salud, tu ubicación, cámara, micrófono, contactos ni fotos. GymStudio no tiene anuncios, ni herramientas de analítica, ni
+rastreo a través de apps o sitios de otras empresas. No vendemos tus datos. No usamos tus datos de salud y actividad física para publicidad
+ni marketing.
+
+En tu dispositivo, la app también guarda tus datos, preferencias y tu sesión para funcionar sin conexión. Durante un descanso, el
+temporizador y el nombre del ejercicio pueden aparecer en tu pantalla bloqueada y en la Dynamic Island mediante Actividades en vivo. Esto
+se queda en tu dispositivo.
 
 ## 4. Por qué podemos usar tus datos
 
-<!-- HIGH RISK: las bases cambian por país (Brasil, Colombia, Corea, Japón y Argentina se apoyan en el consentimiento para datos de salud). Tratamos peso, pasos,
-calorías y notas de objetivo como datos de salud (sensibles) en todas partes, que es la lectura segura. -->
-
 | Finalidad | Base (donde la ley la pide) |
 |---|---|
-| Prestar la cuenta, sincronización, plan y progreso | El contrato contigo |
-| Guardar y usar tus datos de salud y actividad física | Tu consentimiento o autorización explícita, que puedes retirar. [REQUIERE G5/G20: paso de consentimiento en la app] |
-| Enviar datos al proveedor de IA | Tu consentimiento o autorización explícita, separada de la anterior, que puedes retirar. [REQUIERE G2, G3] |
-| Guardar y tratar tus datos fuera de tu país | Tu consentimiento o autorización, o lo que tu ley permita para proveedores de servicios. Ver sección 6 |
-| Seguridad, prevención de abuso, límites y control de costos, responder comentarios | Nuestros intereses legítimos |
+| Prestar la cuenta, la sincronización, el plan y el progreso | El acuerdo entre tú y nosotros (nuestros Términos de uso) |
+| Guardar y usar los datos de salud y actividad física que decides escribir | Tu consentimiento, que das al escribirlos para esta finalidad y que puedes retirar pidiéndonos que los borremos |
+| Enviar datos al proveedor de IA | Tu consentimiento explícito, que la app te pide antes de enviar nada, y que puedes retirar cuando quieras |
+| Guardar y tratar tus datos fuera de tu país | Tu consentimiento, o lo que tu ley local permita para proveedores de servicios. Ver sección 6 |
+| Seguridad, prevención de abusos, límites y control de costos, responder comentarios | Nuestro interés legítimo en ofrecer un servicio seguro y sostenible |
 | Obligaciones legales | La ley |
 
-No estás obligado a dar datos de salud, que son datos sensibles, ni a activar la IA. Sin ellos, la app sigue registrando entrenamientos y
-da planes y recomendaciones basados en reglas. Aceptar nuestros Términos no cuenta como consentimiento para estos usos.
+No tienes que escribir datos de salud ni activar la IA. Sin ellos, la app sigue registrando entrenamientos y da planes y recomendaciones
+basados en reglas.
 
 ## 5. Funciones de IA
 
-Las funciones de IA de GymStudio, incluidas las explicaciones del entrenador con IA, usan **OpenAI** como proveedor externo. Son opcionales, y no se envía nada
-hasta que las actives. [REQUIERE G2]
+Algunas funciones de GymStudio usan **OpenAI**, una empresa de Estados Unidos, para redactar texto. La IA es opcional. **No se envía nada a
+OpenAI hasta que tocas "Permitir IA"** en la app. Si eliges "Ahora no", o desactivas la IA después, la app no envía nada a OpenAI.
 
-| Función | Qué se envía a OpenAI |
-|---|---|
-| Preguntar a la IA | Tu pregunta, la fecha de hoy, tu plan actual y hasta 30 registros recientes de entrenamiento |
-| Explicación del Entrenador IA | Nombre del ejercicio; carga recomendada y anterior; fecha, peso y repeticiones de la última sesión; repetición máxima estimada; número de sesiones usadas |
-| Personalización del plan con IA | Tu objetivo, experiencia, nivel de actividad, duración de sesión, equipo y notas; tu peso, pasos y calorías de los últimos 14 días; tu plan y ejercicios alternativos |
+La app usa IA en tres lugares:
 
-No enviamos tu nombre, correo ni las notas de tus entrenamientos. [REQUIERE G11: quitar el identificador interno de usuario en la
-personalización del plan] Evita escribir nombres o detalles médicos en notas o preguntas.
+| Función | Cuándo | Qué se envía a OpenAI |
+|---|---|---|
+| Preguntar a la IA (botón Ayuda e IA) | Cuando haces una pregunta | Tu pregunta, la fecha de hoy, tu plan actual y tus 30 registros de entrenamiento más recientes (ejercicio, fecha, y el peso, las repeticiones y los detalles de cada serie) |
+| Explicación del entrenador con IA | Automáticamente, cuando la app muestra una carga recomendada | El nombre del ejercicio; la carga y repeticiones recomendadas y anteriores; la fecha, el peso, las repeticiones y el objetivo de tu última sesión; hace cuántos días fue; tu máximo estimado a una repetición; cuántas sesiones se usaron |
+| Personalización del plan | Cuando generas un plan | Tu objetivo, días por semana, experiencia, nivel de actividad, duración de la sesión y equipo; tus 14 registros de medidas más recientes (fecha, peso corporal, pasos, calorías); los días, ejercicios, series y descansos de tu plan; una lista de ejercicios alternativos de la biblioteca de la app |
 
-Según OpenAI, los datos enviados por su API no se usan para entrenar sus modelos a menos que el cliente lo autorice, lo cual no hemos
-hecho [VERIFICAR: panel], y puede conservarlos hasta 30 días para vigilar abusos, más si la ley lo exige. OpenAI los trata principalmente
-en Estados Unidos.
+**Nunca se envía a OpenAI:** tu nombre, tu correo, el identificador de tu cuenta, tus notas de entrenamiento ni tus notas de objetivo. La
+solicitud sale de nuestro servidor, así que OpenAI no ve tu dirección IP. Evita escribir nombres o datos médicos en tus preguntas a la IA.
 
-La carga que ves cada día la calculan las reglas de la app. La IA escribe la explicación, y solo puede personalizar un plan dentro de los
-límites de esas reglas. El entrenador con IA es un programa, no una persona. Las respuestas de la IA pueden tener errores. Puedes desactivar
-la IA en cualquier momento en Perfil → Privacidad e IA [REQUIERE G3]. Los datos ya enviados no se pueden recuperar, pero siguen el plazo indicado.
+OpenAI dice que los datos enviados mediante su API no se usan para entrenar sus modelos salvo que el cliente decida compartirlos, y que
+puede guardarlos hasta 30 días para detectar abusos, o más tiempo si la ley lo exige.
+
+La carga que ves cada día la calculan las reglas de la app. La IA redacta la explicación y solo puede personalizar un plan dentro de los
+límites que fijan esas reglas. El entrenador con IA es un programa, no una persona, y sus respuestas pueden tener errores.
+
+**Para desactivar la IA:** en la app, ve a **Tú → Privacidad e IA** y apaga "Funciones de IA (OpenAI)". Tu elección se guarda en cada
+dispositivo que uses, así que en un dispositivo nuevo la app te vuelve a preguntar. Los datos ya enviados no se pueden recuperar; OpenAI los
+guarda como se explica arriba.
 
 ## 6. Quién recibe tus datos
 
 | Destinatario | Función | Ubicación |
 |---|---|---|
-| Supabase | Aloja la base de datos, el inicio de sesión, funciones de servidor y registros | [VERIFICAR: región] |
-| OpenAI | Texto de IA, solo si activas la IA | Estados Unidos |
-| Google | Solo si inicias sesión con Google, o tocas un enlace que abre Google Imágenes (solo la búsqueda del ejercicio va a Google, y aplican sus propios términos) | Global |
-| Apple [REQUIERE G4] | Iniciar sesión con Apple, si lo usas; el App Store gestiona tu descarga según los términos de Apple | Global |
-| GitHub | Aloja nuestra app web y estas páginas, y puede ver la dirección IP de los visitantes | Estados Unidos |
-| [REQUIERE G6: proveedor de correo, nombre] | Envía correos de la cuenta | [VERIFICAR] |
-| Autoridades, jueces | Cuando la ley lo exija | |
+| Supabase | Aloja nuestra base de datos, el inicio de sesión, las funciones del servidor y sus registros | Base de datos en Singapur. Las funciones del servidor pueden ejecutarse en una ubicación de Supabase cercana a ti |
+| OpenAI | Redacta el texto de IA, solo si permites la IA (sección 5) | Estados Unidos |
+| Google | Envía nuestros correos de cuenta (confirmación y restablecimiento de contraseña) desde nuestra cuenta de Gmail, gymstudioapp@gmail.com, y guarda los correos que nos envías. Además, solo si los usas: el inicio de sesión con Google y los enlaces que abren una búsqueda de Google Imágenes de un ejercicio (solo la búsqueda llega a Google) | Estados Unidos y otros países donde opera Google |
+| GitHub | Aloja nuestra app web y estas páginas, y puede ver la dirección IP de quien las visita | Estados Unidos |
+| Apple | Distribuye la app para iPhone mediante el App Store y TestFlight, con sus propios términos y política de privacidad | Estados Unidos y otros países |
+| Autoridades y tribunales | Solo cuando la ley lo exige | |
 
-Sebastian Pabon puede acceder a los datos guardados cuando sea necesario para dar soporte, corregir problemas o cumplir la ley.
+Sebastian Pabon puede acceder a los datos guardados cuando hace falta para dar soporte, corregir problemas o cumplir deberes legales.
 
 ### Transferencias internacionales
 
-<!-- HIGH RISK: cada país de lanzamiento tiene su regla: APP 8 (Australia), APPI art. 28 (Japón), PIPA art. 28-8 (Corea), limitación de transferencia del PDPA
-(Singapur), LGPD cap. V (Brasil), Ley 1581 art. 26 (Colombia), Ley 25.326 art. 12 (Argentina), México. Lo común: destinatario y país nombrados más consentimiento;
-los contratos con proveedores deben estar aceptados (G19). -->
-Tus datos se guardan y se tratan fuera de tu país, en los lugares indicados arriba, incluidos Estados Unidos y donde operen nuestros proveedores. Sus leyes pueden proteger
-tus datos menos que las tuyas y darte menos formas de reclamar. Usamos proveedores que se comprometen con condiciones de tratamiento de datos [VERIFICAR: acuerdos aceptados con Supabase y OpenAI].
-Al dar los consentimientos de la sección 4 aceptas estas transferencias; puedes retirarlos cuando quieras, aunque la app no puede sincronizar sin su proveedor de alojamiento.
+Tus datos se guardan y se tratan fuera de tu país, en los lugares indicados arriba, incluidos Singapur y Estados Unidos. Las leyes de esos
+lugares pueden proteger tus datos menos que las tuyas y darte menos formas de reclamar. Los términos de Supabase incluyen un acuerdo de
+tratamiento de datos. Al usar una cuenta, y al permitir la IA si así lo decides, aceptas estas transferencias. Puedes retirarte: desactiva la
+IA o pídenos borrar tu cuenta. La app no puede sincronizar sin su proveedor de alojamiento.
 
 ## 7. Cuánto tiempo guardamos los datos
 
 | Datos | Plazo |
 |---|---|
-| Cuenta, entrenamientos, objetivos, medidas, planes, recomendaciones | Hasta que los borres o borres tu cuenta. Si una cuenta no se usa durante **24 meses**, la borramos, después de avisarte por correo. [REQUIERE G6, G17] |
-| Un registro o ejercicio que borras | Desaparece de inmediato de la vista; se elimina del servidor tras **30 días** [REQUIERE G16] |
-| Planes anteriores | Hasta que borres tu cuenta [PO aprueba: este plazo] |
-| Comentarios | **24 meses** [REQUIERE G17] |
-| Conteo de uso de IA | **12 meses** [REQUIERE G17] |
-| Registros de servidor y de inicio de sesión | [VERIFICAR: plazo de registros de Supabase] |
-| Copias de seguridad | Hasta que venza la copia, hasta [VERIFICAR: plan, 7 a 30 días]. Solo se usan para restaurar el servicio |
-| Datos en OpenAI | Hasta 30 días, según OpenAI |
-| Datos en tu dispositivo | Hasta que borres la cuenta en la app o elimines la app. Cerrar sesión no los borra [ver G25] |
+| Cuenta, entrenamientos, ejercicios propios, objetivos, medidas, planes (actual y anteriores), recomendaciones | Hasta que borres tu cuenta. Podemos borrar una cuenta que no se haya usado en 24 meses, después de avisarte por correo |
+| Un registro de entrenamiento que borras en la app | Se oculta de inmediato. Queda en nuestro servidor, marcado como borrado, hasta que se borre tu cuenta. Escríbenos si quieres que lo eliminemos antes |
+| Comentarios y conteo de uso de IA | Hasta que se borre tu cuenta. Escríbenos si quieres que los eliminemos antes |
+| Correos con nosotros y correos de cuenta | En nuestro buzón de Gmail hasta que los borremos. Pídenos borrar los tuyos |
+| Registros del servidor y de inicio de sesión | Supabase los guarda hasta 28 días, según nuestro plan de alojamiento |
+| Copias de seguridad | Si nuestro plan de alojamiento hace copias, se guardan hasta 14 días y solo se usan para restaurar el servicio |
+| Datos en OpenAI | Hasta 30 días, según OpenAI, salvo que la ley exija más |
+| Datos en tu dispositivo | Hasta que quites la app o borres sus datos. Cerrar sesión no los borra |
 
 ## 8. Cómo borrar tu cuenta
 
-En la app: **Perfil → Borrar cuenta**. [REQUIERE G1] Esto elimina de forma permanente tu cuenta y todos los datos asociados de nuestra
-base de datos de inmediato. Las copias de seguridad vencen como se indica arriba. Los datos permanecen en otro dispositivo hasta que abras
-la app allí o la elimines. Borrar la app por sí solo no borra tu cuenta. Si no puedes iniciar sesión, escribe a js.pabonc979@gmail.com.
+Hoy el borrado de cuenta se hace por correo:
+
+1. Escribe a **gymstudioapp@gmail.com** desde el correo de tu cuenta de GymStudio (si usas Google, tu correo de Google), con el asunto
+   "Borrar mi cuenta".
+2. Podemos pedirte que confirmes la solicitud, para asegurarnos de que viene de ti.
+3. Borramos tu cuenta y todos sus datos de nuestra base de datos en un plazo de **10 días** y te avisamos por correo cuando esté hecho.
+
+Las copias en respaldos y registros vencen como se indica en la sección 7. Los datos en tus dispositivos se quedan hasta que quites la app.
+Quitar la app no borra tu cuenta. Estamos agregando un botón para borrar la cuenta dentro de la app; actualizaremos esta sección cuando esté
+disponible.
 
 ## 9. Tus derechos
 
-Según donde vivas, puedes pedir ver tus datos, obtener una copia, corregirlos, suprimirlos, limitar u oponerte a su uso, saber quién los recibió y retirar tu
-consentimiento o autorización cuando quieras sin afectar el uso anterior. La app permite corregir la mayoría de los datos y también borrar.
-Para lo demás, escribe a js.pabonc979@gmail.com. Respondemos en [PO aprueba: 10 días hábiles], o antes si tu ley local fija un plazo menor. Si rechazamos tu solicitud,
-te diremos por qué y podrás pedir que la revisemos. No te trataremos peor por ejercer tus derechos.
+Según dónde vivas, puedes pedir ver tus datos, obtener una copia, corregirlos, borrarlos, limitar u oponerte a cómo se usan, saber quién los
+recibió y retirar tu consentimiento cuando quieras, sin afectar el uso anterior. Puedes corregir la mayoría de los datos en la app. Para todo
+lo demás, escribe a gymstudioapp@gmail.com. Respondemos en un plazo de **10 días hábiles**, o antes si tu ley local fija un plazo menor. Si
+rechazamos una solicitud, te diremos por qué y podrás pedirnos que revisemos esa decisión. No te trataremos peor por ejercer tus derechos.
 
-También puedes presentar una queja ante tu autoridad de protección de datos o de consumo. Por ejemplo: Superintendencia de Industria y Comercio (Colombia), Secretaría
-Anticorrupción y Buen Gobierno (México), Agencia de Acceso a la Información Pública (Argentina), Autoridade Nacional de Proteção de Dados (Brasil), Office of the Australian
-Information Commissioner (Australia), Personal Data Protection Commission (Singapur), Personal Information Protection Commission (Japón, Corea del Sur), Data Protection Board
-(India), el fiscal general de tu estado o la Federal Trade Commission (Estados Unidos).
+También puedes reclamar ante tu autoridad de protección de datos o de consumo. Ejemplos: Office of the Australian Information Commissioner
+(Australia), Personal Data Protection Commission (Singapur), Personal Information Protection Commission (Japón y Corea del Sur), Data
+Protection Board (India), Superintendencia de Industria y Comercio (Colombia), Secretaría Anticorrupción y Buen Gobierno (México), Agencia de
+Acceso a la Información Pública (Argentina), el fiscal general de tu estado o la Federal Trade Commission (Estados Unidos).
 
 ## 10. Menores
 
-GymStudio es solo para personas de 18 años o más. No recopilamos a sabiendas datos de personas menores de esa edad. Si crees que alguien menor tiene una cuenta, escríbenos
-y la borraremos junto con sus datos.
+GymStudio es solo para personas de 18 años o más. No recopilamos a sabiendas datos de personas menores. Si crees que una persona menor tiene
+una cuenta, escríbenos y la borraremos junto con sus datos.
 
 ## 11. Seguridad
 
-Las conexiones están cifradas. Los datos de cada persona están separados en la base de datos mediante reglas de acceso. Las claves de IA y de
-administrador se guardan en el servidor. Ningún sistema es totalmente seguro. Si una brecha te afecta, te avisaremos a ti y a las autoridades
-cuando la ley lo exija.
+Las conexiones están cifradas. Los datos de cada persona se mantienen separados en la base de datos mediante reglas de acceso, así que otros
+usuarios no pueden verlos. Las claves de IA y de administrador se quedan en nuestro servidor y nunca están en la app. Ningún sistema es
+totalmente seguro. Si una filtración te afecta, te avisaremos a ti y a las autoridades cuando la ley lo exija.
 
-## 12. Estados Unidos
+## 12. Si vives en Estados Unidos
 
-Si vives en Estados Unidos, lee también nuestra [Política de privacidad de datos de salud del consumidor](https://sebpabonc.github.io/gymstudio/legal/consumer-health-data.es.html) [REQUIERE G5],
-que cubre Washington, Nevada y leyes estatales similares. No vendemos tus datos personales ni los compartimos para publicidad dirigida.
+Tratamos tu peso corporal, pasos, calorías y objetivos de entrenamiento como datos de salud del consumidor. Solo los recopilamos de ti, solo
+los usamos para las funciones que usas (tu plan, recomendaciones y progreso) y solo los compartimos con los proveedores de la sección 6 para
+esa finalidad, y con OpenAI solo si permites la IA. No los vendemos ni los usamos para publicidad dirigida. Para verlos, borrarlos o dejar de
+compartirlos, escribe a gymstudioapp@gmail.com; si rechazamos tu solicitud, puedes pedirnos que la revisemos y después acudir al fiscal
+general de tu estado.
 
 ## 13. Cambios
 
-Si cambiamos esta política, actualizaremos la fecha y, si el cambio es importante, te avisaremos en la app antes de que aplique. Si queremos
-usar tus datos para una finalidad nueva, te lo pediremos primero.
+Si cambiamos esta política, actualizaremos la fecha de entrada en vigor y, si el cambio es importante, te avisaremos en la app o por correo
+antes de que aplique. Si queremos usar tus datos para una finalidad nueva, te lo pediremos primero.
 
 ## 14. Idioma
 
-Esta política existe en inglés y en español. Si usas la app en español o vives en un país de habla hispana, aplica la versión en español. En los demás casos, aplica la
-versión en inglés. <!-- PO aprueba. Brasil: se necesita una versión en portugués antes de lanzar allí (pregunta 3). -->
+Esta política está disponible en inglés y en español. Si usas la app en español o vives en un país de habla hispana, aplica la versión en
+español. En los demás casos, aplica la versión en inglés.
 
 ## 15. Contacto
 
-Sebastian Pabon, js.pabonc979@gmail.com. Soporte: https://sebpabonc.github.io/gymstudio/legal/support.es.html [REQUIERE G5]
+Sebastian Pabon, gymstudioapp@gmail.com. Soporte: https://sebpabonc.github.io/gymstudio/support/
