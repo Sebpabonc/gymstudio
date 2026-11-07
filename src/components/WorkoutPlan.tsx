@@ -836,7 +836,13 @@ export default function WorkoutPlan({
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
   // Weekly progress bar: 0 = this week, -1 = last week, +1 = next week (PO 2026-10-10: swipe between weeks).
-  const [barWeekOffset, setBarWeekOffset] = useState(0)
+  const [barWeekOffset, setBarWeekOffsetState] = useState(0)
+  // True while the bar shows next week because this week was finished, not because the person moved.
+  const [barWeekAutoOpened, setBarWeekAutoOpened] = useState(false)
+  const setBarWeekOffset = (offset: number) => {
+    setBarWeekAutoOpened(false)
+    setBarWeekOffsetState(offset)
+  }
   const barTouchX = useRef<number | null>(null)
   const [customPlan, setCustomPlan] = useState<CustomPlan>(() => loadCustomPlan())
   const [selectedCustomDayId, setSelectedCustomDayId] = useState('')
@@ -1080,7 +1086,10 @@ export default function WorkoutPlan({
   useEffect(() => {
     if (autoNextWeekShown.current || !currentWeekComplete || !activeBlockWeek || !activeBlock) return
     autoNextWeekShown.current = true
-    if (activeBlockWeek < activeBlock.weeks) setBarWeekOffset((current) => (current === 0 ? 1 : current))
+    if (activeBlockWeek < activeBlock.weeks && barWeekOffset === 0) {
+      setBarWeekOffsetState(1)
+      setBarWeekAutoOpened(true)
+    }
   }, [currentWeekComplete, activeBlockWeek, activeBlock])
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
   const activeCustomDay = customPlan.days.find((day) => day.id === selectedCustomDayId) ?? customPlan.days[0]
@@ -3363,6 +3372,9 @@ export default function WorkoutPlan({
             return { day, done, total: day.exercises.length }
           })
           const completeDays = days.filter(({ done, total }) => total > 0 && done >= total).length
+          // QA 2026-11-07: on a day with no planned session (e.g. the weekend) no other day is called Today.
+          const knownDates = days.map(({ day }) => dayDate(day.key, day.position))
+          const todayIsPlanDay = knownDates.every((date) => date === undefined) || knownDates.includes(today)
           return (
             <div
               className="week-progress"
@@ -3391,7 +3403,7 @@ export default function WorkoutPlan({
               <div className="week-progress-bar" aria-label={t('workout.day.tabsAria')}>
                 {days.map(({ day, done, total }) => {
                   const active = day.key === (activeDay?.key ?? selectedDay)
-                  const isToday = offset === 0 && todayDay?.key === day.key
+                  const isToday = offset === 0 && todayIsPlanDay && todayDay?.key === day.key
                   const date = dayDate(day.key, day.position)
                   return (
                     <button
@@ -3437,7 +3449,9 @@ export default function WorkoutPlan({
           </>
         )}
         {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset !== 0 && (
-          <p className="week-progress-preview-note">{t('workout.week.previewNote')}</p>
+          <p className="week-progress-preview-note">{barWeekAutoOpened && barWeekOffset === 1
+            ? t('workout.week.doneNextNote', { week: formatNumber(language, activeBlockWeek ?? 1) })
+            : t('workout.week.previewNote')}</p>
         )}
         {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset === 0 && (() => {
           // PO 2026-10-18: one clear state per day this week - Start / Continue (n of N) / Completed.
