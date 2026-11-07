@@ -106,6 +106,8 @@ import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
 import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, WORKOUT_UNDO_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from '../utils/workoutMode'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
+import { useDialogFocus } from '../utils/useDialogFocus'
+import { scrollBehavior } from '../utils/motion'
 import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
 import RestTimer from './RestTimer'
 import type { RestTimerState } from '../utils/restTimer'
@@ -721,15 +723,19 @@ export function ExerciseSwapSheet({
   t,
   onCancel,
   onSelect,
+  sheetRef,
 }: {
   alternatives: Exercise[]
   language: Language
   t: Translate
   onCancel: () => void
   onSelect: (exerciseId: string, scope: ExerciseSwap['scope']) => void
+  /** Focus management lives in the parent (useDialogFocus), which owns the open state. */
+  sheetRef?: React.Ref<HTMLElement>
 }) {
   return (
     <section
+      ref={sheetRef}
       className="exercise-swap-sheet"
       role="dialog"
       aria-modal="true"
@@ -916,13 +922,24 @@ export default function WorkoutPlan({
   const trainerRecommendationIds = useRef(new Map<string, string>())
   const [swipeUndo, setSwipeUndo] = useState<WorkoutEntry | null>(null)
   const [progressDeleteConfirmId, setProgressDeleteConfirmId] = useState('')
-  const hasOpenSheet = !!customPlanSheetDraft || calendarOpen || blockSelectorOpen || !!swapTarget || !!sessionSummary
+  const hasOpenSheet = !!customPlanSheetDraft || calendarOpen || blockSelectorOpen || !!swapTarget || !!sessionSummary || finishConfirmOpen
   useBodyScrollLock(hasOpenSheet)
+  const calendarDialogRef = useRef<HTMLElement>(null)
+  const blockSelectorDialogRef = useRef<HTMLElement>(null)
+  const customPlanDialogRef = useRef<HTMLElement>(null)
+  const finishDialogRef = useRef<HTMLElement>(null)
+  const swapDialogRef = useRef<HTMLElement>(null)
+  useDialogFocus(swapDialogRef, !!swapTarget)
+  useDialogFocus(calendarDialogRef, calendarOpen)
+  useDialogFocus(blockSelectorDialogRef, blockSelectorOpen)
+  useDialogFocus(customPlanDialogRef, !!customPlanSheetDraft)
+  useDialogFocus(finishDialogRef, finishConfirmOpen)
   useEffect(() => {
     if (!hasOpenSheet) return undefined
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       if (customPlanSheetDraft) setCustomPlanSheetDraft(null)
+      else if (finishConfirmOpen) setFinishConfirmOpen(false)
       else if (swapTarget) setSwapTarget(null)
       else if (blockSelectorOpen) setBlockSelectorOpen(false)
       else if (calendarOpen) setCalendarOpen(false)
@@ -930,7 +947,7 @@ export default function WorkoutPlan({
     }
     document.addEventListener('keydown', closeOnEscape)
     return () => document.removeEventListener('keydown', closeOnEscape)
-  }, [hasOpenSheet, customPlanSheetDraft, swapTarget, blockSelectorOpen, calendarOpen])
+  }, [hasOpenSheet, customPlanSheetDraft, finishConfirmOpen, swapTarget, blockSelectorOpen, calendarOpen])
   // Continuous learning (PT spec, approved 2026-10-07): the user's past recommendations + results calibrate the engine.
   const [calibrationRows, setCalibrationRows] = useState<Awaited<ReturnType<typeof fetchCalibrationRecommendations>>>([])
   useEffect(() => {
@@ -2073,6 +2090,10 @@ export default function WorkoutPlan({
 
   const workoutGroups = groupSupersets(activeExercises)
   const isWorkoutMode = planMode === 'preset' && workoutGroupIndex !== null && workoutGroupIndex < workoutGroups.length
+  // The finish confirm only exists inside workout mode; never leave it (and its scroll lock) open outside it.
+  useEffect(() => {
+    if (!isWorkoutMode && finishConfirmOpen) setFinishConfirmOpen(false)
+  }, [isWorkoutMode, finishConfirmOpen])
   const workoutGroupCompletion = workoutGroups.map((group) =>
     group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, history))
   )
@@ -2147,7 +2168,7 @@ export default function WorkoutPlan({
       window.requestAnimationFrame(() => {
         const target = document.querySelector<HTMLElement>(`[data-workout-group="${index}"]`)
         target?.focus({ preventScroll: true })
-        target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        target?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
       })
     })
   }
@@ -2182,7 +2203,7 @@ export default function WorkoutPlan({
     setWorkoutGroupInsightNext(null)
     setWorkoutGroupIndex(null)
     onWorkoutModeChange?.(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: scrollBehavior() })
   }
   const finishWorkout = () => setFinishConfirmOpen(true)
   const confirmFinishWorkout = () => {
@@ -3004,6 +3025,7 @@ export default function WorkoutPlan({
       {calendarOpen && (
         <div className="calendar-popover" role="presentation" onClick={() => setCalendarOpen(false)}>
           <section
+            ref={calendarDialogRef}
             className="calendar-popover-card"
             aria-label={text.calendar}
             role="dialog"
@@ -3266,6 +3288,7 @@ export default function WorkoutPlan({
           {blockSelectorOpen && (
             <div className="block-selector-backdrop" role="presentation" onClick={() => setBlockSelectorOpen(false)}>
               <section
+                ref={blockSelectorDialogRef}
                 className="block-selector-sheet"
                 role="dialog"
                 aria-modal="true"
@@ -3595,6 +3618,7 @@ export default function WorkoutPlan({
       {customPlanSheetDraft && (
         <div className="custom-plan-sheet-backdrop" role="presentation" onClick={() => setCustomPlanSheetDraft(null)}>
           <section
+            ref={customPlanDialogRef}
             className="custom-plan-sheet"
             role="dialog"
             aria-modal="true"
@@ -4387,7 +4411,7 @@ export default function WorkoutPlan({
                         onNotes={(anchor) => {
                           const notes = anchor.closest('.planned-exercise-card')
                             ?.querySelector<HTMLTextAreaElement>('.planned-notes-field textarea')
-                          notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                          notes?.scrollIntoView({ behavior: scrollBehavior(), block: 'center' })
                           notes?.focus()
                         }}
                         onTechnique={() => togglePostureTips(exercise.name)}
@@ -5385,12 +5409,13 @@ export default function WorkoutPlan({
             t={t}
             onCancel={() => setSwapTarget(null)}
             onSelect={chooseExerciseSwap}
+            sheetRef={swapDialogRef}
           />
         </div>
       )}
       {finishConfirmOpen && isWorkoutMode && (
         <div className="workout-finish-backdrop" role="presentation">
-          <section className="workout-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-finish-title">
+          <section ref={finishDialogRef} className="workout-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-finish-title">
             <h2 id="workout-finish-title">{t('workout.run.finishConfirm', {
               done: formatNumber(language, workoutDoneExerciseCount),
               total: formatNumber(language, activeExercises.length),

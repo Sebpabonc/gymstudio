@@ -46,6 +46,7 @@ import type { VolumeContextNote } from '../progress/volume'
 import { MUSCLE_CHART_MAXIMUM, MUSCLE_COMMON_RANGE } from '../progress/muscles'
 import type { WatchObservation } from '../progress/comparison'
 import type { ProgressStatus } from '../progress/status'
+import { onTabListKeyDown } from '../utils/tabs'
 import type { TranslationKey } from '../i18n/en'
 import type {
   LiftTrend,
@@ -1324,13 +1325,16 @@ export default function ProgressScreen({
             <div className="pv3-page-heading">
               {activeBlock?.name.trim() && <span>{activeBlock.name}</span>}
             </div>
-            <div className="pv3-tabs" role="tablist" aria-label={t('progress.title')}>
+            <div className="pv3-tabs" role="tablist" aria-label={t('progress.title')} onKeyDown={(event) => onTabListKeyDown(event, TABS, tab, setTab)}>
               {TABS.map((item) => (
                 <button
                   key={item}
+                  id={`pv3-tab-${item}`}
                   type="button"
                   role="tab"
                   aria-selected={tab === item}
+                  aria-controls="pv3-panel"
+                  tabIndex={tab === item ? 0 : -1}
                   className={tab === item ? 'active' : ''}
                   onClick={() => setTab(item)}
                 >
@@ -1338,7 +1342,7 @@ export default function ProgressScreen({
                 </button>
               ))}
             </div>
-            <div role="tabpanel" className="pv3-panel">
+            <div role="tabpanel" id="pv3-panel" className="pv3-panel" aria-labelledby={`pv3-tab-${tab}`}>
               {content}
             </div>
           </>}

@@ -421,6 +421,20 @@ describe('approved workout logging integration', () => {
     expect(elements(node => node.props.className === 'log-toast')).toHaveLength(0)
   })
 
+  it('QA #7: Escape on the finish confirm keeps training instead of leaving the dialog stuck open', async () => {
+    render()
+    await settle()
+    await start()
+    await click('Finish')
+    expect(elements(node => node.props.className === 'workout-finish-dialog')).toHaveLength(1)
+    const addListener = document.addEventListener as unknown as ReturnType<typeof vi.fn>
+    const keyListeners = addListener.mock.calls.filter(([type]) => type === 'keydown').map(([, listener]) => listener)
+    keyListeners.forEach(listener => listener({ key: 'Escape', preventDefault: vi.fn() }))
+    await settle()
+    expect(elements(node => node.props.className === 'workout-finish-dialog')).toHaveLength(0)
+    expect(elements(node => node.props.className === 'workout-completed-content')).toHaveLength(0)
+  })
+
   it('m1: invalid logged corrections never replace saved values or poison the next set', async () => {
     render()
     await settle()

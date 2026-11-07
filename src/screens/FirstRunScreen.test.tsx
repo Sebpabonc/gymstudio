@@ -20,6 +20,8 @@ describe('FirstRunQuestions', () => {
       expect(html).toContain(`<legend>${label}</legend>`)
     }
     expect(html).not.toContain('aria-pressed="true"')
+    // QA #63: the fieldset legend names each group once; no inner role=group repeating it.
+    expect(html).not.toContain('role="group"')
     expect(html).toContain('Te faltan 6')
     expect(html).toContain('Ya tengo cuenta')
   })

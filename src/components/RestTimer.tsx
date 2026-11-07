@@ -119,7 +119,7 @@ export default function RestTimer({
       const progress = fullMs.current > 0 ? Math.min(1, remainingMs / fullMs.current) : 0
       return (
         <aside className={`workout-rest-bar${isDone ? ' done' : ''}`} aria-label={restLabel}>
-          <span className="workout-rest-bar-fill" style={{ width: `${progress * 100}%` }} aria-hidden="true" />
+          <span className="workout-rest-bar-fill" style={{ transform: `scaleX(${progress})` }} aria-hidden="true" />
           <strong role="status">{isDone ? goLabel : formatRemainingTime(remainingRestSeconds(timer, now))}</strong>
           <span className="workout-rest-next">
             <span className="workout-rest-bar-title">{barTitle ?? nextLabel}</span>

@@ -4801,7 +4801,7 @@ button[class] {
 }
 
 .help-ai-tabs button {
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 12px;
   border: 0;
   border-radius: 999px;
@@ -6890,7 +6890,9 @@ a.planned-exercise-main-name {
 
 .login-demo-button {
   display: flex;
+  align-items: center;
   justify-content: center;
+  min-height: 44px;
   width: 100%;
   text-decoration: none;
 }
@@ -8077,7 +8079,7 @@ summary:focus-visible,
 .pv3-tabs button,
 .pv3-range button {
   min-width: 0;
-  min-height: 34px;
+  min-height: 44px;
   padding: 5px 3px;
   border: 0;
   border-radius: 9px;
@@ -8875,15 +8877,28 @@ summary:focus-visible,
 }
 
 .week-progress-nav {
-  min-width: 32px;
-  min-height: 32px;
-  border: 1px solid var(--line);
+  /* 44 px hit area; the visible circle stays 32 px (drawn by ::before), negative margin keeps the layout. */
+  position: relative;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -6px;
+  padding: 0;
+  border: 0;
   border-radius: 999px;
   background: transparent;
   color: var(--muted-strong);
   font-size: 1rem;
   line-height: 1;
   touch-action: manipulation;
+}
+
+.week-progress-nav::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  pointer-events: none;
 }
 
 .week-progress-nav:disabled {
@@ -8905,8 +8920,16 @@ summary:focus-visible,
 }
 
 .week-progress-back {
+  position: relative;
   min-height: 0;
   padding: 2px 8px;
+}
+
+/* Invisible hit-slop: the small pill stays as designed, the tap area is at least 44 px tall. */
+.week-progress-back::before {
+  content: '';
+  position: absolute;
+  inset: -11px 0;
 }
 
 /* Weekly bar sits in a card like the block card above (PO 2026-10-10). */
@@ -9235,7 +9258,8 @@ summary:focus-visible,
   padding: 20px;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: var(--panel);
+  /* Opaque so the workout behind never reads through the buttons. */
+  background: var(--bg-soft);
 }
 
 .workout-finish-dialog h2 {
