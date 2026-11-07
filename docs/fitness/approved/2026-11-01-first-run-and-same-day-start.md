@@ -1,12 +1,17 @@
 ---
 title: First-run questions, same-day start and first-session weights
-status: draft
+status: approved
 author: pt-fitness-expert
 created: 2026-11-01
-approved_by:
-approved_on:
+approved_by: Sebas (PO), "si aprobado", after reviewing the questions, helper lines, medical notice and same-day start; open PO decisions take the PT recommendations below
+approved_on: 2026-11-07
 exercises: [back-squat, barbell-bench-press, dumbbell-goblet-squat, dumbbell-bench-press, dumbbell-romanian-deadlift, push-up, romanian-deadlift, hex-bar-deadlift, dumbbell-bulgarian-split-squat, seated-leg-curl-toes-dorsiflexed-neutral, standing-calf-raises-toes-neutral, leg-press-quad-dominant, barbell-hip-thrust]
 ---
+
+> **Status 2026-11-07:** approved by the PO. Where an open decision below asks the PO, the PT's recommendation applies:
+> both section 1 rule changes ship; `home` gets the helper line and no bodyweight template yet; plan regeneration keeps
+> `nextMonday`; the experience cut-offs, F13 limits and helper wording stand. Items for the Tech Lead (3, 7, 12, 14) and the
+> Governancer (5) stay open for them.
 
 ## Summary
 A new user can start today, safely, on any day of the week. The first run asks six required questions (the PO added activity
