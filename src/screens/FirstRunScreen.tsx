@@ -20,6 +20,7 @@ import {
   type TrainingGoalInput,
 } from '../utils/profileData'
 import { cacheActiveUserPlan, getAskExerciseAiConsent, loadExercises, setAskExerciseAiConsent } from '../utils/storage'
+import { NEW_USER_DEMO_URL } from '../utils/demoMode'
 
 const LoginScreen = lazy(() => import('./LoginScreen'))
 
@@ -69,10 +70,12 @@ function Question({ name, answers, onChange }: {
 }
 
 /** Signed out: the six questions, then account creation. The answers wait on the device until the account exists. */
-export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount }: {
+export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount, demo = false }: {
   initialAnswers?: FirstRunAnswers
   onAnswered: (goal: TrainingGoalInput) => void
   onHaveAccount: () => void
+  /** New-user demo: no account step. */
+  demo?: boolean
 }) {
   const { t } = useT()
   const [answers, setAnswers] = useState<FirstRunAnswers>(() => {
@@ -100,7 +103,14 @@ export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount }:
   return (
     <div className="first-run">
       <p className="first-run-hint">{t('firstRun.intro')}</p>
-      <button type="button" className="secondary-button" onClick={onHaveAccount}>{t('firstRun.haveAccount')}</button>
+      {demo
+        ? <p className="account-message" role="status">{t('firstRun.demoNote')}</p>
+        : (
+          <>
+            <button type="button" className="secondary-button" onClick={onHaveAccount}>{t('firstRun.haveAccount')}</button>
+            <a className="secondary-button" href={NEW_USER_DEMO_URL}>{t('firstRun.tryNewUserDemo')}</a>
+          </>
+        )}
       <section className="card" aria-labelledby="first-run-safety">
         <h3 id="first-run-safety">{t('firstRun.safety.title')}</h3>
         <p className="first-run-hint">{t('firstRun.safety.body')}</p>
@@ -126,7 +136,7 @@ export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount }:
             const goal = completeAnswers(answers)
             if (!goal) return
             onAnswered(goal)
-            setStep('account')
+            if (!demo) setStep('account')
           }}
         >
           {left === 0 ? t('firstRun.continue') : left === 1 ? t('firstRun.left.one') : t('firstRun.left.other', { count: left })}
@@ -134,6 +144,18 @@ export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount }:
       </div>
     </div>
   )
+}
+
+/** New-user demo: nothing leaves the device; the plan is cached in the demo's own space. */
+const demoDeps: FirstRunDeps = {
+  fetchTrainingGoal: async () => null,
+  fetchActiveUserPlan: async () => null,
+  saveTrainingGoal: async (goal) => goal,
+  loadExercises: () => loadExercises(),
+  buildMyPlan,
+  publishUserPlan: async () => undefined,
+  cacheActiveUserPlan,
+  useAi: false,
 }
 
 const deps: FirstRunDeps = {
@@ -155,7 +177,7 @@ type PlanStage =
   | { kind: 'error'; goal?: TrainingGoal }
 
 /** Signed in with first-run answers waiting: save them, ask about AI once, build and publish the plan. */
-export function FirstRunPlan({ goal, onDone }: { goal: TrainingGoalInput; onDone: () => void }) {
+export function FirstRunPlan({ goal, onDone, demo = false }: { goal: TrainingGoalInput; onDone: () => void; demo?: boolean }) {
   const { t, language } = useT()
   const [stage, setStage] = useState<PlanStage>({ kind: 'saving' })
   const started = useRef(false)
@@ -163,7 +185,7 @@ export function FirstRunPlan({ goal, onDone }: { goal: TrainingGoalInput; onDone
   const build = async (saved: TrainingGoal) => {
     setStage({ kind: 'building' })
     try {
-      setStage({ kind: 'ready', plan: await publishFirstRunPlan(saved, deps, language) })
+      setStage({ kind: 'ready', plan: await publishFirstRunPlan(saved, demo ? demoDeps : deps, language) })
     } catch {
       setStage({ kind: 'error', goal: saved })
     }
@@ -172,8 +194,9 @@ export function FirstRunPlan({ goal, onDone }: { goal: TrainingGoalInput; onDone
   const save = async () => {
     setStage({ kind: 'saving' })
     try {
-      const saved = await saveFirstRunGoal(goal, deps)
+      const saved = await saveFirstRunGoal(goal, demo ? demoDeps : deps)
       if (saved === 'kept') setStage({ kind: 'kept' })
+      else if (demo) await build(saved)
       // Ask before building, so the plan request never triggers the consent sheet on its own.
       else if (getAskExerciseAiConsent() === null) setStage({ kind: 'consent', goal: saved })
       else await build(saved)

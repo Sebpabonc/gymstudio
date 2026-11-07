@@ -21,7 +21,7 @@ import { filterExercises } from '../utils/exerciseFilters'
 import { userExercisePrescription } from '../utils/customExerciseDefaults'
 import { openExternal } from '../native/openExternal'
 import { localIsoDate } from '../lib/dates'
-import { isDemoMode } from '../utils/demoMode'
+import { isDemoMode, isNewUserDemo } from '../utils/demoMode'
 import { Exercise, PlannedExercise as BlockExercise, TrainingBlock, WorkoutEntry, WorkoutSet } from '../types'
 import type { Language, Translate } from '../i18n'
 import {
@@ -1225,7 +1225,8 @@ export default function WorkoutPlan({
     const signedIn = authStatus === 'signed-in' && !demoMode
     const localSwaps = loadLocalExerciseSwaps()
     setExerciseSwaps(localSwaps)
-    const cachedPlan = signedIn ? getCachedActiveUserPlan() : null
+    const personalPlanAllowed = signedIn || isNewUserDemo()
+    const cachedPlan = personalPlanAllowed ? getCachedActiveUserPlan() : null
     const globalCache = demoMode ? [] : getCachedTrainingBlocks() ?? []
     const cachedBlocks = selectPlanBlocks(globalCache, cachedPlan, signedIn, demoMode)
     const apply = (
@@ -1254,7 +1255,7 @@ export default function WorkoutPlan({
       if (cachedBlocks.length) apply(exercises, entries, cachedBlocks, true, !!cachedPlan)
       void Promise.all([
         demoMode ? loadDemoBlocks() : fetchTrainingBlocks(),
-        signedIn ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
+        personalPlanAllowed ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
         signedIn ? fetchExerciseSwaps().catch(() => null) : Promise.resolve(null),
       ]).then(([globalBlocks, activePlan, remoteSwaps]) => {
         if (cancelled) return

@@ -29,7 +29,7 @@ export async function buildMyPlan(
   catalogue: Pick<Exercise, 'id' | 'primaryMuscle'>[],
   language: Language = 'en',
   today: Date = new Date(),
-  options: { startsOnFirstLog?: boolean } = {},
+  options: { startsOnFirstLog?: boolean; useAi?: boolean } = {},
 ): Promise<BuiltPlan> {
   const choice = selectTemplate(goal)
   // First run starts on the first logged set (PT spec 2026-11-01 §2); Profile regeneration keeps next Monday (W16).
@@ -38,6 +38,8 @@ export async function buildMyPlan(
   const rulePlan = personalizeTemplate(options.startsOnFirstLog ? { ...templateBlock, startsOnFirstLog: true } : templateBlock, goal, catalogue)
   let block = rulePlan
   let source: BuiltPlan['source'] = 'rules'
+  // The new-user demo has no account, so it never asks the AI (and never opens the consent sheet).
+  if (options.useAi === false) return { templateId: choice.templateId, startDate, block, source, cappedForBeginner: choice.cappedForBeginner }
   try {
     const { answer } = await requestBlockPlan(rulePlan, language)
     const adjustments = parseAiAdjustments(answer)
