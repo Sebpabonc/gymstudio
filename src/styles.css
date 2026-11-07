@@ -753,6 +753,57 @@ button {
   line-height: 1.05rem;
 }
 
+.first-run-survey-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.first-run-progress-label {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.first-run-progress {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+.first-run-progress i {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--panel-strong);
+}
+
+.first-run-progress i.on {
+  background: var(--nav-active);
+}
+
+.first-run-question legend {
+  margin-bottom: 14px;
+}
+
+.first-run-question legend h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--type-card-size);
+  line-height: var(--type-card-lh);
+  font-weight: var(--type-card-weight);
+}
+
+.first-run-question .profile-choice {
+  min-height: 56px;
+}
+
+.first-run-cta .secondary-button {
+  width: 100%;
+  margin-top: 8px;
+}
+
 .first-run-cta {
   position: sticky;
   bottom: 0;

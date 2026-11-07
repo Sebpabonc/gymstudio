@@ -12,37 +12,47 @@ import { FirstRunQuestions, PlanReadyCard } from './FirstRunScreen'
 import { loadSpanishContent } from '../i18n/content'
 import type { BuiltPlan } from '../plans/buildMyPlan'
 
-describe('FirstRunQuestions', () => {
-  it('shows the safety notice and all six questions with nothing preselected', () => {
+describe('FirstRunQuestions (survey, one question per screen)', () => {
+  const none = { onAnswered: () => undefined, onHaveAccount: () => undefined }
+
+  it('opens on a welcome with the full safety notice before the first question', () => {
     language = 'es'
-    const html = renderToStaticMarkup(<FirstRunQuestions onAnswered={() => undefined} onHaveAccount={() => undefined} />)
+    const html = renderToStaticMarkup(<FirstRunQuestions {...none} />)
+    expect(html).toContain('Armemos tu plan')
     expect(html).toContain('Entrena con seguridad')
     expect(html).toContain('Tu plan puede esperar.')
-    for (const label of ['¿Qué quieres lograr?', 'Experiencia', 'Días por semana', 'Equipo', 'Duración de la sesión', 'Nivel de actividad']) {
-      expect(html).toContain(`<legend>${label}</legend>`)
-    }
-    expect(html).not.toContain('aria-pressed="true"')
-    // QA #63: the fieldset legend names each group once; no inner role=group repeating it.
-    expect(html).not.toContain('role="group"')
-    expect(html).toContain('Te faltan 6')
+    expect(html).toContain('>Empezar<')
     expect(html).toContain('Ya tengo cuenta')
+    expect(html).not.toContain('<fieldset')
+  })
+
+  it('resumes at the first unanswered question, one question per screen, nothing preselected there', () => {
+    language = 'es'
+    const html = renderToStaticMarkup(<FirstRunQuestions {...none} initialAnswers={{ goal: 'muscle', experience: 'beginner' } as never} />)
+    expect(html).toContain('Pregunta 3 de 6')
+    expect(html).toContain('¿Cuántos días a la semana puedes entrenar?')
+    expect(html.match(/<fieldset/g)).toHaveLength(1)
+    expect(html).not.toContain('aria-pressed="true"')
+    expect(html).toContain('Entrena con seguridad')
   })
 
   it('Q22: activity options carry their helper lines in English and Spanish', () => {
+    const five = { goal: 'muscle', experience: 'beginner', daysPerWeek: 3, equipment: 'home', sessionMinutes: 45 } as never
     language = 'en'
-    const en = renderToStaticMarkup(<FirstRunQuestions onAnswered={() => undefined} onHaveAccount={() => undefined} />)
+    const en = renderToStaticMarkup(<FirstRunQuestions {...none} initialAnswers={five} />)
+    expect(en).toContain('How much do you move outside your workouts?')
     expect(en).toContain('<span>High</span><small>Outside your workouts, you have a physical job')
     language = 'es'
-    const es = renderToStaticMarkup(<FirstRunQuestions onAnswered={() => undefined} onHaveAccount={() => undefined} />)
+    const es = renderToStaticMarkup(<FirstRunQuestions {...none} initialAnswers={five} />)
     expect(es).toContain('<span>Alto</span><small>Fuera de tus entrenamientos, tienes un trabajo físico')
-    expect(es).toContain('<span>En casa</span><small>Mancuernas y un banco ajustable.</small>')
   })
 
-  it('restores saved answers after a reload', () => {
+  it('restores a complete set of answers on the last question, ready to continue', () => {
     language = 'en'
     const goal = { goal: 'muscle', daysPerWeek: 4, experience: 'beginner', activityLevel: 'high', sessionMinutes: 60, equipment: 'home', notes: '' } as const
-    const html = renderToStaticMarkup(<FirstRunQuestions initialAnswers={goal} onAnswered={() => undefined} onHaveAccount={() => undefined} />)
-    expect(html.match(/aria-pressed="true"/g)).toHaveLength(6)
+    const html = renderToStaticMarkup(<FirstRunQuestions {...none} initialAnswers={goal} />)
+    expect(html).toContain('Question 6 of 6')
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
     expect(html).toContain('>Continue<')
   })
 })
