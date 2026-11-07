@@ -24,6 +24,21 @@ Two changes only, no other rule change:
    (dumbbell/kettlebell 2 kg, everything else 2.5 kg) and land on that grid, instead of a fixed
    +1 / +2.5 / +5 kg. Example: an 8 kg dumbbell lateral raise goes to 10 kg, never 9 kg.
 
+3. PT pre-merge review: the reduce explanation (`workout.nextTarget.why.reduce`) says
+   EN "Two or more sets were at least 3 reps short; lower the weight by 5–10%, at least one step (2 kg for dumbbells and kettlebells, 2.5 kg for everything else)."
+   ES "Dos o más series quedaron al menos 3 reps por debajo del objetivo; baja el peso un 5–10 %, como mínimo un salto (2 kg en mancuernas y kettlebells, 2,5 kg en todo lo demás)."
+4. Band work without added load (engine and custom plans) uses `workout.trainer.reason.no_load_add_reps`:
+   EN "No added load: add reps before adding weight ({reps} last time)." ES "Sin carga añadida: suma repeticiones antes de agregar peso ({reps} la última vez)."
+
+## Why this weight (PT pre-merge review, workout-mode branch)
+
+- The reason describes the session the engine used (the latest, any plan day). When that is another plan day than today's,
+  a line goes first: EN "Based on your last session: {dayName}, {date}." ES "Según tu última sesión: {dayName}, {date}."
+- "Last time:" under the sets keeps the same-target session; when it is another plan day it reads
+  EN "Last {dayName}: {weight} kg × {reps}" ES "Último {dayName}: {weight} kg × {reps}".
+- A rep-target change with the same top load says EN "Kept {weight} kg for today's {todayTarget}-rep target."
+  ES "Mantuve {weight} kg para el objetivo de {todayTarget} repeticiones de hoy." A lower load keeps "I adjusted the load from…".
+
 ## Templates (`templates/*.json`, `es/templates.json`)
 
 - "How to progress" / "Cómo progresar" (all templates) ends with the beginner line:

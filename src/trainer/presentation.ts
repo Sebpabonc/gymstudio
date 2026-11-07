@@ -19,6 +19,7 @@ const reasonTranslations: Record<ReasonCode, TranslationKey> = {
   incomplete_session: 'workout.trainer.reason.incomplete_session',
   light_load_add_reps: 'workout.trainer.reason.light_load_add_reps',
   bodyweight_add_reps: 'workout.trainer.reason.bodyweight_add_reps',
+  no_load_add_reps: 'workout.trainer.reason.no_load_add_reps',
   double_angle: 'workout.trainer.reason.double_angle',
   consolidate_load: 'workout.trainer.reason.consolidate_load',
   achieved_floor: 'workout.trainer.reason.achieved_floor',
@@ -61,12 +62,18 @@ export function trainerReasonParts(
   todayTarget: RepRange = target,
 ): { comparison?: string; lines: string[] } {
   const evidence = recommendation.evidence
-  const key = isRepTargetAdjustment(recommendation, target)
-    ? reasonTranslations.converted_rep_range
+  const repTargetChange = isRepTargetAdjustment(recommendation, target)
+  // PT super-QA review 2026-11-07: an unchanged load is "kept", never "adjusted from".
+  const kept = repTargetChange && !!recommendation.weight && recommendation.weight === evidence.lastWeight && !recommendation.setWeights
+  const key = kept ? 'workout.trainer.reason.kept_for_target'
+    : repTargetChange ? reasonTranslations.converted_rep_range
     : reasonTranslations[recommendation.reason]
   const recentMiss = evidence.recentMiss
   const sameDayMiss = (recommendation.reason === 'below_target_once' || recommendation.reason === 'slightly_below_target') &&
     evidence.sameDayTarget?.min === target.min && evidence.sameDayTarget.max === target.max
+  const withBasis = (lines: string[]) => evidence.lastOtherDayName && evidence.lastDate
+    ? [t('workout.trainer.basedOnLast', { dayName: evidence.lastOtherDayName, date: formatWeekdayDate(language, evidence.lastDate) }), ...lines]
+    : lines
   const reason = t(key, {
     reps: recommendation.reason === 'recent_miss_cap' && recentMiss
       ? formatNumber(language, recentMiss.reps)
@@ -136,12 +143,12 @@ export function trainerReasonParts(
       reps: evidence.sameDayReps?.map((reps) => formatNumber(language, reps)).join(' · ') ?? '',
       change,
     })
-    return { comparison, lines: [reason] }
+    return { comparison, lines: withBasis([reason]) }
   }
 
   return evidence.lastWeight !== undefined && evidence.lastGridWeight !== undefined
     ? { lines: [reason, offGridNote(t, language, evidence.lastWeight, evidence.lastGridWeight)] }
-    : { lines: [reason] }
+    : { lines: withBasis([reason]) }
 }
 
 export function trainerReason(

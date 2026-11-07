@@ -14,6 +14,8 @@ export type NextTarget = {
   firstSetAboveTarget: boolean
   /** Best reps on the logged sets (used by the add_reps reason). */
   topReps?: number
+  /** Band work gets the no-added-load text instead of the bodyweight one (PT super-QA review 2026-11-07). */
+  band?: boolean
 }
 
 export function recommendNextTarget(
@@ -58,6 +60,7 @@ export function recommendNextTarget(
   if (isBodyweight(equipment) && weight === 0) {
     return {
       action: 'add_reps',
+      ...(equipment === 'band' ? { band: true } : {}),
       weight: 0,
       reps: plannedReps,
       setCount: plannedReps.length,

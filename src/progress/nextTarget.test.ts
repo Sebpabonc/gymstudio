@@ -107,8 +107,9 @@ describe('recommendNextTarget', () => {
   })
 
   it('snaps an off-grid dumbbell weight back onto the 2 kg step', () => {
+    // PT review: exact result for 9 kg, all sets hit.
     expect(recommendNextTarget([{ weight: 9, reps: 10 }], [10], 'upper', false, 'dumbbell'))
-      .toMatchObject({ action: 'increase', weight: 10 })
+      .toMatchObject({ action: 'increase', weight: 10, increaseKg: 1 })
   })
 
   it('reduces a dumbbell lift onto the 2 kg step', () => {
@@ -116,6 +117,10 @@ describe('recommendNextTarget', () => {
       [{ weight: 20, reps: 10 }, { weight: 20, reps: 6 }, { weight: 20, reps: 6 }], [10, 10, 10], 'upper', false, 'dumbbell'
     )
     expect(target).toMatchObject({ action: 'reduce', weight: 18 })
+  })
+
+  it('marks band work without load so the card says "no added load"', () => {
+    expect(recommendNextTarget([{ weight: 0, reps: 15 }], [15], 'upper', false, 'band')).toMatchObject({ action: 'add_reps', band: true })
   })
 
   // PT super-QA 2026-11-07 (F7): bodyweight never shows a kg target.

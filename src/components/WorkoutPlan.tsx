@@ -1591,7 +1591,7 @@ export default function WorkoutPlan({
     }).filter((reps) => reps > 0)
 
   const getNextTargetWhy = (target: NextTarget) => {
-    if (target.action === 'add_reps') return t('workout.trainer.reason.bodyweight_add_reps', { reps: target.topReps ?? 0 })
+    if (target.action === 'add_reps') return t(target.band ? 'workout.trainer.reason.no_load_add_reps' : 'workout.trainer.reason.bodyweight_add_reps', { reps: target.topReps ?? 0 })
     if (target.action === 'deload') return t('workout.nextTarget.why.deload')
     if (target.action === 'reduce') return t('workout.nextTarget.why.reduce')
     if (target.action === 'increase' && target.firstSetAboveTarget) {
@@ -4315,7 +4315,15 @@ export default function WorkoutPlan({
                     {activeIndex === setCount - 1 && !draft.setDone[activeIndex] && /\b(last|final)\s+set\b/i.test(exercise.notes ?? '') &&
                       /\b(myo[- ]reps?|rest[- ]pause|partials?)\b/i.test(exercise.notes ?? '') &&
                       activeBlockWeek !== 1 && activeBlockWeek !== 6 && <p className="effortless-hint">{t('workout.run.extraThenDone')}</p>}
-                    {lastSets.length > 0 && <p className="effortless-last">{t('workout.run.lastTime')}: {lastSets.map((set) => `${formatNumber(language, set.weight)} kg × ${formatNumber(language, set.reps)}`).join(', ')}</p>}
+                    {lastSets.length > 0 && (() => {
+                      // PT super-QA review 2026-11-07: name the plan day when the last same-target session was another day.
+                      const otherDay = comparable?.dayKey && comparable.dayKey !== activeDay?.key
+                        ? activeBlock?.days.find((day) => day.key === comparable.dayKey) : undefined
+                      const sets = lastSets.map((set) => `${formatNumber(language, set.weight)} kg × ${formatNumber(language, set.reps)}`).join(', ')
+                      return <p className="effortless-last">{otherDay
+                        ? t('workout.run.lastDay', { dayName: otherDay.name, sets })
+                        : `${t('workout.run.lastTime')}: ${sets}`}</p>
+                    })()}
                   </section>
                   {logged && <p className="effortless-logged" role="status">{workoutFinished ? t('workout.status.done') : t('workout.run.partial', { done: logged.sets.length, total: setCount })}</p>}
                   <details className="workout-trend-details" open={trendOpen} onToggle={(event) => {
