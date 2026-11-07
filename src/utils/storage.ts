@@ -612,6 +612,7 @@ type CatalogueRow = {
   equipment: string | null
   mechanic: 'compound' | 'isolation' | null
   movement_pattern?: string | null
+  laterality?: 'bilateral' | 'unilateral' | null
   posture_tips: string[] | null
   squeeze_cue: string | null
   aliases: string[]
@@ -933,7 +934,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
     const { data, error } = await supabaseClient
       .from('exercises')
       .select(
-        'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, mechanic, movement_pattern, posture_tips, squeeze_cue, aliases'
+        'id, name_en, name_es, body_region, primary_muscle, primary_muscles, secondary_muscles, equipment, mechanic, movement_pattern, laterality, posture_tips, squeeze_cue, aliases'
       )
       .eq('is_active', true)
       .order('name_en')
@@ -956,6 +957,7 @@ async function fetchCatalogueData(): Promise<{ exercises: Exercise[]; aliases: R
         equipment: row.equipment ?? undefined,
         mechanic: row.mechanic ?? undefined,
         movementPattern: row.movement_pattern ?? undefined,
+        laterality: row.laterality ?? undefined,
         postureTips: row.posture_tips ?? undefined,
         squeezeCue: row.squeeze_cue ?? undefined,
       }

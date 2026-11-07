@@ -1778,7 +1778,8 @@ export default function WorkoutPlan({
     const target = loggingTargetRange(exercise.repsPerSet ?? [exercise.reps ?? '8'])
     const planned = activeDay.exercises.find((item) => item.exerciseId === exercise.exerciseId)
     const plannedSets = planned?.sets ?? getDefaultSetCount(exercise)
-    const equipment = exerciseCatalog.find((item) => item.id === exercise.exerciseId)?.equipment
+    const catalogueEntry = exerciseCatalog.find((item) => item.id === exercise.exerciseId)
+    const equipment = catalogueEntry?.equipment
     const { evidence, recommendation } = recommendForExercise({
       history,
       exerciseId: exercise.exerciseId,
@@ -1798,6 +1799,8 @@ export default function WorkoutPlan({
         exerciseId: exercise.exerciseId,
         tempo: /\btempo\b/i.test(exercise.notes ?? ''),
         followLoad: followLoadFor(exercise),
+        // PT 2026-11-07: a first exposure gets a general starting load from the catalogue and the experience answer.
+        starting: { exercise: catalogueEntry, experience: activeBlock.experience },
         calibrationOffset: computeCalibration(
           calibrationExposures,
           today,

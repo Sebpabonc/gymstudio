@@ -20,6 +20,7 @@ export type Exercise = {
   secondaryMuscles?: string[]
   equipment?: string
   movementPattern?: string
+  laterality?: 'bilateral' | 'unilateral'
   postureTips?: string[]
   squeezeCue?: string
   notes?: string
@@ -99,4 +100,6 @@ export type TrainingBlock = {
   startsOnFirstLog?: boolean
   /** Set once, on the first logged set; it then becomes `startDate`. */
   firstLoggedOn?: string
+  /** The first-run experience answer, for the PT's first-session starting loads (2026-11-07). */
+  experience?: 'beginner' | 'intermediate' | 'advanced'
 }
