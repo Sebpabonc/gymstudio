@@ -32,3 +32,13 @@ export function formatNumber(language: Language, value: number, options?: Intl.N
   const locale = language === 'es' ? 'es-ES' : localeFor(language)
   return new Intl.NumberFormat(locale, { useGrouping: true, ...options }).format(value)
 }
+
+/** Formats message parameters for the locale: numbers with the locale's decimal mark, ISO `date` values as "Mon 5 Oct". */
+export function formatMessageParams(language: Language, params: Record<string, string | number>) {
+  return Object.fromEntries(Object.entries(params).map(([key, value]) => [
+    key,
+    typeof value === 'number'
+      ? formatNumber(language, value)
+      : key === 'date' && /^\d{4}-\d{2}-\d{2}/.test(value) ? formatWeekdayDate(language, value) : value,
+  ]))
+}

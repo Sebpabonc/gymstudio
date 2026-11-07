@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { AuthStatus } from '../auth/AuthProvider'
-import { formatNumber, formatShortDate, useT } from '../i18n'
+import { formatMessageParams, formatNumber, formatShortDate, useT } from '../i18n'
 import { localizeBlocks, useSpanishContentReady } from '../i18n/content'
 import { localIsoDate } from '../lib/dates'
 import { isDemoMode, isNewUserDemo } from '../utils/demoMode'
@@ -794,7 +794,7 @@ export default function ProgressScreen({
 
   const renderWatch = (watch: WatchObservation) => (
     <li key={`${watch.exerciseId}-${watch.code}`}>
-      <strong>{displayName(watch.exerciseId)}:</strong> {t(WATCH_KEYS[watch.code], watch.params)}
+      <strong>{displayName(watch.exerciseId)}:</strong> {t(WATCH_KEYS[watch.code], formatMessageParams(language, watch.params))}
     </li>
   )
 
@@ -882,7 +882,7 @@ export default function ProgressScreen({
       <section className="card pv3-card">
         <h3>{t('progress.v3.consistency.title')} · {t('progress.v3.muscles.title')}</h3>
         {currentAdherence !== null
-          ? <p>{t('progress.v3.overview.consistency', {
+          ? <p>{t(consistencyData.currentStreak === 1 ? 'progress.v3.overview.consistency.one' : 'progress.v3.overview.consistency', {
               adherence: formatNumber(language, currentAdherence * 100, { maximumFractionDigits: 0 }),
               streak: formatNumber(language, consistencyData.currentStreak),
             })}</p>
@@ -911,23 +911,26 @@ export default function ProgressScreen({
     const mainChangeText = averageMainChange === null ? '—' : `${averageMainChange > 0 ? '+' : ''}${formatNumber(language, averageMainChange, { maximumFractionDigits: 1 })}%`
     const currentOverloadText = overload?.rate === null || overload?.rate === undefined ? '—' : `${formatNumber(language, Math.round(overload.rate * 100))}%`
     const previousOverloadText = previousOverload.rate === null ? '—' : `${formatNumber(language, Math.round(previousOverload.rate * 100))}%`
+    const previousLabel = (value: string) => t('progress.v3.trends.previous', { value })
+    const showPreviousBlock = blockComparisons.some((row) => !row.newInBlock)
     const windowStart = rangeStart(range, today, activeBlock, progressEntries)
     const windowEnd = rangeEnd(range, today, activeBlock)
     const rangeLiftIds = [...new Set([...mainLiftIds, ...allLiftIds])]
       .filter((id) => (historyByLift.get(id) ?? []).some((session) => session.date >= windowStart && session.date <= windowEnd))
     return (
       <>
-        <SegmentedRange range={range} onChange={setRange} t={t} />
+        {/* Always a fixed 4-week comparison, so it sits above the range control that drives the cards below. */}
         <section className="card pv3-card">
           <h3>{t('progress.v3.trends.compare')}</h3>
           <div className="pv3-chip-grid">
-            <MetricChip label={t('progress.v3.trends.trainingDays')} current={formatNumber(language, currentDays)} previous={`${t('progress.v3.trends.notEnough')}: ${formatNumber(language, previousDays)}`} />
-            <MetricChip label={t('progress.v3.trends.adherence')} current={currentAdherenceText} previous={previousAdherenceText} />
-            <MetricChip label={t('progress.v3.trends.mainLift')} current={mainChangeText} previous="—" />
-            <MetricChip label={t('progress.v3.trends.overload')} current={currentOverloadText} previous={previousOverloadText} />
+            <MetricChip label={t('progress.v3.trends.trainingDays')} current={formatNumber(language, currentDays)} previous={previousLabel(previousDays ? formatNumber(language, previousDays) : '—')} />
+            <MetricChip label={t('progress.v3.trends.adherence')} current={currentAdherenceText} previous={previousLabel(previousAdherenceText)} />
+            <MetricChip label={t('progress.v3.trends.mainLift')} current={mainChangeText} previous={previousLabel('—')} />
+            <MetricChip label={t('progress.v3.trends.overload')} current={currentOverloadText} previous={previousLabel(previousOverloadText)} />
           </div>
           {overload?.rate === null && <p className="pv3-caption">{t('progress.v3.unlock.equivalent', { count: formatNumber(language, overload.comparable) })}</p>}
         </section>
+        <SegmentedRange range={range} onChange={setRange} t={t} />
         <section className="card pv3-card">
           <h3>{t('progress.v3.trends.strength')}</h3>
           {mainLiftIds.map((id) => {
@@ -947,10 +950,10 @@ export default function ProgressScreen({
           <h3>{t('progress.v3.trends.blockCompare')}</h3>
           {blockComparisons.length ? (
             <div className="pv3-table-wrap">
-              <table className="pv3-table">
+              <table className={showPreviousBlock ? 'pv3-table pv3-table-with-previous' : 'pv3-table'}>
                 <thead><tr>
                   <th>{t('progress.strength.exercise')}</th>
-                  <th>{t('progress.v3.trends.previousBlock')}</th>
+                  {showPreviousBlock && <th>{t('progress.v3.trends.previousBlock')}</th>}
                   <th>{t('progress.v3.trends.blockStart')}</th>
                   <th>{t('progress.v3.trends.blockEnd')}</th>
                 </tr></thead>
@@ -958,9 +961,9 @@ export default function ProgressScreen({
                   {blockComparisons.map((row) => (
                     <tr key={row.exerciseId}>
                       <th scope="row">{displayName(row.exerciseId)}</th>
-                      <td>{row.newInBlock ? t('progress.v3.trends.newBlock') : bestSetText(language, row.previousEndBestSet)}</td>
-                      <td>{bestSetText(language, row.startBestSet)}</td>
-                      <td>
+                      {showPreviousBlock && <td data-label={t('progress.v3.trends.previousBlock')}>{row.newInBlock ? t('progress.v3.trends.newBlock') : bestSetText(language, row.previousEndBestSet)}</td>}
+                      <td data-label={t('progress.v3.trends.blockStart')}>{bestSetText(language, row.startBestSet)}</td>
+                      <td data-label={t('progress.v3.trends.blockEnd')}>
                         {bestSetText(language, row.endBestSet)}
                         {row.changePercent !== null && <small className="pv3-table-change"> {row.changePercent > 0 ? '+' : ''}{formatNumber(language, row.changePercent, { maximumFractionDigits: 1 })}%</small>}
                         {row.differentRepTarget && <small className="pv3-table-note">{t('progress.v3.trends.differentTarget')}</small>}
@@ -971,6 +974,7 @@ export default function ProgressScreen({
               </table>
             </div>
           ) : <p className="pv3-caption">{t('progress.v3.unlock.secondBlock')}</p>}
+          {blockComparisons.length > 0 && !showPreviousBlock && <p className="pv3-caption">{t('progress.v3.trends.allNew')}</p>}
           <p className="pv3-caption">{t('progress.v3.trends.blockNote')}</p>
         </section>
         <section className="card pv3-card">
@@ -999,6 +1003,27 @@ export default function ProgressScreen({
     const selectedWeeks = (muscles?.weeks ?? []).filter((week) => week.weekStart >= startDate)
     const visibleWeeks = selectedWeeks.slice(-12)
     const groupNames = muscles?.groups ?? []
+    const weekBlock = (weekStart: string) => {
+      const weekTime = dateValue(weekStart)
+      return blocks.find((block) =>
+        weekTime < dateValue(block.startDate) + block.weeks * 7 * 86_400_000
+        && weekTime + 7 * 86_400_000 > dateValue(block.startDate)
+      )
+    }
+    const weekNumberLabel = (weekStart: string) => {
+      const block = weekBlock(weekStart)
+      return block
+        ? `${t('progress.v3.muscles.week')}${formatNumber(language, Math.max(1, Math.floor((dateValue(weekStart) - dateValue(block.startDate)) / (7 * 86_400_000)) + 1))}`
+        : formatShortDate(language, weekStart)
+    }
+    // Block names are shown once for the whole chart instead of wrapping inside a narrow week column.
+    const blockStarts = visibleWeeks.flatMap((week) => {
+      const block = weekBlock(week.weekStart)
+      const weekTime = dateValue(week.weekStart)
+      return block && dateValue(block.startDate) >= weekTime && dateValue(block.startDate) < weekTime + 7 * 86_400_000
+        ? [{ key: `${block.id}-${week.weekStart}`, text: t('progress.v3.muscles.blockStart', { week: weekNumberLabel(week.weekStart), block: block.name }) }]
+        : []
+    })
     return (
       <>
         <SegmentedRange range={range} onChange={setRange} t={t} />
@@ -1006,6 +1031,7 @@ export default function ProgressScreen({
           <h3>{t('progress.v3.muscles.title')}</h3>
           <p className="pv3-caption">{t('progress.v3.muscles.legend')}</p>
           <p className="pv3-caption">{t('progress.v3.muscles.scale')}</p>
+          {blockStarts.map((item) => <p className="pv3-caption pv3-block-start" key={item.key}>{item.text}</p>)}
           {groupNames.length ? groupNames.map((group) => {
             const average = muscles?.averages[group]
             const title = t(MUSCLE_KEYS[group])
@@ -1036,17 +1062,6 @@ export default function ProgressScreen({
                 <div className="pv3-week-bars" style={{ gridTemplateColumns: `repeat(${Math.max(visibleWeeks.length, 1)}, minmax(0, 1fr))` }}>
                   {visibleWeeks.map((week) => {
                     const value = week.values[group] ?? 0
-                    const weekTime = dateValue(week.weekStart)
-                    const weekBlock = blocks.find((block) =>
-                      weekTime < dateValue(block.startDate) + block.weeks * 7 * 86_400_000
-                      && weekTime + 7 * 86_400_000 > dateValue(block.startDate)
-                    )
-                    const blockStartThisWeek = weekBlock
-                      && dateValue(weekBlock.startDate) >= weekTime
-                      && dateValue(weekBlock.startDate) < weekTime + 7 * 86_400_000
-                    const weekNumber = weekBlock
-                      ? Math.max(1, Math.floor((weekTime - dateValue(weekBlock.startDate)) / (7 * 86_400_000)) + 1)
-                      : null
                     return (
                       <div className="pv3-week-column" key={`${group}-${week.weekStart}`} title={`${weekDateLabel(language, week.weekStart)}: ${formatNumber(language, value)}`}>
                         <strong>{value ? formatNumber(language, value, { maximumFractionDigits: 1 }) : '–'}</strong>
@@ -1057,9 +1072,12 @@ export default function ProgressScreen({
                             style={{ height: `${Math.min(value / 30, 1) * 100}%` }}
                           />
                         </div>
-                        <small>{weekNumber === null ? formatShortDate(language, week.weekStart) : `${t('progress.v3.muscles.week')}${formatNumber(language, weekNumber)}`}</small>
-                        <small className="pv3-week-block" title={blockStartThisWeek ? weekBlock.name : undefined}>{blockStartThisWeek ? weekBlock.name : ''}</small>
-                        <small>{week.deload ? t('progress.v3.muscles.deload') : value === 0 ? t('progress.v3.muscles.noTraining') : formatShortDate(language, week.weekStart)}</small>
+                        <small>{weekNumberLabel(week.weekStart)}</small>
+                        <small>{week.deload
+                          ? t('progress.v3.muscles.deload')
+                          : value === 0
+                            ? t(week.complete ? 'progress.v3.muscles.noTraining' : 'progress.v3.muscles.thisWeek')
+                            : formatShortDate(language, week.weekStart)}</small>
                       </div>
                     )
                   })}
@@ -1073,32 +1091,36 @@ export default function ProgressScreen({
     )
   }
 
-  const renderConsistency = () => (
+  const renderConsistency = () => {
+    const weeksText = (count: number) => t(count === 1 ? 'progress.v3.consistency.weeks.one' : 'progress.v3.consistency.weeks.other', {
+      count: formatNumber(language, count),
+    })
+    const blockForWeek = (weekStart: string) => blocks.find((item) => {
+      const startTime = dateValue(item.startDate)
+      return dateValue(weekStart) >= startTime && dateValue(weekStart) < startTime + item.weeks * 7 * 86_400_000
+    })
+    return (
     <>
-      {consistencyData.adherenceFourWeeks === null
-        ? <section className="card pv3-card"><h3>{t('progress.v3.consistency.title')}</h3><p className="pv3-caption">{t('progress.v3.consistency.unlock', { count: formatNumber(language, completeWeeks.length) })}</p></section>
-        : <section className="card pv3-card">
-            <h3>{t('progress.v3.consistency.title')}</h3>
-            <div className="pv3-consistency-summary">
-              <div><strong>{formatNumber(language, consistencyData.currentStreak)} {t('progress.v3.consistency.weeks')}</strong><span>{t('progress.v3.consistency.currentStreak')}</span></div>
-              <div><strong>{formatNumber(language, consistencyData.longestStreak)} {t('progress.v3.consistency.weeks')}</strong><span>{t('progress.v3.consistency.longestStreak')}</span></div>
-              <div><strong>{formatNumber(language, consistencyData.adherenceFourWeeks * 100, { maximumFractionDigits: 0 })}%</strong><span>{t('progress.v3.consistency.adherence4w')}</span></div>
-            </div>
-          </section>}
       <section className="card pv3-card">
         <h3>{t('progress.v3.consistency.title')}</h3>
+        {consistencyData.adherenceFourWeeks === null
+          ? <p className="pv3-caption">{t('progress.v3.consistency.unlock', { count: formatNumber(language, completeWeeks.length) })}</p>
+          : <div className="pv3-consistency-summary">
+              <div><strong>{weeksText(consistencyData.currentStreak)}</strong><span>{t('progress.v3.consistency.currentStreak')}</span></div>
+              <div><strong>{weeksText(consistencyData.longestStreak)}</strong><span>{t('progress.v3.consistency.longestStreak')}</span></div>
+              <div><strong>{formatNumber(language, consistencyData.adherenceFourWeeks * 100, { maximumFractionDigits: 0 })}%</strong><span>{t('progress.v3.consistency.adherence4w')}</span></div>
+            </div>}
         <div className="pv3-consistency-weeks">
-          {consistencyData.weeks.slice(-12).map((week) => {
-            const block = blocks.find((item) => {
-              const startTime = dateValue(item.startDate)
-              return dateValue(week.weekStart) >= startTime && dateValue(week.weekStart) < startTime + item.weeks * 7 * 86_400_000
-            })
+          {consistencyData.weeks.slice(-12).map((week, index, list) => {
+            const block = blockForWeek(week.weekStart)
+            const previousBlock = index > 0 ? blockForWeek(list[index - 1].weekStart) : undefined
             const percent = week.adherence === null ? null : Math.round(week.adherence * 100)
             return (
-              <div className="pv3-consistency-week" key={week.weekStart}>
+              <React.Fragment key={week.weekStart}>
+              {block && block.id !== previousBlock?.id && <h4 className="pv3-consistency-block">{block.name}</h4>}
+              <div className="pv3-consistency-week">
                 <div className="pv3-consistency-week-label">
                   <strong>{t('progress.v3.consistency.week', { number: block ? Math.max(1, Math.floor((dateValue(week.weekStart) - dateValue(block.startDate)) / (7 * 86_400_000)) + 1) : formatShortDate(language, week.weekStart) })}</strong>
-                  {block && <small title={block.name}>{block.name}</small>}
                 </div>
                 <div className="pv3-day-dots" aria-label={week.plannedDays ? t('progress.v3.consistency.days', {
                   done: week.loggedPlannedDays,
@@ -1123,6 +1145,7 @@ export default function ProgressScreen({
                 </span>
                 {week.sessions > week.loggedPlannedDays && <small>{t('progress.v3.consistency.sessions', { count: week.sessions })}</small>}
               </div>
+              </React.Fragment>
             )
           })}
         </div>
@@ -1150,6 +1173,7 @@ export default function ProgressScreen({
       </details>
     </>
   )
+  }
 
   const renderDetail = () => {
     if (!selectedExercise || !selectedTrend) return null

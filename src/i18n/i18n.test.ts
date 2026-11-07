@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { en } from './en'
 import { es } from './es'
 import { dictionaries, createTranslator, detectLanguage, translate } from './translate'
-import { formatNumber, formatShortDate, formatWeekdayDate } from './format'
+import { formatMessageParams, formatNumber, formatShortDate, formatWeekdayDate } from './format'
 import { useT } from './LanguageProvider'
 import { filterExercises } from '../utils/exerciseFilters'
 import { getExerciseDisplayName } from '../utils/storage'
@@ -283,3 +283,33 @@ describe('Spanish exercise names', () => {
     expect(filterExercises([squat, noEs], 'back squat')).toEqual([squat])
   })
 })
+
+describe('formatMessageParams', () => {
+  it('formats numbers and ISO dates for the locale', () => {
+    expect(formatMessageParams('es', { weight: 82.5, target: 10, date: '2026-11-02', name: 'x' })).toEqual({
+      weight: '82,5',
+      target: '10',
+      date: formatWeekdayDate('es', '2026-11-02'),
+      name: 'x',
+    })
+    expect(formatMessageParams('en', { weight: 82.5 })).toEqual({ weight: '82.5' })
+  })
+
+  it('renders the Progress watch lines without a doubled prefix and with a decimal comma', () => {
+    const t = createTranslator('es')
+    const line = t('progress.v3.watch.W2', formatMessageParams('es', { target: 10, weight: 82.5 }))
+    expect(line).toBe('Todas las series llegaron a 10 reps con 82,5 kg.')
+    expect(es['progress.v3.watch.W1']).not.toContain('La última vez')
+    expect(en['progress.v3.watch.W1']).not.toContain('Last time')
+  })
+
+  it('pluralizes streak weeks', () => {
+    const t = createTranslator('es')
+    expect(t('progress.v3.consistency.weeks.one', { count: '1' })).toBe('1 semana')
+    expect(t('progress.v3.consistency.weeks.other', { count: '3' })).toBe('3 semanas')
+    expect(createTranslator('en')('progress.v3.consistency.weeks.one', { count: '1' })).toBe('1 week')
+    expect(t('progress.v3.overview.consistency.one', { adherence: '80', streak: '1' })).toContain('racha de 1 semana')
+    expect(t('progress.v3.overview.consistency.one', { adherence: '80', streak: '1' })).toMatch(/racha de 1 semana$/)
+  })
+})
+
