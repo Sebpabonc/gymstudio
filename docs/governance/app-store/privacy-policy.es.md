@@ -2,7 +2,9 @@
 Borrador de Governancer, 2026-11-07, para publicar en https://sebpabonc.github.io/gymstudio/privacy/ cuando el PO lo apruebe.
 No es asesoría legal; Governancer no es abogado. Cada frase describe la app al 2026-11-07 (fuentes: data-inventory.md y las notas del
 2026-11-07 en questions-for-po.md). Borrado de cuenta dentro de la app agregado el 2026-11-08 (supabase/functions/delete-account/index.ts,
-src/auth/AuthProvider.tsx). Actualizar cuando lleguen Iniciar sesión con Apple, las tareas de retención o un proveedor nuevo. Este texto prevalece para quienes usan la app en español (sección 14): revisarlo con el mismo cuidado
+src/auth/AuthProvider.tsx). Iniciar sesión con Apple (solo app para iPhone) agregado el 2026-11-08 (src/auth/appleSignIn.ts). La
+revocación de tokens de Apple al borrar la cuenta no está construida (brecha G4), así que esta política no dice nada de ella.
+Actualizar cuando lleguen las tareas de retención o un proveedor nuevo. Este texto prevalece para quienes usan la app en español (sección 14): revisarlo con el mismo cuidado
 que el inglés. Regla de documentos públicos: solo nombre del dueño y correo de la app; nunca dirección ni teléfono.
 -->
 
@@ -31,7 +33,7 @@ GymStudio es para personas de 18 años o más. La app para iPhone no se ofrece e
 
 | Datos | Ejemplos | Para qué los usamos |
 |---|---|---|
-| Datos de la cuenta | Tu correo y tu contraseña (nuestro proveedor de alojamiento solo guarda la contraseña cifrada con hash). Si inicias sesión con Google: tu nombre, correo, el enlace a tu foto de perfil de Google y el identificador que Google te asigna | Crear tu cuenta e iniciar sesión |
+| Datos de la cuenta | Tu correo y tu contraseña (nuestro proveedor de alojamiento solo guarda la contraseña cifrada con hash). Si inicias sesión con Google: tu nombre, correo, el enlace a tu foto de perfil de Google y el identificador que Google te asigna. Si usas Iniciar sesión con Apple (solo en la app para iPhone): el correo que Apple comparte con nosotros, que es una dirección de reenvío privada terminada en @privaterelay.appleid.com si eliges Ocultar mi correo; tu nombre, solo si lo compartes la primera vez que inicias sesión; y el identificador que Apple te asigna. No guardamos tokens de acceso ni de actualización de Apple | Crear tu cuenta e iniciar sesión |
 | Datos de entrenamiento | Ejercicios, fechas, pesos, repeticiones, series, repeticiones en reserva, hora de cada serie, objetivos del plan, tus notas de entrenamiento, ejercicios que creas | Hacer funcionar la app, sincronizarla entre tus dispositivos y mostrar tu progreso |
 | Datos de salud y actividad física | Peso corporal, pasos y calorías que escribes; tu objetivo de entrenamiento (como perder grasa o ganar músculo), días por semana, experiencia, nivel de actividad, duración de la sesión, equipo y las notas de objetivo que agregues | Crear y adaptar tu plan y mostrar tu progreso |
 | Planes y recomendaciones | Tus planes, cambios de ejercicio, las cargas que la app recomendó y si las usaste | Recomendar la carga de hoy y adaptarla a ti |
@@ -100,7 +102,7 @@ guarda como se explica arriba.
 | OpenAI | Redacta el texto de IA, solo si permites la IA (sección 5) | Estados Unidos |
 | Google | Envía nuestros correos de cuenta (confirmación y restablecimiento de contraseña) desde nuestra cuenta de Gmail, gymstudioapp@gmail.com, y guarda los correos que nos envías. Además, solo si los usas: el inicio de sesión con Google y los enlaces que abren una búsqueda de Google Imágenes de un ejercicio (solo la búsqueda llega a Google) | Estados Unidos y otros países donde opera Google |
 | GitHub | Aloja nuestra app web y estas páginas, y puede ver la dirección IP de quien las visita | Estados Unidos |
-| Apple | Distribuye la app para iPhone mediante el App Store y TestFlight, con sus propios términos y política de privacidad | Estados Unidos y otros países |
+| Apple | Distribuye la app para iPhone mediante el App Store y TestFlight, con sus propios términos y política de privacidad. Si usas Iniciar sesión con Apple, Apple confirma quién eres y nos envía un token de inicio de sesión firmado, que verifica nuestro proveedor de alojamiento; si elegiste Ocultar mi correo, Apple te reenvía nuestros correos de cuenta | Estados Unidos y otros países |
 | Autoridades y tribunales | Solo cuando la ley lo exige | |
 
 Sebastian Pabon puede acceder a los datos guardados cuando hace falta para dar soporte, corregir problemas o cumplir deberes legales.
@@ -138,7 +140,8 @@ medidas, planes, recomendaciones, cambios de ejercicio, comentarios y conteo de 
 sesión en ese dispositivo y borra de él los datos de esa cuenta.
 
 Si no puedes iniciar sesión, escribe a **gymstudioapp@gmail.com** desde el correo de tu cuenta de GymStudio (si usas Google, tu correo de
-Google), con el asunto "Borrar mi cuenta". Podemos pedirte que confirmes la solicitud, para asegurarnos de que viene de ti. Borramos tu
+Google; si usas Iniciar sesión con Apple con Ocultar mi correo, incluye la dirección de reenvío terminada en
+@privaterelay.appleid.com que Apple muestra para GymStudio en los ajustes de tu cuenta de Apple), con el asunto "Borrar mi cuenta". Podemos pedirte que confirmes la solicitud, para asegurarnos de que viene de ti. Borramos tu
 cuenta y todos sus datos en un plazo de **10 días** y te avisamos por correo cuando esté hecho.
 
 Las copias en respaldos y registros vencen como se indica en la sección 7. Los entrenamientos guardados en un teléfono sin iniciar sesión

@@ -1,7 +1,7 @@
 <!--
 Borrador de Governancer, 2026-11-07, para publicar en https://sebpabonc.github.io/gymstudio/support/ (Support URL del App Store) cuando el
 PO lo apruebe. La pauta 1.5 de Apple pide una forma fácil de contactarnos; la 2.1 prohíbe texto provisional. Se lee sin iniciar sesión.
-"Borrar tu cuenta" actualizado el 2026-11-08 por el borrado dentro de la app. Solo nombre del dueño y correo de la app; nunca dirección ni teléfono.
+"Borrar tu cuenta" actualizado el 2026-11-08 por el borrado dentro de la app; Iniciar sesión con Apple (solo iPhone) agregado el 2026-11-08. Solo nombre del dueño y correo de la app; nunca dirección ni teléfono.
 -->
 
 # Soporte de GymStudio
@@ -25,7 +25,8 @@ Tu cuenta y todos sus datos sincronizados se borran de inmediato, y no se puede 
 borra de él los datos de esa cuenta. Los entrenamientos guardados en el teléfono sin iniciar sesión (como invitado) se quedan en el teléfono.
 
 **¿No puedes iniciar sesión?** Escribe a **gymstudioapp@gmail.com** desde el correo de tu cuenta de GymStudio (si usas Google, tu correo de
-Google), con el asunto "Borrar mi cuenta". Podemos pedirte que confirmes la solicitud, para asegurarnos de que viene de ti. Borramos tu
+Google; si usas Iniciar sesión con Apple con Ocultar mi correo, incluye la dirección de reenvío terminada en @privaterelay.appleid.com
+que Apple muestra para GymStudio en los ajustes de tu cuenta de Apple), con el asunto "Borrar mi cuenta". Podemos pedirte que confirmes la solicitud, para asegurarnos de que viene de ti. Borramos tu
 cuenta y todos sus datos en un plazo de **10 días** y te avisamos por correo cuando esté hecho.
 
 Quitar la app no borra tu cuenta. Los detalles están en la
@@ -40,7 +41,7 @@ La IA es opcional y está apagada hasta que tocas **Permitir IA**. Para desactiv
 ## Preguntas frecuentes
 
 **¿Necesito una cuenta?** No para probar GymStudio; lo que registres se queda en tu dispositivo. Los planes, objetivos, medidas, la
-sincronización, los comentarios y la IA requieren una cuenta. Puedes registrarte con tu correo o con Google.
+sincronización, los comentarios y la IA requieren una cuenta. Puedes registrarte con tu correo o con Google, y en la app para iPhone también con Iniciar sesión con Apple.
 
 **¿Funciona sin conexión?** El registro sí, y tus datos se sincronizan cuando vuelves a conectarte. Iniciar sesión, crear planes nuevos y
 la IA necesitan conexión.

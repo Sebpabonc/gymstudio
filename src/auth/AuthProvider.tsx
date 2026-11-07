@@ -6,6 +6,7 @@ import { isDemoMode } from '../utils/demoMode'
 import { SyncSignInRequiredError, syncWorkoutHistory } from '../utils/sync'
 import { createSyncScheduler } from './syncScheduler'
 import { isNativeApp, listenForNativeAuthCallback, NATIVE_AUTH_CALLBACK, startNativeGoogleOAuth } from './nativeOAuth'
+import { signInWithAppleNative } from './appleSignIn'
 import {
   hasGuestWorkoutData,
   isGuestDataClaimed,
@@ -81,6 +82,7 @@ type AuthContextValue = {
   passwordRecovery: boolean
   updatePassword: (password: string) => Promise<ActionResult>
   signInWithGoogle: () => Promise<ActionResult>
+  signInWithApple: () => Promise<ActionResult>
   signOut: () => Promise<ActionResult>
   deleteAccount: () => Promise<ActionResult>
 }
@@ -328,6 +330,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return startGoogleOAuth(client, redirectTo)
   }, [])
 
+  const signInWithApple = useCallback(async () => {
+    const client = await getClient()
+    if (!client) return { error: 'Sign-in unavailable offline.' }
+    return { error: await signInWithAppleNative(client) }
+  }, [])
+
   const signOut = useCallback(async () => {
     const client = await getClient()
     if (!client) return { error: 'Sign-in unavailable offline.' }
@@ -376,6 +384,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     passwordRecovery,
     updatePassword,
     signInWithGoogle,
+    signInWithApple,
     signOut,
     deleteAccount,
   }), [
@@ -396,6 +405,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     passwordRecovery,
     updatePassword,
     signInWithGoogle,
+    signInWithApple,
     signOut,
     deleteAccount,
   ])
