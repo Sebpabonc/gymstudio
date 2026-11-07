@@ -171,4 +171,12 @@ describe('PT pre-merge review 2026-11-07', () => {
     }
     expect(lines(recommend({ ...base, equipment: 'machine', technique: 'straight' })).join(' ')).not.toContain('including the bar')
   })
+
+  it('PO 2026-11-07: pyramid lines no longer repeat "start light", and are Spanish in ES', () => {
+    const pyramid = recommend({ ...base, equipment: 'cable', technique: 'pyramid', target: rng(10, 14), setReps: [14, 12, 10] })
+    expect(lines(pyramid)[2]).toBe('Add about 10% each set as the reps drop.')
+    expect(lines(pyramid, 'es')[2]).toBe('Sube cerca de un 10% en cada serie a medida que bajan las reps.')
+    const reverse = recommend({ ...base, equipment: 'plate-loaded', technique: 'reverse-pyramid', target: rng(8, 12), setReps: [8, 10, 12] })
+    expect(lines(reverse, 'es')[2]).toBe('Luego quita cerca de un 10% en cada serie más liviana.')
+  })
 })
