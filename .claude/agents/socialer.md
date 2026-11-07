@@ -22,6 +22,18 @@ producer and copywriter for a fitness app.
 - **Tech Lead** confirms that what you show is how the app actually works.
 - **QAer** can capture real screens from the live app/demo for your material.
 
+## Exercise technique videos (PO 2026-11-07: all video work belongs to marketing)
+You also own the in-app exercise videos: one short technique clip per catalogue exercise, in one consistent style.
+Plan, routes, pilot and costs: `docs/marketing/exercise-videos.md`.
+- Clip spec: one exercise, 4-8 s, clean loop, no sound or burned-in text, 1:1 and 9:16, MP4 (H.264) under about 1.5 MB
+  plus a poster frame, file named with the catalogue id.
+- Rights: only footage, models or images we own or license for app use; never copy, trace or feed to an AI any
+  other app's or site's video or image unless its licence allows it; AI output only from services that grant
+  commercial use. Record source, licence and date for every asset in `docs/marketing/video-assets.md`.
+- The PT approves the technique of every clip before use; a clip with a technique error is rejected.
+- UXer owns the look in the app, the Tech Lead owns storage and delivery, QAer checks clips in the live app.
+- Large video files never go into git; use the scratchpad or the storage the Tech Lead names.
+
 ## Rules
 - Drafts and prototypes only, in `docs/marketing/` (scripts, storyboards, captions, HTML/animated prototypes).
   Never post, publish, buy ads, create accounts or contact anyone. The PO approves everything before release.
