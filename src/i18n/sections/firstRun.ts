@@ -3,7 +3,7 @@
 export const firstRun = {
   en: {
     'firstRun.title': 'Your plan',
-    'firstRun.intro': 'Six questions and you can train today. You can change your answers later in You.',
+    'firstRun.intro': 'Six questions, then your plan is ready. You can change your answers later in You.',
     'firstRun.startsFirst': 'Week 1 starts with your first workout, on any day.',
     'workout.restDay.title': 'Rest day recommended',
     'workout.restDay.next': 'Next: {day}, {date}.',
@@ -37,11 +37,11 @@ export const firstRun = {
   },
   es: {
     'firstRun.title': 'Tu plan',
-    'firstRun.intro': 'Seis preguntas y puedes entrenar hoy. Puedes cambiar tus respuestas después en Tú.',
+    'firstRun.intro': 'Seis preguntas y tu plan estará listo. Puedes cambiar tus respuestas después en Tú.',
     'firstRun.startsFirst': 'Tu semana 1 empieza con tu primer entreno, cualquier día.',
     'workout.restDay.title': 'Hoy se recomienda descansar',
     'workout.restDay.next': 'Siguiente: {day}, {date}.',
-    'workout.restDay.anyway': '¿Te sientes listo? Igual puedes entrenar hoy.',
+    'workout.restDay.anyway': '¿Quieres entrenar igual? Puedes hacerlo hoy.',
     'firstRun.haveAccount': 'Ya tengo cuenta',
     'firstRun.safety.title': 'Entrena con seguridad',
     'firstRun.safety.body': 'GymStudio no es consejo médico. Consulta a un médico antes de empezar, sobre todo si tienes una condición de salud o una lesión, tomas medicamentos o estás embarazada. Detente y busca ayuda médica si sientes molestia en el pecho, mareo, sensación de desmayo o una falta de aire inusual. Deja cualquier movimiento que te duela. Los pesos son sugerencias: tú decides qué levantas. Tu plan puede esperar.',

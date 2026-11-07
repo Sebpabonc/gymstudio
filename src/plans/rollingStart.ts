@@ -55,20 +55,30 @@ function gapAfter(block: TrainingBlock, day: TrainingDay) {
   return gaps?.[index] ?? 1
 }
 
-type Session = { date: string; day: TrainingDay }
+/** PT review 2026-11-07: the gap depends on the pair. Same day: 2. Not the direct successor (after a dropped day): 2, except 6 days. */
+function gapBetween(block: TrainingBlock, last: TrainingDay, next: TrainingDay) {
+  if (last.key === next.key) return SAME_DAY_GAP
+  const days = sortedDays(block)
+  const index = days.findIndex((item) => item.key === last.key)
+  const successor = days[(index + 1) % days.length]
+  if (successor?.key !== next.key && days.length < 6) return 2
+  return gapAfter(block, last)
+}
+
+type Session = { date: string; days: TrainingDay[] }
 
 function sessions(block: TrainingBlock, history: readonly WorkoutEntry[]): Session[] {
-  const byDate = new Map<string, TrainingDay>()
+  const byDate = new Map<string, TrainingDay[]>()
   for (const entry of history) {
     if (entry.blockId !== block.id || !entry.dayKey || entry.sets.length === 0) continue
     const day = block.days.find((item) => item.key === entry.dayKey)
     if (!day) continue
     const date = entry.date.slice(0, 10)
-    const current = byDate.get(date)
-    // A date counts once; if two plan days were logged on it, the later one in the plan sets the next gap.
-    if (!current || day.position > current.position) byDate.set(date, day)
+    const days = byDate.get(date) ?? []
+    if (!days.some((item) => item.key === day.key)) days.push(day)
+    byDate.set(date, days)
   }
-  return [...byDate].map(([date, day]) => ({ date, day })).sort((a, b) => a.date.localeCompare(b.date))
+  return [...byDate].map(([date, days]) => ({ date, days })).sort((a, b) => a.date.localeCompare(b.date))
 }
 
 export type RestRecommendation = { nextDay: TrainingDay; date: string }
@@ -85,7 +95,8 @@ export function restRecommendation(block: TrainingBlock, history: readonly Worko
   if (!last) return null
   const nextDay = nextUnloggedDay(block, [...history], today)
   if (!nextDay) return null
-  const gap = nextDay.key === last.day.key ? SAME_DAY_GAP : gapAfter(block, last.day)
+  // Two plan days on one date: the largest gap among them wins.
+  const gap = Math.max(...last.days.map((day) => gapBetween(block, day, nextDay)))
   const date = addDays(last.date, gap)
   return date > today ? { nextDay, date } : null
 }

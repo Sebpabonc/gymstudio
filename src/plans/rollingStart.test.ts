@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { localIsoDate } from '../lib/dates'
 import type { TrainingBlock, WorkoutEntry } from '../types'
 import { blockWeek, nextUnloggedDay, todayTrainingDay } from '../utils/trainingBlocks'
 import { weekBounds } from '../utils/completedExercises'
@@ -92,7 +93,11 @@ describe('same-day start (W1-W16)', () => {
   })
 
   it('W8: training anyway inside the gap is allowed and moves the next date along', () => {
-    const history = [log('full-body-a', '2026-11-07'), log('full-body-b', '2026-11-08')]
+    const before = [log('full-body-a', '2026-11-07')]
+    const advised = seen(plan(3), before, '2026-11-08')
+    expect(restRecommendation(advised, before, '2026-11-08')?.nextDay.key).toBe('full-body-b')
+    expect(nextUnloggedDay(advised, before, '2026-11-08')?.key).toBe('full-body-b')
+    const history = [...before, log('full-body-b', '2026-11-08')]
     const block = seen(plan(3), history, '2026-11-09')
     expect(restRecommendation(block, history, '2026-11-08')).toBeNull()
     expect(restRecommendation(block, history, '2026-11-09')).toMatchObject({ nextDay: { key: 'full-body-c' }, date: '2026-11-10' })
@@ -138,6 +143,35 @@ describe('same-day start (W1-W16)', () => {
     const block = seen(plan(3), history, '2026-11-14')
     expect(blockWeek(block, '2026-11-14')).toBe(2)
     expect(restRecommendation(block, history, '2026-11-14')).toMatchObject({ nextDay: { key: 'full-body-a' }, date: '2026-11-15' })
+  })
+
+  it('after a dropped day the next session is not the direct successor: 2 days, except 6-day plans', () => {
+    // 4 days: Upper B in week 1, Lower B dropped at the rollover, next is Upper A.
+    const four = [log('upper-a', '2026-11-02'), log('lower-a', '2026-11-03'), log('upper-b', '2026-11-08')]
+    const block4 = seen(plan(4), four, '2026-11-09')
+    expect(restRecommendation(block4, four, '2026-11-09')).toMatchObject({ nextDay: { key: 'upper-a' }, date: '2026-11-10' })
+    // 6 days: any next day stays 1.
+    const six = [log('chest-back-a', '2026-11-02'), log('lower-body-a', '2026-11-08')]
+    expect(restRecommendation(seen(plan(6), six, '2026-11-09'), six, '2026-11-09')).toBeNull()
+  })
+
+  it('two plan days on one date: the largest gap wins', () => {
+    // 5 days: Push partly logged and Pull on the same date; next is Push again, so 2 days.
+    const block = { ...plan(5) }
+    block.days = block.days.map((day) => day.key === 'push'
+      ? { ...day, exercises: [...day.exercises, { ...day.exercises[0], code: 'B1', exerciseId: 'push-y' }] }
+      : day)
+    const history = [log('upper', '2026-11-02'), log('lower', '2026-11-03'), log('push', '2026-11-05'), log('pull', '2026-11-05')]
+    const pinned = seen(block, history, '2026-11-06')
+    expect(restRecommendation(pinned, history, '2026-11-06')).toMatchObject({ nextDay: { key: 'push' }, date: '2026-11-07' })
+  })
+
+  it('W15: a log at 23:30 local is dated that local day, whatever the UTC date', () => {
+    // localIsoDate reads local fields, so the date never jumps to UTC's next day (e.g. 04:30Z in UTC-5).
+    const lateSaturday = new Date(2026, 10, 7, 23, 30)
+    expect(localIsoDate(lateSaturday)).toBe('2026-11-07')
+    const block = seen(plan(3), [log('full-body-a', localIsoDate(lateSaturday))], '2026-11-07')
+    expect(block.startDate).toBe('2026-11-07')
   })
 
   it('W16: only first-run plans move; every other block keeps its start and Monday weeks', () => {
