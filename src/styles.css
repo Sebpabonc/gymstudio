@@ -25,9 +25,9 @@
   --nav-idle: rgba(243, 243, 241, 0.55);
 
   --font-display: clamp(1.7rem, 4.5vw, 2.08rem);
-  --font-section: 0.65rem;
+  --font-section: 0.75rem; /* QA 2026-11-07: 12 px text floor */
   --font-body: 0.76rem;
-  --font-caption: 0.54rem;
+  --font-caption: 0.75rem; /* QA 2026-11-07: 12 px text floor */
   --font-display-weight: 800;
   --font-section-weight: 700;
   --font-body-weight: 500;
@@ -52,7 +52,7 @@
   --type-caption-size: 0.8125rem;
   --type-caption-lh: 1.125rem;
   --type-caption-weight: 400;
-  --type-label-size: 0.6875rem;
+  --type-label-size: 0.75rem; /* QA 2026-11-07: 12 px text floor */
   --type-label-lh: 0.875rem;
   --type-label-weight: 600;
   --type-label-caps-track: 0.06em;
@@ -176,7 +176,7 @@ button {
   padding: 4px 10px;
   background: transparent;
   color: inherit;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -287,7 +287,7 @@ button {
 }
 
 .brand-tagline {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
@@ -338,7 +338,7 @@ button {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 6px 10px;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.12em;
 }
@@ -367,7 +367,7 @@ button {
 
 .sync-pending-count {
   color: var(--text);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -511,7 +511,7 @@ button {
 
 .account-label {
   color: var(--muted-strong);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -552,7 +552,7 @@ button {
   border: 0;
   background: transparent;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -740,7 +740,7 @@ button {
 
 .first-run-stack .profile-choice small {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.05rem;
 }
@@ -874,7 +874,7 @@ button {
   align-items: center;
   gap: 12px;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   text-align: center;
 }
 
@@ -987,7 +987,7 @@ button {
   gap: 5px;
   min-width: 0;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1048,7 +1048,7 @@ button {
 .profile-choice-group legend {
   margin-bottom: 6px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1066,7 +1066,7 @@ button {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text);
-  font-size: 0.73rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1114,7 +1114,7 @@ button {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1208,7 +1208,7 @@ button {
   background: var(--brand-soft);
   color: var(--text);
   padding: 5px 9px;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1322,7 +1322,7 @@ button {
 }
 
 .field-label {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: var(--font-section-weight);
   letter-spacing: 0.01em;
   color: var(--muted);
@@ -1396,6 +1396,16 @@ button {
   text-overflow: ellipsis;
 }
 
+/* QA 2026-11-07: the variant in brackets tells exercises apart, so names get two lines before they shorten. */
+.result-text .result-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .result-equipment {
   display: grid;
   place-items: center;
@@ -1415,7 +1425,7 @@ button {
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   padding: 3px 7px;
 }
 
@@ -1548,7 +1558,7 @@ button {
 }
 
 .result-meta {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--muted);
 }
 
@@ -1786,7 +1796,7 @@ button {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   padding: 5px 10px;
@@ -1927,7 +1937,7 @@ button {
 
 .metric-card span {
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2006,7 +2016,7 @@ button {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted-strong);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 1;
 }
 
@@ -2026,7 +2036,7 @@ button {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -2034,7 +2044,7 @@ button {
   display: grid;
   gap: 6px;
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2133,7 +2143,7 @@ a.secondary-button {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted-strong);
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   padding: 9px 6px;
@@ -2160,7 +2170,7 @@ a.secondary-button {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted-strong);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -2276,12 +2286,12 @@ a.secondary-button {
   padding: 0 8px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted-strong);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .rest-timer-paused {
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 
@@ -2308,7 +2318,7 @@ a.secondary-button {
 
 .workout-rest-timer .rest-timer-action {
   min-width: 52px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .bottom-tab-bar button.active::after {
@@ -2420,7 +2430,7 @@ a.secondary-button {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--line);
   color: var(--muted-strong);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2483,7 +2493,7 @@ a.secondary-button {
 
 .calendar-popover-header strong {
   color: var(--muted-strong);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2495,7 +2505,7 @@ a.secondary-button {
 
 .calendar-program > strong {
   color: var(--muted-strong);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2533,18 +2543,18 @@ a.secondary-button {
 
 .calendar-block-title-row > strong {
   min-width: 0;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .calendar-block-status {
   flex: 0 0 auto;
   color: var(--muted);
-  font-size: 0.54rem;
+  font-size: 0.75rem;
 }
 
 .calendar-block-meta {
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
 }
 
 .calendar-week-list {
@@ -2559,7 +2569,7 @@ a.secondary-button {
   border: 1px solid var(--line);
   border-radius: 5px;
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: 0.75rem;
   text-align: center;
   white-space: nowrap;
 }
@@ -2593,7 +2603,7 @@ a.secondary-button {
 }
 
 .calendar-day-heading > strong {
-  font-size: 0.64rem;
+  font-size: 0.75rem;
 }
 
 .calendar-session-completed {
@@ -2601,7 +2611,7 @@ a.secondary-button {
   align-items: center;
   gap: 3px;
   color: var(--success);
-  font-size: 0.52rem;
+  font-size: 0.75rem;
 }
 
 .calendar-day-focus,
@@ -2609,7 +2619,7 @@ a.secondary-button {
 .calendar-no-exercises,
 .calendar-blocks-empty {
   color: var(--muted);
-  font-size: 0.56rem;
+  font-size: 0.75rem;
 }
 
 .calendar-exercise-list {
@@ -2630,7 +2640,7 @@ a.secondary-button {
 
 .calendar-exercise-list li > span {
   min-width: 0;
-  font-size: 0.59rem;
+  font-size: 0.75rem;
   overflow-wrap: anywhere;
 }
 
@@ -2651,7 +2661,7 @@ a.secondary-button {
 
 .calendar-field span {
   color: var(--muted);
-  font-size: 0.54rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2672,7 +2682,7 @@ a.secondary-button {
 
 .calendar-history > strong {
   color: var(--muted-strong);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2701,7 +2711,7 @@ a.secondary-button {
 .calendar-history-item p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -2754,13 +2764,13 @@ a.secondary-button {
   display: grid;
   gap: 2px;
   color: var(--text);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   text-align: right;
 }
 
 .training-block-number {
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2772,14 +2782,14 @@ a.secondary-button {
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--muted-strong);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
 .training-block-meta {
   flex-wrap: wrap;
   color: var(--muted);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
 }
 
 .training-block-meta strong {
@@ -2789,7 +2799,7 @@ a.secondary-button {
 .training-block-card > p {
   margin: 0;
   color: var(--muted-strong);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
@@ -2816,7 +2826,7 @@ a.secondary-button {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
   color: var(--text);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-align: left;
 }
@@ -2834,13 +2844,13 @@ a.secondary-button {
 .training-block-insights h5 {
   margin: 0 0 3px;
   color: var(--text);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .training-block-insights p {
   margin: 0;
   color: var(--muted-strong);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
@@ -2849,14 +2859,14 @@ a.secondary-button {
   justify-self: start;
   min-height: 44px;
   padding: 7px 10px;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .training-block-origin-legend,
 .block-selector-legend {
   margin: 0;
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -2950,7 +2960,7 @@ a.secondary-button {
 
 .block-selector-option strong {
   min-width: 0;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   overflow-wrap: anywhere;
 }
 
@@ -2964,7 +2974,7 @@ a.secondary-button {
 
 .block-selector-option small {
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   overflow-wrap: anywhere;
 }
 
@@ -2981,7 +2991,7 @@ a.secondary-button {
   border-radius: 12px;
   background: var(--brand-soft);
   color: var(--text);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .next-block-banner span {
@@ -2991,7 +3001,7 @@ a.secondary-button {
 .next-block-banner p {
   margin: 0;
   color: var(--muted-strong);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -3001,7 +3011,7 @@ a.secondary-button {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted-strong);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
   padding: 6px 4px;
   display: flex;
@@ -3018,13 +3028,13 @@ a.secondary-button {
   border-radius: 999px;
   background: var(--brand-soft);
   color: var(--text);
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 800;
   line-height: 1.2;
 }
 
 .day-tab-label {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.1;
@@ -3034,7 +3044,7 @@ a.secondary-button {
 
 .day-tab-summary {
   display: none;
-  font-size: 0.48rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3085,7 +3095,7 @@ a.secondary-button {
 .custom-plan-header p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .custom-plan-list {
@@ -3127,7 +3137,7 @@ a.secondary-button {
 .custom-plan-exercise-edit span {
   flex: 0 0 auto;
   color: var(--muted-strong);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   letter-spacing: -0.01em;
 }
 
@@ -3422,7 +3432,7 @@ a.secondary-button {
 
 .plan-exercise-code {
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
 }
@@ -3435,7 +3445,7 @@ a.secondary-button {
 .planned-exercise-notes {
   margin: -4px 0 0;
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -3560,7 +3570,7 @@ a.secondary-button {
 
 .metric-pill span {
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -3578,7 +3588,7 @@ a.secondary-button {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
   color: var(--muted-strong);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -3601,12 +3611,12 @@ a.secondary-button {
 
 .planned-set-header span {
   color: var(--muted-strong);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
 .set-section-toggle {
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   padding: 5px 9px;
 }
@@ -3636,7 +3646,7 @@ a.secondary-button {
 
 .planned-set-column-headers {
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-align: center;
   text-transform: uppercase;
@@ -3691,7 +3701,7 @@ a.secondary-button {
 .planned-set-label {
   min-width: 0;
   color: var(--muted-strong);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -3776,7 +3786,7 @@ a.secondary-button {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
   color: var(--muted-strong);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -3793,7 +3803,7 @@ a.secondary-button {
 .planned-drop-set-row > strong {
   min-width: 0;
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
 }
 
 .superset-set-column-headers,
@@ -3806,7 +3816,7 @@ a.secondary-button {
 
 .superset-set-column-headers {
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-align: center;
   text-transform: uppercase;
@@ -3837,7 +3847,7 @@ a.secondary-button {
 
 .planned-set-input-group > strong {
   color: var(--muted-strong);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
 }
 
 .planned-progress-row label,
@@ -3845,7 +3855,7 @@ a.secondary-button {
   display: grid;
   gap: 5px;
   color: var(--muted);
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -3896,7 +3906,7 @@ a.secondary-button {
 
 .superset-exercise-label {
   color: var(--muted-strong);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   line-height: 1.3;
   overflow-wrap: anywhere;
 }
@@ -3908,7 +3918,7 @@ a.secondary-button {
 
 .planned-notes-field span {
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
 }
 
 .planned-notes-field textarea {
@@ -3963,7 +3973,7 @@ a.secondary-button {
 }
 
 .planned-history-meta small {
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -3971,7 +3981,7 @@ a.secondary-button {
 .planned-history-comment {
   margin: 2px 0 0;
   color: var(--muted-strong);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   line-height: 1.35;
 }
 
@@ -3993,20 +4003,20 @@ a.secondary-button {
 }
 
 .planned-progress-meta small {
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .planned-progress-meta strong {
   color: var(--muted-strong);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .small-button {
   padding: 10px 12px;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
 }
 
@@ -4018,7 +4028,7 @@ a.secondary-button {
 
 .goal-row span {
   color: var(--muted);
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4071,7 +4081,7 @@ a.secondary-button {
   border-color: var(--line);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   padding: 7px 18px;
 }
@@ -4583,7 +4593,7 @@ button[class] {
 .set-history-best {
   color: var(--text);
   background: var(--brand);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   border-radius: 4px;
   padding: 1px 3px;
@@ -4886,7 +4896,7 @@ button[class] {
   border-radius: 999px;
   background: transparent;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -4957,7 +4967,7 @@ button[class] {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-align: left;
 }
@@ -5045,7 +5055,7 @@ button[class] {
 
 .help-ai-footnote {
   text-align: center;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .help-ai-error {
@@ -5112,7 +5122,7 @@ button[class] {
 
 .ai-inline-answer small {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .ai-inline-answer {
@@ -5152,14 +5162,14 @@ button[class] {
 
 .day-tab-progress {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   opacity: 0.8;
 }
 
 .day-focus-label {
   margin: 8px 0 0;
   color: var(--muted-strong);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -5177,7 +5187,7 @@ button[class] {
   border-radius: 999px;
   background: rgba(255, 209, 102, 0.12);
   color: #ffe29a;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -5347,7 +5357,7 @@ button[class] {
 .session-summary-targets li p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 .session-summary-records ul {
@@ -5380,7 +5390,7 @@ button[class] {
 .next-target-card p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.4;
   white-space: pre-line;
 }
@@ -5405,7 +5415,7 @@ button[class] {
 
 .trainer-rir-copy small {
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .trainer-rir-options {
@@ -5437,7 +5447,7 @@ button[class] {
   gap: 6px;
   padding: 4px 0 8px;
   color: var(--muted-strong);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   line-height: 1.35;
 }
 
@@ -5466,7 +5476,7 @@ button[class] {
 .trainer-recommendation-card p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -5484,7 +5494,7 @@ button[class] {
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--muted-strong);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
 }
 
 .trainer-recommendation-card .trainer-recommended {
@@ -5513,7 +5523,7 @@ button[class] {
 
 /* Keep the last exercise scrollable above the rest timer pill as well as the dock. */
 .app-content.with-rest-timer {
-  padding-bottom: calc(60px + 64px + max(12px, env(safe-area-inset-bottom, 0px)) + 16px);
+  padding-bottom: calc(82px + 52px + max(12px, env(safe-area-inset-bottom, 0px)) + 24px);
 }
 
 body {
@@ -5599,7 +5609,7 @@ body {
   justify-self: start;
   min-height: 28px;
   margin-left: 8px;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
@@ -5621,7 +5631,7 @@ body {
 .training-block-status {
   display: block;
   max-width: 100px;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-align: right;
   white-space: nowrap;
@@ -5634,12 +5644,12 @@ body {
 }
 
 .training-block-number {
-  font-size: 0.58rem;
+  font-size: 0.75rem;
 }
 
 .origin-badge {
   padding: 3px 7px;
-  font-size: 0.56rem;
+  font-size: 0.75rem;
 }
 
 .day-tabs {
@@ -5656,18 +5666,18 @@ body {
 }
 
 .day-tab-label {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0;
 }
 
 .day-tab-progress {
-  font-size: 0.58rem;
+  font-size: 0.75rem;
 }
 
 .day-tab-today {
   padding: 0;
   background: transparent;
-  font-size: 0.46rem;
+  font-size: 0.75rem;
   line-height: 1;
 }
 
@@ -5686,7 +5696,7 @@ body {
 
 .day-focus-label {
   margin: -5px 0 0;
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -5733,7 +5743,7 @@ body {
 }
 
 .superset-group-header p {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .superset-group .planned-exercise-card .technique-chip {
@@ -5743,7 +5753,7 @@ body {
 .planned-meta-line {
   margin: 0;
   color: var(--muted);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   line-height: 1.3;
 }
 
@@ -5758,7 +5768,7 @@ body {
   border-radius: 12px;
   background: rgba(214, 170, 92, 0.1);
   color: var(--muted-strong);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -5849,7 +5859,7 @@ body {
 }
 
 .planned-set-header > span {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
 }
 
 .planned-set-grid {
@@ -5864,7 +5874,7 @@ body {
 
 .planned-set-column-headers {
   padding-bottom: 4px;
-  font-size: 0.54rem;
+  font-size: 0.75rem;
   text-transform: none;
 }
 
@@ -5898,7 +5908,7 @@ body {
 }
 
 .planned-set-label {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   text-align: left;
 }
 
@@ -5911,7 +5921,7 @@ body {
   border: 0;
   background: transparent;
   color: var(--muted);
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   text-align: center;
   text-overflow: ellipsis;
@@ -5997,7 +6007,7 @@ body {
   border: 0;
   background: transparent;
   color: var(--muted-strong);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-align: left;
 }
@@ -6050,7 +6060,7 @@ body {
 .free-set-header {
   min-height: 28px;
   color: var(--muted);
-  font-size: 0.54rem;
+  font-size: 0.75rem;
   text-align: center;
 }
 
@@ -6068,7 +6078,7 @@ body {
   border: 0;
   border-radius: 0;
   background: transparent;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .set-row .set-label {
@@ -6338,7 +6348,7 @@ body {
 
 .superset-log-progress {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .superset-log-body {
@@ -6357,7 +6367,7 @@ body {
 
 .superset-round-columns span {
   color: var(--muted);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   text-align: center;
 }
 
@@ -6386,7 +6396,7 @@ body {
 .superset-round-code {
   color: var(--nav-active);
   font-weight: 800;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 .superset-round-row .previous-set-value {
@@ -6395,7 +6405,7 @@ body {
   border: 0;
   background: transparent;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   text-align: center;
 }
 
@@ -6720,6 +6730,21 @@ body:has([aria-modal='true']) .help-ai-button {
 
 .log-toast.in-summary {
   position: relative;
+}
+
+/* QA 2026-11-07: outside workout mode the toast sits above the tab bar (and the rest pill), never under it. */
+.app-shell:not(.workout-mode-active) .log-toast:not(.in-summary) {
+  bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 60px + 12px);
+}
+
+.app-shell:not(.workout-mode-active) .app-content.with-rest-timer .log-toast:not(.in-summary) {
+  bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 82px + 52px + 10px);
+}
+
+/* QA 2026-11-07: the rest pill and the toast float over the exercise list, so the cards must not show through. */
+.rest-timer-pill,
+.log-toast {
+  background: rgba(14, 14, 15, 0.96);
 }
 
 .bottom-tab-bar button.active {
@@ -7109,7 +7134,7 @@ a.planned-exercise-main-name {
 
 .progress-stat span {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 
 .progress-insight-list,
@@ -7153,7 +7178,7 @@ a.planned-exercise-main-name {
   border-radius: 50%;
   background: rgba(201, 156, 161, 0.16);
   color: var(--nav-active);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -7248,7 +7273,7 @@ a.planned-exercise-main-name {
   grid-area: change;
   justify-self: end;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   text-align: right;
 }
 
@@ -7278,7 +7303,7 @@ a.planned-exercise-main-name {
 
 .progress-muscle-copy {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 
 .progress-muscle-track,
@@ -7320,7 +7345,7 @@ a.planned-exercise-main-name {
   grid-template-columns: 66px minmax(0, 1fr) 42px;
   align-items: center;
   gap: 8px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .progress-block-week-bars li {
@@ -7363,7 +7388,7 @@ a.planned-exercise-main-name {
   gap: 4px;
   min-width: 0;
   color: var(--muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 
 .progress-rir-track,
@@ -7465,7 +7490,7 @@ a.planned-exercise-main-name {
   }
 
   .progress-range-toggle .tab-button {
-    font-size: 0.68rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -7498,7 +7523,7 @@ a.planned-exercise-main-name {
   display: block;
   margin-top: 6px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 /* Workout mode (Start workout): same cards, one exercise at a time. */
@@ -7616,11 +7641,23 @@ a.planned-exercise-main-name {
 }
 
 .workout-mode-progress {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
   overflow: hidden;
   color: var(--text);
   text-align: center;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.workout-mode-progress-day {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workout-mode-progress-count {
+  flex: none;
 }
 
 .workout-mode-language-toggle {
@@ -7778,7 +7815,7 @@ a.planned-exercise-main-name {
 .workout-mode-set-target {
   min-width: 0;
   color: var(--muted-strong);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   text-align: center;
   overflow-wrap: anywhere;
 }
@@ -7820,13 +7857,13 @@ a.planned-exercise-main-name {
 .set-trend-date,
 .set-trend-day {
   fill: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
 .set-trend-reps-label {
   fill: var(--text);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -7853,7 +7890,7 @@ a.planned-exercise-main-name {
   flex-wrap: wrap;
   gap: 8px;
   color: var(--muted-strong);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .set-trend-legend span {
@@ -7872,7 +7909,7 @@ a.planned-exercise-main-name {
   min-height: 1.1em;
   margin: 4px 0 0;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 
 .workout-mode-nav {
@@ -8720,7 +8757,7 @@ summary:focus-visible,
 .pv3-detail-chart .pv3-chart-value,
 .pv3-detail-chart .pv3-swap-marker {
   fill: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .pv3-detail-chart .pv3-best-star {
@@ -8927,7 +8964,7 @@ summary:focus-visible,
   justify-content: center;
   align-items: center;
   gap: 4px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .week-progress-segment.active .week-progress-label {
@@ -9089,7 +9126,7 @@ summary:focus-visible,
   gap: 4px;
   min-width: 0;
   color: var(--muted-strong);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -9136,7 +9173,7 @@ summary:focus-visible,
   grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr);
   align-items: end;
   color: var(--muted);
-  font-size: 0.63rem;
+  font-size: 0.75rem;
 }
 
 .planned-set-section .workout-mode-focused-grid.planned-set-row {
@@ -9158,7 +9195,7 @@ summary:focus-visible,
   background: transparent;
   color: var(--text);
   text-align: left;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -9831,7 +9868,7 @@ button.superset-last-time {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   cursor: pointer;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -9859,7 +9896,7 @@ button.superset-last-time {
 
 .workout-mode-plan-note strong {
   color: var(--text);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -9894,7 +9931,7 @@ button.superset-last-time {
 .superset-workout-table-header {
   align-items: end;
   color: var(--muted);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
 }
 
 .superset-workout-row {
@@ -9911,7 +9948,7 @@ button.superset-last-time {
   display: grid;
   gap: 2px;
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .superset-workout-today {
@@ -9935,7 +9972,7 @@ button.superset-last-time {
 
 .superset-workout-input > span {
   color: var(--muted);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
 }
 
 .superset-workout-input .set-stepper {
@@ -10050,7 +10087,7 @@ button.superset-last-time {
   margin-top: 4px;
   border-bottom: 1px solid var(--line);
   color: var(--muted-strong);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -10059,7 +10096,7 @@ button.superset-last-time {
   display: block;
   margin-top: 2px;
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -10228,7 +10265,8 @@ p.workout-short-cue.cue-card {
 }
 
 .layout-boxes .day-plan-card .planned-exercise-card.collapsed {
-  padding: 12px 0;
+  /* QA 2026-11-07: collapsed cards are boxed (border + background), so text needs room from the border. */
+  padding: 12px 14px;
 }
 
 .day-plan-card .superset-group {

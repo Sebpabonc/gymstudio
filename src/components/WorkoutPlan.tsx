@@ -144,9 +144,10 @@ const swapEquipmentKeys: Record<string, TranslationKey> = {
   band: 'workout.swap.equipment.band',
   barbell: 'workout.swap.equipment.barbell',
   bodyweight: 'workout.swap.equipment.bodyweight',
-  cable: 'workout.swap.equipment.cable',
-  dumbbell: 'workout.swap.equipment.dumbbell',
-  'ez-bar': 'workout.swap.equipment.ezBar',
+  // QA 2026-11-07: same equipment words as the Exercises tab.
+  cable: 'exercises.equipment.cable',
+  dumbbell: 'exercises.equipment.dumbbell',
+  'ez-bar': 'exercises.equipment.ezBar',
   'hex-bar': 'workout.swap.equipment.hexBar',
   kettlebell: 'workout.swap.equipment.kettlebell',
   machine: 'workout.swap.equipment.machine',
@@ -3776,7 +3777,9 @@ export default function WorkoutPlan({
               {t('workout.run.exit')}
             </button>
             <strong className="workout-mode-progress">
-              {t('workout.day.title', { position: activeDay?.position ?? 1, name: activeDay?.name ?? '' })} · {formatNumber(language, workoutExerciseIndex + 1)}/{formatNumber(language, activeExercises.length)}
+              {/* QA 2026-11-07: only the day name shortens; the 1/7 counter always stays visible. */}
+              <span className="workout-mode-progress-day">{t('workout.day.title', { position: activeDay?.position ?? 1, name: activeDay?.name ?? '' })}</span>
+              <span className="workout-mode-progress-count">{` · ${formatNumber(language, workoutExerciseIndex + 1)}/${formatNumber(language, activeExercises.length)}`}</span>
             </strong>
             <time className="workout-mode-elapsed" aria-label={t('workout.run.elapsed')}>{elapsedLabel}</time>
             <button type="button" className="secondary-button small-button workout-mode-finish-top" disabled={savingSet} onClick={finishWorkout}>
