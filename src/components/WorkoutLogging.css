@@ -42,6 +42,13 @@
 .effortless-set-row { padding: 6px; border: 1px solid transparent; border-radius: 12px; }
 .effortless-set-row.now { border-color: var(--line); background: rgba(255, 255, 255, .05); }
 .effortless-set-row.done { background: rgba(79, 174, 110, .13); }
+/* Superset: one shaded block per round (set N of each exercise), with a rose rail on the round being done. */
+.effortless-set-round { display: grid; gap: 4px; padding: 8px 6px 6px; border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, .035); }
+.effortless-set-round.current { border-left-color: var(--brand); background: rgba(255, 255, 255, .06); }
+.effortless-set-round.done { border-left-color: #4fae6e; }
+.effortless-set-round-label { padding: 0 6px; font-size: var(--type-caption-size); font-weight: 700; color: var(--muted); letter-spacing: .02em; }
+.effortless-set-round.current .effortless-set-round-label { color: var(--brand); }
+.effortless-set-round .effortless-set-row.now { background: rgba(255, 255, 255, .05); }
 .effortless-set-exercise { grid-column: 1 / -1; font-size: var(--type-caption-size); color: var(--muted); overflow-wrap: anywhere; }
 .effortless-set-number { font-weight: 650; text-align: center; color: var(--muted); font-variant-numeric: tabular-nums; }
 .effortless-set-value { min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-dark); color: var(--text); font: inherit; font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; cursor: pointer; }
