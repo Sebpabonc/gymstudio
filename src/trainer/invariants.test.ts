@@ -149,3 +149,32 @@ describe('T105/E9: trainer invariants with every historical RIR omitted across b
     expect(checked).toBeGreaterThan(1000)
   })
 })
+
+// F20 (PT first-run spec 2026-11-01): every first-run template slot, no history, any equipment: never 0 kg when loaded,
+// never a made-up number, and bodyweight stays reps-only.
+describe('first-run templates with no history', () => {
+  const templateDir = 'docs/fitness/approved/templates'
+  const templateSlots = readdirSync(templateDir)
+    .filter((file) => file.startsWith('tpl-') && file.endsWith('.json'))
+    .flatMap((file) => (JSON.parse(readFileSync(`${templateDir}/${file}`, 'utf8')) as Block).days
+      .flatMap((day) => day.exercises.map((row) => ({ file, day: day.key, row }))))
+
+  it('gives a protocol and no number for every loaded slot, in every week', () => {
+    expect(templateSlots.length).toBeGreaterThan(100)
+    for (const { file, day, row } of templateSlots) {
+      const equipment = equipmentOf.get(row.exercise_id) ?? 'machine'
+      const setReps = row.reps.map((reps) => parseRepPrescription(reps)?.[0] ?? 8)
+      for (const deload of [false, true]) {
+        const result = recommend({
+          history: [], today: TODAY, target: { min: Math.min(...setReps), max: Math.max(...setReps) }, sets: row.sets,
+          equipment, technique: row.technique, setReps, deload, exerciseId: row.exercise_id,
+        })
+        const where = `${file} ${day} ${row.exercise_id} ${equipment}${deload ? ' deload' : ''}`
+        expect(result.firstSessionProtocol, where).toBeDefined()
+        if (equipment === 'bodyweight' || equipment === 'band') expect(result.weight ?? 0, where).toBe(0)
+        else expect(result.weight, where).toBeNull()
+      }
+    }
+  })
+})
+

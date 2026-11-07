@@ -91,16 +91,20 @@ export function trainerReason(
       newWeight: formatNumber(language, recentMiss.newWeight),
     } : {}),
   })
+  if (recommendation.firstSessionProtocol === 'bodyweight') return t('workout.trainer.firstSession.bodyweight')
   if (recommendation.firstSessionProtocol) {
-    const protocol = [
+    // PT spec 2026-11-01 §4, in this order: warm-up, effort, technique, adjust, load line, log.
+    const protocol = recommendation.firstSessionProtocol
+    return [
       t('workout.trainer.firstSession.warmup'),
       t('workout.trainer.firstSession.effort', { target: trainerRangeLabel(target, language) }),
-      t(recommendation.firstSessionProtocol === 'reverse-pyramid'
-        ? 'workout.trainer.firstSession.reversePyramid'
-        : 'workout.trainer.firstSession.pyramid'),
+      t(protocol === 'reverse-pyramid' ? 'workout.trainer.firstSession.reversePyramid'
+        : protocol === 'pyramid' ? 'workout.trainer.firstSession.pyramid' : 'workout.trainer.firstSession.same'),
+      t('workout.trainer.firstSession.adjust'),
+      ...(recommendation.firstSessionLoad === 'dumbbell' ? [t('workout.trainer.firstSession.dumbbell')] : []),
+      ...(recommendation.firstSessionLoad === 'barbell' ? [t('workout.trainer.firstSession.barbell')] : []),
       t('workout.trainer.firstSession.log'),
-    ]
-    return protocol.join('\n')
+    ].join('\n')
   }
 
   if (

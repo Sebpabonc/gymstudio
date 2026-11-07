@@ -86,7 +86,10 @@ export type Recommendation = {
   dropWeight?: number
   /** Set when per-user calibration moved the load away from the rule result (spec 1.10). */
   calibration?: { offset: number; uncalibratedWeight: number; capped: boolean }
-  firstSessionProtocol?: 'pyramid' | 'reverse-pyramid'
+  /** First time on this exercise (PT spec 2026-11-01 §3-4): no number, a protocol to find the weight. */
+  firstSessionProtocol?: 'straight' | 'pyramid' | 'reverse-pyramid' | 'bodyweight'
+  /** Which load line the first-time text adds: one dumbbell, or the total with the bar. */
+  firstSessionLoad?: 'dumbbell' | 'barbell'
   evidence: {
     lastDate?: string
     lastWeight?: number
@@ -263,9 +266,27 @@ function topWorkingWeight(session: SessionEvidence, planned: number) {
     : workingWeight(logged)
 }
 
-function firstSessionProtocol(input: RecommendInput) {
-  if (!['machine', 'plate-loaded', 'cable', 'smith-machine'].includes(input.equipment ?? '')) return undefined
-  return input.technique === 'reverse-pyramid' ? 'reverse-pyramid' : 'pyramid'
+const LOADED = ['barbell', 'ez-bar', 'hex-bar', 'dumbbell', 'kettlebell', 'cable', 'machine', 'plate-loaded', 'smith-machine']
+
+/** F3/F4/F7: every loaded type gets the protocol that matches its technique; bodyweight and band stay reps-only. */
+function firstSessionProtocol(input: RecommendInput): Recommendation['firstSessionProtocol'] {
+  if (isBodyweight(input.equipment)) return 'bodyweight'
+  if (!LOADED.includes(input.equipment ?? '')) return undefined
+  if (input.technique === 'reverse-pyramid') return 'reverse-pyramid'
+  return input.technique === 'pyramid' ? 'pyramid' : 'straight'
+}
+
+function firstSessionExtra(input: RecommendInput): Partial<Recommendation> {
+  const protocol = firstSessionProtocol(input)
+  if (!protocol) return {}
+  // The barbell line (total with the bar) waits for the PO: his EZ-bar logs look like plates only (spec open decision 7).
+  const load = input.equipment === 'dumbbell' ? 'dumbbell' : undefined
+  return { firstSessionProtocol: protocol, ...(load ? { firstSessionLoad: load } : {}) }
+}
+
+/** F1: no invented number for a loaded exercise; bodyweight keeps its reps-only value. */
+function firstSessionWeight(input: RecommendInput, plannedWeight: number | undefined) {
+  return isBodyweight(input.equipment) ? plannedWeight ?? null : null
 }
 
 const isPyramid = (technique?: string, setReps?: number[]) =>
@@ -302,7 +323,12 @@ export function gridLoad(weight: number, step: number) {
 }
 
 export function recommend(input: RecommendInput): Recommendation {
-  return input.equipment === 'cable' ? recommendOnCableGrid(input) : recommendWithFloor(input)
+  // F6/F8: for a weighted exercise, a session logged only at 0 kg is no history.
+  const usable = isBodyweight(input.equipment) ? input : {
+    ...input,
+    history: input.history.filter((session) => session.sets.some((set) => (!set.tag || set.tag === 'main') && set.weight > 0)),
+  }
+  return usable.equipment === 'cable' ? recommendOnCableGrid(usable) : recommendWithFloor(usable)
 }
 
 /** R31 (PT 2026-11-01): cables only offer the grid. Rules read logs at the grid load; evidence still shows what was logged. */
@@ -406,9 +432,9 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
   if (input.deload) {
     const half = Math.ceil(sets / 2)
     if (!last) {
-      const protocol = firstSessionProtocol(input)
-      if (protocol) return make('collect_data', null, 'no_history', { firstSessionProtocol: protocol })
-      return make('deload', plannedWeight ?? null, 'deload_week', { sets: half, reps: { min: target.min, max: target.min } })
+      const extra = firstSessionExtra(input)
+      if (extra.firstSessionProtocol && extra.firstSessionProtocol !== 'bodyweight') return make('collect_data', null, 'no_history', extra)
+      return make('deload', plannedWeight ?? null, 'deload_week', { sets: half, reps: { min: target.min, max: target.min }, ...extra })
     }
     if (pyramid && input.setReps) {
       const planned = input.setReps
@@ -427,11 +453,8 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
   }
 
   if (!last) {
-    const protocol = firstSessionProtocol(input)
-    return {
-      ...make('collect_data', protocol ? null : plannedWeight ?? null, 'no_history'),
-      ...(protocol ? { firstSessionProtocol: protocol } : {}),
-    }
+    const extra = firstSessionExtra(input)
+    return make('collect_data', extra.firstSessionProtocol ? firstSessionWeight(input, plannedWeight) : plannedWeight ?? null, 'no_history', extra)
   }
 
   // R11: long break — 22-56 days −10 %, more than 56 days −20 %, rounded down; per set for pyramids.
@@ -1000,11 +1023,8 @@ function recommendPyramid(
     action = top === lastLoad ? 'maintain' : 'increase_weight'
     reason = 'converted_rep_range'
   } else {
-    const protocol = firstSessionProtocol(input)
-    return {
-      ...make('collect_data', protocol ? null : input.plannedWeight ?? null, 'no_history'),
-      ...(protocol ? { firstSessionProtocol: protocol } : {}),
-    }
+    const extra = firstSessionExtra(input)
+    return make('collect_data', extra.firstSessionProtocol ? firstSessionWeight(input, input.plannedWeight) : input.plannedWeight ?? null, 'no_history', extra)
   }
 
   // R1.2 / R2.2: the other sets.

@@ -1,7 +1,7 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import WorkoutPlan, { ExerciseSwapSheet, filterCustomPlanExercises, formatEstMaxInsightLine, confirmedWorkoutSet, loggingTargetRange, preserveConfirmedWorkoutSet, savedWorkoutEntryScope, effectiveWorkoutTarget, matchedWorkoutSessionEntries, correctLoggedWorkoutReps } from './WorkoutPlan'
+import WorkoutPlan, { ExerciseSwapSheet, filterCustomPlanExercises, formatEstMaxInsightLine, confirmedWorkoutSet, loggingTargetRange, needsHeavyLoadConfirm, preserveConfirmedWorkoutSet, savedWorkoutEntryScope, effectiveWorkoutTarget, matchedWorkoutSessionEntries, correctLoggedWorkoutReps } from './WorkoutPlan'
 import { createTranslator } from '../i18n/translate'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { anyDayEstMaxComparison } from '../progress/estMax'
@@ -165,6 +165,16 @@ describe('WorkoutPlan', () => {
   })
 
     describe('confirmed set values', () => {
+      it('F18: asks before saving a load above the PT typo limits, per hand for dumbbells', () => {
+        expect(needsHeavyLoadConfirm(200, 'dumbbell')).toBe(true)
+        expect(needsHeavyLoadConfirm(30, 'dumbbell')).toBe(false)
+        expect(needsHeavyLoadConfirm(60, 'dumbbell')).toBe(false)
+        expect(needsHeavyLoadConfirm(48.5, 'kettlebell')).toBe(true)
+        expect(needsHeavyLoadConfirm(201, 'barbell')).toBe(true)
+        expect(needsHeavyLoadConfirm(400, 'plate-loaded')).toBe(false)
+        expect(needsHeavyLoadConfirm(500, 'bodyweight')).toBe(false)
+      })
+
       it('T123/T124: accepts unloaded bodyweight but rejects zero weighted load and zero reps', () => {
         expect(confirmedWorkoutSet(0, 12, 'bodyweight')).toMatchObject({ weight: 0, reps: 12 })
         expect(confirmedWorkoutSet(0, 12, 'barbell')).toBeUndefined()
