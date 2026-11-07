@@ -3405,11 +3405,6 @@ export default function WorkoutPlan({
               .sort()[0]
             return logged ?? rollingDates?.get(dayKey) ?? (activeBlock.days.length <= 7 ? shiftDate(week.start, position - 1) : undefined)
           }
-          const weekdayLabel = (date: string) => {
-            const value = new Date(`${date}T12:00:00`)
-            const weekday = new Intl.DateTimeFormat(language === 'es' ? 'es' : 'en', { weekday: 'short' }).format(value).replace(/[.,]/g, '')
-            return `${weekday.charAt(0).toLocaleUpperCase()}${weekday.slice(1)} ${value.getDate()}`
-          }
           const goWeek = (delta: number) => setBarWeekOffset(Math.min(Math.max(offset + delta, minOffset), maxOffset))
           const days = activeBlock.days.map((day) => {
             const done = day.exercises.filter((item) =>
@@ -3458,7 +3453,7 @@ export default function WorkoutPlan({
                 {days.map(({ day, done, total }) => {
                   const active = day.key === (activeDay?.key ?? selectedDay)
                   const isToday = offset === 0 && todayIsPlanDay && todayDay?.key === day.key
-                  const date = dayDate(day.key, day.position)
+                  const complete = total > 0 && done >= total
                   return (
                     <button
                       key={day.key}
@@ -3480,7 +3475,9 @@ export default function WorkoutPlan({
                         <span className="week-progress-fill" style={{ width: `${total ? Math.min(done / total, 1) * 100 : 0}%` }} />
                       </span>
                       <span className="week-progress-label">
-                        {date ? weekdayLabel(date) : t('workout.day.short', { position: formatNumber(language, day.position) })}
+                        {/* PO 2026-11-07: the plan is flexible, so segments are numbered days, never weekdays or dates. */}
+                        {t('workout.day.number', { position: formatNumber(language, day.position) })}
+                        {complete && <span className="week-progress-check" aria-hidden="true">✓</span>}
                         {isToday && <span className="week-progress-today" aria-hidden="true" />}
                       </span>
                     </button>
@@ -3533,7 +3530,7 @@ export default function WorkoutPlan({
             {rest && (
               <div className="rest-day-note" role="status">
                 <strong>{t('workout.restDay.title')}</strong>
-                <span>{t('workout.restDay.next', { day: rest.nextDay.name, date: formatWeekdayDate(language, `${rest.date}T00:00:00Z`) })}</span>
+                <span>{t('workout.restDay.next', { position: formatNumber(language, rest.nextDay.position), day: rest.nextDay.name })}</span>
                 <span>{t('workout.restDay.anyway')}</span>
               </div>
             )}
@@ -4044,6 +4041,10 @@ export default function WorkoutPlan({
             // Preset plans: the "Next" box comes from the AI Trainer engine (next occurrence), not the old rule.
             const trainerNext = planMode === 'preset' && completedEntry
               ? buildWorkoutSummary([completedEntry], history, trainingBlocks, exerciseCatalog, today)[0]
+              : undefined
+            // PO 2026-11-07: say which plan day comes next ("Day 2"), not a calendar weekday.
+            const trainerNextPosition = trainerNext?.nextDayKey
+              ? trainingBlocks.find((block) => block.id === completedEntry?.blockId)?.days.find((day) => day.key === trainerNext.nextDayKey)?.position
               : undefined
             const insightTarget = planMode === 'preset'
               ? null
@@ -4615,8 +4616,8 @@ export default function WorkoutPlan({
                 {/* PO 2026-10-10: the Next box lives inside the expanded card. */}
                 {trainerNext && !isCollapsed && !isWorkoutMode && barWeekOffset === 0 && (
                   <aside className="next-target-card">
-                    <strong>{t('workout.session.performanceNext', {
-                      day: trainerNext.nextDate ? formatWeekdayDate(language, `${trainerNext.nextDate}T00:00:00Z`).split(' ')[0] : '',
+                    <strong>{t(trainerNextPosition ? 'workout.session.performanceNext' : 'workout.session.performanceNextPlain', {
+                      day: trainerNextPosition ? t('workout.day.number', { position: formatNumber(language, trainerNextPosition) }) : '',
                       weight: formatNumber(language, trainerNext.next.weight ?? trainerNext.actual.weight),
                       reps: trainerRangeLabel(trainerNext.next.reps),
                     })}</strong>

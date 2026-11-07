@@ -9104,6 +9104,12 @@ summary:focus-visible,
   font-weight: 700;
 }
 
+.week-progress-check {
+  color: #c9a0a6;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
 .week-progress-today {
   width: 6px;
   height: 6px;

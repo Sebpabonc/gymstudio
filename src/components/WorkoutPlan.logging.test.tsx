@@ -854,6 +854,20 @@ describe('approved workout logging integration', () => {
       expect(segments()[1].props['aria-label']).toBe('Day 2 · Second day · Today · 0/4')
     })
 
+    it.each(['en', 'es'] as const)('labels segments by plan day number, not weekday or date (%s)', async language => {
+      harness.language = language
+      const t = createTranslator(language)
+      saveWorkoutHistory(dayEntries('chest-back-a', '2026-10-19'))
+      vi.setSystemTime(new Date('2026-10-20T12:00:00Z'))
+      render()
+      await settle()
+      const labels = [...renderToStaticMarkup(tree).matchAll(/<span class="week-progress-label">(.*?)<\/span><\/button>/g)]
+        .map(match => match[1].replace(/<[^>]+>/g, ''))
+      expect(labels).toEqual([`${t('workout.day.number', { position: 1 })}✓`, t('workout.day.number', { position: 2 })])
+      expect(labels[0]).toBe(language === 'en' ? 'Day 1✓' : 'Día 1✓')
+      expect(labels.join(' ')).not.toMatch(/\d{2}|Mon|Tue|lun|mar/)
+    })
+
     it.each(['en', 'es'] as const)('opens next week after a finished week without telling the person to go back (%s)', async language => {
       harness.language = language
       const t = createTranslator(language)
