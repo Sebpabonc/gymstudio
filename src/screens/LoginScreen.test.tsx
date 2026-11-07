@@ -63,8 +63,10 @@ describe('LoginScreen', () => {
     const html = renderToStaticMarkup(<LoginScreen onClose={() => undefined} initialMode="sign-up" />)
     expect(html).toContain('I am 18 or older and I accept the Terms and Privacy Policy.')
     expect(html).toMatch(/type="checkbox"\/>/)
-    expect(html).toMatch(/<button type="submit" class="primary-button" disabled="">Create account/)
-    expect(html).toMatch(/class="google-button" disabled=""/)
+    expect(html).toMatch(/<button type="submit" class="primary-button" disabled="" aria-describedby="account-age-required">Create account/)
+    expect(html).toMatch(/class="google-button" disabled="" aria-describedby="account-age-required"/)
+    // QA 2026-11-07: the disabled buttons say why.
+    expect(html).toContain('id="account-age-required">Tick the box above to continue.</p>')
   })
 
   it('does not ask for the 18+ box when signing in', () => {
@@ -72,6 +74,7 @@ describe('LoginScreen', () => {
     auth.status = 'signed-out'
     const html = renderToStaticMarkup(<LoginScreen onClose={() => undefined} initialMode="sign-in" />)
     expect(html).not.toContain('I am 18 or older')
+    expect(html).not.toContain('Tick the box above')
     expect(html).toMatch(/class="google-button">/)
   })
 })

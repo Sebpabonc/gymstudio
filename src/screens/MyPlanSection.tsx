@@ -1,6 +1,7 @@
 import CollapsibleCard from './CollapsibleCard'
 import React from 'react'
 import { formatShortDate, useT } from '../i18n'
+import { localizeBlock, useSpanishContentReady } from '../i18n/content'
 import type { BuiltPlan } from '../plans/buildMyPlan'
 import type { Exercise } from '../types'
 import { getExerciseDisplayName } from '../utils/storage'
@@ -44,12 +45,16 @@ export default function MyPlanSection({
   onCancelRegeneration,
 }: Props) {
   const { t, language } = useT()
+  // Re-render once the approved Spanish block texts have loaded.
+  useSpanishContentReady(language)
   const exerciseName = (id: string) => {
     const exercise = exercises.find((item) => item.id === id)
     return exercise ? getExerciseDisplayName(exercise, language) : id
   }
 
-  const renderPlan = (plan: PlanPreview, isPreview: boolean) => (
+  const renderPlan = (rawPlan: PlanPreview, isPreview: boolean) => {
+    const plan = { ...rawPlan, block: localizeBlock(rawPlan.block, language) }
+    return (
     <div className="personal-plan-details">
       <div className="personal-plan-heading">
         <h3>{plan.block.name}</h3>
@@ -97,7 +102,8 @@ export default function MyPlanSection({
         </div>
       )}
     </div>
-  )
+    )
+  }
 
   return (
     <CollapsibleCard className="card profile-data-card personal-plan-card" titleId="profile-plan-title" title={t('profile.plan.title')}>

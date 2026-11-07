@@ -686,6 +686,14 @@ button {
   accent-color: var(--nav-active);
 }
 
+.account-age-required {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  text-align: center;
+}
+
 /* First run (PO 2026-11-07): the questionnaire is a new visitor's first screen, built from the Profile goal controls. */
 .first-run {
   display: grid;
@@ -767,6 +775,63 @@ button {
 
 .first-run-weeks i:first-child {
   background: var(--nav-active);
+}
+
+.first-run-ready .first-run-ready-label {
+  margin: 0;
+  color: var(--nav-active);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.first-run-ready h2 {
+  font-size: 1.25rem;
+  line-height: 1.6rem;
+}
+
+.first-run-weeks-row {
+  display: grid;
+  gap: 6px;
+}
+
+.first-run-weeks-label {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.first-run-days {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.first-run-days li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+}
+
+.first-run-days strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.first-run-days span {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.8125rem;
 }
 
 .welcome-card {
@@ -2002,6 +2067,20 @@ button {
   padding: 10px 14px;
   background: rgba(255, 255, 255, 0.02);
   color: var(--text);
+}
+
+/* A link styled as a secondary button looks and sizes like the button next to it. */
+a.secondary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+}
+
+.first-run > .secondary-button {
+  min-height: 44px;
+  margin: 0;
 }
 
 .notes-input {

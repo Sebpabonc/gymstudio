@@ -5,7 +5,9 @@ import { refreshCatalogue, fetchRemoteCatalogue, saveWorkoutHistory as saveHisto
 import {
   clearPendingFirstRunGoal,
   dismissWelcome as dismissWelcomeForTest,
+  getFirstRunDraft,
   getPendingFirstRunGoal,
+  saveFirstRunDraft,
   isNewVisitor,
   markFirstRunDone,
   savePendingFirstRunGoal,
@@ -170,6 +172,16 @@ describe('first run storage', () => {
     expect(getPendingFirstRunGoal()).toBeNull()
     localStorage.setItem('gym-studio.first-run-goal', JSON.stringify({ ...goal, daysPerWeek: 7 }))
     expect(getPendingFirstRunGoal()).toBeNull()
+  })
+
+  it('QA 2026-11-07: keeps partial answers across a reload and drops invalid ones', () => {
+    expect(getFirstRunDraft()).toEqual({})
+    saveFirstRunDraft({ goal: 'strength', daysPerWeek: 4 })
+    expect(getFirstRunDraft()).toEqual({ goal: 'strength', daysPerWeek: 4 })
+    localStorage.setItem('gym-studio.first-run-draft', JSON.stringify({ goal: 'strength', daysPerWeek: 9, equipment: 'moon' }))
+    expect(getFirstRunDraft()).toEqual({ goal: 'strength' })
+    clearPendingFirstRunGoal()
+    expect(getFirstRunDraft()).toEqual({})
   })
 })
 
