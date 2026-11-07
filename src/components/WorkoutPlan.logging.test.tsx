@@ -265,6 +265,19 @@ describe('approved workout logging integration', () => {
     expect(await loadWorkoutHistory()).toEqual(before)
   })
 
+  it('the last set of an exercise moves to the next one at once and keeps the rest running', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40)
+    for (let i = 0; i < 2; i++) await click(doneLabel())
+    expect(renderToStaticMarkup(tree)).not.toContain('row</h2>')
+    await click(doneLabel())
+    expect(renderToStaticMarkup(tree)).toContain('row</h2>')
+    expect(startRest).toHaveBeenLastCalledWith(120, expect.stringContaining('row'))
+    expect(changeRest).not.toHaveBeenCalledWith(null)
+  })
+
   it('m1: decrementing a minimum logged weight cannot overwrite a rejected correction', async () => {
     render()
     await settle()

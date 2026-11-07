@@ -2296,7 +2296,12 @@ export default function WorkoutPlan({
 
   const advanceWorkoutRest = (timer: RestTimerState | null) => {
     onRestTimerChange?.(timer)
-    if (timer || !pendingWorkoutNext.current) return
+    if (timer) return
+    if (!pendingWorkoutNext.current) {
+      // Already moved on after the last set: the finished exercise's insight ends with its rest.
+      setWorkoutInsight(null)
+      return
+    }
     const next = pendingWorkoutNext.current
     pendingWorkoutNext.current = null
     goToWorkoutGroup(next.group)
@@ -2385,9 +2390,15 @@ export default function WorkoutPlan({
       setSwitchUntil(Date.now() + 10_000)
     } else {
       setSwitchUntil(null)
-      pendingWorkoutNext.current = { group: nextGroupIndex, exercise: nextItem.exerciseIndex }
+      // PO 2026-11-01: the last set moves on at once; rest keeps running in the bar over the next exercise.
+      const exerciseFinished = nextGroupIndex !== groupIndex
+      pendingWorkoutNext.current = exerciseFinished ? null : { group: nextGroupIndex, exercise: nextItem.exerciseIndex }
+      if (exerciseFinished) {
+        goToWorkoutGroup(nextGroupIndex)
+        setWorkoutExerciseIndex(nextItem.exerciseIndex)
+      }
       const insightExercise = exerciseCatalog.find((item) => item.id === exercise.exerciseId)
-      if (nextSet < 0 && insightExercise) setWorkoutInsight(buildWorkoutExerciseInsight(result.entry, result.history, trainingBlocks, insightExercise))
+      setWorkoutInsight(nextSet < 0 && insightExercise ? buildWorkoutExerciseInsight(result.entry, result.history, trainingBlocks, insightExercise) : null)
       const restExercise = group.isSuperset && position === 0 ? group.items[group.items.length - 1].exercise : exercise
       onStartRest(getWorkoutRestSeconds(loadRestBetweenSets(), restExercise.restSeconds), next)
     }
