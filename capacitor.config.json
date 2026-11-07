@@ -1,5 +1,5 @@
 {
-  "appId": "com.gymstudio.app",
+  "appId": "com.gymstudioapp.app",
   "appName": "Gym Studio",
   "webDir": "dist",
   "server": {
