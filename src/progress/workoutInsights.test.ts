@@ -125,4 +125,24 @@ describe('workout set trend data', () => {
       { weight: 32.5, reps: 12, logged: false },
     ])
   })
+
+  it('labels today from the active plan day, not the weekday, before anything is logged', () => {
+    const block: TrainingBlock = {
+      id: 'plan-1', number: 1, name: 'Plan', method: 'flat', startDate: '2026-11-02', weeks: 6,
+      origin: 'pt', summary: '', insights: [], days: [],
+    }
+    // 2026-11-07 is a Saturday, which the weekday fallback would call a B day.
+    const before = buildWorkoutSetTrend([], [block], 'bench', '2026-11-07', [{ weight: 20, reps: 8 }], 5, {
+      blockId: 'plan-1',
+      dayKey: 'full-body-a',
+    })
+    expect(before[0].dayType).toBe('A')
+
+    const dayC = buildWorkoutSetTrend([], [block], 'bench', '2026-11-07', [], 5, { dayKey: 'full-body-c' })
+    expect(dayC[0].dayType).toBe('C')
+
+    const noLetter = buildWorkoutSetTrend([], [block], 'bench', '2026-11-07', [], 5, { dayKey: 'push' })
+    expect(noLetter[0].dayType).toBeNull()
+  })
 })
+

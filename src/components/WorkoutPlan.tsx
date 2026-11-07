@@ -4066,7 +4066,10 @@ export default function WorkoutPlan({
             const prescribedRestSeconds = getWorkoutRestSeconds(loadRestBetweenSets(), exercise.restSeconds)
             const prescribedRestLabel = `${Math.floor(prescribedRestSeconds / 60)}:${String(prescribedRestSeconds % 60).padStart(2, '0')}`
             const trendSessions = planMode === 'preset' && exercise.exerciseId
-              ? buildWorkoutSetTrend(history, trainingBlocks, exercise.exerciseId, today, trendTargets)
+              ? buildWorkoutSetTrend(history, trainingBlocks, exercise.exerciseId, today, trendTargets, 5, {
+                  blockId: activeBlock?.id,
+                  dayKey: activeDay?.key,
+                })
               : []
             const setHint = !group.isSuperset && exercise.technique === 'straight' && nextUncheckedIndex >= 0
               ? nextSetHint({
