@@ -297,7 +297,7 @@ function progressingSessions(input: RecommendInput) {
 type Make = (action: TrainerAction, weight: number | null, reason: ReasonCode, extra?: Partial<Recommendation>) => Recommendation
 
 /** R31a: on a cable grid a load counts as the grid load at or below it, and never below one step. */
-function gridLoad(weight: number, step: number) {
+export function gridLoad(weight: number, step: number) {
   return weight <= 0 ? weight : Math.max(step, roundToStep(weight, step, 'down'))
 }
 

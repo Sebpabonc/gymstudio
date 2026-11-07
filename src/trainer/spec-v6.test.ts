@@ -229,3 +229,13 @@ describe('R31 cable loads stay on the 2.5 kg grid', () => {
     expect(trainerReason(createTranslator('en'), 'en', result, target)).not.toContain('moves in 2.5 kg steps')
   })
 })
+
+describe('R31 logger hint', () => {
+  it('names the grid load and leaves on-grid loads alone', async () => {
+    const { gridLoad } = await import('./engine')
+    expect(gridLoad(6, 2.5)).toBe(5)
+    expect(gridLoad(26, 2.5)).toBe(25)
+    expect(gridLoad(1, 2.5)).toBe(2.5)
+    expect(gridLoad(27.5, 2.5)).toBe(27.5)
+  })
+})

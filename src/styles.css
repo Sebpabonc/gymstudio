@@ -10507,3 +10507,6 @@ p.workout-short-cue.cue-card {
 .layout-boxes .day-plan-card .planned-exercise-card.workout-mode-completed-card {
   padding: 16px;
 }
+
+/* R31: muted note under a cable set whose load is off the 2.5 kg grid. */
+.set-off-grid-hint { grid-column: 1 / -1; margin: 0; font-size: var(--type-caption-size); color: var(--muted); }

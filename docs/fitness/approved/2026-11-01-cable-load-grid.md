@@ -14,7 +14,13 @@ exercises: [cable-lateral-raise, rope-low-cable-oh-tricep-extensions, cable-rear
 > - On a 2.5 kg main load the drop stays at 2.5 kg (no lighter pin), so `dropWeight` is never 0.
 > - The off-grid line is also added below the reason when the card has no same-day comparison.
 > - On cable, the T179 jump guardrail is measured from the grid load.
-> - The open decisions below stay open: 25 kg stands for rope on B day. The Spanish line is still pending from the PT.
+> - 25 kg stands for rope on B day. The lateral-raise item stays a watch item for the next replay.
+>
+> **Open decisions closed 2026-11-07** (PO: "entre tú y el PT soluciona esas preguntas"; PT decision):
+> - **Grid.** Every cable moves in multiples of 2.5 kg from 2.5. A stack with a different step gets a configured step (R12a).
+> - **Logger hint.** Yes. One muted line under any cable set row being edited, never a block and never a changed value.
+>   EN "Not on the 2.5 kg steps; counts as {grid} kg." ES "Fuera de los pasos de 2,5 kg; cuenta como {grid} kg."
+> - **Spanish card line.** "Registraste {logged} kg. Esta polea sube de 2,5 en 2,5 kg, así que lo cuento como {grid} kg."
 
 ## Summary
 The PO confirmed on 2026-11-01 that his cables have no 6 kg or 26 kg, yet the engine recommends both. The step is
