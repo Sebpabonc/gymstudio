@@ -748,7 +748,7 @@ export default function ProgressScreen({
     : null
   const unlockedMuscleWeeks = muscleData.weeks.filter((week) => week.complete && !week.deload).length
 
-  // One action heading per watch type ("Ready to add weight"), then each lift with the existing evidence line.
+  // One action heading per watch type ("Hit every target rep"), then each lift with the existing evidence line.
   const nextGroups = nextWatches.reduce<Array<{ code: WatchObservation['code']; watches: WatchObservation[] }>>((groups, watch) => {
     const last = groups[groups.length - 1]
     if (last?.code === watch.code && watch.code !== 'W1') last.watches.push(watch)

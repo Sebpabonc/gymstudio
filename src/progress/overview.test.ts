@@ -28,7 +28,7 @@ function entries(exerciseId: string, reps: number[]): ProgressEntry[] {
 }
 
 describe('Overview "Next session" (PO 2026-11-07)', () => {
-  it('puts "Ready to add weight" (W2) first, then missed targets, repeats and baselines, top 3', () => {
+  it('puts "Hit every target rep" (W2) first, then missed targets, repeats and baselines, top 3', () => {
     const ordered = nextSessionWatches([
       watch('squat', 'W1'),
       watch('row', 'W1'),
@@ -63,9 +63,9 @@ describe('Overview "Next session" (PO 2026-11-07)', () => {
     expect(next).toHaveLength(3)
   })
 
-  it('words W2 as "Ready to add weight" in both languages', () => {
-    expect(en['progress.v3.next.W2']).toBe('Ready to add weight')
-    expect(es['progress.v3.next.W2']).toBe('Listo para subir peso')
+  it('words W2 as a fact, not a load call, in both languages', () => {
+    expect(en['progress.v3.next.W2']).toBe('Hit every target rep')
+    expect(es['progress.v3.next.W2']).toBe('Lograste todas las reps')
     expect(en['progress.v3.next.title']).toBe('Next session')
   })
 })
