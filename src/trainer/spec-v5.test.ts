@@ -245,7 +245,7 @@ describe('PT-approved trainer watch items R26–R30', () => {
       setReps: [14, 12, 10], history: [],
     })
     expect(trainerReason(createTranslator('en'), 'en', pyramid, pyramid.reps))
-      .toContain('Start light and add about 10% each set as the reps drop.')
+      .toContain('Add about 10% each set as the reps drop.')
   })
 
   it('T93 resumes normal reverse-pyramid progression after the first session', () => {

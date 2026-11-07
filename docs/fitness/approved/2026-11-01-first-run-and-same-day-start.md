@@ -247,6 +247,13 @@ the old text and must change with them.
 | `workout.trainer.firstSession.log` | All loaded | Your next target will start from what you log. | Tu próximo objetivo partirá de lo que registres. |
 | `workout.trainer.firstSession.bodyweight` | Bodyweight, band | Do the reps with control, and stop with about 3 more left in you. | Haz las reps con control y detente cuando aún te queden unas 3 más. |
 
+**Pyramid lines (PT pre-merge review, approved by the PO 2026-11-07):**
+
+| Key | EN | ES |
+|---|---|---|
+| `workout.trainer.firstSession.pyramid` | Add about 10% each set as the reps drop. | Sube cerca de un 10% en cada serie a medida que bajan las reps. |
+| `workout.trainer.firstSession.reversePyramid` | Then take off about 10% for each lighter set. | Luego quita cerca de un 10% en cada serie más liviana. |
+
 **Do not write:** "safe", "injury-free", "right for your body", "guaranteed", "this will prevent…", or any promise about results.
 
 ## 5. Medical notice
