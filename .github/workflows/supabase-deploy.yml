@@ -45,7 +45,7 @@ jobs:
 
       - name: Apply migrations
         if: ${{ inputs.apply }}
-        run: supabase db push --linked
+        run: supabase db push --linked --yes
 
       - name: Deploy ai-gateway
         if: ${{ inputs.apply }}
