@@ -3,7 +3,7 @@ Borrador de Governancer, 2026-11-07, para publicar en https://sebpabonc.github.i
 legal; Governancer no es abogado y ningún abogado lo revisó (decisión del PO, 2026-11-01). Escrito para una app gratis, sin pagos. La
 licencia es el EULA estándar de Apple (ver terms.en.md). Las secciones 4 y 5 tienen texto de entrenamiento e IA para revisión del PT.
 Este texto prevalece para quienes usan la app en español (sección 16): revisarlo con el mismo cuidado que el inglés. Sección 11 actualizada el
-2026-11-08 por el borrado dentro de la app.
+2026-11-08 por el borrado dentro de la app; la sección 3 lista las formas de iniciar sesión (Apple agregado el 2026-11-08).
 -->
 
 # Términos de uso de GymStudio
@@ -31,7 +31,7 @@ Debes tener al menos 18 años, y la edad necesaria para aceptar este acuerdo don
 
 ## 3. Tu cuenta
 
-Mantén privado tu inicio de sesión. Eres responsable de lo que pase en tu cuenta, salvo que no sea culpa tuya. Avísanos a
+Puedes iniciar sesión con correo y contraseña, con Google o, en la app para iPhone, con Iniciar sesión con Apple. Mantén privado tu inicio de sesión. Eres responsable de lo que pase en tu cuenta, salvo que no sea culpa tuya. Avísanos a
 gymstudioapp@gmail.com si crees que otra persona la está usando.
 
 ## 4. Tu salud y seguridad: léelo, por favor

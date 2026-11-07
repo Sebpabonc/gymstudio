@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { hasGuestWorkoutData } from '../utils/storage'
 import { Translate, useT } from '../i18n'
 import { legalUrl } from '../legal'
+import { isAppleSignInAvailable } from '../auth/appleSignIn'
 
 type LoginMode = 'sign-in' | 'sign-up'
 
@@ -33,7 +34,7 @@ export default function LoginScreen({ onClose, initialMode, backLabel, intro }: 
   intro?: string
 }) {
   const { t, language } = useT()
-  const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle, syncSignInRequired,
+  const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle, signInWithApple, syncSignInRequired,
     passwordRecovery, updatePassword } = useAuth()
   const [mode, setMode] = useState<LoginMode>(() => initialMode ?? (syncSignInRequired || hasGuestWorkoutData() ? 'sign-in' : 'sign-up'))
   // Governance sign-up step (ai-disclosure.md G): unticked, and required before any new account.
@@ -84,6 +85,16 @@ export default function LoginScreen({ onClose, initialMode, backLabel, intro }: 
     setErrorMessage('')
     setNotice('')
     const result = await signInWithGoogle()
+    setBusy(false)
+    if (result.error) setErrorMessage(friendlyError(result.error, t))
+  }
+
+  const continueWithApple = async () => {
+    if (needsAge) return
+    setBusy(true)
+    setErrorMessage('')
+    setNotice('')
+    const result = await signInWithApple()
     setBusy(false)
     if (result.error) setErrorMessage(friendlyError(result.error, t))
   }
@@ -251,6 +262,13 @@ export default function LoginScreen({ onClose, initialMode, backLabel, intro }: 
       </form>
 
       <div className="account-divider"><span>{t('login.or')}</span></div>
+      {/* App Store 4.8: Sign in with Apple next to Google, in the iPhone app. */}
+      {isAppleSignInAvailable() && (
+        <button type="button" className="apple-button" onClick={continueWithApple} disabled={busy || needsAge} aria-describedby={needsAge ? 'account-age-required' : undefined}>
+          <span className="apple-mark" aria-hidden="true">{'\uF8FF'}</span>
+          {t('login.apple')}
+        </button>
+      )}
       <button type="button" className="google-button" onClick={continueWithGoogle} disabled={busy || needsAge} aria-describedby={needsAge ? 'account-age-required' : undefined}>
         <span className="google-mark" aria-hidden="true">G</span>
         {t('login.google')}

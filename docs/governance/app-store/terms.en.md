@@ -3,7 +3,7 @@ Draft by Governancer, 2026-11-07, for publication at https://sebpabonc.github.io
 advice; Governancer is not a lawyer, and no lawyer has reviewed this (PO decision 2026-11-01). Written for a free app with no payments.
 Licence decision: keep Apple's Standard EULA as the licence in App Store Connect (https://www.apple.com/legal/internet-services/itunes/dev/stdeula/,
 read 2026-10-31) and publish these Terms as supplemental service terms; do not upload a custom EULA. Minimum age 18 here matches the 18+
-App Store rating. Sections 4 and 5 carry fitness and AI wording for the PT to review. Section 11 updated 2026-11-08 for in-app deletion.
+App Store rating. Sections 4 and 5 carry fitness and AI wording for the PT to review. Section 11 updated 2026-11-08 for in-app deletion; section 3 lists sign-in options (Apple added 2026-11-08).
 -->
 
 # GymStudio Terms of Use
@@ -31,7 +31,7 @@ You must be at least 18, and old enough to enter into this agreement where you l
 
 ## 3. Your account
 
-Keep your sign-in private. You are responsible for what happens in your account unless it isn't your fault. Tell us at
+You can sign in with email and password, with Google, or, in the iPhone app, with Sign in with Apple. Keep your sign-in private. You are responsible for what happens in your account unless it isn't your fault. Tell us at
 gymstudioapp@gmail.com if you think someone else is using it.
 
 ## 4. Your health and safety: please read

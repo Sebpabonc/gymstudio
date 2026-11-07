@@ -1,7 +1,7 @@
 <!--
 Draft by Governancer, 2026-11-07, for publication at https://sebpabonc.github.io/gymstudio/support/ (App Store Support URL) after the PO
 approves it. Apple guideline 1.5 asks for an easy way to contact us; guideline 2.1 forbids placeholder text. No sign-in needed to read
-this page. "Delete your account" updated 2026-11-08 for in-app deletion. Owner name and app email only; never a street address or phone number.
+this page. "Delete your account" updated 2026-11-08 for in-app deletion; Sign in with Apple (iPhone only) added 2026-11-08. Owner name and app email only; never a street address or phone number.
 -->
 
 # GymStudio support
@@ -24,7 +24,9 @@ You can delete your account inside the app:
 Your account and all its synced data are deleted at once, and this cannot be undone. The app then signs you out on that phone and removes
 that account's data from it. Workouts saved on the phone without signing in (as a guest) stay on the phone.
 
-**Can't sign in?** Write to **gymstudioapp@gmail.com** from your GymStudio account's email address (for Google sign-in, your Google email),
+**Can't sign in?** Write to **gymstudioapp@gmail.com** from your GymStudio account's email address (for Google sign-in, your Google email; for
+Sign in with Apple with Hide My Email, include the relay address ending in @privaterelay.appleid.com that Apple shows for GymStudio in
+your Apple Account settings),
 with the subject "Delete my account". We may ask you to confirm the request, to make sure it comes from you. We delete your account and
 all its data within **10 days** and email you when it is done.
 
@@ -40,7 +42,7 @@ for what AI sends to OpenAI.
 ## Common questions
 
 **Do I need an account?** Not to try GymStudio; what you log then stays on your device. Plans, goals, measurements, sync, feedback and AI need an
-account. You can sign up with email or with Google.
+account. You can sign up with email or with Google, and in the iPhone app also with Sign in with Apple.
 
 **Does it work offline?** Logging does, and your data syncs when you reconnect. Sign-in, new plans and AI need a connection.
 

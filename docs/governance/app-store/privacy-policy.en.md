@@ -2,7 +2,9 @@
 Draft by Governancer, 2026-11-07, for publication at https://sebpabonc.github.io/gymstudio/privacy/ after the PO approves it.
 Not legal advice; Governancer is not a lawyer. Every statement describes the app as of 2026-11-07 (sources: data-inventory.md and the
 2026-11-07 notes in questions-for-po.md). In-app account deletion added 2026-11-08 (supabase/functions/delete-account/index.ts,
-src/auth/AuthProvider.tsx). Update this text when Sign in with Apple, retention jobs or a new provider ship. Public-document rule: owner name and app email only; never a street address or phone number.
+src/auth/AuthProvider.tsx). Sign in with Apple (iPhone app only) added 2026-11-08 (src/auth/appleSignIn.ts,
+@capacitor-community/apple-sign-in 6.0.0, Supabase signInWithIdToken). Apple token revocation on deletion is not built (gaps G4), so
+this policy says nothing about it. Update this text when retention jobs or a new provider ship. Public-document rule: owner name and app email only; never a street address or phone number.
 -->
 
 # GymStudio Privacy Policy
@@ -30,7 +32,7 @@ GymStudio is for people aged 18 or older. The iPhone app is not offered in the E
 
 | Data | Examples | Why we use it |
 |---|---|---|
-| Account details | Your email address and password (our hosting provider stores the password only in hashed form). If you sign in with Google: your name, email, Google profile picture link and Google's ID for you | To create your account and sign you in |
+| Account details | Your email address and password (our hosting provider stores the password only in hashed form). If you sign in with Google: your name, email, Google profile picture link and Google's ID for you. If you use Sign in with Apple (iPhone app only): the email Apple shares with us, which is a private relay address ending in @privaterelay.appleid.com if you choose Hide My Email; your name, only if you share it the first time you sign in; and Apple's ID for you. We do not keep Apple access or refresh tokens | To create your account and sign you in |
 | Workout data | Exercises, dates, weights, reps, sets, reps in reserve, set times, plan targets, your workout notes, exercises you create | To run the app, sync it across your devices and show your progress |
 | Health and fitness data | Body weight, steps and calories you type in; your training goal (such as losing fat or gaining muscle), days per week, experience, activity level, session length, equipment and any goal notes you add | To build and adapt your plan and show your progress |
 | Plans and recommendations | Your plans, exercise swaps, the loads the app recommended and whether you used them | To recommend today's load and adapt it to you |
@@ -96,7 +98,7 @@ use, so a new device asks you again. Data already sent cannot be recalled; OpenA
 | OpenAI | Writes AI text, only if you allow AI (section 5) | United States |
 | Google | Sends our account emails (confirmation and password reset) from our Gmail account, gymstudioapp@gmail.com, and holds the emails you send us. Also, only if you use them: Google sign-in, and links that open a Google Images search for an exercise (only the search goes to Google) | United States and other countries where Google operates |
 | GitHub | Hosts our web app and these pages, and can see visitors' IP addresses | United States |
-| Apple | Distributes the iPhone app through the App Store and TestFlight, under Apple's own terms and privacy policy | United States and other countries |
+| Apple | Distributes the iPhone app through the App Store and TestFlight, under Apple's own terms and privacy policy. If you use Sign in with Apple, Apple confirms who you are and sends us a signed sign-in token, which our hosting provider checks; if you chose Hide My Email, Apple forwards our account emails to you | United States and other countries |
 | Authorities and courts | Only when the law requires it | |
 
 Sebastian Pabon can access stored data when needed to provide support, fix problems or meet legal duties.
@@ -134,7 +136,8 @@ recommendations, exercise swaps, feedback and AI usage counts. It cannot be undo
 that account's data from it.
 
 If you cannot sign in, write to **gymstudioapp@gmail.com** from the email address of your GymStudio account (for Google sign-in, your Google
-email), with the subject "Delete my account". We may ask you to confirm the request, to make sure it comes from you. We delete your account
+email; for Sign in with Apple with Hide My Email, include the relay address ending in @privaterelay.appleid.com that Apple shows for
+GymStudio in your Apple Account settings), with the subject "Delete my account". We may ask you to confirm the request, to make sure it comes from you. We delete your account
 and all its data within **10 days** and email you when it is done.
 
 Copies in backups and logs expire as described in section 7. Workouts saved on a phone without signing in (as a guest) stay on that phone

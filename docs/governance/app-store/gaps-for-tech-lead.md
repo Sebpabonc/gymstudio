@@ -9,7 +9,7 @@ Items marked **New** were not in issue #384.
 | G1 | ~~S1~~ Done | ~~In-app account deletion~~ Done 2026-11-08 | TL |
 | G2 | S1 | **New.** AI calls bypass consent, and "Not now" is ignored | TL |
 | G3 | S1 | **New.** No way to withdraw AI consent | TL, UXer |
-| G4 | S1 | Build Sign in with Apple (PO decided 2026-11-01) | TL |
+| G4 | S1 Partly done | ~~Build Sign in with Apple~~ Sign-in done 2026-11-08 (iPhone only). **Open:** Apple token revocation on account deletion | TL |
 | G5 | S1 | Hosted policy, US health policy and support URLs, in-app links, terms and 18+ step | TL |
 | G6 | S1 | **New.** No production email provider, so sign-ups cannot confirm. PO said later: must be before launch | PO + TL |
 | G7 | S1 | New-user path unproven; bundled fallback exposes the private program | TL, QAer |
@@ -104,6 +104,11 @@ Apple 5.1.1(ii): "an easily accessible and understandable way to withdraw consen
 the choice is null and nothing clears it, so a decline is permanent and an accept is permanent. Add Profile → Privacy & AI.
 
 ## G4. Login option (S1)
+
+**Status: partly done (2026-11-08).** Sign-in built, iPhone app only: `src/auth/appleSignIn.ts` (`@capacitor-community/apple-sign-in` 6.0.0,
+scopes `email name`, Supabase `signInWithIdToken` provider `apple`, name saved once as `full_name` in auth user metadata; no Apple access
+or refresh tokens kept). **Still open:** revoking Apple tokens when the account is deleted (G1 item 7; Apple 5.1.1(v)). Until built, no
+public document claims revocation. Also open: QAer check on a real device, and the relay email source (G6).
 
 PO decided 2026-11-01: **add Sign in with Apple.** Design and consequences: `app-store-connect-answers.md` section 6. The Apple relay needs a registered email source, which ties to G6.
 
