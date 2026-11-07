@@ -8342,7 +8342,8 @@ summary:focus-visible,
 
 .pv3-lift-row {
   width: 100%;
-  padding: 9px 0;
+  min-height: 44px;
+  padding: 5px 0;
   border: 0;
   background: transparent;
   color: inherit;
@@ -8371,36 +8372,89 @@ summary:focus-visible,
   font-style: normal;
 }
 
-.pv3-sparkline {
-  flex: 0 0 92px;
-  width: 92px;
-  height: 28px;
-  overflow: visible;
+.pv3-lift-chevron {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 1.2rem;
 }
 
-.pv3-sparkline line {
-  stroke: var(--line);
-  stroke-dasharray: 2 3;
+.pv3-status-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.pv3-sparkline path {
-  fill: none;
-  stroke: var(--muted);
-  stroke-width: 1.5;
+.pv3-info {
+  min-width: 0;
+  text-align: right;
 }
 
-.pv3-sparkline circle {
-  fill: var(--nav-active);
+.pv3-info summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -10px -12px 0;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
 }
 
-.pv3-summary-counts,
+.pv3-info summary::-webkit-details-marker {
+  display: none;
+}
+
+.pv3-info[open] {
+  flex-basis: 100%;
+}
+
+.pv3-status-heading:has(.pv3-info[open]) {
+  flex-wrap: wrap;
+}
+
+.pv3-info small {
+  display: block;
+  color: var(--muted);
+  text-align: left;
+}
+
+.pv3-next-list li {
+  display: grid;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.pv3-next-list small {
+  font-size: inherit;
+}
+
+.pv3-next-list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.pv3-next-list span,
+.pv3-next-list small,
+.pv3-baseline-best span {
+  color: var(--muted);
+}
+
+.pv3-baseline-best {
+  display: grid;
+  gap: 1px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--brand-soft);
+}
+
 .pv3-consistency-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
-.pv3-summary-counts > div,
 .pv3-consistency-summary > div,
 .pv3-chip {
   min-width: 0;
@@ -8410,13 +8464,11 @@ summary:focus-visible,
   text-align: center;
 }
 
-.pv3-summary-counts strong,
 .pv3-consistency-summary strong {
   display: block;
   font-size: 1rem;
 }
 
-.pv3-summary-counts span,
 .pv3-consistency-summary span {
   display: block;
   color: var(--muted);
