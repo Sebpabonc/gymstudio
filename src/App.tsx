@@ -45,7 +45,6 @@ import { RestTimerState, startRestTimer } from './utils/restTimer'
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen'))
 const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
-const ProfileDataSections = lazy(() => import('./screens/ProfileDataSections'))
 const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
 
 export default function App() {
@@ -301,7 +300,7 @@ export default function App() {
             demoMode ? (
               <Suspense fallback={<section className="card account-screen">{t('account.loading')}</section>}>
                 <>
-                  <ProfileDataSections />
+                  {/* PO 2026-11-07: the goal, plan and measurement cards can't be saved in the demo, so they don't show here. */}
                   <section className="card account-screen">
                     <h2>{t('demo.title')}</h2>
                     <p className="account-message">{t('demo.message')}</p>
