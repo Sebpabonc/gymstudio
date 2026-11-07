@@ -613,6 +613,12 @@ button {
   white-space: pre-line;
 }
 
+.effortless-why .effortless-why-comparison {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
 .effortless-why b {
   color: var(--nav-active);
   font-size: 0.75rem;
@@ -630,6 +636,8 @@ button {
 }
 
 .first-workout-note {
+  /* Clears the sticky workout header when it is scrolled into view on opening. */
+  scroll-margin-top: calc(68px + env(safe-area-inset-top, 0px));
   display: grid;
   gap: 6px;
   margin: 0 0 10px;
@@ -1369,7 +1377,7 @@ button {
 }
 
 .exercise-create-link > span {
-  color: var(--brand);
+  color: var(--nav-active);
   font-size: 1.25rem;
 }
 
@@ -7537,11 +7545,23 @@ a.planned-exercise-main-name {
 }
 
 .workout-mode-progress {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
   overflow: hidden;
   color: var(--text);
   text-align: center;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.workout-mode-progress-day {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workout-mode-progress-count {
+  flex: none;
 }
 
 .workout-mode-language-toggle {
@@ -7601,7 +7621,8 @@ a.planned-exercise-main-name {
 .workout-mode-chip.current {
   border-color: var(--brand);
   background: var(--brand-soft);
-  color: var(--brand);
+  /* --brand as text is ~3:1 on the dark panel; --nav-active keeps the brand hue at AA contrast. */
+  color: var(--nav-active);
 }
 
 .workout-mode-chip.done {
@@ -8066,7 +8087,8 @@ summary:focus-visible,
 
 .pv3-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Columns size to their label, then share the rest, so "Consistency" fits at 375 px. */
+  grid-template-columns: repeat(4, auto);
   gap: 4px;
   margin: 8px 0;
   padding: 3px;
@@ -9426,7 +9448,7 @@ summary:focus-visible,
 
 .workout-mode-completed-summary > strong {
   flex: none;
-  color: var(--brand);
+  color: var(--nav-active);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -10255,9 +10277,21 @@ p.workout-short-cue.cue-card {
   font-variant-numeric: tabular-nums;
 }
 
+.plan-card.workout-mode-active .workout-exercise-tools {
+  gap: 4px;
+}
+
+/* A column is never narrower than its label ("Technique" at 375 px), and the rest share the space evenly. */
+.plan-card.workout-mode-active .workout-exercise-tools.has-swap {
+  grid-template-columns: repeat(4, minmax(min-content, 1fr));
+}
+
 .plan-card.workout-mode-active .workout-tool {
   flex-direction: column;
   gap: 2px;
+  /* "Technique" at 375 px: room for the label, and an ellipsis rather than clipping at large text sizes. */
+  padding-inline: 2px;
+  overflow: hidden;
   font-size: var(--type-label-size);
   line-height: var(--type-label-lh);
   font-weight: var(--type-label-weight);
@@ -10270,6 +10304,12 @@ p.workout-short-cue.cue-card {
 .plan-card.workout-mode-active .workout-tool svg {
   width: 20px;
   height: 20px;
+}
+
+.plan-card.workout-mode-active .workout-tool span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .plan-card.workout-mode-active .workout-mode-plan-note {

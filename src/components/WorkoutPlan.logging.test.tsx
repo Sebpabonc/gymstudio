@@ -145,6 +145,25 @@ function fixSet(set = 1) {
   render()
 }
 
+function pendingRow(name: string) {
+  return elements(node => typeof node.props.className === 'string' && node.props.className.split(' ')[0] === 'effortless-set-row' &&
+    !node.props.className.split(' ').includes('done') &&
+    elements(child => child.type === 'small' && child.props.children === name, node).length > 0)[0]
+}
+
+/** Logs the first pending set of one superset exercise, whichever row is highlighted. */
+async function logPendingRow(name: string, weight: number) {
+  if (!elements(node => node.type === WorkoutSetInputs, pendingRow(name)).length) {
+    elements(node => node.props.className === 'effortless-set-value', pendingRow(name))[0].props.onClick()
+    render()
+  }
+  elements(node => node.type === WorkoutSetInputs, pendingRow(name))[0].props.onValueChange('weight', String(weight))
+  render()
+  vi.advanceTimersByTime(600)
+  await elements(node => node.props.className === 'effortless-tick', pendingRow(name))[0].props.onClick()
+  await settle()
+}
+
 function doneLabel() {
   return elements(node => node.type === 'button' && node.props['data-next'] === true)[0].props['aria-label']
 }
@@ -293,8 +312,9 @@ describe('approved workout logging integration', () => {
     await start()
     const [why] = whyLines()
     expect(why.props.label).toBe('Why this weight')
-    expect(why.props.reason).toMatch(/\S/)
-    expect(why.props.details.sections[0].lines).toContain(why.props.reason)
+    expect(why.props.reason.lines.join(' ')).toMatch(/\S/)
+    // The sheet shows the same parts, one per line (QA 2026-11-07: they used to run together).
+    for (const line of why.props.reason.lines) expect(why.props.details.sections[0].lines).toContain(line)
   })
 
   it('m1: decrementing a minimum logged weight cannot overwrite a rejected correction', async () => {
@@ -380,6 +400,55 @@ describe('approved workout logging integration', () => {
     const ticks = elements(node => node.props.className === 'effortless-tick')
     expect(ticks.map(tick => !!tick.props.disabled)).toEqual([true, false, false])
     expect(ticks[1].props['aria-label']).toBe('Undo set 2')
+  })
+
+  it('QA 2026-11-07: after C1 1 and C2 1 the highlighted row is C1 set 2 (approved C1 → C2 order)', async () => {
+    render()
+    await settle()
+    await start()
+    await click('2 · row')
+    await logPendingRow('row', 40)
+    // C1 → C2 switch: C2's set 1 is next.
+    expect(elements(node => node.props['data-next'] === true, pendingRow('curl'))).toHaveLength(1)
+    await logPendingRow('curl', 20)
+    // Rest runs over the C2 card, but the next set is C1's set 2, not C2's set 2.
+    const now = elements(node => typeof node.props.className === 'string' && node.props.className.split(' ').includes('now'))
+    expect(now).toHaveLength(1)
+    expect(elements(node => node.type === 'small', now[0])[0].props.children).toBe('row')
+    expect(elements(node => node.props['data-next'] === true, pendingRow('row'))).toHaveLength(1)
+    expect(elements(node => node.props['data-next'] === true, pendingRow('curl'))).toHaveLength(0)
+  })
+
+  it('QA 2026-11-07: the first-workout note stays after the first set, and the chips say which are done', async () => {
+    render()
+    await settle()
+    await start()
+    const note = () => elements(node => node.props.className === 'first-workout-note')
+    expect(note()).toHaveLength(1)
+    await enter(40)
+    await click(doneLabel())
+    expect(note()).toHaveLength(1)
+    // Header controls and the chip list are two differently named landmarks; chips aren't toggle buttons.
+    const html = renderToStaticMarkup(tree)
+    expect(html).toContain('aria-label="Workout controls"')
+    expect(html).toContain('aria-label="Exercises in this workout"')
+    const chips = elements(node => node.type === 'button' && typeof node.props.className === 'string' && node.props.className.startsWith('workout-mode-chip'))
+    expect(chips.every(chip => chip.props['aria-pressed'] === undefined)).toBe(true)
+  })
+
+  it('a11y QA 2026-11-07: a set Done button is never disabled while the set saves (focus would drop to <body>)', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40)
+    vi.advanceTimersByTime(600)
+    const pending = button(doneLabel()).props.onClick()
+    render()
+    const ticks = elements(node => node.props.className === 'effortless-tick')
+    expect(ticks[0].props.disabled).toBe(false)
+    expect(ticks[0].props['aria-disabled']).toBe(true)
+    await pending
+    await settle()
   })
 
   it('T132/T149: superset rows belong to each exercise and unequal counts keep their own sets', async () => {
@@ -544,9 +613,10 @@ describe('approved workout logging integration', () => {
     await click('3 · curl')
     const previous = { weight: inputs().props.weight, reps: inputs().props.reps }
     await click('2 · row')
+    // Out of the superset order on purpose (C1 three times): after each C1 set the highlighted row is C2's
+    // (approved C1 → C2 order), so tap C1's own pending row.
     for (let i = 0; i < 3; i++) {
-      await enter(40)
-      await click(doneLabel())
+      await logPendingRow('row', 40)
       if (i < 2) await click('2 · row')
     }
     expect((await loadWorkoutHistory()).find(entry => entry.exerciseId === 'row' && entry.date === '2026-10-19')?.sets).toHaveLength(3)

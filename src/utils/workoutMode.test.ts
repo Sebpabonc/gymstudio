@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from './workoutMode'
+import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet, formatRestTarget, isFirstWorkout, restAnnouncement } from './workoutMode'
+import { createTranslator } from '../i18n/translate'
 
 it('B1: accepts a fresh confirmation only after the 600 ms deadline', () => {
   const deadline = 1000 + WORKOUT_DONE_GUARD_MS
@@ -136,5 +137,34 @@ describe('dayWorkoutStatus', () => {
       .toMatchObject({ done: 0, loggedSets: 2, state: 'in-progress' })
     expect(dayWorkoutStatus(ids, [{ ...first, sets: [] }], scope, [3, 3, 3]))
       .toMatchObject({ done: 0, loggedSets: 0, state: 'not-started' })
+  })
+})
+
+describe('QA 2026-11-07 workout mode helpers', () => {
+  const t = createTranslator('en')
+  const es = createTranslator('es')
+
+  it('never shows 0 kg for a loaded next exercise with no weight yet', () => {
+    expect(formatRestTarget('en', t, 0, 8, 'dumbbell')).toBe('Enter weight · 8 reps')
+    expect(formatRestTarget('es', es, 0, 10, 'cable')).toBe('Ingresa el peso · 10 reps')
+    expect(formatRestTarget('en', t, 0, 12, 'bodyweight')).toBe('12')
+    expect(formatRestTarget('en', t, 14, 8, 'dumbbell')).toBe('14 kg × 8')
+    expect(formatRestTarget('es', es, 32.5, 10, 'barbell')).toBe('32,5 kg × 10')
+    expect(formatRestTarget('en', t, 10, 8, 'bodyweight')).toBe('10 kg × 8')
+  })
+
+  it('keeps the first-workout note for the whole first workout', () => {
+    expect(isFirstWorkout([], '2026-11-07', false)).toBe(true)
+    expect(isFirstWorkout(['2026-11-07', '2026-11-07T10:00:00'], '2026-11-07', false)).toBe(true)
+    expect(isFirstWorkout(['2026-11-07'], '2026-11-07', true)).toBe(false)
+    expect(isFirstWorkout(['2026-11-06', '2026-11-07'], '2026-11-07', false)).toBe(false)
+  })
+
+  it('announces only rest start, 30 s left and done', () => {
+    expect(restAnnouncement(150, false)).toBe('start')
+    expect(restAnnouncement(31, false)).toBe('start')
+    expect(restAnnouncement(30, false)).toBe('thirty')
+    expect(restAnnouncement(1, false)).toBe('thirty')
+    expect(restAnnouncement(0, true)).toBe('done')
   })
 })

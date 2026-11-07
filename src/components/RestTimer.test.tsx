@@ -105,6 +105,20 @@ describe('RestTimer', () => {
     cleanups.forEach(cleanup => { if (cleanup) cleanup() })
   })
 
+  it('a11y QA 2026-11-07: the ticking countdown is not a live region; only start / 30 s / done are announced', () => {
+    for (const minimized of [false, true]) {
+      mocks.minimized = minimized
+      const running = renderToStaticMarkup(RestTimer({ timer: { endAt: 121_000 }, hidden: false, onChange: vi.fn(), workoutMode: true })!)
+      expect(running.match(/role="status"/g)).toHaveLength(1)
+      expect(running).toContain('<span class="sr-only" role="status">rest.announceStart</span>')
+      expect(running).not.toMatch(/role="status">2:00/)
+      const last = renderToStaticMarkup(RestTimer({ timer: { endAt: 21_000 }, hidden: false, onChange: vi.fn(), workoutMode: true })!)
+      expect(last).toContain('role="status">rest.announceThirty</span>')
+      const done = renderToStaticMarkup(RestTimer({ timer: { endAt: 1000 }, hidden: false, onChange: vi.fn(), workoutMode: true })!)
+      expect(done).toContain('role="status">Go</span>')
+    }
+  })
+
   it('m4: tapping outside minimizes the popup but tapping inside does not', () => {
     const tree = RestTimer({ timer: { endAt: 121_000 }, hidden: false, onChange: vi.fn(), workoutMode: true })!
     const target = {}
