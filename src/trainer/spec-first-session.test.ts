@@ -111,10 +111,10 @@ describe('first-time wording (L1, L2)', () => {
       'Your next target will start from what you log.',
     ])
     expect(lines(result, 'es')).toEqual([
-      'Empieza liviano y sube un poco el peso en 1 a 3 series fáciles de calentamiento. No las registres.',
+      'Empieza ligero y sube un poco el peso en 1 a 3 series fáciles de calentamiento. No las registres.',
       'Elige un peso con el que completes 8 reps y aún te queden unas 3 más.',
       'Usa ese peso en todas las series.',
-      '¿Muy pesado o muy liviano? Cámbialo. Hoy es normal.',
+      '¿Muy pesado o muy ligero? Cámbialo. Hoy es normal.',
       'Tu próximo objetivo partirá de lo que registres.',
     ])
     expect(lines(result).join(' ')).not.toMatch(/left on the heaviest|reps you had left/)
@@ -177,6 +177,6 @@ describe('PT pre-merge review 2026-11-07', () => {
     expect(lines(pyramid)[2]).toBe('Add about 10% each set as the reps drop.')
     expect(lines(pyramid, 'es')[2]).toBe('Sube cerca de un 10% en cada serie a medida que bajan las reps.')
     const reverse = recommend({ ...base, equipment: 'plate-loaded', technique: 'reverse-pyramid', target: rng(8, 12), setReps: [8, 10, 12] })
-    expect(lines(reverse, 'es')[2]).toBe('Luego quita cerca de un 10% en cada serie más liviana.')
+    expect(lines(reverse, 'es')[2]).toBe('Luego quita cerca de un 10% en cada serie más ligera.')
   })
 })

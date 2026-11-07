@@ -76,7 +76,8 @@ export function localizeCatalogue(exercises: Exercise[], language: Language): Ex
 /** Block with Spanish name, summary, insights, day names/focus and notes when available. Ids, keys and codes never change. */
 export function localizeBlock(block: TrainingBlock, language: Language): TrainingBlock {
   if (language !== 'es') return block
-  const es = BLOCKS_ES[block.id]
+  // Earlier demo cycles reuse their template's texts (src/plans/demoBlock.ts).
+  const es = BLOCKS_ES[block.id] ?? BLOCKS_ES[block.id.replace(/~past-\d+$/, '')]
   if (!es) return block
   return {
     ...block,

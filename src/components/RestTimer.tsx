@@ -8,6 +8,7 @@ import {
   toggleRestTimerPause,
 } from '../utils/restTimer'
 import { useT } from '../i18n'
+import { restAnnouncement } from '../utils/workoutMode'
 import { fireRestAlert } from '../native/restAlerts'
 import './RestTimer.css'
 
@@ -103,6 +104,15 @@ export default function RestTimer({
 
   const isDone = isRestTimerDone(timer, now)
   const isPaused = isRestTimerPaused(timer)
+  const remainingSeconds = remainingRestSeconds(timer, now)
+  // The ticking number is not a live region (it would be read every second); this polite region only changes
+  // when the rest starts, at 30 s left and when it's done.
+  const phase = restAnnouncement(remainingSeconds, isDone)
+  const announcement = (
+    <span className="sr-only" role="status">
+      {phase === 'done' ? goLabel : phase === 'thirty' ? t('rest.announceThirty') : t('rest.announceStart')}
+    </span>
+  )
   const stop = () => {
     onChange(null)
   }
@@ -119,8 +129,9 @@ export default function RestTimer({
       const progress = fullMs.current > 0 ? Math.min(1, remainingMs / fullMs.current) : 0
       return (
         <aside className={`workout-rest-bar${isDone ? ' done' : ''}`} aria-label={restLabel}>
-          <span className="workout-rest-bar-fill" style={{ width: `${progress * 100}%` }} aria-hidden="true" />
-          <strong role="status">{isDone ? goLabel : formatRemainingTime(remainingRestSeconds(timer, now))}</strong>
+          <span className="workout-rest-bar-fill" style={{ transform: `scaleX(${progress})` }} aria-hidden="true" />
+          <strong>{isDone ? goLabel : formatRemainingTime(remainingSeconds)}</strong>
+          {announcement}
           <span className="workout-rest-next">
             <span className="workout-rest-bar-title">{barTitle ?? nextLabel}</span>
             {barValue && <b>{barValue}</b>}
@@ -161,9 +172,10 @@ export default function RestTimer({
             <button type="button" onClick={() => setMinimized(true)}>{t('rest.hide')}</button>
           </header>
           {label && <p className="workout-rest-label">{label}</p>}
-          <div className="workout-rest-countdown" role="status">
-            {isDone ? goLabel : formatRemainingTime(remainingRestSeconds(timer, now))}
+          <div className="workout-rest-countdown">
+            {isDone ? goLabel : formatRemainingTime(remainingSeconds)}
           </div>
+          {announcement}
           {nextLabel && <p className="workout-rest-next">{nextLabel}</p>}
           {children && <div className="workout-rest-insight">{children}</div>}
           <div className="workout-rest-actions">

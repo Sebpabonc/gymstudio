@@ -4,7 +4,7 @@ import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { isDemoMode, isNewUserDemo } from './demoMode'
 import { RestTimerState } from './restTimer'
-import { buildTrainingGoalPayload, fetchActiveUserPlan as fetchRemoteActiveUserPlan, updateActiveUserPlan } from './profileData'
+import { buildTrainingGoalPayload, fetchActiveUserPlan as fetchRemoteActiveUserPlan, trainingGoalOptions, updateActiveUserPlan } from './profileData'
 import { pinFirstLog } from '../plans/rollingStart'
 import type { SavedUserPlan, TrainingGoalInput } from './profileData'
 
@@ -28,6 +28,7 @@ const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
 // First run (PT spec 2026-11-01): answers wait here, outside any account, until the new account exists.
 const FIRST_RUN_GOAL_KEY = 'gym-studio.first-run-goal'
 const FIRST_RUN_DONE_KEY = 'gym-studio.first-run-done'
+const FIRST_RUN_DRAFT_KEY = 'gym-studio.first-run-draft'
 let helpAiAppOpensThisLoad: number | null = null
 
 export type CustomPlanExercise = {
@@ -94,7 +95,7 @@ function signalWorkoutHistorySaved() {
 const GUEST_CLAIMED_KEY = 'gym-studio.guest-claimed'
 const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
 const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY, LANGUAGE_KEY,
-  FIRST_RUN_GOAL_KEY, FIRST_RUN_DONE_KEY])
+  FIRST_RUN_GOAL_KEY, FIRST_RUN_DONE_KEY, FIRST_RUN_DRAFT_KEY])
 
 let storageNamespace: string | null = null
 
@@ -529,6 +530,36 @@ export function savePendingFirstRunGoal(goal: TrainingGoalInput) {
 
 export function clearPendingFirstRunGoal() {
   localStorage.removeItem(storageKey(FIRST_RUN_GOAL_KEY))
+  clearFirstRunDraft()
+}
+
+type FirstRunDraft = Partial<Omit<TrainingGoalInput, 'notes'>>
+
+/** Answers picked so far, before Continue: a reload keeps them. Unknown values are dropped. */
+export function getFirstRunDraft(): FirstRunDraft {
+  const parsed = readJson<Record<string, unknown> | null>(storageKey(FIRST_RUN_DRAFT_KEY), null)
+  if (!parsed || typeof parsed !== 'object') return {}
+  const draft: Record<string, unknown> = {}
+  for (const key of Object.keys(trainingGoalOptions) as (keyof typeof trainingGoalOptions)[]) {
+    if ((trainingGoalOptions[key] as readonly unknown[]).includes(parsed[key])) draft[key] = parsed[key]
+  }
+  return draft as FirstRunDraft
+}
+
+export function saveFirstRunDraft(draft: FirstRunDraft) {
+  try {
+    localStorage.setItem(storageKey(FIRST_RUN_DRAFT_KEY), JSON.stringify(draft))
+  } catch {
+    // The draft is a convenience; the questions still work without storage.
+  }
+}
+
+export function clearFirstRunDraft() {
+  try {
+    localStorage.removeItem(storageKey(FIRST_RUN_DRAFT_KEY))
+  } catch {
+    // Nothing to clear when storage is unavailable.
+  }
 }
 
 type TrainingExerciseRow = {

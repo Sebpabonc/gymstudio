@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import AiConsentPrompt from '../components/AiConsentPrompt'
 import { formatShortDate, useT, type TranslationKey } from '../i18n'
+import { localizeBlock, useSpanishContentReady } from '../i18n/content'
 import { buildMyPlan, type BuiltPlan } from '../plans/buildMyPlan'
 import {
   completeAnswers,
@@ -19,7 +20,7 @@ import {
   type TrainingGoal,
   type TrainingGoalInput,
 } from '../utils/profileData'
-import { cacheActiveUserPlan, getAskExerciseAiConsent, loadExercises, setAskExerciseAiConsent } from '../utils/storage'
+import { cacheActiveUserPlan, getAskExerciseAiConsent, getFirstRunDraft, loadExercises, saveFirstRunDraft, setAskExerciseAiConsent } from '../utils/storage'
 import { NEW_USER_DEMO_URL } from '../utils/demoMode'
 
 const LoginScreen = lazy(() => import('./LoginScreen'))
@@ -47,7 +48,7 @@ function Question({ name, answers, onChange }: {
   return (
     <fieldset className="profile-choice-group">
       <legend>{label}</legend>
-      <div className={`profile-choice-chips${question.help ? ' first-run-stack' : ''}`} role="group" aria-label={label}>
+      <div className={`profile-choice-chips${question.help ? ' first-run-stack' : ''}`}>
         {options.map((option) => (
           <button
             key={option}
@@ -78,11 +79,15 @@ export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount, d
   demo?: boolean
 }) {
   const { t } = useT()
-  const [answers, setAnswers] = useState<FirstRunAnswers>(() => {
-    if (!initialAnswers) return {}
+  const [answers, setAnswersState] = useState<FirstRunAnswers>(() => {
+    if (!initialAnswers) return getFirstRunDraft()
     const { notes: _notes, ...rest } = initialAnswers as TrainingGoalInput
     return rest
   })
+  const setAnswers = (next: FirstRunAnswers) => {
+    setAnswersState(next)
+    saveFirstRunDraft(next)
+  }
   const [step, setStep] = useState<'questions' | 'account'>('questions')
   const left = unansweredCount(answers)
 
@@ -235,24 +240,43 @@ export function FirstRunPlan({ goal, onDone, demo = false }: { goal: TrainingGoa
   }
   return (
     <div className="first-run">
-      <section className="card" aria-live="polite">
-        {stage.kind === 'kept' ? (
-          <p>{t('firstRun.kept')}</p>
-        ) : (
-          <>
-            <h2>{t('firstRun.ready')}</h2>
-            <div className="first-run-weeks" aria-hidden="true">{Array.from({ length: 6 }, (_, index) => <i key={index} />)}</div>
-            <p><strong>{stage.plan.block.name}</strong></p>
-            <p className="first-run-hint">{stage.plan.block.startsOnFirstLog
-              ? t('firstRun.startsFirst')
-              : t('profile.plan.starts', { date: formatShortDate(language, stage.plan.startDate) })}</p>
-            {stage.plan.cappedForBeginner && <p className="first-run-hint">{t('profile.plan.beginnerNote')}</p>}
-          </>
-        )}
-      </section>
+      {stage.kind === 'ready'
+        ? <PlanReadyCard plan={stage.plan} />
+        : <section className="card" aria-live="polite"><p>{t('firstRun.kept')}</p></section>}
       <div className="first-run-cta">
         <button type="button" className="primary-button" onClick={onDone}>{t('firstRun.seeToday')}</button>
       </div>
     </div>
+  )
+}
+
+/** The new plan as Today will show it: name, the 6-week bar, the days and when week 1 starts. */
+export function PlanReadyCard({ plan }: { plan: BuiltPlan }) {
+  const { t, language } = useT()
+  useSpanishContentReady(language)
+  const block = localizeBlock(plan.block, language)
+  return (
+    <section className="card first-run-ready" aria-live="polite" aria-labelledby="first-run-ready-title">
+      <p className="first-run-ready-label">{t('firstRun.ready')}</p>
+      <h2 id="first-run-ready-title">{block.name}</h2>
+      <div className="first-run-weeks-row">
+        <div className="first-run-weeks" aria-hidden="true" style={{ gridTemplateColumns: `repeat(${block.weeks}, 1fr)` }}>
+          {Array.from({ length: block.weeks }, (_, index) => <i key={index} />)}
+        </div>
+        <span className="first-run-weeks-label">{t('workout.block.weekOf', { week: 1, total: block.weeks })}</span>
+      </div>
+      <ol className="first-run-days">
+        {block.days.map((day) => (
+          <li key={day.key}>
+            <strong>{t('workout.day.title', { position: day.position, name: day.name })}</strong>
+            <span>{t('progress.sessions.count', { count: day.exercises.length })}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="first-run-hint">{block.startsOnFirstLog
+        ? t('firstRun.startsFirst')
+        : t('profile.plan.starts', { date: formatShortDate(language, plan.startDate) })}</p>
+      {plan.cappedForBeginner && <p className="first-run-hint">{t('profile.plan.beginnerNote')}</p>}
+    </section>
   )
 }

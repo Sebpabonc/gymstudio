@@ -145,6 +145,25 @@ function fixSet(set = 1) {
   render()
 }
 
+function pendingRow(name: string) {
+  return elements(node => typeof node.props.className === 'string' && node.props.className.split(' ')[0] === 'effortless-set-row' &&
+    !node.props.className.split(' ').includes('done') &&
+    elements(child => child.type === 'small' && child.props.children === name, node).length > 0)[0]
+}
+
+/** Logs the first pending set of one superset exercise, whichever row is highlighted. */
+async function logPendingRow(name: string, weight: number) {
+  if (!elements(node => node.type === WorkoutSetInputs, pendingRow(name)).length) {
+    elements(node => node.props.className === 'effortless-set-value', pendingRow(name))[0].props.onClick()
+    render()
+  }
+  elements(node => node.type === WorkoutSetInputs, pendingRow(name))[0].props.onValueChange('weight', String(weight))
+  render()
+  vi.advanceTimersByTime(600)
+  await elements(node => node.props.className === 'effortless-tick', pendingRow(name))[0].props.onClick()
+  await settle()
+}
+
 function doneLabel() {
   return elements(node => node.type === 'button' && node.props['data-next'] === true)[0].props['aria-label']
 }
@@ -293,8 +312,9 @@ describe('approved workout logging integration', () => {
     await start()
     const [why] = whyLines()
     expect(why.props.label).toBe('Why this weight')
-    expect(why.props.reason).toMatch(/\S/)
-    expect(why.props.details.sections[0].lines).toContain(why.props.reason)
+    expect(why.props.reason.lines.join(' ')).toMatch(/\S/)
+    // The sheet shows the same parts, one per line (QA 2026-11-07: they used to run together).
+    for (const line of why.props.reason.lines) expect(why.props.details.sections[0].lines).toContain(line)
   })
 
   it('m1: decrementing a minimum logged weight cannot overwrite a rejected correction', async () => {
@@ -382,6 +402,55 @@ describe('approved workout logging integration', () => {
     expect(ticks[1].props['aria-label']).toBe('Undo set 2')
   })
 
+  it('QA 2026-11-07: after C1 1 and C2 1 the highlighted row is C1 set 2 (approved C1 → C2 order)', async () => {
+    render()
+    await settle()
+    await start()
+    await click('2 · row')
+    await logPendingRow('row', 40)
+    // C1 → C2 switch: C2's set 1 is next.
+    expect(elements(node => node.props['data-next'] === true, pendingRow('curl'))).toHaveLength(1)
+    await logPendingRow('curl', 20)
+    // Rest runs over the C2 card, but the next set is C1's set 2, not C2's set 2.
+    const now = elements(node => typeof node.props.className === 'string' && node.props.className.split(' ').includes('now'))
+    expect(now).toHaveLength(1)
+    expect(elements(node => node.type === 'small', now[0])[0].props.children).toBe('row')
+    expect(elements(node => node.props['data-next'] === true, pendingRow('row'))).toHaveLength(1)
+    expect(elements(node => node.props['data-next'] === true, pendingRow('curl'))).toHaveLength(0)
+  })
+
+  it('QA 2026-11-07: the first-workout note stays after the first set, and the chips say which are done', async () => {
+    render()
+    await settle()
+    await start()
+    const note = () => elements(node => node.props.className === 'first-workout-note')
+    expect(note()).toHaveLength(1)
+    await enter(40)
+    await click(doneLabel())
+    expect(note()).toHaveLength(1)
+    // Header controls and the chip list are two differently named landmarks; chips aren't toggle buttons.
+    const html = renderToStaticMarkup(tree)
+    expect(html).toContain('aria-label="Workout controls"')
+    expect(html).toContain('aria-label="Exercises in this workout"')
+    const chips = elements(node => node.type === 'button' && typeof node.props.className === 'string' && node.props.className.startsWith('workout-mode-chip'))
+    expect(chips.every(chip => chip.props['aria-pressed'] === undefined)).toBe(true)
+  })
+
+  it('a11y QA 2026-11-07: a set Done button is never disabled while the set saves (focus would drop to <body>)', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40)
+    vi.advanceTimersByTime(600)
+    const pending = button(doneLabel()).props.onClick()
+    render()
+    const ticks = elements(node => node.props.className === 'effortless-tick')
+    expect(ticks[0].props.disabled).toBe(false)
+    expect(ticks[0].props['aria-disabled']).toBe(true)
+    await pending
+    await settle()
+  })
+
   it('T132/T149: superset rows belong to each exercise and unequal counts keep their own sets', async () => {
     harness.block!.days[0].exercises[2].sets = 2
     render()
@@ -419,6 +488,20 @@ describe('approved workout logging integration', () => {
     const screen = elements(node => node.props.className === 'workout-completed-content')[0]
     expect(elements(node => node.props.className === 'log-toast in-summary', screen)).toHaveLength(1)
     expect(elements(node => node.props.className === 'log-toast')).toHaveLength(0)
+  })
+
+  it('QA #7: Escape on the finish confirm keeps training instead of leaving the dialog stuck open', async () => {
+    render()
+    await settle()
+    await start()
+    await click('Finish')
+    expect(elements(node => node.props.className === 'workout-finish-dialog')).toHaveLength(1)
+    const addListener = document.addEventListener as unknown as ReturnType<typeof vi.fn>
+    const keyListeners = addListener.mock.calls.filter(([type]) => type === 'keydown').map(([, listener]) => listener)
+    keyListeners.forEach(listener => listener({ key: 'Escape', preventDefault: vi.fn() }))
+    await settle()
+    expect(elements(node => node.props.className === 'workout-finish-dialog')).toHaveLength(0)
+    expect(elements(node => node.props.className === 'workout-completed-content')).toHaveLength(0)
   })
 
   it('m1: invalid logged corrections never replace saved values or poison the next set', async () => {
@@ -544,9 +627,10 @@ describe('approved workout logging integration', () => {
     await click('3 · curl')
     const previous = { weight: inputs().props.weight, reps: inputs().props.reps }
     await click('2 · row')
+    // Out of the superset order on purpose (C1 three times): after each C1 set the highlighted row is C2's
+    // (approved C1 → C2 order), so tap C1's own pending row.
     for (let i = 0; i < 3; i++) {
-      await enter(40)
-      await click(doneLabel())
+      await logPendingRow('row', 40)
       if (i < 2) await click('2 · row')
     }
     expect((await loadWorkoutHistory()).find(entry => entry.exerciseId === 'row' && entry.date === '2026-10-19')?.sets).toHaveLength(3)
@@ -736,5 +820,43 @@ describe('approved workout logging integration', () => {
     await click(doneLabel())
     await click(t('workout.run.exit'))
     button(t('workout.run.resumeCount', { done: 1, total: 4 }))
+  })
+
+  describe('QA 2026-11-07: week bar on a day with no planned session', () => {
+    const segments = () => elements(node => typeof node.props.className === 'string' && node.props.className.includes('week-progress-segment'))
+    const dayEntries = (dayKey: string, date: string) => ['press', 'row', 'curl', 'drop'].map(id => ({ ...historyEntry(id, date), id: `${id}-${dayKey}`, dayKey }))
+    beforeEach(() => {
+      harness.block!.days.push({ ...harness.block!.days[0], key: 'chest-back-b', name: 'Second day', position: 2 })
+    })
+
+    it('marks no day as Today on a Saturday, and keeps the next unlogged day as Today on its own date', async () => {
+      saveWorkoutHistory(dayEntries('chest-back-a', '2026-10-19'))
+      vi.setSystemTime(new Date('2026-10-24T12:00:00Z'))
+      render()
+      await settle()
+      expect(segments().map(node => node.props['aria-label'])).toEqual(['Day 1 · Test day · 4/4', 'Day 2 · Second day · 0/4'])
+      await reload()
+      vi.setSystemTime(new Date('2026-10-20T12:00:00Z'))
+      await reload()
+      expect(segments()[1].props['aria-label']).toBe('Day 2 · Second day · Today · 0/4')
+    })
+
+    it.each(['en', 'es'] as const)('opens next week after a finished week without telling the person to go back (%s)', async language => {
+      harness.language = language
+      const t = createTranslator(language)
+      saveWorkoutHistory([...dayEntries('chest-back-a', '2026-10-19'), ...dayEntries('chest-back-b', '2026-10-20')])
+      vi.setSystemTime(new Date('2026-10-24T12:00:00Z'))
+      render()
+      await settle()
+      const html = renderToStaticMarkup(tree)
+      expect(html).toContain(t('workout.week.doneNextNote', { week: 3 }))
+      expect(html).not.toContain(t('workout.week.previewNote'))
+      // Moving by hand afterwards brings back the normal note.
+      await click(t('workout.week.next'))
+      expect(renderToStaticMarkup(tree)).toContain(t('workout.week.previewNote'))
+      await click(t('workout.week.previous'))
+      await click(t('workout.week.previous'))
+      expect(segments().every(node => !String(node.props['aria-label']).includes(t('workout.day.today')))).toBe(true)
+    })
   })
 })

@@ -1,3 +1,6 @@
+import { formatNumber } from '../i18n/format'
+import type { Language, Translate } from '../i18n/translate'
+
 export const WORKOUT_DONE_GUARD_MS = 600
 export const WORKOUT_UNDO_GUARD_MS = 1200
 
@@ -104,4 +107,31 @@ export function dayWorkoutStatus(
   const hasPartial = loggedSets > 0
   const state = total > 0 && done >= total ? 'done' : done > 0 || hasPartial ? 'in-progress' : 'not-started'
   return { state, done, total, loggedSets, lastDate }
+}
+
+/**
+ * The rest bar's "what's next" numbers. A loaded exercise with no weight yet (a first time) never reads "0 kg"
+ * (AI Trainer invariant: never 0 kg for a weighted exercise); bodyweight at 0 shows the reps only.
+ */
+export function formatRestTarget(language: Language, t: Translate, weight: number, reps: number, equipment?: string) {
+  const repsText = formatNumber(language, reps)
+  if (equipment === 'bodyweight' && !(weight > 0)) return repsText
+  if (!(weight > 0)) return t('workout.run.restTargetNoWeight', { reps: repsText })
+  return `${formatNumber(language, weight)} kg × ${repsText}`
+}
+
+/**
+ * The first-workout note (PT spec 2026-11-01 §4) stays for the whole first workout: while nothing was logged
+ * before today and the day isn't finished.
+ */
+export function isFirstWorkout(entryDates: readonly string[], today: string, dayFinished: boolean) {
+  return !dayFinished && entryDates.every((date) => date.slice(0, 10) === today)
+}
+
+export type RestAnnouncement = 'start' | 'thirty' | 'done'
+
+/** A ticking countdown is never a live region; screen readers hear only these three moments. */
+export function restAnnouncement(remainingSeconds: number, isDone: boolean): RestAnnouncement {
+  if (isDone) return 'done'
+  return remainingSeconds <= 30 ? 'thirty' : 'start'
 }

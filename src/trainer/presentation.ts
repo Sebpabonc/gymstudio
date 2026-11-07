@@ -19,6 +19,7 @@ const reasonTranslations: Record<ReasonCode, TranslationKey> = {
   incomplete_session: 'workout.trainer.reason.incomplete_session',
   light_load_add_reps: 'workout.trainer.reason.light_load_add_reps',
   bodyweight_add_reps: 'workout.trainer.reason.bodyweight_add_reps',
+  no_load_add_reps: 'workout.trainer.reason.no_load_add_reps',
   double_angle: 'workout.trainer.reason.double_angle',
   consolidate_load: 'workout.trainer.reason.consolidate_load',
   achieved_floor: 'workout.trainer.reason.achieved_floor',
@@ -51,19 +52,30 @@ function offGridNote(t: Translate, language: Language, logged: number, grid: num
   return t('workout.trainer.offGridLoad', { logged: formatNumber(language, logged), grid: formatNumber(language, grid) })
 }
 
-export function trainerReason(
+/** The reason in its parts: an optional "vs last {day}" comparison line, then the reason (and any off-grid note). */
+export function trainerReasonParts(
   t: Translate,
   language: Language,
   recommendation: Recommendation,
-  target: RepRange
-) {
+  target: RepRange,
+  /** The rep range the card shows today (the engine's, which the prefilled reps come from); defaults to target. */
+  todayTarget: RepRange = target,
+): { comparison?: string; lines: string[] } {
   const evidence = recommendation.evidence
-  const key = isRepTargetAdjustment(recommendation, target)
-    ? reasonTranslations.converted_rep_range
+  const repTargetChange = isRepTargetAdjustment(recommendation, target)
+  // PT super-QA review 2026-11-07: an unchanged load is "kept", never "adjusted from".
+  const kept = repTargetChange && !!recommendation.weight && recommendation.weight === evidence.lastWeight && !recommendation.setWeights
+  const key = kept ? 'workout.trainer.reason.kept_for_target'
+    : repTargetChange ? reasonTranslations.converted_rep_range
     : reasonTranslations[recommendation.reason]
   const recentMiss = evidence.recentMiss
   const sameDayMiss = (recommendation.reason === 'below_target_once' || recommendation.reason === 'slightly_below_target') &&
     evidence.sameDayTarget?.min === target.min && evidence.sameDayTarget.max === target.max
+  // Only when the sentence reasons from that last session, not from today's same-day session (QA retest 2026-11-07).
+  const usesSameDay = recommendation.reason === 'same_day_boost' || sameDayMiss
+  const withBasis = (lines: string[]) => !usesSameDay && evidence.lastOtherDayName && evidence.lastDate
+    ? [t('workout.trainer.basedOnLast', { dayName: evidence.lastOtherDayName, date: formatWeekdayDate(language, evidence.lastDate) }), ...lines]
+    : lines
   const reason = t(key, {
     reps: recommendation.reason === 'recent_miss_cap' && recentMiss
       ? formatNumber(language, recentMiss.reps)
@@ -78,7 +90,7 @@ export function trainerReason(
         ? evidence.sameDayWeight
         : evidence.lastWeight ?? 0),
     target: trainerRangeLabel(sameDayMiss ? evidence.sameDayTarget ?? target : evidence.lastTarget ?? target, language),
-    todayTarget: trainerRangeLabel(target, language),
+    todayTarget: trainerRangeLabel(todayTarget, language),
     days: evidence.daysSinceLast ?? 0,
     dayName: evidence.sameDayName ?? (evidence.sameDayDate
       ? formatWeekdayDate(language, evidence.sameDayDate)
@@ -91,11 +103,11 @@ export function trainerReason(
       newWeight: formatNumber(language, recentMiss.newWeight),
     } : {}),
   })
-  if (recommendation.firstSessionProtocol === 'bodyweight') return t('workout.trainer.firstSession.bodyweight')
+  if (recommendation.firstSessionProtocol === 'bodyweight') return { lines: [t('workout.trainer.firstSession.bodyweight')] }
   if (recommendation.firstSessionProtocol) {
     // PT spec 2026-11-01 §4, in this order: warm-up, effort, technique, adjust, load line, log.
     const protocol = recommendation.firstSessionProtocol
-    return [
+    return { lines: [
       t('workout.trainer.firstSession.warmup'),
       t('workout.trainer.firstSession.effort', { target: trainerRangeLabel(target, language) }),
       // PT review: the same-weight line is for straight sets and supersets only; a drop set skips the technique line.
@@ -105,7 +117,7 @@ export function trainerReason(
       ...(recommendation.firstSessionLoad === 'dumbbell' ? [t('workout.trainer.firstSession.dumbbell')] : []),
       ...(recommendation.firstSessionLoad === 'barbell' ? [t('workout.trainer.firstSession.barbell')] : []),
       t('workout.trainer.firstSession.log'),
-    ].join('\n')
+    ] }
   }
 
   if (
@@ -133,10 +145,21 @@ export function trainerReason(
       reps: evidence.sameDayReps?.map((reps) => formatNumber(language, reps)).join(' · ') ?? '',
       change,
     })
-    return `${comparison}\n${reason}`
+    return { comparison, lines: withBasis([reason]) }
   }
 
   return evidence.lastWeight !== undefined && evidence.lastGridWeight !== undefined
-    ? `${reason}\n${offGridNote(t, language, evidence.lastWeight, evidence.lastGridWeight)}`
-    : reason
+    ? { lines: [reason, offGridNote(t, language, evidence.lastWeight, evidence.lastGridWeight)] }
+    : { lines: withBasis([reason]) }
+}
+
+export function trainerReason(
+  t: Translate,
+  language: Language,
+  recommendation: Recommendation,
+  target: RepRange,
+  todayTarget: RepRange = target,
+) {
+  const parts = trainerReasonParts(t, language, recommendation, target, todayTarget)
+  return [...(parts.comparison ? [parts.comparison] : []), ...parts.lines].join('\n')
 }

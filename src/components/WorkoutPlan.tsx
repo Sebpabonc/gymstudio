@@ -104,9 +104,11 @@ import { nextSetHint } from '../trainer/setSignal'
 import { buildWorkoutSummary, type WorkoutSummaryRow } from '../trainer/summary'
 import TrainerRecommendationCard from '../trainer/TrainerRecommendationCard'
 import { applyTrainerRecommendation, type TrainerChoice, type TrainerDraftValues } from '../trainer/draft'
-import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, WORKOUT_UNDO_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet } from '../utils/workoutMode'
+import { canConfirmWorkoutDone, WORKOUT_DONE_GUARD_MS, WORKOUT_UNDO_GUARD_MS, dayWorkoutStatus, nextSupersetLoggingStep, nextWorkoutGroupIndex, shouldCollapseCompletedLogger, workoutChipState, resumeSupersetLoggingPosition, supersetSwitchSeconds, nextWorkoutLoggingSet, formatRestTarget, isFirstWorkout } from '../utils/workoutMode'
 import { useBodyScrollLock } from '../utils/useBodyScrollLock'
-import { trainerRangeLabel as formatTrainerRange, trainerReason } from '../trainer/presentation'
+import { useDialogFocus } from '../utils/useDialogFocus'
+import { scrollBehavior } from '../utils/motion'
+import { trainerRangeLabel as formatTrainerRange, trainerReason, trainerReasonParts } from '../trainer/presentation'
 import RestTimer from './RestTimer'
 import type { RestTimerState } from '../utils/restTimer'
 import {
@@ -144,9 +146,10 @@ const swapEquipmentKeys: Record<string, TranslationKey> = {
   band: 'workout.swap.equipment.band',
   barbell: 'workout.swap.equipment.barbell',
   bodyweight: 'workout.swap.equipment.bodyweight',
-  cable: 'workout.swap.equipment.cable',
-  dumbbell: 'workout.swap.equipment.dumbbell',
-  'ez-bar': 'workout.swap.equipment.ezBar',
+  // QA 2026-11-07: same equipment words as the Exercises tab.
+  cable: 'exercises.equipment.cable',
+  dumbbell: 'exercises.equipment.dumbbell',
+  'ez-bar': 'exercises.equipment.ezBar',
   'hex-bar': 'workout.swap.equipment.hexBar',
   kettlebell: 'workout.swap.equipment.kettlebell',
   machine: 'workout.swap.equipment.machine',
@@ -617,9 +620,14 @@ export function formatEstMaxInsightLine(
 }
 
 /** PO 2026-11-01 (#396): the reason for today's weight in view while logging; tapping it opens the cue sheet. */
+/** Shown as its own line, "vs last …" / "frente a …" starts with a capital. */
+export function capitalizeFirst(line: string) {
+  return line.charAt(0).toLocaleUpperCase() + line.slice(1)
+}
+
 function WhyWeightLine({ label, reason, details, id }: {
   label: string
-  reason: string
+  reason: { comparison?: string; lines: string[] }
   details: SqueezeCueDetails
   id: string
 }) {
@@ -629,7 +637,9 @@ function WhyWeightLine({ label, reason, details, id }: {
     <>
       <button type="button" className="effortless-why" aria-haspopup="dialog" onClick={() => setOpen(true)}>
         <b>{label}</b>
-        <span>{reason}</span>
+        {/* The "vs last …" comparison is its own muted line above the reason (design QA 2026-11-07). */}
+        {reason.comparison && <span className="effortless-why-comparison">{capitalizeFirst(reason.comparison)}</span>}
+        {reason.lines.map((line, index) => <span key={index}>{capitalizeFirst(line)}</span>)}
       </button>
       {open && <CueSheet details={details} sections={details.sections} id={id} onClose={close} />}
     </>
@@ -721,15 +731,19 @@ export function ExerciseSwapSheet({
   t,
   onCancel,
   onSelect,
+  sheetRef,
 }: {
   alternatives: Exercise[]
   language: Language
   t: Translate
   onCancel: () => void
   onSelect: (exerciseId: string, scope: ExerciseSwap['scope']) => void
+  /** Focus management lives in the parent (useDialogFocus), which owns the open state. */
+  sheetRef?: React.Ref<HTMLElement>
 }) {
   return (
     <section
+      ref={sheetRef}
       className="exercise-swap-sheet"
       role="dialog"
       aria-modal="true"
@@ -836,7 +850,13 @@ export default function WorkoutPlan({
   const [planMode, setPlanMode] = useState<PlanMode>(mode ?? 'preset')
   const [selectedDay, setSelectedDay] = useState('chest-back-a')
   // Weekly progress bar: 0 = this week, -1 = last week, +1 = next week (PO 2026-10-10: swipe between weeks).
-  const [barWeekOffset, setBarWeekOffset] = useState(0)
+  const [barWeekOffset, setBarWeekOffsetState] = useState(0)
+  // True while the bar shows next week because this week was finished, not because the person moved.
+  const [barWeekAutoOpened, setBarWeekAutoOpened] = useState(false)
+  const setBarWeekOffset = (offset: number) => {
+    setBarWeekAutoOpened(false)
+    setBarWeekOffsetState(offset)
+  }
   const barTouchX = useRef<number | null>(null)
   const [customPlan, setCustomPlan] = useState<CustomPlan>(() => loadCustomPlan())
   const [selectedCustomDayId, setSelectedCustomDayId] = useState('')
@@ -916,13 +936,24 @@ export default function WorkoutPlan({
   const trainerRecommendationIds = useRef(new Map<string, string>())
   const [swipeUndo, setSwipeUndo] = useState<WorkoutEntry | null>(null)
   const [progressDeleteConfirmId, setProgressDeleteConfirmId] = useState('')
-  const hasOpenSheet = !!customPlanSheetDraft || calendarOpen || blockSelectorOpen || !!swapTarget || !!sessionSummary
+  const hasOpenSheet = !!customPlanSheetDraft || calendarOpen || blockSelectorOpen || !!swapTarget || !!sessionSummary || finishConfirmOpen
   useBodyScrollLock(hasOpenSheet)
+  const calendarDialogRef = useRef<HTMLElement>(null)
+  const blockSelectorDialogRef = useRef<HTMLElement>(null)
+  const customPlanDialogRef = useRef<HTMLElement>(null)
+  const finishDialogRef = useRef<HTMLElement>(null)
+  const swapDialogRef = useRef<HTMLElement>(null)
+  useDialogFocus(swapDialogRef, !!swapTarget)
+  useDialogFocus(calendarDialogRef, calendarOpen)
+  useDialogFocus(blockSelectorDialogRef, blockSelectorOpen)
+  useDialogFocus(customPlanDialogRef, !!customPlanSheetDraft)
+  useDialogFocus(finishDialogRef, finishConfirmOpen)
   useEffect(() => {
     if (!hasOpenSheet) return undefined
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       if (customPlanSheetDraft) setCustomPlanSheetDraft(null)
+      else if (finishConfirmOpen) setFinishConfirmOpen(false)
       else if (swapTarget) setSwapTarget(null)
       else if (blockSelectorOpen) setBlockSelectorOpen(false)
       else if (calendarOpen) setCalendarOpen(false)
@@ -930,7 +961,7 @@ export default function WorkoutPlan({
     }
     document.addEventListener('keydown', closeOnEscape)
     return () => document.removeEventListener('keydown', closeOnEscape)
-  }, [hasOpenSheet, customPlanSheetDraft, swapTarget, blockSelectorOpen, calendarOpen])
+  }, [hasOpenSheet, customPlanSheetDraft, finishConfirmOpen, swapTarget, blockSelectorOpen, calendarOpen])
   // Continuous learning (PT spec, approved 2026-10-07): the user's past recommendations + results calibrate the engine.
   const [calibrationRows, setCalibrationRows] = useState<Awaited<ReturnType<typeof fetchCalibrationRecommendations>>>([])
   useEffect(() => {
@@ -1080,7 +1111,10 @@ export default function WorkoutPlan({
   useEffect(() => {
     if (autoNextWeekShown.current || !currentWeekComplete || !activeBlockWeek || !activeBlock) return
     autoNextWeekShown.current = true
-    if (activeBlockWeek < activeBlock.weeks) setBarWeekOffset((current) => (current === 0 ? 1 : current))
+    if (activeBlockWeek < activeBlock.weeks && barWeekOffset === 0) {
+      setBarWeekOffsetState(1)
+      setBarWeekAutoOpened(true)
+    }
   }, [currentWeekComplete, activeBlockWeek, activeBlock])
   const activeDay = activeBlock?.days.find((day) => day.key === selectedDay) ?? activeBlock?.days[0]
   const activeCustomDay = customPlan.days.find((day) => day.id === selectedCustomDayId) ?? customPlan.days[0]
@@ -1546,7 +1580,7 @@ export default function WorkoutPlan({
         ? 'lower'
         : 'upper'
     const targetReps = getExerciseTargetReps(exercise)
-    return recommendNextTarget(sets, targetReps, progressionType, deload)
+    return recommendNextTarget(sets, targetReps, progressionType, deload, exerciseInfo?.equipment)
   }
 
   const getExerciseTargetReps = (exercise: PlanExercise) =>
@@ -1557,6 +1591,7 @@ export default function WorkoutPlan({
     }).filter((reps) => reps > 0)
 
   const getNextTargetWhy = (target: NextTarget) => {
+    if (target.action === 'add_reps') return t(target.band ? 'workout.trainer.reason.no_load_add_reps' : 'workout.trainer.reason.bodyweight_add_reps', { reps: target.topReps ?? 0 })
     if (target.action === 'deload') return t('workout.nextTarget.why.deload')
     if (target.action === 'reduce') return t('workout.nextTarget.why.reduce')
     if (target.action === 'increase' && target.firstSetAboveTarget) {
@@ -1613,7 +1648,7 @@ export default function WorkoutPlan({
         ? scaleWeightForOtherDay(weight, source?.reps, exercise ? getExerciseTargetReps(exercise)[index] : undefined)
         : weight
     })
-    const baseSetWeights = nextTarget
+    const baseSetWeights = nextTarget && nextTarget.action !== 'add_reps'
       ? Array.from({ length: fallbackSetCount }, () => nextTarget.weight)
       : lastWeights
     const baseDropWeights = Array.from({ length: fallbackSetCount }, (_, index) => {
@@ -2073,9 +2108,14 @@ export default function WorkoutPlan({
 
   const workoutGroups = groupSupersets(activeExercises)
   const isWorkoutMode = planMode === 'preset' && workoutGroupIndex !== null && workoutGroupIndex < workoutGroups.length
+  // The finish confirm only exists inside workout mode; never leave it (and its scroll lock) open outside it.
+  useEffect(() => {
+    if (!isWorkoutMode && finishConfirmOpen) setFinishConfirmOpen(false)
+  }, [isWorkoutMode, finishConfirmOpen])
   const workoutGroupCompletion = workoutGroups.map((group) =>
     group.items.every(({ exercise }) => !!findExerciseCompletion(exercise, history))
   )
+  const firstWorkout = isWorkoutMode && isFirstWorkout(history.map((entry) => entry.date), today, workoutGroupCompletion.every(Boolean))
   const workoutSessionEntries = matchedWorkoutSessionEntries(activeExercises.map((exercise) => findExerciseEntry(exercise, history)))
   const workoutDoneExerciseCount = activeExercises.filter((exercise) => {
     const entry = findExerciseEntry(exercise, workoutSessionEntries)
@@ -2095,13 +2135,19 @@ export default function WorkoutPlan({
   const resumedRestExercise = restTimer ? activeExercises[workoutExerciseIndex] : undefined
   const resumedRestDraft = resumedRestExercise ? getDraftForExercise(resumedRestExercise.name, resumedRestExercise) : undefined
   const resumedRestSet = resumedRestDraft ? nextWorkoutLoggingSet(resumedRestDraft.setDone, getDefaultSetCount(resumedRestExercise!)) : 0
-  const workoutRestNextLabel = workoutRestContext?.next ?? (resumedRestExercise && resumedRestDraft
+  // After a reload the rest is resumed without its context: rebuild the same bar text the set's log would show.
+  const resumedRestTarget = resumedRestExercise && resumedRestDraft
+    ? formatRestTarget(language, t, resumedRestDraft.setWeights[resumedRestSet], resumedRestDraft.setReps[resumedRestSet],
+      exerciseCatalog.find((item) => item.id === resumedRestExercise.exerciseId)?.equipment)
+    : undefined
+  const workoutRestNextLabel = workoutRestContext?.next ?? (resumedRestExercise && resumedRestTarget !== undefined
     ? t('workout.run.nextSuperset', { name: `${displayExerciseName(resumedRestExercise.name)} · ${t('workout.run.nextSetTarget', {
-      set: formatNumber(language, resumedRestSet + 1),
-      weight: formatNumber(language, resumedRestDraft.setWeights[resumedRestSet]),
-      reps: formatNumber(language, resumedRestDraft.setReps[resumedRestSet]),
+      set: formatNumber(language, resumedRestSet + 1), target: resumedRestTarget,
     })}` })
     : undefined)
+  const workoutRestBarTitle = workoutRestContext ? workoutRestContext.barTitle
+    : resumedRestTarget !== undefined ? t('workout.run.restNextSet', { set: formatNumber(language, resumedRestSet + 1) }) : undefined
+  const workoutRestBarValue = workoutRestContext ? workoutRestContext.barValue : resumedRestTarget
   useEffect(() => {
     if (!isWorkoutMode) return undefined
     setElapsedNow(Date.now())
@@ -2123,7 +2169,7 @@ export default function WorkoutPlan({
   useEffect(() => {
     doneBlockedUntil.current = Date.now() + WORKOUT_DONE_GUARD_MS
   }, [workoutGroupIndex, workoutExerciseIndex])
-  const goToWorkoutGroup = (index: number) => {
+  const goToWorkoutGroup = (index: number, opening = false) => {
     if (index < 0 || index >= workoutGroups.length) return
     setOpenSetRow(null)
     supersetRestUndo.current = null
@@ -2147,7 +2193,9 @@ export default function WorkoutPlan({
       window.requestAnimationFrame(() => {
         const target = document.querySelector<HTMLElement>(`[data-workout-group="${index}"]`)
         target?.focus({ preventScroll: true })
-        target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        // On opening the first workout, its note sits above the card: keep it in view instead of scrolling past it.
+        const firstNote = opening ? document.querySelector<HTMLElement>('.first-workout-note') : null
+        ;(firstNote ?? target)?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
       })
     })
   }
@@ -2169,7 +2217,7 @@ export default function WorkoutPlan({
     setWorkoutInsight(null)
     setWorkoutGroupInsights([])
     setWorkoutGroupInsightNext(null)
-    goToWorkoutGroup(firstOpen >= 0 ? firstOpen : 0)
+    goToWorkoutGroup(firstOpen >= 0 ? firstOpen : 0, true)
   }
   const exitWorkout = () => {
     setSavedExitToast(true)
@@ -2182,7 +2230,7 @@ export default function WorkoutPlan({
     setWorkoutGroupInsightNext(null)
     setWorkoutGroupIndex(null)
     onWorkoutModeChange?.(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: scrollBehavior() })
   }
   const finishWorkout = () => setFinishConfirmOpen(true)
   const confirmFinishWorkout = () => {
@@ -2409,19 +2457,29 @@ export default function WorkoutPlan({
     const nextExercise = nextItem.exercise
     const nextDraftValues = nextExercise.name === exercise.name ? nextDraft : getDraftForExercise(nextExercise.name, nextExercise)
     const nextIndex = nextDraftValues.setDone.findIndex((done) => !done)
+    const nextEquipment = exerciseCatalog.find((item) => item.id === nextExercise.exerciseId)?.equipment
+    const nextTarget = formatRestTarget(language, t, nextDraftValues.setWeights[nextIndex], nextDraftValues.setReps[nextIndex], nextEquipment)
     const next = t('workout.run.nextSuperset', { name: `${displayExerciseName(nextExercise.name)} · ${t('workout.run.nextSetTarget', {
-      set: formatNumber(language, nextIndex + 1), weight: formatNumber(language, nextDraftValues.setWeights[nextIndex]),
-      reps: formatNumber(language, nextDraftValues.setReps[nextIndex]),
+      set: formatNumber(language, nextIndex + 1), target: nextTarget,
     })}` })
+    // Keyboard / switch users continue from the next set's Done button instead of the top of the page.
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      const active = document.activeElement as HTMLElement | null | undefined
+      if (active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA') return
+      const nextTick = document.querySelector?.<HTMLElement>('.workout-mode-current [data-next]:not(:disabled)')
+      if (nextTick) nextTick.focus({ preventScroll: true })
+      else if (!active || active === document.body || !active.isConnected) {
+        document.querySelector?.<HTMLElement>('.workout-mode-current')?.focus({ preventScroll: true })
+      }
+    }))
     const confirmed = `${equipment === 'bodyweight' ? '' : `${formatNumber(language, draft.setWeights[setIndex])} kg × `}${formatNumber(language, draft.setReps[setIndex])}`
     const drop = exercise.technique === 'drop-set' && draft.dropSetReps[setIndex] > 0
       ? ` ↓ ${formatNumber(language, draft.dropSetWeights[setIndex])} kg × ${formatNumber(language, draft.dropSetReps[setIndex])}` : ''
-    const nextEquipment = exerciseCatalog.find((item) => item.id === nextExercise.exerciseId)?.equipment
     setWorkoutRestContext({ set: setIndex + 1, next, logged: `✓ ${t('workout.run.logged')} · ${confirmed}${drop}`,
       barTitle: nextExercise.name === exercise.name
         ? t('workout.run.restNextSet', { set: formatNumber(language, nextIndex + 1) })
         : displayExerciseName(nextExercise.name),
-      barValue: `${nextEquipment === 'bodyweight' && nextDraftValues.setWeights[nextIndex] === 0 ? '' : `${formatNumber(language, nextDraftValues.setWeights[nextIndex])} kg × `}${formatNumber(language, nextDraftValues.setReps[nextIndex])}`,
+      barValue: nextTarget,
     })
     if (thinSwitch) {
       pendingWorkoutNext.current = null
@@ -3004,6 +3062,7 @@ export default function WorkoutPlan({
       {calendarOpen && (
         <div className="calendar-popover" role="presentation" onClick={() => setCalendarOpen(false)}>
           <section
+            ref={calendarDialogRef}
             className="calendar-popover-card"
             aria-label={text.calendar}
             role="dialog"
@@ -3266,6 +3325,7 @@ export default function WorkoutPlan({
           {blockSelectorOpen && (
             <div className="block-selector-backdrop" role="presentation" onClick={() => setBlockSelectorOpen(false)}>
               <section
+                ref={blockSelectorDialogRef}
                 className="block-selector-sheet"
                 role="dialog"
                 aria-modal="true"
@@ -3363,6 +3423,9 @@ export default function WorkoutPlan({
             return { day, done, total: day.exercises.length }
           })
           const completeDays = days.filter(({ done, total }) => total > 0 && done >= total).length
+          // QA 2026-11-07: on a day with no planned session (e.g. the weekend) no other day is called Today.
+          const knownDates = days.map(({ day }) => dayDate(day.key, day.position))
+          const todayIsPlanDay = knownDates.every((date) => date === undefined) || knownDates.includes(today)
           return (
             <div
               className="week-progress"
@@ -3391,7 +3454,7 @@ export default function WorkoutPlan({
               <div className="week-progress-bar" aria-label={t('workout.day.tabsAria')}>
                 {days.map(({ day, done, total }) => {
                   const active = day.key === (activeDay?.key ?? selectedDay)
-                  const isToday = offset === 0 && todayDay?.key === day.key
+                  const isToday = offset === 0 && todayIsPlanDay && todayDay?.key === day.key
                   const date = dayDate(day.key, day.position)
                   return (
                     <button
@@ -3437,7 +3500,9 @@ export default function WorkoutPlan({
           </>
         )}
         {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset !== 0 && (
-          <p className="week-progress-preview-note">{t('workout.week.previewNote')}</p>
+          <p className="week-progress-preview-note">{barWeekAutoOpened && barWeekOffset === 1
+            ? t('workout.week.doneNextNote', { week: formatNumber(language, activeBlockWeek ?? 1) })
+            : t('workout.week.previewNote')}</p>
         )}
         {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset === 0 && (() => {
           // PO 2026-10-18: one clear state per day this week - Start / Continue (n of N) / Completed.
@@ -3595,6 +3660,7 @@ export default function WorkoutPlan({
       {customPlanSheetDraft && (
         <div className="custom-plan-sheet-backdrop" role="presentation" onClick={() => setCustomPlanSheetDraft(null)}>
           <section
+            ref={customPlanDialogRef}
             className="custom-plan-sheet"
             role="dialog"
             aria-modal="true"
@@ -3757,12 +3823,14 @@ export default function WorkoutPlan({
       {activeExercises.length > 0 && (
       <section className={`day-plan-card${barWeekOffset !== 0 && !isWorkoutMode ? ' viewing-other-week' : ''}`}>
         {isWorkoutMode && workoutGroupIndex !== null && (
-          <div className="workout-mode-bar" role="navigation" aria-label={t('workout.run.modeAria')}>
+          <div className="workout-mode-bar" role="navigation" aria-label={t('workout.run.controlsAria')}>
             <button type="button" className="secondary-button small-button" disabled={savingSet} onClick={exitWorkout}>
               {t('workout.run.exit')}
             </button>
+            {/* Only the day name truncates; the exercise counter always stays visible (QA 2026-11-07, ES at 375). */}
             <strong className="workout-mode-progress">
-              {t('workout.day.title', { position: activeDay?.position ?? 1, name: activeDay?.name ?? '' })} · {formatNumber(language, workoutExerciseIndex + 1)}/{formatNumber(language, activeExercises.length)}
+              <span className="workout-mode-progress-day">{t('workout.day.title', { position: activeDay?.position ?? 1, name: activeDay?.name ?? '' })}</span>
+              <span className="workout-mode-progress-count">{' '}· {formatNumber(language, workoutExerciseIndex + 1)}/{formatNumber(language, activeExercises.length)}</span>
             </strong>
             <time className="workout-mode-elapsed" aria-label={t('workout.run.elapsed')}>{elapsedLabel}</time>
             <button type="button" className="secondary-button small-button workout-mode-finish-top" disabled={savingSet} onClick={finishWorkout}>
@@ -3770,8 +3838,9 @@ export default function WorkoutPlan({
             </button>
           </div>
         )}
-        {isWorkoutMode && history.length === 0 && (
-          // PT spec 2026-11-01 §4: once, at the top of the first workout.
+        {firstWorkout && (
+          // PT spec 2026-11-01 §4: once, at the top of the first workout. Tech Lead 2026-11-07: it stays for that whole
+          // workout (not only until set 1) so the pain/stop line can be found again, and it is in view when the workout opens.
           <div className="first-workout-note" role="note">
             <p>{t('workout.firstDay.intro')}</p>
             <p>{t('workout.firstDay.sore')}</p>
@@ -3781,7 +3850,7 @@ export default function WorkoutPlan({
         {isWorkoutMode && (
           <div className="workout-mode-overview">
             <div className="workout-mode-chip-row">
-              <nav className="workout-mode-chips" aria-label={t('workout.run.modeAria')}>
+              <nav className="workout-mode-chips" aria-label={t('workout.run.exercisesAria')}>
                 {workoutGroups.map((group, groupIndex) => <span key={group.key}
                   className={group.isSuperset ? 'effortless-chip-pair' : 'effortless-chip-single'}
                   role={group.isSuperset ? 'group' : undefined}
@@ -3801,9 +3870,8 @@ export default function WorkoutPlan({
                       type="button"
                       className={`workout-mode-chip ${state}`}
                       disabled={savingSet}
-                      aria-label={`${number} · ${name}`}
+                      aria-label={t(findExerciseCompletion(exercise, history) ? 'workout.run.chipLabelDone' : 'workout.run.chipLabel', { number, name })}
                       aria-current={state === 'current' ? 'step' : undefined}
-                      aria-pressed={state === 'current'}
                       onClick={() => {
                         pendingWorkoutNext.current = null
                         setWorkoutWeightInputs({})
@@ -3829,7 +3897,7 @@ export default function WorkoutPlan({
         {isWorkoutMode && restTimer && onRestTimerChange && <RestTimer
           timer={restTimer} hidden={false} onChange={advanceWorkoutRest} workoutMode
           label={workoutRestLabel} nextLabel={workoutRestNextLabel}
-          barTitle={workoutRestContext?.barTitle} barValue={workoutRestContext?.barValue}
+          barTitle={workoutRestBarTitle} barValue={workoutRestBarValue}
           onUndo={toast ? undoLastLog : undefined}>
           {workoutInsight && <p className="effortless-hint">{formatWorkoutInsightLine(workoutInsight, activeDay?.name ?? '', language, t)}</p>}
         </RestTimer>}
@@ -3944,7 +4012,9 @@ export default function WorkoutPlan({
                           reps: trainerRangeLabel(trainer.recommendation.reps),
                           sets: formatNumber(language, trainer.recommendation.sets),
                         }),
-                        trainerReason(t, language, trainer.recommendation, trainer.target),
+                        // One sheet line per part, so "same weight" and the reason no longer run together (QA 2026-11-07).
+                        ...trainerReason(t, language, trainer.recommendation, trainer.target, trainer.recommendation.reps)
+                          .split('\n').map(capitalizeFirst),
                       ]
                     : [],
                 },
@@ -4012,7 +4082,10 @@ export default function WorkoutPlan({
             const prescribedRestSeconds = getWorkoutRestSeconds(loadRestBetweenSets(), exercise.restSeconds)
             const prescribedRestLabel = `${Math.floor(prescribedRestSeconds / 60)}:${String(prescribedRestSeconds % 60).padStart(2, '0')}`
             const trendSessions = planMode === 'preset' && exercise.exerciseId
-              ? buildWorkoutSetTrend(history, trainingBlocks, exercise.exerciseId, today, trendTargets)
+              ? buildWorkoutSetTrend(history, trainingBlocks, exercise.exerciseId, today, trendTargets, 5, {
+                  blockId: activeBlock?.id,
+                  dayKey: activeDay?.key,
+                })
               : []
             const setHint = !group.isSuperset && exercise.technique === 'straight' && nextUncheckedIndex >= 0
               ? nextSetHint({
@@ -4136,6 +4209,13 @@ export default function WorkoutPlan({
                 count: getDefaultSetCount(item),
                 equipment: exerciseCatalog.find((catalogue) => catalogue.id === item.exerciseId)?.equipment,
               }))
+              // Superset: the highlighted row follows the approved C1 → C2 round order (PT 2026-11-01 §5.4), not the card
+              // being shown, so after C2's set (rest over the C2 card) the next row is C1's next set.
+              const nextRowItem = group.isSuperset && rowItems.length === 2
+                ? rowItems[resumeSupersetLoggingPosition(
+                  [rowItems[0].draft.setDone.slice(0, rowItems[0].count).filter(Boolean).length, rowItems[1].draft.setDone.slice(0, rowItems[1].count).filter(Boolean).length],
+                  [rowItems[0].count, rowItems[1].count]) ?? 0].item
+                : exercise
               const setRows = Array.from({ length: Math.max(...rowItems.map(({ count }) => count)) }, (_, index) =>
                 rowItems.filter(({ count }) => index < count).map((row) => ({ ...row, index }))).flat()
               const needsWeight = !confirmedWorkoutSet(setWeights[activeIndex], setReps[activeIndex], libraryMatch?.equipment,
@@ -4143,7 +4223,9 @@ export default function WorkoutPlan({
               // PT spec 2026-11-01 §4: the first time on an exercise, its how-to-find-the-weight lines sit under the sets.
               // Kept until the exercise is finished (PT review): the same-weight line matters most after set 1.
               const firstTimeKey = `${today}:${language}:${getPlanDraftKey(exercise.name)}`
-              if (planMode === 'preset' && !draft.setDone.some(Boolean) && !firstTimeLinesRef.current[firstTimeKey]) {
+              // Today's own sets are not evidence (buildEvidence), so after a reload mid-exercise the protocol is rebuilt
+              // from the same recommendation instead of being lost (QA 2026-11-07).
+              if (planMode === 'preset' && !firstTimeLinesRef.current[firstTimeKey]) {
                 const firstTime = getTrainerRecommendation(exercise)
                 firstTimeLinesRef.current[firstTimeKey] = firstTime?.recommendation.firstSessionProtocol
                   ? trainerReason(t, language, firstTime.recommendation, firstTime.target).split('\n') : []
@@ -4177,7 +4259,7 @@ export default function WorkoutPlan({
                   {(!partner || group.items[0].exerciseIndex !== exerciseIndex || usesPairRest) && <p className="effortless-rest">{t('workout.label.rest')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>}
                   {trainer && !trainer.recommendation.firstSessionProtocol && (
                     <WhyWeightLine label={t('workout.run.whyWeight')} id={`${exerciseKey}-why`} details={cueDetails}
-                      reason={trainerReason(t, language, trainer.recommendation, trainer.target)} />
+                      reason={trainerReasonParts(t, language, trainer.recommendation, trainer.target, trainer.recommendation.reps)} />
                   )}
                   <section className="effortless-logger">
                     <div className="effortless-set-head" aria-hidden="true"><span /><span>kg</span><span>{text.repsShort}</span><span /></div>
@@ -4188,7 +4270,7 @@ export default function WorkoutPlan({
                         const nextOpen = Array.from({ length: count }, (_, set) => !!rowDraft.setDone[set]).indexOf(false)
                         const isNext = index === nextOpen
                         const isLatest = done && !rowDraft.setDone[index + 1]
-                        const current = isNext && item.name === exercise.name
+                        const current = isNext && item.name === nextRowItem.name
                         const weight = rowDraft.setWeights[index]
                         const reps = rowDraft.setReps[index]
                         const drop = item.technique === 'drop-set' ? { weight: rowDraft.dropSetWeights[index], reps: rowDraft.dropSetReps[index] } : undefined
@@ -4211,7 +4293,9 @@ export default function WorkoutPlan({
                             <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
                               aria-label={t('workout.set.repsLabel', { set: index + 1 })}>{formatNumber(language, reps)}</button>
                             <button type="button" className="effortless-tick" data-next={current || undefined} aria-pressed={done}
-                              disabled={savingSet || (done ? !isLatest : !isNext || !valid)}
+                              // Not disabled while saving: a disabled focused button drops focus to <body> (a11y QA 2026-11-07).
+                              // logWorkoutSet/undoWorkoutSet already ignore taps while a save runs.
+                              disabled={done ? !isLatest : !isNext || !valid} aria-disabled={savingSet || undefined}
                               aria-label={done ? t('workout.run.undoSet', { set: index + 1 }) : doneLabel}
                               onClick={() => void (done ? undoWorkoutSet(item, index, count) : logWorkoutSet(item, index, count))}>
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
@@ -4231,7 +4315,15 @@ export default function WorkoutPlan({
                     {activeIndex === setCount - 1 && !draft.setDone[activeIndex] && /\b(last|final)\s+set\b/i.test(exercise.notes ?? '') &&
                       /\b(myo[- ]reps?|rest[- ]pause|partials?)\b/i.test(exercise.notes ?? '') &&
                       activeBlockWeek !== 1 && activeBlockWeek !== 6 && <p className="effortless-hint">{t('workout.run.extraThenDone')}</p>}
-                    {lastSets.length > 0 && <p className="effortless-last">{t('workout.run.lastTime')}: {lastSets.map((set) => `${formatNumber(language, set.weight)} kg × ${formatNumber(language, set.reps)}`).join(', ')}</p>}
+                    {lastSets.length > 0 && (() => {
+                      // PT super-QA review 2026-11-07: name the plan day when the last same-target session was another day.
+                      const otherDay = comparable?.dayKey && comparable.dayKey !== activeDay?.key
+                        ? activeBlock?.days.find((day) => day.key === comparable.dayKey) : undefined
+                      const sets = lastSets.map((set) => `${formatNumber(language, set.weight)} kg × ${formatNumber(language, set.reps)}`).join(', ')
+                      return <p className="effortless-last">{otherDay
+                        ? t('workout.run.lastDay', { dayName: otherDay.name, sets })
+                        : `${t('workout.run.lastTime')}: ${sets}`}</p>
+                    })()}
                   </section>
                   {logged && <p className="effortless-logged" role="status">{workoutFinished ? t('workout.status.done') : t('workout.run.partial', { done: logged.sets.length, total: setCount })}</p>}
                   <details className="workout-trend-details" open={trendOpen} onToggle={(event) => {
@@ -4387,7 +4479,7 @@ export default function WorkoutPlan({
                         onNotes={(anchor) => {
                           const notes = anchor.closest('.planned-exercise-card')
                             ?.querySelector<HTMLTextAreaElement>('.planned-notes-field textarea')
-                          notes?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                          notes?.scrollIntoView({ behavior: scrollBehavior(), block: 'center' })
                           notes?.focus()
                         }}
                         onTechnique={() => togglePostureTips(exercise.name)}
@@ -4512,7 +4604,8 @@ export default function WorkoutPlan({
                 )}
                 {insightTarget && !isCollapsed && (toastRecommendation || completedEntry) && (
                   <aside className="next-target-card" role="status" aria-live="polite">
-                    <strong>{getNextTargetLabel(insightTarget)}</strong>
+                    {/* PT super-QA 2026-11-07 (F7): no kg label for bodyweight work without added load. */}
+                    {insightTarget.action !== 'add_reps' && <strong>{getNextTargetLabel(insightTarget)}</strong>}
                     <p>{getNextTargetWhy(insightTarget)}</p>
                   </aside>
                 )}
@@ -5385,12 +5478,13 @@ export default function WorkoutPlan({
             t={t}
             onCancel={() => setSwapTarget(null)}
             onSelect={chooseExerciseSwap}
+            sheetRef={swapDialogRef}
           />
         </div>
       )}
       {finishConfirmOpen && isWorkoutMode && (
         <div className="workout-finish-backdrop" role="presentation">
-          <section className="workout-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-finish-title">
+          <section ref={finishDialogRef} className="workout-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="workout-finish-title">
             <h2 id="workout-finish-title">{t('workout.run.finishConfirm', {
               done: formatNumber(language, workoutDoneExerciseCount),
               total: formatNumber(language, activeExercises.length),

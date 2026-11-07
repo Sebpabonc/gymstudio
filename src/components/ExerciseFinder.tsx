@@ -20,6 +20,7 @@ import {
 import { defaultActiveBlock, todayTrainingDay } from '../utils/trainingBlocks'
 import { filterLoggableSets, getPreviousWorkoutSets } from '../utils/workoutSets'
 import ExerciseSearchSuggestions from './ExerciseSearchSuggestions'
+import { useDialogFocus } from '../utils/useDialogFocus'
 import { CueSheet } from './SqueezeCue'
 import WorkoutSetInputs from './WorkoutSetInputs'
 
@@ -76,6 +77,8 @@ export default function ExerciseFinder({
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [createSheetOpen, setCreateSheetOpen] = useState(false)
+  const createSheetRef = useRef<HTMLElement>(null)
+  useDialogFocus(createSheetRef, createSheetOpen, () => setCreateSheetOpen(false))
   const [createName, setCreateName] = useState('')
   const [createRegion, setCreateRegion] = useState('')
   const [createEquipment, setCreateEquipment] = useState('')
@@ -246,7 +249,7 @@ export default function ExerciseFinder({
       {message && <p role="status">{message}</p>}
       {createSheetOpen && (
         <div className="custom-plan-sheet-backdrop" role="presentation" onClick={() => setCreateSheetOpen(false)}>
-          <section className="custom-plan-sheet" role="dialog" aria-modal="true"
+          <section ref={createSheetRef} className="custom-plan-sheet" role="dialog" aria-modal="true"
             aria-labelledby="create-exercise-title" onClick={(event) => event.stopPropagation()}>
             <div className="custom-plan-sheet-header">
               <h2 id="create-exercise-title">{t('exercises.createTitle')}</h2>

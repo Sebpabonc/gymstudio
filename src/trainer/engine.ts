@@ -63,6 +63,7 @@ export type ReasonCode =
   | 'incomplete_session'
   | 'light_load_add_reps'
   | 'bodyweight_add_reps'
+  | 'no_load_add_reps'
   | 'double_angle'
   | 'consolidate_load'
   | 'achieved_floor'
@@ -92,6 +93,8 @@ export type Recommendation = {
   firstSessionLoad?: 'dumbbell' | 'barbell'
   evidence: {
     lastDate?: string
+    /** Plan day of the session the rule used, when it is a different plan day from today's (PT super-QA review). */
+    lastOtherDayName?: string
     lastWeight?: number
     lastReps?: number[]
     lastTarget?: RepRange
@@ -155,7 +158,7 @@ export function equipmentStep(equipment?: string) {
   }
 }
 
-const isBodyweight = (equipment?: string) => equipment === 'bodyweight' || equipment === 'band'
+export const isBodyweight = (equipment?: string) => equipment === 'bodyweight' || equipment === 'band'
 
 export function roundToStep(weight: number, step: number, direction: 'down' | 'up' | 'nearest' = 'down') {
   if (step <= 0) return Math.max(0, weight)
@@ -409,6 +412,7 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
   const sameDaySets = sameDay ? progressionSets(sameDay.sets, sets) : []
   const evidence: Recommendation['evidence'] = {
     lastDate: last?.date,
+    ...(last?.dayName && last.dayKey && input.dayKey && last.dayKey !== input.dayKey ? { lastOtherDayName: last.dayName } : {}),
     lastWeight: last ? lastWeight : undefined,
     lastReps: last ? lastReps : undefined,
     lastTarget: last?.target,
@@ -1145,9 +1149,11 @@ function recommendStraightRules(
       const logged = progressionSets(session.sets, sets)
       return logged.length >= sets && logged.every((set) => set.reps >= (session.target ?? target).max + 2)
     }
-    if (atPlus2(progressing[0]) && atPlus2(progressing[1])) return make('increase_weight', 2.5, 'bodyweight_add_reps')
+    // PT super-QA review 2026-11-07: band work says "no added load", not "bodyweight work".
+    const addRepsReason = input.equipment === 'band' ? 'no_load_add_reps' : 'bodyweight_add_reps'
+    if (atPlus2(progressing[0]) && atPlus2(progressing[1])) return make('increase_weight', 2.5, addRepsReason)
     if (lastReps.some((reps) => reps < lastTarget.min)) return make('maintain', 0, belowTargetReason(lastReps, lastTarget))
-    return make('increase_reps', 0, 'bodyweight_add_reps')
+    return make('increase_reps', 0, addRepsReason)
   }
 
   // Guardrail: at most +10 % or 2 steps, always one step allowed; an outlier allows one step only.

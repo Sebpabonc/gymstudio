@@ -116,10 +116,17 @@ export type WorkoutTrendTarget = { weight: number; reps: number }
 export type WorkoutTrendSet = WorkoutTrendTarget & { logged: boolean }
 export type WorkoutTrendSession = {
   date: string
-  dayType: 'A' | 'B' | null
+  /** Day letter from the plan day key ("upper-a" → "A", "full-body-c" → "C"); null when the day has no letter. */
+  dayType: string | null
   deload: boolean
   today: boolean
   sets: WorkoutTrendSet[]
+}
+
+function trendDayLabel(session: Pick<ProgressLiftSession, 'date' | 'dayKey'>, blocks: TrainingBlock[]) {
+  // A saved plan day decides the label by its own key; only legacy entries without one fall back to the date.
+  if (session.dayKey) return session.dayKey.match(/(?:^|-)([a-z])$/i)?.[1].toUpperCase() ?? null
+  return getDayType({ date: session.date }, blocks)
 }
 
 export function buildWorkoutSetTrend(
@@ -128,7 +135,8 @@ export function buildWorkoutSetTrend(
   exerciseId: string,
   today: string,
   targets: WorkoutTrendTarget[],
-  limit = 5
+  limit = 5,
+  todayScope: { blockId?: string | null; dayKey?: string | null } = {}
 ): WorkoutTrendSession[] {
   const sessions = progressLiftSessions(entries, blocks)
     .filter((session) => session.exerciseId === exerciseId)
@@ -137,8 +145,8 @@ export function buildWorkoutSetTrend(
     todaySession = {
       exerciseId,
       date: today,
-      blockId: null,
-      dayKey: null,
+      blockId: todayScope.blockId ?? null,
+      dayKey: todayScope.dayKey ?? null,
       sets: [],
       deload: false,
     }
@@ -154,7 +162,7 @@ export function buildWorkoutSetTrend(
     }
     return {
       date: session.date,
-      dayType: getDayType({ date: session.date, dayKey: session.dayKey ?? undefined }, blocks),
+      dayType: trendDayLabel(session, blocks),
       deload: session.deload,
       today: isToday,
       sets,

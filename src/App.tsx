@@ -18,6 +18,7 @@ import { AppTab, getNavigationTitle, navigationTabs } from './navigation'
 import { Exercise, WorkoutEntry } from './types'
 import { useAuth } from './auth/AuthProvider'
 import { useTextEntryFocused } from './utils/textEntryFocus'
+import { hiddenControlProps, useDialogFocus } from './utils/useDialogFocus'
 import { loadDemoBlocks } from './plans/demoBlock'
 import { exitDemoMode, isDemoMode, isNewUserDemo } from './utils/demoMode'
 import {
@@ -65,9 +66,13 @@ export default function App() {
   const dockHidden = useTextEntryFocused()
   const [showWelcome, setShowWelcome] = useState(() => !hasDismissedWelcome())
   const [showAiConsent, setShowAiConsent] = useState(false)
+  const aiConsentRef = useRef<HTMLElement>(null)
+  useDialogFocus(aiConsentRef, showAiConsent)
   // PO 2026-11-07: a new visitor opens straight into the questionnaire; answers wait on the device until sign-up.
   const [firstRunVisitor, setFirstRunVisitor] = useState(() => isNewVisitor())
   const [pendingFirstRunGoal, setPendingFirstRunGoal] = useState(() => getPendingFirstRunGoal())
+  // "I have an account" opens sign-in; the first run only ends once the person is signed in.
+  const [loginInitialMode, setLoginInitialMode] = useState<'sign-in' | undefined>(undefined)
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const { t, language, setLanguage } = useT()
@@ -214,6 +219,11 @@ export default function App() {
     setFirstRunVisitor(false)
     setShowWelcome(false)
   }
+  useEffect(() => {
+    // Signed in without first-run answers waiting (e.g. after "I have an account"): the questions are done.
+    if (passwordRecovery || demoMode || status !== 'signed-in') return
+    if (firstRunVisitor && pendingFirstRunGoal === null) finishFirstRun()
+  }, [status, firstRunVisitor, pendingFirstRunGoal, passwordRecovery, demoMode])
   const screenTitle = firstRunActive ? t('firstRun.title') : getNavigationTitle(activeTab, t)
 
   return (
@@ -304,7 +314,16 @@ export default function App() {
                 {status === 'signed-in'
                   ? <ProfileScreen onClose={() => setActiveTab('today')} />
                   // Signed out: sign-in first; goal/plan/measurements need an account, so they appear after signing in.
-                  : <LoginScreen onClose={() => setActiveTab('today')} />}
+                  : (
+                    <LoginScreen
+                      initialMode={loginInitialMode}
+                      backLabel={firstRunVisitor ? t('firstRun.account.back') : undefined}
+                      onClose={() => {
+                        setLoginInitialMode(undefined)
+                        setActiveTab('today')
+                      }}
+                    />
+                  )}
               </Suspense>
             )
           ) : activeTab === 'progress' ? (
@@ -345,7 +364,7 @@ export default function App() {
                   setPendingFirstRunGoal(goal)
                 }}
                 onHaveAccount={() => {
-                  finishFirstRun()
+                  setLoginInitialMode('sign-in')
                   setActiveTab('you')
                 }}
               />
@@ -412,7 +431,7 @@ export default function App() {
           )}
           </div>
         </main>
-        <nav className={`bottom-tab-bar${dockHidden || firstRunActive ? ' hidden' : ''}`} aria-label={t('nav.aria')}>
+        <nav className={`bottom-tab-bar${dockHidden || firstRunActive ? ' hidden' : ''}`} aria-label={t('nav.aria')} {...hiddenControlProps(dockHidden || firstRunActive)}>
           {navigationTabs.map((tab) => (
             <button
               key={tab.id}
@@ -446,7 +465,7 @@ export default function App() {
         />
         {showAiConsent && (
           <div className="help-ai-overlay ai-permission-overlay" role="presentation">
-            <section className="help-ai-sheet ai-permission-sheet" role="dialog" aria-modal="true" aria-labelledby="ai-permission-title">
+            <section ref={aiConsentRef} className="help-ai-sheet ai-permission-sheet" role="dialog" aria-modal="true" aria-labelledby="ai-permission-title">
               <AiConsentPrompt onChoice={(choice) => {
                 setAskExerciseAiConsent(choice)
                 clearPendingAiConsentPrompt()
