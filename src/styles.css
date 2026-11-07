@@ -60,6 +60,16 @@
   --type-num-size: 1.25rem;
   --type-num-lh: 1.5rem;
   --type-num-weight: 700;
+
+  /* UX spec 2026-11-07 §2: one set of box and control sizes. */
+  --control-h: 48px;
+  --control-h-inline: 44px;
+  --hit-min: 44px;
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --pad-card: 16px;
+  --radius-inner: 14px;
+  --pad-inner: 12px;
 }
 
 * {
@@ -10981,8 +10991,11 @@ p.workout-short-cue.cue-card {
   font-variant-numeric: tabular-nums;
 }
 
-.account-screen :is(h2, h3, p, span, small, button, a.secondary-button, label, legend, input, textarea),
-.profile-screen :is(h2, h3, p, span, small, button, a.secondary-button, label, legend, input, textarea),
+/* a.secondary-button stays outside :is(), which takes its highest argument's specificity and would outrank the 16 px input rule. */
+.account-screen :is(h2, h3, p, span, small, button, label, legend, input, textarea),
+.profile-screen :is(h2, h3, p, span, small, button, label, legend, input, textarea),
+.account-screen .secondary-button,
+.profile-screen .secondary-button,
 .first-run-cta .secondary-button {
   font-size: var(--type-body-size);
   line-height: var(--type-body-lh);
@@ -11139,4 +11152,95 @@ p.workout-short-cue.cue-card {
   font-size: var(--type-headline-size);
   line-height: var(--type-headline-lh);
   font-weight: var(--type-headline-weight);
+}
+
+/* UX spec 2026-11-07 #7: every top-level card shares one padding and radius, so text edges line up at 16 px. */
+.card,
+.pv3-card,
+.pv3-status {
+  padding: var(--pad-card);
+  border-radius: var(--radius-card);
+}
+
+/* #8: text inputs share one height, radius and type (16 px avoids iOS zoom). */
+.account-form input,
+.search-input,
+.find-search-shell .search-input,
+.chat-input-row input,
+.profile-data-field input,
+.help-ai-composer textarea {
+  min-height: var(--control-h);
+  border-radius: var(--radius-control);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* #9: compact text buttons keep their look but get a 44 px tap area. */
+.text-button {
+  position: relative;
+}
+
+.text-button::after {
+  content: '';
+  position: absolute;
+  inset: -6px 0;
+}
+
+.help-ai-chip {
+  min-height: var(--control-h-inline);
+}
+
+/* #10: AI sheet text on the scale. */
+.help-ai-message,
+.chat-reply {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+}
+
+.help-ai-hint,
+.help-ai-error,
+.help-ai-tabs button,
+.help-ai-chip {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  letter-spacing: 0;
+}
+
+/* #11: login back/forgot links and mode tabs use the button role; field labels are captions. */
+.account-back,
+.forgot-password,
+.account-mode-tabs button {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.account-mode-tabs button {
+  min-height: var(--control-h-inline);
+}
+
+.account-label {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  font-weight: 600;
+}
+
+/* #12: no global tracking; only tokens add it. */
+body {
+  letter-spacing: 0;
+}
+
+/* Stacked under the primary button, the Google and demo buttons share its 48 px height. */
+.google-button,
+.login-demo-button {
+  min-height: var(--control-h);
+  border-radius: var(--radius-control);
+}
+
+/* iOS zooms into any field under 16 px: scoped type rules must not shrink inputs. */
+.account-screen :is(input, textarea, select),
+.profile-screen :is(input, textarea, select),
+.plan-card.workout-mode-active :is(input, textarea, select) {
+  font-size: 16px;
 }
