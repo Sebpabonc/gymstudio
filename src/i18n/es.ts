@@ -2,6 +2,7 @@ import { app } from './sections/app'
 import { workout } from './sections/workout'
 import { progress } from './sections/progress'
 import { profile } from './sections/profile'
+import { firstRun } from './sections/firstRun'
 import type { Dictionary } from './en'
 
 export const es: Dictionary = {
@@ -9,4 +10,5 @@ export const es: Dictionary = {
   ...workout.es,
   ...progress.es,
   ...profile.es,
+  ...firstRun.es,
 }

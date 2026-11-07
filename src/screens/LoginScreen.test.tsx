@@ -55,4 +55,23 @@ describe('LoginScreen', () => {
     expect(html).toContain('Confirm new password')
     expect(html).toContain('id="recovery-password"')
   })
+
+  it('requires the unticked 18+ box before creating an account with email or Google', () => {
+    auth.available = true
+    auth.status = 'signed-out'
+    auth.passwordRecovery = false
+    const html = renderToStaticMarkup(<LoginScreen onClose={() => undefined} initialMode="sign-up" />)
+    expect(html).toContain('I am 18 or older and I accept the Terms and Privacy Policy.')
+    expect(html).toMatch(/type="checkbox"\/>/)
+    expect(html).toMatch(/<button type="submit" class="primary-button" disabled="">Create account/)
+    expect(html).toMatch(/class="google-button" disabled=""/)
+  })
+
+  it('does not ask for the 18+ box when signing in', () => {
+    auth.available = true
+    auth.status = 'signed-out'
+    const html = renderToStaticMarkup(<LoginScreen onClose={() => undefined} initialMode="sign-in" />)
+    expect(html).not.toContain('I am 18 or older')
+    expect(html).toMatch(/class="google-button">/)
+  })
 })
