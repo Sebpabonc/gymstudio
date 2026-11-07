@@ -9,6 +9,10 @@ on:
         description: 'Apply migrations and deploy functions (off = dry run)'
         type: boolean
         default: false
+      mark_applied:
+        description: 'Migration version already applied by hand to record in history first, e.g. 033 (only with apply)'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -42,6 +46,12 @@ jobs:
       - name: Migrations (dry run)
         if: ${{ !inputs.apply }}
         run: supabase db push --linked --dry-run
+
+      - name: Record hand-applied migration
+        if: ${{ inputs.apply && inputs.mark_applied != '' }}
+        env:
+          VERSION: ${{ inputs.mark_applied }}
+        run: supabase migration repair "$VERSION" --status applied --linked --yes
 
       - name: Apply migrations
         if: ${{ inputs.apply }}
