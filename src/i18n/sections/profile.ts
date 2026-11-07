@@ -1,6 +1,10 @@
 export const profile = {
   en: {
     'privacy.ai.title': 'Privacy & AI',
+    'legal.title': 'Help and legal',
+    'legal.support': 'Support',
+    'legal.privacy': 'Privacy Policy',
+    'legal.terms': 'Terms of Use',
     'privacy.ai.toggle': 'AI features (OpenAI)',
     'privacy.ai.help': 'When on, your questions, plan and recent training data are sent to OpenAI to explain loads, personalise plans and answer you.',
     'privacy.ai.offConfirm': 'AI is off. Nothing more will be sent. Data already sent can’t be recalled and is kept by OpenAI for up to 30 days.',
@@ -80,6 +84,10 @@ export const profile = {
   },
   es: {
     'privacy.ai.title': 'Privacidad e IA',
+    'legal.title': 'Ayuda y legal',
+    'legal.support': 'Soporte',
+    'legal.privacy': 'Política de privacidad',
+    'legal.terms': 'Términos de uso',
     'privacy.ai.toggle': 'Funciones de IA (OpenAI)',
     'privacy.ai.help': 'Cuando está activa, tus preguntas, tu plan y tus datos recientes de entrenamiento se envían a OpenAI para explicar cargas, personalizar planes y responderte.',
     'privacy.ai.offConfirm': 'La IA está desactivada. No se enviará nada más. Los datos ya enviados no se pueden recuperar y OpenAI los guarda hasta 30 días.',

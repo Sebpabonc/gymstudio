@@ -11244,3 +11244,33 @@ body {
 .plan-card.workout-mode-active :is(input, textarea, select) {
   font-size: 16px;
 }
+
+/* Links to the public legal pages (login sign-up and You). */
+.account-legal-links {
+  margin: 0;
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.profile-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-legal-links a,
+.account-legal-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  color: var(--nav-active);
+}
+
+.profile-legal-links a {
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  text-decoration: none;
+}
