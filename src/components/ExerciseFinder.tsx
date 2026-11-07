@@ -8,7 +8,7 @@ import { openExternal } from '../native/openExternal'
 import { loadDemoBlocks } from '../plans/demoBlock'
 import { activeSwaps, applySwaps, type ExerciseSwap } from '../plans/exerciseSwaps'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
-import { isDemoMode } from '../utils/demoMode'
+import { isDemoMode, isNewUserDemo } from '../utils/demoMode'
 import { exerciseImageQuery, exerciseImageSearchUrl } from '../utils/exerciseImages'
 import { ALL_BODY_REGIONS, equipmentLabel, filterExercises, getAvailableBodyRegions, getExerciseTips } from '../utils/exerciseFilters'
 import {
@@ -83,7 +83,7 @@ export default function ExerciseFinder({
   const [swaps, setSwaps] = useState(loadLocalExerciseSwaps)
   const [blocks, setBlocks] = useState(() => selectPlanBlocks(
     demo ? [] : getCachedTrainingBlocks() ?? [],
-    signedIn ? getCachedActiveUserPlan() : null, signedIn, demo,
+    signedIn || isNewUserDemo() ? getCachedActiveUserPlan() : null, signedIn, demo,
   ))
   const [personal, setPersonal] = useState(() => signedIn && !!getCachedActiveUserPlan())
   const selected = exercises.find((exercise) => exercise.id === selectedId)
@@ -93,7 +93,7 @@ export default function ExerciseFinder({
     let cancelled = false
     void Promise.all([
       demo ? loadDemoBlocks() : fetchTrainingBlocks(),
-      signedIn && !demo ? fetchActiveUserPlan().catch(() => getCachedActiveUserPlan()) : Promise.resolve(null),
+      (signedIn && !demo) || isNewUserDemo() ? fetchActiveUserPlan().catch(() => getCachedActiveUserPlan()) : Promise.resolve(null),
     ]).then(([globalBlocks, plan]) => {
       if (cancelled) return
       setBlocks(selectPlanBlocks(globalBlocks, plan, signedIn, demo))

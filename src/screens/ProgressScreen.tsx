@@ -3,7 +3,7 @@ import type { AuthStatus } from '../auth/AuthProvider'
 import { formatNumber, formatShortDate, useT } from '../i18n'
 import { localizeBlocks, useSpanishContentReady } from '../i18n/content'
 import { localIsoDate } from '../lib/dates'
-import { isDemoMode } from '../utils/demoMode'
+import { isDemoMode, isNewUserDemo } from '../utils/demoMode'
 import { defaultActiveBlock } from '../utils/trainingBlocks'
 import { groupSessions, type LoggedSession } from '../utils/sessions'
 import { activeSwaps, applySwaps } from '../plans/exerciseSwaps'
@@ -586,13 +586,14 @@ export default function ProgressScreen({
     const signedIn = authStatus === 'signed-in' && !demoMode
     const localSwaps = loadLocalExerciseSwaps()
     setExerciseSwaps(localSwaps)
-    const cachedPlan = signedIn ? getCachedActiveUserPlan() : null
+    const personalPlanAllowed = signedIn || isNewUserDemo()
+    const cachedPlan = personalPlanAllowed ? getCachedActiveUserPlan() : null
     const globalCache = demoMode ? [] : getCachedTrainingBlocks() ?? []
     const cachedBlocks = selectPlanBlocks(globalCache, cachedPlan, signedIn, demoMode)
     if (cachedBlocks.length) setBlocks(cachedBlocks)
     void Promise.all([
       demoMode ? loadDemoBlocks() : fetchTrainingBlocks(),
-      signedIn ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
+      personalPlanAllowed ? fetchActiveUserPlan().catch(() => null) : Promise.resolve(null),
       signedIn ? fetchExerciseSwaps().catch(() => null) : Promise.resolve(null),
     ]).then(([globalBlocks, activePlan, remoteSwaps]) => {
       if (cancelled) return

@@ -173,6 +173,30 @@ describe('first run storage', () => {
   })
 })
 
+describe('new-user demo storage', () => {
+  it('keeps its own empty space, its first run and a local personal plan', () => {
+    sessionStorage.setItem('gym-studio.demo-mode', 'new')
+    try {
+      localStorage.setItem('gym-studio.demo.history', JSON.stringify([{ id: 'x', exerciseId: 'x', date: '2026-11-01', sets: [] }]))
+      expect(isNewVisitor()).toBe(true)
+      const goal = { goal: 'muscle', daysPerWeek: 3, experience: 'beginner', activityLevel: 'low', sessionMinutes: 45, equipment: 'home', notes: '' } as const
+      savePendingFirstRunGoal(goal)
+      expect(localStorage.getItem('gym-studio.demo-new.first-run-goal')).not.toBeNull()
+      expect(getPendingFirstRunGoal()).toEqual(goal)
+      const plan = { templateId: 'tpl-3d-full-body-db', startDate: '2026-11-07', source: 'rules' as const,
+        block: { id: 'p', number: 1, name: 'P', method: '', startDate: '2026-11-07', weeks: 6, origin: 'pt' as const, summary: '', insights: [], days: [] } }
+      cacheActiveUserPlan(plan)
+      expect(getCachedActiveUserPlan()).toEqual(plan)
+      markFirstRunDone()
+      expect(isNewVisitor()).toBe(false)
+    } finally {
+      sessionStorage.removeItem('gym-studio.demo-mode')
+    }
+    expect(getCachedActiveUserPlan()).toBeNull()
+    expect(isNewVisitor()).toBe(true)
+  })
+})
+
 describe('first-run plan start', () => {
   const block = {
     id: 'personal-new', number: 1, name: 'Personal plan', method: 'straight sets', startDate: '2026-11-07', weeks: 6,

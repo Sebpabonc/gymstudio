@@ -2,6 +2,7 @@ import { localIsoDate } from '../lib/dates'
 import type { TrainingBlock } from '../types'
 import type { SavedUserPlan } from '../utils/profileData'
 import { withFloatingStart } from './rollingStart'
+import { isNewUserDemo } from '../utils/demoMode'
 
 export function selectPlanBlocks(
   globalBlocks: TrainingBlock[],
@@ -9,5 +10,6 @@ export function selectPlanBlocks(
   signedIn: boolean,
   demoMode: boolean,
 ): TrainingBlock[] {
-  return signedIn && !demoMode && personalPlan ? [withFloatingStart(personalPlan.block, localIsoDate())] : globalBlocks
+  const personal = (signedIn && !demoMode) || isNewUserDemo()
+  return personal && personalPlan ? [withFloatingStart(personalPlan.block, localIsoDate())] : globalBlocks
 }

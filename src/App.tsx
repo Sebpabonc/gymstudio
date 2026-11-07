@@ -19,7 +19,7 @@ import { Exercise, WorkoutEntry } from './types'
 import { useAuth } from './auth/AuthProvider'
 import { useTextEntryFocused } from './utils/textEntryFocus'
 import { loadDemoBlocks } from './plans/demoBlock'
-import { exitDemoMode, isDemoMode } from './utils/demoMode'
+import { exitDemoMode, isDemoMode, isNewUserDemo } from './utils/demoMode'
 import {
   clearPendingFirstRunGoal,
   dismissWelcome,
@@ -49,6 +49,7 @@ const ProgressScreen = lazy(() => import('./screens/ProgressScreen'))
 
 export default function App() {
   const demoMode = isDemoMode()
+  const newUserDemo = isNewUserDemo()
   const { status, syncStatus, user, pendingSyncCount, syncSignInRequired, passwordRecovery } = useAuth()
   const [rawExercises, setExercises] = useState<Exercise[]>([])
   const [history, setHistory] = useState<WorkoutEntry[]>([])
@@ -146,6 +147,11 @@ export default function App() {
     const readHistory = async () => {
       const savedHistory = await loadWorkoutHistory()
       if (!demoMode) return savedHistory
+      // The new-user demo starts empty: no generated history.
+      if (newUserDemo) {
+        setDemoHistoryReady(true)
+        return savedHistory
+      }
       if (savedHistory.length > 0) {
         setDemoHistoryReady(true)
         return savedHistory
@@ -196,8 +202,10 @@ export default function App() {
 
 
 
-  const firstRunPlanActive = !demoMode && !passwordRecovery && status === 'signed-in' && pendingFirstRunGoal !== null
-  const firstRunQuestionsActive = !demoMode && !passwordRecovery && status !== 'signed-in' && firstRunVisitor
+  const firstRunPlanActive = !passwordRecovery && pendingFirstRunGoal !== null &&
+    (newUserDemo || (!demoMode && status === 'signed-in'))
+  const firstRunQuestionsActive = !passwordRecovery && firstRunVisitor &&
+    (newUserDemo ? pendingFirstRunGoal === null : !demoMode && status !== 'signed-in')
   const firstRunActive = activeTab === 'today' && (firstRunPlanActive || firstRunQuestionsActive)
   const finishFirstRun = () => {
     clearPendingFirstRunGoal()
@@ -324,12 +332,13 @@ export default function App() {
               </Suspense>
             )
           ) : activeTab === 'today' && firstRunPlanActive ? (
-            <FirstRunPlan goal={pendingFirstRunGoal!} onDone={finishFirstRun} />
+            <FirstRunPlan goal={pendingFirstRunGoal!} onDone={finishFirstRun} demo={newUserDemo} />
           ) : activeTab === 'today' && firstRunQuestionsActive ? (
-            status === 'loading' ? (
+            status === 'loading' && !newUserDemo ? (
               <section className="card account-screen" aria-live="polite"><p>{t('account.loading')}</p></section>
             ) : (
               <FirstRunQuestions
+                demo={newUserDemo}
                 initialAnswers={pendingFirstRunGoal ?? undefined}
                 onAnswered={(goal) => {
                   savePendingFirstRunGoal(goal)

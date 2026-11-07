@@ -2,7 +2,7 @@ import type { ExerciseSwap } from '../plans/exerciseSwaps'
 import { Exercise, PlannedExercise, TrainingBlock, TrainingDay, WorkoutEntry } from '../types'
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
-import { isDemoMode } from './demoMode'
+import { isDemoMode, isNewUserDemo } from './demoMode'
 import { RestTimerState } from './restTimer'
 import { buildTrainingGoalPayload, fetchActiveUserPlan as fetchRemoteActiveUserPlan, updateActiveUserPlan } from './profileData'
 import { pinFirstLog } from '../plans/rollingStart'
@@ -204,6 +204,7 @@ export function setStorageNamespace(userId: string | null) {
 
 export function storageKey(key: string) {
   if (key === LANGUAGE_KEY) return key
+  if (isNewUserDemo()) return key.replace(/^gym-studio\./, 'gym-studio.demo-new.')
   if (isDemoMode()) return key.replace(/^gym-studio\./, 'gym-studio.demo.')
   if (storageNamespace && !SHARED_KEYS.has(key)) {
     return key.replace(/^gym-studio\./, `gym-studio.user.${storageNamespace}.`)
@@ -500,18 +501,19 @@ export function dismissWelcome() {
 
 /** A first visit on this device: no welcome dismissed, no guest workouts, first run not finished. */
 export function isNewVisitor() {
+  if (isNewUserDemo()) return localStorage.getItem(storageKey(FIRST_RUN_DONE_KEY)) !== 'true'
   if (isDemoMode()) return false
-  return !hasDismissedWelcome() && !hasGuestWorkoutData() && localStorage.getItem(FIRST_RUN_DONE_KEY) !== 'true'
+  return !hasDismissedWelcome() && !hasGuestWorkoutData() && localStorage.getItem(storageKey(FIRST_RUN_DONE_KEY)) !== 'true'
 }
 
 export function markFirstRunDone() {
-  localStorage.setItem(FIRST_RUN_DONE_KEY, 'true')
+  localStorage.setItem(storageKey(FIRST_RUN_DONE_KEY), 'true')
   dismissWelcome()
 }
 
 export function getPendingFirstRunGoal(): TrainingGoalInput | null {
-  if (isDemoMode()) return null
-  const parsed = readJson<Partial<TrainingGoalInput> | null>(FIRST_RUN_GOAL_KEY, null)
+  if (isDemoMode() && !isNewUserDemo()) return null
+  const parsed = readJson<Partial<TrainingGoalInput> | null>(storageKey(FIRST_RUN_GOAL_KEY), null)
   if (!parsed || typeof parsed !== 'object') return null
   try {
     buildTrainingGoalPayload({ ...parsed, notes: '' } as TrainingGoalInput)
@@ -522,11 +524,11 @@ export function getPendingFirstRunGoal(): TrainingGoalInput | null {
 }
 
 export function savePendingFirstRunGoal(goal: TrainingGoalInput) {
-  localStorage.setItem(FIRST_RUN_GOAL_KEY, JSON.stringify({ ...goal, notes: '' }))
+  localStorage.setItem(storageKey(FIRST_RUN_GOAL_KEY), JSON.stringify({ ...goal, notes: '' }))
 }
 
 export function clearPendingFirstRunGoal() {
-  localStorage.removeItem(FIRST_RUN_GOAL_KEY)
+  localStorage.removeItem(storageKey(FIRST_RUN_GOAL_KEY))
 }
 
 type TrainingExerciseRow = {
@@ -705,7 +707,7 @@ export function getCachedTrainingBlocks(): TrainingBlock[] | null {
 }
 
 export function getCachedActiveUserPlan(): SavedUserPlan | null {
-  if (isDemoMode()) return null
+  if (isDemoMode() && !isNewUserDemo()) return null
   try {
     const parsed = JSON.parse(localStorage.getItem(storageKey(ACTIVE_USER_PLAN_KEY)) ?? 'null')
     if (
@@ -725,7 +727,7 @@ export function getCachedActiveUserPlan(): SavedUserPlan | null {
 }
 
 export function cacheActiveUserPlan(plan: SavedUserPlan | null) {
-  if (isDemoMode()) return
+  if (isDemoMode() && !isNewUserDemo()) return
   try {
     const key = storageKey(ACTIVE_USER_PLAN_KEY)
     if (plan) localStorage.setItem(key, JSON.stringify(plan))
@@ -737,6 +739,7 @@ export function cacheActiveUserPlan(plan: SavedUserPlan | null) {
 
 /** A first-run plan's start, pinned on this device to the first logged set, is sent to the account (best effort). */
 function pushPinnedStart(plan: SavedUserPlan) {
+  if (isDemoMode()) return
   void updateActiveUserPlan(plan).catch(() => undefined)
 }
 
@@ -752,6 +755,8 @@ function pinRollingPlanStart(history: readonly WorkoutEntry[]) {
 
 /** Uses the account-scoped cache immediately when the signed-in user's plan is offline. */
 export async function fetchActiveUserPlan(): Promise<SavedUserPlan | null> {
+  // The new-user demo has no account: its plan only lives on this device.
+  if (isNewUserDemo()) return getCachedActiveUserPlan()
   if (isDemoMode()) return null
   const cached = getCachedActiveUserPlan()
   try {

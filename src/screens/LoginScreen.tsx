@@ -255,6 +255,8 @@ export default function LoginScreen({ onClose, initialMode, backLabel, intro }: 
       <div className="account-divider"><span>{t('login.or')}</span></div>
       <a className="secondary-button login-demo-button" href="?demo=1">{t('login.tryDemo')}</a>
       <p className="account-message login-demo-hint">{t('login.tryDemoHint')}</p>
+      {/* PO 2026-11-07: test the first run without an account or email. */}
+      <a className="secondary-button login-demo-button" href="?demo=new">{t('login.tryNewUserDemo')}</a>
     </section>
   )
 }
