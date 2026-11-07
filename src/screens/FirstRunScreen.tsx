@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import AiConsentPrompt from '../components/AiConsentPrompt'
-import { formatShortDate, useT, type TranslationKey } from '../i18n'
+import { formatNumber, formatShortDate, useT, type TranslationKey } from '../i18n'
 import { localizeBlock, useSpanishContentReady } from '../i18n/content'
 import { buildMyPlan, type BuiltPlan } from '../plans/buildMyPlan'
 import {
@@ -36,33 +36,32 @@ const QUESTIONS: Record<QuestionKey, { label: TranslationKey; prefix: string; he
   activityLevel: { label: 'profile.goal.field.activity', prefix: 'profile.goal.activity', help: 'firstRun.help.activity' },
 }
 
-function Question({ name, answers, onChange }: {
+/** PO 2026-11-07: a survey, one question per screen, instead of one long list. */
+const SURVEY: QuestionKey[] = ['goal', 'experience', 'daysPerWeek', 'equipment', 'sessionMinutes', 'activityLevel']
+const AUTO_ADVANCE_MS = 220
+
+function Question({ name, answers, onPick }: {
   name: QuestionKey
   answers: FirstRunAnswers
-  onChange: (answers: FirstRunAnswers) => void
+  onPick: (value: string | number) => void
 }) {
   const { t } = useT()
   const question = QUESTIONS[name]
-  const label = t(question.label)
   const options = trainingGoalOptions[name] as readonly (string | number)[]
   return (
-    <fieldset className="profile-choice-group">
-      <legend>{label}</legend>
-      <div className={`profile-choice-chips${question.help ? ' first-run-stack' : ''}`}>
+    <fieldset className="profile-choice-group first-run-question">
+      <legend><h2>{t(`firstRun.q.${name}` as TranslationKey)}</h2></legend>
+      <div className="profile-choice-chips first-run-stack">
         {options.map((option) => (
           <button
             key={option}
             type="button"
             className={answers[name] === option ? 'profile-choice active' : 'profile-choice'}
             aria-pressed={answers[name] === option}
-            onClick={() => onChange({ ...answers, [name]: option })}
+            onClick={() => onPick(option)}
           >
-            {question.help ? (
-              <>
-                <span>{t(`${question.prefix}.${option}` as TranslationKey)}</span>
-                <small>{t(`${question.help}.${option}` as TranslationKey)}</small>
-              </>
-            ) : t(`${question.prefix}.${option}` as TranslationKey)}
+            <span>{t(`${question.prefix}.${option}` as TranslationKey)}</span>
+            {question.help && <small>{t(`${question.help}.${option}` as TranslationKey)}</small>}
           </button>
         ))}
       </div>
@@ -70,7 +69,7 @@ function Question({ name, answers, onChange }: {
   )
 }
 
-/** Signed out: the six questions, then account creation. The answers wait on the device until the account exists. */
+/** Signed out: a welcome with the safety notice, six one-question screens, then account creation. */
 export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount, demo = false }: {
   initialAnswers?: FirstRunAnswers
   onAnswered: (goal: TrainingGoalInput) => void
@@ -78,18 +77,43 @@ export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount, d
   /** New-user demo: no account step. */
   demo?: boolean
 }) {
-  const { t } = useT()
+  const { t, language } = useT()
   const [answers, setAnswersState] = useState<FirstRunAnswers>(() => {
     if (!initialAnswers) return getFirstRunDraft()
     const { notes: _notes, ...rest } = initialAnswers as TrainingGoalInput
     return rest
   })
-  const setAnswers = (next: FirstRunAnswers) => {
+  // -1 = welcome. A returning visitor with saved answers resumes at the first unanswered question.
+  const [index, setIndex] = useState(() => {
+    const answered = SURVEY.filter((key) => answers[key] !== undefined).length
+    if (answered === 0) return -1
+    const next = SURVEY.findIndex((key) => answers[key] === undefined)
+    return next < 0 ? SURVEY.length - 1 : next
+  })
+  const [step, setStep] = useState<'questions' | 'account'>('questions')
+  const advance = useRef<number | null>(null)
+  useEffect(() => () => { if (advance.current !== null) window.clearTimeout(advance.current) }, [])
+
+  const finish = (all: FirstRunAnswers) => {
+    const goal = completeAnswers(all)
+    if (!goal) return
+    onAnswered(goal)
+    if (!demo) setStep('account')
+  }
+  const pick = (value: string | number) => {
+    const key = SURVEY[index]
+    const next = { ...answers, [key]: value }
     setAnswersState(next)
     saveFirstRunDraft(next)
+    if (advance.current !== null) window.clearTimeout(advance.current)
+    advance.current = window.setTimeout(() => {
+      advance.current = null
+      const missing = SURVEY.findIndex((item) => next[item] === undefined)
+      if (index < SURVEY.length - 1) setIndex(index + 1)
+      else if (missing >= 0) setIndex(missing)
+      else finish(next)
+    }, AUTO_ADVANCE_MS)
   }
-  const [step, setStep] = useState<'questions' | 'account'>('questions')
-  const left = unansweredCount(answers)
 
   if (step === 'account') {
     return (
@@ -98,55 +122,67 @@ export function FirstRunQuestions({ initialAnswers, onAnswered, onHaveAccount, d
           initialMode="sign-up"
           backLabel={t('firstRun.account.back')}
           intro={t('firstRun.account.note')}
-          onClose={() => setStep('questions')}
+          onClose={() => { setStep('questions'); setIndex(SURVEY.length - 1) }}
         />
       </Suspense>
     )
   }
 
-  const question = (name: QuestionKey) => <Question name={name} answers={answers} onChange={setAnswers} />
-  return (
-    <div className="first-run">
-      <p className="first-run-hint">{t('firstRun.intro')}</p>
-      {demo
-        ? <p className="account-message" role="status">{t('firstRun.demoNote')}</p>
-        : (
-          <>
-            <button type="button" className="secondary-button" onClick={onHaveAccount}>{t('firstRun.haveAccount')}</button>
-            <a className="secondary-button" href={NEW_USER_DEMO_URL}>{t('firstRun.tryNewUserDemo')}</a>
-          </>
-        )}
-      <section className="card" aria-labelledby="first-run-safety">
-        <h3 id="first-run-safety">{t('firstRun.safety.title')}</h3>
-        <p className="first-run-hint">{t('firstRun.safety.body')}</p>
-      </section>
-      <section className="card" aria-labelledby="first-run-goal">
-        <h2 id="first-run-goal">{t('firstRun.card.goal')}</h2>
-        {question('goal')}
-        {question('experience')}
-      </section>
-      <section className="card" aria-labelledby="first-run-training">
-        <h2 id="first-run-training">{t('firstRun.card.training')}</h2>
-        {question('daysPerWeek')}
-        {question('equipment')}
-        {question('sessionMinutes')}
-        {question('activityLevel')}
-      </section>
-      <div className="first-run-cta">
-        <button
-          type="button"
-          className="primary-button"
-          disabled={left > 0}
-          onClick={() => {
-            const goal = completeAnswers(answers)
-            if (!goal) return
-            onAnswered(goal)
-            if (!demo) setStep('account')
-          }}
-        >
-          {left === 0 ? t('firstRun.continue') : left === 1 ? t('firstRun.left.one') : t('firstRun.left.other', { count: left })}
-        </button>
+  if (index < 0) {
+    return (
+      <div className="first-run first-run-welcome">
+        <section className="card" aria-labelledby="first-run-welcome">
+          <h2 id="first-run-welcome">{t('firstRun.welcome.title')}</h2>
+          <p className="first-run-hint">{t('firstRun.intro')}</p>
+        </section>
+        <section className="card" aria-labelledby="first-run-safety">
+          <h3 id="first-run-safety">{t('firstRun.safety.title')}</h3>
+          <p className="first-run-hint">{t('firstRun.safety.body')}</p>
+        </section>
+        {demo && <p className="account-message" role="status">{t('firstRun.demoNote')}</p>}
+        <div className="first-run-cta">
+          <button type="button" className="primary-button" onClick={() => setIndex(0)}>{t('firstRun.start')}</button>
+          {!demo && (
+            <>
+              <button type="button" className="secondary-button" onClick={onHaveAccount}>{t('firstRun.haveAccount')}</button>
+              <a className="secondary-button" href={NEW_USER_DEMO_URL}>{t('firstRun.tryNewUserDemo')}</a>
+            </>
+          )}
+        </div>
       </div>
+    )
+  }
+
+  const key = SURVEY[index]
+  const answered = answers[key] !== undefined
+  const allDone = unansweredCount(answers) === 0
+  return (
+    <div className="first-run first-run-survey">
+      <div className="first-run-survey-top">
+        <button type="button" className="account-back" onClick={() => setIndex(index - 1)}>{t('firstRun.back')}</button>
+        <span className="first-run-progress-label">
+          {t('firstRun.progress', { n: formatNumber(language, index + 1), total: formatNumber(language, SURVEY.length) })}
+        </span>
+      </div>
+      <div className="first-run-progress" role="progressbar" aria-valuemin={1} aria-valuemax={SURVEY.length} aria-valuenow={index + 1}
+        aria-label={t('firstRun.progress', { n: index + 1, total: SURVEY.length })}>
+        {SURVEY.map((item, position) => <i key={item} className={position <= index ? 'on' : ''} />)}
+      </div>
+      <section className="card" key={key}>
+        <Question name={key} answers={answers} onPick={pick} />
+      </section>
+      {answered && (
+        <div className="first-run-cta">
+          <button type="button" className="primary-button" onClick={() => {
+            if (index < SURVEY.length - 1) setIndex(index + 1)
+            else if (allDone) finish(answers)
+          }}>{index < SURVEY.length - 1 ? t('firstRun.next') : t('firstRun.continue')}</button>
+        </div>
+      )}
+      <details className="account-privacy first-run-safety-reminder">
+        <summary>{t('firstRun.safety.title')}</summary>
+        <p>{t('firstRun.safety.body')}</p>
+      </details>
     </div>
   )
 }
