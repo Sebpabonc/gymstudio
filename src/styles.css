@@ -591,6 +591,24 @@ button {
   margin: 0 0 4px;
 }
 
+.rest-day-note {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.rest-day-note strong {
+  color: var(--text);
+  font-size: 0.9375rem;
+}
+
 .account-age-confirm {
   display: flex;
   align-items: flex-start;

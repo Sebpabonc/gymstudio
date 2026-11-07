@@ -95,4 +95,8 @@ export type TrainingBlock = {
   summary: string
   insights: { title: string; body: string }[]
   days: TrainingDay[]
+  /** First-run plans (PT spec 2026-11-01 §2): week 1 starts on the first logged set; until then the start floats on today. */
+  startsOnFirstLog?: boolean
+  /** Set once, on the first logged set; it then becomes `startDate`. */
+  firstLoggedOn?: string
 }

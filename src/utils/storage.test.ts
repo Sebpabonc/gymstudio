@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { Exercise, WorkoutEntry } from '../types'
-import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
+import { refreshCatalogue, fetchRemoteCatalogue, saveWorkoutHistory as saveHistoryForPin } from './storage'
 import {
   clearPendingFirstRunGoal,
   dismissWelcome as dismissWelcomeForTest,
@@ -170,6 +170,24 @@ describe('first run storage', () => {
     expect(getPendingFirstRunGoal()).toBeNull()
     localStorage.setItem('gym-studio.first-run-goal', JSON.stringify({ ...goal, daysPerWeek: 7 }))
     expect(getPendingFirstRunGoal()).toBeNull()
+  })
+})
+
+describe('first-run plan start', () => {
+  const block = {
+    id: 'personal-new', number: 1, name: 'Personal plan', method: 'straight sets', startDate: '2026-11-07', weeks: 6,
+    origin: 'pt' as const, summary: '', insights: [], days: [], startsOnFirstLog: true,
+  }
+  const plan = { templateId: 'tpl-3d-full-body-gym', startDate: '2026-11-07', source: 'rules' as const, block }
+
+  it('pins the start to the first logged set, once', () => {
+    cacheActiveUserPlan(plan)
+    saveHistoryForPin([{ id: 'other', exerciseId: 'x', date: '2026-11-08', blockId: 'global', dayKey: 'a', sets: [{ id: 's', weight: 20, reps: 8 }] }])
+    expect(getCachedActiveUserPlan()?.block.firstLoggedOn).toBeUndefined()
+    saveHistoryForPin([{ id: 'first', exerciseId: 'x', date: '2026-11-09', blockId: 'personal-new', dayKey: 'a', sets: [{ id: 's', weight: 20, reps: 8 }] }])
+    expect(getCachedActiveUserPlan()).toMatchObject({ startDate: '2026-11-09', block: { startDate: '2026-11-09', firstLoggedOn: '2026-11-09' } })
+    saveHistoryForPin([{ id: 'later', exerciseId: 'x', date: '2026-11-03', blockId: 'personal-new', dayKey: 'a', sets: [{ id: 's', weight: 20, reps: 8 }] }])
+    expect(getCachedActiveUserPlan()?.block.firstLoggedOn).toBe('2026-11-09')
   })
 })
 

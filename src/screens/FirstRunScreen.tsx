@@ -220,7 +220,9 @@ export function FirstRunPlan({ goal, onDone }: { goal: TrainingGoalInput; onDone
             <h2>{t('firstRun.ready')}</h2>
             <div className="first-run-weeks" aria-hidden="true">{Array.from({ length: 6 }, (_, index) => <i key={index} />)}</div>
             <p><strong>{stage.plan.block.name}</strong></p>
-            <p className="first-run-hint">{t('profile.plan.starts', { date: formatShortDate(language, stage.plan.startDate) })}</p>
+            <p className="first-run-hint">{stage.plan.block.startsOnFirstLog
+              ? t('firstRun.startsFirst')
+              : t('profile.plan.starts', { date: formatShortDate(language, stage.plan.startDate) })}</p>
             {stage.plan.cappedForBeginner && <p className="first-run-hint">{t('profile.plan.beginnerNote')}</p>}
           </>
         )}

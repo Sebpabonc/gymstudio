@@ -211,6 +211,15 @@ export async function fetchActiveUserPlan(): Promise<SavedUserPlan | null> {
     : null
 }
 
+/** Rewrites the active plan in place (a first-run plan pinning its start to the first logged set). */
+export async function updateActiveUserPlan(plan: SavedUserPlan): Promise<void> {
+  const client = await getClient()
+  const { error } = await client.from('user_plans')
+    .update({ start_date: plan.startDate, block: plan.block })
+    .eq('active', true)
+  throwIfError(error)
+}
+
 /** Publishes a new personal plan: the previous active plan is kept as history (active = false). */
 export async function publishUserPlan(plan: SavedUserPlan): Promise<void> {
   const client = await getClient()
