@@ -5,6 +5,8 @@ import { TrainingBlock } from '../types'
 import { mapTrainingBlockRows } from '../utils/storage'
 import { blockWeek } from '../utils/trainingBlocks'
 import { generateDemoHistory } from './generateDemoHistory'
+import { loadDemoBlocks } from '../plans/demoBlock'
+import { equipmentStep } from '../trainer/engine'
 
 const approvedBlocks = mapTrainingBlockRows(blockRows)
 
@@ -154,5 +156,33 @@ describe('generateDemoHistory', () => {
       reps: 12,
       drop: { reps: 12 },
     })
+  })
+
+  it('QA 2026-11-07: the demo holds about six months on real equipment steps, rising block over block', async () => {
+    const blocks = await loadDemoBlocks('2026-11-07')
+    const options = { blocks, endDate: '2026-11-07', months: 6, seed: 26 }
+    const history = generateDemoHistory(options)
+    expect(generateDemoHistory(options)).toEqual(history)
+    const dates = history.map((entry) => entry.date).sort()
+    expect(dates[0] <= '2026-05-15').toBe(true)
+    expect(new Set(dates).size).toBeGreaterThan(80)
+    expect(new Set(history.map((entry) => entry.blockId)).size).toBe(5)
+
+    const { exerciseLibrary } = await loadExerciseLibrary()
+    const equipment = new Map(exerciseLibrary.map((exercise) => [exercise.id, exercise.equipment]))
+    const offStep = history.flatMap((entry) => entry.sets.flatMap((set) => [set.weight, ...(set.drop ? [set.drop.weight] : [])])
+      .filter((weight) => weight > 0)
+      .filter((weight) => {
+        const step = equipmentStep(equipment.get(entry.exerciseId))
+        return Math.abs(weight / step - Math.round(weight / step)) > 1e-9
+      })
+      .map((weight) => `${entry.exerciseId} ${weight}`))
+    expect(offStep).toEqual([])
+
+    const firstSession = (blockId: string, exerciseId: string) => history
+      .filter((entry) => entry.blockId === blockId && entry.exerciseId === exerciseId)
+      .sort((a, b) => a.date.localeCompare(b.date))[1]
+    const lift = history.find((entry) => entry.blockId === blocks[0].id)!.exerciseId
+    expect(firstSession(blocks[4].id, lift).sets[0].weight).toBeGreaterThan(firstSession(blocks[0].id, lift).sets[0].weight)
   })
 })
