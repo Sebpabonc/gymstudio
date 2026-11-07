@@ -25,9 +25,10 @@
   --nav-idle: rgba(243, 243, 241, 0.55);
 
   --font-display: clamp(1.7rem, 4.5vw, 2.08rem);
-  --font-section: 0.75rem; /* QA 2026-11-07: 12 px text floor */
-  --font-body: 0.76rem;
-  --font-caption: 0.75rem; /* QA 2026-11-07: 12 px text floor */
+  /* PO 2026-11-07: one type system. The legacy names point at the --type-* scale (UX spec 2026-11-07). */
+  --font-section: var(--type-label-size);
+  --font-body: var(--type-body-size);
+  --font-caption: var(--type-caption-size);
   --font-display-weight: 800;
   --font-section-weight: 700;
   --font-body-weight: 500;
@@ -47,7 +48,7 @@
   --type-headline-track: -0.01em;
   --type-body-size: 0.9375rem;
   --type-body-lh: 1.25rem;
-  --type-body-weight: 400;
+  --type-body-weight: 500;
   --type-body-strong-weight: 600;
   --type-caption-size: 0.8125rem;
   --type-caption-lh: 1.125rem;
@@ -80,6 +81,7 @@ body {
   color: var(--text);
   font-family: var(--font-ui);
   font-size: var(--font-body);
+  line-height: var(--type-body-lh);
   line-height: 1.45;
   font-weight: var(--font-body-weight);
   letter-spacing: -0.01em;
@@ -720,8 +722,12 @@ button {
   color: var(--text);
 }
 
-.first-run .card h3 {
-  font-size: 0.9375rem;
+.first-run .card h2,
+.first-run .card h3,
+.welcome-card h2 {
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
 }
 
 .first-run-hint {
@@ -788,6 +794,7 @@ button {
   padding: 0;
 }
 
+.first-run .first-run-question legend h2,
 .first-run-question legend h2 {
   margin: 0;
   color: var(--text);
@@ -913,7 +920,6 @@ button {
 .welcome-card h2 {
   margin: 0;
   color: var(--text);
-  font-size: 1rem;
 }
 
 .welcome-card ul {
@@ -2176,9 +2182,12 @@ a.secondary-button {
   background: var(--button-dark);
   color: var(--button-text);
   border-color: transparent;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  min-height: 48px;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
   box-shadow: 0 10px 22px rgba(33, 33, 35, 0.32);
 }
 
@@ -3582,17 +3591,20 @@ a.secondary-button {
 }
 
 .planned-exercise-main-name {
-  font-size: calc(var(--font-body) * 1.4);
-  line-height: 1.3;
+  font-size: var(--type-headline-size);
+  font-weight: var(--type-headline-weight);
+  line-height: var(--type-headline-lh);
 }
 
 .planned-exercise-header .planned-exercise-main-name {
-  font-size: calc(var(--font-body) * 1.4);
+  font-size: var(--type-headline-size);
+  font-weight: var(--type-headline-weight);
 }
 
 /* PO 2026-10-05: the exercise name keeps the same size closed and open (no jump). */
 .planned-exercise-card.collapsed .planned-exercise-main-name {
-  font-size: calc(var(--font-body) * 1.4);
+  font-size: var(--type-headline-size);
+  font-weight: var(--type-headline-weight);
 }
 
 .planned-exercise-detail-name {
@@ -5753,8 +5765,8 @@ body {
 
 .selected-day-name {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.25;
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
 }
 
 .day-focus-label {
@@ -10414,7 +10426,7 @@ p.workout-short-cue.cue-card {
   font-variant-numeric: tabular-nums;
 }
 
-/* Today keeps its existing type sizes; its cards share a single 16 px text edge. */
+/* Today's cards share a single 16 px text edge. */
 .planned-exercise-card,
 .planned-exercise-card.collapsed {
   padding: 16px;
@@ -10453,12 +10465,12 @@ p.workout-short-cue.cue-card {
   text-transform: none;
 }
 
-.app-shell:not(.active-tab-today) .brand-tagline {
+.brand-tagline {
   font-size: var(--type-caption-size);
   line-height: var(--type-caption-lh);
 }
 
-.app-shell:not(.active-tab-today) .brand-header h1 {
+.brand-header h1 {
   font-size: var(--type-title-size);
   line-height: var(--type-title-lh);
   font-weight: var(--type-title-weight);
@@ -10997,4 +11009,82 @@ p.workout-short-cue.cue-card {
 .exercise-swap-name,
 .exercise-swap-name .exercise-image-link-tail {
   font-size: 0.9375rem;
+}
+
+/* UX spec 2026-11-07 #3-#4: full-width welcome button; the workout-mode exercise name is the focus title. */
+.welcome-card .primary-button {
+  width: 100%;
+}
+
+.plan-card.workout-mode-active .effortless-name {
+  font-size: var(--type-card-size);
+  line-height: var(--type-card-lh);
+  font-weight: var(--type-card-weight);
+  letter-spacing: var(--type-card-track);
+}
+
+/* UX spec 2026-11-07 #5-#6: Today's labels, chips and projected sets on the shared type scale. */
+.preview-projected-sets li,
+.preview-projected-sets li span,
+.week-progress-preview-note {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.preview-projected-sets li strong {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: var(--type-body-strong-weight);
+}
+
+.preview-projected-title,
+.week-progress-label,
+.week-progress-back,
+.training-block-status,
+.training-block-primary .training-block-status,
+.day-focus-label,
+.plan-badge,
+.technique-chip,
+.toggle-button,
+.training-block-primary .toggle-button,
+.small-button {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.training-block-name,
+.training-block-primary .training-block-name {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: var(--type-body-strong-weight);
+}
+
+/* UX spec 2026-11-07 #5-#6: You/profile choices, labels and card headers. */
+.profile-choice-chips .profile-choice {
+  min-height: 44px;
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.profile-choice-chips.first-run-stack .profile-choice {
+  min-height: 56px;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: var(--type-body-strong-weight);
+}
+
+.profile-choice-group legend,
+.profile-data-field > span {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+}
+
+.collapsible-card-header h2 {
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-lh);
+  font-weight: var(--type-headline-weight);
 }
