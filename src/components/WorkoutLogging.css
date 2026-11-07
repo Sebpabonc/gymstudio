@@ -31,6 +31,23 @@
 }
 .effortless-card > *, .effortless-logger > * { min-width: 0; }
 .effortless-inputs { border: 0; padding: 0; margin: 0; min-width: 0; }
+.effortless-reason {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  font-weight: var(--type-caption-weight);
+  text-align: left;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.effortless-reason strong { color: var(--text); }
 .effortless-card .workout-mode-big-inputs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .effortless-card .workout-mode-big-field { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 8px; }
 .effortless-card .workout-mode-big-field .set-stepper { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; width: 100%; }
