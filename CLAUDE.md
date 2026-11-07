@@ -21,5 +21,8 @@
 - When Sebas asks for marketing, social media or promo content ("Socialer"): run the agent in
   `.claude/agents/socialer.md`; drafts land in `docs/marketing/`, fitness claims go to the PT, and nothing is
   published without Sebas's approval.
+- When Sebas asks for exercise videos, technique clips or animations ("Videoer"): run the agent in
+  `.claude/agents/videoer.md`; plans and drafts land in `docs/video/`, every clip needs the PT's technique approval,
+  and purchases or accounts are Sebas's.
 - When Sebas asks for governance, legal, privacy or App Store documents ("Governancer"): run the agent in
   `.claude/agents/governancer.md`; drafts land in `docs/governance/` and Sebas submits everything with his own login.
