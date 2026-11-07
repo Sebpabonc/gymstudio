@@ -137,7 +137,7 @@ export function watchObservations(
   entries: ProgressEntry[],
   blocks: TrainingBlock[],
   exercises: Exercise[],
-  limit = 3
+  limit: number = PROGRESS_THRESHOLDS.watchMessageLimit
 ): WatchObservation[] {
   const observations: WatchObservation[] = []
   for (const row of latestEquivalentComparisons(entries, blocks, exercises)) {
@@ -189,5 +189,5 @@ export function watchObservations(
       continue
     }
   }
-  return observations.sort((a, b) => b.priority - a.priority).slice(0, Math.min(limit, PROGRESS_THRESHOLDS.watchMessageLimit))
+  return observations.sort((a, b) => b.priority - a.priority).slice(0, limit)
 }

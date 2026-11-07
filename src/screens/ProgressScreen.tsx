@@ -29,8 +29,6 @@ import {
   exerciseVolumeTrend,
   liftTrend,
   liftTrendEvidence,
-  liftTrendIndexPoints,
-  latestEquivalentComparisons,
   muscleTrend,
   overallProgressStatus,
   progressLiftSessions,
@@ -45,6 +43,7 @@ import { sessionVolumeComparison } from '../progress/volume'
 import type { VolumeContextNote } from '../progress/volume'
 import { MUSCLE_CHART_MAXIMUM, MUSCLE_COMMON_RANGE } from '../progress/muscles'
 import type { WatchObservation } from '../progress/comparison'
+import { baselineSummary, nextSessionWatches, type BaselineSummary } from '../progress/overview'
 import type { ProgressStatus } from '../progress/status'
 import { onTabListKeyDown } from '../utils/tabs'
 import type { TranslationKey } from '../i18n/en'
@@ -96,6 +95,12 @@ const WATCH_KEYS: Record<WatchObservation['code'], TranslationKey> = {
   W2: 'progress.v3.watch.W2',
   W3: 'progress.v3.watch.W3',
   W6: 'progress.v3.watch.W6',
+}
+const NEXT_KEYS: Record<WatchObservation['code'], TranslationKey> = {
+  W1: 'progress.v3.next.W1',
+  W2: 'progress.v3.next.W2',
+  W3: 'progress.v3.next.W3',
+  W6: 'progress.v3.next.W6',
 }
 const MUSCLE_KEYS: Record<MuscleGroup, TranslationKey> = {
   Chest: 'progress.muscle.chest',
@@ -160,28 +165,6 @@ function bestSetText(language: 'en' | 'es', set: { weight: number; reps: number 
   return set
     ? `${formatNumber(language, set.weight, { maximumFractionDigits: 1 })} kg × ${formatNumber(language, set.reps)}`
     : '—'
-}
-
-function Sparkline({ trend, min, max, exercise }: { trend: LiftTrend; min: number; max: number; exercise?: Exercise }) {
-  const points = liftTrendIndexPoints(trend, exercise)
-  if (!points.length) {
-    return <svg className="pv3-sparkline" viewBox="0 0 100 28" aria-hidden="true"><line x1="2" y1="14" x2="98" y2="14" /></svg>
-  }
-  const span = max - min || 1
-  const plotted = points.map((point, index) => ({
-    ...point,
-    x: 3 + index / Math.max(points.length - 1, 1) * 94,
-    y: 24 - (point.value - min) / span * 20,
-  }))
-  const path = plotted.map((point, index) => `${index === 0 || point.breakBefore ? 'M' : 'L'}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ')
-  const latest = plotted[plotted.length - 1]
-  return (
-    <svg className="pv3-sparkline" viewBox="0 0 100 28" aria-hidden="true">
-      <line x1="2" y1="24" x2="98" y2="24" />
-      <path d={path} />
-      <circle cx={latest.x} cy={latest.y} r="3" />
-    </svg>
-  )
 }
 
 function MiniTrendChart({ trend, t, exercise, language }: {
@@ -410,7 +393,7 @@ function MetricChip({ label, current, previous }: { label: string; current: stri
     <div className="pv3-chip">
       <strong>{current}</strong>
       <span>{label}</span>
-      <small>{previous}</small>
+      {previous && <small>{previous}</small>}
     </div>
   )
 }
@@ -466,23 +449,15 @@ function progressWeekStart(today: string, block: TrainingBlock | null) {
   return dateString(blockStart + Math.floor((todayValue - blockStart) / (7 * 86_400_000)) * 7 * 86_400_000)
 }
 
-function weeklyBestText(
-  summary: ReturnType<typeof weeklyBestEstMax>,
+/** One short line for an Overview row: this week's best set, without the week-over-week wording. */
+function weeklyBestCompactText(
+  summary: ReturnType<typeof weeklyBestEstMax> | undefined,
   language: 'en' | 'es',
   t: ReturnType<typeof useT>['t']
 ) {
-  if (!summary.current) return ''
+  if (!summary?.current) return ''
   const best = bestSetText(language, summary.current.bestSet)
-  if (!summary.currentWeekComplete) return t('progress.v3.weeklyBest.soFar', { best })
-  if (!summary.previous || !summary.previousWeekComplete) {
-    return t('progress.v3.weeklyBest.completeFirst', { best })
-  }
-  const change = t(`progress.v3.weeklyBest.${summary.change ?? 'same'}` as TranslationKey)
-  return t('progress.v3.weeklyBest.complete', {
-    best,
-    previous: bestSetText(language, summary.previous.bestSet),
-    change,
-  })
+  return t(summary.currentWeekComplete ? 'progress.v3.weeklyBest.completeFirst' : 'progress.v3.weeklyBest.soFar', { best })
 }
 
 function volumeContextText(
@@ -655,12 +630,8 @@ export default function ProgressScreen({
       weeklyBestEstMax(liftSessions, id, weekStart, blocks),
     ]))
   }, [mainLiftIds, blocks, liftSessions, activeBlock, today])
-  const comparisons = useMemo(
-    () => blocks ? latestEquivalentComparisons(progressEntries, blocks, exercises) : [],
-    [progressEntries, blocks, exercises]
-  )
   const watches = useMemo(
-    () => blocks ? watchObservations(progressEntries, blocks, exercises, 3) : [],
+    () => blocks ? watchObservations(progressEntries, blocks, exercises, Number.POSITIVE_INFINITY) : [],
     [progressEntries, blocks, exercises]
   )
   const consistency = useMemo(
@@ -679,11 +650,6 @@ export default function ProgressScreen({
     () => blocks ? blockLiftComparisons(progressEntries, blocks, exercises, activeBlock) : [],
     [progressEntries, blocks, exercises, activeBlock]
   )
-  const allIndexValues = [...overviewTrends.entries()].flatMap(([id, trend]) =>
-    liftTrendIndexPoints(trend, exerciseById.get(id)).map((point) => point.value)
-  )
-  const sparkMin = allIndexValues.length ? Math.min(...allIndexValues, 0) : -6
-  const sparkMax = allIndexValues.length ? Math.max(...allIndexValues, 0) : 6
   const selectedExercise: Exercise | null = selectedLiftId
     ? exerciseById.get(selectedLiftId) ?? { id: selectedLiftId, name: selectedLiftId, primaryMuscle: 'Other' }
     : null
@@ -731,12 +697,6 @@ export default function ProgressScreen({
 
   if (!blocks) return <section className="card" aria-live="polite"><p className="empty-state">{t('progress.loading')}</p></section>
 
-  const comparisonCounts = comparisons.reduce((counts, row) => {
-    if (row.comparison.verdict === 'improved') counts.improved += 1
-    else if (row.comparison.verdict === 'held') counts.held += 1
-    return counts
-  }, { improved: 0, held: 0 })
-  const latestComparisons = new Map(comparisons.map((row) => [row.exerciseId, row]))
   const historyByLift = new Map<string, ProgressLiftSession[]>()
   for (const session of liftSessions) historyByLift.set(session.exerciseId, [...(historyByLift.get(session.exerciseId) ?? []), session])
   const worthReasons = new Map<string, string>()
@@ -749,6 +709,8 @@ export default function ProgressScreen({
     }
   }
   const completeWeeks = consistencyData.weeks.filter((week) => week.complete)
+  const baseline = baselineSummary(mainTrends, completeWeeks.length)
+  const nextWatches = nextSessionWatches(watches)
   const recentFour = completeWeeks.slice(-4)
   const previousFour = completeWeeks.slice(-8, -4)
   const currentAdherence = weekMean(recentFour)
@@ -784,124 +746,97 @@ export default function ProgressScreen({
   const averageMainChange = mainChangeValues.length
     ? mainChangeValues.reduce((sum, value) => sum + value, 0) / mainChangeValues.length
     : null
-  const muscleAverageRows = muscles
-    ? muscles.groups.flatMap((group) => {
-        const value = muscles.averages[group]
-        return value === undefined ? [] : [{ group, value }]
-      })
-    : []
-  const insideRange = muscleAverageRows.filter((row) => row.value >= 10 && row.value <= 20).length
   const unlockedMuscleWeeks = muscleData.weeks.filter((week) => week.complete && !week.deload).length
 
-  const renderWatch = (watch: WatchObservation) => (
-    <li key={`${watch.exerciseId}-${watch.code}`}>
-      <strong>{displayName(watch.exerciseId)}:</strong> {t(WATCH_KEYS[watch.code], formatMessageParams(language, watch.params))}
+  // One action heading per watch type ("Ready to add weight"), then each lift with the existing evidence line.
+  const nextGroups = nextWatches.reduce<Array<{ code: WatchObservation['code']; watches: WatchObservation[] }>>((groups, watch) => {
+    const last = groups[groups.length - 1]
+    if (last?.code === watch.code && watch.code !== 'W1') last.watches.push(watch)
+    else groups.push({ code: watch.code, watches: [watch] })
+    return groups
+  }, [])
+  const renderNextGroup = (group: (typeof nextGroups)[number]) => (
+    <li key={`${group.code}-${group.watches[0].exerciseId}`} className={`pv3-next-${group.code}`}>
+      <strong>{t(NEXT_KEYS[group.code], formatMessageParams(language, group.watches[0].params))}</strong>
+      {group.watches.map((watch) => (
+        <span key={watch.exerciseId}>
+          {displayName(watch.exerciseId)} <small>· {t(WATCH_KEYS[watch.code], formatMessageParams(language, watch.params))}</small>
+        </span>
+      ))}
     </li>
   )
 
-  const renderOverview = () => (
+  const consistencyLine = currentAdherence !== null
+    ? t(consistencyData.currentStreak === 1 ? 'progress.v3.overview.consistency.one' : 'progress.v3.overview.consistency', {
+        adherence: formatNumber(language, currentAdherence * 100, { maximumFractionDigits: 0 }),
+        streak: formatNumber(language, consistencyData.currentStreak),
+      })
+    : ''
+
+  const renderBaseline = (summary: BaselineSummary) => {
+    const best = mainLiftIds
+      .map((id) => ({ id, text: weeklyBestCompactText(weeklyBestSummaries.get(id), language, t) }))
+      .find((row) => row.text)
+    return (
+      <section className="card pv3-card pv3-baseline">
+        <h3>{t('progress.v3.baseline.title')}</h3>
+        <p>{t('progress.v3.baseline.body', {
+          sessions: t('progress.v3.unlock.sessions', { count: formatNumber(language, summary.sessions) }),
+        })}</p>
+        <p className="pv3-caption">{t(summary.sessions < summary.target ? 'progress.v3.baseline.caption' : 'progress.v3.baseline.captionSpan')}</p>
+        {best && <p className="pv3-baseline-best"><strong>{displayName(best.id)}</strong> <span>{best.text}</span></p>}
+      </section>
+    )
+  }
+
+  const renderOverview = () => baseline ? renderBaseline(baseline) : (
     <>
       <section className={`card pv3-status pv3-status-${status.status}`}>
-        <strong className="pv3-status-word">{translatedStatus(status.status, t)}</strong>
-        <p>{status.counts.eligible
-          ? t('progress.v3.status.reason', {
-              improving: formatNumber(language, status.counts.improving),
-              total: formatNumber(language, status.counts.eligible),
-              held: formatNumber(language, status.counts.held),
-              lower: formatNumber(language, status.counts.lower),
-            })
-          : t('progress.v3.status.buildingReason')}</p>
-        <small>{t('progress.v3.status.explainer')}</small>
-      </section>
-
-      <section className="card pv3-card">
-        <h3>{t('progress.v3.mainLifts')}</h3>
-        {mainLiftIds.length ? (
-          <ul className="pv3-lift-list">
-            {mainLiftIds.map((id) => {
-              const trend = overviewTrends.get(id)
-              if (!trend) return null
-              const evidence = liftTrendEvidence(trend)
-              const latest = trend.points.some((point) => !point.deload && (trend.highRep
-                ? point.topLoad !== null && point.repsAtTop > 0
-                : point.e1rm !== null))
-              const evidenceLine = evidence
-                ? trend.highRep
-                  ? t('progress.v3.evidence.highRep', {
-                      firstLoad: formatNumber(language, evidence.first.topLoad ?? 0, { maximumFractionDigits: 1 }),
-                      firstReps: formatNumber(language, evidence.first.repsAtTop),
-                      lastLoad: formatNumber(language, evidence.last.topLoad ?? 0, { maximumFractionDigits: 1 }),
-                      lastReps: formatNumber(language, evidence.last.repsAtTop),
-                    })
-                  : t('progress.v3.evidence.estMax', {
-                      first: bestSetText(language, evidence.first.bestSet),
-                      last: bestSetText(language, evidence.last.bestSet),
-                    })
-                : ''
-              const weeklyBest = weeklyBestSummaries.get(id)
-              const weeklyBestLine = weeklyBest ? weeklyBestText(weeklyBest, language, t) : ''
-              const reason = worthReasons.get(id)
-              const comparison = latestComparisons.get(id)?.comparison
-              return (
-                <li key={id}>
-                  <button type="button" className="pv3-lift-row" onClick={() => setSelectedLiftId(id)} aria-label={t('progress.strength.openDetail', { exercise: displayName(id) })}>
-                    <span className="pv3-lift-copy">
-                      <strong>{displayName(id)}</strong>
-                      <span>{translatedVerdict(evidence ? trend.verdict : 'not-enough-data', t)}</span>
-                      {evidenceLine && <small>{evidenceLine}</small>}
-                      {weeklyBestLine && <small>{weeklyBestLine}</small>}
-                      {rateText(trend, language, t) && <small>{rateText(trend, language, t)}</small>}
-                      {!latest && <small>{t('progress.v3.unlock.sessions', { count: formatNumber(language, trend.points.filter((point) => !point.deload).length) })}</small>}
-                      {comparison?.messages[0]?.startsWith('sets:') && <small>{t('progress.v3.summary.setCount', {
-                        current: comparison.workingSetCount,
-                        previous: comparison.previousWorkingSetCount,
-                      })}</small>}
-                      {reason && <em className="pv3-worth-tag">{t('progress.v3.worthLooking')}: {reason}</em>}
-                    </span>
-                    <Sparkline trend={trend} min={sparkMin} max={sparkMax} exercise={exerciseById.get(id)} />
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        ) : <p className="empty-state">{t('progress.v3.verdict.insufficient')}</p>}
-        <p className="pv3-caption">{mainTrends.some((trend) => trend.highRep) ? t('progress.v3.sparklineHighRepNote') : t('progress.v3.sparklineNote')}</p>
-      </section>
-
-      <section className="card pv3-card">
-        <h3>{t('progress.v3.summary.title')}</h3>
-        <div className="pv3-summary-counts">
-          <div><strong>{formatNumber(language, comparisonCounts.improved)}</strong><span>{t('progress.v3.summary.improved')}</span></div>
-          <div><strong>{formatNumber(language, comparisonCounts.held)}</strong><span>{t('progress.v3.summary.held')}</span></div>
-          <div><strong>{formatNumber(language, watches.length)}</strong><span>{t('progress.v3.summary.watch')}</span></div>
+        <div className="pv3-status-heading">
+          <strong className="pv3-status-word">{translatedStatus(status.status, t)}</strong>
+          <details className="pv3-info">
+            <summary aria-label={t('progress.v3.status.about')}>ⓘ</summary>
+            <small>{t('progress.v3.status.explainer')}</small>
+          </details>
         </div>
-        {watches.length
-          ? <ul className="pv3-watch-list">{watches.slice(0, 3).map(renderWatch)}</ul>
-          : <p className="pv3-caption">{t('progress.v3.summary.empty')}</p>}
+        <p>{t('progress.v3.status.reason', {
+          improving: formatNumber(language, status.counts.improving),
+          total: formatNumber(language, status.counts.eligible),
+          held: formatNumber(language, status.counts.held),
+          lower: formatNumber(language, status.counts.lower),
+        })}</p>
+        {consistencyLine && <p>{consistencyLine}</p>}
       </section>
 
       <section className="card pv3-card">
-        <h3>{t('progress.v3.consistency.title')} · {t('progress.v3.muscles.title')}</h3>
-        {currentAdherence !== null
-          ? <p>{t(consistencyData.currentStreak === 1 ? 'progress.v3.overview.consistency.one' : 'progress.v3.overview.consistency', {
-              adherence: formatNumber(language, currentAdherence * 100, { maximumFractionDigits: 0 }),
-              streak: formatNumber(language, consistencyData.currentStreak),
-            })}</p>
-          : <p>{t('progress.v3.overview.building', {
-              count: formatNumber(language, completeWeeks.length),
-              total: 4,
-            })}</p>}
-        {muscleAverageRows.length
-          ? <p>{t('progress.v3.overview.muscles', {
-              inside: formatNumber(language, insideRange),
-              total: formatNumber(language, muscleAverageRows.length),
-            })}</p>
-          : <p className="pv3-caption">{t('progress.v3.muscles.unlock', {
-              count: formatNumber(language, Math.min(unlockedMuscleWeeks, 4)),
-            })}</p>}
-        {overload?.rate !== null && overload?.rate !== undefined
-          ? <p>{t('progress.v3.overview.overload', { rate: formatNumber(language, Math.round(overload.rate * 100)) })}</p>
-          : <p className="pv3-caption">{t('progress.v3.unlock.equivalent', { count: formatNumber(language, overload?.comparable ?? 0) })}</p>}
+        <h3>{t('progress.v3.yourLifts')}</h3>
+        <ul className="pv3-lift-list">
+          {mainLiftIds.map((id) => {
+            const trend = overviewTrends.get(id)
+            if (!trend) return null
+            const hasVerdict = Boolean(liftTrendEvidence(trend)) && trend.verdict !== 'not-enough-data'
+            const number = (hasVerdict ? rateText(trend, language, t) : '')
+              || weeklyBestCompactText(weeklyBestSummaries.get(id), language, t)
+            return (
+              <li key={id}>
+                <button type="button" className="pv3-lift-row" onClick={() => setSelectedLiftId(id)} aria-label={t('progress.strength.openDetail', { exercise: displayName(id) })}>
+                  <span className="pv3-lift-copy">
+                    <strong>{displayName(id)}</strong>
+                    <span>{translatedVerdict(hasVerdict ? trend.verdict : 'not-enough-data', t)}{number ? ` · ${number}` : ''}</span>
+                  </span>
+                  <span className="pv3-lift-chevron" aria-hidden="true">›</span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
+
+      <section className="card pv3-card">
+        <h3>{t('progress.v3.next.title')}</h3>
+        {nextWatches.length
+          ? <ul className="pv3-watch-list pv3-next-list">{nextGroups.map(renderNextGroup)}</ul>
+          : <p className="pv3-caption">{t('progress.v3.summary.empty')}</p>}
       </section>
     </>
   )
@@ -913,6 +848,15 @@ export default function ProgressScreen({
     const currentOverloadText = overload?.rate === null || overload?.rate === undefined ? '—' : `${formatNumber(language, Math.round(overload.rate * 100))}%`
     const previousOverloadText = previousOverload.rate === null ? '—' : `${formatNumber(language, Math.round(previousOverload.rate * 100))}%`
     const previousLabel = (value: string) => t('progress.v3.trends.previous', { value })
+    // A chip is only a comparison when both periods have a value; "Previous: —" chips are hidden (PO 2026-11-07).
+    // Main-lift strength is already a change between the two periods, so it has no "previous" line.
+    const compareChips = [
+      { label: t('progress.v3.trends.trainingDays'), current: formatNumber(language, currentDays), previous: previousDays ? formatNumber(language, previousDays) : '—' },
+      { label: t('progress.v3.trends.adherence'), current: currentAdherenceText, previous: previousAdherenceText },
+      { label: t('progress.v3.trends.mainLift'), current: mainChangeText, previous: null },
+      { label: t('progress.v3.trends.overload'), current: currentOverloadText, previous: previousOverloadText },
+    ].filter((chip) => chip.previous === null ? chip.current !== '—' : chip.previous !== '—')
+      .map((chip) => ({ ...chip, previous: chip.previous === null ? '' : previousLabel(chip.previous) }))
     const showPreviousBlock = blockComparisons.some((row) => !row.newInBlock)
     const windowStart = rangeStart(range, today, activeBlock, progressEntries)
     const windowEnd = rangeEnd(range, today, activeBlock)
@@ -923,13 +867,11 @@ export default function ProgressScreen({
         {/* Always a fixed 4-week comparison, so it sits above the range control that drives the cards below. */}
         <section className="card pv3-card">
           <h3>{t('progress.v3.trends.compare')}</h3>
-          <div className="pv3-chip-grid">
-            <MetricChip label={t('progress.v3.trends.trainingDays')} current={formatNumber(language, currentDays)} previous={previousLabel(previousDays ? formatNumber(language, previousDays) : '—')} />
-            <MetricChip label={t('progress.v3.trends.adherence')} current={currentAdherenceText} previous={previousLabel(previousAdherenceText)} />
-            <MetricChip label={t('progress.v3.trends.mainLift')} current={mainChangeText} previous={previousLabel('—')} />
-            <MetricChip label={t('progress.v3.trends.overload')} current={currentOverloadText} previous={previousLabel(previousOverloadText)} />
-          </div>
-          {overload?.rate === null && <p className="pv3-caption">{t('progress.v3.unlock.equivalent', { count: formatNumber(language, overload.comparable) })}</p>}
+          {compareChips.length
+            ? <div className="pv3-chip-grid">
+              {compareChips.map((chip) => <MetricChip key={chip.label} label={chip.label} current={chip.current} previous={chip.previous} />)}
+            </div>
+            : <p className="pv3-caption">{t('progress.v3.trends.compareEmpty')}</p>}
         </section>
         <SegmentedRange range={range} onChange={setRange} t={t} />
         <section className="card pv3-card">
