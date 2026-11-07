@@ -3,6 +3,14 @@ import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { Exercise, WorkoutEntry } from '../types'
 import { refreshCatalogue, fetchRemoteCatalogue } from './storage'
 import {
+  clearPendingFirstRunGoal,
+  dismissWelcome as dismissWelcomeForTest,
+  getPendingFirstRunGoal,
+  isNewVisitor,
+  markFirstRunDone,
+  savePendingFirstRunGoal,
+} from './storage'
+import {
   addWorkoutEntry,
   deleteWorkoutEntry,
   fetchTrainingBlocks,
@@ -125,6 +133,43 @@ describe('language preference', () => {
     } finally {
       sessionStorage.removeItem('gym-studio.demo-mode')
     }
+  })
+})
+
+describe('first run storage', () => {
+  const goal = { goal: 'strength', daysPerWeek: 4, experience: 'intermediate', activityLevel: 'high', sessionMinutes: 60, equipment: 'home', notes: '' } as const
+
+  it('treats only a first visit as new', () => {
+    expect(isNewVisitor()).toBe(true)
+    dismissWelcomeForTest()
+    expect(isNewVisitor()).toBe(false)
+  })
+
+  it('is not new after guest workouts or a finished first run', () => {
+    localStorage.setItem('gym-studio.history', JSON.stringify([{ id: 'a', exerciseId: 'x', date: '2026-11-01', sets: [] }]))
+    expect(isNewVisitor()).toBe(false)
+    localStorage.removeItem('gym-studio.history')
+    markFirstRunDone()
+    expect(isNewVisitor()).toBe(false)
+  })
+
+  it('keeps answers outside the account namespace so the new account can read them', () => {
+    savePendingFirstRunGoal(goal)
+    try {
+      setStorageNamespace('new-user')
+      expect(getPendingFirstRunGoal()).toEqual(goal)
+      clearPendingFirstRunGoal()
+      expect(getPendingFirstRunGoal()).toBeNull()
+    } finally {
+      setStorageNamespace(null)
+    }
+  })
+
+  it('ignores incomplete or invalid saved answers', () => {
+    localStorage.setItem('gym-studio.first-run-goal', JSON.stringify({ ...goal, activityLevel: undefined }))
+    expect(getPendingFirstRunGoal()).toBeNull()
+    localStorage.setItem('gym-studio.first-run-goal', JSON.stringify({ ...goal, daysPerWeek: 7 }))
+    expect(getPendingFirstRunGoal()).toBeNull()
   })
 })
 

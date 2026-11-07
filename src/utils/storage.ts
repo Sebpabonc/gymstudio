@@ -4,8 +4,8 @@ import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { isDemoMode } from './demoMode'
 import { RestTimerState } from './restTimer'
-import { fetchActiveUserPlan as fetchRemoteActiveUserPlan } from './profileData'
-import type { SavedUserPlan } from './profileData'
+import { buildTrainingGoalPayload, fetchActiveUserPlan as fetchRemoteActiveUserPlan } from './profileData'
+import type { SavedUserPlan, TrainingGoalInput } from './profileData'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
 const HISTORY_KEY = 'gym-studio.history'
@@ -24,6 +24,9 @@ const WORKOUT_TREND_OPEN_KEY = 'gym-studio.workout-trend-open'
 const EXERCISE_SWAPS_KEY = 'gym-studio.exercise-swaps'
 const TRAINER_EXPLANATIONS_KEY = 'gym-studio.trainer-explanations'
 const HELP_AI_APP_OPENS_KEY = 'gym-studio.help-ai-app-opens'
+// First run (PT spec 2026-11-01): answers wait here, outside any account, until the new account exists.
+const FIRST_RUN_GOAL_KEY = 'gym-studio.first-run-goal'
+const FIRST_RUN_DONE_KEY = 'gym-studio.first-run-done'
 let helpAiAppOpensThisLoad: number | null = null
 
 export type CustomPlanExercise = {
@@ -89,7 +92,8 @@ function signalWorkoutHistorySaved() {
 
 const GUEST_CLAIMED_KEY = 'gym-studio.guest-claimed'
 const CUSTOM_PLAN_STORAGE_KEY = 'gym-studio.custom-plan'
-const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY, LANGUAGE_KEY])
+const SHARED_KEYS = new Set([CATALOGUE_KEY, TRAINING_BLOCKS_KEY, GUEST_CLAIMED_KEY, WELCOME_DISMISSED_KEY, LAYOUT_MODE_KEY, LANGUAGE_KEY,
+  FIRST_RUN_GOAL_KEY, FIRST_RUN_DONE_KEY])
 
 let storageNamespace: string | null = null
 
@@ -491,6 +495,37 @@ export function hasDismissedWelcome() {
 
 export function dismissWelcome() {
   localStorage.setItem(storageKey(WELCOME_DISMISSED_KEY), 'true')
+}
+
+/** A first visit on this device: no welcome dismissed, no guest workouts, first run not finished. */
+export function isNewVisitor() {
+  if (isDemoMode()) return false
+  return !hasDismissedWelcome() && !hasGuestWorkoutData() && localStorage.getItem(FIRST_RUN_DONE_KEY) !== 'true'
+}
+
+export function markFirstRunDone() {
+  localStorage.setItem(FIRST_RUN_DONE_KEY, 'true')
+  dismissWelcome()
+}
+
+export function getPendingFirstRunGoal(): TrainingGoalInput | null {
+  if (isDemoMode()) return null
+  const parsed = readJson<Partial<TrainingGoalInput> | null>(FIRST_RUN_GOAL_KEY, null)
+  if (!parsed || typeof parsed !== 'object') return null
+  try {
+    buildTrainingGoalPayload({ ...parsed, notes: '' } as TrainingGoalInput)
+    return { ...(parsed as TrainingGoalInput), notes: '' }
+  } catch {
+    return null
+  }
+}
+
+export function savePendingFirstRunGoal(goal: TrainingGoalInput) {
+  localStorage.setItem(FIRST_RUN_GOAL_KEY, JSON.stringify({ ...goal, notes: '' }))
+}
+
+export function clearPendingFirstRunGoal() {
+  localStorage.removeItem(FIRST_RUN_GOAL_KEY)
 }
 
 type TrainingExerciseRow = {

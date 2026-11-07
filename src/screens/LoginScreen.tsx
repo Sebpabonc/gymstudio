@@ -25,11 +25,19 @@ function friendlyError(message: string, t: Translate) {
   return t('login.generic')
 }
 
-export default function LoginScreen({ onClose }: { onClose: () => void }) {
+export default function LoginScreen({ onClose, initialMode, backLabel, intro }: {
+  onClose: () => void
+  initialMode?: LoginMode
+  backLabel?: string
+  intro?: string
+}) {
   const { t } = useT()
   const { available, status, signInWithPassword, signUp, resetPassword, signInWithGoogle, syncSignInRequired,
     passwordRecovery, updatePassword } = useAuth()
-  const [mode, setMode] = useState<LoginMode>(() => syncSignInRequired || hasGuestWorkoutData() ? 'sign-in' : 'sign-up')
+  const [mode, setMode] = useState<LoginMode>(() => initialMode ?? (syncSignInRequired || hasGuestWorkoutData() ? 'sign-in' : 'sign-up'))
+  // Governance sign-up step (ai-disclosure.md G): unticked, and required before any new account.
+  const [ageConfirmed, setAgeConfirmed] = useState(false)
+  const needsAge = mode === 'sign-up' && !ageConfirmed
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -40,6 +48,7 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (needsAge) return
     setBusy(true)
     setErrorMessage('')
     setNotice('')
@@ -69,6 +78,7 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
   }
 
   const continueWithGoogle = async () => {
+    if (needsAge) return
     setBusy(true)
     setErrorMessage('')
     setNotice('')
@@ -155,8 +165,9 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
 
   return (
     <section className="card account-screen">
-      <button type="button" className="account-back" onClick={onClose}>{t('login.backToToday')}</button>
+      <button type="button" className="account-back" onClick={onClose}>{backLabel ?? t('login.backToToday')}</button>
       <h2>{mode === 'sign-in' ? t('login.welcomeBack') : t('login.createTitle')}</h2>
+      {intro && <p className="account-message">{intro}</p>}
       {syncSignInRequired && <p className="account-message" role="status" aria-live="polite">{t('profile.syncSignInRequired')}</p>}
       <ul className="account-benefits">
         <li>{t('login.benefit1')}</li>
@@ -221,13 +232,19 @@ export default function LoginScreen({ onClose }: { onClose: () => void }) {
             {t('login.forgot')}
           </button>
         )}
-        <button type="submit" className="primary-button" disabled={busy}>
+        {mode === 'sign-up' && (
+          <label className="account-age-confirm">
+            <input type="checkbox" checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} />
+            <span>{t('login.ageConfirm')}</span>
+          </label>
+        )}
+        <button type="submit" className="primary-button" disabled={busy || needsAge}>
           {busy ? t('login.wait') : mode === 'sign-in' ? t('login.signIn') : t('login.createAccount')}
         </button>
       </form>
 
       <div className="account-divider"><span>{t('login.or')}</span></div>
-      <button type="button" className="google-button" onClick={continueWithGoogle} disabled={busy}>
+      <button type="button" className="google-button" onClick={continueWithGoogle} disabled={busy || needsAge}>
         <span className="google-mark" aria-hidden="true">G</span>
         {t('login.google')}
       </button>

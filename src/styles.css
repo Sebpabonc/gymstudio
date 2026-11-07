@@ -591,6 +591,107 @@ button {
   margin: 0 0 4px;
 }
 
+.account-age-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--text);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.account-age-confirm input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--nav-active);
+}
+
+/* First run (PO 2026-11-07): the questionnaire is a new visitor's first screen, built from the Profile goal controls. */
+.first-run {
+  display: grid;
+  gap: 12px;
+}
+
+.first-run .card {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.first-run .card h2,
+.first-run .card h3 {
+  margin: 0;
+  color: var(--text);
+}
+
+.first-run .card h3 {
+  font-size: 0.9375rem;
+}
+
+.first-run-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.first-run-stack {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.first-run-stack .profile-choice {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  height: auto;
+  padding: 10px 13px;
+  border-radius: 16px;
+  text-align: left;
+}
+
+.first-run-stack .profile-choice small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.05rem;
+}
+
+.first-run-cta {
+  position: sticky;
+  bottom: 0;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, var(--bg-dark) 72%, rgba(15, 15, 16, 0));
+}
+
+.first-run-cta .primary-button {
+  width: 100%;
+}
+
+.first-run-cta .primary-button:disabled {
+  opacity: 0.55;
+}
+
+.first-run-weeks {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+.first-run-weeks i {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--panel-strong);
+}
+
+.first-run-weeks i:first-child {
+  background: var(--nav-active);
+}
+
 .welcome-card {
   display: grid;
   gap: 10px;

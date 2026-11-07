@@ -7,6 +7,7 @@ import { prepareRestAlerts, scheduleRestAlert } from './native/restAlerts'
 import { localizeCatalogue, useSpanishContentReady } from './i18n/content'
 import HelpAndAi from './components/HelpAndAi'
 import AiConsentPrompt from './components/AiConsentPrompt'
+import { FirstRunPlan, FirstRunQuestions } from './screens/FirstRunScreen'
 import {
   AI_CONSENT_REQUIRED_EVENT,
   clearPendingAiConsentPrompt,
@@ -20,8 +21,13 @@ import { useTextEntryFocused } from './utils/textEntryFocus'
 import { loadDemoBlocks } from './plans/demoBlock'
 import { exitDemoMode, isDemoMode } from './utils/demoMode'
 import {
+  clearPendingFirstRunGoal,
   dismissWelcome,
+  getPendingFirstRunGoal,
   hasDismissedWelcome,
+  isNewVisitor,
+  markFirstRunDone,
+  savePendingFirstRunGoal,
   loadExercises,
   loadRestTimerState,
   loadWorkoutHistory,
@@ -58,6 +64,9 @@ export default function App() {
   const dockHidden = useTextEntryFocused()
   const [showWelcome, setShowWelcome] = useState(() => !hasDismissedWelcome())
   const [showAiConsent, setShowAiConsent] = useState(false)
+  // PO 2026-11-07: a new visitor opens straight into the questionnaire; answers wait on the device until sign-up.
+  const [firstRunVisitor, setFirstRunVisitor] = useState(() => isNewVisitor())
+  const [pendingFirstRunGoal, setPendingFirstRunGoal] = useState(() => getPendingFirstRunGoal())
   const [exerciseMode, setExerciseMode] = useState<'lookup' | 'custom'>('lookup')
   const [progressExerciseId, setProgressExerciseId] = useState('')
   const { t, language, setLanguage } = useT()
@@ -187,6 +196,18 @@ export default function App() {
 
 
 
+  const firstRunPlanActive = !demoMode && !passwordRecovery && status === 'signed-in' && pendingFirstRunGoal !== null
+  const firstRunQuestionsActive = !demoMode && !passwordRecovery && status !== 'signed-in' && firstRunVisitor
+  const firstRunActive = activeTab === 'today' && (firstRunPlanActive || firstRunQuestionsActive)
+  const finishFirstRun = () => {
+    clearPendingFirstRunGoal()
+    markFirstRunDone()
+    setPendingFirstRunGoal(null)
+    setFirstRunVisitor(false)
+    setShowWelcome(false)
+  }
+  const screenTitle = firstRunActive ? t('firstRun.title') : getNavigationTitle(activeTab, t)
+
   return (
     <div className={`app-shell layout-boxes active-tab-${activeTab}${workoutModeActive ? ' workout-mode-active' : ''}`}>
       <div className="phone-frame">
@@ -195,7 +216,7 @@ export default function App() {
           <div className={`brand-bar${headerCollapsed ? ' collapsed' : ''}`}>
             <span className="brand-bar-title" aria-hidden="true">
               <span className="brand-bar-wordmark">Gym Studio</span>
-              <span className="brand-bar-screen">{getNavigationTitle(activeTab, t)}</span>
+              <span className="brand-bar-screen">{screenTitle}</span>
             </span>
             <span className="brand-bar-actions">
             <span className="layout-toggle language-toggle" role="group" aria-label={t('lang.label')}>
@@ -231,7 +252,7 @@ export default function App() {
           <header className={`brand-header${headerCollapsed ? ' collapsed' : ''}`}>
             <span className="brand-tagline" aria-hidden="true">{t('header.tagline')}</span>
             <span className="brand-wordmark" aria-hidden="true">Gym Studio</span>
-            <h1>{getNavigationTitle(activeTab, t)}</h1>
+            <h1>{screenTitle}</h1>
           </header>
           <div className="screen-surface">
           {!passwordRecovery && activeTab === 'exercises' && (
@@ -302,6 +323,24 @@ export default function App() {
                 />
               </Suspense>
             )
+          ) : activeTab === 'today' && firstRunPlanActive ? (
+            <FirstRunPlan goal={pendingFirstRunGoal!} onDone={finishFirstRun} />
+          ) : activeTab === 'today' && firstRunQuestionsActive ? (
+            status === 'loading' ? (
+              <section className="card account-screen" aria-live="polite"><p>{t('account.loading')}</p></section>
+            ) : (
+              <FirstRunQuestions
+                initialAnswers={pendingFirstRunGoal ?? undefined}
+                onAnswered={(goal) => {
+                  savePendingFirstRunGoal(goal)
+                  setPendingFirstRunGoal(goal)
+                }}
+                onHaveAccount={() => {
+                  finishFirstRun()
+                  setActiveTab('you')
+                }}
+              />
+            )
           ) : activeTab === 'today' ? (
             demoMode && !demoHistoryReady ? (
               <section className="card" aria-live="polite">
@@ -364,7 +403,7 @@ export default function App() {
           )}
           </div>
         </main>
-        <nav className={`bottom-tab-bar${dockHidden ? ' hidden' : ''}`} aria-label={t('nav.aria')}>
+        <nav className={`bottom-tab-bar${dockHidden || firstRunActive ? ' hidden' : ''}`} aria-label={t('nav.aria')}>
           {navigationTabs.map((tab) => (
             <button
               key={tab.id}
@@ -392,7 +431,7 @@ export default function App() {
         {!workoutModeActive && <RestTimer timer={restTimer} hidden={dockHidden} nextLabel={restLabel.current} onChange={updateRestTimer} />}
         <HelpAndAi
           activeTab={activeTab}
-          hidden={dockHidden}
+          hidden={dockHidden || firstRunActive}
           showPulse={showHelpPulse}
           onSignIn={() => setActiveTab('you')}
         />
