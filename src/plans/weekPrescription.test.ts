@@ -31,7 +31,7 @@ describe('prescriptionForWeek', () => {
       technique: 'straight',
       sets: 4,
       reps: ['8'],
-      weekNote: 'Week 1: straight sets, 3-second lowering, 2-3 reps in reserve.',
+      weekNote: 'Week 1: straight sets, 3-second lowering, stop with about 3 reps left in you.',
     })
   })
 
@@ -40,7 +40,7 @@ describe('prescriptionForWeek', () => {
       technique: 'straight',
       sets: 2,
       reps: ['8'],
-      weekNote: 'Deload: same weights, half the sets, 3+ reps in reserve.',
+      weekNote: 'Deload: same weights, half the sets, stop with 3 or more reps left in you.',
     })
   })
 
@@ -103,10 +103,10 @@ describe('prescriptionForWeek', () => {
     const plan = exercise({ notes })
 
     expect(prescriptionForWeek(plan, 1, { beginnerIntro: true }).notes).toBe(
-      'Week 1: straight sets, 3-second lowering, 2-3 reps in reserve.'
+      'Week 1: straight sets, 3-second lowering, stop with about 3 reps left in you.'
     )
     expect(prescriptionForWeek(plan, 6).notes).toBe(
-      'Deload: same weights, half the sets, 3+ reps in reserve.'
+      'Deload: same weights, half the sets, stop with 3 or more reps left in you.'
     )
     for (const week of [1, 2, 3, 4, 5]) {
       expect(prescriptionForWeek(plan, week)).toEqual(plan)
