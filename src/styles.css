@@ -785,6 +785,7 @@ button {
 
 .first-run-question legend {
   margin-bottom: 14px;
+  padding: 0;
 }
 
 .first-run-question legend h2 {
@@ -797,10 +798,21 @@ button {
 
 .first-run-question .profile-choice {
   min-height: 56px;
+  align-content: center;
+}
+
+/* Start, I have an account and the demo link share one size (button or link). */
+.first-run-cta .primary-button,
+.first-run-cta .secondary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
 }
 
 .first-run-cta .secondary-button {
-  width: 100%;
   margin-top: 8px;
 }
 
@@ -10899,10 +10911,19 @@ p.workout-short-cue.cue-card {
   font-variant-numeric: tabular-nums;
 }
 
-.account-screen :is(h2, h3, p, span, small, button, label, legend, input, textarea),
-.profile-screen :is(h2, h3, p, span, small, button, label, legend, input, textarea) {
+.account-screen :is(h2, h3, p, span, small, button, a.secondary-button, label, legend, input, textarea),
+.profile-screen :is(h2, h3, p, span, small, button, a.secondary-button, label, legend, input, textarea),
+.first-run-cta .secondary-button {
   font-size: var(--type-body-size);
   line-height: var(--type-body-lh);
+}
+
+/* Secondary actions (buttons and links) use the same weight as Continue with Google. */
+.account-screen .secondary-button,
+.profile-screen .secondary-button,
+.first-run-cta .secondary-button {
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .account-screen .collapsible-card-header h2,
