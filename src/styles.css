@@ -591,6 +591,34 @@ button {
   margin: 0 0 4px;
 }
 
+.effortless-why {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--brand-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.2rem;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.effortless-why span {
+  white-space: pre-line;
+}
+
+.effortless-why b {
+  color: var(--nav-active);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .effortless-first-time {
   display: grid;
   gap: 4px;
