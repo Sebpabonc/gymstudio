@@ -616,6 +616,26 @@ export function formatEstMaxInsightLine(
   return line
 }
 
+/** PO 2026-11-01 (#396): the reason for today's weight in view while logging; tapping it opens the cue sheet. */
+function WhyWeightLine({ label, reason, details, id }: {
+  label: string
+  reason: string
+  details: SqueezeCueDetails
+  id: string
+}) {
+  const [open, setOpen] = useState(false)
+  const close = useCallback(() => setOpen(false), [])
+  return (
+    <>
+      <button type="button" className="effortless-why" aria-haspopup="dialog" onClick={() => setOpen(true)}>
+        <b>{label}</b>
+        <span>{reason}</span>
+      </button>
+      {open && <CueSheet details={details} sections={details.sections} id={id} onClose={close} />}
+    </>
+  )
+}
+
 function StrengthInsightLine({ line, id, t }: {
   line: string
   id: string
@@ -4155,6 +4175,10 @@ export default function WorkoutPlan({
                     expanded onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />}
                   {((workoutTechnique && exercise.technique !== 'superset') || workoutPlanNote) && <p className="workout-mode-plan-note">{workoutTechnique && exercise.technique !== 'superset' && <strong>{workoutTechnique} </strong>}{workoutPlanNote}</p>}
                   {(!partner || group.items[0].exerciseIndex !== exerciseIndex || usesPairRest) && <p className="effortless-rest">{t('workout.label.rest')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>}
+                  {trainer && !trainer.recommendation.firstSessionProtocol && (
+                    <WhyWeightLine label={t('workout.run.whyWeight')} id={`${exerciseKey}-why`} details={cueDetails}
+                      reason={trainerReason(t, language, trainer.recommendation, trainer.target)} />
+                  )}
                   <section className="effortless-logger">
                     <div className="effortless-set-head" aria-hidden="true"><span /><span>kg</span><span>{text.repsShort}</span><span /></div>
                     <div className="effortless-set-rows">

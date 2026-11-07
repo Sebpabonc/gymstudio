@@ -278,6 +278,25 @@ describe('approved workout logging integration', () => {
     expect(changeRest).not.toHaveBeenCalledWith(null)
   })
 
+  it('#396: shows why this weight above the sets, opening the cue sheet, and nothing the first time', async () => {
+    const whyLines = () => elements(node => typeof node.type === 'function' && node.type.name === 'WhyWeightLine')
+    render()
+    await settle()
+    await start()
+    // No history yet: the first-time lines show instead, so no reason box.
+    expect(whyLines()).toHaveLength(0)
+    saveWorkoutHistory([{ id: 'last', exerciseId: 'press', date: '2026-10-12', blockId: 'block', dayKey: 'chest-back-a',
+      sets: [8, 8, 8].map((reps, index) => ({ id: `s${index}`, weight: 40, reps })) }])
+    harness.slots = []
+    render()
+    await settle()
+    await start()
+    const [why] = whyLines()
+    expect(why.props.label).toBe('Why this weight')
+    expect(why.props.reason).toMatch(/\S/)
+    expect(why.props.details.sections[0].lines).toContain(why.props.reason)
+  })
+
   it('m1: decrementing a minimum logged weight cannot overwrite a rejected correction', async () => {
     render()
     await settle()
