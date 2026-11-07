@@ -141,21 +141,18 @@ describe('after the first session (S39, S40, S43)', () => {
 })
 
 describe('first-time card text (L1-L4)', () => {
-  it('L1: dumbbell straight, EN and ES, in order', () => {
+  it('L1: dumbbell straight, EN and ES, in order (short card, PT 2026-11-07)', () => {
     const result = first('dumbbell-bench-press', 'beginner', 10, { technique: 'straight' })
     expect(trainerReasonParts(en, 'en', result, rng(10)).lines).toEqual([
       'Suggested start: 6 kg per dumbbell.',
-      "Start light and add a little weight over 1-3 easy warm-up sets. Don't log these.",
-      'It should let you finish 10 reps with about 3 more left in you.',
-      'Use that weight on every set.',
-      "Too heavy or too light after your warm-up? Change it. That's normal today.",
-      'Log the weight of one dumbbell.',
-      'Your next target will start from what you log.',
+      "Warm up with 1-3 lighter sets first. Don't log them.",
+      'Aim for 10 reps with about 3 to spare. Change the weight if needed.',
     ])
-    const spanish = trainerReasonParts(es, 'es', result, rng(10)).lines
-    expect(spanish[0]).toBe('Peso sugerido para empezar: 6 kg por mancuerna.')
-    expect(spanish[2]).toBe('Debería permitirte completar 10 reps y que aún te queden unas 3 más.')
-    expect(spanish[4]).toBe('¿Muy pesado o muy ligero después de calentar? Cámbialo. Hoy es normal.')
+    expect(trainerReasonParts(es, 'es', result, rng(10)).lines).toEqual([
+      'Peso sugerido para empezar: 6 kg por mancuerna.',
+      'Calienta primero con 1 a 3 series más ligeras. No las registres.',
+      'Haz 10 reps y que te queden unas 3 de sobra. Cambia el peso si hace falta.',
+    ])
   })
 
   it('L1 bar: barbell says the total with the bar', () => {
@@ -167,9 +164,27 @@ describe('first-time card text (L1-L4)', () => {
   it('L2/L3: pyramid and drop-set cards', () => {
     const pyramid = first('wide-grip-chest-press', 'intermediate', [15, 12, 10, 8], { technique: 'pyramid' })
     expect(trainerReasonParts(en, 'en', pyramid, rng(8, 15)).lines[0]).toBe('Suggested weights are filled in for each set, up to 25 kg.')
+    expect(trainerReasonParts(en, 'en', pyramid, rng(8, 15)).lines.slice(1)).toEqual([
+      "Warm up with 1-3 lighter sets first. Don't log them.",
+      expect.stringMatching(/^Aim for .+ reps with about 3 to spare\. Change the weight if needed\.$/),
+    ])
     const drop = first('wide-grip-chest-press', 'beginner', 12, { technique: 'drop-set' })
     expect(trainerReasonParts(en, 'en', drop, rng(12)).lines[0]).toBe('Suggested start: 15 kg, then about 10 kg for the drop.')
     expect(trainerReasonParts(es, 'es', drop, rng(12)).lines[0]).toBe('Peso sugerido para empezar: 15 kg y luego unos 10 kg para la bajada.')
+  })
+
+  it('L5: no suggested-start card has more than 3 lines, in either language', () => {
+    const cards = [
+      first('dumbbell-bench-press', 'beginner', 10, { technique: 'straight' }),
+      first('back-squat', 'beginner', 8),
+      first('wide-grip-chest-press', 'intermediate', [15, 12, 10, 8], { technique: 'pyramid' }),
+      first('wide-grip-chest-press', 'beginner', 12, { technique: 'drop-set' }),
+      first('kettlebell-swing', 'intermediate', 12),
+    ]
+    for (const card of cards) {
+      expect(trainerReasonParts(en, 'en', card, rng(8, 15)).lines.length).toBeLessThanOrEqual(3)
+      expect(trainerReasonParts(es, 'es', card, rng(8, 15)).lines.length).toBeLessThanOrEqual(3)
+    }
   })
 
   it('kettlebell card says per kettlebell', () => {

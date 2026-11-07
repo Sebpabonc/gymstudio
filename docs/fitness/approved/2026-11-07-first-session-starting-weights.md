@@ -8,6 +8,9 @@ approved_on: 2026-11-07
 exercises: [back-squat, dumbbell-bench-press, leg-extensions-toes-dorsiflexed-neutral, machine-leg-extension-single-leg, cable-lateral-raise, barbell-bench-press, incline-barbell-bench-press, barbell-deadlift, hex-bar-deadlift, barbell-good-morning, barbell-overhead-press, barbell-bent-over-row, dumbbell-romanian-deadlift, dumbbell-goblet-squat, dumbbell-bulgarian-split-squat, dumbbell-shoulder-press, standing-db-lateral-raises, dumbbell-farmers-carry, kettlebell-swing, kettlebell-turkish-get-up, ez-bar-curl, lat-pulldown, single-arm-lat-pulldown, cable-face-pull, cable-crunch, seated-leg-curl-toes-dorsiflexed-neutral, standing-calf-raises-toes-neutral, wide-grip-chest-press, plate-loaded-chest-press-wide-grip, leg-press-quad-dominant, smith-machine-squat, machine-assisted-pull-up, machine-dip-assisted, band-assisted-pull-up, push-up]
 ---
 
+> **Superseded in part (2026-11-07):** the card text for suggested-start cases (section 3, tests L1-L3) is replaced by
+> `2026-11-07-suggested-start-short-copy.md`. The excluded-exercise card (L4) and every number and rule here are unchanged.
+
 > **Status 2026-11-07:** approved under the PO's request. Open decisions resolved by the Tech Lead from the PO's own logs:
 > Smith machine weights are the total with the bar (his Smith shoulder press is logged at 20-25 kg); plate-loaded weights are
 > plates added (his leg press is logged at 120-150 kg, T-bar row at 30-42.5 kg). Values, hex bar and stack minimums as written.
