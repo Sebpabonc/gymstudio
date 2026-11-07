@@ -120,11 +120,19 @@ describe('after the first session (S39, S40, S43)', () => {
   it('S39/S40: the suggestion is never history; the next session follows what was logged', () => {
     const base = { today: '2026-11-27', target: rng(8), sets: 3, equipment: 'barbell', starting: { exercise: meta('back-squat'), experience: 'beginner' as const } }
     const logged = (weight: number) => [{ date: '2026-11-20', target: rng(8), sets: [8, 8, 8].map((reps) => ({ weight, reps })) }]
-    // S39 as written expects 22.5 (reached_top_of_range); the approved light-load rule R8 gives 20 and more reps instead.
-    // Sent back to the PT (2026-11-07); the engine keeps its approved rule, so the suggestion is still never used as history.
-    expect(recommend({ ...base, history: logged(20) })).toMatchObject({ weight: 20, reason: 'light_load_add_reps' })
+    // S39, with the PT's R8 amendment (no light-load rule on barbell, smith or hex bar).
+    expect(recommend({ ...base, history: logged(20) })).toMatchObject({ weight: 22.5, reason: 'reached_top_of_range' })
     expect(recommend({ ...base, history: logged(60) })).toMatchObject({ weight: 62.5 })
     expect(recommend({ ...base, history: logged(60) }).firstSessionSuggested).toBeUndefined()
+  })
+
+  it('R8 amendment keeps the light-load rule on dumbbells', () => {
+    const history = [{ date: '2026-11-20', target: rng(12), sets: [12, 12, 12].map((reps) => ({ weight: 8, reps })) }]
+    expect(recommend({ today: '2026-11-27', target: rng(12), sets: 3, equipment: 'dumbbell', step: 2, history })).toMatchObject({ reason: 'light_load_add_reps' })
+  })
+
+  it('missing catalogue fields exclude the exercise, even for side or rear delts', () => {
+    expect(first('cable-lateral-raise', 'beginner', 12, { starting: { exercise: { id: 'x', equipment: 'cable', primaryMuscles: ['Side Delts'] }, experience: 'beginner' } }).weight).toBeNull()
   })
 
   it('S43: a 0 kg-only history still counts as a first exposure', () => {

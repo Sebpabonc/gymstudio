@@ -11,8 +11,9 @@ exercises: [back-squat, dumbbell-bench-press, leg-extensions-toes-dorsiflexed-ne
 > **Status 2026-11-07:** approved under the PO's request. Open decisions resolved by the Tech Lead from the PO's own logs:
 > Smith machine weights are the total with the bar (his Smith shoulder press is logged at 20-25 kg); plate-loaded weights are
 > plates added (his leg press is logged at 120-150 kg, T-bar row at 30-42.5 kg). Values, hex bar and stack minimums as written.
-> **Back to the PT:** S39 expects 22.5 after 20 × 8, 8, 8, but the approved light-load rule R8 gives 20 kg with more reps;
-> the engine keeps R8 until the PT amends one of them.
+> **R8 amendment (PT pre-merge review, 2026-11-07):** R8 does not apply to `barbell`, `smith-machine` or `hex-bar`. On these,
+> 2.5 kg is the standard smallest jump on a bar of 20 kg or more, and the normal guardrail still caps it. R8 stays as written
+> for dumbbell, kettlebell, cable, machine, EZ bar and plate-loaded. S39 gives 22.5 with `reached_top_of_range`.
 
 ## Summary
 PO decision (2026-11-07): the first time a user does a loaded exercise, the app shows a general suggested starting weight

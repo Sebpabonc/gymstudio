@@ -54,10 +54,11 @@ const down = (value: number, step: number) => Number((Math.floor(value / step + 
 
 /** 2.2: the first matching class, from the catalogue fields. */
 export function exerciseClass(exercise: StartingExercise): ExerciseClass | null {
-  const muscles = exercise.primaryMuscles ?? []
-  if (muscles.length > 0 && muscles.every((muscle) => muscle === 'Side Delts' || muscle === 'Rear Delts')) return 'small'
+  // Spec 2.5: missing catalogue fields exclude the exercise before any class is chosen (PT review).
   const pattern = exercise.movementPattern
   if (!pattern || !exercise.mechanic) return null
+  const muscles = exercise.primaryMuscles ?? []
+  if (muscles.length > 0 && muscles.every((muscle) => muscle === 'Side Delts' || muscle === 'Rear Delts')) return 'small'
   if (pattern === 'carry') return 'carry'
   if (pattern === 'core') return 'core'
   if (exercise.mechanic === 'isolation') return exercise.bodyRegion === 'Legs' || exercise.bodyRegion === 'Glutes' ? 'iso_lower' : 'iso_upper'

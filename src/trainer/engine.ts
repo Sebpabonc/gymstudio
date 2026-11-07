@@ -1233,7 +1233,10 @@ function recommendStraightRules(
 
   // R8: light loads — when one step is more than 10 % of the load, add reps to max + 2 before adding the step.
   // (Added load on bodyweight work follows normal straight-set rules — R7, T9/T21.)
-  if (!isBodyweight(input.equipment) && lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT && sameRange(lastTarget, target)) {
+  // PT amendment 2026-11-07 (starting-weights review, S39): not on barbell, smith or hex bar, where 2.5 kg is the smallest
+  // jump on a bar of 20 kg or more and the guardrail still caps it.
+  const barLoad = input.equipment === 'barbell' || input.equipment === 'smith-machine' || input.equipment === 'hex-bar'
+  if (!isBodyweight(input.equipment) && !barLoad && lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT && sameRange(lastTarget, target)) {
     if ((complete && lastReps.every((reps) => reps >= target.max + 2)) || tooEasyFor(target)) {
       return make('increase_weight', lastWeight + step, 'reached_top_of_range', { reps: { min: target.min, max: target.min } })
     }
