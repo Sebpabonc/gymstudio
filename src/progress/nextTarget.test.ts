@@ -19,7 +19,7 @@ describe('recommendNextTarget', () => {
         [10, 10, 10],
         'lower'
       )
-    ).toMatchObject({ action: 'increase', weight: 15 })
+    ).toMatchObject({ action: 'increase', weight: 12.5 })
   })
 
   it('does not increase when later sets fall 3+ reps short, even after a strong first set', () => {
@@ -91,19 +91,46 @@ describe('recommendNextTarget', () => {
     ).toMatchObject({ action: 'deload', weight: 20, reps: [12, 12, 12], setCount: 3 })
   })
 
-  it('uses the isolation increment and ignores invalid targets', () => {
-    expect(recommendNextTarget([{ weight: 8, reps: 10 }], [10], 'isolation')).toMatchObject({
-      action: 'increase',
-      weight: 9,
-    })
+  it('ignores invalid targets', () => {
     expect(recommendNextTarget([], [10], 'upper')).toBeNull()
   })
 
-  it('can recommend adding load for a bodyweight exercise logged at zero kilograms', () => {
-    expect(recommendNextTarget([{ weight: 0, reps: 10 }], [10], 'upper')).toMatchObject({
-      action: 'increase',
-      weight: 2.5,
-    })
+  // PT super-QA 2026-11-07: weight steps come from the equipment, never a fixed +1/+2.5/+5 kg.
+  it('moves an 8 kg dumbbell isolation lift to 10 kg (2 kg dumbbell step), never 9 kg', () => {
+    expect(recommendNextTarget([{ weight: 8, reps: 12 }, { weight: 8, reps: 12 }], [12, 12], 'isolation', false, 'dumbbell'))
+      .toMatchObject({ action: 'increase', weight: 10, increaseKg: 2 })
+  })
+
+  it('uses the 2.5 kg step for barbell lower-body work instead of +5 kg', () => {
+    expect(recommendNextTarget([{ weight: 60, reps: 8 }, { weight: 60, reps: 8 }], [8, 8], 'lower', false, 'barbell'))
+      .toMatchObject({ action: 'increase', weight: 62.5, increaseKg: 2.5 })
+  })
+
+  it('snaps an off-grid dumbbell weight back onto the 2 kg step', () => {
+    expect(recommendNextTarget([{ weight: 9, reps: 10 }], [10], 'upper', false, 'dumbbell'))
+      .toMatchObject({ action: 'increase', weight: 10 })
+  })
+
+  it('reduces a dumbbell lift onto the 2 kg step', () => {
+    const target = recommendNextTarget(
+      [{ weight: 20, reps: 10 }, { weight: 20, reps: 6 }, { weight: 20, reps: 6 }], [10, 10, 10], 'upper', false, 'dumbbell'
+    )
+    expect(target).toMatchObject({ action: 'reduce', weight: 18 })
+  })
+
+  // PT super-QA 2026-11-07 (F7): bodyweight never shows a kg target.
+  it('gives a push-up at 0 kg an add-reps target, never a kg target', () => {
+    const target = recommendNextTarget([{ weight: 0, reps: 12 }, { weight: 0, reps: 12 }, { weight: 0, reps: 11 }], [12, 12, 12], 'upper', false, 'bodyweight')
+    expect(target).toMatchObject({ action: 'add_reps', weight: 0, increaseKg: 0, topReps: 12 })
+  })
+
+  it('treats band work without added load the same way', () => {
+    expect(recommendNextTarget([{ weight: 0, reps: 15 }], [15], 'upper', false, 'band')).toMatchObject({ action: 'add_reps', weight: 0 })
+  })
+
+  it('still progresses weighted bodyweight work (added load) with the 2.5 kg step', () => {
+    expect(recommendNextTarget([{ weight: 10, reps: 8 }], [8], 'upper', false, 'bodyweight'))
+      .toMatchObject({ action: 'increase', weight: 12.5 })
   })
 
   it('uses the working weight (most sets), not the warm-up first set', () => {

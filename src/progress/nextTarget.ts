@@ -1,22 +1,28 @@
 import type { WorkoutSet } from '../types'
+import { equipmentStep, isBodyweight, roundToStep } from '../trainer/engine'
 
 export type ProgressionType = 'upper' | 'lower' | 'isolation'
 
 export type NextTarget = {
-  action: 'increase' | 'hold' | 'reduce' | 'deload'
+  /** add_reps: bodyweight/band work without added load — no kg target (PT super-QA 2026-11-07, F7). */
+  action: 'increase' | 'hold' | 'reduce' | 'deload' | 'add_reps'
   weight: number
   reps: number[]
   setCount: number
   shortSets: number[]
   increaseKg: number
   firstSetAboveTarget: boolean
+  /** Best reps on the logged sets (used by the add_reps reason). */
+  topReps?: number
 }
 
 export function recommendNextTarget(
   sets: Pick<WorkoutSet, 'weight' | 'reps'>[],
   targetReps: number[],
-  progressionType: ProgressionType,
-  deload = false
+  // Kept for callers; the step now comes from the equipment (PT super-QA 2026-11-07).
+  _progressionType: ProgressionType,
+  deload = false,
+  equipment?: string
 ): NextTarget | null {
   const plannedReps = targetReps.filter((reps) => Number.isFinite(reps) && reps > 0)
   const loggedSets = sets.filter((set) => Number.isFinite(set.weight) && Number.isFinite(set.reps))
@@ -29,6 +35,7 @@ export function recommendNextTarget(
     (best, set) => ((counts.get(set.weight) ?? 0) > (counts.get(best) ?? 0) ? set.weight : best),
     loggedSets[0].weight
   )
+  const topReps = Math.max(...loggedSets.map((set) => set.reps), 0)
   const shortSets = plannedReps.flatMap((target, index) =>
     loggedSets[index] && loggedSets[index].reps < target ? [index + 1] : []
   )
@@ -43,6 +50,21 @@ export function recommendNextTarget(
       shortSets,
       increaseKg: 0,
       firstSetAboveTarget: false,
+      topReps,
+    }
+  }
+
+  // PT super-QA 2026-11-07 (F7): bodyweight or band work without added load never gets a kg target.
+  if (isBodyweight(equipment) && weight === 0) {
+    return {
+      action: 'add_reps',
+      weight: 0,
+      reps: plannedReps,
+      setCount: plannedReps.length,
+      shortSets,
+      increaseKg: 0,
+      firstSetAboveTarget: false,
+      topReps,
     }
   }
 
@@ -55,30 +77,34 @@ export function recommendNextTarget(
     (target, index) =>
       loggedSets[index] !== undefined && target - loggedSets[index].reps >= 3
   ).length
-  const increaseKg = progressionType === 'lower' ? 5 : progressionType === 'isolation' ? 1 : 2.5
+  // PT super-QA 2026-11-07: weight steps come from the equipment (dumbbell 2 kg, barbell/cable/machine 2.5 kg).
+  const step = equipmentStep(equipment)
 
   if (allSetsHitTarget || (firstSetAboveTarget && shortByAtLeastThree === 0)) {
+    const nextWeight = roundToStep(weight + step, step, 'down')
     return {
       action: 'increase',
-      weight: Number((weight + increaseKg).toFixed(2)),
+      weight: nextWeight,
       reps: plannedReps,
       setCount: plannedReps.length,
       shortSets,
-      increaseKg,
+      increaseKg: Number((nextWeight - weight).toFixed(2)),
       firstSetAboveTarget,
+      topReps,
     }
   }
 
   if (allSetsLogged && shortByAtLeastThree >= 2) {
-    const roundedWeight = Math.round((weight * 0.925) / 2.5) * 2.5
+    const roundedWeight = roundToStep(weight * 0.925, step, 'nearest')
     return {
       action: 'reduce',
-      weight: Math.max(0, Math.min(weight - 2.5, roundedWeight)),
+      weight: roundToStep(Math.min(weight - step, roundedWeight), step, 'down'),
       reps: plannedReps,
       setCount: plannedReps.length,
       shortSets,
       increaseKg: 0,
       firstSetAboveTarget: false,
+      topReps,
     }
   }
 
@@ -90,5 +116,6 @@ export function recommendNextTarget(
     shortSets,
     increaseKg: 0,
     firstSetAboveTarget: false,
+    topReps,
   }
 }
