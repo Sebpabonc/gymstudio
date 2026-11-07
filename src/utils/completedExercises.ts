@@ -7,6 +7,7 @@ export type CompletionScope = {
   date: string
   blockId?: string
   dayKey?: string
+  weekAnchor?: string
 }
 
 export function findCompletedEntry(entries: WorkoutEntry[], scope: CompletionScope): WorkoutEntry | undefined {
@@ -19,10 +20,14 @@ export function findCompletedEntry(entries: WorkoutEntry[], scope: CompletionSco
 }
 
 /** Monday–Sunday week containing `date` (ISO yyyy-mm-dd). */
-export function weekBounds(date: string) {
+export function weekBounds(date: string, anchor?: string) {
   const value = Date.parse(`${date}T00:00:00Z`)
   const weekday = new Date(value).getUTCDay()
-  const start = new Date(value - (weekday === 0 ? 6 : weekday - 1) * 86_400_000)
+  // With an anchor (a first-run plan's start), weeks are 7 days from it instead of Monday to Sunday.
+  const anchorValue = anchor ? Date.parse(`${anchor.slice(0, 10)}T00:00:00Z`) : NaN
+  const start = Number.isNaN(anchorValue)
+    ? new Date(value - (weekday === 0 ? 6 : weekday - 1) * 86_400_000)
+    : new Date(anchorValue + Math.floor((value - anchorValue) / (7 * 86_400_000)) * 7 * 86_400_000)
   const end = new Date(start.getTime() + 6 * 86_400_000)
   return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) }
 }
@@ -32,7 +37,7 @@ export function weekBounds(date: string) {
  * block/day any time this Monday–Sunday week (latest wins); next Monday every day starts empty again.
  */
 export function findWeekCompletion(entries: WorkoutEntry[], scope: CompletionScope): WorkoutEntry | undefined {
-  const { start, end } = weekBounds(scope.date)
+  const { start, end } = weekBounds(scope.date, scope.weekAnchor)
   return entries
     .filter((entry) =>
       entry.date >= start && entry.date <= end &&

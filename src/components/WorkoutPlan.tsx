@@ -63,7 +63,7 @@ import {
   todayTrainingDay,
   trainingBlockDateStatus,
 } from '../utils/trainingBlocks'
-import { findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
+import { type CompletionScope, findNextPendingIndex, findWeekCompletion, weekBounds, findPrefillSelection, formatLoggedTime, getDayKeyType, summarizeCompletedEntry, upsertScopedEntry } from '../utils/completedExercises'
 import {
   copySetOneWeight,
   filterLoggableSets,
@@ -87,6 +87,7 @@ import {
 } from '../progress/workoutInsights'
 import type { WorkoutExerciseInsight } from '../progress/workoutInsights'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
+import { plannedDayDates, restRecommendation, startsOnFirstLog, weekAnchor } from '../plans/rollingStart'
 import { loadDemoBlocks } from '../plans/demoBlock'
 import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
 import type { ExerciseSwap } from '../plans/exerciseSwaps'
@@ -1039,7 +1040,7 @@ export default function WorkoutPlan({
   const autoNextWeekShown = useRef(false)
   const currentWeekComplete = useMemo(() => {
     if (!activeBlock || activeBlock.days.length === 0) return false
-    const week = weekBounds(today)
+    const week = weekBounds(today, weekAnchor(activeBlock))
     return activeBlock.days.every((day) => dayWorkoutStatus(day.exercises.map((item) => item.exerciseId), history, {
       blockId: activeBlock.id, dayKey: day.key, weekStart: week.start, weekEnd: week.end,
     }, day.exercises.map((item) => prescriptionForWeek(item, activeBlockWeek ?? 1).sets)).state === 'done')
@@ -1115,10 +1116,11 @@ export default function WorkoutPlan({
     [history, today, trainingBlocks]
   )
 
-  const completionScope = (blockId?: string, dayKey?: string) => ({ date: localIsoDate(), blockId, dayKey })
+  const completionScope = (blockId?: string, dayKey?: string, anchor?: string): CompletionScope =>
+    ({ date: localIsoDate(), blockId, dayKey, ...(anchor ? { weekAnchor: anchor } : {}) })
   const activeCompletionScope =
     planMode === 'preset' && activeBlock && activeDay
-      ? completionScope(activeBlock.id, activeDay.key)
+      ? completionScope(activeBlock.id, activeDay.key, weekAnchor(activeBlock))
       : completionScope()
   const chooseExerciseSwap = (toExerciseId: string, scope: ExerciseSwap['scope']) => {
     if (!swapTarget) return
@@ -3285,20 +3287,23 @@ export default function WorkoutPlan({
         <>
         {activeBlock && (() => {
           // PO 2026-10-10: the day tiles become one thin weekly progress bar (one tappable segment per day).
-          const currentWeek = weekBounds(localIsoDate())
+          const anchor = weekAnchor(activeBlock)
+          const currentWeek = weekBounds(localIsoDate(), anchor)
           const shiftDate = (date: string, days: number) => new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10)
-          const blockStartWeek = weekBounds(activeBlock.startDate.slice(0, 10)).start
+          const blockStartWeek = weekBounds(activeBlock.startDate.slice(0, 10), anchor).start
           const minOffset = Math.round((Date.parse(blockStartWeek) - Date.parse(currentWeek.start)) / (7 * 86_400_000))
           const maxOffset = minOffset + activeBlock.weeks - 1
           const offset = Math.min(Math.max(barWeekOffset, minOffset), maxOffset)
           const week = { start: shiftDate(currentWeek.start, offset * 7), end: shiftDate(currentWeek.end, offset * 7) }
           const weekNumber = offset - minOffset + 1
+          // First-run plans label unlogged days by the PT rhythm and rest gaps, not by Monday + position.
+          const rollingDates = startsOnFirstLog(activeBlock) ? plannedDayDates(activeBlock, history, week.start, today) : undefined
           const dayDate = (dayKey: string, position: number) => {
             const logged = history
               .filter((entry) => entry.dayKey === dayKey && entry.blockId === activeBlock.id && entry.date >= week.start && entry.date <= week.end)
               .map((entry) => entry.date.slice(0, 10))
               .sort()[0]
-            return logged ?? (activeBlock.days.length <= 7 ? shiftDate(week.start, position - 1) : undefined)
+            return logged ?? rollingDates?.get(dayKey) ?? (activeBlock.days.length <= 7 ? shiftDate(week.start, position - 1) : undefined)
           }
           const weekdayLabel = (date: string) => {
             const value = new Date(`${date}T12:00:00`)
@@ -3399,7 +3404,7 @@ export default function WorkoutPlan({
         )}
         {activeDay && activeExercises.length > 0 && !isWorkoutMode && barWeekOffset === 0 && (() => {
           // PO 2026-10-18: one clear state per day this week - Start / Continue (n of N) / Completed.
-          const week = weekBounds(today)
+          const week = weekBounds(today, weekAnchor(activeBlock))
           const status = activeBlock
             ? dayWorkoutStatus(activeExercises.map((exercise) => exercise.exerciseId), history, {
                 blockId: activeBlock.id, dayKey: activeDay.key, weekStart: week.start, weekEnd: week.end,
@@ -3416,14 +3421,25 @@ export default function WorkoutPlan({
           const inProgress = status
             ? status.state === 'in-progress'
             : activeExercises.some((exercise) => findExerciseCompletion(exercise, history)?.date.slice(0, 10) === today)
+          // PT spec 2026-11-01 §2: inside the gap after the last session, recommend rest. Advice, not a lock.
+          const rest = activeBlock && !inProgress ? restRecommendation(activeBlock, history, today) : null
           return (
-            <button type="button" className="primary-button start-workout-button" onClick={startWorkout}>
+            <>
+            {rest && (
+              <div className="rest-day-note" role="status">
+                <strong>{t('workout.restDay.title')}</strong>
+                <span>{t('workout.restDay.next', { day: rest.nextDay.name, date: formatWeekdayDate(language, `${rest.date}T00:00:00Z`) })}</span>
+                <span>{t('workout.restDay.anyway')}</span>
+              </div>
+            )}
+            <button type="button" className={`${rest ? 'secondary-button' : 'primary-button'} start-workout-button`} onClick={startWorkout}>
               {inProgress && status
                 ? status.done === 0 && status.loggedSets > 0
                   ? t(status.loggedSets === 1 ? 'workout.run.resumeSets.one' : 'workout.run.resumeSets.other', { count: formatNumber(language, status.loggedSets) })
                   : t('workout.run.resumeCount', { done: formatNumber(language, status.done), total: formatNumber(language, status.total) })
                 : inProgress ? t('workout.run.resume') : t('workout.run.start')}
             </button>
+            </>
           )
         })()}
         </>

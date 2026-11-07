@@ -4,7 +4,8 @@ import { loadExerciseLibrary } from '../data/exerciseLibrary'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { isDemoMode } from './demoMode'
 import { RestTimerState } from './restTimer'
-import { buildTrainingGoalPayload, fetchActiveUserPlan as fetchRemoteActiveUserPlan } from './profileData'
+import { buildTrainingGoalPayload, fetchActiveUserPlan as fetchRemoteActiveUserPlan, updateActiveUserPlan } from './profileData'
+import { pinFirstLog } from '../plans/rollingStart'
 import type { SavedUserPlan, TrainingGoalInput } from './profileData'
 
 const EXERCISES_KEY = 'gym-studio.exercises'
@@ -734,12 +735,32 @@ export function cacheActiveUserPlan(plan: SavedUserPlan | null) {
   }
 }
 
+/** A first-run plan's start, pinned on this device to the first logged set, is sent to the account (best effort). */
+function pushPinnedStart(plan: SavedUserPlan) {
+  void updateActiveUserPlan(plan).catch(() => undefined)
+}
+
+/** Pins a first-run plan's start to its first logged set (PT spec 2026-11-01 §2), once. */
+function pinRollingPlanStart(history: readonly WorkoutEntry[]) {
+  const plan = getCachedActiveUserPlan()
+  const pinned = plan ? pinFirstLog(plan.block, history) : null
+  if (!plan || !pinned) return
+  const next = { ...plan, startDate: pinned.startDate, block: pinned }
+  cacheActiveUserPlan(next)
+  pushPinnedStart(next)
+}
+
 /** Uses the account-scoped cache immediately when the signed-in user's plan is offline. */
 export async function fetchActiveUserPlan(): Promise<SavedUserPlan | null> {
   if (isDemoMode()) return null
   const cached = getCachedActiveUserPlan()
   try {
-    const plan = await fetchRemoteActiveUserPlan()
+    let plan = await fetchRemoteActiveUserPlan()
+    // A start pinned while offline wins over the server's unpinned copy of the same plan.
+    if (plan && cached?.block.firstLoggedOn && !plan.block.firstLoggedOn && cached.block.id === plan.block.id) {
+      plan = cached
+      pushPinnedStart(cached)
+    }
     cacheActiveUserPlan(plan)
     return plan
   } catch (error) {
@@ -1225,6 +1246,7 @@ export function saveWorkoutHistory(history: WorkoutEntry[]) {
 
   localStorage.setItem(storageKey(HISTORY_KEY), JSON.stringify(allHistory))
   saveSyncMetadata({ ...metadata, entries: nextEntries })
+  pinRollingPlanStart(history)
   signalWorkoutHistorySaved()
 }
 
@@ -1296,6 +1318,7 @@ export function saveMergedWorkoutHistory(history: SyncWorkoutEntry[]) {
     JSON.stringify(history.map(({ updatedAt: _updatedAt, dirty: _dirty, deletedAt: _deletedAt, syncError: _syncError, ...entry }) => entry))
   )
   saveSyncMetadata({ ...metadata, entries })
+  pinRollingPlanStart(history.filter((entry) => !entry.deletedAt))
 }
 
 export function markWorkoutEntriesSynced(

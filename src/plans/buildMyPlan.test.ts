@@ -31,6 +31,18 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
+describe('buildMyPlan start date', () => {
+  it('W16: Profile plans start next Monday; first-run plans start today and wait for the first log', async () => {
+    const today = new Date(2026, 10, 7, 12)
+    const profile = await buildMyPlan(goal, [], 'en', today)
+    expect(profile.startDate).toBe('2026-11-09')
+    expect(profile.block.startsOnFirstLog).toBeUndefined()
+    const firstRun = await buildMyPlan(goal, [], 'en', today, { startsOnFirstLog: true })
+    expect(firstRun.startDate).toBe('2026-11-07')
+    expect(firstRun.block.startsOnFirstLog).toBe(true)
+  })
+})
+
 describe('buildMyPlan consent fallback', () => {
   it.each([null, 'declined'] as const)('uses the rule plan without a gateway request when consent is %s', async (choice) => {
     getConsent.mockReturnValue(choice)

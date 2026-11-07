@@ -36,7 +36,7 @@ describe('first run plan', () => {
     expect(d.saveTrainingGoal).toHaveBeenCalledWith(goal)
     expect(saved).toEqual(goal)
     const plan = await publishFirstRunPlan(goal, d, 'es')
-    expect(d.buildMyPlan).toHaveBeenCalledWith(goal, [], 'es')
+    expect(d.buildMyPlan).toHaveBeenCalledWith(goal, [], 'es', expect.any(Date), { startsOnFirstLog: true })
     const published = { templateId: 'tpl-3d-full-body-gym', startDate: '2026-11-09', block, source: 'rules' }
     expect(d.publishUserPlan).toHaveBeenCalledWith(published)
     expect(d.cacheActiveUserPlan).toHaveBeenCalledWith(published)

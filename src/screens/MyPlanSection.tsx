@@ -55,7 +55,9 @@ export default function MyPlanSection({
         <h3>{plan.block.name}</h3>
         {plan.source === 'ai' && <span className="personal-plan-badge">{t('profile.plan.aiBadge')}</span>}
       </div>
-      <p className="profile-data-hint">{t('profile.plan.starts', { date: formatShortDate(language, plan.startDate) })}</p>
+      <p className="profile-data-hint">{plan.block.startsOnFirstLog && !plan.block.firstLoggedOn
+        ? t('firstRun.startsFirst')
+        : t('profile.plan.starts', { date: formatShortDate(language, plan.startDate) })}</p>
       {plan.cappedForBeginner && <p className="profile-data-hint">{t('profile.plan.beginnerNote')}</p>}
       <p>{plan.block.summary}</p>
       {plan.block.insights.length > 0 && (

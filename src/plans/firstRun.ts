@@ -21,7 +21,7 @@ export type FirstRunDeps = {
   fetchActiveUserPlan: () => Promise<SavedUserPlan | null>
   saveTrainingGoal: (goal: TrainingGoalInput) => Promise<TrainingGoal>
   loadExercises: () => Promise<Exercise[]>
-  buildMyPlan: (goal: TrainingGoal, catalogue: Exercise[], language: Language) => Promise<BuiltPlan>
+  buildMyPlan: (goal: TrainingGoal, catalogue: Exercise[], language: Language, today: Date, options: { startsOnFirstLog: boolean }) => Promise<BuiltPlan>
   publishUserPlan: (plan: SavedUserPlan) => Promise<void>
   cacheActiveUserPlan: (plan: SavedUserPlan | null) => void
 }
@@ -36,7 +36,7 @@ export async function saveFirstRunGoal(goal: TrainingGoalInput, deps: FirstRunDe
 /** Builds the plan the same way Profile does (template → PT rules → AI if allowed) and makes it the active plan. */
 export async function publishFirstRunPlan(goal: TrainingGoal, deps: FirstRunDeps, language: Language): Promise<BuiltPlan> {
   const catalogue = await deps.loadExercises()
-  const built = await deps.buildMyPlan(goal, catalogue, language)
+  const built = await deps.buildMyPlan(goal, catalogue, language, new Date(), { startsOnFirstLog: true })
   const plan: SavedUserPlan = { templateId: built.templateId, startDate: built.startDate, block: built.block, source: built.source }
   await deps.publishUserPlan(plan)
   deps.cacheActiveUserPlan(plan)
