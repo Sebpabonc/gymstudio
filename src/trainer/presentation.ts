@@ -105,15 +105,31 @@ export function trainerReasonParts(
   })
   if (recommendation.firstSessionProtocol === 'bodyweight') return { lines: [t('workout.trainer.firstSession.bodyweight')] }
   if (recommendation.firstSessionProtocol) {
-    // PT spec 2026-11-01 §4, in this order: warm-up, effort, technique, adjust, load line, log.
+    // PT spec 2026-11-01 §4, in this order: warm-up, effort, technique, adjust, load line, log. With a suggested start
+    // (PT 2026-11-07), the suggestion comes first and the effort and adjust lines change.
     const protocol = recommendation.firstSessionProtocol
+    const suggested = !!recommendation.firstSessionSuggested && recommendation.weight !== null
+    const kg = (value: number) => formatNumber(language, value)
+    const suggestion = !suggested ? []
+      : protocol === 'pyramid' || protocol === 'reverse-pyramid'
+        ? [t('workout.trainer.firstSession.suggestedSets', { weight: kg(recommendation.weight!) })]
+      : protocol === 'drop-set' && recommendation.dropWeight !== undefined
+        ? [t('workout.trainer.firstSession.suggestedDrop', { weight: kg(recommendation.weight!), drop: kg(recommendation.dropWeight) })]
+      : recommendation.firstSessionLoad === 'dumbbell'
+        ? [t('workout.trainer.firstSession.suggestedDumbbell', { weight: kg(recommendation.weight!) })]
+      : recommendation.firstSessionLoad === 'barbell'
+        ? [t('workout.trainer.firstSession.suggestedBar', { weight: kg(recommendation.weight!) })]
+      : equipmentIsKettlebell(recommendation)
+        ? [t('workout.trainer.firstSession.suggestedKettlebell', { weight: kg(recommendation.weight!) })]
+        : [t('workout.trainer.firstSession.suggested', { weight: kg(recommendation.weight!) })]
     return { lines: [
+      ...suggestion,
       t('workout.trainer.firstSession.warmup'),
-      t('workout.trainer.firstSession.effort', { target: trainerRangeLabel(target, language) }),
+      t(suggested ? 'workout.trainer.firstSession.effort' : 'workout.trainer.firstSession.effortFind', { target: trainerRangeLabel(target, language) }),
       // PT review: the same-weight line is for straight sets and supersets only; a drop set skips the technique line.
       ...(protocol === 'drop-set' ? [] : [t(protocol === 'reverse-pyramid' ? 'workout.trainer.firstSession.reversePyramid'
         : protocol === 'pyramid' ? 'workout.trainer.firstSession.pyramid' : 'workout.trainer.firstSession.same')]),
-      t('workout.trainer.firstSession.adjust'),
+      t(suggested ? 'workout.trainer.firstSession.adjust' : 'workout.trainer.firstSession.adjustFind'),
       ...(recommendation.firstSessionLoad === 'dumbbell' ? [t('workout.trainer.firstSession.dumbbell')] : []),
       ...(recommendation.firstSessionLoad === 'barbell' ? [t('workout.trainer.firstSession.barbell')] : []),
       t('workout.trainer.firstSession.log'),
@@ -163,3 +179,6 @@ export function trainerReason(
   const parts = trainerReasonParts(t, language, recommendation, target, todayTarget)
   return [...(parts.comparison ? [parts.comparison] : []), ...parts.lines].join('\n')
 }
+
+const equipmentIsKettlebell = (recommendation: Recommendation) => recommendation.firstSessionLoad === undefined &&
+  recommendation.firstSessionEquipment === 'kettlebell'

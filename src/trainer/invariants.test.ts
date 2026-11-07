@@ -178,29 +178,44 @@ describe('T105/E9: trainer invariants with every historical RIR omitted across b
 
 // F20 (PT first-run spec 2026-11-01): every first-run template slot, no history, any equipment: never 0 kg when loaded,
 // never a made-up number, and bodyweight stays reps-only.
-describe('first-run templates with no history', () => {
+describe('first-run templates with no history (S45)', () => {
   const templateDir = 'docs/fitness/approved/templates'
   const templateSlots = readdirSync(templateDir)
     .filter((file) => file.startsWith('tpl-') && file.endsWith('.json'))
     .flatMap((file) => (JSON.parse(readFileSync(`${templateDir}/${file}`, 'utf8')) as Block).days
       .flatMap((day) => day.exercises.map((row) => ({ file, day: day.key, row }))))
+  const rows = new Map(readdirSync(catalogueDir).filter((file) => file.endsWith('.json'))
+    .flatMap((file) => JSON.parse(readFileSync(`${catalogueDir}/${file}`, 'utf8')) as Array<Record<string, any>>)
+    .map((row) => [row.id as string, row]))
+  const limits: Record<string, number> = { dumbbell: 60, kettlebell: 48, 'ez-bar': 80, cable: 150, machine: 150, barbell: 200, 'hex-bar': 200, 'smith-machine': 200, 'plate-loaded': 400 }
+  const minimums: Record<string, number> = { barbell: 20, 'smith-machine': 20, 'hex-bar': 20, 'ez-bar': 10, dumbbell: 2, kettlebell: 4, cable: 2.5, machine: 5, 'plate-loaded': 5 }
 
-  it('gives a protocol and no number for every loaded slot, in every week', () => {
+  it('suggests a start on the grid, at or above the minimum and under the typo limit, for every loaded slot and level', () => {
     expect(templateSlots.length).toBeGreaterThan(100)
     for (const { file, day, row } of templateSlots) {
-      const equipment = equipmentOf.get(row.exercise_id) ?? 'machine'
+      const catalogue = rows.get(row.exercise_id)
+      const equipment = catalogue?.equipment ?? 'machine'
       const setReps = row.reps.map((reps) => parseRepPrescription(reps)?.[0] ?? 8)
-      for (const deload of [false, true]) {
-        const result = recommend({
-          history: [], today: TODAY, target: { min: Math.min(...setReps), max: Math.max(...setReps) }, sets: row.sets,
-          equipment, technique: row.technique, setReps, deload, exerciseId: row.exercise_id,
-        })
-        const where = `${file} ${day} ${row.exercise_id} ${equipment}${deload ? ' deload' : ''}`
-        expect(result.firstSessionProtocol, where).toBeDefined()
-        if (equipment === 'bodyweight' || equipment === 'band') expect(result.weight ?? 0, where).toBe(0)
-        else expect(result.weight, where).toBeNull()
+      for (const experience of ['beginner', 'intermediate', 'advanced'] as const) {
+        for (const deload of [false, true]) {
+          const result = recommend({
+            history: [], today: TODAY, target: { min: Math.min(...setReps), max: Math.max(...setReps) }, sets: row.sets,
+            equipment, technique: row.technique, setReps, deload, exerciseId: row.exercise_id,
+            starting: { experience, exercise: catalogue && { id: catalogue.id, name: catalogue.name_en, equipment, movementPattern: catalogue.movement_pattern,
+              mechanic: catalogue.mechanic, bodyRegion: catalogue.body_region, primaryMuscles: catalogue.primary_muscles, laterality: catalogue.laterality } },
+          })
+          const where = `${file} ${day} ${row.exercise_id} ${equipment} ${experience}${deload ? ' deload' : ''}`
+          expect(result.firstSessionProtocol, where).toBeDefined()
+          if (equipment === 'bodyweight' || equipment === 'band') { expect(result.weight ?? 0, where).toBe(0); continue }
+          if (/assisted/i.test(`${catalogue?.name_en ?? ''} ${row.exercise_id}`) && equipment === 'machine') { expect(result.weight, where).toBeNull(); continue }
+          const step = equipment === 'dumbbell' || equipment === 'kettlebell' ? 2 : 2.5
+          for (const weight of [result.weight!, ...(result.setWeights ?? [])]) {
+            expect(weight, where).toBeGreaterThanOrEqual(minimums[equipment])
+            expect(weight, where).toBeLessThan(limits[equipment])
+            expect(multipleOf(weight, step), `${weight} off the ${step} kg grid: ${where}`).toBe(true)
+          }
+        }
       }
     }
   })
 })
-

@@ -17,6 +17,7 @@ export async function loadExerciseLibrary() {
     secondaryMuscles: exercise.secondary_muscles,
     equipment: exercise.equipment,
     movementPattern: exercise.movement_pattern,
+    laterality: (exercise as { laterality?: Exercise['laterality'] }).laterality,
     postureTips: exercise.posture_tips,
     squeezeCue: exercise.squeeze_cue,
     primaryMuscle: exercise.primary_muscles[0],

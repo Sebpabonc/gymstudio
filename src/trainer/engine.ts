@@ -5,6 +5,7 @@
 // docs/fitness/approved/2026-10-19-reverse-pyramid-after-strong-b.md (R25, T64–T72).
 // The PT owns these rules; change them only through an approved PT spec with test cases.
 // Pure functions: the LLM never chooses numbers — it only explains the structured recommendation returned here.
+import { startingSetLoads, type Experience, type StartingExercise } from './startingLoads'
 
 export type SetTag = 'main' | 'mini' | 'partial'
 
@@ -91,6 +92,10 @@ export type Recommendation = {
   firstSessionProtocol?: 'straight' | 'pyramid' | 'reverse-pyramid' | 'drop-set' | 'bodyweight'
   /** Which load line the first-time text adds: one dumbbell, or the total with the bar. */
   firstSessionLoad?: 'dumbbell' | 'barbell'
+  /** The weight is the PT's general starting load (2026-11-07 starting-weights spec), not from history. */
+  firstSessionSuggested?: boolean
+  /** Equipment of a first exposure, for the per-kettlebell suggestion line. */
+  firstSessionEquipment?: string
   evidence: {
     lastDate?: string
     /** Plan day of the session the rule used, when it is a different plan day from today's (PT super-QA review). */
@@ -136,6 +141,8 @@ export type RecommendInput = {
   exerciseId?: string
   /** R12a: a configured per-exercise step wins over the equipment default. */
   step?: number
+  /** First exposure only: catalogue data and the user's experience for the PT's starting-load table. */
+  starting?: { exercise?: StartingExercise; experience?: Experience }
 }
 
 const MAX_REPS_FOR_ESTIMATE = 15
@@ -286,7 +293,16 @@ function firstSessionExtra(input: RecommendInput): Partial<Recommendation> {
   // Open decision 7, PO 2026-11-07 ("correcto total con barra"): barbell, EZ and hex bar weights are the total with the bar.
   const load = input.equipment === 'dumbbell' ? 'dumbbell'
     : ['barbell', 'ez-bar', 'hex-bar'].includes(input.equipment ?? '') ? 'barbell' : undefined
-  return { firstSessionProtocol: protocol, ...(load ? { firstSessionLoad: load } : {}) }
+  return { firstSessionProtocol: protocol, ...(load ? { firstSessionLoad: load } : {}),
+    ...(input.equipment === 'kettlebell' ? { firstSessionEquipment: 'kettlebell' } : {}) }
+}
+
+/** PT 2026-11-07: the general starting load for a first exposure, or null (bodyweight, band, assisted, no catalogue data). */
+function suggestedStart(input: RecommendInput) {
+  if (!input.starting || isBodyweight(input.equipment)) return null
+  const reps = input.setReps?.length ? input.setReps : Array.from({ length: input.sets }, () => input.target.min)
+  return startingSetLoads({ ...input.starting.exercise, equipment: input.equipment ?? input.starting.exercise?.equipment },
+    input.starting.experience, reps, input.technique)
 }
 
 /** F1: no invented number for a loaded exercise; bodyweight keeps its reps-only value. */
@@ -439,6 +455,25 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
     const half = Math.ceil(sets / 2)
     if (!last) {
       const extra = firstSessionExtra(input)
+      const start = suggestedStart(input)
+      if (start) {
+        // First exposure in the deload week: the table value, no extra cut, deload sets and reps (R4).
+        const planned = input.setReps
+        if (start.setWeights && planned) {
+          const topIndex = planned.indexOf(Math.min(...planned))
+          const indexes = planned.map((_, index) => index)
+          const chosen = (input.technique === 'reverse-pyramid' ? indexes.filter((index) => index !== topIndex) : indexes).slice(0, half)
+          const setWeights = chosen.map((index) => start.setWeights![index])
+          const setReps = chosen.map((index) => planned[index])
+          return make('deload', Math.max(...setWeights), 'deload_week', {
+            sets: half, setWeights, setReps, reps: { min: Math.min(...setReps), max: Math.max(...setReps) }, ...extra, firstSessionSuggested: true,
+          })
+        }
+        return make('deload', start.weight, 'deload_week', {
+          sets: half, reps: { min: target.min, max: target.min }, ...extra, firstSessionSuggested: true,
+          ...(start.dropWeight !== undefined ? { dropWeight: start.dropWeight } : {}),
+        })
+      }
       if (extra.firstSessionProtocol && extra.firstSessionProtocol !== 'bodyweight') return make('collect_data', null, 'no_history', extra)
       return make('deload', plannedWeight ?? null, 'deload_week', { sets: half, reps: { min: target.min, max: target.min }, ...extra })
     }
@@ -460,6 +495,8 @@ function recommendUnfloored(input: RecommendInput): Recommendation {
 
   if (!last) {
     const extra = firstSessionExtra(input)
+    const start = suggestedStart(input)
+    if (start) return make('collect_data', start.weight, 'no_history', { ...extra, ...start, firstSessionSuggested: true })
     return make('collect_data', extra.firstSessionProtocol ? firstSessionWeight(input, plannedWeight) : plannedWeight ?? null, 'no_history', extra)
   }
 
@@ -1030,6 +1067,8 @@ function recommendPyramid(
     reason = 'converted_rep_range'
   } else {
     const extra = firstSessionExtra(input)
+    const start = suggestedStart(input)
+    if (start) return make('collect_data', start.weight, 'no_history', { ...extra, ...start, firstSessionSuggested: true })
     return make('collect_data', extra.firstSessionProtocol ? firstSessionWeight(input, input.plannedWeight) : input.plannedWeight ?? null, 'no_history', extra)
   }
 
@@ -1194,7 +1233,10 @@ function recommendStraightRules(
 
   // R8: light loads — when one step is more than 10 % of the load, add reps to max + 2 before adding the step.
   // (Added load on bodyweight work follows normal straight-set rules — R7, T9/T21.)
-  if (!isBodyweight(input.equipment) && lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT && sameRange(lastTarget, target)) {
+  // PT amendment 2026-11-07 (starting-weights review, S39): not on barbell, smith or hex bar, where 2.5 kg is the smallest
+  // jump on a bar of 20 kg or more and the guardrail still caps it.
+  const barLoad = input.equipment === 'barbell' || input.equipment === 'smith-machine' || input.equipment === 'hex-bar'
+  if (!isBodyweight(input.equipment) && !barLoad && lastWeight > 0 && step / lastWeight > MAX_INCREASE_PCT && sameRange(lastTarget, target)) {
     if ((complete && lastReps.every((reps) => reps >= target.max + 2)) || tooEasyFor(target)) {
       return make('increase_weight', lastWeight + step, 'reached_top_of_range', { reps: { min: target.min, max: target.min } })
     }

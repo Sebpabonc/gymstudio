@@ -35,7 +35,10 @@ export async function buildMyPlan(
   // First run starts on the first logged set (PT spec 2026-11-01 §2); Profile regeneration keeps next Monday (W16).
   const startDate = options.startsOnFirstLog ? localIsoDate(today) : nextMonday(today)
   const templateBlock = templateToBlock(await loadTemplate(choice.templateId), startDate)
-  const rulePlan = personalizeTemplate(options.startsOnFirstLog ? { ...templateBlock, startsOnFirstLog: true } : templateBlock, goal, catalogue)
+  const rulePlan = {
+    ...personalizeTemplate(options.startsOnFirstLog ? { ...templateBlock, startsOnFirstLog: true } : templateBlock, goal, catalogue),
+    experience: goal.experience,
+  }
   let block = rulePlan
   let source: BuiltPlan['source'] = 'rules'
   // The new-user demo has no account, so it never asks the AI (and never opens the consent sheet).
@@ -44,7 +47,7 @@ export async function buildMyPlan(
     const { answer } = await requestBlockPlan(rulePlan, language)
     const adjustments = parseAiAdjustments(answer)
     if (adjustments) {
-      block = { ...applyAiAdjustments(rulePlan, adjustments, catalogue), startsOnFirstLog: rulePlan.startsOnFirstLog }
+      block = { ...applyAiAdjustments(rulePlan, adjustments, catalogue), startsOnFirstLog: rulePlan.startsOnFirstLog, experience: rulePlan.experience }
       source = 'ai'
     }
   } catch {
