@@ -23,7 +23,7 @@ function renderChart(sets: WorkoutTrendSession['sets'], options: { language?: 'e
 }
 
 describe('SetTrendChart', () => {
-  it('shows one centered load label when a session uses the same load for every set', () => {
+  it('draws reps as bar height and one load under the group when every set uses the same load', () => {
     const html = renderChart([
       { weight: 30, reps: 10, logged: true },
       { weight: 30, reps: 9, logged: true },
@@ -31,21 +31,71 @@ describe('SetTrendChart', () => {
     ])
 
     expect(html.match(/class="set-trend-weight-label"/g)).toHaveLength(1)
-    expect(html).not.toContain('rotate(-45')
+    expect(html).toContain('>30 kg<')
+    expect(html).not.toContain('rotate(')
+    const heights = [...html.matchAll(/class="set-trend-bar" x="[^"]+" y="[^"]+" width="10" height="([^"]+)"/g)].map((match) => Number(match[1]))
+    expect(heights[0]).toBeGreaterThan(heights[1])
+    expect(heights[1]).toBeGreaterThan(heights[2])
   })
 
-  it('rotates per-set load labels when loads differ within a session', () => {
+  it('writes each set load under its bar on one row when loads differ', () => {
     const html = renderChart([
-      { weight: 52.5, reps: 8, logged: true },
-      { weight: 45, reps: 10, logged: true },
-      { weight: 40, reps: 12, logged: true },
+      { weight: 28, reps: 14, logged: true },
+      { weight: 30, reps: 12, logged: true },
+      { weight: 32, reps: 8, logged: true },
     ])
 
-    expect(html.match(/class="set-trend-weight-label rotated"/g)).toHaveLength(3)
-    expect(html.match(/rotate\(-45/g)).toHaveLength(3)
-    // One shared baseline above the tallest bar, so the diagonal labels stay parallel and never cross.
-    const ys = [...html.matchAll(/class="set-trend-weight-label rotated" x="[^"]+" y="([^"]+)"/g)].map((match) => match[1])
-    expect(new Set(ys).size).toBe(1)
+    const labels = [...html.matchAll(/class="set-trend-weight-label per-set" x="[^"]+" y="([^"]+)"[^>]*>([^<]+)</g)]
+    expect(labels.map((match) => match[2])).toEqual(['28', '30', '32'])
+    expect(new Set(labels.map((match) => match[1])).size).toBe(1)
+  })
+
+  it('fits decimal per-set loads of a three-set reverse pyramid under their bars', () => {
+    const html = renderChart([
+      { weight: 52.5, reps: 8, logged: true },
+      { weight: 47.5, reps: 10, logged: true },
+      { weight: 42.5, reps: 12, logged: true },
+    ])
+
+    expect(html.match(/class="set-trend-weight-label per-set"/g)).toHaveLength(3)
+  })
+
+  it('falls back to the load range when per-set loads would not fit under their bars', () => {
+    const html = renderChart([
+      { weight: 52.5, reps: 8, logged: true },
+      { weight: 47.5, reps: 10, logged: true },
+      { weight: 42.5, reps: 12, logged: true },
+      { weight: 37.5, reps: 12, logged: true },
+      { weight: 32.5, reps: 15, logged: true },
+    ])
+
+    expect(html.match(/class="set-trend-weight-label"/g)).toHaveLength(1)
+    expect(html).toContain('32.5–52.5 kg')
+  })
+
+  it('shades the plan goal behind logged bars and marks a missed goal as done/goal', () => {
+    const html = renderChart([
+      { weight: 28, reps: 14, logged: true, targetReps: 14 },
+      { weight: 30, reps: 12, logged: true, targetReps: 12 },
+      { weight: 32, reps: 8, logged: true, targetReps: 10 },
+    ], { language: 'es' })
+
+    expect(html.match(/class="set-trend-goal"/g)).toHaveLength(3)
+    expect(html).toContain('class="set-trend-reps-label missed"')
+    expect(html).toContain('>8/10<')
+    expect(html.match(/missed/g)).toHaveLength(1)
+    expect(html).toContain('S3 32 kg × 8 (meta 10)')
+    expect(html).toContain('Meta del plan')
+  })
+
+  it('draws a set still to do at its plan goal, with no shade behind it', () => {
+    const html = renderChart([
+      { weight: 32, reps: 8, logged: true, targetReps: 10 },
+      { weight: 32, reps: 8, logged: false, targetReps: 10 },
+    ], { today: true })
+
+    expect(html.match(/class="set-trend-goal"/g)).toHaveLength(1)
+    expect(html).toContain('S2 32 kg × 10 target')
   })
 
   it('shows an empty state instead of 0 kg target bars for a first-time exercise', () => {
@@ -69,6 +119,7 @@ describe('SetTrendChart', () => {
     expect(html).not.toMatch(/\bkg\b/)
     expect(html).toContain('S1 10 reps')
     expect(html).toContain('Bars show reps per set')
+    expect(html).not.toContain('Plan goal')
   })
 
   it('drops 0 kg target bars when the history has load', () => {
@@ -109,9 +160,9 @@ describe('alignedTrendScroll', () => {
 
   it('starts the visible area on a whole group and keeps the newest group in full', () => {
     const { scroll, width } = alignedTrendScroll(5, 311)
-    // 3 whole 92 px groups fit in 311 px, so the window starts just before group index 2.
-    expect(scroll).toBe(38 + 2 * 92 - 4)
+    // 3 whole 100 px groups fit in 311 px, so the window starts just before group index 2.
+    expect(scroll).toBe(38 + 2 * 100 - 4)
     expect(width - scroll).toBe(311)
-    expect(scroll + 311).toBeGreaterThanOrEqual(38 + 5 * 92 - 2)
+    expect(scroll + 311).toBeGreaterThanOrEqual(38 + 5 * 100 - 2)
   })
 })
