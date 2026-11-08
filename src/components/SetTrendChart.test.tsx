@@ -41,8 +41,11 @@ describe('SetTrendChart', () => {
       { weight: 40, reps: 12, logged: true },
     ])
 
-    expect(html.match(/class="set-trend-weight-label"/g)).toHaveLength(3)
+    expect(html.match(/class="set-trend-weight-label rotated"/g)).toHaveLength(3)
     expect(html.match(/rotate\(-45/g)).toHaveLength(3)
+    // One shared baseline above the tallest bar, so the diagonal labels stay parallel and never cross.
+    const ys = [...html.matchAll(/class="set-trend-weight-label rotated" x="[^"]+" y="([^"]+)"/g)].map((match) => match[1])
+    expect(new Set(ys).size).toBe(1)
   })
 
   it('shows an empty state instead of 0 kg target bars for a first-time exercise', () => {

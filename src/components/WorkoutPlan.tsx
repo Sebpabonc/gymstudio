@@ -94,7 +94,7 @@ import type { ExerciseSwap } from '../plans/exerciseSwaps'
 import { fetchExerciseSwaps, removeExerciseSwap, saveExerciseSwap } from '../utils/profileData'
 import { fetchCalibrationRecommendations, saveTrainerRecommendation } from '../utils/profileData'
 import type { TrainerRecommendationRow } from '../utils/profileData'
-import { prescriptionForWeek } from '../plans/weekPrescription'
+import { prescriptionForWeek, trainerRepsForWeek } from '../plans/weekPrescription'
 import { equipmentStep } from '../trainer/engine'
 import { prepareRestAlerts } from '../native/restAlerts'
 import { isDoubleAngleFollower, recommendForExercise } from '../trainer/evidence'
@@ -1773,10 +1773,13 @@ export default function WorkoutPlan({
   const buildTrainerRecommendation = (exercise: PlanExercise) => {
     if (planMode !== 'preset' || !activeBlock || !activeDay || !exercise.exerciseId) return null
     const original = getOriginalDraftForExercise(exercise.name, exercise)
-    // First number of each set ("12+12" drop-set → 12): the main-set reps the PT spec progresses on.
-    const reps = (exercise.repsPerSet ?? [exercise.reps ?? '8']).map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0)
-    const target = loggingTargetRange(exercise.repsPerSet ?? [exercise.reps ?? '8'])
     const planned = activeDay.exercises.find((item) => item.exerciseId === exercise.exerciseId)
+    const repSource = planned && activeBlockWeek === 6
+      ? trainerRepsForWeek(planned, activeBlockWeek)
+      : exercise.repsPerSet ?? [exercise.reps ?? '8']
+    // First number of each set ("12+12" drop-set → 12): the main-set reps the PT spec progresses on.
+    const reps = repSource.map((rep) => parseRepPrescription(rep)[0]).filter((rep) => rep > 0)
+    const target = loggingTargetRange(repSource)
     const plannedSets = planned?.sets ?? getDefaultSetCount(exercise)
     const catalogueEntry = exerciseCatalog.find((item) => item.id === exercise.exerciseId)
     const equipment = catalogueEntry?.equipment
@@ -2482,7 +2485,10 @@ export default function WorkoutPlan({
       barTitle: nextExercise.name === exercise.name
         ? t('workout.run.restNextSet', { set: formatNumber(language, nextIndex + 1) })
         : displayExerciseName(nextExercise.name),
-      barValue: nextTarget,
+      // Superset partner: the title is the exercise, so the value carries the set number like the same-exercise bar does.
+      barValue: nextExercise.name === exercise.name
+        ? nextTarget
+        : t('workout.run.nextSetTarget', { set: formatNumber(language, nextIndex + 1), target: nextTarget }),
     })
     if (thinSwitch) {
       pendingWorkoutNext.current = null
@@ -4260,7 +4266,7 @@ export default function WorkoutPlan({
                   {isTipsVisible && <SqueezeCue cue={libraryMatch?.squeezeCue} cueLabel={t('workout.squeezeCue')}
                     tips={postureTips} tipsLabel={text.posture} tipsId={`posture-tips-${exerciseKey}`}
                     expanded onToggle={() => togglePostureTips(exercise.name)} details={cueDetails} />}
-                  {((workoutTechnique && exercise.technique !== 'superset') || workoutPlanNote) && <p className="workout-mode-plan-note">{workoutTechnique && exercise.technique !== 'superset' && <strong>{workoutTechnique} </strong>}{workoutPlanNote}</p>}
+                  {((workoutTechnique && exercise.technique !== 'superset') || workoutPlanNote) && <p className="workout-mode-plan-note">{workoutTechnique && exercise.technique !== 'superset' && <strong>{workoutTechnique}</strong>}{workoutTechnique && exercise.technique !== 'superset' && workoutPlanNote ? ' · ' : ''}{workoutPlanNote}</p>}
                   {(!partner || group.items[0].exerciseIndex !== exerciseIndex || usesPairRest) && <p className="effortless-rest">{t('workout.label.rest')} {Math.floor(loggerRestSeconds / 60)}:{String(loggerRestSeconds % 60).padStart(2, '0')}</p>}
                   {trainer && !trainer.recommendation.firstSessionProtocol && (
                     <WhyWeightLine label={t('workout.run.whyWeight')} id={`${exerciseKey}-why`} details={cueDetails}

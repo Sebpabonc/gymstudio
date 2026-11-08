@@ -623,7 +623,7 @@ export const workout = {
     'workout.run.enterWeight': 'Ingresa el peso',
     'workout.run.whyWeight': 'Por qué este peso',
     'workout.run.undoSet': 'Deshacer serie {set}',
-    'workout.run.restNextSet': 'Sigue: serie {set}',
+    'workout.run.restNextSet': 'Siguiente: serie {set}',
     'workout.run.doneWeight': 'Hecho · {weight} kg × {reps}',
     'workout.run.doneBodyweight': 'Hecho · {reps} reps',
     'workout.run.doneDrop': 'Hecho · {weight} kg × {reps} → {dropWeight} kg × {dropReps}',

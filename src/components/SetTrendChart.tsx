@@ -145,6 +145,9 @@ export default function SetTrendChart({
             const startX = groupX + (groupWidth - dataWidth) / 2
             const uniformWeight = metric === 'kg' && session.sets.length > 0 &&
               session.sets.every((set) => set.weight === session.sets[0].weight)
+            // Rotated labels share one baseline (above the tallest bar) so they stay parallel and never cross (PO 2026-11-09).
+            const tallest = Math.max(0, ...session.sets.map((set) => valueOf(set)))
+            const columnLabelY = Math.max(14, BASELINE - Math.max(1, tallest / axisMaximum * PLOT_HEIGHT) - 15)
             return (
               <g key={`${session.date}-${sessionIndex}`}>
                 {session.today && (
@@ -158,13 +161,13 @@ export default function SetTrendChart({
                   const weightLabelX = uniformWeight
                     ? startX + (session.sets.length - 1) * barStep / 2 + barWidth / 2
                     : x + barWidth / 2
-                  const weightLabelY = Math.max(14, y - 15)
+                  const weightLabelY = uniformWeight ? Math.max(14, y - 15) : columnLabelY
                   const label = setText(session, setIndex)
                   return (
                     <g key={key} onClick={() => setSelected(key)}>
                       {metric === 'kg' && (!uniformWeight || setIndex === 0) && (
                         <text
-                          className="set-trend-weight-label"
+                          className={uniformWeight ? 'set-trend-weight-label' : 'set-trend-weight-label rotated'}
                           x={weightLabelX}
                           y={weightLabelY}
                           textAnchor={uniformWeight ? 'middle' : 'start'}
