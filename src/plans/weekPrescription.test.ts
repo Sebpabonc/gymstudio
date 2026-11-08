@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { PlannedExercise } from '../types'
-import { prescriptionForWeek } from './weekPrescription'
+import { recommend } from '../trainer/engine'
+import { prescriptionForWeek, trainerRepsForWeek } from './weekPrescription'
 
 const exercise = (overrides: Partial<PlannedExercise> = {}): PlannedExercise => ({
   code: 'A1',
@@ -116,5 +117,27 @@ describe('prescriptionForWeek', () => {
   it('does not replace tempo notes', () => {
     const plan = exercise({ notes: 'Use a controlled tempo with a 3-second lowering.' })
     expect(prescriptionForWeek(plan, 1, { beginnerIntro: true }).notes).toBe(plan.notes)
+  })
+})
+
+describe('trainerRepsForWeek', () => {
+  // PO screenshot 2026-11-09: a deload reverse pyramid 8/10/12 showed 42.5 × 12, 42.5 × 12 because the top set was cut twice.
+  it('deload reverse pyramid: the engine gets the block reps and returns the same sets as the prescription', () => {
+    const plan = exercise({ sets: 3, reps: ['8', '10', '12'], technique: 'reverse-pyramid' })
+    expect(prescriptionForWeek(plan, 6).reps).toEqual(['10', '12'])
+    const setReps = trainerRepsForWeek(plan, 6).map(Number)
+    expect(setReps).toEqual([8, 10, 12])
+    const last = { weight: 42.5, reps: 10 }
+    const result = recommend({
+      history: [{ date: '2026-11-05', sets: [last, last, { weight: 42.5, reps: 12 }], target: { min: 8, max: 12 }, technique: 'reverse-pyramid', setReps }],
+      today: '2026-11-09', target: { min: 8, max: 12 }, sets: 3, equipment: 'plate-loaded', technique: 'reverse-pyramid', setReps, deload: true,
+    })
+    expect(result).toMatchObject({ sets: 2, setReps: [10, 12], setWeights: [42.5, 42.5] })
+    expect(result.setReps).toEqual(prescriptionForWeek(plan, 6).reps.map(Number))
+  })
+
+  it('other weeks use the week prescription', () => {
+    const plan = exercise({ sets: 3, reps: ['8', '10', '12'], technique: 'reverse-pyramid' })
+    expect(trainerRepsForWeek(plan, 3)).toEqual(['8', '10', '12'])
   })
 })

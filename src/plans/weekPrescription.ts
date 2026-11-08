@@ -50,3 +50,11 @@ export function prescriptionForWeek(
     weekNote,
   }
 }
+
+/**
+ * Reps the trainer engine progresses on. In the deload week the engine applies R4 itself (drops the reverse-pyramid
+ * top set, halves the sets), so it gets the block's own reps; passing the deload prescription would cut the top set twice.
+ */
+export function trainerRepsForWeek(exercise: PlannedExercise, week: number): string[] {
+  return week === 6 ? [...exercise.reps] : prescriptionForWeek(exercise, week).reps
+}

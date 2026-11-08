@@ -7949,6 +7949,11 @@ a.planned-exercise-main-name {
   font-variant-numeric: tabular-nums;
 }
 
+/* Diagonal per-set weights sit 18 px apart: 11 px keeps neighbours from touching. */
+.set-trend-weight-label.rotated {
+  font-size: 11px;
+}
+
 .set-trend-reps-label {
   fill: var(--text);
   font-size: 12px;
