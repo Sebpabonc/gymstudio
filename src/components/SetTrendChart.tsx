@@ -5,8 +5,9 @@ import type { WorkoutTrendSession } from '../progress/workoutInsights'
 const SET_COLORS = ['#f58a9b', '#e36d83', '#c94f69', '#a83d57', '#803047']
 const PLOT_TOP = 28
 const BASELINE = 94
+const WEIGHT_ROW = 110
 const PLOT_HEIGHT = BASELINE - PLOT_TOP
-const GROUP_WIDTH = 92
+const GROUP_WIDTH = 100
 const GROUP_LEFT = 38
 
 function tickStep(maximum: number) {
@@ -15,6 +16,11 @@ function tickStep(maximum: number) {
 
 function formatWeight(value: number, language: Language) {
   return `${formatNumber(language, value)} kg`
+}
+
+/** Rough width of an 11 px tabular-number label (digits ~6 px, separators ~3 px), to decide whether per-set loads fit. */
+function labelWidth(text: string) {
+  return [...text].reduce((width, char) => width + (/\d/.test(char) ? 6.6 : 3.3), 0)
 }
 
 /**
@@ -43,13 +49,14 @@ export default function SetTrendChart({
   const [selected, setSelected] = useState<string | null>(null)
   const allSets = rawSessions.flatMap((session) => session.sets)
   const hasLogged = allSets.some((set) => set.logged)
-  // Bodyweight (or not-yet-loaded) history is charted in reps; a kg axis is only drawn when some set has load.
-  const metric: 'kg' | 'reps' = allSets.some((set) => set.weight > 0) ? 'kg' : 'reps'
-  const sessions = metric === 'kg'
+  const hasLoad = allSets.some((set) => set.weight > 0)
+  // PO 2026-11-09 (option A): bars are reps, the plan's rep goal is shaded behind each bar and the load is written below.
+  const sessions = hasLoad
     ? rawSessions.map((session) => ({ ...session, sets: session.sets.filter((set) => set.logged || set.weight > 0) }))
     : rawSessions
-  const valueOf = (set: WorkoutTrendSession['sets'][number]) => metric === 'kg' ? set.weight : set.reps
-  const values = sessions.flatMap((session) => session.sets.map(valueOf))
+  // A set still to do is drawn at its goal; a logged one at what was done.
+  const barReps = (set: WorkoutTrendSession['sets'][number]) => set.logged ? set.reps : set.targetReps ?? set.reps
+  const values = sessions.flatMap((session) => session.sets.flatMap((set) => [barReps(set), set.targetReps ?? 0]))
   const maximum = Math.max(5, ...values)
   const step = tickStep(maximum)
   const axisMaximum = Math.ceil(maximum / step) * step
@@ -59,8 +66,10 @@ export default function SetTrendChart({
   const groupWidth = GROUP_WIDTH
   const barWidth = 10
   const maxSetCount = Math.max(1, ...sessions.map((session) => session.sets.length))
-  // 12 px labels (QA 2026-11-07) need a little more room between bars; never wider than the session group.
-  const barStep = Math.min(barWidth + 8, (groupWidth - 10) / maxSetCount)
+  // Room for the per-set load under each bar; never wider than the session group.
+  const barStep = Math.min(barWidth + 20, (groupWidth - 10) / maxSetCount)
+  const hasTargets = allSets.some((set) => set.targetReps)
+  const heightOf = (reps: number) => Math.max(1, reps / axisMaximum * PLOT_HEIGHT)
 
   useEffect(() => {
     const element = scrollRef.current
@@ -72,7 +81,7 @@ export default function SetTrendChart({
     if (element) element.scrollLeft = layout.scroll
   }, [layout.scroll, width])
 
-  if (!hasLogged && metric === 'reps') {
+  if (!hasLogged && !hasLoad) {
     return (
       <section className="set-trend-chart" aria-label={t('workout.trend.title')}>
         <p className="set-trend-caption set-trend-empty">{t('workout.trend.empty')}</p>
@@ -86,18 +95,13 @@ export default function SetTrendChart({
   }
   const setText = (session: WorkoutTrendSession, setIndex: number) => {
     const set = session.sets[setIndex]
-    return metric === 'kg'
-      ? t('workout.trend.selected', {
-          when: when(session),
-          set: setIndex + 1,
-          weight: formatNumber(language, set.weight),
-          reps: formatNumber(language, set.reps),
-        })
-      : t('workout.trend.selectedReps', {
-          when: when(session),
-          set: setIndex + 1,
-          reps: formatNumber(language, set.reps),
-        })
+    const reps = formatNumber(language, barReps(set))
+    const text = hasLoad
+      ? t('workout.trend.selected', { when: when(session), set: setIndex + 1, weight: formatNumber(language, set.weight), reps })
+      : t('workout.trend.selectedReps', { when: when(session), set: setIndex + 1, reps })
+    return set.logged && set.targetReps
+      ? `${text} · ${t('workout.trend.goal', { reps: formatNumber(language, set.targetReps) })}`
+      : text
   }
 
   const selectedBar = selected?.split(':')
@@ -105,15 +109,17 @@ export default function SetTrendChart({
   const selectedSetIndex = Number(selectedBar?.[1])
   const selectedCaption = selectedSession && selectedSession.sets[selectedSetIndex]
     ? setText(selectedSession, selectedSetIndex)
-    : t(metric === 'kg' ? 'workout.trend.fromZero' : 'workout.trend.fromZeroReps')
+    : t(hasTargets ? 'workout.trend.fromZeroGoal' : 'workout.trend.fromZeroReps')
   const accessibleSummary = sessions.map((session) => {
     const deload = session.deload ? ` · ${t('workout.trend.deload')}` : ''
     const sets = session.sets.map((set, index) => {
-      const value = metric === 'kg'
-        ? `${formatWeight(set.weight, language)} × ${formatNumber(language, set.reps)}`
-        : t('workout.trend.repsValue', { reps: formatNumber(language, set.reps) })
+      const reps = formatNumber(language, barReps(set))
+      const value = hasLoad
+        ? `${formatWeight(set.weight, language)} × ${reps}`
+        : t('workout.trend.repsValue', { reps })
       const planned = set.logged ? '' : ` ${t('workout.trend.planned')}`
-      return `${t('workout.trend.set', { set: index + 1 })} ${value}${planned}`
+      const goal = set.logged && set.targetReps ? ` (${t('workout.trend.goal', { reps: formatNumber(language, set.targetReps) })})` : ''
+      return `${t('workout.trend.set', { set: index + 1 })} ${value}${planned}${goal}`
     }).join(', ')
     return `${when(session)}${deload}: ${sets}`
   }).join('. ')
@@ -123,12 +129,12 @@ export default function SetTrendChart({
       <div className="set-trend-scroll" ref={scrollRef} tabIndex={0} aria-label={t('workout.trend.scroll')}>
         <svg
           width={width}
-          height="132"
-          viewBox={`0 0 ${width} 132`}
+          height="150"
+          viewBox={`0 0 ${width} 150`}
           role="img"
           aria-label={`${t('workout.trend.accessible')}: ${accessibleSummary}`}
         >
-          <text className="set-trend-axis-title" x="2" y="10">{metric === 'kg' ? 'kg' : t('workout.trend.repsAxis')}</text>
+          <text className="set-trend-axis-title" x="2" y="10">{t('workout.trend.repsAxis')}</text>
           {Array.from({ length: Math.floor(axisMaximum / step) + 1 }, (_, index) => {
             const value = axisMaximum - index * step
             const y = BASELINE - value / axisMaximum * PLOT_HEIGHT
@@ -143,41 +149,40 @@ export default function SetTrendChart({
             const groupX = GROUP_LEFT + sessionIndex * groupWidth
             const dataWidth = Math.min(groupWidth - 10, maxSetCount * barStep)
             const startX = groupX + (groupWidth - dataWidth) / 2
-            const uniformWeight = metric === 'kg' && session.sets.length > 0 &&
-              session.sets.every((set) => set.weight === session.sets[0].weight)
-            // Rotated labels share one baseline (above the tallest bar) so they stay parallel and never cross (PO 2026-11-09).
-            const tallest = Math.max(0, ...session.sets.map((set) => valueOf(set)))
-            const columnLabelY = Math.max(14, BASELINE - Math.max(1, tallest / axisMaximum * PLOT_HEIGHT) - 15)
+            const centerX = startX + (session.sets.length - 1) * barStep / 2 + barWidth / 2
+            const loads = session.sets.map((set) => set.weight)
+            const uniformWeight = loads.every((weight) => weight === loads[0])
+            const perSetLoads = !uniformWeight &&
+              loads.every((weight) => labelWidth(formatNumber(language, weight)) <= barStep - 5)
+            const loadRange = `${formatNumber(language, Math.min(...loads))}–${formatWeight(Math.max(...loads), language)}`
             return (
               <g key={`${session.date}-${sessionIndex}`}>
                 {session.today && (
-                  <rect className="set-trend-today-outline" x={groupX + 2} y="18" width={groupWidth - 5} height="108" rx="8" />
+                  <rect className="set-trend-today-outline" x={groupX + 2} y="18" width={groupWidth - 5} height="126" rx="8" />
                 )}
                 {session.sets.map((set, setIndex) => {
-                  const height = Math.max(1, valueOf(set) / axisMaximum * PLOT_HEIGHT)
+                  const height = heightOf(barReps(set))
                   const x = startX + setIndex * barStep
                   const y = BASELINE - height
+                  const goalY = set.targetReps ? BASELINE - heightOf(set.targetReps) : null
+                  const missed = set.logged && set.targetReps !== undefined && set.reps < set.targetReps
                   const key = `${sessionIndex}:${setIndex}`
-                  const weightLabelX = uniformWeight
-                    ? startX + (session.sets.length - 1) * barStep / 2 + barWidth / 2
-                    : x + barWidth / 2
-                  const weightLabelY = uniformWeight ? Math.max(14, y - 15) : columnLabelY
+                  const color = SET_COLORS[Math.min(setIndex, SET_COLORS.length - 1)]
                   const label = setText(session, setIndex)
                   return (
                     <g key={key} onClick={() => setSelected(key)}>
-                      {metric === 'kg' && (!uniformWeight || setIndex === 0) && (
-                        <text
-                          className={uniformWeight ? 'set-trend-weight-label' : 'set-trend-weight-label rotated'}
-                          x={weightLabelX}
-                          y={weightLabelY}
-                          textAnchor={uniformWeight ? 'middle' : 'start'}
-                          transform={uniformWeight ? undefined : `rotate(-45 ${weightLabelX} ${weightLabelY})`}
-                        >
-                          {formatNumber(language, set.weight)}
-                        </text>
+                      {goalY !== null && set.logged && (
+                        <rect className="set-trend-goal" x={x} y={goalY} width={barWidth} height={BASELINE - goalY} rx="2" />
                       )}
-                      <text className="set-trend-reps-label" x={x + barWidth / 2} y={Math.max(26, y - 5)} textAnchor="middle">
-                        {formatNumber(language, set.reps)}
+                      <text
+                        className={missed ? 'set-trend-reps-label missed' : 'set-trend-reps-label'}
+                        x={x + barWidth / 2}
+                        y={Math.max(12, Math.min(y, goalY ?? y) - 5)}
+                        textAnchor="middle"
+                      >
+                        {missed
+                          ? `${formatNumber(language, set.reps)}/${formatNumber(language, set.targetReps ?? 0)}`
+                          : formatNumber(language, barReps(set))}
                       </text>
                       <rect
                         className={[
@@ -190,19 +195,29 @@ export default function SetTrendChart({
                         width={barWidth}
                         height={height}
                         rx="2"
-                        fill={set.logged && !session.deload ? SET_COLORS[Math.min(setIndex, SET_COLORS.length - 1)] : 'transparent'}
-                        stroke={SET_COLORS[Math.min(setIndex, SET_COLORS.length - 1)]}
+                        fill={set.logged && !session.deload ? color : 'transparent'}
+                        stroke={color}
                         strokeDasharray={!set.logged || session.deload ? '3 2' : undefined}
                       >
                         <title>{label}</title>
                       </rect>
+                      {perSetLoads && (
+                        <text className="set-trend-weight-label per-set" x={x + barWidth / 2} y={WEIGHT_ROW} textAnchor="middle">
+                          {formatNumber(language, set.weight)}
+                        </text>
+                      )}
                     </g>
                   )
                 })}
-                <text className="set-trend-date" x={groupX + groupWidth / 2} y="108" textAnchor="middle">
+                {hasLoad && session.sets.length > 0 && !perSetLoads && (
+                  <text className="set-trend-weight-label" x={centerX} y={WEIGHT_ROW} textAnchor="middle">
+                    {uniformWeight ? formatWeight(loads[0], language) : loadRange}
+                  </text>
+                )}
+                <text className="set-trend-date" x={groupX + groupWidth / 2} y="127" textAnchor="middle">
                   {formatShortDate(language, `${session.date}T00:00:00Z`)}
                 </text>
-                <text className="set-trend-day" x={groupX + groupWidth / 2} y="120" textAnchor="middle">
+                <text className="set-trend-day" x={groupX + groupWidth / 2} y="140" textAnchor="middle">
                   {session.deload ? t('workout.trend.deload') : session.dayType ?? ''}
                 </text>
               </g>
@@ -214,6 +229,7 @@ export default function SetTrendChart({
         {Array.from({ length: maxSetCount }, (_, index) => (
           <span key={index}><i style={{ background: SET_COLORS[Math.min(index, SET_COLORS.length - 1)] }} />{t('workout.trend.set', { set: index + 1 })}</span>
         ))}
+        {hasTargets && <span><i className="set-trend-goal-swatch" />{t('workout.trend.goalLegend')}</span>}
       </div>
       <p className="set-trend-caption" aria-live="polite">{selectedCaption}</p>
     </section>

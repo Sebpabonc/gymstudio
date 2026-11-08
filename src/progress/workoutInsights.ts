@@ -2,7 +2,8 @@ import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { anyDayEstMaxComparison } from './estMax'
 import { compareLiftSessions, watchObservations } from './comparison'
 import { equivalentLiftSessions, progressLiftSessions } from './trends'
-import { getDayType, workingSets } from './utils'
+import { blockWeek, getDayType, plannedExerciseForEntry, workingSets } from './utils'
+import { prescriptionForWeek } from '../plans/weekPrescription'
 import type { ProgressLiftSession, SessionComparison } from './types'
 
 export type WorkoutSetChange = {
@@ -113,7 +114,11 @@ export function workoutMuscleSetTotals(entries: WorkoutEntry[], exercises: Exerc
 }
 
 export type WorkoutTrendTarget = { weight: number; reps: number }
-export type WorkoutTrendSet = WorkoutTrendTarget & { logged: boolean }
+export type WorkoutTrendSet = WorkoutTrendTarget & {
+  logged: boolean
+  /** The plan's rep goal for this set that day (top of a range); absent when the session has no plan day. */
+  targetReps?: number
+}
 export type WorkoutTrendSession = {
   date: string
   /** Day letter from the plan day key ("upper-a" → "A", "full-body-c" → "C"); null when the day has no letter. */
@@ -127,6 +132,21 @@ function trendDayLabel(session: Pick<ProgressLiftSession, 'date' | 'dayKey'>, bl
   // A saved plan day decides the label by its own key; only legacy entries without one fall back to the date.
   if (session.dayKey) return session.dayKey.match(/(?:^|-)([a-z])$/i)?.[1].toUpperCase() ?? null
   return getDayType({ date: session.date }, blocks)
+}
+
+/** Top rep number of a prescription ("8-10" → 10, "12+6" drop set → 12, "AMRAP" → null). */
+function topReps(prescription: string | undefined) {
+  const numbers = (prescription?.split('+', 1)[0].match(/\d+/g) ?? []).map(Number)
+  return numbers.length ? Math.max(...numbers) : null
+}
+
+/** Per-set rep goals the plan set for a session, with the week's own prescription (deload drops sets). */
+function sessionTargetReps(session: Pick<ProgressLiftSession, 'blockId' | 'date' | 'dayKey' | 'exerciseId'>, blocks: TrainingBlock[]) {
+  const block = blocks.find((item) => item.id === session.blockId)
+  const planned = block ? plannedExerciseForEntry(block, { ...session, dayKey: session.dayKey ?? undefined }) : null
+  const week = block ? blockWeek(block, session.date) : null
+  if (!block || !planned || week === null) return []
+  return prescriptionForWeek(planned, week).reps.map(topReps)
 }
 
 export function buildWorkoutSetTrend(
@@ -156,10 +176,15 @@ export function buildWorkoutSetTrend(
   return selected.map((session) => {
     const loggedSets = workingSets(session.sets)
     const isToday = session.date === today
-    const sets = loggedSets.map(({ weight, reps }) => ({ weight, reps, logged: true }))
+    const targetReps = sessionTargetReps(session, blocks)
+    const sets: WorkoutTrendSet[] = loggedSets.map(({ weight, reps }) => ({ weight, reps, logged: true }))
     if (isToday) {
       targets.slice(sets.length).forEach((target) => sets.push({ ...target, logged: false }))
     }
+    sets.forEach((set, index) => {
+      const goal = targetReps[index]
+      if (goal) set.targetReps = goal
+    })
     return {
       date: session.date,
       dayType: trendDayLabel(session, blocks),

@@ -126,6 +126,31 @@ describe('workout set trend data', () => {
     ])
   })
 
+  it('adds the plan rep goal of each set, using the week prescription (deload drops the reverse-pyramid top set)', () => {
+    const block: TrainingBlock = {
+      id: 'block-1', number: 1, name: 'Block', method: 'flat', startDate: '2026-10-05', weeks: 6,
+      origin: 'pt', summary: '', insights: [],
+      days: [{
+        key: 'chest-b', position: 2, name: 'Chest B', focus: '',
+        exercises: [{ code: 'B1', position: 1, exerciseId: 'bench', sets: 3, reps: ['14', '12', '8-10'], restSeconds: 150, technique: 'pyramid' }],
+      }, {
+        key: 'chest-a', position: 1, name: 'Chest A', focus: '',
+        exercises: [{ code: 'A1', position: 1, exerciseId: 'bench', sets: 3, reps: ['8', '10', '12'], restSeconds: 150, technique: 'reverse-pyramid' }],
+      }],
+    } as TrainingBlock
+    const pyramid = entry('2026-10-29', [[28, 14], [30, 12], [32, 8]], { dayKey: 'chest-b' })
+    const deload = entry('2026-11-09', [[42.5, 10], [42.5, 12]], { dayKey: 'chest-a' })
+    const trend = buildWorkoutSetTrend([pyramid, deload], [block], 'bench', '2026-11-09', [])
+
+    expect(trend[0].sets.map((set) => set.targetReps)).toEqual([14, 12, 10])
+    expect(trend[1].sets.map((set) => set.targetReps)).toEqual([10, 12])
+  })
+
+  it('leaves the goal out when the session has no plan day', () => {
+    const trend = buildWorkoutSetTrend([entry('2026-10-29', [[30, 10]])], [], 'bench', '2026-10-30', [])
+    expect(trend[0].sets[0]).not.toHaveProperty('targetReps')
+  })
+
   it('labels today from the active plan day, not the weekday, before anything is logged', () => {
     const block: TrainingBlock = {
       id: 'plan-1', number: 1, name: 'Plan', method: 'flat', startDate: '2026-11-02', weeks: 6,
