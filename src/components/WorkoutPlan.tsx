@@ -481,6 +481,13 @@ export function effectiveWorkoutTarget(
   return choice === 'accepted' ? recommended : prescribed
 }
 
+/** Stamps the finish time on a session's logged entries (already-finished ones keep theirs). Same array when nothing changes. */
+export function markSessionFinished(history: WorkoutEntry[], sessionEntries: WorkoutEntry[], finishedAt: string): WorkoutEntry[] {
+  const ids = new Set(sessionEntries.filter((entry) => !entry.finishedAt).map((entry) => entry.id))
+  if (!ids.size) return history
+  return history.map((entry) => ids.has(entry.id) ? { ...entry, finishedAt } : entry)
+}
+
 export function matchedWorkoutSessionEntries(matches: Array<WorkoutEntry | undefined>): WorkoutEntry[] {
   return [...new Map(matches.filter((entry): entry is WorkoutEntry => !!entry).map((entry) => [entry.id, entry])).values()]
 }
@@ -2239,7 +2246,7 @@ export default function WorkoutPlan({
     window.scrollTo({ top: 0, behavior: scrollBehavior() })
   }
   const finishWorkout = () => setFinishConfirmOpen(true)
-  const confirmFinishWorkout = () => {
+  const confirmFinishWorkout = async () => {
     if (workoutInsightTimer.current !== null) window.clearTimeout(workoutInsightTimer.current)
     workoutInsightTimer.current = null
     setFinishConfirmOpen(false)
@@ -2248,7 +2255,18 @@ export default function WorkoutPlan({
     setWorkoutGroupInsightNext(null)
     setWorkoutGroupIndex(null)
     onWorkoutModeChange?.(false)
-    openSessionSummary(history, Date.now(), true)
+    // PO 2026-11-09: finishing closes the plan day for the week, so it reads Completed even with exercises left.
+    await saveQueue.current
+    const currentHistory = await loadWorkoutHistory()
+    const nextHistory = planMode === 'preset' && activeBlock && activeDay
+      ? markSessionFinished(currentHistory, matchedWorkoutSessionEntries(
+          activeExercises.map((exercise) => findExerciseEntry(exercise, currentHistory))), new Date().toISOString())
+      : currentHistory
+    if (nextHistory !== currentHistory) {
+      saveWorkoutHistory(nextHistory)
+      setHistory(nextHistory)
+    }
+    openSessionSummary(nextHistory, Date.now(), true)
   }
 
   const undoLastLog = async () => {
@@ -3424,7 +3442,12 @@ export default function WorkoutPlan({
                   entry.dayKey === day.key
               )
             ).length
-            return { day, done, total: day.exercises.length }
+            // PO 2026-11-09: a day closed with Finish workout counts as complete, even with exercises left.
+            const finished = history.some((entry) =>
+              entry.finishedAt && entry.blockId === activeBlock.id && entry.dayKey === day.key &&
+              entry.date >= week.start && entry.date <= week.end)
+            const total = day.exercises.length
+            return { day, done: finished ? total : done, total }
           })
           const completeDays = days.filter(({ done, total }) => total > 0 && done >= total).length
           // QA 2026-11-07: on a day with no planned session (e.g. the weekend) no other day is called Today.

@@ -503,6 +503,20 @@ describe('approved workout logging integration', () => {
     expect(elements(node => node.props.className === 'log-toast')).toHaveLength(0)
   })
 
+  it('PO 2026-11-09: Finish now stamps the session so the day counts as complete', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40, 8)
+    await click(doneLabel())
+    expect((await loadWorkoutHistory()).every(entry => !entry.finishedAt)).toBe(true)
+    await click('Finish')
+    await click('Finish now')
+    const saved = await loadWorkoutHistory()
+    expect(saved.length).toBeGreaterThan(0)
+    expect(saved.every(entry => typeof entry.finishedAt === 'string')).toBe(true)
+  })
+
   it('QA #7: Escape on the finish confirm keeps training instead of leaving the dialog stuck open', async () => {
     render()
     await settle()

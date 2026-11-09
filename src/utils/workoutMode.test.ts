@@ -104,6 +104,14 @@ describe('dayWorkoutStatus', () => {
     expect(dayWorkoutStatus(ids, ['bench', 'row', 'press'].map((id) => entry(id, '2026-10-12')), scope).state).toBe('done')
   })
 
+  it('PO 2026-11-09: a day closed with Finish workout is done, even with exercises left', () => {
+    const finished = { ...entry('bench', '2026-10-12'), sets: [{}, {}, {}], finishedAt: '2026-10-12T19:00:00Z' }
+    expect(dayWorkoutStatus(ids, [finished], scope, [3, 3, 3])).toMatchObject({ state: 'done', done: 1, total: 3 })
+    // A finish on another day or week does not close this one.
+    expect(dayWorkoutStatus(ids, [{ ...finished, dayKey: 'd3' }], scope, [3, 3, 3]).state).toBe('not-started')
+    expect(dayWorkoutStatus(ids, [{ ...finished, date: '2026-10-19' }], scope, [3, 3, 3]).state).toBe('not-started')
+  })
+
   it('ignores the same exercise logged on another day or block', () => {
     expect(dayWorkoutStatus(ids, [entry('bench', '2026-10-15', 'd3'), entry('row', '2026-10-15', 'd1', 'b5')], scope).state)
       .toBe('not-started')

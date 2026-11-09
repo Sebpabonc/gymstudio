@@ -1,7 +1,7 @@
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import WorkoutPlan, { ExerciseSwapSheet, filterCustomPlanExercises, formatEstMaxInsightLine, confirmedWorkoutSet, loggingTargetRange, needsHeavyLoadConfirm, preserveConfirmedWorkoutSet, savedWorkoutEntryScope, effectiveWorkoutTarget, matchedWorkoutSessionEntries, correctLoggedWorkoutReps } from './WorkoutPlan'
+import WorkoutPlan, { ExerciseSwapSheet, filterCustomPlanExercises, formatEstMaxInsightLine, confirmedWorkoutSet, loggingTargetRange, needsHeavyLoadConfirm, preserveConfirmedWorkoutSet, savedWorkoutEntryScope, effectiveWorkoutTarget, matchedWorkoutSessionEntries, markSessionFinished, correctLoggedWorkoutReps } from './WorkoutPlan'
 import { createTranslator } from '../i18n/translate'
 import type { Exercise, TrainingBlock, WorkoutEntry } from '../types'
 import { anyDayEstMaxComparison } from '../progress/estMax'
@@ -25,6 +25,17 @@ describe('resumed weekly workout summaries', () => {
     expect(entries).toEqual([entry, partner])
     expect(workoutCompletionCounts(entries, 2, 6, 2)).toMatchObject({ complete: true, sets: 6, exercises: 2 })
     expect(matchedWorkoutSessionEntries([entry, entry, undefined])).toEqual([entry])
+  })
+
+  it('PO 2026-11-09: Finish stamps only the session entries and keeps an earlier finish time', () => {
+    const base = { blockId: 'block', dayKey: 'upper-a', sets: [] }
+    const press = { ...base, id: 'press', exerciseId: 'press', date: '2026-10-26' }
+    const row = { ...base, id: 'row', exerciseId: 'row', date: '2026-10-26', finishedAt: '2026-10-26T18:00:00Z' }
+    const other = { ...base, id: 'other', exerciseId: 'press', date: '2026-10-19' }
+    const history = [other, press, row]
+    const next = markSessionFinished(history, [press, row], '2026-10-26T19:00:00Z')
+    expect(next.map((item) => item.finishedAt)).toEqual([undefined, '2026-10-26T19:00:00Z', '2026-10-26T18:00:00Z'])
+    expect(markSessionFinished(history, [row], '2026-10-26T19:00:00Z')).toBe(history)
   })
 })
 

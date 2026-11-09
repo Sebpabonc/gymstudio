@@ -72,6 +72,9 @@ export function validateWorkoutEntry(entry: WorkoutEntry): string | null {
   if (entry.target != null && (typeof entry.target !== 'object' || Array.isArray(entry.target))) {
     return 'target must be an object or null'
   }
+  if (entry.finishedAt != null && (typeof entry.finishedAt !== 'string' || Number.isNaN(Date.parse(entry.finishedAt)))) {
+    return 'finishedAt must be a timestamp or null'
+  }
   return null
 }
 
@@ -85,6 +88,7 @@ export type RemoteWorkoutEntry = {
   block_id: string | null
   day_key: string | null
   target?: WorkoutEntry['target'] | null
+  finished_at?: string | null
   updated_at: string
   deleted_at: string | null
 }
@@ -115,6 +119,7 @@ export function fromRemoteEntry(entry: RemoteWorkoutEntry): SyncWorkoutEntry {
     blockId: entry.block_id ?? undefined,
     dayKey: entry.day_key ?? undefined,
     ...(entry.target ? { target: entry.target } : {}),
+    ...(entry.finished_at ? { finishedAt: entry.finished_at } : {}),
     updatedAt: entry.updated_at,
     dirty: false,
     deletedAt: entry.deleted_at ?? undefined,
@@ -134,6 +139,7 @@ export function toRemoteWorkoutEntry(entry: SyncWorkoutEntry, userId: string, us
     block_id: entry.blockId ?? null,
     day_key: entry.dayKey ?? null,
     target: entry.target ?? null,
+    finished_at: entry.finishedAt ?? null,
     updated_at: entry.updatedAt,
     deleted_at: entry.deletedAt ?? null,
   }
@@ -405,7 +411,7 @@ export async function syncWorkoutHistory(userId: string, isActive: () => boolean
     const { data, error } = await request(() => {
       let pageQuery = client
         .from('workout_entries')
-        .select('id, exercise_id, user_exercise_id, date, sets, notes, block_id, day_key, target, updated_at, deleted_at')
+        .select('id, exercise_id, user_exercise_id, date, sets, notes, block_id, day_key, target, finished_at, updated_at, deleted_at')
       if (lastPulledAt) pageQuery = pageQuery.gte('updated_at', lastPulledAt)
       return pageQuery.eq('user_id', userId)
         .order('updated_at', { ascending: true })
