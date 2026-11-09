@@ -72,7 +72,14 @@ export type DayWorkoutStatus = {
   lastDate?: string
 }
 
-type DayLogEntry = { exerciseId: string; date: string; blockId?: string; dayKey?: string; sets?: readonly { tag?: string }[] }
+type DayLogEntry = {
+  exerciseId: string
+  date: string
+  blockId?: string
+  dayKey?: string
+  sets?: readonly { tag?: string }[]
+  finishedAt?: string
+}
 
 /**
  * PO 2026-10-18: the Today button says Start / Continue (n of N) / Completed for this day this week.
@@ -105,7 +112,9 @@ export function dayWorkoutStatus(
   const loggedSets = [...latestEntries.values()].reduce((count, entry) =>
     count + (entry.sets?.filter((set) => !set.tag || set.tag === 'main').length ?? 0), 0)
   const hasPartial = loggedSets > 0
-  const state = total > 0 && done >= total ? 'done' : done > 0 || hasPartial ? 'in-progress' : 'not-started'
+  // PO 2026-11-09: Finish workout closes the day for the week, even with exercises left.
+  const finished = dayEntries.some((entry) => entry.finishedAt)
+  const state = total > 0 && (done >= total || finished) ? 'done' : done > 0 || hasPartial ? 'in-progress' : 'not-started'
   return { state, done, total, loggedSets, lastDate }
 }
 

@@ -59,6 +59,8 @@ export type WorkoutEntry = {
   dayKey?: string
   notes?: string
   target?: EntryTarget
+  /** Set on a plan-day session's entries when the user taps Finish workout; the day then counts as complete (PO 2026-11-09). */
+  finishedAt?: string
 }
 
 export type TrainingTechnique = 'straight' | 'superset' | 'drop-set' | 'pyramid' | 'reverse-pyramid'

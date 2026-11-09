@@ -106,6 +106,11 @@ describe('mergeWorkoutEntries', () => {
     const restored = fromRemoteEntry(remote as RemoteWorkoutEntry)
     expect(restored.sets).toEqual(partial.sets)
     expect(restored.target).toEqual(partial.target)
+    expect(restored).not.toHaveProperty('finishedAt')
+    const finished = { ...partial, finishedAt: '2026-10-03T19:00:00.000Z' }
+    expect(toRemoteWorkoutEntry(finished, 'user-1', new Set()).finished_at).toBe(finished.finishedAt)
+    expect(fromRemoteEntry(toRemoteWorkoutEntry(finished, 'user-1', new Set()) as RemoteWorkoutEntry).finishedAt)
+      .toBe(finished.finishedAt)
     expect(restored.sets).toHaveLength(1)
     expect(restored.sets[0]).not.toHaveProperty('rir')
     const old = { ...partial, sets: [{ ...partial.sets[0], rir: 0 }] }
