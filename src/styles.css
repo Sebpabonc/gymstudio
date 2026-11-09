@@ -10514,7 +10514,8 @@ p.workout-short-cue.cue-card {
 }
 
 .layout-boxes .day-plan-card {
-  padding: 16px;
+  /* PO 2026-11-09: slimmer side padding so exercise cards get the width. */
+  padding: 16px 10px;
 }
 
 .layout-boxes .day-plan-card .planned-exercise-card.collapsed {
@@ -11179,6 +11180,11 @@ p.workout-short-cue.cue-card {
 .pv3-status {
   padding: var(--pad-card);
   border-radius: var(--radius-card);
+}
+
+/* PO 2026-11-09: Today's plan wrapper is borderless, so the shared card padding only narrowed it; its panels use the full width. */
+.card.plan-card {
+  padding: 0;
 }
 
 /* #8: text inputs share one height, radius and type (16 px avoids iOS zoom). */
