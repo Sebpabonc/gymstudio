@@ -11353,3 +11353,12 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 1.1rem;
 }
+
+/* PO 2026-11-09: the sticky workout header spans the screen edge to edge, so scrolled content never shows beside it. */
+.plan-card.workout-mode-active .workout-mode-bar,
+.plan-card.workout-mode-active .workout-mode-overview {
+  margin-right: calc(-1 * var(--workout-bleed, 16px));
+  margin-left: calc(-1 * var(--workout-bleed, 16px));
+  padding-right: var(--workout-bleed, 16px);
+  padding-left: var(--workout-bleed, 16px);
+}
