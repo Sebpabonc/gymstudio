@@ -9,6 +9,9 @@ const WEIGHT_ROW = 110
 const PLOT_HEIGHT = BASELINE - PLOT_TOP
 const GROUP_WIDTH = 100
 const GROUP_LEFT = 38
+/** The reps axis sits in its own column that never scrolls (PO 2026-11-14: scrolling hid the numbers). */
+const AXIS_WIDTH = 30
+const PLOT_PAD = 4
 
 function tickStep(maximum: number) {
   return [5, 10, 15, 20, 25, 50].find((step) => Math.ceil(maximum / step) <= 4) ?? 50
@@ -24,15 +27,14 @@ function labelWidth(text: string) {
 }
 
 /**
- * Scroll position (and the chart width that allows it) that shows the newest group in full
- * and starts the visible area on a whole group, so the first column is never cut in half.
+ * Scroll position (and the plot width that allows it) for the scrolling plot beside the fixed axis: it shows the
+ * newest group in full and starts the visible area on a whole group, so the first column is never cut in half.
  */
 export function alignedTrendScroll(groupCount: number, viewportWidth: number) {
-  const contentWidth = Math.max(280, groupCount * GROUP_WIDTH + 34)
-  if (!viewportWidth || contentWidth <= viewportWidth) return { scroll: 0, width: contentWidth }
-  const visibleGroups = Math.max(1, Math.floor((viewportWidth - 2) / GROUP_WIDTH))
-  if (visibleGroups >= groupCount) return { scroll: contentWidth - viewportWidth, width: contentWidth }
-  const scroll = GROUP_LEFT + (groupCount - visibleGroups) * GROUP_WIDTH - 4
+  const contentWidth = groupCount * GROUP_WIDTH + PLOT_PAD * 2
+  if (!viewportWidth || contentWidth <= viewportWidth) return { scroll: 0, width: Math.max(contentWidth, viewportWidth) }
+  const visibleGroups = Math.max(1, Math.floor((viewportWidth - PLOT_PAD) / GROUP_WIDTH))
+  const scroll = (groupCount - visibleGroups) * GROUP_WIDTH
   return { scroll, width: Math.max(contentWidth, scroll + viewportWidth) }
 }
 
@@ -60,6 +62,7 @@ export default function SetTrendChart({
   const maximum = Math.max(5, ...values)
   const step = tickStep(maximum)
   const axisMaximum = Math.ceil(maximum / step) * step
+  const ticks = Array.from({ length: Math.floor(axisMaximum / step) + 1 }, (_, index) => axisMaximum - index * step)
   const [viewportWidth, setViewportWidth] = useState(0)
   const layout = alignedTrendScroll(sessions.length, viewportWidth)
   const width = layout.width
@@ -70,6 +73,8 @@ export default function SetTrendChart({
   const barStep = Math.min(barWidth + 20, (groupWidth - 10) / maxSetCount)
   const hasTargets = allSets.some((set) => set.targetReps)
   const heightOf = (reps: number) => Math.max(1, reps / axisMaximum * PLOT_HEIGHT)
+  // "14/15" is wider than a bar slot; it shows only where it fits, otherwise the reps alone in the missed colour.
+  const goalLabelFits = (text: string) => [...text].reduce((total, char) => total + (/\d/.test(char) ? 7.2 : 3.6), 0) <= barStep - 1
 
   useEffect(() => {
     const element = scrollRef.current
@@ -126,6 +131,15 @@ export default function SetTrendChart({
 
   return (
     <section className="set-trend-chart" aria-label={t('workout.trend.title')}>
+      <div className="set-trend-plot">
+        <svg className="set-trend-axis" width={AXIS_WIDTH} height="150" viewBox={`0 0 ${AXIS_WIDTH} 150`} aria-hidden="true">
+          <text className="set-trend-axis-title" x="2" y="10">{t('workout.trend.repsAxis')}</text>
+          {ticks.map((value) => (
+            <text key={value} className="set-trend-axis-label" x={AXIS_WIDTH - 6} y={BASELINE - value / axisMaximum * PLOT_HEIGHT + 3} textAnchor="end">
+              {formatNumber(language, value)}
+            </text>
+          ))}
+        </svg>
       <div className="set-trend-scroll" ref={scrollRef} tabIndex={0} aria-label={t('workout.trend.scroll')}>
         <svg
           width={width}
@@ -134,17 +148,11 @@ export default function SetTrendChart({
           role="img"
           aria-label={`${t('workout.trend.accessible')}: ${accessibleSummary}`}
         >
-          <text className="set-trend-axis-title" x="2" y="10">{t('workout.trend.repsAxis')}</text>
-          {Array.from({ length: Math.floor(axisMaximum / step) + 1 }, (_, index) => {
-            const value = axisMaximum - index * step
+          {ticks.map((value) => {
             const y = BASELINE - value / axisMaximum * PLOT_HEIGHT
-            return (
-              <g key={value}>
-                <text className="set-trend-axis-label" x="26" y={y + 3} textAnchor="end">{formatNumber(language, value)}</text>
-                <line className="set-trend-grid-line" x1="31" x2={width} y1={y} y2={y} />
-              </g>
-            )
+            return <line key={value} className="set-trend-grid-line" x1="0" x2={width} y1={y} y2={y} />
           })}
+          <g transform={`translate(${PLOT_PAD - GROUP_LEFT} 0)`}>
           {sessions.map((session, sessionIndex) => {
             const groupX = GROUP_LEFT + sessionIndex * groupWidth
             const dataWidth = Math.min(groupWidth - 10, maxSetCount * barStep)
@@ -180,7 +188,7 @@ export default function SetTrendChart({
                         y={Math.max(12, Math.min(y, goalY ?? y) - 5)}
                         textAnchor="middle"
                       >
-                        {missed
+                        {missed && goalLabelFits(`${set.reps}/${set.targetReps}`)
                           ? `${formatNumber(language, set.reps)}/${formatNumber(language, set.targetReps ?? 0)}`
                           : formatNumber(language, barReps(set))}
                       </text>
@@ -223,7 +231,9 @@ export default function SetTrendChart({
               </g>
             )
           })}
+          </g>
         </svg>
+      </div>
       </div>
       <div className="set-trend-legend" aria-hidden="true">
         {Array.from({ length: maxSetCount }, (_, index) => (

@@ -88,6 +88,20 @@ describe('SetTrendChart', () => {
     expect(html).toContain('Meta del plan')
   })
 
+  it('keeps the reps axis numbers outside the scrolling plot', () => {
+    const html = renderChart([{ weight: 12, reps: 12, logged: true, targetReps: 15 }])
+    const axis = html.slice(html.indexOf('class="set-trend-axis"'), html.indexOf('class="set-trend-scroll"'))
+    expect(axis.match(/class="set-trend-axis-label"/g)?.length).toBeGreaterThan(1)
+    expect(html.slice(html.indexOf('class="set-trend-scroll"'))).not.toContain('set-trend-axis-label')
+  })
+
+  it('shows only the reps when done/goal is too wide for three bars (14/15)', () => {
+    const html = renderChart([14, 14, 14].map((reps) => ({ weight: 12, reps, logged: true, targetReps: 15 })))
+    expect(html.match(/class="set-trend-reps-label missed"/g)).toHaveLength(3)
+    expect(html).not.toContain('14/15')
+    expect(html.match(/>14</g)).toHaveLength(3)
+  })
+
   it('draws a set still to do at its plan goal, with no shade behind it', () => {
     const html = renderChart([
       { weight: 32, reps: 8, logged: true, targetReps: 10 },
@@ -154,15 +168,15 @@ describe('SetTrendChart', () => {
 })
 
 describe('alignedTrendScroll', () => {
-  it('starts at the left when everything fits', () => {
-    expect(alignedTrendScroll(2, 343)).toEqual({ scroll: 0, width: 280 })
+  it('starts at the left and fills the viewport when everything fits', () => {
+    expect(alignedTrendScroll(2, 300)).toEqual({ scroll: 0, width: 300 })
   })
 
   it('starts the visible area on a whole group and keeps the newest group in full', () => {
-    const { scroll, width } = alignedTrendScroll(5, 311)
-    // 3 whole 100 px groups fit in 311 px, so the window starts just before group index 2.
-    expect(scroll).toBe(38 + 2 * 100 - 4)
-    expect(width - scroll).toBe(311)
-    expect(scroll + 311).toBeGreaterThanOrEqual(38 + 5 * 100 - 2)
+    const { scroll, width } = alignedTrendScroll(5, 281)
+    // 2 whole 100 px groups fit in 281 px, so the window starts at group index 3.
+    expect(scroll).toBe(3 * 100)
+    expect(width - scroll).toBe(281)
+    expect(scroll + 281).toBeGreaterThanOrEqual(4 + 5 * 100 - 4)
   })
 })
