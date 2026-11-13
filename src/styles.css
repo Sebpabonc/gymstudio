@@ -7921,7 +7921,18 @@ a.planned-exercise-main-name {
   border-top: 1px solid var(--line);
 }
 
+.set-trend-plot {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.set-trend-axis {
+  flex: none;
+}
+
 .set-trend-scroll {
+  flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
   overflow-x: auto;
