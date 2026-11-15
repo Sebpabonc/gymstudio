@@ -4411,7 +4411,7 @@
       },
       {
         "title": "How to progress",
-        "body": "Week 1 is lighter: stop every set about 3 reps short of failure, skip the last set of each exercise and skip all extras. From week 2, progress each pyramid set's weight on its own, adding a small step once its reps are clean. Raise each superset exercise once all its reps are done. Week 6 is always a deload: half the sets, no extras."
+        "body": "Week 1 is lighter: stop every set about 3 reps short of failure, skip the last set of each exercise and skip all extras. From week 2, stop every pyramid set 1-3 reps short and progress each set's weight on its own, adding a small step once its reps are clean. Raise each superset exercise once all its reps are done. Week 6 is always a deload: half the sets, no extras."
       },
       {
         "title": "What to expect",
@@ -4534,13 +4534,14 @@
             "rest_seconds": 150,
             "technique": "pyramid",
             "angle_degrees": 75,
-            "notes": ""
+            "notes": "Stop every set 1-3 reps short of failure, not only the last."
           },
           {
             "code": "B1",
             "exercise_id": "db-60-y-raises",
-            "sets": 3,
+            "sets": 4,
             "reps": [
+              "10",
               "10",
               "10",
               "10"
@@ -4608,17 +4609,17 @@
           },
           {
             "code": "F1",
-            "exercise_id": "cable-triceps-kickback",
+            "exercise_id": "dumbbell-overhead-triceps-extension-single-arm",
             "sets": 3,
             "reps": [
-              "12+12",
-              "12+12",
-              "12+12"
+              "12",
+              "12",
+              "12"
             ],
             "rest_seconds": 60,
-            "technique": "drop-set",
+            "technique": "straight",
             "angle_degrees": null,
-            "notes": "Reps are per arm; drop the pin about 25% and keep going."
+            "notes": "Last set: add 4-6 half reps in the stretch."
           }
         ]
       },
@@ -4672,34 +4673,35 @@
           },
           {
             "code": "D1",
-            "exercise_id": "machine-hip-thrust",
+            "exercise_id": "romanian-deadlift",
             "sets": 3,
             "reps": [
               "10",
               "10",
               "10"
             ],
-            "rest_seconds": 10,
-            "technique": "superset",
+            "technique": "straight",
+            "rest_seconds": 120,
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Lower in 3 seconds to a strong hamstring stretch."
           },
           {
-            "code": "D2",
-            "exercise_id": "prone-leg-curl-toes-dorsiflexed-neutral",
-            "sets": 3,
+            "code": "E1",
+            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
+            "sets": 4,
             "reps": [
+              "15",
               "15",
               "15",
               "15"
             ],
+            "technique": "straight",
             "rest_seconds": 90,
-            "technique": "superset",
             "angle_degrees": null,
             "notes": "Toes pulled up (dorsiflexed), pointing straight ahead."
           },
           {
-            "code": "E1",
+            "code": "F1",
             "exercise_id": "standing-calf-raises-toes-neutral",
             "sets": 4,
             "reps": [
@@ -4714,7 +4716,7 @@
             "notes": "Last set: myo-reps, 3 mini-sets of 5, 5 breaths rest."
           },
           {
-            "code": "F1",
+            "code": "G1",
             "exercise_id": "hanging-knee-raise",
             "sets": 4,
             "reps": [
@@ -4841,13 +4843,14 @@
             "rest_seconds": 120,
             "technique": "pyramid",
             "angle_degrees": 75,
-            "notes": ""
+            "notes": "Stop every set 1-3 reps short of failure, not only the last."
           },
           {
             "code": "B1",
             "exercise_id": "db-60-y-raises",
-            "sets": 3,
+            "sets": 4,
             "reps": [
+              "12",
               "12",
               "12",
               "12"
@@ -4915,7 +4918,7 @@
           },
           {
             "code": "E1",
-            "exercise_id": "cable-triceps-kickback",
+            "exercise_id": "dumbbell-overhead-triceps-extension-single-arm",
             "sets": 3,
             "reps": [
               "20",
@@ -4939,15 +4942,15 @@
             "exercise_id": "smith-machine-squat",
             "sets": 4,
             "reps": [
-              "20",
               "15",
               "12",
-              "10"
+              "10",
+              "8"
             ],
             "rest_seconds": 120,
             "technique": "pyramid",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Stop every set 1-3 reps short of failure, not only the last."
           },
           {
             "code": "B1",
@@ -4993,9 +4996,10 @@
           },
           {
             "code": "D1",
-            "exercise_id": "prone-leg-curl-toes-dorsiflexed-neutral",
-            "sets": 3,
+            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
+            "sets": 4,
             "reps": [
+              "20",
               "20",
               "20",
               "20"
@@ -5202,8 +5206,9 @@
           {
             "code": "B1",
             "exercise_id": "cable-lateral-raise",
-            "sets": 3,
+            "sets": 4,
             "reps": [
+              "12+12",
               "12+12",
               "12+12",
               "12+12"
@@ -5323,18 +5328,17 @@
           },
           {
             "code": "C1",
-            "exercise_id": "smith-machine-hip-thrust",
-            "sets": 4,
+            "exercise_id": "romanian-deadlift",
+            "sets": 3,
             "reps": [
               "8",
               "10",
-              "12",
-              "15"
+              "12"
             ],
-            "rest_seconds": 90,
+            "rest_seconds": 120,
             "technique": "reverse-pyramid",
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Lower in 3 seconds to a strong hamstring stretch."
           },
           {
             "code": "D1",
@@ -5509,8 +5513,9 @@
           {
             "code": "B1",
             "exercise_id": "cable-lateral-raise",
-            "sets": 3,
+            "sets": 4,
             "reps": [
+              "15+15",
               "15+15",
               "15+15",
               "15+15"
@@ -5606,8 +5611,8 @@
             "reps": [
               "10",
               "12",
-              "15",
-              "20"
+              "14",
+              "15"
             ],
             "rest_seconds": 120,
             "technique": "reverse-pyramid",
@@ -5631,8 +5636,9 @@
           {
             "code": "B2",
             "exercise_id": "machine-seated-leg-curl-single-leg",
-            "sets": 3,
+            "sets": 4,
             "reps": [
+              "15",
               "15",
               "15",
               "15"
