@@ -9,17 +9,19 @@ describe('getExerciseVideo (#442)', () => {
       src: 'exercise-videos/incline-dumbbell-press.mp4',
       poster: 'exercise-videos/incline-dumbbell-press.jpg',
       model: 'Seb',
+      status: 'approved',
     })
   })
 
   it('returns nothing for an exercise without a clip', () => {
-    expect(getExerciseVideo('lat-pulldown')).toBeUndefined()
+    expect(getExerciseVideo('hammer-curls')).toBeUndefined()
     expect(getExerciseVideo(undefined)).toBeUndefined()
     expect(getExerciseVideo('')).toBeUndefined()
   })
 
   it('only listed ids return a video (no inherited keys)', () => {
-    expect(Object.keys(exerciseVideos).sort()).toEqual(['dumbbell-bench-press', 'incline-dumbbell-press'])
+    expect(Object.keys(exerciseVideos)).toHaveLength(19)
+    expect(Object.values(exerciseVideos).filter((v) => v.status === 'approved')).toHaveLength(8)
     expect(getExerciseVideo('toString')).toBeUndefined()
     expect(getExerciseVideo('__proto__')).toBeUndefined()
     expect(getExerciseVideo('constructor')).toBeUndefined()

@@ -43,7 +43,7 @@ vi.mock('react-dom', async () => ({
 }))
 vi.mock('../utils/useBodyScrollLock', () => ({ useBodyScrollLock: () => undefined }))
 
-const video = { src: 'exercise-videos/incline-dumbbell-press.mp4', poster: 'exercise-videos/incline-dumbbell-press.jpg', model: 'Seb' }
+const video = { src: 'exercise-videos/incline-dumbbell-press.mp4', poster: 'exercise-videos/incline-dumbbell-press.jpg', model: 'Seb', status: 'approved' as const }
 const labels: ExerciseVideoLabels = {
   open: 'Watch technique video: Incline press', close: 'Close video', normal: 'Normal', slow: 'Slow 0.5×',
   badge: 'Technique', cue: 'Squeeze',
