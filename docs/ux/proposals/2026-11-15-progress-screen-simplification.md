@@ -211,7 +211,7 @@ Worth a look   Back squat: about the same
 [ See every lift ›]   [ Compare with Block 5 › ]
 [ Ask AI to explain my block ]  (optional, see 7)
 
-Next: Block 7 starts Mon 17 Nov  [ View plan › ]
+Next: Block 7 starts Mon 16 Nov  [ View plan › ]
 -------------------------------------
 ```
 
