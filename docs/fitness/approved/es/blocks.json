@@ -467,7 +467,7 @@
       },
       {
         "title": "Cómo funciona",
-        "body": "Cada día A abre con pirámide inversa: una serie top pesada (4 reps en el press de banca en Smith y el press militar sentado con barra, 5 en la sentadilla trasera), luego series más ligeras de 6, 8 y 10, con 2.5-3 minutos de descanso. El resto son series rectas. El pecho se trabaja en dos ángulos: press inclinado con mancuernas a 30 grados y luego press plano con mancuernas. Los días de brazos y piernas combinan dos ejercicios que no compiten en una superserie. Uno o dos extras por día en la última serie (rest-pause, parciales, myo-reps, drop set o tempo lento) están en las notas."
+        "body": "Cada día A abre con pirámide inversa: una serie top pesada (4 reps en el press de banca en Smith y el press militar sentado con barra, 5 en la sentadilla trasera), luego series más ligeras de 6, 8 y 10, con 2.5-3 minutos de descanso. El resto son series rectas. El pecho se trabaja en dos ángulos: press inclinado con mancuernas a 30 grados y luego press plano con mancuernas. Cada día tiene una superserie; los días de pecho y espalda terminan con curl predicador y extensión de tríceps con cuerda sobre la cabeza. Uno o dos extras por día en la última serie (rest-pause, parciales, myo-reps, drop set o tempo lento) están en las notas."
       },
       {
         "title": "Días A vs. días B",
@@ -539,7 +539,11 @@
       "lower-body-b/C1": "Las reps son por pierna.",
       "lower-body-b/D1": "Reps por pierna; baja el peso un 25% y sigue sin descanso.",
       "lower-body-b/E1": "Pausa de 2 s abajo en cada rep.",
-      "lower-body-b/E2": "Rueda más lejos a medida que te haces más fuerte."
+      "lower-body-b/E2": "Rueda más lejos a medida que te haces más fuerte.",
+      "chest-back-a/H1": "Baja hasta que el codo quede casi recto; nunca rebotes abajo.",
+      "chest-back-a/H2": "Dobla bien los codos sobre la cabeza; para a 1-2 reps del fallo antes de Brazos.",
+      "chest-back-b/H1": "Baja hasta que el codo quede casi recto; nunca rebotes abajo.",
+      "chest-back-b/H2": "Dobla bien los codos sobre la cabeza; para a 1-2 reps del fallo antes de Brazos."
     }
   },
   "block-2026-12-28-hypertrophy-pyramid-ii": {

@@ -126,6 +126,9 @@ intensity — so no two consecutive blocks use the same method. Each block chang
   flat 6s (A) / 8s (B), 2-minute rests, 5–6 exercises. New: back squat, barbell row, flat Smith
   machine bench press, 30° incline dumbbell press, seated barbell overhead press (upright seat),
   weighted dips and wide pull-ups, 30° chest-supported dumbbell row, JM press, ab wheel.
+  Arm emphasis (2026-11-15, PO request): both chest-back days end with an EZ-bar preacher curl + rope
+  overhead extension superset (3 sets, kept from block 6), raising direct arm work from 16 to 22 sets a week,
+  and to 14 even when Arms B is missed. Details: `approved/2026-11-15-block7-arm-emphasis.md`.
 - **Block 8 — Hypertrophy Pyramid II (28 Dec 2026).** Ascending pyramids 15-12-10-8 (A) /
   20-15-12-10 (B) on the first lift, then supersets. Chest leads with a 45° incline barbell press,
   then a decline (−15°) dumbbell press + decline fly superset; arms day adds 45° Y-raises, 45° spider
@@ -168,7 +171,7 @@ chest-supported T-bar, preacher bench) have no bench angle to set.
 | Block | Chest (main / others) | Shoulders | Back | Arms |
 |---|---|---|---|---|
 | 6 — Flat pyramid II | **30°** DB press / 0° DB press, high-to-low cable fly, pec deck | Smith seated press 75° | Chest-supported T-bar (machine) | Incline curl 45°; EZ skull crusher flat 0° |
-| 7 — Strength II | **0°** Smith flat press / 30° DB press, dips | Seated BB press 90°; seated lateral raise 90° | Chest-supported DB row 30° | JM press 0°; seated overhead extension 90° |
+| 7 — Strength II | **0°** Smith flat press / 30° DB press, dips | Seated BB press 90°; seated lateral raise 90° | Chest-supported DB row 30° | JM press 0°; seated overhead extension 90°; preacher curl + rope overhead extension on chest-back days (no angle) |
 | 8 — Pyramid II | **45°** incline BB press / −15° DB press + fly | DB press 75°; Y-raise 45° | EZ pullover 0° | Spider curl 45°; decline skull crusher −15° |
 | 9 — Reverse pyramid III | **0°** BB bench / 15° incline fly, incline machine | Standing press; rear-delt fly 30° | Chest-supported DB row 45° | Incline curl 60°; seated overhead extension 90° |
 
