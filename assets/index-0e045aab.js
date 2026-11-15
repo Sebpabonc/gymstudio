@@ -1,1 +1,0 @@
-import{ah as i,ai as t}from"./index-7ff66cb7.js";const p=i("SignInWithApple",{web:()=>t(()=>import("./web-db8f9a3a.js"),["./web-db8f9a3a.js","./index-7ff66cb7.js","./index-253e54a7.css"],import.meta.url).then(e=>new e.SignInWithAppleWeb)});export{p as SignInWithApple};
