@@ -11810,3 +11810,17 @@ body {
   color: var(--muted-strong);
   font-size: 0.7rem;
 }
+
+.ps-trend {
+  margin: 0 0 10px;
+}
+
+.ps-detail-trend {
+  display: grid;
+  gap: 8px;
+}
+
+.ps-detail-trend h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}

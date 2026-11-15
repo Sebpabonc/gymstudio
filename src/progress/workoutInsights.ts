@@ -203,3 +203,27 @@ export function buildWorkoutSetTrend(
     }
   })
 }
+
+/** Progress (PO 2026-11-15): one lift's logged sessions in a date window, for the "Trend by set" chart. No today placeholder. */
+export function liftSetTrend(
+  entries: WorkoutEntry[],
+  blocks: TrainingBlock[],
+  exerciseId: string,
+  from: string,
+  to: string
+): WorkoutTrendSession[] {
+  return progressLiftSessions(entries, blocks)
+    .filter((session) => session.exerciseId === exerciseId && session.date >= from && session.date <= to)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((session) => {
+      const targetReps = sessionTargetReps(session, blocks)
+      const sets: WorkoutTrendSet[] = workingSets(session.sets).map(({ weight, reps }, index) => ({
+        weight,
+        reps,
+        logged: true,
+        ...(targetReps[index] ? { targetReps: targetReps[index] as number } : {}),
+      }))
+      return { date: session.date, dayType: trendDayLabel(session, blocks), deload: session.deload, today: false, sets }
+    })
+    .filter((session) => session.sets.length > 0)
+}
