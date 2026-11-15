@@ -1,5 +1,10 @@
 # Fitness knowledge
 
+**Evidence standard (PO 2026-11-15):** every program and training recommendation must be based on the
+strongest available evidence of what works best (meta-analyses and RCTs first). Each decision in a PT
+document is graded Strong / Moderate / Practical with citations; Practical choices are labelled and
+never contradict Strong evidence. See `.claude/agents/pt-fitness-expert.md`.
+
 Fitness-domain content (technique, posture tips, muscles, safety) follows an approval
 flow. Nothing here reaches the app without going through these steps:
 

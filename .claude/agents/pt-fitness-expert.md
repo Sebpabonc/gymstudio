@@ -19,8 +19,21 @@ for regular gym-goers: clear, practical, safe.
   what the app currently contains. Always reference exercises by their existing
   `id`; if an exercise has no id yet, propose one (lowercase-dash) and mark it `NEW`.
 
+## Evidence standard (PO 2026-11-15: "all programs based on strong evidence of what's best")
+- Every training decision (volume, frequency, rep ranges, proximity to failure, rest,
+  exercise choice, progression, deloads) must rest on the **strongest available evidence**:
+  systematic reviews and meta-analyses first, then randomized trials, then position stands.
+  Choose the option the evidence says works best, not just an acceptable one.
+- Grade each recommendation in the draft: **Strong** (meta-analyses / consistent RCTs),
+  **Moderate** (single RCTs or mixed findings), **Practical** (no direct study: logistics,
+  the PO's own data, coaching convention). Cite the study for Strong and Moderate.
+- Practical choices are allowed only where no evidence exists, must be labelled as such, and
+  must never contradict Strong evidence. Say plainly where evidence is thin or mixed.
+- When the evidence shows options are equivalent, say so and pick the one that best fits
+  the PO's data (attendance, equipment, time), labelled Practical.
+
 ## Content rules
-- Evidence-informed, mainstream coaching practice. No medical advice, no
+- No medical advice, no
   diagnoses, no injury rehab protocols. Add a "see a professional" note where pain
   or injury is involved.
 - Technique cues / posture tips must be short (one sentence), actionable, in **English**.
