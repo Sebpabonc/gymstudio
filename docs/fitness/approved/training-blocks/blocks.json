@@ -3710,7 +3710,7 @@
     "insights": [
       {
         "title": "Goal",
-        "body": "Get stronger on the big lifts so blocks 8 and 9 can be done with heavier weights. A small dose of heavy 4-5 rep work builds strength you can later turn into muscle, while most sets stay at 6-12 reps where growth is efficient."
+        "body": "Get stronger on the big lifts. Muscle grows about the same from 5 to 30 reps when sets are hard, but heavier sets build more strength, so a small dose of heavy 4-5 rep work is added while most sets stay at 6-12 reps. Total hard sets per week is what drives growth."
       },
       {
         "title": "How it works",
@@ -3832,7 +3832,7 @@
               "10"
             ],
             "technique": "straight",
-            "rest_seconds": 60,
+            "rest_seconds": 90,
             "angle_degrees": 30,
             "notes": "Pull elbows back toward the hips; chest stays on the pad."
           },
@@ -4015,7 +4015,7 @@
           },
           {
             "code": "D1",
-            "exercise_id": "machine-standing-leg-curl",
+            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
             "sets": 4,
             "reps": [
               "8",
@@ -4026,7 +4026,7 @@
             "rest_seconds": 90,
             "technique": "straight",
             "angle_degrees": null,
-            "notes": "Reps per leg. Last set: rest-pause, 15 s, then 2 mini-sets."
+            "notes": "Lean your chest forward slightly. Last set: rest-pause, 15 s, then 2 mini-sets."
           },
           {
             "code": "E1",
@@ -4158,7 +4158,7 @@
               "12"
             ],
             "technique": "straight",
-            "rest_seconds": 60,
+            "rest_seconds": 90,
             "angle_degrees": 30,
             "notes": "Pull elbows back toward the hips; chest stays on the pad."
           },
@@ -4341,7 +4341,7 @@
           },
           {
             "code": "D1",
-            "exercise_id": "machine-standing-leg-curl",
+            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
             "sets": 3,
             "reps": [
               "10+10",
@@ -4351,7 +4351,7 @@
             "rest_seconds": 90,
             "technique": "drop-set",
             "angle_degrees": null,
-            "notes": "Reps per leg; drop the weight about 25% and keep going."
+            "notes": "Drop the weight about 25% and keep going."
           },
           {
             "code": "E1",
