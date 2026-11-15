@@ -503,6 +503,22 @@ describe('approved workout logging integration', () => {
     expect(elements(node => node.props.className === 'log-toast')).toHaveLength(0)
   })
 
+  it('PO 2026-11-15: the finish summary shows one collapsed row per exercise with details on tap', async () => {
+    render()
+    await settle()
+    await start()
+    await enter(40, 8)
+    await click(doneLabel())
+    await click('Finish')
+    await click('Finish now')
+    const screen = elements(node => node.props.className === 'workout-completed-content')[0]
+    expect(elements(node => node.props.className === 'workout-completed-tally', screen)).toHaveLength(0)
+    expect(elements(node => node.props.className === 'workout-completed-headline', screen)).toHaveLength(1)
+    const rows = elements(node => node.props.className === 'workout-completed-exercise', screen)
+    expect(rows.length).toBeGreaterThan(0)
+    rows.forEach(row => expect(row.props.open).toBeUndefined())
+  })
+
   it('PO 2026-11-09: Finish now stamps the session so the day counts as complete', async () => {
     render()
     await settle()

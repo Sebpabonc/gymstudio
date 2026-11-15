@@ -6815,6 +6815,7 @@ body:has([aria-modal='true']) .help-ai-button {
 
 .log-toast.in-summary {
   position: relative;
+  inset: auto;
 }
 
 /* QA 2026-11-07: outside workout mode the toast sits above the tab bar (and the rest pill), never under it. */
@@ -9702,21 +9703,23 @@ summary:focus-visible,
   font-size: 0.78rem;
 }
 
-.workout-completed-tally {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px 14px;
-  padding: 10px;
+.workout-completed-headline {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
+  text-align: center;
 }
 
-.workout-completed-tally span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.82rem;
+.workout-completed-headline strong {
+  font-size: 1.05rem;
+}
+
+.workout-completed-headline span {
+  color: var(--muted-strong);
+  font-size: 0.85rem;
 }
 
 .workout-completed-muscles h3,
@@ -9740,11 +9743,7 @@ summary:focus-visible,
 }
 
 .workout-completed-insights li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
-  gap: 5px;
-  padding: 10px 12px;
   border-left: 3px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
 }
@@ -9754,20 +9753,77 @@ summary:focus-visible,
   background: var(--brand-soft);
 }
 
-.workout-completed-insights li > strong {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.workout-completed-hint {
+  margin: -4px 0 8px;
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+}
+
+.workout-completed-exercise > summary {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 8px;
   align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  list-style: none;
+  cursor: pointer;
 }
 
-.workout-completed-insights li > strong small {
+.workout-completed-exercise > summary::-webkit-details-marker {
+  display: none;
+}
+
+.workout-completed-exercise > summary::after {
+  content: '▸';
+  color: var(--muted-strong);
+}
+
+.workout-completed-exercise[open] > summary::after {
+  content: '▾';
+}
+
+.workout-completed-verdict {
+  font-weight: 800;
+  text-align: center;
+}
+
+.workout-completed-verdict.improved {
+  color: var(--brand);
+}
+
+.workout-completed-verdict.dropped {
+  color: #f58a9b;
+}
+
+.workout-completed-exercise-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.workout-completed-exercise-text strong {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.workout-completed-exercise-text strong small {
   margin-left: auto;
+  color: var(--muted-strong);
+  font-weight: 600;
 }
 
-.workout-completed-insights li p {
-  margin: 0;
-  color: var(--text);
+.workout-completed-exercise-text > span {
+  color: var(--muted-strong);
+  font-size: 0.85rem;
+}
+
+.workout-completed-exercise-detail {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 12px 12px;
 }
 
 .workout-completed-back {
