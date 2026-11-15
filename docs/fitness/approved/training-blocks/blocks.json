@@ -3714,7 +3714,7 @@
       },
       {
         "title": "How it works",
-        "body": "Each A day opens with a reverse pyramid: one heavy top set (4 reps on the Smith bench and seated overhead press, 5 on the back squat), then lighter back-off sets of 6, 8 and 10, with 2.5-3 minutes rest. Other lifts are straight sets. Chest is trained at two angles: 30-degree incline dumbbell press, then the flat dumbbell press. Arm and leg days pair two non-competing exercises in one superset. One or two last-set extras per day (rest-pause, partials, myo-reps, a drop set or a slow tempo) are written in the notes."
+        "body": "Each A day opens with a reverse pyramid: one heavy top set (4 reps on the Smith bench and seated overhead press, 5 on the back squat), then lighter back-off sets of 6, 8 and 10, with 2.5-3 minutes rest. Other lifts are straight sets. Chest is trained at two angles: 30-degree incline dumbbell press, then the flat dumbbell press. Each day has one superset; chest-back days end with preacher curls and overhead rope extensions. One or two last-set extras per day (rest-pause, partials, myo-reps, a drop set or a slow tempo) are written in the notes."
       },
       {
         "title": "A days vs B days",
@@ -3835,6 +3835,34 @@
             "rest_seconds": 60,
             "angle_degrees": 30,
             "notes": "Pull elbows back toward the hips; chest stays on the pad."
+          },
+          {
+            "code": "H1",
+            "exercise_id": "ez-bb-preacher-curls",
+            "sets": 3,
+            "reps": [
+              "10",
+              "10",
+              "10"
+            ],
+            "technique": "superset",
+            "rest_seconds": 10,
+            "angle_degrees": null,
+            "notes": "Lower until the elbow is almost straight; never bounce at the bottom."
+          },
+          {
+            "code": "H2",
+            "exercise_id": "rope-low-cable-oh-tricep-extensions",
+            "sets": 3,
+            "reps": [
+              "10",
+              "10",
+              "10"
+            ],
+            "technique": "superset",
+            "rest_seconds": 75,
+            "angle_degrees": null,
+            "notes": "Elbows bend fully overhead; stop 1-2 reps short for the next Arms day."
           }
         ]
       },
@@ -4133,6 +4161,34 @@
             "rest_seconds": 60,
             "angle_degrees": 30,
             "notes": "Pull elbows back toward the hips; chest stays on the pad."
+          },
+          {
+            "code": "H1",
+            "exercise_id": "ez-bb-preacher-curls",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
+            "technique": "superset",
+            "rest_seconds": 10,
+            "angle_degrees": null,
+            "notes": "Lower until the elbow is almost straight; never bounce at the bottom."
+          },
+          {
+            "code": "H2",
+            "exercise_id": "rope-low-cable-oh-tricep-extensions",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
+            "technique": "superset",
+            "rest_seconds": 75,
+            "angle_degrees": null,
+            "notes": "Elbows bend fully overhead; stop 1-2 reps short for the next Arms day."
           }
         ]
       },
