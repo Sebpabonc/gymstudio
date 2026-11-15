@@ -3430,7 +3430,34 @@ export default function WorkoutPlan({
               .sort()[0]
             return logged ?? rollingDates?.get(dayKey) ?? (activeBlock.days.length <= 7 ? shiftDate(week.start, position - 1) : undefined)
           }
-          const goWeek = (delta: number) => setBarWeekOffset(Math.min(Math.max(offset + delta, minOffset), maxOffset))
+          // PO 2026-11-15: the arrows run on into the next (or previous) block, so the last week can preview what comes next.
+          const blockStart = (block: TrainingBlock) => block.startDate.slice(0, 10)
+          const blockEnd = (block: TrainingBlock) => shiftDate(blockStart(block), block.weeks * 7)
+          const sortedBlocks = [...trainingBlocks].sort((a, b) => blockStart(a).localeCompare(blockStart(b)))
+          const nextBlock = sortedBlocks.find((block) =>
+            blockStart(block) >= blockEnd(activeBlock) && blockStart(block) <= shiftDate(blockEnd(activeBlock), 7))
+          const previousBlock = [...sortedBlocks].reverse().find((block) =>
+            blockEnd(block) <= blockStart(activeBlock) && blockEnd(block) >= shiftDate(blockStart(activeBlock), -7))
+          const switchBlock = (block: TrainingBlock, nextOffset: number) => {
+            setSelectedBlockId(block.id)
+            setSelectedDay(block.days[0]?.key ?? '')
+            setCollapsedExercises({})
+            setBarWeekOffset(nextOffset)
+          }
+          const goWeek = (delta: number) => {
+            if (delta > 0 && offset >= maxOffset && nextBlock) return switchBlock(nextBlock, offset + 1)
+            if (delta < 0 && offset <= minOffset && previousBlock) return switchBlock(previousBlock, offset - 1)
+            setBarWeekOffset(Math.min(Math.max(offset + delta, minOffset), maxOffset))
+          }
+          const backToThisWeek = () => {
+            const current = defaultActiveBlock(trainingBlocks, today)
+            if (current && current.id !== activeBlock.id) {
+              setSelectedBlockId(current.id)
+              setSelectedDay(todayTrainingDay(current, history, today)?.key ?? current.days[0]?.key ?? '')
+              setCollapsedExercises({})
+            }
+            setBarWeekOffset(0)
+          }
           const days = activeBlock.days.map((day) => {
             const done = day.exercises.filter((item) =>
               history.some(
@@ -3467,17 +3494,17 @@ export default function WorkoutPlan({
               }}
             >
               <div className="week-progress-head">
-                <button type="button" className="week-progress-nav" onClick={() => goWeek(-1)} disabled={offset <= minOffset} aria-label={t('workout.week.previous')}>‹</button>
+                <button type="button" className="week-progress-nav" onClick={() => goWeek(-1)} disabled={offset <= minOffset && !previousBlock} aria-label={t('workout.week.previous')}>‹</button>
                 <span>
                   {offset === 0 ? t('workout.week.progressTitle') : t('workout.week.numbered', { week: formatNumber(language, weekNumber) })}
                   {offset !== 0 && (
-                    <button type="button" className="text-button week-progress-back" onClick={() => setBarWeekOffset(0)}>{t('workout.week.backToThis')}</button>
+                    <button type="button" className="text-button week-progress-back" onClick={backToThisWeek}>{t('workout.week.backToThis')}</button>
                   )}
                 </span>
                 <strong>{offset === 0
                   ? t('workout.week.progressDays', { done: formatNumber(language, completeDays), total: formatNumber(language, days.length) })
                   : `${formatNumber(language, completeDays)}/${formatNumber(language, days.length)}`}</strong>
-                <button type="button" className="week-progress-nav" onClick={() => goWeek(1)} disabled={offset >= maxOffset} aria-label={t('workout.week.next')}>›</button>
+                <button type="button" className="week-progress-nav" onClick={() => goWeek(1)} disabled={offset >= maxOffset && !nextBlock} aria-label={t('workout.week.next')}>›</button>
               </div>
               <div className="week-progress-bar" aria-label={t('workout.day.tabsAria')}>
                 {days.map(({ day, done, total }) => {

@@ -20,6 +20,7 @@ const harness = vi.hoisted(() => ({
   cleanups: [] as (() => void)[],
   language: 'en' as 'en' | 'es',
   block: null as TrainingBlock | null,
+  nextBlocks: [] as TrainingBlock[],
   catalogue: [] as Exercise[],
 }))
 
@@ -67,8 +68,8 @@ vi.mock('../i18n/content', async () => ({
 vi.mock('../utils/storage', async () => ({
   ...await vi.importActual<typeof import('../utils/storage')>('../utils/storage'),
   loadExercises: async () => harness.catalogue,
-  getCachedTrainingBlocks: () => [harness.block],
-  fetchTrainingBlocks: async () => [harness.block],
+  getCachedTrainingBlocks: () => [harness.block, ...harness.nextBlocks],
+  fetchTrainingBlocks: async () => [harness.block, ...harness.nextBlocks],
 }))
 vi.mock('../native/restAlerts', () => ({ prepareRestAlerts: vi.fn(), fireRestAlert: vi.fn() }))
 
@@ -199,6 +200,7 @@ beforeEach(() => {
   harness.catalogue = ['press', 'row', 'curl', 'drop'].map(id => ({
     id, name: id, primaryMuscle: 'Chest', equipment: id === 'drop' ? 'machine' : 'barbell',
   }))
+  harness.nextBlocks = []
   harness.block = {
     id: 'block', number: 1, name: 'Test block', method: 'flat', startDate: '2026-10-05',
     weeks: 6, origin: 'pt', summary: '', insights: [],
@@ -896,6 +898,26 @@ describe('approved workout logging integration', () => {
       expect(labels).toEqual([`${t('workout.day.number', { position: 1 })}✓`, t('workout.day.number', { position: 2 })])
       expect(labels[0]).toBe(language === 'en' ? 'Day 1✓' : 'Día 1✓')
       expect(labels.join(' ')).not.toMatch(/\d{2}|Mon|Tue|lun|mar/)
+    })
+
+    it('PO 2026-11-15: in the last week of a block, next week previews the next block and back returns', async () => {
+      harness.nextBlocks = [{
+        ...harness.block!, id: 'next-block', number: 2, name: 'Next block', startDate: '2026-11-16',
+        days: [{ ...harness.block!.days[0], key: 'chest-back-a', name: 'Next block day' }],
+      }]
+      vi.setSystemTime(new Date('2026-11-15T12:00:00Z'))
+      render()
+      await settle()
+      expect(renderToStaticMarkup(tree)).toContain('Test day')
+      await click('Next week')
+      const preview = renderToStaticMarkup(tree)
+      expect(preview).toContain('Next block day')
+      expect(preview).toContain(createTranslator('en')('workout.week.previewNote'))
+      await click('Previous week')
+      expect(renderToStaticMarkup(tree)).toContain('Test day')
+      await click('Next week')
+      await click(createTranslator('en')('workout.week.backToThis'))
+      expect(renderToStaticMarkup(tree)).toContain('Test day')
     })
 
     it.each(['en', 'es'] as const)('opens next week after a finished week without telling the person to go back (%s)', async language => {
