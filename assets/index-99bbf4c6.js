@@ -1,1 +1,0 @@
-import{aj as e,ak as o}from"./index-49c759bc.js";const i=e("Browser",{web:()=>o(()=>import("./web-c4679660.js"),["./web-c4679660.js","./index-49c759bc.js","./index-b875bd73.css"],import.meta.url).then(r=>new r.BrowserWeb)});export{i as Browser};
