@@ -920,6 +920,24 @@ describe('approved workout logging integration', () => {
       expect(renderToStaticMarkup(tree)).toContain('Test day')
     })
 
+    it('PO 2026-11-15: previewing a new exercise shows per-set reps and no planned bars for a week not started', async () => {
+      harness.catalogue.push({ id: 'smith', name: 'smith', primaryMuscle: 'Chest', equipment: 'machine' } as never)
+      harness.nextBlocks = [{
+        ...harness.block!, id: 'next-block', number: 2, name: 'Next block', startDate: '2026-11-16',
+        days: [{ key: 'chest-back-a', name: 'Next block day', position: 1, exercises: [
+          { code: 'A1', position: 1, exerciseId: 'smith', sets: 4, reps: ['4', '6', '8', '10'], restSeconds: 180, technique: 'reverse-pyramid' },
+        ] }],
+      }]
+      vi.setSystemTime(new Date('2026-11-15T12:00:00Z'))
+      render()
+      await settle()
+      await click('Next week')
+      const html = renderToStaticMarkup(tree)
+      expect(html).toContain('Next block day')
+      expect(html).not.toMatch(/× 4–10/)
+      expect(html).not.toContain(createTranslator('en')('workout.trend.title'))
+    })
+
     it.each(['en', 'es'] as const)('opens next week after a finished week without telling the person to go back (%s)', async language => {
       harness.language = language
       const t = createTranslator(language)
