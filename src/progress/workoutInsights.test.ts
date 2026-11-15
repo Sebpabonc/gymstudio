@@ -6,6 +6,7 @@ import {
   workoutCompletionCounts,
   workoutInsightTally,
   workoutSummaryHeadline,
+  liftSetTrend,
   workoutMuscleSetTotals,
 } from './workoutInsights'
 
@@ -188,5 +189,21 @@ describe('workoutSummaryHeadline (PO 2026-11-15)', () => {
       compared: 0,
       others: [{ key: 'baseline', count: 3 }],
     })
+  })
+})
+
+describe('liftSetTrend (Progress, PO 2026-11-15)', () => {
+  it('returns only logged sessions in the window, oldest first, without a today placeholder', () => {
+    const entries = [
+      { id: '1', exerciseId: 'bench', date: '2026-10-05', sets: [{ id: 'a', weight: 40, reps: 8 }] },
+      { id: '2', exerciseId: 'bench', date: '2026-10-12', sets: [{ id: 'b', weight: 42.5, reps: 8 }] },
+      { id: '3', exerciseId: 'bench', date: '2026-11-20', sets: [{ id: 'c', weight: 45, reps: 8 }] },
+      { id: '4', exerciseId: 'row', date: '2026-10-12', sets: [{ id: 'd', weight: 50, reps: 10 }] },
+    ] as WorkoutEntry[]
+    const trend = liftSetTrend(entries, [], 'bench', '2026-10-01', '2026-11-15')
+    expect(trend.map((session) => [session.date, session.today, session.sets.map((set) => set.weight)])).toEqual([
+      ['2026-10-05', false, [40]],
+      ['2026-10-12', false, [42.5]],
+    ])
   })
 })

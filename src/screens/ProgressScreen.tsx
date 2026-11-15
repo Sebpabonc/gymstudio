@@ -47,6 +47,8 @@ import { baselineSummary, nextSessionWatches, type BaselineSummary } from '../pr
 import type { ProgressStatus } from '../progress/status'
 import { onTabListKeyDown } from '../utils/tabs'
 import { blockStory } from '../progress/blockStory'
+import { liftSetTrend } from '../progress/workoutInsights'
+import SetTrendChart from '../components/SetTrendChart'
 import { StoryConsistency, StoryLifts, StoryMuscles, StoryOverview } from './progress/StoryViews'
 import type { TranslationKey } from '../i18n/en'
 import type {
@@ -804,6 +806,7 @@ export default function ProgressScreen({
     },
     onOpenLift: setSelectedLiftId,
     onTab: setTab,
+    setTrend: (id: string) => liftSetTrend(entries, blocks, id, story.block.startDate.slice(0, 10), story.referenceDate),
   } : null
 
   const renderDetail = () => {
@@ -875,6 +878,11 @@ export default function ProgressScreen({
           <button type="button" className="secondary-button" onClick={() => onOpenExercise(selectedLiftId)}>{t('progress.strength.openExercise')}</button>
         </div>
         <SegmentedRange range={range} onChange={setRange} t={t} />
+        {/* PO 2026-11-15: the workout's "Trend by set" chart leads the lift detail, over the chosen range. */}
+        <section className="card pv3-card ps-detail-trend">
+          <h3>{t('workout.trend.title')}</h3>
+          <SetTrendChart sessions={liftSetTrend(entries, blocks, selectedLiftId, start, end)} language={language} t={t} />
+        </section>
         <section className="card pv3-card">
           <p className="pv3-detail-takeaway">{validPoints.length ? takeaway : t('progress.v3.verdict.insufficient')}</p>
           <p className="pv3-detail-rate">

@@ -6,6 +6,8 @@ import { storyTakeaways, weekdayRhythm } from '../../progress/blockStory'
 import type { MuscleGroup, ProgressV3Tab } from '../../progress/types'
 import { MUSCLE_COMMON_RANGE } from '../../progress/muscles'
 import { PROGRESS_THRESHOLDS } from '../../progress/thresholds'
+import type { WorkoutTrendSession } from '../../progress/workoutInsights'
+import SetTrendChart from '../../components/SetTrendChart'
 
 /*
  * Progress redesign (PO 2026-11-15): each tab answers one question about the block in plain sentences.
@@ -26,6 +28,8 @@ export type StoryViewProps = {
   chip: (exerciseId: string) => string | null
   onOpenLift: (exerciseId: string) => void
   onTab: (tab: ProgressV3Tab) => void
+  /** Logged sessions of a lift in the story block, for "Trend by set". */
+  setTrend: (exerciseId: string) => WorkoutTrendSession[]
 }
 
 const MUSCLE_KEYS: Record<MuscleGroup, TranslationKey> = {
@@ -210,7 +214,7 @@ function liftLine(lift: LiftStory, t: T, language: Language) {
   }
 }
 
-export function StoryLifts({ story, t, language, name, chip, onOpenLift }: StoryViewProps) {
+export function StoryLifts({ story, t, language, name, chip, onOpenLift, setTrend }: StoryViewProps) {
   const groups = GROUP_ORDER
     .map((group) => ({ group, lifts: story.lifts.filter((lift) => lift.group === group) }))
     .filter((item) => item.lifts.length)
@@ -250,6 +254,11 @@ export function StoryLifts({ story, t, language, name, chip, onOpenLift }: Story
                     </span>
                     <Sparkline values={lift.series} muted={group !== 'recent'} label={t('progress.story.sparkLabel', { lift: name(lift.exerciseId) })} />
                   </button>
+                  {/* PO 2026-11-15: the workout's "Trend by set" chart, one tap away on every lift. */}
+                  <details className="workout-trend-details ps-trend">
+                    <summary>{t('workout.trend.title')}</summary>
+                    <SetTrendChart sessions={setTrend(lift.exerciseId)} language={language} t={t} />
+                  </details>
                 </li>
               )
             })}
