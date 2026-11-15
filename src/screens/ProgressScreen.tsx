@@ -46,6 +46,8 @@ import type { WatchObservation } from '../progress/comparison'
 import { baselineSummary, nextSessionWatches, type BaselineSummary } from '../progress/overview'
 import type { ProgressStatus } from '../progress/status'
 import { onTabListKeyDown } from '../utils/tabs'
+import { blockStory } from '../progress/blockStory'
+import { StoryConsistency, StoryLifts, StoryMuscles, StoryOverview } from './progress/StoryViews'
 import type { TranslationKey } from '../i18n/en'
 import type {
   LiftTrend,
@@ -650,6 +652,16 @@ export default function ProgressScreen({
     () => blocks ? blockLiftComparisons(progressEntries, blocks, exercises, activeBlock) : [],
     [progressEntries, blocks, exercises, activeBlock]
   )
+  // Story block: the current block once it has logs, else the latest block with logs (the recap).
+  const story = useMemo(() => {
+    if (!blocks) return null
+    const logged = new Set(entries.map((entry) => entry.blockId).filter(Boolean))
+    const candidates = [...blocks]
+      .filter((block) => logged.has(block.id) && block.startDate.slice(0, 10) <= today)
+      .sort((a, b) => b.startDate.localeCompare(a.startDate))
+    const block = activeBlock && logged.has(activeBlock.id) ? activeBlock : candidates[0]
+    return block ? blockStory(progressEntries, blocks, block, exercises, today) : null
+  }, [blocks, entries, progressEntries, exercises, activeBlock, today])
   const selectedExercise: Exercise | null = selectedLiftId
     ? exerciseById.get(selectedLiftId) ?? { id: selectedLiftId, name: selectedLiftId, primaryMuscle: 'Other' }
     : null
@@ -748,375 +760,51 @@ export default function ProgressScreen({
     : null
   const unlockedMuscleWeeks = muscleData.weeks.filter((week) => week.complete && !week.deload).length
 
-  // One action heading per watch type ("Hit every target rep"), then each lift with the existing evidence line.
-  const nextGroups = nextWatches.reduce<Array<{ code: WatchObservation['code']; watches: WatchObservation[] }>>((groups, watch) => {
-    const last = groups[groups.length - 1]
-    if (last?.code === watch.code && watch.code !== 'W1') last.watches.push(watch)
-    else groups.push({ code: watch.code, watches: [watch] })
-    return groups
-  }, [])
-  const renderNextGroup = (group: (typeof nextGroups)[number]) => (
-    <li key={`${group.code}-${group.watches[0].exerciseId}`} className={`pv3-next-${group.code}`}>
-      <strong>{t(NEXT_KEYS[group.code], formatMessageParams(language, group.watches[0].params))}</strong>
-      {group.watches.map((watch) => (
-        <span key={watch.exerciseId}>
-          {displayName(watch.exerciseId)} <small>· {t(WATCH_KEYS[watch.code], formatMessageParams(language, watch.params))}</small>
-        </span>
-      ))}
-    </li>
-  )
-
-  const consistencyLine = currentAdherence !== null
-    ? t(consistencyData.currentStreak === 1 ? 'progress.v3.overview.consistency.one' : 'progress.v3.overview.consistency', {
-        adherence: formatNumber(language, currentAdherence * 100, { maximumFractionDigits: 0 }),
-        streak: formatNumber(language, consistencyData.currentStreak),
-      })
-    : ''
-
-  const renderBaseline = (summary: BaselineSummary) => {
-    const best = mainLiftIds
-      .map((id) => ({ id, text: weeklyBestCompactText(weeklyBestSummaries.get(id), language, t) }))
-      .find((row) => row.text)
-    return (
-      <section className="card pv3-card pv3-baseline">
-        <h3>{t('progress.v3.baseline.title')}</h3>
-        <p>{t('progress.v3.baseline.body', {
-          sessions: t('progress.v3.unlock.sessions', { count: formatNumber(language, summary.sessions) }),
-        })}</p>
-        <p className="pv3-caption">{t(summary.sessions < summary.target ? 'progress.v3.baseline.caption' : 'progress.v3.baseline.captionSpan')}</p>
-        {best && <p className="pv3-baseline-best"><strong>{displayName(best.id)}</strong> <span>{best.text}</span></p>}
-      </section>
-    )
-  }
-
-  const renderOverview = () => baseline ? renderBaseline(baseline) : (
-    <>
-      <section className={`card pv3-status pv3-status-${status.status}`}>
-        <div className="pv3-status-heading">
-          <strong className="pv3-status-word">{translatedStatus(status.status, t)}</strong>
-          <details className="pv3-info">
-            <summary aria-label={t('progress.v3.status.about')}>ⓘ</summary>
-            <small>{t('progress.v3.status.explainer')}</small>
-          </details>
-        </div>
-        <p>{t('progress.v3.status.reason', {
-          improving: formatNumber(language, status.counts.improving),
-          total: formatNumber(language, status.counts.eligible),
-          held: formatNumber(language, status.counts.held),
-          lower: formatNumber(language, status.counts.lower),
-        })}</p>
-        {consistencyLine && <p>{consistencyLine}</p>}
-      </section>
-
-      <section className="card pv3-card">
-        <h3>{t('progress.v3.yourLifts')}</h3>
-        <ul className="pv3-lift-list">
-          {mainLiftIds.map((id) => {
-            const trend = overviewTrends.get(id)
-            if (!trend) return null
-            const hasVerdict = Boolean(liftTrendEvidence(trend)) && trend.verdict !== 'not-enough-data'
-            const number = (hasVerdict ? rateText(trend, language, t) : '')
-              || weeklyBestCompactText(weeklyBestSummaries.get(id), language, t)
-            return (
-              <li key={id}>
-                <button type="button" className="pv3-lift-row" onClick={() => setSelectedLiftId(id)} aria-label={t('progress.strength.openDetail', { exercise: displayName(id) })}>
-                  <span className="pv3-lift-copy">
-                    <strong>{displayName(id)}</strong>
-                    <span>{translatedVerdict(hasVerdict ? trend.verdict : 'not-enough-data', t)}{number ? ` · ${number}` : ''}</span>
-                  </span>
-                  <span className="pv3-lift-chevron" aria-hidden="true">›</span>
-                </button>
-              </li>
-            )
-          })}
+  const renderSessionLog = () => (
+    <details className="card pv3-card pv3-session-log">
+      <summary>{t('progress.v3.sessionLog')}</summary>
+      {undoEntries && (
+        <p role="status" className="pv3-undo">
+          {t('progress.sessions.deleted', { count: undoEntries.length })}
+          <button type="button" className="text-button" onClick={() => void undoDelete()}>{t('progress.v3.undo')}</button>
+        </p>
+      )}
+      {sessionLog.length ? (
+        <ul className="pv3-session-list">
+          {sessionLog.slice(0, 16).map((session) => (
+            <li key={session.key}>
+              <span><strong>{formatShortDate(language, session.date)}</strong><small>{t('progress.sessions.count', { count: session.entries.length })}</small></span>
+              {confirmSession === session.key
+                ? <span className="pv3-confirm"><span>{t('progress.v3.deleteConfirm')}</span><button type="button" onClick={() => void deleteSession(session)}>{t('progress.v3.delete')}</button><button type="button" onClick={() => setConfirmSession('')}>{t('progress.delete.cancel')}</button></span>
+                : <button type="button" className="text-button" onClick={() => setConfirmSession(session.key)}>{t('progress.v3.delete')}</button>}
+            </li>
+          ))}
         </ul>
-      </section>
-
-      <section className="card pv3-card">
-        <h3>{t('progress.v3.next.title')}</h3>
-        {nextWatches.length
-          ? <ul className="pv3-watch-list pv3-next-list">{nextGroups.map(renderNextGroup)}</ul>
-          : <p className="pv3-caption">{t('progress.v3.summary.empty')}</p>}
-      </section>
-    </>
+      ) : <p className="pv3-caption">{t('progress.v3.sessionLog.empty')}</p>}
+    </details>
   )
 
-  const renderTrends = () => {
-    const currentAdherenceText = currentAdherence === null ? '—' : `${formatNumber(language, currentAdherence * 100, { maximumFractionDigits: 0 })}%`
-    const previousAdherenceText = previousAdherence === null ? '—' : `${formatNumber(language, previousAdherence * 100, { maximumFractionDigits: 0 })}%`
-    const mainChangeText = averageMainChange === null ? '—' : `${averageMainChange > 0 ? '+' : ''}${formatNumber(language, averageMainChange, { maximumFractionDigits: 1 })}%`
-    const currentOverloadText = overload?.rate === null || overload?.rate === undefined ? '—' : `${formatNumber(language, Math.round(overload.rate * 100))}%`
-    const previousOverloadText = previousOverload.rate === null ? '—' : `${formatNumber(language, Math.round(previousOverload.rate * 100))}%`
-    const previousLabel = (value: string) => t('progress.v3.trends.previous', { value })
-    // A chip is only a comparison when both periods have a value; "Previous: —" chips are hidden (PO 2026-11-07).
-    // Main-lift strength is already a change between the two periods, so it has no "previous" line.
-    const compareChips = [
-      { label: t('progress.v3.trends.trainingDays'), current: formatNumber(language, currentDays), previous: previousDays ? formatNumber(language, previousDays) : '—' },
-      { label: t('progress.v3.trends.adherence'), current: currentAdherenceText, previous: previousAdherenceText },
-      { label: t('progress.v3.trends.mainLift'), current: mainChangeText, previous: null },
-      { label: t('progress.v3.trends.overload'), current: currentOverloadText, previous: previousOverloadText },
-    ].filter((chip) => chip.previous === null ? chip.current !== '—' : chip.previous !== '—')
-      .map((chip) => ({ ...chip, previous: chip.previous === null ? '' : previousLabel(chip.previous) }))
-    const showPreviousBlock = blockComparisons.some((row) => !row.newInBlock)
-    const windowStart = rangeStart(range, today, activeBlock, progressEntries)
-    const windowEnd = rangeEnd(range, today, activeBlock)
-    const rangeLiftIds = [...new Set([...mainLiftIds, ...allLiftIds])]
-      .filter((id) => (historyByLift.get(id) ?? []).some((session) => session.date >= windowStart && session.date <= windowEnd))
-    return (
-      <>
-        {/* Always a fixed 4-week comparison, so it sits above the range control that drives the cards below. */}
-        <section className="card pv3-card">
-          <h3>{t('progress.v3.trends.compare')}</h3>
-          {compareChips.length
-            ? <div className="pv3-chip-grid">
-              {compareChips.map((chip) => <MetricChip key={chip.label} label={chip.label} current={chip.current} previous={chip.previous} />)}
-            </div>
-            : <p className="pv3-caption">{t('progress.v3.trends.compareEmpty')}</p>}
-        </section>
-        <SegmentedRange range={range} onChange={setRange} t={t} />
-        <section className="card pv3-card">
-          <h3>{t('progress.v3.trends.strength')}</h3>
-          {mainLiftIds.map((id) => {
-            const trend = trends.get(id)
-            if (!trend) return null
-            return (
-              <button type="button" className="pv3-trend-lift" key={id} onClick={() => setSelectedLiftId(id)}>
-                <span className="pv3-trend-heading"><strong>{displayName(id)}</strong><span>{translatedVerdict(trend.verdict, t)}</span></span>
-                {trend.verdict !== 'not-enough-data' && <span className="pv3-trend-detail">{rateText(trend, language, t)}{rateText(trend, language, t) ? ' · ' : ''}{t(`progress.v3.confidence.${trend.confidence === 'based-on' ? 'basedOn' : trend.confidence ?? 'early'}`, { count: formatNumber(language, trend.points.filter((point) => !point.deload).length) })}</span>}
-                <MiniTrendChart trend={trend} t={t} exercise={displayName(id)} language={language} />
-              </button>
-            )
-          })}
-          <p className="pv3-caption">{t('progress.v3.trends.rawLegend')}</p>
-        </section>
-        <section className="card pv3-card">
-          <h3>{t('progress.v3.trends.blockCompare')}</h3>
-          {blockComparisons.length ? (
-            <div className="pv3-table-wrap">
-              <table className={showPreviousBlock ? 'pv3-table pv3-table-with-previous' : 'pv3-table'}>
-                <thead><tr>
-                  <th>{t('progress.strength.exercise')}</th>
-                  {showPreviousBlock && <th>{t('progress.v3.trends.previousBlock')}</th>}
-                  <th>{t('progress.v3.trends.blockStart')}</th>
-                  <th>{t('progress.v3.trends.blockEnd')}</th>
-                </tr></thead>
-                <tbody>
-                  {blockComparisons.map((row) => (
-                    <tr key={row.exerciseId}>
-                      <th scope="row">{displayName(row.exerciseId)}</th>
-                      {showPreviousBlock && <td data-label={t('progress.v3.trends.previousBlock')}>{row.newInBlock ? t('progress.v3.trends.newBlock') : bestSetText(language, row.previousEndBestSet)}</td>}
-                      <td data-label={t('progress.v3.trends.blockStart')}>{bestSetText(language, row.startBestSet)}</td>
-                      <td data-label={t('progress.v3.trends.blockEnd')}>
-                        {bestSetText(language, row.endBestSet)}
-                        {row.changePercent !== null && <small className="pv3-table-change"> {row.changePercent > 0 ? '+' : ''}{formatNumber(language, row.changePercent, { maximumFractionDigits: 1 })}%</small>}
-                        {row.differentRepTarget && <small className="pv3-table-note">{t('progress.v3.trends.differentTarget')}</small>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : <p className="pv3-caption">{t('progress.v3.unlock.secondBlock')}</p>}
-          {blockComparisons.length > 0 && !showPreviousBlock && <p className="pv3-caption">{t('progress.v3.trends.allNew')}</p>}
-          <p className="pv3-caption">{t('progress.v3.trends.blockNote')}</p>
-        </section>
-        <section className="card pv3-card">
-          <h3>{t('progress.v3.trends.allExercises')}</h3>
-          <ul className="pv3-all-exercises">
-            {rangeLiftIds.map((id) => {
-              const trend = trends.get(id)
-              return (
-                <li key={id}>
-                  <button type="button" onClick={() => setSelectedLiftId(id)}>
-                    <span>{displayName(id)}</span>
-                    <strong>{trend ? translatedVerdict(trend.verdict, t) : '—'}</strong>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-          {!rangeLiftIds.length && <p className="empty-state">{t('progress.v3.verdict.insufficient')}</p>}
-        </section>
-      </>
-    )
-  }
-
-  const renderMuscles = () => {
-    const startDate = rangeStart(range, today, activeBlock, progressEntries)
-    const selectedWeeks = (muscles?.weeks ?? []).filter((week) => week.weekStart >= startDate)
-    const visibleWeeks = selectedWeeks.slice(-12)
-    const groupNames = muscles?.groups ?? []
-    const weekBlock = (weekStart: string) => {
-      const weekTime = dateValue(weekStart)
-      return blocks.find((block) =>
-        weekTime < dateValue(block.startDate) + block.weeks * 7 * 86_400_000
-        && weekTime + 7 * 86_400_000 > dateValue(block.startDate)
-      )
-    }
-    const weekNumberLabel = (weekStart: string) => {
-      const block = weekBlock(weekStart)
-      return block
-        ? `${t('progress.v3.muscles.week')}${formatNumber(language, Math.max(1, Math.floor((dateValue(weekStart) - dateValue(block.startDate)) / (7 * 86_400_000)) + 1))}`
-        : formatShortDate(language, weekStart)
-    }
-    // Block names are shown once for the whole chart instead of wrapping inside a narrow week column.
-    const blockStarts = visibleWeeks.flatMap((week) => {
-      const block = weekBlock(week.weekStart)
-      const weekTime = dateValue(week.weekStart)
-      return block && dateValue(block.startDate) >= weekTime && dateValue(block.startDate) < weekTime + 7 * 86_400_000
-        ? [{ key: `${block.id}-${week.weekStart}`, text: t('progress.v3.muscles.blockStart', { week: weekNumberLabel(week.weekStart), block: block.name }) }]
-        : []
-    })
-    return (
-      <>
-        <SegmentedRange range={range} onChange={setRange} t={t} />
-        <section className="card pv3-card">
-          <h3>{t('progress.v3.muscles.title')}</h3>
-          <p className="pv3-caption">{t('progress.v3.muscles.legend')}</p>
-          <p className="pv3-caption">{t('progress.v3.muscles.scale')}</p>
-          {blockStarts.map((item) => <p className="pv3-caption pv3-block-start" key={item.key}>{item.text}</p>)}
-          {groupNames.length ? groupNames.map((group) => {
-            const average = muscles?.averages[group]
-            const title = t(MUSCLE_KEYS[group])
-            return (
-              <article className="pv3-muscle-row" key={group}>
-                <h4>{title}</h4>
-                <>
-                  <Gauge
-                    value={average ?? null}
-                    label={t('progress.v3.muscles.common')}
-                    averageLabel={t('progress.v3.muscles.average')}
-                    language={language}
-                  />
-                  {average !== undefined
-                    ? <>
-                      <p className="pv3-muscle-takeaway">{t('progress.v3.muscles.takeaway', {
-                        muscle: title,
-                        sets: formatNumber(language, average, { maximumFractionDigits: 1 }),
-                        range: t(average < MUSCLE_COMMON_RANGE.min
-                          ? 'progress.v3.muscles.belowRange'
-                          : average > MUSCLE_COMMON_RANGE.max
-                            ? 'progress.v3.muscles.aboveRange'
-                            : 'progress.v3.muscles.insideRange'),
-                      })}</p>
-                    </>
-                    : <p className="pv3-caption">{t('progress.v3.muscles.unlock', { count: formatNumber(language, Math.min(unlockedMuscleWeeks, 4)) })}</p>}
-                </>
-                <div className="pv3-week-bars" style={{ gridTemplateColumns: `repeat(${Math.max(visibleWeeks.length, 1)}, minmax(0, 1fr))` }}>
-                  {visibleWeeks.map((week) => {
-                    const value = week.values[group] ?? 0
-                    return (
-                      <div className="pv3-week-column" key={`${group}-${week.weekStart}`} title={`${weekDateLabel(language, week.weekStart)}: ${formatNumber(language, value)}`}>
-                        <strong>{value ? formatNumber(language, value, { maximumFractionDigits: 1 }) : '–'}</strong>
-                        <div className="pv3-week-track">
-                          <span className="pv3-week-band" />
-                          <span
-                            className={week.deload ? 'pv3-week-fill pv3-week-deload' : 'pv3-week-fill'}
-                            style={{ height: `${Math.min(value / 30, 1) * 100}%` }}
-                          />
-                        </div>
-                        <small>{weekNumberLabel(week.weekStart)}</small>
-                        <small>{week.deload
-                          ? t('progress.v3.muscles.deload')
-                          : value === 0
-                            ? t(week.complete ? 'progress.v3.muscles.noTraining' : 'progress.v3.muscles.thisWeek')
-                            : formatShortDate(language, week.weekStart)}</small>
-                      </div>
-                    )
-                  })}
-                </div>
-              </article>
-            )
-          }) : <p className="empty-state">{t('progress.v3.verdict.insufficient')}</p>}
-          <p className="pv3-caption">{t('progress.v3.muscles.note')}</p>
-        </section>
-      </>
-    )
-  }
-
-  const renderConsistency = () => {
-    const weeksText = (count: number) => t(count === 1 ? 'progress.v3.consistency.weeks.one' : 'progress.v3.consistency.weeks.other', {
-      count: formatNumber(language, count),
-    })
-    const blockForWeek = (weekStart: string) => blocks.find((item) => {
-      const startTime = dateValue(item.startDate)
-      return dateValue(weekStart) >= startTime && dateValue(weekStart) < startTime + item.weeks * 7 * 86_400_000
-    })
-    return (
-    <>
-      <section className="card pv3-card">
-        <h3>{t('progress.v3.consistency.title')}</h3>
-        {consistencyData.adherenceFourWeeks === null
-          ? <p className="pv3-caption">{t('progress.v3.consistency.unlock', { count: formatNumber(language, completeWeeks.length) })}</p>
-          : <div className="pv3-consistency-summary">
-              <div><strong>{weeksText(consistencyData.currentStreak)}</strong><span>{t('progress.v3.consistency.currentStreak')}</span></div>
-              <div><strong>{weeksText(consistencyData.longestStreak)}</strong><span>{t('progress.v3.consistency.longestStreak')}</span></div>
-              <div><strong>{formatNumber(language, consistencyData.adherenceFourWeeks * 100, { maximumFractionDigits: 0 })}%</strong><span>{t('progress.v3.consistency.adherence4w')}</span></div>
-            </div>}
-        <div className="pv3-consistency-weeks">
-          {consistencyData.weeks.slice(-12).map((week, index, list) => {
-            const block = blockForWeek(week.weekStart)
-            const previousBlock = index > 0 ? blockForWeek(list[index - 1].weekStart) : undefined
-            const percent = week.adherence === null ? null : Math.round(week.adherence * 100)
-            return (
-              <React.Fragment key={week.weekStart}>
-              {block && block.id !== previousBlock?.id && <h4 className="pv3-consistency-block">{block.name}</h4>}
-              <div className="pv3-consistency-week">
-                <div className="pv3-consistency-week-label">
-                  <strong>{t('progress.v3.consistency.week', { number: block ? Math.max(1, Math.floor((dateValue(week.weekStart) - dateValue(block.startDate)) / (7 * 86_400_000)) + 1) : formatShortDate(language, week.weekStart) })}</strong>
-                </div>
-                <div className="pv3-day-dots" aria-label={week.plannedDays ? t('progress.v3.consistency.days', {
-                  done: week.loggedPlannedDays,
-                  planned: week.plannedDays,
-                  percent: percent ?? 0,
-                }) : t('progress.v3.consistency.sessions', { count: week.sessions })}>
-                  {Array.from({ length: Math.min(week.plannedDays || Math.max(week.sessions, 1), 8) }, (_, index) => (
-                    <span key={index} className={index < week.loggedPlannedDays ? 'done' : ''} />
-                  ))}
-                </div>
-                <span className="pv3-consistency-value">
-                  {week.complete
-                    ? t('progress.v3.consistency.days', {
-                        done: week.loggedPlannedDays,
-                        planned: week.plannedDays,
-                        percent: percent ?? 0,
-                      })
-                    : t('progress.v3.consistency.currentDays', {
-                        done: week.loggedPlannedDays,
-                        planned: week.plannedDays,
-                      })}
-                </span>
-                {week.sessions > week.loggedPlannedDays && <small>{t('progress.v3.consistency.sessions', { count: week.sessions })}</small>}
-              </div>
-              </React.Fragment>
-            )
-          })}
-        </div>
-      </section>
-      <details className="card pv3-card pv3-session-log">
-        <summary>{t('progress.v3.sessionLog')}</summary>
-        {undoEntries && (
-          <p role="status" className="pv3-undo">
-            {t('progress.sessions.deleted', { count: undoEntries.length })}
-            <button type="button" className="text-button" onClick={() => void undoDelete()}>{t('progress.v3.undo')}</button>
-          </p>
-        )}
-        {sessionLog.length ? (
-          <ul className="pv3-session-list">
-            {sessionLog.slice(0, 16).map((session) => (
-              <li key={session.key}>
-                <span><strong>{formatShortDate(language, session.date)}</strong><small>{t('progress.sessions.count', { count: session.entries.length })}</small></span>
-                {confirmSession === session.key
-                  ? <span className="pv3-confirm"><span>{t('progress.v3.deleteConfirm')}</span><button type="button" onClick={() => void deleteSession(session)}>{t('progress.v3.delete')}</button><button type="button" onClick={() => setConfirmSession('')}>{t('progress.delete.cancel')}</button></span>
-                  : <button type="button" className="text-button" onClick={() => setConfirmSession(session.key)}>{t('progress.v3.delete')}</button>}
-              </li>
-            ))}
-          </ul>
-        ) : <p className="pv3-caption">{t('progress.v3.sessionLog.empty')}</p>}
-      </details>
-    </>
-  )
-  }
+  const storyTrends = new Map(story
+    ? planMainLifts(story.block, progressEntries, exercises).map((id) => [
+        id,
+        liftTrend(progressEntries, blocks, exerciseById.get(id), 'block', story.block, today),
+      ])
+    : [])
+  const storyStatus = overallProgressStatus([...storyTrends.values()].map((trend) => trend.verdict))
+  const storyProps = story ? {
+    story,
+    t,
+    language,
+    name: displayName,
+    verdicts: { improving: storyStatus.counts.improving, eligible: storyStatus.counts.eligible },
+    chip: (id: string) => {
+      const trend = storyTrends.get(id)
+        ?? liftTrend(progressEntries, blocks, exerciseById.get(id) ?? { id, name: id, primaryMuscle: 'Other' }, 'block', story.block, today)
+      return translatedVerdict(trend.verdict, t)
+    },
+    onOpenLift: setSelectedLiftId,
+    onTab: setTab,
+  } : null
 
   const renderDetail = () => {
     if (!selectedExercise || !selectedTrend) return null
@@ -1269,13 +957,15 @@ export default function ProgressScreen({
     )
   }
 
-  const content = tab === 'overview'
-    ? renderOverview()
-    : tab === 'trends'
-      ? renderTrends()
-      : tab === 'muscles'
-        ? renderMuscles()
-        : renderConsistency()
+  const content = !storyProps
+    ? <section className="card ps-card"><p className="pv3-caption">{t('progress.insight.empty')}</p></section>
+    : tab === 'overview'
+      ? <StoryOverview {...storyProps} />
+      : tab === 'trends'
+        ? <StoryLifts {...storyProps} />
+        : tab === 'muscles'
+          ? <StoryMuscles {...storyProps} />
+          : <><StoryConsistency {...storyProps} />{renderSessionLog()}</>
 
   return (
     <div className="progress-v3">

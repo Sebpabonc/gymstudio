@@ -1,7 +1,7 @@
 export const progressV3 = {
   en: {
     'progress.v3.tab.overview': 'Overview',
-    'progress.v3.tab.trends': 'Trends',
+    'progress.v3.tab.trends': 'Lifts',
     'progress.v3.tab.muscles': 'Muscles',
     'progress.v3.tab.consistency': 'Consistency',
     'progress.v3.range.label': 'Trend range',
@@ -153,7 +153,7 @@ export const progressV3 = {
   },
   es: {
     'progress.v3.tab.overview': 'Resumen',
-    'progress.v3.tab.trends': 'Tendencias',
+    'progress.v3.tab.trends': 'Ejercicios',
     'progress.v3.tab.muscles': 'Músculos',
     'progress.v3.tab.consistency': 'Constancia',
     'progress.v3.range.label': 'Rango de tendencia',

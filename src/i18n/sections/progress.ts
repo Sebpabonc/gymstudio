@@ -1,4 +1,5 @@
 import { progressV3 } from './progressV3'
+import { progressStory } from './progressStory'
 
 export const progress = {
   en: {
@@ -191,6 +192,7 @@ export const progress = {
     'progress.consistency.grid': '12-week training consistency',
     'progress.section.sessionLog': 'Session log',
     ...progressV3.en,
+    ...progressStory.en,
   },
   es: {
     'progress.unit.kg': 'kg',
@@ -382,5 +384,6 @@ export const progress = {
     'progress.consistency.grid': 'Constancia en 12 semanas',
     'progress.section.sessionLog': 'Registro de sesiones',
     ...progressV3.es,
+    ...progressStory.es,
   },
 }

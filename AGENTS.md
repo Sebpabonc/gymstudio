@@ -112,9 +112,9 @@ behaviour just because an agent wrote it. See `docs/fitness/README.md`.
 
 - **PT / Fitness Expert** is a Claude subagent: `.claude/agents/pt-fitness-expert.md`.
   It writes only to `docs/fitness/drafts/` using `docs/fitness/TEMPLATE.md`.
-- Flow: PT draft → Sebas approves the content → Tech Lead moves it to
-  `docs/fitness/approved/` (status `approved`, approver + date) → Tech Lead writes
-  the Issue → Copilot implements.
+- Flow: PT draft → the Tech Lead reviews and approves the content (PO 2026-11-15: approvals go
+  through the crew, not to Sebas) → Tech Lead moves it to `docs/fitness/approved/` (status
+  `approved`, approver + date) → Tech Lead writes the Issue → Copilot implements.
 - Copilot must never implement fitness content that is not in `approved/`.
 
 ## Security
