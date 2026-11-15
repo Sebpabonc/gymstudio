@@ -5,6 +5,7 @@ import {
   buildWorkoutSetTrend,
   workoutCompletionCounts,
   workoutInsightTally,
+  workoutSummaryHeadline,
   workoutMuscleSetTotals,
 } from './workoutInsights'
 
@@ -171,3 +172,21 @@ describe('workout set trend data', () => {
   })
 })
 
+
+describe('workoutSummaryHeadline (PO 2026-11-15)', () => {
+  it('counts improved out of the compared lifts and lists only the other non-zero counts', () => {
+    expect(workoutSummaryHeadline({ improved: 4, same: 1, lower: 1, mixed: 0, baseline: 2 })).toEqual({
+      improved: 4,
+      compared: 6,
+      others: [{ key: 'same', count: 1 }, { key: 'lower', count: 1 }, { key: 'baseline', count: 2 }],
+    })
+  })
+
+  it('has nothing to compare when every lift is a first time', () => {
+    expect(workoutSummaryHeadline({ improved: 0, same: 0, lower: 0, mixed: 0, baseline: 3 })).toEqual({
+      improved: 0,
+      compared: 0,
+      others: [{ key: 'baseline', count: 3 }],
+    })
+  })
+})

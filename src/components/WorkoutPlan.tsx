@@ -83,6 +83,7 @@ import {
   buildWorkoutSetTrend,
   workoutCompletionCounts,
   workoutInsightTally,
+  workoutSummaryHeadline,
   workoutMuscleSetTotals,
 } from '../progress/workoutInsights'
 import type { WorkoutExerciseInsight } from '../progress/workoutInsights'
@@ -5578,17 +5579,24 @@ export default function WorkoutPlan({
                 <span>{t('workout.completed.exercises')}</span>
               </div>
             </div>
-            <div className="workout-completed-tally" aria-label={t('workout.completed.insights')}>
-              {([
-                ['improved', '↑', sessionSummary.tally.improved],
-                ['same', '→', sessionSummary.tally.same],
-                ['lower', '↓', sessionSummary.tally.lower],
-                ['mixed', '↕', sessionSummary.tally.mixed],
-                ['baseline', '●', sessionSummary.tally.baseline],
-              ] as const).map(([key, icon, count]) => (
-                <span key={key}><strong aria-hidden="true">{icon}</strong>{formatNumber(language, count)} {t(`workout.insight.${key}` as TranslationKey)}</span>
-              ))}
-            </div>
+            {(() => {
+              const headline = workoutSummaryHeadline(sessionSummary.tally)
+              return (
+                <div className="workout-completed-headline">
+                  {headline.improved > 0 && (
+                    <strong>{t('workout.completed.headline', {
+                      improved: formatNumber(language, headline.improved),
+                      compared: formatNumber(language, headline.compared),
+                    })}</strong>
+                  )}
+                  {headline.others.length > 0 && (
+                    <span>{headline.others.map(({ key, count }) =>
+                      t(`workout.completed.count.${key}` as TranslationKey, { count: formatNumber(language, count) })
+                    ).join(' · ')}</span>
+                  )}
+                </div>
+              )
+            })()}
             <section className="workout-completed-muscles">
               <h3>{t('workout.completed.muscles')}</h3>
               <p>{sessionSummary.muscleTotals.map(({ muscle, sets }) =>
@@ -5597,6 +5605,7 @@ export default function WorkoutPlan({
             </section>
             <section className="workout-completed-insights">
               <h3>{t('workout.completed.insights')}</h3>
+              <p className="workout-completed-hint">{t('workout.completed.showDetail')}</p>
               <ul>
                 {sessionSummary.insights.map(({ exercise, insight }, index) => {
                   const plannedExercise = activeExercises.find((item) => item.exerciseId === exercise.id)
@@ -5615,7 +5624,7 @@ export default function WorkoutPlan({
                       ?.days.find((day) => day.key === insight.previous?.dayKey)?.name ?? sessionSummary.dayName
                     : ''
                   const basis = insight.previous
-                    ? t('workout.insight.workingBasis', {
+                    ? t('workout.insight.basis', {
                         date: formatWeekdayDate(language, `${insight.previous.date}T00:00:00Z`),
                         day: previousDay,
                       }) + (plannedExercise?.technique === 'drop-set' ? t('workout.insight.mainPart') : '')
@@ -5637,22 +5646,25 @@ export default function WorkoutPlan({
                   )
                   return (
                     <li key={exercise.id} className={index === sessionSummary.insights.length - 1 ? 'just-now' : ''}>
-                      <strong>
-                        <span aria-hidden="true">{icon}</span> {displayExerciseName(exercise)} · {t(verdictKey as TranslationKey)}
-                        {index === sessionSummary.insights.length - 1 && <small>{t('workout.completed.justNow')}</small>}
-                      </strong>
-                      <p>{formatWorkoutInsightLine(insight, sessionSummary.dayName, language, t)}</p>
-                      {basis && <small>{basis}</small>}
-                      {estMaxInsightLine && <StrengthInsightLine line={estMaxInsightLine} id={`${exercise.id}-strength`} t={t} />}
-                      {watch && <small className="workout-insight-watch">{watch}</small>}
-                      <details className="workout-trend-details" open={trendOpen} onToggle={(event) => {
-                        const next = event.currentTarget.open
-                        setTrendOpen(next)
-                        saveWorkoutTrendOpen(next)
-                      }}>
-                        <summary>{t('workout.trend.title')}</summary>
-                        <SetTrendChart sessions={buildWorkoutSetTrend(history, trainingBlocks, exercise.id, sessionSummary.date, [])}
-                          language={language} t={t} />
+                      <details className="workout-completed-exercise">
+                        <summary>
+                          <span className={`workout-completed-verdict ${verdict}`} aria-hidden="true">{icon}</span>
+                          <span className="workout-completed-exercise-text">
+                            <strong>
+                              {displayExerciseName(exercise)}
+                              <span className="sr-only"> · {t(verdictKey as TranslationKey)}</span>
+                              {index === sessionSummary.insights.length - 1 && <small>{t('workout.completed.justNow')}</small>}
+                            </strong>
+                            <span>{formatWorkoutInsightLine(insight, sessionSummary.dayName, language, t)}</span>
+                          </span>
+                        </summary>
+                        <div className="workout-completed-exercise-detail">
+                          {basis && <small>{basis}</small>}
+                          {estMaxInsightLine && <StrengthInsightLine line={estMaxInsightLine} id={`${exercise.id}-strength`} t={t} />}
+                          {watch && <small className="workout-insight-watch">{watch}</small>}
+                          <SetTrendChart sessions={buildWorkoutSetTrend(history, trainingBlocks, exercise.id, sessionSummary.date, [])}
+                            language={language} t={t} />
+                        </div>
                       </details>
                     </li>
                   )

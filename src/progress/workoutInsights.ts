@@ -84,6 +84,15 @@ export function workoutInsightTally(insights: WorkoutExerciseInsight[]): Workout
   }, { improved: 0, same: 0, lower: 0, mixed: 0, baseline: 0 })
 }
 
+/** Glanceable summary (PO 2026-11-15): "Better on X of Y" plus the other non-zero counts. Y excludes first-time lifts. */
+export function workoutSummaryHeadline(tally: WorkoutInsightTally) {
+  const compared = tally.improved + tally.same + tally.lower + tally.mixed
+  const others = (['same', 'lower', 'mixed', 'baseline'] as const)
+    .filter((key) => tally[key] > 0)
+    .map((key) => ({ key, count: tally[key] }))
+  return { improved: tally.improved, compared, others }
+}
+
 export function workoutCompletionCounts(
   entries: WorkoutEntry[],
   plannedExercises: number,
