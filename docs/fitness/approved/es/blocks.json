@@ -564,7 +564,7 @@
       },
       {
         "title": "Cómo progresar",
-        "body": "La semana 1 es más ligera: termina cada serie a unas 3 reps del fallo, sáltate la última serie de cada ejercicio y todos los extras. Desde la semana 2, progresa el peso de cada serie de la pirámide por separado, subiendo un poco cuando completes sus reps limpias. Sube cada ejercicio de superserie cuando completes todas sus reps. La semana 6 siempre es de descarga: la mitad de las series, sin extras."
+        "body": "La semana 1 es más ligera: termina cada serie a unas 3 reps del fallo, sáltate la última serie de cada ejercicio y todos los extras. Desde la semana 2, termina cada serie de la pirámide a 1-3 reps del fallo y progresa su peso por separado, subiendo un poco cuando completes sus reps limpias. Sube cada ejercicio de superserie cuando completes todas sus reps. La semana 6 siempre es de descarga: la mitad de las series, sin extras."
       },
       {
         "title": "Qué esperar",
@@ -606,12 +606,10 @@
       "chest-back-a/D1": "Última serie: rest-pause, 15 s y 2 mini-series.",
       "chest-back-a/E1": "Pausa de 2 s en el estiramiento detrás de la cabeza.",
       "arms-a/B1": "Última serie: myo-reps, 3 mini-series de 4, 5 respiraciones de pausa.",
-      "arms-a/F1": "Reps por brazo; baja el peso un 25% y sigue sin descanso.",
+      "arms-a/F1": "Última serie: suma 4-6 medias reps en el estiramiento.",
       "lower-body-a/A1": "Serie final de 6 con 1-2 reps en reserva; pon los topes de seguridad.",
       "lower-body-a/B1": "Las reps son por pierna.",
       "lower-body-a/C1": "Puntas arriba, un poco afuera. Última serie: 5 medias reps abajo.",
-      "lower-body-a/D2": "Puntas hacia arriba (dorsiflexión), apuntando al frente.",
-      "lower-body-a/E1": "Última serie: myo-reps, 3 mini-series de 5, 5 respiraciones de pausa.",
       "chest-back-b/D2": "Pausa de 2 s en el estiramiento detrás de la cabeza.",
       "arms-b/D1": "Última serie: suma 4-6 medias reps abajo.",
       "arms-b/E1": "Las reps son por brazo.",
@@ -619,7 +617,13 @@
       "lower-body-b/B2": "Puntas hacia arriba (dorsiflexión), un poco hacia afuera.",
       "lower-body-b/C1": "Sube el peso cada serie mientras bajan las reps.",
       "lower-body-b/D1": "Puntas hacia arriba; baja en 3 segundos en cada rep.",
-      "lower-body-b/E1": "Pausa de 2 s en el estiramiento profundo de abajo, en cada rep."
+      "lower-body-b/E1": "Pausa de 2 s en el estiramiento profundo de abajo, en cada rep.",
+      "arms-a/A1": "Para cada serie a 1-3 reps del fallo, no solo la última.",
+      "arms-b/A1": "Para cada serie a 1-3 reps del fallo, no solo la última.",
+      "lower-body-b/A1": "Para cada serie a 1-3 reps del fallo, no solo la última.",
+      "lower-body-a/D1": "Baja en 3 segundos hasta un buen estiramiento del femoral.",
+      "lower-body-a/E1": "Puntas hacia arriba (dorsiflexión), apuntando al frente.",
+      "lower-body-a/F1": "Última serie: myo-reps, 3 mini-series de 5, 5 respiraciones de pausa."
     }
   },
   "block-2027-02-08-hypertrophy-reverse-pyramid-iii": {
@@ -704,7 +708,8 @@
       "lower-body-b/B1": "Puntas hacia arriba (dorsiflexión), apuntando al frente.",
       "lower-body-b/B2": "Las reps son por pierna.",
       "lower-body-b/D1": "Última serie: suma 6 medias reps abajo (estiramiento profundo).",
-      "lower-body-b/E1": "Sostén un disco en el pecho cuando tu peso corporal sea fácil."
+      "lower-body-b/E1": "Sostén un disco en el pecho cuando tu peso corporal sea fácil.",
+      "lower-body-a/C1": "Baja en 3 segundos hasta un buen estiramiento del femoral."
     }
   }
 }

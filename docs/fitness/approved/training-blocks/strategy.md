@@ -139,6 +139,11 @@ intensity — so no two consecutive blocks use the same method. Each block chang
   10-12-15-20 (B) and drop sets 12+12 (A) / 15+15 (B), using the strength from block 7. New: flat
   barbell bench, 15° low-incline flies, barbell T-bar row, 45° chest-supported dumbbell row, 60°
   incline curls, standing overhead press, front squat, Smith hip thrust.
+- **Evidence audit (2026-11-15, `approved/2026-11-15-blocks-7-9-evidence-audit.md`).** Block 7: seated leg curl,
+  90 s on the chest-supported row. Block 8: Romanian deadlift + seated leg curl on Lower A (hamstrings 6 → 11 sets),
+  overhead triceps instead of kickbacks, 4 sets of Y-raises, every pyramid set 1-3 reps short of failure, Smith squat
+  B pyramid 15-12-10-8. Block 9: Romanian deadlift on Lower A, 4 sets of leg curls on Lower B and of cable laterals,
+  front squat B reps capped at 15.
 
 ## Bench angle strategy
 

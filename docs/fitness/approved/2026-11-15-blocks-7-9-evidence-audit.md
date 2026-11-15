@@ -411,6 +411,10 @@ All exercises are existing catalogue ids; no NEW ids. Posture tips: see the appr
 
 ## Applied (Tech Lead, 2026-11-15)
 - Block 7 changes 1-3 (seated leg curl, chest-supported row rest 90 s, Goal text EN/ES): migration 037.
-- Blocks 8-9 changes: applied in a follow-up before Block 8 starts (28 Dec).
+- Blocks 8-9 changes 4, 6, 7, 8, 9, 11, 12 and 13: migration 038. Change 12 uses 10-12-14-15 (the validator needs
+  rising reps in a reverse pyramid; still capped at 15).
+- Not yet applied: change 5 (Block 8 week 1 keeps all sets) needs an engine change, because the app treats Block 8
+  week 1 as a deload (legacy rule in src/progress/thresholds.ts and the trainer); decide with the PT before 28 Dec.
+  Changes 10 and 14 (arm finishers in Blocks 8-9) wait for Block 7 Arms B attendance.
 - Attendance: Option A (6-day rotation, never skip a leg day) stays the default; Option B is kept as a ready proposal.
 - Flexible deload (R4): decided by week 5 of Block 7.
