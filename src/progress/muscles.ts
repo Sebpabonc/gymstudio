@@ -51,7 +51,7 @@ function blankValues(): Record<MuscleGroup, number> {
   }
 }
 
-function muscleCredits(exercise: Exercise | undefined) {
+export function muscleCredits(exercise: Exercise | undefined) {
   const primary = exercise?.primaryMuscles ?? (exercise?.primaryMuscle ? [exercise.primaryMuscle] : [])
   const secondary = exercise?.secondaryMuscles ?? (exercise?.secondaryMuscle ? [exercise.secondaryMuscle] : [])
   const credits: Partial<Record<MuscleGroup, number>> = {}

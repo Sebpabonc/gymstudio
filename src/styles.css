@@ -11429,3 +11429,384 @@ body {
   padding-right: var(--workout-bleed, 16px);
   padding-left: var(--workout-bleed, 16px);
 }
+
+/* Progress story (PO 2026-11-15): one question per tab, plain sentences, neutral colours. */
+.ps-hero {
+  display: grid;
+  gap: 10px;
+  background: var(--brand-soft);
+}
+
+.ps-hero h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.ps-hero p {
+  margin: 0;
+  color: var(--muted-strong);
+  line-height: 1.45;
+}
+
+.ps-eyebrow {
+  color: var(--muted-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ps-card {
+  display: grid;
+  gap: 10px;
+}
+
+.ps-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.ps-card p {
+  margin: 0;
+}
+
+.ps-info {
+  font-size: 0.82rem;
+}
+
+.ps-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ps-tiles.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ps-tile {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ps-tile strong {
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-tile span {
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+}
+
+.ps-takeaways,
+.ps-lift-list,
+.ps-muscle-list,
+.ps-daytype-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ps-takeaway {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 12px;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ps-takeaways li:first-child .ps-takeaway {
+  border-top: 0;
+}
+
+.ps-takeaway strong {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.ps-take-number {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.ps-chevron {
+  color: var(--muted-strong);
+}
+
+.ps-week-bars {
+  display: grid;
+  gap: 8px;
+  align-items: end;
+}
+
+.ps-week-bars > div {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.ps-week-bars span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-week-bars i {
+  width: 100%;
+  border-radius: 6px;
+  background: var(--brand);
+}
+
+.ps-week-bars .deload i {
+  opacity: 0.45;
+}
+
+.ps-week-bars small {
+  color: var(--muted-strong);
+  font-size: 0.7rem;
+}
+
+.ps-lift {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ps-lift-list li:first-child .ps-lift {
+  border-top: 0;
+}
+
+.ps-lift-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ps-lift-copy > span {
+  color: var(--muted-strong);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.ps-lift-copy > .ps-lift-sets {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-chip {
+  justify-self: start;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+}
+
+.ps-spark polyline {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.ps-spark circle {
+  fill: var(--text);
+}
+
+.ps-spark.muted polyline {
+  stroke: var(--muted-strong);
+}
+
+.ps-muscle-list li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 72px;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  border-top: 1px solid var(--line);
+}
+
+.ps-muscle-list li:first-child {
+  border-top: 0;
+}
+
+.ps-muscle-name {
+  font-size: 0.88rem;
+}
+
+.ps-muscle-bars {
+  position: relative;
+  height: 22px;
+}
+
+.ps-muscle-bars i {
+  position: absolute;
+  left: 0;
+  height: 7px;
+  border-radius: 4px;
+}
+
+.ps-muscle-bars .range {
+  top: 0;
+  bottom: 0;
+  height: auto;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ps-muscle-bars .early {
+  top: 3px;
+  background: var(--muted-strong);
+  opacity: 0.6;
+}
+
+.ps-muscle-bars .late {
+  top: 12px;
+  background: var(--brand);
+}
+
+.ps-muscle-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  color: var(--muted-strong);
+  font-size: 0.75rem;
+}
+
+.ps-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ps-legend i {
+  width: 14px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.ps-legend .early {
+  background: var(--muted-strong);
+  opacity: 0.6;
+}
+
+.ps-legend .late {
+  background: var(--brand);
+}
+
+.ps-legend .range {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ps-calendar {
+  display: grid;
+  gap: 6px;
+}
+
+.ps-cal-row {
+  display: grid;
+  gap: 6px;
+  align-items: center;
+}
+
+.ps-cal-row.head span {
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.ps-cal-row [role='rowheader'] {
+  color: var(--muted-strong);
+  font-size: 0.75rem;
+}
+
+.ps-cal-row [role='cell'] {
+  height: 26px;
+  border-radius: 6px;
+}
+
+.ps-cal-row .done {
+  background: var(--brand);
+}
+
+.ps-cal-row .open {
+  border: 1.5px dashed var(--line);
+}
+
+.ps-daytype-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 36px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  font-size: 0.88rem;
+}
+
+.ps-daytype-list strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.ps-weekdays div {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.ps-weekdays i {
+  width: 100%;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--brand);
+}
+
+.ps-weekdays span {
+  color: var(--muted-strong);
+  font-size: 0.7rem;
+}
