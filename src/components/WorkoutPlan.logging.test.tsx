@@ -5,6 +5,7 @@ import WorkoutPlan from './WorkoutPlan'
 import WorkoutSetInputs from './WorkoutSetInputs'
 import RestTimer from './RestTimer'
 import WorkoutExerciseActions from './WorkoutExerciseActions'
+import ExerciseVideo from './ExerciseVideo'
 import type { RestTimerState } from '../utils/restTimer'
 import { createTranslator } from '../i18n/translate'
 import { loadWorkoutHistory, saveWorkoutHistory } from '../utils/storage'
@@ -297,6 +298,44 @@ describe('approved workout logging integration', () => {
     expect(renderToStaticMarkup(tree)).toContain('row</h2>')
     expect(startRest).toHaveBeenLastCalledWith(120, expect.stringContaining('row'))
     expect(changeRest).not.toHaveBeenCalledWith(null)
+  })
+
+  it('#442: an exercise with an approved clip shows the video tile under its name; others are unchanged', async () => {
+    harness.catalogue[0] = { ...harness.catalogue[0], id: 'incline-dumbbell-press', name: 'press' }
+    harness.block!.days[0].exercises[0].exerciseId = 'incline-dumbbell-press'
+    render()
+    await settle()
+    await start()
+    const tiles = elements(node => node.type === ExerciseVideo)
+    expect(tiles).toHaveLength(1)
+    expect(tiles[0].props.video.src).toBe('exercise-videos/incline-dumbbell-press.mp4')
+    expect(tiles[0].props.active).toBe(true)
+    expect(tiles[0].props.labels.open).toBe('Watch technique video: press')
+    const card = elements(node => node.type === 'article')[0]
+    const children = React.Children.toArray(card.props.children) as React.ReactElement[]
+    const nameIndex = children.findIndex(child => child.type === 'h2')
+    expect(children[nameIndex + 1].type).toBe(ExerciseVideo)
+    const html = renderToStaticMarkup(tree)
+    expect(html).toContain('class="exercise-video"')
+    expect(html).toContain('preload="none"')
+    // The next exercise (row) has no approved clip: no tile and no empty space.
+    await enter(40)
+    for (let i = 0; i < 3; i++) await click(doneLabel())
+    expect(renderToStaticMarkup(tree)).toContain('row</h2>')
+    expect(elements(node => node.type === ExerciseVideo)).toHaveLength(0)
+    expect(renderToStaticMarkup(tree)).not.toContain('exercise-video')
+  })
+
+  it('#442: a superset shows each exercise its own clip', async () => {
+    harness.catalogue[1] = { ...harness.catalogue[1], id: 'dumbbell-bench-press', name: 'row' }
+    harness.block!.days[0].exercises[1].exerciseId = 'dumbbell-bench-press'
+    render()
+    await settle()
+    await start()
+    expect(elements(node => node.type === ExerciseVideo)).toHaveLength(0)
+    await click('2 · row')
+    const tiles = elements(node => node.type === ExerciseVideo)
+    expect(tiles.map(tile => tile.props.video.src)).toEqual(['exercise-videos/dumbbell-bench-press.mp4'])
   })
 
   it('#396: shows why this weight above the sets, opening the cue sheet, and nothing the first time', async () => {

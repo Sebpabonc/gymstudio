@@ -9,6 +9,8 @@ import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue, { CueSheet, ShortCue, type SqueezeCueDetails } from './SqueezeCue'
 import WorkoutExerciseActions from './WorkoutExerciseActions'
 import WorkoutSetInputs from './WorkoutSetInputs'
+import ExerciseVideo from './ExerciseVideo'
+import { getExerciseVideo } from '../data/exerciseVideos'
 import './WorkoutLogging.css'
 import { prefillLoggedReps, canCarryWorkoutLoad, carryWorkoutWeight, capUnloggedReps, findComparableLoggingEntry, roundDownWorkoutDrop } from '../utils/effortlessLogging'
 import { getWorkoutRestSeconds } from '../utils/restTimer'
@@ -4225,6 +4227,8 @@ export default function WorkoutPlan({
               : ''
             if (isWorkoutMode) {
               if (exerciseIndex !== workoutExerciseIndex) return null
+              // #442: PT-approved technique clip for the exercise on this card (a superset shows each exercise's own).
+              const exerciseVideo = getExerciseVideo(libraryMatch?.id ?? exercise.exerciseId)
               const storedLogged = findExerciseEntry(exercise, history)
               const logged = storedLogged ? { ...storedLogged,
                 sets: storedLogged.sets.filter((set) => !set.tag || set.tag === 'main').slice(0, setCount) } : undefined
@@ -4301,6 +4305,11 @@ export default function WorkoutPlan({
                 <article key={exercise.code ?? exercise.name} className="planned-exercise-card effortless-card workout-mode-current"
                   data-exercise-card={exerciseKey} data-workout-group={groupIndex} tabIndex={-1}>
                   <h2 className="effortless-name">{displayTitle.main}{displayTitle.details && <small>{displayTitle.details}</small>}</h2>
+                  {exerciseVideo && <ExerciseVideo key={exerciseVideo.src} video={exerciseVideo} title={displayName}
+                    cue={shortCue ?? libraryMatch?.squeezeCue} active={exerciseIndex === workoutExerciseIndex}
+                    labels={{ open: t('workout.video.open', { name: displayName }), close: t('workout.video.close'),
+                      normal: t('workout.video.normal'), slow: t('workout.video.slow'), badge: t('workout.video.badge'),
+                      cue: t('workout.run.squeezeLabel') }} />}
                   {partner && <p className="effortless-partner">{t(group.items[0].exerciseIndex === exerciseIndex && !usesPairRest ? 'workout.run.supersetWith' : 'workout.run.supersetThenRest', { name: displayExerciseName(partner.name) })}</p>}
                   {switchUntil && switchUntil > elapsedNow && <div className="effortless-switch" role="status">
                     <span>{t('workout.run.supersetSwitch', { name: displayName, seconds: supersetSwitchSeconds(switchUntil, elapsedNow) })}</span>
