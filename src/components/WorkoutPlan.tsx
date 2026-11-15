@@ -81,6 +81,7 @@ import { recommendNextTarget, type NextTarget, type ProgressionType } from '../p
 import {
   buildWorkoutExerciseInsight,
   buildWorkoutSetTrend,
+  liftSetTrend,
   workoutCompletionCounts,
   workoutInsightTally,
   workoutSummaryHeadline,
@@ -4142,7 +4143,10 @@ export default function WorkoutPlan({
             }))
             const prescribedRestSeconds = getWorkoutRestSeconds(loadRestBetweenSets(), exercise.restSeconds)
             const prescribedRestLabel = `${Math.floor(prescribedRestSeconds / 60)}:${String(prescribedRestSeconds % 60).padStart(2, '0')}`
-            const trendSessions = planMode === 'preset' && exercise.exerciseId
+            // PO 2026-11-15: previewing another week shows only logged sessions, never a planned "today" for a week not started.
+            const trendSessions = planMode === 'preset' && exercise.exerciseId && barWeekOffset !== 0
+              ? liftSetTrend(history, trainingBlocks, exercise.exerciseId, '0000-01-01', today).slice(-5)
+              : planMode === 'preset' && exercise.exerciseId
               ? buildWorkoutSetTrend(history, trainingBlocks, exercise.exerciseId, today, trendTargets, 5, {
                   blockId: activeBlock?.id,
                   dayKey: activeDay?.key,
@@ -4651,14 +4655,15 @@ export default function WorkoutPlan({
                   const planReps = exercise.repsPerSet ?? []
                   const rows = Array.from({ length: count }, (_, index) => {
                     const weight = projected.setWeights?.[index] ?? projected.weight ?? trainerNext?.actual.weight ?? 0
+                    // PO 2026-11-15: each set shows its own planned reps (4, 6, 8, 10), not the whole range on every row.
                     const reps = projected.setReps?.[index] !== undefined
                       ? formatNumber(language, projected.setReps[index])
-                      : trainerRangeLabel(projected.reps) || planReps[index]
+                      : planReps[index] || trainerRangeLabel(projected.reps)
                     return { weight, reps }
                   })
                   return (
                     <div className="preview-projected-load">
-                      <span className="preview-projected-title">{t('workout.week.projectedTitle')}</span>
+                      <span className="preview-projected-title">{t(trendSessions.length ? 'workout.week.projectedTitle' : 'workout.week.startTitle')}</span>
                       <ol className="preview-projected-sets">
                         {rows.map((row, index) => (
                           <li key={index}>
@@ -4701,11 +4706,11 @@ export default function WorkoutPlan({
                           total: setCount,
                         })}</p>}
                         <p className="effortless-last">{t('workout.run.lastTime')}: {previousSummary || '—'}</p>
-                        <details className="workout-trend-details" open={trendOpen} onToggle={(event) => {
+                        {(barWeekOffset === 0 || trendSessions.length > 0) && <details className="workout-trend-details" open={trendOpen} onToggle={(event) => {
                           const next = event.currentTarget.open
                           setTrendOpen(next)
                           saveWorkoutTrendOpen(next)
-                        }}><summary>{t('workout.trend.title')}</summary><SetTrendChart sessions={trendSessions} language={language} t={t} /></details>
+                        }}><summary>{t('workout.trend.title')}</summary><SetTrendChart sessions={trendSessions} language={language} t={t} /></details>}
                       </>
                     )}
                     {!isWorkoutMode && <div className="chip-row chip-row-tight">
