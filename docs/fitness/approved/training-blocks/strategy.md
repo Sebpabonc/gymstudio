@@ -144,6 +144,9 @@ intensity — so no two consecutive blocks use the same method. Each block chang
   overhead triceps instead of kickbacks, 4 sets of Y-raises, every pyramid set 1-3 reps short of failure, Smith squat
   B pyramid 15-12-10-8. Block 9: Romanian deadlift on Lower A, 4 sets of leg curls on Lower B and of cable laterals,
   front squat B reps capped at 15.
+- **Block 7 chest-back trim (2026-11-15, `approved/2026-11-15-block7-chest-back-trim.md`).** 9 → 7 exercises per
+  chest-back day, same weekly sets: incline press 4 sets (flat DB press dropped), barbell row and pull-ups 5 sets
+  (chest-supported row dropped).
 
 ## Bench angle strategy
 
@@ -176,7 +179,7 @@ chest-supported T-bar, preacher bench) have no bench angle to set.
 | Block | Chest (main / others) | Shoulders | Back | Arms |
 |---|---|---|---|---|
 | 6 — Flat pyramid II | **30°** DB press / 0° DB press, high-to-low cable fly, pec deck | Smith seated press 75° | Chest-supported T-bar (machine) | Incline curl 45°; EZ skull crusher flat 0° |
-| 7 — Strength II | **0°** Smith flat press / 30° DB press, dips | Seated BB press 90°; seated lateral raise 90° | Chest-supported DB row 30° | JM press 0°; seated overhead extension 90°; preacher curl + rope overhead extension on chest-back days (no angle) |
+| 7 — Strength II | **0°** Smith flat press / 30° DB press, dips | Seated BB press 90°; seated lateral raise 90° | Barbell row, wide pull-ups | JM press 0°; seated overhead extension 90°; preacher curl + rope overhead extension on chest-back days (no angle) |
 | 8 — Pyramid II | **45°** incline BB press / −15° DB press + fly | DB press 75°; Y-raise 45° | EZ pullover 0° | Spider curl 45°; decline skull crusher −15° |
 | 9 — Reverse pyramid III | **0°** BB bench / 15° incline fly, incline machine | Standing press; rear-delt fly 30° | Chest-supported DB row 45° | Incline curl 60°; seated overhead extension 90° |
 

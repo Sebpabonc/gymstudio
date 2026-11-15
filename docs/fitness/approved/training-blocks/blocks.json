@@ -3706,7 +3706,7 @@
     "start_date": "2026-11-16",
     "weeks": 6,
     "origin": "pt",
-    "summary": "A 6-week strength block: one heavy top set of 4-5 reps on each A-day main lift, straight sets of 6-8 elsewhere, chest pressed at 30 then 0 degrees, one superset at most per day, and one or two last-set extras like rest-pause or partials.",
+    "summary": "A 6-week strength block: one heavy top set of 4-5 reps on each A-day main lift, straight sets of 6-8 elsewhere, chest pressed at 0 then 30 degrees, one superset at most per day, and one or two last-set extras like rest-pause or partials.",
     "insights": [
       {
         "title": "Goal",
@@ -3714,7 +3714,7 @@
       },
       {
         "title": "How it works",
-        "body": "Each A day opens with a reverse pyramid: one heavy top set (4 reps on the Smith bench and seated overhead press, 5 on the back squat), then lighter back-off sets of 6, 8 and 10, with 2.5-3 minutes rest. Other lifts are straight sets. Chest is trained at two angles: 30-degree incline dumbbell press, then the flat dumbbell press. Each day has one superset; chest-back days end with preacher curls and overhead rope extensions. One or two last-set extras per day (rest-pause, partials, myo-reps, a drop set or a slow tempo) are written in the notes."
+        "body": "Each A day opens with a reverse pyramid: one heavy top set (4 reps on the Smith bench and seated overhead press, 5 on the back squat), then lighter back-off sets of 6, 8 and 10, with 2.5-3 minutes rest. Other lifts are straight sets. Chest is trained at two angles: the flat Smith bench press, then the 30-degree incline dumbbell press. Each day has one superset; chest-back days end with preacher curls and overhead rope extensions. One or two last-set extras per day (rest-pause, partials, myo-reps, a drop set or a slow tempo) are written in the notes."
       },
       {
         "title": "A days vs B days",
@@ -3730,7 +3730,7 @@
       },
       {
         "title": "Key tips",
-        "body": "Warm up before every top set with 3-4 ramp sets (for example 50% x 8, 70% x 4, 85% x 2). Use safety pins or a spotter, never grind or fail a heavy set, and skip the top set if sleep or joints are bad. Use the same dumbbells for the incline and flat press. If a lift hurts, stop and see a qualified professional."
+        "body": "Warm up before every top set with 3-4 ramp sets (for example 50% x 8, 70% x 4, 85% x 2). Use safety pins or a spotter, never grind or fail a heavy set, and skip the top set if sleep or joints are bad. If a lift hurts, stop and see a qualified professional."
       }
     ],
     "days": [
@@ -3757,8 +3757,9 @@
           {
             "code": "B1",
             "exercise_id": "barbell-bent-over-row",
-            "sets": 4,
+            "sets": 5,
             "reps": [
+              "6",
               "6",
               "6",
               "6",
@@ -3767,39 +3768,29 @@
             "technique": "straight",
             "rest_seconds": 150,
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Brace hard; end the set if your torso rises or your back rounds."
           },
           {
             "code": "C1",
             "exercise_id": "incline-dumbbell-press",
-            "sets": 2,
+            "sets": 4,
             "reps": [
+              "8",
+              "8",
               "8",
               "8"
             ],
             "technique": "straight",
             "rest_seconds": 90,
             "angle_degrees": 30,
-            "notes": "Double angle: incline first, then the same dumbbells flat."
+            "notes": "Lower to a deep chest stretch; press up over the upper chest."
           },
           {
             "code": "D1",
-            "exercise_id": "dumbbell-bench-press",
-            "sets": 2,
+            "exercise_id": "pull-up-wide-grip",
+            "sets": 5,
             "reps": [
               "8",
-              "8"
-            ],
-            "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": 0,
-            "notes": "Same dumbbells as the incline press; lower the bench to flat."
-          },
-          {
-            "code": "E1",
-            "exercise_id": "pull-up-wide-grip",
-            "sets": 4,
-            "reps": [
               "8",
               "8",
               "8",
@@ -3811,7 +3802,7 @@
             "notes": "Add a belt if easy; use the assisted machine if needed."
           },
           {
-            "code": "F1",
+            "code": "E1",
             "exercise_id": "dip",
             "sets": 2,
             "reps": [
@@ -3824,20 +3815,7 @@
             "notes": "Lean forward. Last set: rest-pause, 15 s, then 2 mini-sets."
           },
           {
-            "code": "G1",
-            "exercise_id": "dumbbell-chest-supported-row",
-            "sets": 2,
-            "reps": [
-              "10",
-              "10"
-            ],
-            "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": 30,
-            "notes": "Pull elbows back toward the hips; chest stays on the pad."
-          },
-          {
-            "code": "H1",
+            "code": "F1",
             "exercise_id": "ez-bb-preacher-curls",
             "sets": 3,
             "reps": [
@@ -3851,7 +3829,7 @@
             "notes": "Lower until the elbow is almost straight; never bounce at the bottom."
           },
           {
-            "code": "H2",
+            "code": "F2",
             "exercise_id": "rope-low-cable-oh-tricep-extensions",
             "sets": 3,
             "reps": [
@@ -4083,8 +4061,9 @@
           {
             "code": "B1",
             "exercise_id": "barbell-bent-over-row",
-            "sets": 4,
+            "sets": 5,
             "reps": [
+              "8",
               "8",
               "8",
               "8",
@@ -4093,39 +4072,29 @@
             "technique": "straight",
             "rest_seconds": 120,
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Brace hard; end the set if your torso rises or your back rounds."
           },
           {
             "code": "C1",
             "exercise_id": "incline-dumbbell-press",
-            "sets": 2,
+            "sets": 4,
             "reps": [
+              "10",
+              "10",
               "10",
               "10"
             ],
             "technique": "straight",
             "rest_seconds": 90,
             "angle_degrees": 30,
-            "notes": "Double angle: incline first, then the same dumbbells flat."
+            "notes": "Lower to a deep chest stretch; press up over the upper chest."
           },
           {
             "code": "D1",
-            "exercise_id": "dumbbell-bench-press",
-            "sets": 2,
+            "exercise_id": "pull-up-wide-grip",
+            "sets": 5,
             "reps": [
               "10",
-              "10"
-            ],
-            "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": 0,
-            "notes": "Same dumbbells as the incline press; lower the bench to flat."
-          },
-          {
-            "code": "E1",
-            "exercise_id": "pull-up-wide-grip",
-            "sets": 4,
-            "reps": [
               "10",
               "10",
               "10",
@@ -4137,7 +4106,7 @@
             "notes": "Add a belt if easy; use the assisted machine if needed."
           },
           {
-            "code": "F1",
+            "code": "E1",
             "exercise_id": "dip",
             "sets": 2,
             "reps": [
@@ -4150,20 +4119,7 @@
             "notes": "Lean forward for chest; lower in 3 seconds."
           },
           {
-            "code": "G1",
-            "exercise_id": "dumbbell-chest-supported-row",
-            "sets": 2,
-            "reps": [
-              "12",
-              "12"
-            ],
-            "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": 30,
-            "notes": "Pull elbows back toward the hips; chest stays on the pad."
-          },
-          {
-            "code": "H1",
+            "code": "F1",
             "exercise_id": "ez-bb-preacher-curls",
             "sets": 3,
             "reps": [
@@ -4177,7 +4133,7 @@
             "notes": "Lower until the elbow is almost straight; never bounce at the bottom."
           },
           {
-            "code": "H2",
+            "code": "F2",
             "exercise_id": "rope-low-cable-oh-tricep-extensions",
             "sets": 3,
             "reps": [
