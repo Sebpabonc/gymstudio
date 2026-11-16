@@ -3706,31 +3706,31 @@
     "start_date": "2026-11-16",
     "weeks": 6,
     "origin": "pt",
-    "summary": "A 6-week strength block: one heavy top set of 4-5 reps on each A-day main lift, straight sets of 6-8 elsewhere, chest pressed at 0 then 30 degrees, one superset at most per day, and one or two last-set extras like rest-pause or partials.",
+    "summary": "A 6-week strength block: one heavy top set of 4-5 reps on each A-day main lift, 6-8 reps on A days and 8-10 on B days, 3 back exercises per chest-back day, supersets on every day, and no exercise above 4 sets.",
     "insights": [
       {
         "title": "Goal",
-        "body": "Get stronger on the big lifts. Muscle grows about the same from 5 to 30 reps when sets are hard, but heavier sets build more strength, so a small dose of heavy 4-5 rep work is added while most sets stay at 6-12 reps. Total hard sets per week is what drives growth."
+        "body": "Get stronger on the big lifts while you keep building muscle. Muscle grows about the same from 5 to 30 reps when sets are hard, but heavier sets build more strength, so a small dose of heavy 4-5 rep work sits on top of 6-12 rep sets. Total hard sets per week is what drives growth: about 20 for chest, back, biceps, triceps and quads, and 14 for hamstrings."
       },
       {
         "title": "How it works",
-        "body": "Each A day opens with a reverse pyramid: one heavy top set (4 reps on the Smith bench and seated overhead press, 5 on the back squat), then lighter back-off sets of 6, 8 and 10, with 2.5-3 minutes rest. Other lifts are straight sets. Chest is trained at two angles: the flat Smith bench press, then the 30-degree incline dumbbell press. Each day has one superset; chest-back days end with preacher curls and overhead rope extensions. One or two last-set extras per day (rest-pause, partials, myo-reps, a drop set or a slow tempo) are written in the notes."
+        "body": "Each A day opens alone with a reverse pyramid: one heavy top set (4 reps on the Smith bench and seated overhead press, 5 on the back squat), then lighter sets of 6, 8 and 10, with 3 minutes rest. After that, most work is done in supersets of two muscles that don't compete, like the incline press with chin-ups or leg curls with leg extensions: first exercise, about 10 seconds, second exercise, then the full rest. Chest-back days have three back exercises: chin-ups, a chest-supported row and straight-arm pulldowns. No exercise has more than 4 sets."
       },
       {
         "title": "A days vs B days",
-        "body": "A days carry the heavy top set and 6-8 reps on the main lifts. B days use the same exercises with straight sets of 8-10 and a slightly lighter load, plus a pyramid on the JM press and a drop set on leg curls. A days build maximum strength; B days add volume for growth."
+        "body": "A days are heavier: the top set and 6-8 reps on the main lifts, and 10-12 reps on cables and isolation moves. B days use the same exercises in the same order, a bit lighter, with straight sets of 8-10 on the main lifts and 12-15 on isolation moves. A days build maximum strength; B days add volume for growth. Track and progress A and B days separately."
       },
       {
         "title": "How to progress",
-        "body": "Top sets: stop with 1-2 reps left and add the smallest step once you hit the target cleanly; back-off sets follow. Straight sets: same weight for all sets, add a step when every set is complete. Week 1: no top set (do it as a back-off set) and no extras. Weeks 2-5: full plan. Week 6 is always a deload: half the sets, no top sets, no extras."
+        "body": "Top sets: stop with 1-2 reps left and add the smallest step once you hit the target cleanly; back-off sets follow. Other sets: same weight for every set, and add a step when every set hits its reps. In a superset, progress each exercise on its own. Week 1: no top set (do it as a back-off set) and no extras. Weeks 2-5: full plan. Week 6 is always a deload: half the sets, no top sets, no extras."
       },
       {
         "title": "What to expect",
-        "body": "Sessions are slower, with long rests and heavy, focused sets rather than a pump. Expect more whole-body tiredness after squats and rows. By week 5 your top sets should be clearly heavier than in week 2."
+        "body": "Supersets make sessions denser: about 65-75 minutes, with fewer long waits, but you will breathe harder. The heavy top sets still get full rest. Your back is now trained from three angles every chest-back day. By week 5 your top sets should be clearly heavier than in week 2."
       },
       {
         "title": "Key tips",
-        "body": "Warm up before every top set with 3-4 ramp sets (for example 50% x 8, 70% x 4, 85% x 2). Use safety pins or a spotter, never grind or fail a heavy set, and skip the top set if sleep or joints are bad. If a lift hurts, stop and see a qualified professional."
+        "body": "Warm up before every top set with 3-4 ramp sets (for example 50% x 8, 70% x 4, 85% x 2). Set up both stations of a superset before you start; if one is taken, do both as straight sets with normal rest. Use safety pins or a spotter, never grind or fail a heavy set, and skip the top set if sleep or joints are bad. If a lift hurts, stop and see a qualified professional."
       }
     ],
     "days": [
@@ -3756,22 +3756,35 @@
           },
           {
             "code": "B1",
-            "exercise_id": "barbell-bent-over-row",
-            "sets": 4,
+            "exercise_id": "plate-loaded-chest-press-incline",
+            "sets": 3,
             "reps": [
-              "6",
-              "6",
-              "6",
-              "6"
+              "8",
+              "8",
+              "8"
             ],
-            "technique": "straight",
-            "rest_seconds": 150,
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Brace hard; end the set if your torso rises or your back rounds."
+            "notes": "Lower until you feel a deep chest stretch; press up over the upper chest."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "neutral-grip-weighted-chin-ups",
+            "sets": 3,
+            "reps": [
+              "8",
+              "8",
+              "8"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": null,
+            "notes": "Add a belt if easy; use the assisted machine if reps fall short."
           },
           {
             "code": "C1",
-            "exercise_id": "incline-dumbbell-press",
+            "exercise_id": "neutral-grip-supp-rows",
             "sets": 4,
             "reps": [
               "8",
@@ -3780,40 +3793,40 @@
               "8"
             ],
             "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": 30,
-            "notes": "Lower to a deep chest stretch; press up over the upper chest."
+            "rest_seconds": 120,
+            "angle_degrees": null,
+            "notes": "Let the handles pull your shoulder blades forward, then drive elbows back."
           },
           {
             "code": "D1",
-            "exercise_id": "pull-up-wide-grip",
-            "sets": 4,
+            "exercise_id": "high-cable-fly",
+            "sets": 3,
             "reps": [
-              "8",
-              "8",
-              "8",
-              "8"
-            ],
-            "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": null,
-            "notes": "Add a belt if easy; use the assisted machine if needed."
-          },
-          {
-            "code": "E1",
-            "exercise_id": "dip",
-            "sets": 2,
-            "reps": [
+              "10",
               "10",
               "10"
             ],
-            "technique": "straight",
-            "rest_seconds": 90,
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Lean forward. Last set: rest-pause, 15 s, then 2 mini-sets."
+            "notes": "Arms open slightly behind you. Last set: rest-pause, 15 s, 2 mini-sets."
           },
           {
-            "code": "F1",
+            "code": "D2",
+            "exercise_id": "cable-straight-arms-pull-downs",
+            "sets": 3,
+            "reps": [
+              "10",
+              "10",
+              "10"
+            ],
+            "technique": "superset",
+            "rest_seconds": 75,
+            "angle_degrees": null,
+            "notes": "Same cable tower as the fly; let your arms rise high to stretch the lats."
+          },
+          {
+            "code": "E1",
             "exercise_id": "ez-bb-preacher-curls",
             "sets": 3,
             "reps": [
@@ -3827,7 +3840,7 @@
             "notes": "Lower until the elbow is almost straight; never bounce at the bottom."
           },
           {
-            "code": "F2",
+            "code": "E2",
             "exercise_id": "rope-low-cable-oh-tricep-extensions",
             "sets": 3,
             "reps": [
@@ -3857,8 +3870,8 @@
               "8",
               "10"
             ],
-            "rest_seconds": 180,
             "technique": "reverse-pyramid",
+            "rest_seconds": 180,
             "angle_degrees": 90,
             "notes": "Top set of 4 at 1-2 reps in reserve, then about 10% lighter."
           },
@@ -3872,28 +3885,28 @@
               "10",
               "10"
             ],
-            "rest_seconds": 60,
-            "technique": "straight",
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": 90,
             "notes": "Last set: myo-reps, 3 mini-sets of 4, 5 breaths rest."
           },
           {
-            "code": "C1",
-            "exercise_id": "barbell-jm-press",
+            "code": "B2",
+            "exercise_id": "reverse-pec-deck-fly",
             "sets": 4,
             "reps": [
-              "6",
-              "6",
-              "6",
-              "6"
+              "12",
+              "12",
+              "12",
+              "12"
             ],
-            "rest_seconds": 120,
-            "technique": "straight",
-            "angle_degrees": 0,
-            "notes": ""
+            "technique": "superset",
+            "rest_seconds": 75,
+            "angle_degrees": null,
+            "notes": "Arms long and wide; move from the shoulders, no shrugging."
           },
           {
-            "code": "D1",
+            "code": "C1",
             "exercise_id": "barbell-curl",
             "sets": 4,
             "reps": [
@@ -3902,10 +3915,40 @@
               "8",
               "8"
             ],
-            "rest_seconds": 10,
             "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Elbows stay at your sides; no swinging."
+          },
+          {
+            "code": "C2",
+            "exercise_id": "barbell-jm-press",
+            "sets": 4,
+            "reps": [
+              "6",
+              "6",
+              "6",
+              "6"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": 0,
+            "notes": "If your elbows ache, use 8 reps; never grind a heavy set."
+          },
+          {
+            "code": "D1",
+            "exercise_id": "cable-bayesian-curl",
+            "sets": 4,
+            "reps": [
+              "10",
+              "10",
+              "10",
+              "10"
+            ],
+            "technique": "superset",
+            "rest_seconds": 10,
+            "angle_degrees": null,
+            "notes": "Reps per arm. Last set: add 4-6 half reps in the stretch."
           },
           {
             "code": "D2",
@@ -3917,25 +3960,10 @@
               "10",
               "10"
             ],
-            "rest_seconds": 90,
             "technique": "superset",
+            "rest_seconds": 75,
             "angle_degrees": 90,
-            "notes": ""
-          },
-          {
-            "code": "E1",
-            "exercise_id": "cable-bayesian-curl",
-            "sets": 4,
-            "reps": [
-              "10",
-              "10",
-              "10",
-              "10"
-            ],
-            "rest_seconds": 60,
-            "technique": "straight",
-            "angle_degrees": null,
-            "notes": "Reps per arm. Last set: add 4-6 half reps in the stretch."
+            "notes": "Let the dumbbell sink low behind your head for a full stretch."
           }
         ]
       },
@@ -3954,8 +3982,8 @@
               "8",
               "10"
             ],
-            "rest_seconds": 180,
             "technique": "reverse-pyramid",
+            "rest_seconds": 180,
             "angle_degrees": null,
             "notes": "Safety pins set. Top set of 5, 1-2 reps in reserve, never grind."
           },
@@ -3969,40 +3997,52 @@
               "8",
               "8"
             ],
-            "rest_seconds": 120,
             "technique": "straight",
+            "rest_seconds": 120,
             "angle_degrees": null,
             "notes": "Lower in 3 seconds to a strong hamstring stretch."
           },
           {
             "code": "C1",
             "exercise_id": "dumbbell-lunge-reverse",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "8",
               "8",
               "8",
               "8"
             ],
-            "rest_seconds": 90,
             "technique": "straight",
+            "rest_seconds": 90,
             "angle_degrees": null,
             "notes": "Reps are per leg."
           },
           {
             "code": "D1",
             "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "8",
               "8",
               "8",
               "8"
             ],
-            "rest_seconds": 90,
-            "technique": "straight",
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Lean your chest forward slightly. Last set: rest-pause, 15 s, then 2 mini-sets."
+            "notes": "Lean your chest forward. Last set: rest-pause, 15 s, then 2 mini-sets."
+          },
+          {
+            "code": "D2",
+            "exercise_id": "leg-extensions-toes-dorsiflexed-neutral",
+            "sets": 3,
+            "reps": [
+              "10",
+              "10",
+              "10"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": null,
+            "notes": "Toes pulled up; slow through the deep bend."
           },
           {
             "code": "E1",
@@ -4014,8 +4054,8 @@
               "10",
               "10"
             ],
-            "rest_seconds": 10,
             "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
             "notes": "Pause 2 s at the bottom of every rep."
           },
@@ -4029,8 +4069,8 @@
               "12",
               "12"
             ],
-            "rest_seconds": 60,
             "technique": "superset",
+            "rest_seconds": 60,
             "angle_degrees": null,
             "notes": "Roll out further as you get stronger."
           }
@@ -4054,26 +4094,39 @@
             "technique": "straight",
             "rest_seconds": 120,
             "angle_degrees": 0,
-            "notes": ""
+            "notes": "Lower the bar to mid-chest in 2-3 seconds every rep."
           },
           {
             "code": "B1",
-            "exercise_id": "barbell-bent-over-row",
-            "sets": 4,
+            "exercise_id": "plate-loaded-chest-press-incline",
+            "sets": 3,
             "reps": [
-              "8",
-              "8",
-              "8",
-              "8"
+              "10",
+              "10",
+              "10"
             ],
-            "technique": "straight",
-            "rest_seconds": 120,
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Brace hard; end the set if your torso rises or your back rounds."
+            "notes": "Lower until you feel a deep chest stretch; press up over the upper chest."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "neutral-grip-weighted-chin-ups",
+            "sets": 3,
+            "reps": [
+              "10",
+              "10",
+              "10"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": null,
+            "notes": "Add a belt if easy; use the assisted machine if reps fall short."
           },
           {
             "code": "C1",
-            "exercise_id": "incline-dumbbell-press",
+            "exercise_id": "neutral-grip-supp-rows",
             "sets": 4,
             "reps": [
               "10",
@@ -4083,39 +4136,39 @@
             ],
             "technique": "straight",
             "rest_seconds": 90,
-            "angle_degrees": 30,
-            "notes": "Lower to a deep chest stretch; press up over the upper chest."
+            "angle_degrees": null,
+            "notes": "Let the handles pull your shoulder blades forward, then drive elbows back."
           },
           {
             "code": "D1",
-            "exercise_id": "pull-up-wide-grip",
-            "sets": 4,
+            "exercise_id": "high-cable-fly",
+            "sets": 3,
             "reps": [
-              "10",
-              "10",
-              "10",
-              "10"
-            ],
-            "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": null,
-            "notes": "Add a belt if easy; use the assisted machine if needed."
-          },
-          {
-            "code": "E1",
-            "exercise_id": "dip",
-            "sets": 2,
-            "reps": [
+              "12",
               "12",
               "12"
             ],
-            "technique": "straight",
-            "rest_seconds": 90,
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Lean forward for chest; lower in 3 seconds."
+            "notes": "Last set: add 4-6 half reps with arms wide open."
           },
           {
-            "code": "F1",
+            "code": "D2",
+            "exercise_id": "cable-straight-arms-pull-downs",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
+            "technique": "superset",
+            "rest_seconds": 75,
+            "angle_degrees": null,
+            "notes": "Same cable tower as the fly; let your arms rise high to stretch the lats."
+          },
+          {
+            "code": "E1",
             "exercise_id": "ez-bb-preacher-curls",
             "sets": 3,
             "reps": [
@@ -4129,7 +4182,7 @@
             "notes": "Lower until the elbow is almost straight; never bounce at the bottom."
           },
           {
-            "code": "F2",
+            "code": "E2",
             "exercise_id": "rope-low-cable-oh-tricep-extensions",
             "sets": 3,
             "reps": [
@@ -4159,8 +4212,8 @@
               "8",
               "8"
             ],
-            "rest_seconds": 120,
             "technique": "straight",
+            "rest_seconds": 120,
             "angle_degrees": 90,
             "notes": "Lower the bar in 3 seconds every rep."
           },
@@ -4174,28 +4227,28 @@
               "12",
               "12"
             ],
-            "rest_seconds": 60,
-            "technique": "straight",
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": 90,
-            "notes": ""
+            "notes": "Strict, no swinging; lead with the elbows."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "reverse-pec-deck-fly",
+            "sets": 4,
+            "reps": [
+              "15",
+              "15",
+              "15",
+              "15"
+            ],
+            "technique": "superset",
+            "rest_seconds": 75,
+            "angle_degrees": null,
+            "notes": "Arms long and wide; move from the shoulders, no shrugging."
           },
           {
             "code": "C1",
-            "exercise_id": "barbell-jm-press",
-            "sets": 4,
-            "reps": [
-              "14",
-              "12",
-              "10",
-              "8"
-            ],
-            "rest_seconds": 120,
-            "technique": "pyramid",
-            "angle_degrees": 0,
-            "notes": "Add weight each set as reps drop."
-          },
-          {
-            "code": "D1",
             "exercise_id": "barbell-curl",
             "sets": 4,
             "reps": [
@@ -4204,10 +4257,40 @@
               "10",
               "10"
             ],
-            "rest_seconds": 10,
             "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Elbows stay at your sides; no swinging."
+          },
+          {
+            "code": "C2",
+            "exercise_id": "barbell-jm-press",
+            "sets": 4,
+            "reps": [
+              "10",
+              "10",
+              "10",
+              "10"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": 0,
+            "notes": "Smooth reps; if your elbows ache, go lighter."
+          },
+          {
+            "code": "D1",
+            "exercise_id": "cable-bayesian-curl",
+            "sets": 4,
+            "reps": [
+              "12",
+              "12",
+              "12",
+              "12"
+            ],
+            "technique": "superset",
+            "rest_seconds": 10,
+            "angle_degrees": null,
+            "notes": "Reps per arm. Last set: add 4-6 half reps in the stretch."
           },
           {
             "code": "D2",
@@ -4219,25 +4302,10 @@
               "12",
               "12"
             ],
-            "rest_seconds": 90,
             "technique": "superset",
+            "rest_seconds": 75,
             "angle_degrees": 90,
-            "notes": ""
-          },
-          {
-            "code": "E1",
-            "exercise_id": "cable-bayesian-curl",
-            "sets": 4,
-            "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
-            ],
-            "rest_seconds": 60,
-            "technique": "straight",
-            "angle_degrees": null,
-            "notes": "Reps per arm. Last set: add 4-6 half reps in the stretch."
+            "notes": "Let the dumbbell sink low behind your head for a full stretch."
           }
         ]
       },
@@ -4256,10 +4324,10 @@
               "8",
               "8"
             ],
-            "rest_seconds": 120,
             "technique": "straight",
+            "rest_seconds": 120,
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Safety pins set; stop 1-2 reps short on every set."
           },
           {
             "code": "B1",
@@ -4271,23 +4339,22 @@
               "10",
               "10"
             ],
-            "rest_seconds": 120,
             "technique": "straight",
+            "rest_seconds": 120,
             "angle_degrees": null,
-            "notes": ""
+            "notes": "Hips back to a strong hamstring stretch; keep the spine neutral."
           },
           {
             "code": "C1",
             "exercise_id": "dumbbell-lunge-reverse",
-            "sets": 4,
+            "sets": 3,
             "reps": [
-              "10",
               "10",
               "10",
               "10"
             ],
-            "rest_seconds": 90,
             "technique": "straight",
+            "rest_seconds": 90,
             "angle_degrees": null,
             "notes": "Reps are per leg."
           },
@@ -4296,14 +4363,28 @@
             "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
             "sets": 3,
             "reps": [
-              "10+10",
-              "10+10",
-              "10+10"
+              "10",
+              "10",
+              "10"
             ],
-            "rest_seconds": 90,
-            "technique": "drop-set",
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Drop the weight about 25% and keep going."
+            "notes": "Lean forward. Last set: drop the weight about 25% and keep going."
+          },
+          {
+            "code": "D2",
+            "exercise_id": "leg-extensions-toes-dorsiflexed-neutral",
+            "sets": 3,
+            "reps": [
+              "12",
+              "12",
+              "12"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": null,
+            "notes": "Toes pulled up; slow through the deep bend."
           },
           {
             "code": "E1",
@@ -4315,8 +4396,8 @@
               "12",
               "12"
             ],
-            "rest_seconds": 10,
             "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
             "notes": "Pause 2 s at the bottom of every rep."
           },
@@ -4330,8 +4411,8 @@
               "12",
               "12"
             ],
-            "rest_seconds": 60,
             "technique": "superset",
+            "rest_seconds": 60,
             "angle_degrees": null,
             "notes": "Roll out further as you get stronger."
           }

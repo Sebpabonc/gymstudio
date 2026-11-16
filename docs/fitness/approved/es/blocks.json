@@ -459,31 +459,31 @@
   },
   "block-2026-11-16-strength-hypertrophy-ii": {
     "name": "Fuerza · Series pesadas de 6-8 II",
-    "summary": "Un bloque de fuerza de 6 semanas: una serie top pesada de 4-5 reps en el ejercicio principal de cada día A, series rectas de 6-8 en el resto, pecho a 0 y luego 30 grados, máximo una superserie por día y uno o dos extras en la última serie como rest-pause o parciales.",
+    "summary": "Un bloque de fuerza de 6 semanas: una serie top pesada de 4-5 reps en el principal de cada día A, 6-8 reps en los días A y 8-10 en los B, 3 ejercicios de espalda por día de pecho y espalda, superseries todos los días y ningún ejercicio con más de 4 series.",
     "insights": [
       {
         "title": "Objetivo",
-        "body": "Ganar fuerza en los ejercicios grandes. El músculo crece más o menos igual entre 5 y 30 reps cuando las series son exigentes, pero las series pesadas construyen más fuerza, así que se suma una dosis pequeña de trabajo pesado a 4-5 reps mientras la mayoría de las series se quedan en 6-12 reps. Lo que impulsa el crecimiento es el total de series exigentes por semana."
+        "body": "Ganar fuerza en los ejercicios grandes mientras sigues construyendo músculo. El músculo crece más o menos igual entre 5 y 30 reps cuando las series son exigentes, pero las series pesadas construyen más fuerza, así que se suma una dosis pequeña de trabajo pesado a 4-5 reps sobre series de 6-12. Lo que impulsa el crecimiento es el total de series exigentes por semana: unas 20 para pecho, espalda, bíceps, tríceps y cuádriceps, y 14 para femorales."
       },
       {
         "title": "Cómo funciona",
-        "body": "Cada día A abre con pirámide inversa: una serie top pesada (4 reps en el press de banca en Smith y el press militar sentado con barra, 5 en la sentadilla trasera), luego series más ligeras de 6, 8 y 10, con 2.5-3 minutos de descanso. El resto son series rectas. El pecho se trabaja en dos ángulos: press de banca plano en Smith y luego press inclinado con mancuernas a 30 grados. Cada día tiene una superserie; los días de pecho y espalda terminan con curl predicador y extensión de tríceps con cuerda sobre la cabeza. Uno o dos extras por día en la última serie (rest-pause, parciales, myo-reps, drop set o tempo lento) están en las notas."
+        "body": "Cada día A abre solo con una pirámide inversa: una serie top pesada (4 reps en el press de banca en Smith y el press militar sentado, 5 en la sentadilla), luego series más ligeras de 6, 8 y 10, con 3 minutos de descanso. Después, casi todo va en superseries de dos músculos que no compiten, como el press inclinado con dominadas o el curl femoral con la extensión: el primero, unos 10 segundos, el segundo y luego el descanso completo. Los días de pecho y espalda tienen tres ejercicios de espalda: dominadas, remo con pecho apoyado y jalón con brazos rectos. Ningún ejercicio pasa de 4 series."
       },
       {
         "title": "Días A vs. días B",
-        "body": "Los días A llevan la serie top pesada y 6-8 reps en los principales. Los días B usan los mismos ejercicios con series rectas de 8-10 y un poco menos de peso, más una pirámide en el press JM y un drop set en el curl femoral. Los días A construyen fuerza máxima; los días B suman volumen para crecer."
+        "body": "Los días A son más pesados: la serie top y 6-8 reps en los principales, y 10-12 reps en poleas y ejercicios de aislamiento. Los días B usan los mismos ejercicios en el mismo orden, un poco más ligeros, con series rectas de 8-10 en los principales y 12-15 en aislamiento. Los días A construyen fuerza máxima; los días B suman volumen para crecer. Registra y progresa los días A y B por separado."
       },
       {
         "title": "Cómo progresar",
-        "body": "Series top: termina con 1-2 reps en reserva y sube el incremento más pequeño cuando cumplas el objetivo limpio; las series ligeras siguen. Series rectas: mismo peso en todas, sube cuando completes todas. Semana 1: sin serie top (hazla como serie ligera) y sin extras. Semanas 2-5: plan completo. La semana 6 siempre es de descarga: la mitad de las series, sin series top ni extras."
+        "body": "Series top: termina con 1-2 reps en reserva y sube el incremento más pequeño cuando cumplas el objetivo limpio; las series ligeras siguen. Otras series: mismo peso en todas y sube cuando todas lleguen a sus reps. En una superserie, progresa cada ejercicio por separado. Semana 1: sin serie top (hazla como serie ligera) y sin extras. Semanas 2-5: plan completo. La semana 6 siempre es de descarga: la mitad de las series, sin series top ni extras."
       },
       {
         "title": "Qué esperar",
-        "body": "Sesiones más lentas, con descansos largos y series pesadas y enfocadas en vez de bombeo. Espera más cansancio general después de sentadillas y remos. Para la semana 5 tus series top deberían ser claramente más pesadas que en la semana 2."
+        "body": "Las superseries hacen las sesiones más densas: unos 65-75 minutos, con menos esperas largas, pero vas a respirar más fuerte. Las series top pesadas siguen con descanso completo. Tu espalda ahora se trabaja desde tres ángulos cada día de pecho y espalda. Para la semana 5 tus series top deberían ser claramente más pesadas que en la semana 2."
       },
       {
         "title": "Consejos clave",
-        "body": "Calienta antes de cada serie top con 3-4 series de aproximación (por ejemplo 50% x 8, 70% x 4, 85% x 2). Usa topes de seguridad o un compañero, nunca pelees ni falles una serie pesada, y sáltate la serie top si dormiste mal o te molestan las articulaciones. Si algo duele, detente y consulta a un profesional calificado."
+        "body": "Calienta antes de cada serie top con 3-4 series de aproximación (por ejemplo 50% x 8, 70% x 4, 85% x 2). Prepara las dos estaciones de una superserie antes de empezar; si una está ocupada, haz ambas como series rectas con descanso normal. Usa topes de seguridad o un compañero, nunca pelees ni falles una serie pesada, y sáltate la serie top si dormiste mal o te molestan las articulaciones. Si algo duele, detente y consulta a un profesional calificado."
       }
     ],
     "days": {
@@ -513,35 +513,50 @@
       }
     },
     "notes": {
+      "chest-back-a/A1": "Serie top de 4 con 1-2 reps en reserva, luego un 10% más ligero.",
+      "chest-back-a/B1": "Baja hasta sentir un buen estiramiento del pecho; empuja sobre la parte alta.",
+      "chest-back-a/B2": "Agrega un cinturón si es fácil; usa la máquina asistida si no llegas a las reps.",
+      "chest-back-a/C1": "Deja que el agarre adelante los omóplatos y luego lleva los codos atrás.",
+      "chest-back-a/D1": "Brazos un poco por detrás. Última serie: rest-pause, 15 s y 2 mini-series.",
+      "chest-back-a/D2": "Misma polea que la apertura; sube bien los brazos para estirar los dorsales.",
+      "chest-back-a/E1": "Baja hasta que el codo quede casi recto; nunca rebotes abajo.",
+      "chest-back-a/E2": "Dobla bien los codos sobre la cabeza; para a 1-2 reps del fallo antes de Brazos.",
       "arms-a/A1": "Serie top de 4 con 1-2 reps en reserva, luego un 10% más ligero.",
       "arms-a/B1": "Última serie: myo-reps, 3 mini-series de 4, 5 respiraciones de pausa.",
-      "arms-a/E1": "Reps por brazo. Última serie: suma 4-6 medias reps en el estiramiento.",
-      "lower-body-a/A1": "Topes puestos. Serie top de 5, 1-2 reps en reserva, nunca la pelees.",
-      "lower-body-a/B1": "Baja en 3 segundos hasta estirar fuerte los isquiotibiales.",
+      "arms-a/B2": "Brazos largos y abiertos; mueve desde los hombros, sin encogerlos.",
+      "arms-a/C1": "Los codos quedan a los lados; sin balanceo.",
+      "arms-a/C2": "Si te molestan los codos, haz 8 reps; nunca pelees una serie pesada.",
+      "arms-a/D1": "Reps por brazo. Última serie: suma 4-6 medias reps en el estiramiento.",
+      "arms-a/D2": "Deja bajar la mancuerna detrás de la cabeza para un estiramiento completo.",
+      "lower-body-a/A1": "Topes puestos. Serie top de 5 con 1-2 reps en reserva, sin pelear.",
+      "lower-body-a/B1": "Baja en 3 segundos hasta un buen estiramiento del femoral.",
       "lower-body-a/C1": "Las reps son por pierna.",
-      "lower-body-a/D1": "Inclina el pecho un poco hacia delante. Última serie: rest-pause, 15 s y 2 mini-series.",
+      "lower-body-a/D1": "Inclina el pecho al frente. Última serie: rest-pause, 15 s y 2 mini-series.",
+      "lower-body-a/D2": "Puntas hacia arriba; lento en la flexión profunda.",
       "lower-body-a/E1": "Pausa de 2 s abajo en cada rep.",
-      "lower-body-a/E2": "Rueda más lejos a medida que te haces más fuerte.",
+      "lower-body-a/E2": "Rueda más lejos a medida que ganes fuerza.",
+      "chest-back-b/A1": "Baja la barra a la mitad del pecho en 2-3 segundos en cada rep.",
+      "chest-back-b/B1": "Baja hasta sentir un buen estiramiento del pecho; empuja sobre la parte alta.",
+      "chest-back-b/B2": "Agrega un cinturón si es fácil; usa la máquina asistida si no llegas a las reps.",
+      "chest-back-b/C1": "Deja que el agarre adelante los omóplatos y luego lleva los codos atrás.",
+      "chest-back-b/D1": "Última serie: suma 4-6 medias reps con los brazos bien abiertos.",
+      "chest-back-b/D2": "Misma polea que la apertura; sube bien los brazos para estirar los dorsales.",
+      "chest-back-b/E1": "Baja hasta que el codo quede casi recto; nunca rebotes abajo.",
+      "chest-back-b/E2": "Dobla bien los codos sobre la cabeza; para a 1-2 reps del fallo antes de Brazos.",
       "arms-b/A1": "Baja la barra en 3 segundos en cada rep.",
-      "arms-b/C1": "Sube el peso cada serie mientras bajan las reps.",
-      "arms-b/E1": "Reps por brazo. Última serie: suma 4-6 medias reps en el estiramiento.",
+      "arms-b/B1": "Estricto, sin balanceo; guía con los codos.",
+      "arms-b/B2": "Brazos largos y abiertos; mueve desde los hombros, sin encogerlos.",
+      "arms-b/C1": "Los codos quedan a los lados; sin balanceo.",
+      "arms-b/C2": "Reps suaves; si te molestan los codos, baja el peso.",
+      "arms-b/D1": "Reps por brazo. Última serie: suma 4-6 medias reps en el estiramiento.",
+      "arms-b/D2": "Deja bajar la mancuerna detrás de la cabeza para un estiramiento completo.",
+      "lower-body-b/A1": "Topes puestos; para a 1-2 reps del fallo en cada serie.",
+      "lower-body-b/B1": "Cadera atrás hasta un buen estiramiento del femoral; espalda neutra.",
       "lower-body-b/C1": "Las reps son por pierna.",
-      "lower-body-b/D1": "Baja el peso un 25% y sigue sin descanso.",
+      "lower-body-b/D1": "Inclínate al frente. Última serie: baja el peso un 25% y sigue.",
+      "lower-body-b/D2": "Puntas hacia arriba; lento en la flexión profunda.",
       "lower-body-b/E1": "Pausa de 2 s abajo en cada rep.",
-      "lower-body-b/E2": "Rueda más lejos a medida que te haces más fuerte.",
-      "chest-back-a/A1": "Serie top de 4 con 1-2 reps en reserva, luego un 10% más ligero.",
-      "chest-back-a/B1": "Aprieta el abdomen; termina la serie si el torso se levanta o la espalda se curva.",
-      "chest-back-a/C1": "Baja hasta un buen estiramiento del pecho; empuja sobre la parte alta del pecho.",
-      "chest-back-a/D1": "Agrega un cinturón si es fácil; usa la máquina asistida si hace falta.",
-      "chest-back-a/E1": "Inclínate al frente. Última serie: rest-pause, 15 s y 2 mini-series.",
-      "chest-back-a/F1": "Baja hasta que el codo quede casi recto; nunca rebotes abajo.",
-      "chest-back-a/F2": "Dobla bien los codos sobre la cabeza; para a 1-2 reps del fallo antes de Brazos.",
-      "chest-back-b/B1": "Aprieta el abdomen; termina la serie si el torso se levanta o la espalda se curva.",
-      "chest-back-b/C1": "Baja hasta un buen estiramiento del pecho; empuja sobre la parte alta del pecho.",
-      "chest-back-b/D1": "Agrega un cinturón si es fácil; usa la máquina asistida si hace falta.",
-      "chest-back-b/E1": "Inclínate al frente para el pecho; baja en 3 segundos.",
-      "chest-back-b/F1": "Baja hasta que el codo quede casi recto; nunca rebotes abajo.",
-      "chest-back-b/F2": "Dobla bien los codos sobre la cabeza; para a 1-2 reps del fallo antes de Brazos."
+      "lower-body-b/E2": "Rueda más lejos a medida que ganes fuerza."
     }
   },
   "block-2026-12-28-hypertrophy-pyramid-ii": {
