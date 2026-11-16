@@ -145,8 +145,8 @@ intensity — so no two consecutive blocks use the same method. Each block chang
   B pyramid 15-12-10-8. Block 9: Romanian deadlift on Lower A, 4 sets of leg curls on Lower B and of cable laterals,
   front squat B reps capped at 15.
 - **Block 7 chest-back trim (2026-11-15, `approved/2026-11-15-block7-chest-back-trim.md`).** 9 → 7 exercises per
-  chest-back day, same weekly sets: incline press 4 sets (flat DB press dropped), barbell row and pull-ups 5 sets
-  (chest-supported row dropped).
+  chest-back day: incline press 4 sets (flat DB press dropped), chest-supported row dropped. 2026-11-16 (PO felt 5
+  sets of one lift was too many): PT Option B, barbell row and pull-ups 4 sets; back 16 sets a week.
 
 ## Bench angle strategy
 

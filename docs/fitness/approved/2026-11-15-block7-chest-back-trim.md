@@ -224,3 +224,8 @@ All ids already exist in Block 7 and the catalogue. No NEW ids. Posture tips: se
 ## Applied (Tech Lead, 2026-11-15)
 Option A (same weekly sets; the PO trains 6 days a week). Migration 039. No Block 7 logs exist yet, so the trainer has no
 history to re-key; invariants pass for every planned exercise.
+
+## Changed to Option B (Tech Lead, 2026-11-16)
+After his first session the PO said 5 sets of the same exercise did not feel right. Option B (already graded in this
+doc): barbell row and pull-ups back to 4 sets. Back 20 → 16 direct sets a week, still in the supported 10-20 range
+(Strong; Schoenfeld 2017, Pelland 2026); no exercise above 4 sets. Migration 040.
