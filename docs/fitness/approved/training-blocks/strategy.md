@@ -147,6 +147,11 @@ intensity — so no two consecutive blocks use the same method. Each block chang
 - **Block 7 chest-back trim (2026-11-15, `approved/2026-11-15-block7-chest-back-trim.md`).** 9 → 7 exercises per
   chest-back day: incline press 4 sets (flat DB press dropped), chest-supported row dropped. 2026-11-16 (PO felt 5
   sets of one lift was too many): PT Option B, barbell row and pull-ups 4 sets; back 16 sets a week.
+- **Block 7 redesign (2026-11-16, `approved/2026-11-16-block7-redesign.md`).** After his first session the PO asked for
+  more back variety, supersets like block 6 and no exercise above 4 sets. Every day now has supersets; chest-back days
+  have 3 back exercises (neutral-grip chin-ups, chest-supported neutral row, straight-arm pulldown) and the plate-loaded
+  incline press; arms days add reverse pec deck; leg days pair the seated leg curl with leg extensions. Weekly sets:
+  chest, back, biceps, triceps, quads about 20; hamstrings 14.
 
 ## Bench angle strategy
 
@@ -179,7 +184,7 @@ chest-supported T-bar, preacher bench) have no bench angle to set.
 | Block | Chest (main / others) | Shoulders | Back | Arms |
 |---|---|---|---|---|
 | 6 — Flat pyramid II | **30°** DB press / 0° DB press, high-to-low cable fly, pec deck | Smith seated press 75° | Chest-supported T-bar (machine) | Incline curl 45°; EZ skull crusher flat 0° |
-| 7 — Strength II | **0°** Smith flat press / 30° DB press, dips | Seated BB press 90°; seated lateral raise 90° | Barbell row, wide pull-ups | JM press 0°; seated overhead extension 90°; preacher curl + rope overhead extension on chest-back days (no angle) |
+| 7 — Strength II | **0°** Smith flat press / plate-loaded incline press (fixed angle) | Seated BB press 90°; seated lateral raise 90° | Neutral-grip chin-ups, chest-supported neutral row | JM press 0°; seated overhead extension 90°; preacher curl + rope overhead extension on chest-back days (no angle) |
 | 8 — Pyramid II | **45°** incline BB press / −15° DB press + fly | DB press 75°; Y-raise 45° | EZ pullover 0° | Spider curl 45°; decline skull crusher −15° |
 | 9 — Reverse pyramid III | **0°** BB bench / 15° incline fly, incline machine | Standing press; rear-delt fly 30° | Chest-supported DB row 45° | Incline curl 60°; seated overhead extension 90° |
 
