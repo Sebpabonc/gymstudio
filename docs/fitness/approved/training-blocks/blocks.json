@@ -3757,9 +3757,8 @@
           {
             "code": "B1",
             "exercise_id": "barbell-bent-over-row",
-            "sets": 5,
+            "sets": 4,
             "reps": [
-              "6",
               "6",
               "6",
               "6",
@@ -3788,9 +3787,8 @@
           {
             "code": "D1",
             "exercise_id": "pull-up-wide-grip",
-            "sets": 5,
+            "sets": 4,
             "reps": [
-              "8",
               "8",
               "8",
               "8",
@@ -4061,9 +4059,8 @@
           {
             "code": "B1",
             "exercise_id": "barbell-bent-over-row",
-            "sets": 5,
+            "sets": 4,
             "reps": [
-              "8",
               "8",
               "8",
               "8",
@@ -4092,9 +4089,8 @@
           {
             "code": "D1",
             "exercise_id": "pull-up-wide-grip",
-            "sets": 5,
+            "sets": 4,
             "reps": [
-              "10",
               "10",
               "10",
               "10",
