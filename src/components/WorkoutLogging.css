@@ -54,6 +54,11 @@
 .effortless-set-value { min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-dark); color: var(--text); font: inherit; font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; cursor: pointer; }
 .effortless-set-value[aria-expanded="true"] { border-color: var(--brand); }
 .effortless-set-row.done .effortless-set-value { border-color: transparent; background: transparent; }
+/* PO 2026-11-17: values are typed straight into the row; a saved set looks flat until tapped. */
+.effortless-set-input { width: 100%; min-width: 0; min-height: 44px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-dark); color: var(--text); font: inherit; font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; text-align: center; -moz-appearance: textfield; }
+.effortless-set-input::-webkit-outer-spin-button, .effortless-set-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.effortless-set-input:focus { outline: none; border-color: var(--brand); }
+.effortless-set-row.done .effortless-set-input:not(:focus) { border-color: transparent; background: transparent; }
 .effortless-tick { justify-self: center; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 2.5px solid var(--muted); border-radius: 50%; background: transparent; color: var(--text); cursor: pointer; touch-action: manipulation; }
 .effortless-tick svg { width: 24px; height: 24px; opacity: .3; }
 .effortless-set-row.now .effortless-tick { border-color: var(--text); }

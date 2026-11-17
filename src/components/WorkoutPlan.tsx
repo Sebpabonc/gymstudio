@@ -8,7 +8,7 @@ import { explanationKey, explanationPayload, validateExplanation } from '../trai
 import type { AuthStatus } from '../auth/AuthProvider'
 import SqueezeCue, { CueSheet, ShortCue, type SqueezeCueDetails } from './SqueezeCue'
 import WorkoutExerciseActions from './WorkoutExerciseActions'
-import WorkoutSetInputs from './WorkoutSetInputs'
+import WorkoutSetInputs, { InlineSetValues } from './WorkoutSetInputs'
 import ExerciseVideo from './ExerciseVideo'
 import { getExerciseVideo } from '../data/exerciseVideos'
 import './WorkoutLogging.css'
@@ -4364,10 +4364,19 @@ export default function WorkoutPlan({
                           <div key={rowKey} className={`effortless-set-row${done ? ' done' : ''}${current ? ' now' : ''}`}>
                             {group.isSuperset && <small className="effortless-set-exercise">{displayExerciseName(item.name)}</small>}
                             <span className="effortless-set-number">{formatNumber(language, index + 1)}</span>
-                            <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
-                              aria-label={t('workout.set.weightLabel', { set: index + 1 })}>{bodyweight ? '—' : weight === 0 ? '' : formatNumber(language, weight)}</button>
-                            <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
-                              aria-label={t('workout.set.repsLabel', { set: index + 1 })}>{formatNumber(language, reps)}</button>
+                            {drop ? (
+                              <>
+                                <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
+                                  aria-label={t('workout.set.weightLabel', { set: index + 1 })}>{bodyweight ? '—' : weight === 0 ? '' : formatNumber(language, weight)}</button>
+                                <button type="button" className="effortless-set-value" aria-expanded={open} onClick={toggleRow}
+                                  aria-label={t('workout.set.repsLabel', { set: index + 1 })}>{formatNumber(language, reps)}</button>
+                              </>
+                            ) : (
+                              <InlineSetValues setIndex={index} reps={reps} bodyweight={bodyweight} saved={done} t={t}
+                                weightInput={workoutWeightInputs[rowKey] ?? (bodyweight || weight === 0 ? '' : formatNumber(language, weight))}
+                                onWeightInputChange={(raw) => setWorkoutWeightInputs((currentInputs) => ({ ...currentInputs, [rowKey]: raw }))}
+                                onValueChange={(field, value) => updatePlanSetValue(item, index, field, value, count)} />
+                            )}
                             <button type="button" className="effortless-tick" data-next={current || undefined} aria-pressed={done}
                               // Not disabled while saving: a disabled focused button drops focus to <body> (a11y QA 2026-11-07).
                               // logWorkoutSet/undoWorkoutSet already ignore taps while a save runs.
@@ -4377,7 +4386,7 @@ export default function WorkoutPlan({
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
                             </button>
                             {drop && drop.reps > 0 && <p className="effortless-set-drop">↓ {formatNumber(language, drop.weight)} kg × {formatNumber(language, drop.reps)}</p>}
-                            {open && <div className="effortless-set-editor">{input(item, rowDraft, index, equipment)}</div>}
+                            {open && drop && <div className="effortless-set-editor">{input(item, rowDraft, index, equipment)}</div>}
                           </div>
                         )
                         })
