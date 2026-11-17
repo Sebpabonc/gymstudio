@@ -171,3 +171,45 @@ export default function WorkoutSetInputs({
     </div>
   )
 }
+
+/**
+ * PO 2026-11-17: kg and reps are typed straight into the set row (no editor opening under it).
+ * A saved set commits when the field is left; an unsaved one updates as you type.
+ */
+export function InlineSetValues({
+  setIndex, weightInput, reps, bodyweight, saved, t, onWeightInputChange, onValueChange,
+}: {
+  setIndex: number
+  weightInput: string
+  reps: number
+  bodyweight: boolean
+  saved: boolean
+  t: Translate
+  onWeightInputChange: (raw: string) => void
+  onValueChange: (field: 'weight' | 'reps', value: string) => void
+}) {
+  const commitWeight = (raw: string) => {
+    onWeightInputChange(raw)
+    const numeric = Number(raw.replace(',', '.'))
+    onValueChange('weight', raw.trim() && Number.isFinite(numeric) ? String(numeric) : '0')
+  }
+  const weightProps = {
+    type: 'text', inputMode: 'decimal' as const, className: 'effortless-set-input', 'data-log-weight': true,
+    placeholder: bodyweight ? '—' : '', 'aria-label': t('workout.set.weightLabel', { set: setIndex + 1 }), onFocus: selectOnFocus,
+  }
+  const repsProps = {
+    type: 'number', inputMode: 'numeric' as const, min: '0', className: 'effortless-set-input',
+    'aria-label': t('workout.set.repsLabel', { set: setIndex + 1 }), onFocus: selectOnFocus,
+  }
+  return saved ? (
+    <>
+      <BufferedInput {...weightProps} value={weightInput} onCommit={commitWeight} />
+      <BufferedInput {...repsProps} value={reps} onCommit={(raw) => onValueChange('reps', raw.replace(/^0+(?=\d)/, ''))} />
+    </>
+  ) : (
+    <>
+      <input {...weightProps} value={weightInput} onChange={(event) => commitWeight(event.target.value)} />
+      <input {...repsProps} value={reps} onChange={(event) => onValueChange('reps', cleanNumberInput(event))} />
+    </>
+  )
+}

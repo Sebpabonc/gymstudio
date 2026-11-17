@@ -2,7 +2,7 @@ import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import WorkoutPlan from './WorkoutPlan'
-import WorkoutSetInputs from './WorkoutSetInputs'
+import WorkoutSetInputs, { InlineSetValues } from './WorkoutSetInputs'
 import RestTimer from './RestTimer'
 import WorkoutExerciseActions from './WorkoutExerciseActions'
 import ExerciseVideo from './ExerciseVideo'
@@ -123,19 +123,31 @@ async function click(text: string) {
   await settle()
 }
 
+// PO 2026-11-17: kg and reps are typed in the row itself; only drop sets still open an editor.
+let fixingSet: number | null = null
+
 function inputs(drop = false) {
-  let found = elements(node => node.type === WorkoutSetInputs)
-  if (!found.length) {
-    // A row's editor opens from its numbers; default to the set you are on.
-    const row = elements(node => typeof node.props.className === 'string' && node.props.className.includes('effortless-set-row') && node.props.className.includes('now'))[0]
-    elements(node => node.props.className === 'effortless-set-value', row)[0].props.onClick()
-    render()
-    found = elements(node => node.type === WorkoutSetInputs)
+  const nowRow = () => elements(node => typeof node.props.className === 'string' && node.props.className.includes('effortless-set-row') && node.props.className.includes('now'))[0]
+  // Drop sets keep their editor: open it from the row's numbers.
+  const editor = () => {
+    let found = elements(node => node.type === WorkoutSetInputs)
+    if (!found.length) {
+      elements(node => node.props.className === 'effortless-set-value', nowRow())[0].props.onClick()
+      render()
+      found = elements(node => node.type === WorkoutSetInputs)
+    }
+    return found
   }
-  return found[drop ? 1 : 0]
+  if (drop) return editor()[1]
+  const all = elements(node => node.type === InlineSetValues)
+  if (fixingSet !== null && all.length) return all[fixingSet - 1]
+  const row = nowRow()
+  const inline = row ? elements(node => node.type === InlineSetValues, row)[0] : all[0]
+  return inline ?? editor()[0]
 }
 
 async function enter(weight: number, reps = 8) {
+  fixingSet = null
   inputs().props.onValueChange('weight', String(weight))
   render()
   inputs().props.onValueChange('reps', String(reps))
@@ -143,7 +155,7 @@ async function enter(weight: number, reps = 8) {
 }
 
 function fixSet(set = 1) {
-  elements(node => node.props.className === 'effortless-set-value')[(set - 1) * 2].props.onClick()
+  fixingSet = set
   render()
 }
 
@@ -155,11 +167,7 @@ function pendingRow(name: string) {
 
 /** Logs the first pending set of one superset exercise, whichever row is highlighted. */
 async function logPendingRow(name: string, weight: number) {
-  if (!elements(node => node.type === WorkoutSetInputs, pendingRow(name)).length) {
-    elements(node => node.props.className === 'effortless-set-value', pendingRow(name))[0].props.onClick()
-    render()
-  }
-  elements(node => node.type === WorkoutSetInputs, pendingRow(name))[0].props.onValueChange('weight', String(weight))
+  elements(node => node.type === InlineSetValues || node.type === WorkoutSetInputs, pendingRow(name))[0].props.onValueChange('weight', String(weight))
   render()
   vi.advanceTimersByTime(600)
   await elements(node => node.props.className === 'effortless-tick', pendingRow(name))[0].props.onClick()
@@ -202,6 +210,7 @@ beforeEach(() => {
     id, name: id, primaryMuscle: 'Chest', equipment: id === 'drop' ? 'machine' : 'barbell',
   }))
   harness.nextBlocks = []
+  fixingSet = null
   harness.block = {
     id: 'block', number: 1, name: 'Test block', method: 'flat', startDate: '2026-10-05',
     weeks: 6, origin: 'pt', summary: '', insights: [],
@@ -365,8 +374,7 @@ describe('approved workout logging integration', () => {
     await enter(2.5, 8)
     await click(doneLabel())
     fixSet()
-    const decrease = elements(node => node.type === 'button', WorkoutSetInputs(inputs().props))[0]
-    decrease.props.onClick()
+    inputs().props.onValueChange('weight', '0')
     await settle()
     expect(inputs().props.weightInput).toBe('2.5')
     expect((await loadWorkoutHistory())[0].sets[0].weight).toBe(2.5)
@@ -524,11 +532,11 @@ describe('approved workout logging integration', () => {
     render()
     await settle()
     await start()
-    expect(inputs().props.commitOnBlur).toBe(false)
+    expect(inputs().props.saved).toBe(false)
     await enter(40, 8)
     await click(doneLabel())
     fixSet()
-    expect(inputs().props.commitOnBlur).toBe(true)
+    expect(inputs().props.saved).toBe(true)
   })
 
   it('R1: Undo on Completed sits inline after Back, never floating over it', async () => {
@@ -598,7 +606,6 @@ describe('approved workout logging integration', () => {
     inputs().props.onWeightInputChange('')
     inputs().props.onValueChange('weight', '0')
     await settle()
-    expect(inputs().props.weight).toBe(40)
     expect(inputs().props.weightInput).toBe('40')
     inputs().props.onValueChange('reps', '0')
     await settle()
@@ -606,7 +613,7 @@ describe('approved workout logging integration', () => {
     expect((await loadWorkoutHistory())[0].sets[0]).toMatchObject({ weight: 40, reps: 8 })
     fixSet()
     await settle()
-    expect(inputs().props.weight).toBe(40)
+    expect(inputs().props.weightInput).toBe('40')
     expect(doneLabel()).not.toBe('Enter weight')
   })
 
@@ -772,7 +779,7 @@ describe('approved workout logging integration', () => {
     await click(doneLabel())
     await enter(87.5)
     await click(doneLabel())
-    expect(inputs().props.weight).toBe(87.5)
+    expect(inputs().props.weightInput).toBe('87.5')
     expect((await loadWorkoutHistory())[0].sets.map(set => set.weight)).toEqual([85, 87.5])
   })
 
