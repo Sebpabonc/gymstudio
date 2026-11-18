@@ -3706,15 +3706,15 @@
     "start_date": "2026-11-16",
     "weeks": 6,
     "origin": "pt",
-    "summary": "A 6-week strength block: one heavy top set of 4-5 reps on each A-day main lift, 6-8 reps on A days and 8-10 on B days, 3 back exercises per chest-back day, supersets on every day, and no exercise above 4 sets.",
+    "summary": "A 6-week strength block: a heavy top set of 4 reps on the chest-back and arms A days, 6-8 reps on A days and 8-10 on B days, 3 back exercises per chest-back day, machine-based leg days, supersets every day and no exercise above 4 sets.",
     "insights": [
       {
         "title": "Goal",
-        "body": "Get stronger on the big lifts while you keep building muscle. Muscle grows about the same from 5 to 30 reps when sets are hard, but heavier sets build more strength, so a small dose of heavy 4-5 rep work sits on top of 6-12 rep sets. Total hard sets per week is what drives growth: about 20 for chest, back, biceps, triceps and quads, and 14 for hamstrings."
+        "body": "Get stronger on the big lifts while you keep building muscle. Muscle grows about the same from 5 to 30 reps when sets are hard, but heavier sets build more strength, so a small dose of heavy 4-rep work sits on top of 6-12 rep sets. Total hard sets per week is what drives growth: about 20 for chest, back, biceps and triceps; on leg days, 16 for glutes and 8 each for quads, hamstrings, calves and inner thighs."
       },
       {
         "title": "How it works",
-        "body": "Each A day opens alone with a reverse pyramid: one heavy top set (4 reps on the Smith bench and seated overhead press, 5 on the back squat), then lighter sets of 6, 8 and 10, with 3 minutes rest. After that, most work is done in supersets of two muscles that don't compete, like the incline press with chin-ups or leg curls with leg extensions: first exercise, about 10 seconds, second exercise, then the full rest. Chest-back days have three back exercises: chin-ups, a chest-supported row and straight-arm pulldowns. No exercise has more than 4 sets."
+        "body": "Chest-back A and Arms A open alone with a reverse pyramid: one heavy top set of 4 reps (Smith bench, seated overhead press), then lighter sets of 6, 8 and 10, with 3 minutes rest. After that, and for the whole leg day, work is done in supersets of two muscles that don't compete, like the incline press with chin-ups or leg extensions with leg curls: first exercise, about 10 seconds, second exercise, then the full rest. Chest-back days have three back exercises: chin-ups, a chest-supported row and straight-arm pulldowns. No exercise has more than 4 sets."
       },
       {
         "title": "A days vs B days",
@@ -3726,7 +3726,7 @@
       },
       {
         "title": "What to expect",
-        "body": "Supersets make sessions denser: about 65-75 minutes, with fewer long waits, but you will breathe harder. The heavy top sets still get full rest. Your back is now trained from three angles every chest-back day. By week 5 your top sets should be clearly heavier than in week 2."
+        "body": "Supersets make sessions denser: about 65-75 minutes (leg days about 55), with fewer long waits, but you will breathe harder. The heavy top sets still get full rest. Your back is now trained from three angles every chest-back day. By week 5 your top sets should be clearly heavier than in week 2."
       },
       {
         "title": "Key tips",
@@ -3970,98 +3970,86 @@
       {
         "key": "lower-body-a",
         "name": "Lower Body A",
-        "focus": "Legs & core · heavy",
+        "focus": "Legs & glutes · heavy",
         "exercises": [
           {
             "code": "A1",
-            "exercise_id": "back-squat",
+            "exercise_id": "machine-hip-thrust",
             "sets": 4,
             "reps": [
-              "5",
-              "6",
               "8",
+              "8",
+              "8",
+              "8"
+            ],
+            "technique": "superset",
+            "rest_seconds": 10,
+            "angle_degrees": null,
+            "notes": "Warm up with 2 light sets. Chin tucked; squeeze 1 s at the top, no arching."
+          },
+          {
+            "code": "A2",
+            "exercise_id": "leg-press-calf-raises-toes-neutral",
+            "sets": 4,
+            "reps": [
+              "10",
+              "10",
+              "10",
               "10"
             ],
-            "technique": "reverse-pyramid",
-            "rest_seconds": 180,
+            "technique": "superset",
+            "rest_seconds": 120,
             "angle_degrees": null,
-            "notes": "Safety pins set. Top set of 5, 1-2 reps in reserve, never grind."
+            "notes": "Knees straight, not locked; pause 2 s in the deep stretch at the bottom."
           },
           {
             "code": "B1",
-            "exercise_id": "romanian-deadlift",
+            "exercise_id": "leg-extensions-toes-dorsiflexed-neutral",
             "sets": 4,
             "reps": [
-              "8",
-              "8",
-              "8",
-              "8"
+              "10",
+              "10",
+              "10",
+              "10"
             ],
-            "technique": "straight",
-            "rest_seconds": 120,
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Lower in 3 seconds to a strong hamstring stretch."
+            "notes": "Slow through the deep bend. Last set: rest-pause, 15 s, then 2 mini-sets."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "machine-standing-leg-curl",
+            "sets": 4,
+            "reps": [
+              "10",
+              "10",
+              "10",
+              "10"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": null,
+            "notes": "Reps per leg. Hips pressed into the pad; lower slowly to a straight knee."
           },
           {
             "code": "C1",
-            "exercise_id": "dumbbell-lunge-reverse",
-            "sets": 3,
-            "reps": [
-              "8",
-              "8",
-              "8"
-            ],
-            "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": null,
-            "notes": "Reps are per leg."
-          },
-          {
-            "code": "D1",
-            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
-            "sets": 3,
-            "reps": [
-              "8",
-              "8",
-              "8"
-            ],
-            "technique": "superset",
-            "rest_seconds": 10,
-            "angle_degrees": null,
-            "notes": "Lean your chest forward. Last set: rest-pause, 15 s, then 2 mini-sets."
-          },
-          {
-            "code": "D2",
-            "exercise_id": "leg-extensions-toes-dorsiflexed-neutral",
-            "sets": 3,
-            "reps": [
-              "10",
-              "10",
-              "10"
-            ],
-            "technique": "superset",
-            "rest_seconds": 90,
-            "angle_degrees": null,
-            "notes": "Toes pulled up; slow through the deep bend."
-          },
-          {
-            "code": "E1",
-            "exercise_id": "smith-machine-calf-raise",
+            "exercise_id": "machine-hip-abduction",
             "sets": 4,
             "reps": [
-              "10",
-              "10",
-              "10",
-              "10"
+              "12",
+              "12",
+              "12",
+              "12"
             ],
             "technique": "superset",
             "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Pause 2 s at the bottom of every rep."
+            "notes": "Sit tall, push out with your knees; pause 1 s wide, close slowly."
           },
           {
-            "code": "E2",
-            "exercise_id": "ab-wheel-rollout",
+            "code": "C2",
+            "exercise_id": "machine-hip-adduction",
             "sets": 4,
             "reps": [
               "12",
@@ -4072,7 +4060,7 @@
             "technique": "superset",
             "rest_seconds": 60,
             "angle_degrees": null,
-            "notes": "Roll out further as you get stronger."
+            "notes": "Same machine as abduction if it is a 2-in-1; open slowly to a mild stretch."
           }
         ]
       },
@@ -4312,109 +4300,97 @@
       {
         "key": "lower-body-b",
         "name": "Lower Body B",
-        "focus": "Legs & core · volume",
+        "focus": "Legs & glutes · volume",
         "exercises": [
           {
             "code": "A1",
-            "exercise_id": "back-squat",
+            "exercise_id": "machine-hip-thrust",
             "sets": 4,
             "reps": [
-              "8",
-              "8",
-              "8",
-              "8"
+              "10",
+              "10",
+              "10",
+              "10"
             ],
-            "technique": "straight",
-            "rest_seconds": 120,
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Safety pins set; stop 1-2 reps short on every set."
+            "notes": "Warm up with 2 light sets. Chin tucked; squeeze 1 s at the top, no arching."
+          },
+          {
+            "code": "A2",
+            "exercise_id": "leg-press-calf-raises-toes-neutral",
+            "sets": 4,
+            "reps": [
+              "12",
+              "12",
+              "12",
+              "12"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": null,
+            "notes": "Knees straight, not locked; pause 2 s in the deep stretch at the bottom."
           },
           {
             "code": "B1",
-            "exercise_id": "romanian-deadlift",
+            "exercise_id": "leg-extensions-toes-dorsiflexed-neutral",
             "sets": 4,
             "reps": [
-              "10",
-              "10",
-              "10",
-              "10"
+              "12",
+              "12",
+              "12",
+              "12"
             ],
-            "technique": "straight",
-            "rest_seconds": 120,
+            "technique": "superset",
+            "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Hips back to a strong hamstring stretch; keep the spine neutral."
+            "notes": "Slow through the deep bend. Last set: drop the weight about 25%, keep going."
+          },
+          {
+            "code": "B2",
+            "exercise_id": "machine-standing-leg-curl",
+            "sets": 4,
+            "reps": [
+              "12",
+              "12",
+              "12",
+              "12"
+            ],
+            "technique": "superset",
+            "rest_seconds": 90,
+            "angle_degrees": null,
+            "notes": "Reps per leg. Hips pressed into the pad; lower slowly to a straight knee."
           },
           {
             "code": "C1",
-            "exercise_id": "dumbbell-lunge-reverse",
-            "sets": 3,
+            "exercise_id": "machine-hip-abduction",
+            "sets": 4,
             "reps": [
-              "10",
-              "10",
-              "10"
-            ],
-            "technique": "straight",
-            "rest_seconds": 90,
-            "angle_degrees": null,
-            "notes": "Reps are per leg."
-          },
-          {
-            "code": "D1",
-            "exercise_id": "seated-leg-curl-toes-dorsiflexed-neutral",
-            "sets": 3,
-            "reps": [
-              "10",
-              "10",
-              "10"
+              "15",
+              "15",
+              "15",
+              "15"
             ],
             "technique": "superset",
             "rest_seconds": 10,
             "angle_degrees": null,
-            "notes": "Lean forward. Last set: drop the weight about 25% and keep going."
+            "notes": "Sit tall, push out with your knees; pause 1 s wide, close slowly."
           },
           {
-            "code": "D2",
-            "exercise_id": "leg-extensions-toes-dorsiflexed-neutral",
-            "sets": 3,
-            "reps": [
-              "12",
-              "12",
-              "12"
-            ],
-            "technique": "superset",
-            "rest_seconds": 90,
-            "angle_degrees": null,
-            "notes": "Toes pulled up; slow through the deep bend."
-          },
-          {
-            "code": "E1",
-            "exercise_id": "smith-machine-calf-raise",
+            "code": "C2",
+            "exercise_id": "machine-hip-adduction",
             "sets": 4,
             "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
-            ],
-            "technique": "superset",
-            "rest_seconds": 10,
-            "angle_degrees": null,
-            "notes": "Pause 2 s at the bottom of every rep."
-          },
-          {
-            "code": "E2",
-            "exercise_id": "ab-wheel-rollout",
-            "sets": 4,
-            "reps": [
-              "12",
-              "12",
-              "12",
-              "12"
+              "15",
+              "15",
+              "15",
+              "15"
             ],
             "technique": "superset",
             "rest_seconds": 60,
             "angle_degrees": null,
-            "notes": "Roll out further as you get stronger."
+            "notes": "Same machine as abduction if it is a 2-in-1; open slowly to a mild stretch."
           }
         ]
       }
