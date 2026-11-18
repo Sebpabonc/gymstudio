@@ -37,6 +37,17 @@ describe('suggestAlternatives', () => {
   })
 })
 
+describe('suggestAlternatives: full list (PO 2026-11-18)', () => {
+  it('returns every same-muscle exercise, best matches first, when no limit applies', () => {
+    const original = byId('smith-machine-shoulder-press')
+    const all = suggestAlternatives(original, catalogue, [], Infinity)
+    const sameMuscle = catalogue.filter((item) => item.primaryMuscle === original.primaryMuscle && item.id !== original.id)
+    expect(all).toHaveLength(sameMuscle.length)
+    expect(all.length).toBeGreaterThan(3)
+    expect(all.slice(0, 3)).toEqual(suggestAlternatives(original, catalogue))
+  })
+})
+
 describe('applySwaps', () => {
   const block = {
     id: 'b', days: [{ key: 'arms-a', position: 1, name: 'A', exercises: [

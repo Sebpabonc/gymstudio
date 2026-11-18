@@ -93,7 +93,7 @@ import type { WorkoutExerciseInsight } from '../progress/workoutInsights'
 import { selectPlanBlocks } from '../plans/selectPlanBlocks'
 import { plannedDayDates, restRecommendation, startsOnFirstLog, weekAnchor } from '../plans/rollingStart'
 import { loadDemoBlocks } from '../plans/demoBlock'
-import { activeSwaps, applySwaps, suggestAlternatives } from '../plans/exerciseSwaps'
+import { activeSwaps, applySwaps, suggestAlternatives, TOP_SWAP_SUGGESTIONS } from '../plans/exerciseSwaps'
 import type { ExerciseSwap } from '../plans/exerciseSwaps'
 import { fetchExerciseSwaps, removeExerciseSwap, saveExerciseSwap } from '../utils/profileData'
 import { fetchCalibrationRecommendations, saveTrainerRecommendation } from '../utils/profileData'
@@ -752,6 +752,54 @@ export function ExerciseSwapSheet({
   /** Focus management lives in the parent (useDialogFocus), which owns the open state. */
   sheetRef?: React.Ref<HTMLElement>
 }) {
+  const top = alternatives.slice(0, TOP_SWAP_SUGGESTIONS)
+  const more = alternatives.slice(TOP_SWAP_SUGGESTIONS)
+  const renderAlternative = (alternative: Exercise) => (
+    <article className="exercise-swap-suggestion" key={alternative.id}>
+      <a
+        className="exercise-swap-name exercise-image-link"
+        href={exerciseImageSearchUrl(exerciseImageQuery(alternative.id, getExerciseDisplayName(alternative, language), alternative.equipment))}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t('workout.exercise.imageSearch', { name: getExerciseDisplayName(alternative, language) })}
+        onClick={(event) => {
+          event.stopPropagation()
+          event.preventDefault()
+          void openExternal(event.currentTarget.href)
+        }}
+      >
+        <NameWithArrow name={getExerciseDisplayName(alternative, language)} />
+      </a>
+      <div className="chip-row chip-row-tight">
+        <span className="chip">{t('workout.swap.muscle')}: {localizeMuscle(alternative.primaryMuscle, language)}</span>
+        {alternative.equipment && (
+          <span className="chip subtle">
+            {t('workout.swap.equipment')}: {
+              swapEquipmentKeys[alternative.equipment]
+                ? t(swapEquipmentKeys[alternative.equipment])
+                : alternative.equipment
+            }
+          </span>
+        )}
+      </div>
+      <div className="exercise-swap-actions">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => onSelect(alternative.id, 'today')}
+        >
+          {t('workout.swap.justToday')}
+        </button>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => onSelect(alternative.id, 'always')}
+        >
+          {t('workout.swap.always')}
+        </button>
+      </div>
+    </article>
+  )
   return (
     <section
       ref={sheetRef}
@@ -768,53 +816,16 @@ export function ExerciseSwapSheet({
         </button>
       </header>
       <div className="exercise-swap-suggestions">
-        {alternatives.map((alternative) => (
-          <article className="exercise-swap-suggestion" key={alternative.id}>
-            <a
-              className="exercise-swap-name exercise-image-link"
-              href={exerciseImageSearchUrl(exerciseImageQuery(alternative.id, getExerciseDisplayName(alternative, language), alternative.equipment))}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t('workout.exercise.imageSearch', { name: getExerciseDisplayName(alternative, language) })}
-              onClick={(event) => {
-                event.stopPropagation()
-                event.preventDefault()
-                void openExternal(event.currentTarget.href)
-              }}
-            >
-              <NameWithArrow name={getExerciseDisplayName(alternative, language)} />
-            </a>
-            <div className="chip-row chip-row-tight">
-              <span className="chip">{t('workout.swap.muscle')}: {localizeMuscle(alternative.primaryMuscle, language)}</span>
-              {alternative.equipment && (
-                <span className="chip subtle">
-                  {t('workout.swap.equipment')}: {
-                    swapEquipmentKeys[alternative.equipment]
-                      ? t(swapEquipmentKeys[alternative.equipment])
-                      : alternative.equipment
-                  }
-                </span>
-              )}
-            </div>
-            <div className="exercise-swap-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => onSelect(alternative.id, 'today')}
-              >
-                {t('workout.swap.justToday')}
-              </button>
-              <button
-                type="button"
-                className="primary-button"
-                onClick={() => onSelect(alternative.id, 'always')}
-              >
-                {t('workout.swap.always')}
-              </button>
-            </div>
-          </article>
-        ))}
+        {top.map(renderAlternative)}
       </div>
+      {more.length > 0 && (
+        <details className="exercise-swap-more">
+          <summary>{t('workout.swap.more', { count: more.length })}</summary>
+          <div className="exercise-swap-suggestions">
+            {more.map(renderAlternative)}
+          </div>
+        </details>
+      )}
     </section>
   )
 }
@@ -1180,7 +1191,8 @@ export default function WorkoutPlan({
     ? suggestAlternatives(
         swapTarget.exercise,
         exerciseCatalog,
-        activeExercises.flatMap((exercise) => exercise.exerciseId ? [exercise.exerciseId] : [])
+        activeExercises.flatMap((exercise) => exercise.exerciseId ? [exercise.exerciseId] : []),
+        Infinity
       )
     : []
   const todayDay = activeBlock ? todayTrainingDay(activeBlock, history, today) : undefined
