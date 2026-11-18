@@ -152,6 +152,11 @@ intensity — so no two consecutive blocks use the same method. Each block chang
   have 3 back exercises (neutral-grip chin-ups, chest-supported neutral row, straight-arm pulldown) and the plate-loaded
   incline press; arms days add reverse pec deck; leg days pair the seated leg curl with leg extensions. Weekly sets:
   chest, back, biceps, triceps, quads about 20; hamstrings 14.
+- **Block 7 legs, PO's exercises (2026-11-19, `approved/2026-11-18-block7-legs-po-exercises.md`).** At the PO's
+  request both leg days hold only six machine exercises in three supersets, 4 sets each: hip thrust + leg-press calf
+  raise, leg extension + standing leg curl, hip abduction + adduction. Squat, RDL, lunge, seated curl and ab wheel are
+  out for this block. Weekly direct sets: glutes 16; quads, hamstrings, calves, adductors 8; abs 0. Block 8 restarts
+  the squat and RDL about 10-15% below his last loads.
 
 ## Bench angle strategy
 

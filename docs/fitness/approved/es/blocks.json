@@ -459,15 +459,15 @@
   },
   "block-2026-11-16-strength-hypertrophy-ii": {
     "name": "Fuerza · Series pesadas de 6-8 II",
-    "summary": "Un bloque de fuerza de 6 semanas: una serie top pesada de 4-5 reps en el principal de cada día A, 6-8 reps en los días A y 8-10 en los B, 3 ejercicios de espalda por día de pecho y espalda, superseries todos los días y ningún ejercicio con más de 4 series.",
+    "summary": "Un bloque de fuerza de 6 semanas: una serie top pesada de 4 reps en los días A de pecho-espalda y brazos, 6-8 reps en los días A y 8-10 en los B, 3 ejercicios de espalda por día de pecho y espalda, piernas en máquinas, superseries todos los días y ningún ejercicio con más de 4 series.",
     "insights": [
       {
         "title": "Objetivo",
-        "body": "Ganar fuerza en los ejercicios grandes mientras sigues construyendo músculo. El músculo crece más o menos igual entre 5 y 30 reps cuando las series son exigentes, pero las series pesadas construyen más fuerza, así que se suma una dosis pequeña de trabajo pesado a 4-5 reps sobre series de 6-12. Lo que impulsa el crecimiento es el total de series exigentes por semana: unas 20 para pecho, espalda, bíceps, tríceps y cuádriceps, y 14 para femorales."
+        "body": "Ganar fuerza en los ejercicios grandes mientras sigues construyendo músculo. El músculo crece más o menos igual entre 5 y 30 reps cuando las series son exigentes, pero las series pesadas construyen más fuerza, así que se suma una dosis pequeña de trabajo pesado a 4 reps sobre series de 6-12. Lo que impulsa el crecimiento es el total de series exigentes por semana: unas 20 para pecho, espalda, bíceps y tríceps; en los días de pierna, 16 para glúteos y 8 para cuádriceps, femorales, pantorrillas y aductores."
       },
       {
         "title": "Cómo funciona",
-        "body": "Cada día A abre solo con una pirámide inversa: una serie top pesada (4 reps en el press de banca en Smith y el press militar sentado, 5 en la sentadilla), luego series más ligeras de 6, 8 y 10, con 3 minutos de descanso. Después, casi todo va en superseries de dos músculos que no compiten, como el press inclinado con dominadas o el curl femoral con la extensión: el primero, unos 10 segundos, el segundo y luego el descanso completo. Los días de pecho y espalda tienen tres ejercicios de espalda: dominadas, remo con pecho apoyado y jalón con brazos rectos. Ningún ejercicio pasa de 4 series."
+        "body": "Los días A de pecho-espalda y brazos abren solos con una pirámide inversa: una serie top pesada de 4 reps (banca en Smith, press militar sentado), luego series más ligeras de 6, 8 y 10, con 3 minutos de descanso. Después, y en todo el día de pierna, el trabajo va en superseries de dos músculos que no compiten, como el press inclinado con dominadas o la extensión con el curl femoral: el primero, unos 10 segundos, el segundo y luego el descanso completo. Los días de pecho y espalda tienen tres ejercicios de espalda: dominadas, remo con pecho apoyado y jalón con brazos rectos. Ningún ejercicio pasa de 4 series."
       },
       {
         "title": "Días A vs. días B",
@@ -479,7 +479,7 @@
       },
       {
         "title": "Qué esperar",
-        "body": "Las superseries hacen las sesiones más densas: unos 65-75 minutos, con menos esperas largas, pero vas a respirar más fuerte. Las series top pesadas siguen con descanso completo. Tu espalda ahora se trabaja desde tres ángulos cada día de pecho y espalda. Para la semana 5 tus series top deberían ser claramente más pesadas que en la semana 2."
+        "body": "Las superseries hacen las sesiones más densas: unos 65-75 minutos (los días de pierna, unos 55), con menos esperas largas, pero vas a respirar más fuerte. Las series top pesadas siguen con descanso completo. Tu espalda ahora se trabaja desde tres ángulos cada día de pecho y espalda. Para la semana 5 tus series top deberían ser claramente más pesadas que en la semana 2."
       },
       {
         "title": "Consejos clave",
@@ -497,7 +497,7 @@
       },
       "lower-body-a": {
         "name": "Tren inferior A",
-        "focus": "Piernas y core · pesado"
+        "focus": "Piernas y glúteos · pesado"
       },
       "chest-back-b": {
         "name": "Pecho y Espalda B",
@@ -509,7 +509,7 @@
       },
       "lower-body-b": {
         "name": "Tren inferior B",
-        "focus": "Piernas y core · volumen"
+        "focus": "Piernas y glúteos · volumen"
       }
     },
     "notes": {
@@ -528,13 +528,6 @@
       "arms-a/C2": "Si te molestan los codos, haz 8 reps; nunca pelees una serie pesada.",
       "arms-a/D1": "Reps por brazo. Última serie: suma 4-6 medias reps en el estiramiento.",
       "arms-a/D2": "Deja bajar la mancuerna detrás de la cabeza para un estiramiento completo.",
-      "lower-body-a/A1": "Topes puestos. Serie top de 5 con 1-2 reps en reserva, sin pelear.",
-      "lower-body-a/B1": "Baja en 3 segundos hasta un buen estiramiento del femoral.",
-      "lower-body-a/C1": "Las reps son por pierna.",
-      "lower-body-a/D1": "Inclina el pecho al frente. Última serie: rest-pause, 15 s y 2 mini-series.",
-      "lower-body-a/D2": "Puntas hacia arriba; lento en la flexión profunda.",
-      "lower-body-a/E1": "Pausa de 2 s abajo en cada rep.",
-      "lower-body-a/E2": "Rueda más lejos a medida que ganes fuerza.",
       "chest-back-b/A1": "Baja la barra a la mitad del pecho en 2-3 segundos en cada rep.",
       "chest-back-b/B1": "Baja hasta sentir un buen estiramiento del pecho; empuja sobre la parte alta.",
       "chest-back-b/B2": "Agrega un cinturón si es fácil; usa la máquina asistida si no llegas a las reps.",
@@ -550,13 +543,18 @@
       "arms-b/C2": "Reps suaves; si te molestan los codos, baja el peso.",
       "arms-b/D1": "Reps por brazo. Última serie: suma 4-6 medias reps en el estiramiento.",
       "arms-b/D2": "Deja bajar la mancuerna detrás de la cabeza para un estiramiento completo.",
-      "lower-body-b/A1": "Topes puestos; para a 1-2 reps del fallo en cada serie.",
-      "lower-body-b/B1": "Cadera atrás hasta un buen estiramiento del femoral; espalda neutra.",
-      "lower-body-b/C1": "Las reps son por pierna.",
-      "lower-body-b/D1": "Inclínate al frente. Última serie: baja el peso un 25% y sigue.",
-      "lower-body-b/D2": "Puntas hacia arriba; lento en la flexión profunda.",
-      "lower-body-b/E1": "Pausa de 2 s abajo en cada rep.",
-      "lower-body-b/E2": "Rueda más lejos a medida que ganes fuerza."
+      "lower-body-a/A1": "Calienta con 2 series ligeras. Mentón adentro; aprieta 1 s arriba sin arquear.",
+      "lower-body-a/A2": "Rodillas estiradas sin bloquear; pausa de 2 s abajo, en el estiramiento.",
+      "lower-body-a/B2": "Reps por pierna. Cadera pegada al cojín; baja lento hasta estirar la rodilla.",
+      "lower-body-a/C1": "Siéntate erguido, rodillas hacia afuera; pausa 1 s abierto y cierra lento.",
+      "lower-body-a/C2": "Misma máquina que la abducción si es 2 en 1; abre lento, estiramiento leve.",
+      "lower-body-b/A1": "Calienta con 2 series ligeras. Mentón adentro; aprieta 1 s arriba sin arquear.",
+      "lower-body-b/A2": "Rodillas estiradas sin bloquear; pausa de 2 s abajo, en el estiramiento.",
+      "lower-body-b/B2": "Reps por pierna. Cadera pegada al cojín; baja lento hasta estirar la rodilla.",
+      "lower-body-b/C1": "Siéntate erguido, rodillas hacia afuera; pausa 1 s abierto y cierra lento.",
+      "lower-body-b/C2": "Misma máquina que la abducción si es 2 en 1; abre lento, estiramiento leve.",
+      "lower-body-a/B1": "Lento en la flexión profunda. Última serie: rest-pause, 15 s y 2 mini-series.",
+      "lower-body-b/B1": "Lento en la flexión profunda. Última serie: baja el peso un 25% y sigue."
     }
   },
   "block-2026-12-28-hypertrophy-pyramid-ii": {
