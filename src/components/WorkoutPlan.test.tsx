@@ -489,5 +489,19 @@ describe('WorkoutPlan', () => {
     expect(saveAlways).toHaveBeenCalledWith('alt-one')
     expect(onSelect).toHaveBeenNthCalledWith(1, 'alt-one', 'today')
     expect(onSelect).toHaveBeenNthCalledWith(2, 'alt-one', 'always')
+    expect(html).not.toContain('More options')
+  })
+
+  it('shows the top three, then the rest under "More options"', () => {
+    const alternatives: Exercise[] = Array.from({ length: 7 }, (_, index) => (
+      { id: `alt-${index}`, name: `Alternative ${index}`, primaryMuscle: 'Chest', equipment: 'cable' }
+    ))
+    const html = renderToString(ExerciseSwapSheet({
+      alternatives, language: 'en', t: createTranslator('en'), onCancel: vi.fn(), onSelect: vi.fn(),
+    }))
+    expect(html.match(/class="exercise-swap-suggestion"/g)).toHaveLength(7)
+    expect(html).toContain('More options (4)')
+    expect(html.indexOf('Alternative 2')).toBeLessThan(html.indexOf('More options'))
+    expect(html.indexOf('Alternative 3')).toBeGreaterThan(html.indexOf('More options'))
   })
 })

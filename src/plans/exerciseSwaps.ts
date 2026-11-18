@@ -3,8 +3,12 @@ import type { Exercise, TrainingBlock } from '../types'
 // Swapping a busy/unavailable exercise (PO 2026-10-06). Alternatives come from the approved catalogue only:
 // same primary muscle is required; same movement pattern, same mechanic and shared secondary muscles rank
 // higher, and a different piece of equipment ranks higher (the original one is probably taken).
+// PO 2026-11-18: 3 is often not enough, so the sheet shows the top 3 first and every other match under "More options".
 
 type SwapCandidate = Pick<Exercise, 'id' | 'primaryMuscle' | 'secondaryMuscles' | 'equipment' | 'mechanic' | 'movementPattern'>
+
+/** How many ranked alternatives the sheet shows before "More options". */
+export const TOP_SWAP_SUGGESTIONS = 3
 
 export type ExerciseSwap = {
   fromExerciseId: string
@@ -18,7 +22,7 @@ export function suggestAlternatives<T extends SwapCandidate>(
   exercise: SwapCandidate,
   catalogue: T[],
   excludeIds: string[] = [],
-  limit = 3
+  limit = TOP_SWAP_SUGGESTIONS
 ): T[] {
   const excluded = new Set([exercise.id, ...excludeIds])
   const secondary = new Set(exercise.secondaryMuscles ?? [])
