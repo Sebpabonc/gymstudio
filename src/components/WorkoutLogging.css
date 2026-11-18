@@ -130,6 +130,22 @@
   object-fit: cover;
   pointer-events: none;
 }
+.exercise-video-expand {
+  position: absolute;
+  right: var(--pad-inner);
+  bottom: var(--pad-inner);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--text);
+}
+.exercise-video-expand svg {
+  width: 15px;
+  height: 15px;
+}
 .exercise-video-badge {
   position: absolute;
   left: var(--pad-inner);

@@ -111,6 +111,12 @@ export default function ExerciseVideo({ video, title, labels, cue, active }: Exe
           tabIndex={-1}
           onError={() => setFailed(true)}
         />
+        {/* Prototype option A: a corner icon says the tile opens full screen. */}
+        <span className="exercise-video-expand" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+          </svg>
+        </span>
         {reducedMotion && (
           <span className="exercise-video-badge" aria-hidden="true">
             <span className="exercise-video-badge-icon">▶</span>
