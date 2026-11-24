@@ -56,8 +56,9 @@ export default function SetTrendChart({
   const sessions = hasLoad
     ? rawSessions.map((session) => ({ ...session, sets: session.sets.filter((set) => set.logged || set.weight > 0) }))
     : rawSessions
-  // A set still to do is drawn at its goal; a logged one at what was done.
-  const barReps = (set: WorkoutTrendSession['sets'][number]) => set.logged ? set.reps : set.targetReps ?? set.reps
+  // A logged set is drawn at what was done; a set still to do at what the logging card proposes (PO 2026-11-24),
+  // so the chart never disagrees with the boxes above it. The plan goal stays shaded behind both.
+  const barReps = (set: WorkoutTrendSession['sets'][number]) => set.reps
   const values = sessions.flatMap((session) => session.sets.flatMap((set) => [barReps(set), set.targetReps ?? 0]))
   const maximum = Math.max(5, ...values)
   const step = tickStep(maximum)
@@ -104,7 +105,7 @@ export default function SetTrendChart({
     const text = hasLoad
       ? t('workout.trend.selected', { when: when(session), set: setIndex + 1, weight: formatNumber(language, set.weight), reps })
       : t('workout.trend.selectedReps', { when: when(session), set: setIndex + 1, reps })
-    return set.logged && set.targetReps
+    return set.targetReps
       ? `${text} · ${t('workout.trend.goal', { reps: formatNumber(language, set.targetReps) })}`
       : text
   }
@@ -123,7 +124,7 @@ export default function SetTrendChart({
         ? `${formatWeight(set.weight, language)} × ${reps}`
         : t('workout.trend.repsValue', { reps })
       const planned = set.logged ? '' : ` ${t('workout.trend.planned')}`
-      const goal = set.logged && set.targetReps ? ` (${t('workout.trend.goal', { reps: formatNumber(language, set.targetReps) })})` : ''
+      const goal = set.targetReps ? ` (${t('workout.trend.goal', { reps: formatNumber(language, set.targetReps) })})` : ''
       return `${t('workout.trend.set', { set: index + 1 })} ${value}${planned}${goal}`
     }).join(', ')
     return `${when(session)}${deload}: ${sets}`
@@ -179,7 +180,7 @@ export default function SetTrendChart({
                   const label = setText(session, setIndex)
                   return (
                     <g key={key} onClick={() => setSelected(key)}>
-                      {goalY !== null && set.logged && (
+                      {goalY !== null && (
                         <rect className="set-trend-goal" x={x} y={goalY} width={barWidth} height={BASELINE - goalY} rx="2" />
                       )}
                       <text
