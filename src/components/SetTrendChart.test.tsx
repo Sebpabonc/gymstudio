@@ -102,14 +102,16 @@ describe('SetTrendChart', () => {
     expect(html.match(/>14</g)).toHaveLength(3)
   })
 
-  it('draws a set still to do at its plan goal, with no shade behind it', () => {
+  it('draws a set still to do at the reps the logging card proposes, with the plan goal shaded behind', () => {
+    // PO 2026-11-24: the card proposed 22.5 × 6 while the chart drew 8 (the plan goal).
     const html = renderChart([
-      { weight: 32, reps: 8, logged: true, targetReps: 10 },
-      { weight: 32, reps: 8, logged: false, targetReps: 10 },
+      { weight: 22.5, reps: 8, logged: true, targetReps: 8 },
+      { weight: 22.5, reps: 6, logged: false, targetReps: 8 },
     ], { today: true })
 
-    expect(html.match(/class="set-trend-goal"/g)).toHaveLength(1)
-    expect(html).toContain('S2 32 kg × 10 target')
+    expect(html.match(/class="set-trend-goal"/g)).toHaveLength(2)
+    expect(html).toContain('S2 22.5 kg × 6 target')
+    expect(html).not.toContain('S2 22.5 kg × 8')
   })
 
   it('shows an empty state instead of 0 kg target bars for a first-time exercise', () => {
